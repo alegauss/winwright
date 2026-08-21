@@ -129,15 +129,6 @@ inspect printed resolves, whichever line the reader started from.
 
 ## Block D — Act — patterns before pointers
 
-### §WW29 A menu is opened the way a keyboard user opens it
-
-Down to the item, Right to expand, and never invoke - invoking one entry launches a
-terminal and another ends the run. The submenu appearing is an event, so it is polled to
-a deadline rather than slept at for a fixed interval that is either too short on the day
-it matters or paid on every run. Nothing is pressed to reset between attempts, and that
-is deliberate: Left on a top-level entry dismisses the whole menu, and retrying after
-one walked a menu that was no longer there and failed all three times.
-
 ### §WW30 Bounded, counted, and never until green
 
 One walk and one read is a coin toss against a shell that drops synthesised input: three

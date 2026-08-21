@@ -17,7 +17,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW29** (deps: —) **a menu is driven by clicks a shell does not always deliver** — Opened, read and expanded the way a keyboard user does, with a destructive entry never invoked, since invoking one of them ends the run or launches a terminal. → §WW29
 - 📋 **WW30** (deps: —) **a flaky act is hidden behind a retry that runs until it passes** — Attempts are capped and counted and the count reaches the record, so an act that genuinely stopped working still goes red and merely stops doing so at random. → §WW30
 - 📋 **WW31** (deps: —) **the notification-area icon has no clickable point and no reliable right-click** — Its rectangle is used instead, the overflow flyout is opened first where it hides there, and focus plus the application key is the route that works on the current shell. → §WW31
 - 📋 **WW32** (deps: —) **a selection that silently does not land leaves the pane it should have built unrealised** — Select, confirm, and fall back to the pointer only then, because the next step otherwise blames a slow scan for a tab that was never opened. → §WW32

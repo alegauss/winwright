@@ -17,32 +17,37 @@ internal static class Keys
     private const ushort VkShift = 0x10;
     private const ushort VkEnd = 0x23;
     private const ushort VkHome = 0x24;
+    private const ushort VkEscape = 0x1B;
+    private const ushort VkF10 = 0x79;
     private const ushort VkLeft = 0x25;
     private const ushort VkUp = 0x26;
     private const ushort VkRight = 0x27;
     private const ushort VkDown = 0x28;
 
+    /// <summary>
+    /// F10, which is how a keyboard user enters a menu bar. It is used rather than Alt because it
+    /// needs no modifier to be held, and a modifier is a thing another process has to agree about.
+    /// </summary>
+    internal static void SendMenuBar() => Press(Tap(VkF10));
+
+    /// <summary>Escape, which backs out of a menu. Backing out is not the same as invoking.</summary>
+    internal static void SendEscape() => Press(Tap(VkEscape));
+
     /// <summary>Anchor at one end of a list, which is a selection change like any other.</summary>
-    internal static void SendHomeOrEnd(bool home)
-    {
-        var inputs = Tap(home ? VkHome : VkEnd);
-        Win32.SendInput((uint)inputs.Length, inputs, System.Runtime.InteropServices.Marshal.SizeOf<Win32.Input>());
-    }
+    internal static void SendHomeOrEnd(bool home) => Press(Tap(home ? VkHome : VkEnd));
 
-    internal static void Send(TraversalKey key)
+    internal static void Send(TraversalKey key) => Press(key switch
     {
-        var inputs = key switch
-        {
-            TraversalKey.Tab => Tap(VkTab),
-            TraversalKey.ShiftTab => WithShift(VkTab),
-            TraversalKey.Right => Tap(VkRight),
-            TraversalKey.Left => Tap(VkLeft),
-            TraversalKey.Up => Tap(VkUp),
-            _ => Tap(VkDown),
-        };
+        TraversalKey.Tab => Tap(VkTab),
+        TraversalKey.ShiftTab => WithShift(VkTab),
+        TraversalKey.Right => Tap(VkRight),
+        TraversalKey.Left => Tap(VkLeft),
+        TraversalKey.Up => Tap(VkUp),
+        _ => Tap(VkDown),
+    });
 
+    private static void Press(Win32.Input[] inputs) =>
         Win32.SendInput((uint)inputs.Length, inputs, System.Runtime.InteropServices.Marshal.SizeOf<Win32.Input>());
-    }
 
     private static Win32.Input[] Tap(ushort virtualKey) => [Down(virtualKey), Up(virtualKey)];
 

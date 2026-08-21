@@ -70,7 +70,7 @@ public sealed class InstanceCheckTests : IDisposable
         Assert.True(check.Refuses);
         var refusal = Assert.Throws<AnotherInstanceException>(check.RequireSole);
         Assert.Contains($"pid {System.Environment.ProcessId}", refusal.Message);
-        Assert.Contains("winwright settings", refusal.Message);
+        Assert.True(refusal.Message.Contains("winwright settings"), refusal.Message);
     }
 
     [Fact]
