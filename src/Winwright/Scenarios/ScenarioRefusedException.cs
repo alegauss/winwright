@@ -1,9 +1,11 @@
 namespace Winwright.Scenarios;
 
 /// <summary>
-/// The scenario did not load. Thrown before a run starts, never during one, because everything it
-/// reports is true of the file rather than of this machine: a refusal at load is the same refusal
-/// on every desk, which is exactly what tells it apart from a hole.
+/// The scenario did not load. Thrown before a run starts and never during one, because what it
+/// reports is settled before any assertion runs: either something true of the file alone, or
+/// something true of the file read against the application it names — an act reaching for a
+/// pattern that build's control does not carry. Either way it is the same refusal for anyone
+/// holding the same two, which is exactly what tells it apart from a hole.
 /// </summary>
 public sealed class ScenarioRefusedException : Exception
 {

@@ -84,13 +84,6 @@ by forty is the default because it was the first pair of numbers typed.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW23 What a control offers, before the act is written
-
-Reaching for a pattern a control does not carry is a run-time failure today, discovered
-on a red run and usually far from the line that caused it. Inspect names the patterns
-per element, and the scenario loader checks each act against them, so the same mistake
-becomes a refusal at load with the element and the pattern both named.
-
 ## Block D — Act — patterns before pointers
 
 ### §WW24 Invoked, not clicked

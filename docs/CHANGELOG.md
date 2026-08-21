@@ -30,6 +30,7 @@
 - ✅ **WW20** **a control missing because its pane is collapsed reads the same as one that is gone** — A miss says whether the step matched elsewhere, whether what it stopped under is shut and must be opened, or that nothing in the window is shut and the control is gone.
 - ✅ **WW21** **two elements carrying the same name cannot be told apart by any condition** — The grammar takes order=left, right, top or bottom and sorts matches by rectangle, and a step matching several without saying which is refused with what it matched.
 - ✅ **WW22** **a resolved element goes stale and the act runs against a handle nobody holds** — A subject holds a locator and never an element, resolving again per act, and every pattern is read into plain values so two readings either side of an act can differ.
+- ✅ **WW23** **there is no way to ask what patterns an element actually offers** — What an element offers is asked for by locator, and every declared act is checked against it before the run, refusing with the element and the pattern both named.
 
 ## Block D — Act — patterns before pointers
 
