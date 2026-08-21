@@ -15,6 +15,7 @@
 - ✅ **WW8** **a case that returns early leaves its process running and locks the next build** — A LaunchedProcess can only be made by the register, so an early return still stops the process, and whatever was alive at the end is named with its pid and whether it stopped.
 - ✅ **WW9** **a build that failed leaves the previous exe in place and the run reports on code that is not in the tree** — The binary's write time is compared against the newest source outside build output, and older yields an absent precondition carrying both stamps rather than a failure.
 - ✅ **WW10** **attaching to a running instance checks whatever binary is up, not the one that was named** — The running instance is identified by file version and then write time, and a mismatch becomes an absent precondition naming both, with the version difference preferred.
+- ✅ **WW11** **a borderless window is invisible to the launcher, because its main window handle stays zero** — Top-level windows are enumerated by process id with a size floor, largest first, so an owned borderless popup the main window handle skips is found with its class, title and bounds.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

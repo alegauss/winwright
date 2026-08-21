@@ -41,14 +41,6 @@ is the line that has content and is not a step.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW11 A window with no main window handle
-
-A borderless toast, a balloon or a menu is a top-level window the process owns, and the
-process object reports none of them. Top-level windows are enumerated by process id and
-filtered by a sane size, which skips the tool and message windows every process carries.
-claude-tray's frame capture already does exactly this, and it is the one path in the
-launcher that reaches an animation.
-
 ### §WW12 Another window of the same app is the wrong picture
 
 The failure this refusal exists for returned a picture of another instance's Settings
