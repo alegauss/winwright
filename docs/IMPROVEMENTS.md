@@ -41,16 +41,6 @@ is the line that has content and is not a step.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW8 Every launch is registered by construction
-
-Measured in claude-tray: two trays a failing case had started were still alive
-afterwards, the next build died on a file lock naming their process ids, and the command
-after that ran the previous executable and reported on code that was not in the tree.
-The register is total because every launch goes through one place - there is no per-case
-list to keep, so a case returning early down a path nobody thought about still has its
-process stopped - and whatever survived is named in the summary rather than cleaned up
-in silence.
-
 ### §WW9 A build that failed leaves the old exe in place
 
 The same wrong reading as driving an unnamed binary, arrived at by accident rather than

@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 namespace Winwright.Projects;
 
 /// <summary>
-/// How long this project is willing to wait, by name. Three are seeded here so a declaration that
+/// How long this project is willing to wait, by name. A few are seeded here so a declaration that
 /// says nothing still works everywhere, and anything else a project needs it declares once — a
 /// timeout typed into the case that needs it is a number nobody can tune without reading every case.
 /// </summary>
@@ -16,6 +16,7 @@ public sealed class Timeouts
             ["resolve"] = 5000,
             ["act"] = 2000,
             ["launch"] = 15000,
+            ["stop"] = 5000,
         });
 
     private readonly IReadOnlyDictionary<string, int> byName;
