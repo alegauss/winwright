@@ -35,6 +35,7 @@
 ## Block D — Act — patterns before pointers
 
 - ✅ **WW24** **an act needs the foreground, so a run started from an editor drives somebody else's window** — Invoke, toggle, value, range, selection and expand each re-resolve, require actionability, act through the pattern and read back, proven with the foreground held elsewhere.
+- ✅ **WW25** **a pointer act happens implicitly wherever a pattern was missing** — A pointer act is its own declared kind that nothing falls back to, it sends nothing unless the window owns the foreground, and what needs a desktop is summarised from the declaration.
 
 ## Block E — Capture — the picture that proves what it photographed
 

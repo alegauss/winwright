@@ -17,7 +17,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW25** (deps: —) **a pointer act happens implicitly wherever a pattern was missing** — Synthesized input is declared per act and carries the foreground precondition with it, so what needs the desktop is visible in the file rather than found on a red run. → §WW25
 - 📋 **WW26** (deps: —) **typing is asserted by a screenshot, which cannot see whether a key arrived** — Text is typed and read back through the value the control reports, which is the only check separating a live input path from a window that merely looks right. → §WW26
 - 📋 **WW27** (deps: —) **keyboard traversal has no observable at all** — Focus is read after a traversal key and named by what holds it, which is how a window accepting no keyboard input is caught while every picture of it looks perfect. → §WW27
 - 📋 **WW28** (deps: —) **a picker walked to a value passes through every value on the way** — The route and the number of selection changes are part of the answer, because an observation about one switch is void when the walk made several. → §WW28

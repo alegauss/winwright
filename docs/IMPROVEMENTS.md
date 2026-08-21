@@ -129,14 +129,6 @@ inspect printed resolves, whichever line the reader started from.
 
 ## Block D — Act — patterns before pointers
 
-### §WW25 A pointer act is declared, never inferred
-
-Some controls have no pattern at all: a bare border with no automation peer, a
-notification-area icon, a segment of a custom template. Reaching for the mouse there is
-right, and doing it silently is not, because the act then carries a precondition the
-file never mentions. Declaring it puts the cost where the reader is, and makes the set
-of acts that need a real desktop countable rather than discovered.
-
 ### §WW26 Typing, read back through the control
 
 The windows in claude-tray accepted no keyboard input at all from the day the first one
