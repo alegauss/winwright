@@ -23,6 +23,8 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+- ✅ **WW16** **an element is addressed by hand-built automation conditions at every call site** — One grammar parses id, name, type, class, pattern, index and descendant chaining, round-trips, and refuses a control type or pattern UI Automation itself does not have.
+
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed

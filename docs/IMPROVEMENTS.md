@@ -84,14 +84,6 @@ by forty is the default because it was the first pair of numbers typed.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW16 One locator grammar
-
-The same three conditions are rebuilt at every call site today, in PowerShell in one
-project and in C# in another. One grammar parsed once - the automation id, the name, the
-control type, the class name, the pattern it must carry, an index and chaining - and
-resolved by every verb the same way. It is also what the scenario file writes, so an
-agent learns one thing rather than one per language.
-
 ### §WW17 A deadline, and a form with no wait at all
 
 Both exist in the harnesses already and the second matters more than it looks: a helper

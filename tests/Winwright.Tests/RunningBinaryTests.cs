@@ -95,7 +95,7 @@ public class RunningBinaryTests : IDisposable
     public void Attaching_to_what_this_run_started_recognises_it()
     {
         using var register = new ProcessRegister();
-        var launched = register.Launch(LongRunning());
+        var launched = Attachable.Launch(register, LongRunning());
 
         var check = RunningBinary.Check(Path.Combine(System.Environment.SystemDirectory, "cmd.exe"), launched);
 
@@ -124,7 +124,7 @@ public class RunningBinaryTests : IDisposable
         var start = LongRunning();
         start.FileName = running;
         using var register = new ProcessRegister();
-        var launched = register.Launch(start);
+        var launched = Attachable.Launch(register, start);
 
         var check = RunningBinary.Check(named, launched);
 

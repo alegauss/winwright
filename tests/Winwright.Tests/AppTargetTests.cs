@@ -56,35 +56,6 @@ public sealed class AppTargetTests : IDisposable
         return start;
     }
 
-    /// <summary>
-    /// Launch, then wait until Windows will say what the process is running. A process reports no
-    /// main module for the first instants of its life, and attaching to one that milliseconds old
-    /// is a test about process startup rather than about attaching — the case attach exists for is
-    /// an instance somebody has had open for a while.
-    /// </summary>
-    private LaunchedProcess Attachable(ProcessRegister register)
-    {
-        var launched = register.Launch(Windowless());
-        for (var attempt = 0; attempt < 100; attempt++)
-        {
-            try
-            {
-                using var reading = Process.GetProcessById(launched.Pid);
-                if (!string.IsNullOrEmpty(reading.MainModule?.FileName))
-                    return launched;
-            }
-            catch (Exception waiting) when (waiting is InvalidOperationException or System.ComponentModel.Win32Exception)
-            {
-                // Still starting.
-            }
-
-            Thread.Sleep(20);
-        }
-
-        Assert.Fail($"pid {launched.Pid} never said what it was running");
-        return launched;
-    }
-
     [Fact]
     public void A_launch_knows_what_it_passed()
     {
@@ -101,7 +72,7 @@ public sealed class AppTargetTests : IDisposable
     public void An_attach_says_which_binary_it_reached()
     {
         using var register = new ProcessRegister();
-        var launched = Attachable(register);
+        var launched = Attachable.Launch(register, Windowless());
 
         var target = AppTarget.AttachTo(launched.Pid);
 
@@ -115,7 +86,7 @@ public sealed class AppTargetTests : IDisposable
     public void An_attached_target_has_no_arguments_to_read_at_all()
     {
         using var register = new ProcessRegister();
-        var target = AppTarget.AttachTo(Attachable(register).Pid);
+        var target = AppTarget.AttachTo(Attachable.Launch(register, Windowless()).Pid);
 
         Assert.IsType<AttachedTarget>(target);
         Assert.DoesNotContain(typeof(AttachedTarget).GetProperties(), property => property.Name == "Arguments");
@@ -125,7 +96,7 @@ public sealed class AppTargetTests : IDisposable
     public void An_assertion_that_needed_a_launch_argument_is_a_hole_and_not_a_comparison()
     {
         using var register = new ProcessRegister();
-        var target = AppTarget.AttachTo(Attachable(register).Pid);
+        var target = AppTarget.AttachTo(Attachable.Launch(register, Windowless()).Pid);
 
         var declaration = AssertionDeclaration.Of(
             "the beta profile is selected", "the profile menu", AppTarget.LaunchArgumentsPreconditionName);

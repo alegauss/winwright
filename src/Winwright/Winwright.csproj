@@ -3,7 +3,21 @@
   <PropertyGroup>
     <RootNamespace>Winwright</RootNamespace>
     <AssemblyName>Winwright</AssemblyName>
+
+    <!-- WW16. This is the documented way to reach UIAutomationClient and UIAutomationTypes, which
+         are in-box in the Windows Desktop framework. The locator grammar validates a control type
+         and a pattern name against UI Automation's own vocabulary rather than against a list kept
+         here by hand, and a list kept by hand is a list that drifts from the thing it describes. -->
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
+
+  <!-- Turning UseWPF on swaps the SDK's implicit global usings for WPF's set, and System.IO is
+       not in that set: the tracing and project files stopped compiling the moment the property
+       above was added. Naming it back is the whole repair, and it is written down here because
+       the error it causes says nothing about WPF. -->
+  <ItemGroup>
+    <Using Include="System.IO" />
+  </ItemGroup>
 
   <!-- No PackageReference here, and that is a non-goal rather than an omission: a package in the
        engine is a package every adopting project inherits. -->
