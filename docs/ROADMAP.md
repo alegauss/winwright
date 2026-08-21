@@ -7,7 +7,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW13** (deps: —) **a synthesized key press goes to whatever owns the foreground, which is usually the editor** — Foreground ownership is asked before any synthesized input and answered as unchecked with the intruder named, never retried until it happens to pass. → §WW13
 - 📋 **WW14** (deps: —) **there is no way to drive a process somebody else started** — Attach takes a pid or a window, says which binary it reached, and marks every assertion needing a launch argument as unchecked instead of comparing against the wrong one. → §WW14
 - 📋 **WW15** (deps: —) **a launch argument silently does not survive an attach** — The language a resident process resolved is read the way the app read it, and one explicitly asked for that this process cannot be in is unchecked rather than ignored. → §WW15
 

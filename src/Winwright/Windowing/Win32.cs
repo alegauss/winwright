@@ -44,6 +44,9 @@ internal static class Win32
     [DllImport("user32.dll", SetLastError = true)]
     internal static extern nint GetWindow(nint window, uint command);
 
+    [DllImport("user32.dll")]
+    internal static extern nint GetForegroundWindow();
+
     /// <summary>GW_OWNER: the window that owns this one, which is what a toast or a menu has.</summary>
     internal const uint GwOwner = 4;
 

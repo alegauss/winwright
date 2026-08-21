@@ -41,15 +41,6 @@ is the line that has content and is not a step.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW13 The foreground is a precondition, not a retry
-
-Windows refuses the foreground to a process that does not already own it, so a run
-started from an editor drives somebody else's window. Measured while verifying a task in
-claude-tray: the same case failed at three different points on three runs and passed
-unchanged either side of stashing the code under test. It is asked once, answered as
-unchecked with the intruder named, and deliberately not retried - a case that passes on
-the second attempt cannot tell a busy desktop from a broken build.
-
 ### §WW14 Attach is a different promise from launch
 
 Attaching is convenient on a developer machine, where a single-instance mutex makes a
