@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW2** (deps: —) **nothing separates an assertion that should have run from one this project can never observe** — Unchecked is for an absent precondition; an assertion with nothing to match on any machine is refused when the scenario loads, so a check that covers nothing cannot ship. → §WW2
 - 📋 **WW3** (deps: —) **a run records what it concluded and not what it observed** — One line of trace per step carrying the locator, what it resolved to, what was read back and the verdict, so a failure is read from the record instead of reproduced. → §WW3
 - 📋 **WW4** (deps: —) **the same unrun assertion is tallied once per environment a sweep walks** — The line prints at every occurrence, because where it did not run is part of the reading, and the summary dedupes by name so one hole reads as one hole. → §WW4
 - 📋 **WW5** (deps: —) **every path, timeout and language file is typed into the scenario that needs it** — A per-project declaration carries them once, so a scenario names what it drives and never where this machine happens to keep it. → §WW5

@@ -2,6 +2,8 @@ using Winwright.Verdicts;
 
 using Xunit;
 
+using static Winwright.Tests.Fixtures;
+
 namespace Winwright.Tests;
 
 /// <summary>
@@ -15,7 +17,7 @@ public class VerdictSummaryTests
     {
         var verdict = RunVerdict.Over([
             AssertionResult.Pass("the window is titled Claude"),
-            AssertionResult.Unchecked("the tray menu opens", "a tray is already resident"),
+            AssertionResult.Unchecked("the tray menu opens", FreeNotificationArea),
         ]);
 
         Assert.Equal(
@@ -28,14 +30,14 @@ public class VerdictSummaryTests
     {
         var verdict = RunVerdict.Over([
             AssertionResult.Pass("the window is titled Claude"),
-            AssertionResult.Unchecked("the tray menu opens", "a tray is already resident"),
-            AssertionResult.Unchecked("the report renders", "no profile registered"),
+            AssertionResult.Unchecked("the tray menu opens", FreeNotificationArea),
+            AssertionResult.Unchecked("the report renders", RegisteredProfile),
         ]);
 
         var summary = VerdictSummary.Render(verdict);
 
-        Assert.Contains("  unchecked  the tray menu opens - a tray is already resident", summary);
-        Assert.Contains("  unchecked  the report renders - no profile registered", summary);
+        Assert.Contains("  unchecked  the tray menu opens - 'a free notification area' absent: a tray is already resident", summary);
+        Assert.Contains("  unchecked  the report renders - 'a registered profile' absent: no profile registered", summary);
     }
 
     [Fact]
@@ -43,14 +45,14 @@ public class VerdictSummaryTests
     {
         var verdict = RunVerdict.Over([
             AssertionResult.Fail("the report renders", "the file was never written"),
-            AssertionResult.Unchecked("the tray menu opens", "a tray is already resident"),
+            AssertionResult.Unchecked("the tray menu opens", FreeNotificationArea),
         ]);
 
         var summary = VerdictSummary.Render(verdict);
 
         Assert.StartsWith("FAILED (exit 1) - 2 assertions: 0 passed, 1 failed, 1 unchecked", summary);
         Assert.Contains("  failed     the report renders - the file was never written", summary);
-        Assert.Contains("  unchecked  the tray menu opens - a tray is already resident", summary);
+        Assert.Contains("  unchecked  the tray menu opens - 'a free notification area' absent: a tray is already resident", summary);
     }
 
     [Fact]

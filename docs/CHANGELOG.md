@@ -3,6 +3,7 @@
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
 - ✅ **WW1** **an assertion that could not be evaluated reports the same green as one that passed** — A run reads as one of three outcomes whose enum values are the exit codes themselves - 0, 1, 2 - and the degraded summary names every assertion that never ran.
+- ✅ **WW2** **nothing separates an assertion that should have run from one this project can never observe** — A hole is now constructed from an absent named precondition and from nothing else, and an assertion naming no subject, or a requirement no run measures, is refused when the scenario loads.
 
 ## Block B — Attach, launch, and leave nothing behind
 

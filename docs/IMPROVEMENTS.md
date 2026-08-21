@@ -2,16 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW2 Unchecked is a missing precondition, not a missing check
-
-The distinction is load-bearing and easy to lose. Unchecked means it should have been
-checked and was not - a second profile that does not exist here, a foreground this run
-does not own. It is deliberately not for an assertion that can never run: the Settings
-window binds nothing to Escape, so there is no Escape behaviour to lose and nothing is
-reported. A check that matches nothing on any machine is worse than an absent one,
-because it reads green forever; that one is refused when the scenario loads rather than
-counted as a hole at run time.
-
 ### §WW3 The trace is what the run saw
 
 A verdict with no record makes every failure a re-run, and a re-run on a different desk

@@ -47,7 +47,9 @@ public static class VerdictSummary
         foreach (var failure in verdict.Failures)
             lines.Add($"  failed     {failure.Name} - {failure.Detail}");
         foreach (var hole in verdict.Unchecked)
-            lines.Add($"  unchecked  {hole.Name} - {hole.Detail}");
+            lines.Add(hole.Missing is null
+                ? $"  unchecked  {hole.Name} - {hole.Detail}"
+                : $"  unchecked  {hole.Name} - '{hole.Missing.Name}' absent: {hole.Detail}");
 
         return lines;
     }
