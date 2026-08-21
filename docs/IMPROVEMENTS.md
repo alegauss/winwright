@@ -84,14 +84,6 @@ by forty is the default because it was the first pair of numbers typed.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW18 Actionability, for Windows
-
-Playwright waits for visible, stable, enabled and able to receive events. The Windows
-equivalent is present in the tree, not offscreen, enabled, and carrying the pattern the
-act needs - and the fourth is the one no browser has, because a control offering no
-invoke pattern cannot be pressed without the foreground. The refusal names which of the
-four was missing, since each one has a different remedy.
-
 ### §WW19 Inspect is a verb
 
 The control view dump exists in claude-tray and prints only on a failure, after a
