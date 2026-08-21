@@ -7,6 +7,9 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW110** (deps: —) **nothing enumerates what a run measured, so a runner that forgets a precondition stops checking it** — One reading collects the conditions this tool measures and the sentences they produce, so what a run checked is a list it can print rather than five calls to remember. → §WW110
+- 📋 **WW111** (deps: —) **the suite's own window fixtures take the foreground from whoever is working at the machine** — Fixture windows are created off-screen, since a suite that flashes over the desk also perturbs the one reading a task in this block exists to measure. → §WW111
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 - 📋 **WW16** (deps: —) **an element is addressed by hand-built automation conditions at every call site** — One locator grammar - id, name, type, class, the pattern it carries, an index and chaining - parsed once and resolved the same way by every verb. → §WW16

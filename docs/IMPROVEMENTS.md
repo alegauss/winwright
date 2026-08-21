@@ -41,6 +41,47 @@ is the line that has content and is not a step.
 
 ## Block B — Attach, launch, and leave nothing behind
 
+### §WW110 The run has no preamble
+
+Block B shipped five measurements and joined none of them. Staleness, the running
+binary, the foreground, the launch arguments and the resolved language each answer with
+a precondition and a sentence, and each is reached by its own call on its own type.
+Nothing lists them.
+
+Two things follow, and the second is the one that matters. The block's criterion "a run
+says which binary it drove" is currently met three times over by three sentences, which
+is to say it is not met once: a reader gets whichever of them the caller remembered to
+print. And a runner assembling the precondition set by hand will one day be edited by
+somebody who does not know all five are there - at which point the forgotten one stops
+being measured and every assertion that needed it silently starts passing. That is WW6's
+defect with a different subject, and this block is where it can still be closed cheaply.
+
+What is wanted is one reading, taken once at the start of a run: the target, the binary
+with both its keys, the language and where it was read, the staleness comparison, the
+foreground at the moment input was first synthesised, and what other instances were
+open. It renders as the preamble a summary opens with, and it hands over a set the
+assertions are then resolved against, so that adding a sixth measurement is one file and
+not an audit of every runner.
+
+### §WW111 The suite leaves the foreground somewhere else
+
+Found while writing WW13. Creating a top-level window with WS_VISIBLE activates it, so
+every fixture in this suite that needs a visible window takes the foreground for as long
+as it lives. On a developer machine that is a flash over whatever was being typed into,
+several times a run.
+
+It is filed under this block rather than dismissed as test hygiene for two reasons. The
+theme here is leaving nothing behind, and a foreground handed to a window that has since
+been destroyed is something left behind. And the tool measures the foreground: a suite
+that moves it is a suite whose own readings of it are taken on a desk the suite
+disturbed, which is the shape of a test that agrees with itself.
+
+The fix is small. A fixture window can be created at coordinates outside every monitor's
+bounds, which keeps it visible to the enumeration under test and invisible to the person
+at the keyboard. Where a test genuinely needs a window on screen, it can say so and
+place it deliberately. What should not survive is the current arrangement, where forty
+by forty is the default because it was the first pair of numbers typed.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW16 One locator grammar
