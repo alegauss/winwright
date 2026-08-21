@@ -12,7 +12,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-- 📋 **WW19** (deps: —) **the control view only prints when a check has already failed** — Inspect is a verb of its own: id, type, name, class and rectangle for a live window, so a locator is written from the tree instead of from the markup. → §WW19
 - 📋 **WW20** (deps: —) **a control missing because its pane is collapsed reads the same as one that is gone** — A pane that is not showing is absent from the tree by design, so the miss says which of the two it is and what would have to be navigated first. → §WW20
 - 📋 **WW21** (deps: —) **two elements carrying the same name cannot be told apart by any condition** — Ordering by the rectangle is the disambiguation the tree does not offer, and it belongs in the locator rather than at the call site that needed it. → §WW21
 - 📋 **WW22** (deps: —) **a resolved element goes stale and the act runs against a handle nobody holds** — An element is re-resolved per act and a pattern read fresh each time, because a live view compared with itself can never fail. → §WW22

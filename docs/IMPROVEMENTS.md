@@ -84,14 +84,6 @@ by forty is the default because it was the first pair of numbers typed.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW19 Inspect is a verb
-
-The control view dump exists in claude-tray and prints only on a failure, after a
-throwaway script had already been written to get the same output while diagnosing a
-missing template part. Making it a verb is what lets a locator be written from the tree
-instead of from the markup - and the markup is the thing being asserted, so reading the
-expected name out of it is how a check comes to agree with the defect.
-
 ### §WW20 A collapsed pane is not in the tree
 
 A control on a page that is not showing cannot be found by any id, which reads exactly

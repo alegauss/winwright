@@ -1,5 +1,7 @@
 using System.Windows.Automation;
 
+using Winwright.Windowing;
+
 namespace Winwright.Locating;
 
 /// <summary>
@@ -14,6 +16,7 @@ namespace Winwright.Locating;
 /// <param name="ClassName">The window class.</param>
 /// <param name="IsOffscreen">Whether UI Automation considers it scrolled or collapsed out of view.</param>
 /// <param name="IsEnabled">Whether it will take input at all.</param>
+/// <param name="Bounds">Where it is on screen, which is what a capture and a click both need.</param>
 /// <param name="Patterns">The patterns it offers, by short name.</param>
 public sealed record ElementFacts(
     string Name,
@@ -22,8 +25,26 @@ public sealed record ElementFacts(
     string ClassName,
     bool IsOffscreen,
     bool IsEnabled,
+    WindowBounds Bounds,
     IReadOnlySet<string> Patterns)
 {
+    /// <summary>
+    /// The locator step that would address this element, spelled the way the grammar spells one.
+    /// It is the whole point of inspecting: the line a reader copies is already a locator, so it
+    /// is written from the tree rather than from the markup the check is about to assert on.
+    /// <para>
+    /// A control type UI Automation reports that the grammar does not accept is left out rather
+    /// than written into a step that would not parse — a custom control can report anything.
+    /// </para>
+    /// </summary>
+    public LocatorStep AsLocatorStep() => new(
+        UiaVocabulary.IsControlType(ControlType) ? ControlType : null,
+        string.IsNullOrEmpty(AutomationId) ? null : AutomationId,
+        string.IsNullOrEmpty(Name) ? null : Name,
+        string.IsNullOrEmpty(ClassName) ? null : ClassName,
+        null,
+        null);
+
     /// <summary>Whether it offers that pattern, spelled as the locator grammar spells one.</summary>
     public bool Supports(string pattern) => Patterns.Contains(pattern);
 
@@ -56,6 +77,7 @@ public sealed record ElementFacts(
                 current.ClassName ?? "",
                 current.IsOffscreen,
                 current.IsEnabled,
+                Rectangle(current.BoundingRectangle),
                 element.GetSupportedPatterns()
                     .Select(pattern => Short(pattern.ProgrammaticName, suffix: "PatternIdentifiers.Pattern"))
                     .ToHashSet(StringComparer.Ordinal));
@@ -65,6 +87,11 @@ public sealed record ElementFacts(
             return null;
         }
     }
+
+    private static WindowBounds Rectangle(System.Windows.Rect rect) =>
+        rect.IsEmpty || double.IsInfinity(rect.Width) || double.IsInfinity(rect.Height)
+            ? default
+            : new WindowBounds((int)rect.Left, (int)rect.Top, (int)rect.Right, (int)rect.Bottom);
 
     private static string Short(string? programmaticName, string prefix = "", string suffix = "")
     {

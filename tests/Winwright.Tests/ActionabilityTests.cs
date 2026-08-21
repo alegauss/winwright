@@ -15,7 +15,9 @@ public class ActionabilityTests
 {
     private static ElementFacts Button(
         bool offscreen = false, bool enabled = true, params string[] patterns) =>
-        new("Save", "save", "Button", "Button", offscreen, enabled, patterns.ToHashSet(StringComparer.Ordinal));
+        new("Save", "save", "Button", "Button", offscreen, enabled,
+            new Winwright.Windowing.WindowBounds(120, 660, 210, 688),
+            patterns.ToHashSet(StringComparer.Ordinal));
 
     [Fact]
     public void All_four_holding_is_the_only_reading_that_lets_an_act_run()
