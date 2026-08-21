@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW4** (deps: —) **the same unrun assertion is tallied once per environment a sweep walks** — The line prints at every occurrence, because where it did not run is part of the reading, and the summary dedupes by name so one hole reads as one hole. → §WW4
 - 📋 **WW5** (deps: —) **every path, timeout and language file is typed into the scenario that needs it** — A per-project declaration carries them once, so a scenario names what it drives and never where this machine happens to keep it. → §WW5
 - 📋 **WW6** (deps: —) **a summary can say every check passed while one of them never ran** — The word every is earned rather than default: it is refused whenever the unchecked list is non-empty, which is how a dropped assertion stops riding out in an info line. → §WW6
 - 📋 **WW7** (deps: —) **a step that threw is indistinguishable from one that failed its assertion** — A thrown exception is its own outcome carrying the step it came from, so a broken harness is never reported as a broken build. → §WW7

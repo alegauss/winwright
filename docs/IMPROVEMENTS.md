@@ -2,14 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW4 Printed every time, counted once
-
-claude-tray's environment sweep walks one submenu per sampled mode, so an assertion
-absent in all three modes was counted three times and read as three holes. The line
-still prints at every occurrence, because where it did not run is part of the reading,
-and the tally dedupes by name. Two different properties, and collapsing them either
-hides an occurrence or inflates the count.
-
 ### §WW5 The declaration is per project
 
 roadkeep's sixth law, applied here. The executable, the source root the staleness check

@@ -45,15 +45,33 @@ public static class VerdictSummary
 
         var lines = new List<string>();
         foreach (var failure in verdict.Failures)
-            lines.Add($"  failed     {failure.Name} - {failure.Detail}");
+            lines.Add(Line(failure));
         foreach (var hole in verdict.Unchecked)
-            lines.Add(hole.Missing is null
-                ? $"  unchecked  {hole.Name} - {hole.Detail}"
-                : $"  unchecked  {hole.Name} - '{hole.Missing.Name}' absent: {hole.Detail}");
+            lines.Add(Line(hole));
 
         return lines;
     }
 
-    private static string Plural(int count, string noun) =>
+    /// <summary>
+    /// One assertion as its own line. <paramref name="environment"/> is what a sweep puts in
+    /// front of it, so the same assertion appearing in three environments reads as three places
+    /// rather than as three assertions.
+    /// </summary>
+    public static string Line(AssertionResult result, string? environment = null)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        if (result.Outcome == AssertionOutcome.Passed)
+            throw new ArgumentException(
+                $"'{result.Name}' passed, and a summary that lists what passed is one nobody reads to the end",
+                nameof(result));
+
+        var word = result.Outcome == AssertionOutcome.Failed ? "failed    " : "unchecked ";
+        var place = string.IsNullOrWhiteSpace(environment) ? "" : $"[{environment.Trim()}] ";
+        var why = result.Missing is null ? result.Detail : $"'{result.Missing.Name}' absent: {result.Detail}";
+        return $"  {word} {place}{result.Name} - {why}";
+    }
+
+    /// <summary>Count and noun, agreeing. Used by every headline this project renders.</summary>
+    public static string Plural(int count, string noun) =>
         count == 1 ? $"1 {noun}" : $"{count} {noun}s";
 }
