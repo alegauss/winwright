@@ -17,4 +17,11 @@ public enum RunOutcome
     /// into either of the other two is the non-goal this project's central finding rests on.
     /// </summary>
     Degraded = 2,
+
+    /// <summary>
+    /// The harness broke — something threw, and what it says is about this tool rather than about
+    /// the application under test. It outranks the other three, because a reader told the build
+    /// failed opens the wrong repository, and nothing after the throw was observed at all.
+    /// </summary>
+    Broken = 3,
 }

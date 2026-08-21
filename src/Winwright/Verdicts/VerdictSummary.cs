@@ -31,8 +31,9 @@ public static class VerdictSummary
 
         var word = verdict.Outcome.ToString().ToUpperInvariant();
         var passed = verdict.Results.Count - verdict.Failures.Count - verdict.Unchecked.Count;
+        var broke = verdict.Broke.Count == 0 ? "" : $"; the harness broke {Times(verdict.Broke.Count)}";
         return $"{word} (exit {verdict.ExitCode}) - {Plural(verdict.Results.Count, "assertion")}: "
-            + $"{passed} passed, {verdict.Failures.Count} failed, {verdict.Unchecked.Count} unchecked";
+            + $"{passed} passed, {verdict.Failures.Count} failed, {verdict.Unchecked.Count} unchecked{broke}";
     }
 
     /// <summary>
@@ -49,7 +50,8 @@ public static class VerdictSummary
             return $"every assertion passed ({verdict.Results.Count} of {verdict.Results.Count}).";
 
         var passed = verdict.Results.Count - verdict.Failures.Count - verdict.Unchecked.Count;
-        return Composed(passed, verdict.Results.Count, Coverage.Failed(verdict), Coverage.NotRun(verdict));
+        return Composed(
+            passed, verdict.Results.Count, Coverage.Failed(verdict), Coverage.NotRun(verdict), verdict.Broke);
     }
 
     /// <summary>
@@ -61,6 +63,8 @@ public static class VerdictSummary
         ArgumentNullException.ThrowIfNull(verdict);
 
         var lines = new List<string>();
+        foreach (var error in verdict.Broke)
+            lines.Add($"  threw      {error}");
         foreach (var failure in verdict.Failures)
             lines.Add(Line(failure));
         foreach (var hole in verdict.Unchecked)
@@ -96,9 +100,20 @@ public static class VerdictSummary
     /// The unearned sentence: what passed as a fraction, then what failed and what never ran, each
     /// named. Shared with the sweep, so one hole reads the same way whichever summary printed it.
     /// </summary>
-    internal static string Composed(int passed, int total, IReadOnlyList<string> failed, IReadOnlyList<string> notRun)
+    internal static string Composed(
+        int passed,
+        int total,
+        IReadOnlyList<string> failed,
+        IReadOnlyList<string> notRun,
+        IReadOnlyList<HarnessError> broke)
     {
-        var clauses = new List<string> { $"{passed} of {Plural(total, "assertion")} passed" };
+        var clauses = new List<string>();
+
+        // The break leads, because it is the clause that says which repository to open.
+        if (broke.Count > 0)
+            clauses.Add($"the harness broke at {string.Join(", ", broke.Select(error => error.ToString()))}");
+
+        clauses.Add($"{passed} of {Plural(total, "assertion")} passed");
         if (failed.Count > 0)
             clauses.Add($"{failed.Count} failed: {string.Join(", ", failed)}");
         if (notRun.Count > 0)
@@ -106,4 +121,7 @@ public static class VerdictSummary
 
         return string.Join("; ", clauses) + ".";
     }
+
+    /// <summary>Once, or a count. Small, and it keeps "broke 1 times" out of a headline.</summary>
+    internal static string Times(int count) => count == 1 ? "once" : $"{count} times";
 }

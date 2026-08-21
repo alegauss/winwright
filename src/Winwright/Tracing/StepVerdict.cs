@@ -15,4 +15,11 @@ public enum StepVerdict
 
     /// <summary>It was never attempted, because a precondition for it was absent.</summary>
     Unchecked,
+
+    /// <summary>
+    /// The harness threw here. Kept apart from <see cref="Failed"/> in the trace as well as in
+    /// the verdict, because the reader who greps for what broke is deciding which repository to
+    /// open, and a step that threw is the one line that answers that.
+    /// </summary>
+    Threw,
 }

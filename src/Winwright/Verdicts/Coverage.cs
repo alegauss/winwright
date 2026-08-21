@@ -37,6 +37,20 @@ public static class Coverage
         return verdict.Unchecked.Select(tally => tally.Name).ToList();
     }
 
+    /// <summary>Everywhere the harness threw, one line each, in the order it threw.</summary>
+    public static IReadOnlyList<HarnessError> Broke(RunVerdict verdict)
+    {
+        ArgumentNullException.ThrowIfNull(verdict);
+        return verdict.Broke;
+    }
+
+    /// <summary>The same, across a sweep, with each error keeping the environment it came from.</summary>
+    public static IReadOnlyList<HarnessError> Broke(SweepVerdict verdict)
+    {
+        ArgumentNullException.ThrowIfNull(verdict);
+        return verdict.Broke.Select(at => at.Error).ToList();
+    }
+
     /// <summary>The assertions that ran and did not hold, by name and deduped.</summary>
     public static IReadOnlyList<string> Failed(RunVerdict verdict)
     {
@@ -59,7 +73,7 @@ public static class Coverage
     public static string RequireEvery(RunVerdict verdict, string claim = "every check passed")
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(claim);
-        return EarnsEvery(verdict) ? claim : throw new UnearnedGreenException(claim, NotRun(verdict), Failed(verdict));
+        return EarnsEvery(verdict) ? claim : throw new UnearnedGreenException(claim, NotRun(verdict), Failed(verdict), Broke(verdict));
     }
 
     /// <summary>The same gate in front of a sweep's own green.</summary>
@@ -67,6 +81,6 @@ public static class Coverage
     public static string RequireEvery(SweepVerdict verdict, string claim = "every check passed")
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(claim);
-        return EarnsEvery(verdict) ? claim : throw new UnearnedGreenException(claim, NotRun(verdict), Failed(verdict));
+        return EarnsEvery(verdict) ? claim : throw new UnearnedGreenException(claim, NotRun(verdict), Failed(verdict), Broke(verdict));
     }
 }

@@ -2,13 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW7 A broken harness is not a broken build
-
-A pattern that throws, an assembly that will not load, a locator that cannot be parsed -
-none of these is a statement about the code under test, and reporting them as a failed
-assertion sends whoever reads it to the wrong file. The outcome carries the step and the
-exception and is its own colour, so the reader knows which repository to open.
-
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW8 Every launch is registered by construction

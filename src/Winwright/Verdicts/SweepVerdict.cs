@@ -7,6 +7,11 @@ namespace Winwright.Verdicts;
 /// <param name="Verdict">That environment's own reading, unchanged by the sweep around it.</param>
 public sealed record EnvironmentRun(string Environment, RunVerdict Verdict);
 
+/// <summary>One harness error and the environment it was thrown in.</summary>
+/// <param name="Environment">The environment the sweep was walking when it broke.</param>
+/// <param name="Error">What was thrown, carrying the step it came from.</param>
+public sealed record BrokenAt(string Environment, HarnessError Error);
+
 /// <summary>One assertion in one environment: where it happened, and what happened.</summary>
 /// <param name="Environment">The environment this occurrence belongs to.</param>
 /// <param name="Result">The assertion result recorded there.</param>
@@ -41,7 +46,11 @@ public sealed class SweepVerdict
         Environments = environments;
         Failures = failures;
         Unchecked = unchecked_;
-        Outcome = failures.Count > 0 ? RunOutcome.Failed
+        Broke = new ReadOnlyCollection<BrokenAt>(environments
+            .SelectMany(run => run.Verdict.Broke.Select(error => new BrokenAt(run.Environment, error)))
+            .ToList());
+        Outcome = Broke.Count > 0 ? RunOutcome.Broken
+            : failures.Count > 0 ? RunOutcome.Failed
             : unchecked_.Count > 0 ? RunOutcome.Degraded
             : RunOutcome.Passed;
     }
@@ -55,7 +64,10 @@ public sealed class SweepVerdict
     /// <summary>The distinct assertions that never ran somewhere, each with every place they did not.</summary>
     public IReadOnlyList<AssertionTally> Unchecked { get; }
 
-    /// <summary>The one of three readings the sweep as a whole earned.</summary>
+    /// <summary>Every place the harness threw, with the environment it threw in.</summary>
+    public IReadOnlyList<BrokenAt> Broke { get; }
+
+    /// <summary>The one of four readings the sweep as a whole earned.</summary>
     public RunOutcome Outcome { get; }
 
     /// <summary>The process exit code, which is the outcome itself and not a second mapping.</summary>

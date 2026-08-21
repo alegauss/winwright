@@ -31,10 +31,13 @@ public static class SweepSummary
         ArgumentNullException.ThrowIfNull(verdict);
 
         var word = verdict.Outcome.ToString().ToUpperInvariant();
+        var broke = verdict.Broke.Count == 0
+            ? ""
+            : $"; the harness broke {VerdictSummary.Times(verdict.Broke.Count)}";
         return $"{word} (exit {verdict.ExitCode}) - "
             + $"{VerdictSummary.Plural(verdict.Environments.Count, "environment")}: "
             + $"{Counted(verdict.Failures.Count, verdict.FailureOccurrences, "failed")}, "
-            + $"{Counted(verdict.Unchecked.Count, verdict.UncheckedOccurrences, "unchecked")}";
+            + $"{Counted(verdict.Unchecked.Count, verdict.UncheckedOccurrences, "unchecked")}{broke}";
     }
 
     /// <summary>
@@ -50,7 +53,12 @@ public static class SweepSummary
         if (Coverage.EarnsEvery(verdict))
             return $"every assertion passed in {walked}.";
 
-        var clauses = new List<string> { $"{walked} walked" };
+        var clauses = new List<string>();
+        if (verdict.Broke.Count > 0)
+            clauses.Add("the harness broke at "
+                + string.Join(", ", verdict.Broke.Select(at => $"[{at.Environment}] {at.Error}")));
+
+        clauses.Add($"{walked} walked");
         if (verdict.Failures.Count > 0)
             clauses.Add($"{verdict.Failures.Count} failed: {string.Join(", ", Coverage.Failed(verdict))}");
         if (verdict.Unchecked.Count > 0)
@@ -68,6 +76,8 @@ public static class SweepSummary
         ArgumentNullException.ThrowIfNull(verdict);
 
         var lines = new List<string>();
+        foreach (var at in verdict.Broke)
+            lines.Add($"  threw      [{at.Environment}] {at.Error}");
         foreach (var tally in verdict.Failures)
             foreach (var occurrence in tally.Occurrences)
                 lines.Add(VerdictSummary.Line(occurrence.Result, occurrence.Environment));
