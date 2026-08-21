@@ -2,14 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW3 The trace is what the run saw
-
-A verdict with no record makes every failure a re-run, and a re-run on a different desk
-answers a different question. One line per step: the locator as written, what it
-resolved to, the pattern used, what was read back, how long it waited and how many polls
-saw it. Written as JSONL beside the run, because the reader is usually an agent and a
-viewer nobody can grep is a viewer nobody opens.
-
 ### §WW4 Printed every time, counted once
 
 claude-tray's environment sweep walks one submenu per sampled mode, so an assertion

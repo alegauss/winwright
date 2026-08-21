@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW3** (deps: —) **a run records what it concluded and not what it observed** — One line of trace per step carrying the locator, what it resolved to, what was read back and the verdict, so a failure is read from the record instead of reproduced. → §WW3
 - 📋 **WW4** (deps: —) **the same unrun assertion is tallied once per environment a sweep walks** — The line prints at every occurrence, because where it did not run is part of the reading, and the summary dedupes by name so one hole reads as one hole. → §WW4
 - 📋 **WW5** (deps: —) **every path, timeout and language file is typed into the scenario that needs it** — A per-project declaration carries them once, so a scenario names what it drives and never where this machine happens to keep it. → §WW5
 - 📋 **WW6** (deps: —) **a summary can say every check passed while one of them never ran** — The word every is earned rather than default: it is refused whenever the unchecked list is non-empty, which is how a dropped assertion stops riding out in an info line. → §WW6
