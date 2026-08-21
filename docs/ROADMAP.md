@@ -7,8 +7,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW15** (deps: —) **a launch argument silently does not survive an attach** — The language a resident process resolved is read the way the app read it, and one explicitly asked for that this process cannot be in is unchecked rather than ignored. → §WW15
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 - 📋 **WW16** (deps: —) **an element is addressed by hand-built automation conditions at every call site** — One locator grammar - id, name, type, class, the pattern it carries, an index and chaining - parsed once and resolved the same way by every verb. → §WW16

@@ -46,6 +46,10 @@ public sealed class ProjectDeclaration
                 .Where(name => !string.IsNullOrWhiteSpace(name))
                 .Select(name => name.Trim())
                 .ToList());
+        LanguagePreferenceFile = Resolve(shape.Language?.PreferenceFile);
+        LanguagePreferenceKey = string.IsNullOrWhiteSpace(shape.Language?.PreferenceKey)
+            ? null
+            : shape.Language.PreferenceKey.Trim();
         Timeouts = Timeouts.Declared(shape.Timeouts, path);
     }
 
@@ -67,6 +71,15 @@ public sealed class ProjectDeclaration
 
     /// <summary>How long this project waits, by name, with the engine's defaults folded under it.</summary>
     public Timeouts Timeouts { get; }
+
+    /// <summary>
+    /// The JSON file this application saves the user's chosen language in, resolved. Null where
+    /// the project declares none, and then the display language is the whole of the resolution.
+    /// </summary>
+    public string? LanguagePreferenceFile { get; }
+
+    /// <summary>The key inside that file, dotted for a nested one. Null where none is declared.</summary>
+    public string? LanguagePreferenceKey { get; }
 
     /// <summary>The application under test.</summary>
     /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
@@ -153,5 +166,14 @@ public sealed class ProjectDeclaration
         [JsonPropertyName("sourceIgnore")] public IReadOnlyList<string>? SourceIgnore { get; init; }
 
         [JsonPropertyName("timeouts")] public Dictionary<string, int>? Timeouts { get; init; }
+
+        [JsonPropertyName("language")] public LanguageShape? Language { get; init; }
+    }
+
+    private sealed record LanguageShape
+    {
+        [JsonPropertyName("preferenceFile")] public string? PreferenceFile { get; init; }
+
+        [JsonPropertyName("preferenceKey")] public string? PreferenceKey { get; init; }
     }
 }

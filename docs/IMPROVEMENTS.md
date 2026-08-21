@@ -41,15 +41,6 @@ is the line that has content and is not a step.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW15 A launch argument does not survive an attach
-
-Measured in claude-tray: verifying a task against a Portuguese tray with the default
-English produced four failures for labels that were all present, in another language.
-There is no command line to read, so the language is resolved the way the app resolved
-it - saved preference first, then the display language - and reported out loud. A
-language explicitly asked for that this process cannot be in is unchecked rather than
-quietly replaced.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW16 One locator grammar

@@ -10,7 +10,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- WW15: this tool reasons about which language an application resolved, so it needs real
+         cultures. Under invariant globalization pt-BR is not a culture that can be constructed,
+         and the one comparison this project exists to make would be unmakeable. -->
+    <InvariantGlobalization>false</InvariantGlobalization>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
