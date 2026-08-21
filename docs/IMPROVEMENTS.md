@@ -82,6 +82,30 @@ at the keyboard. Where a test genuinely needs a window on screen, it can say so 
 place it deliberately. What should not survive is the current arrangement, where forty
 by forty is the default because it was the first pair of numbers typed.
 
+### §WW114 The fixtures need a desk of their own
+
+Measured while WW29 was being written, and it cost most of that task. Every fixture that
+synthesizes input needs this process to own the foreground. Windows grants that to a
+thread holding a window it has just created - usually. Once the process has been refused
+once, it stops being granted, and from then on a fixture that opens a window is simply
+not activated.
+
+The evidence was unambiguous. Making the fixture insist on the foreground before
+returning turned one busy desktop into forty-seven failures in a single run, each
+costing four seconds of waiting first. Softening it back to a request made the suite
+green again and left the fragility exactly where it was: whether these tests pass is
+partly a question about what else is on the screen.
+
+A second finding of the same afternoon has the same answer. An open menu holds its
+thread inside a modal loop, so the quit posted to it is never read and its window
+outlives the test - and the class that then counts what this process is showing fails
+about a window it never touched. Repaired, but the same shape: one process, one desktop,
+every fixture sharing both.
+
+A desktop created for the run is where this ends. The fixtures are the only windows on
+it, the foreground is theirs because there is nothing to lose it to, and nothing they do
+reaches the person at the keyboard - which is what WW111 asks for from the other side.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW112 Actionability needs a door, not a convention
