@@ -186,6 +186,9 @@ public static class Pointer
     private static Win32.Input Mouse(uint flags, int dx, int dy) => new()
     {
         Type = Win32.InputMouse,
-        Mouse = new Win32.MouseInput { Dx = dx, Dy = dy, Flags = flags },
+        Payload = new Win32.InputPayload
+        {
+            Mouse = new Win32.MouseInput { Dx = dx, Dy = dy, Flags = flags },
+        },
     };
 }

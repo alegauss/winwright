@@ -129,15 +129,6 @@ inspect printed resolves, whichever line the reader started from.
 
 ## Block D — Act — patterns before pointers
 
-### §WW26 Typing, read back through the control
-
-The windows in claude-tray accepted no keyboard input at all from the day the first one
-shipped, while every screenshot ever taken of them looked perfect - because mouse input
-travels the window procedure and keyboard input travels the component dispatcher, and
-those are different input environments. Text typed and then read back through the value
-the control reports is the only observable that separates the two, and it is the reason
-an interaction loop exists beside the picture loop at all.
-
 ### §WW27 Traversal has an observable
 
 Tab moving focus is a property of the window and nothing in a picture shows it. What

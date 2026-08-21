@@ -65,13 +65,41 @@ internal static class Win32
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    internal struct KeyInput
+    {
+        public ushort VirtualKey;
+        public ushort Scan;
+        public uint Flags;
+        public uint Time;
+        public nint ExtraInfo;
+    }
+
+    /// <summary>INPUT is a union, and writing it as one is what keeps its size right on x64.</summary>
+    [StructLayout(LayoutKind.Explicit)]
+    internal struct InputPayload
+    {
+        [FieldOffset(0)]
+        public MouseInput Mouse;
+
+        [FieldOffset(0)]
+        public KeyInput Key;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     internal struct Input
     {
         public uint Type;
-        public MouseInput Mouse;
+        public InputPayload Payload;
     }
 
     internal const uint InputMouse = 0;
+    internal const uint InputKeyboard = 1;
+
+    internal const uint KeyUp = 0x0002;
+    internal const uint KeyUnicode = 0x0004;
+
+    internal const ushort VkBack = 0x08;
+    internal const ushort VkEnd = 0x23;
     internal const uint MouseMove = 0x0001;
     internal const uint MouseAbsolute = 0x8000;
     internal const uint MouseVirtualDesk = 0x4000;
@@ -87,6 +115,12 @@ internal static class Win32
 
     [DllImport("user32.dll")]
     internal static extern int GetSystemMetrics(int index);
+
+    [DllImport("user32.dll")]
+    internal static extern uint MapVirtualKeyW(uint code, uint mapping);
+
+    /// <summary>MAPVK_VK_TO_VSC: the scan code a virtual key has on the layout in force.</summary>
+    internal const uint VirtualKeyToScan = 0;
 
     internal const int VirtualScreenX = 76;
     internal const int VirtualScreenY = 77;

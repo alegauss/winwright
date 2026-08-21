@@ -65,6 +65,16 @@ public sealed class Subject
     public Locator Locator { get; }
 
     /// <summary>
+    /// How long an act on this subject waits for what it did to show up, in milliseconds. Input
+    /// is delivered to a queue and processed by another thread, so reading back the instant after
+    /// sending it reads the value from before — which is a race, not a result.
+    /// </summary>
+    public int ActMs => timeouts?.For("act") ?? deadlineMs;
+
+    /// <summary>How often that wait looks again.</summary>
+    public int PollMs => timeouts?.For("poll") ?? pollMs;
+
+    /// <summary>
     /// Resolve it again, now. Every act calls this: nothing here caches an element, so there is
     /// no handle to go stale between one act and the next.
     /// </summary>
