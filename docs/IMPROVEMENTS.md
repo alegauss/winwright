@@ -84,6 +84,49 @@ by forty is the default because it was the first pair of numbers typed.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+### §WW112 Actionability needs a door, not a convention
+
+The check landed and the chokepoint did not. A verb about to click something can read
+the facts, judge them and require the answer - or it can resolve, take the element and
+press it, and nothing in the types notices. The block's criterion "an act never runs
+against an element that cannot take it" is met by whoever remembers, which is the shape
+of rule this project has closed twice already and should not leave open a third time.
+
+Both closures are worth copying. A process cannot be launched outside the register
+because the type a caller needs has no public constructor; an attached target cannot be
+asked what arguments it was started with because the property is not on it. Neither
+relies on anybody reading a note.
+
+What is wanted here is the same move: the thing a verb needs in order to act is handed
+out only by something that has already judged actionability, and carries the judgement
+with it. A verb holding one of those knows the four properties held at the moment it was
+made; a verb that wants to skip the check has nothing to call. Where the judgement then
+belongs - refusal, hole or failure - stays the acting block's decision, and this only
+makes it impossible to never have made it.
+
+It is filed here rather than under the acting block because the door is part of what
+locating hands over, and a door invented per verb is four doors that differ.
+
+### §WW113 The root's line is the one that does not work
+
+Measured while writing the subject tests. A step searches the descendants of the root it
+is given and never the root itself, which is right and is what every other locator
+engine does. The trouble is that inspect prints the root as its first line, in exactly
+the same shape as every other line: a locator step, then the rectangle, then the
+patterns.
+
+So the flow this block exists for - read the tree, copy the line, write the locator -
+has one line in it that quietly does not work. An agent copying the first line gets a
+miss, and the miss is diagnosed as absent, because from the root's own point of view
+nothing under it matches a step describing the root. That is the least helpful answer
+this tool gives about the most obvious mistake.
+
+There are two ways out and the task is not fixing which. The first step could match the
+root or its descendants, which is what a reader copying the line means; or inspect could
+mark the root as the root rather than printing it in the shape of something to copy.
+Either closes it. What must be true afterwards is that a locator assembled from what
+inspect printed resolves, whichever line the reader started from.
+
 ## Block D — Act — patterns before pointers
 
 ### §WW24 Invoked, not clicked
