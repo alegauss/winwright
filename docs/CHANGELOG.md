@@ -29,6 +29,7 @@
 - ✅ **WW19** **the control view only prints when a check has already failed** — Inspect walks the control view of a live window and prints one line per element that begins with the locator step addressing it, then its rectangle, state and patterns.
 - ✅ **WW20** **a control missing because its pane is collapsed reads the same as one that is gone** — A miss says whether the step matched elsewhere, whether what it stopped under is shut and must be opened, or that nothing in the window is shut and the control is gone.
 - ✅ **WW21** **two elements carrying the same name cannot be told apart by any condition** — The grammar takes order=left, right, top or bottom and sorts matches by rectangle, and a step matching several without saying which is refused with what it matched.
+- ✅ **WW22** **a resolved element goes stale and the act runs against a handle nobody holds** — A subject holds a locator and never an element, resolving again per act, and every pattern is read into plain values so two readings either side of an act can differ.
 
 ## Block D — Act — patterns before pointers
 

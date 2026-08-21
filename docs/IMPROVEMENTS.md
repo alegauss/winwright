@@ -84,14 +84,6 @@ by forty is the default because it was the first pair of numbers typed.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW22 A pattern's current value is a live view
-
-Holding a pattern and comparing its value before against its value after compares the
-reading with itself and can never fail. claude-tray's slider check carries a note about
-it and casts the numbers out first. The engine reads values into snapshots and
-re-resolves per act, so the trap is closed once rather than remembered by every author
-who writes an assertion about a change.
-
 ### §WW23 What a control offers, before the act is written
 
 Reaching for a pattern a control does not carry is a run-time failure today, discovered
