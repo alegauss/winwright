@@ -37,6 +37,7 @@
 - ✅ **WW24** **an act needs the foreground, so a run started from an editor drives somebody else's window** — Invoke, toggle, value, range, selection and expand each re-resolve, require actionability, act through the pattern and read back, proven with the foreground held elsewhere.
 - ✅ **WW25** **a pointer act happens implicitly wherever a pattern was missing** — A pointer act is its own declared kind that nothing falls back to, it sends nothing unless the window owns the foreground, and what needs a desktop is summarised from the declaration.
 - ✅ **WW26** **typing is asserted by a screenshot, which cannot see whether a key arrived** — Text goes in as real keys and the act waits for the control's own value to say so, refusing a control that reports no value because typing nobody can read back is the screenshot.
+- ✅ **WW27** **keyboard traversal has no observable at all** — A traversal key answers with what holds the focus rather than whether it moved, and a nudge presses away from whichever end the range sits at and says it did.
 
 ## Block E — Capture — the picture that proves what it photographed
 

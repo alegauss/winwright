@@ -1,5 +1,11 @@
 namespace Winwright.Locating;
 
+/// <summary>What waiting for a condition cost, and whether it ever came true.</summary>
+/// <param name="Happened">Whether the condition held before the deadline.</param>
+/// <param name="WaitedMs">How much of the deadline was spent.</param>
+/// <param name="Polls">How many times it was asked.</param>
+public sealed record Waited(bool Happened, int WaitedMs, int Polls);
+
 /// <summary>
 /// What one attempt to find something saw, and what it cost to see it. The two numbers are the
 /// ones a trace step records, because a run that says only "found" cannot be read afterwards for

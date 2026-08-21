@@ -129,15 +129,6 @@ inspect printed resolves, whichever line the reader started from.
 
 ## Block D — Act — patterns before pointers
 
-### §WW27 Traversal has an observable
-
-Tab moving focus is a property of the window and nothing in a picture shows it. What
-holds focus after the key is read and named, so a failure says where focus actually went
-rather than only that it did not move. The same shape covers an arrow key driving a
-slider, with one measured detail: at the maximum the press in that direction is a
-legitimate no-op, so the other one is used and the assertion stays about the control
-rather than about the starting value.
-
 ### §WW28 The route and the hop count are part of the answer
 
 A claim about one switch is void when the walk made several, because each intermediate

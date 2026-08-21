@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using System.Windows.Automation;
 
 using Winwright.Acting;
 using Winwright.Locating;
@@ -16,138 +15,83 @@ namespace Winwright.Tests;
 /// These synthesize real input, so they move the real pointer. The cursor is put back where it
 /// was afterwards, which is the least a suite owes the desk it is running on.
 /// </para>
+/// <para>
+/// The windows are pumped ones on their own threads. The first draft created them on the test
+/// thread, which worked until the suite grew: once this process has been refused the foreground
+/// once, Windows stops granting it, and a bare window created by a thread that owns nothing is
+/// never activated. Only a thread holding the window it just made is given the desktop.
+/// </para>
 /// </summary>
 [Collection(WindowFixture.Serial)]
 public sealed class PointerTests : IDisposable
 {
-    private const uint WsPopup = 0x80000000;
     private const uint WsVisible = 0x10000000;
     private const uint WsChild = 0x40000000;
     private const uint BsAutoCheckBox = 0x0003;
 
-    private readonly List<nint> created = [];
+    private readonly PumpedDialog dialog = PumpedDialog.Open(
+        "winwright statistics",
+        new PumpedDialog.ChildWindow("Button", "Wrap lines", WsChild | WsVisible | BsAutoCheckBox, 20, 20, 160, 30),
+        new PumpedDialog.ChildWindow("Static", "a label", WsChild | WsVisible, 20, 80, 120, 20));
+
+    private readonly List<PumpedDialog> decoys = [];
     private readonly Win32Cursor cursor = Win32Cursor.Where();
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern nint CreateWindowExW(
-        uint exStyle, string className, string? windowName, uint style,
-        int x, int y, int width, int height, nint parent, nint menu, nint instance, nint parameter);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool DestroyWindow(nint window);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct Msg
-    {
-        public nint Window;
-        public uint Message;
-        public nint WParam;
-        public nint LParam;
-        public uint Time;
-        public int X;
-        public int Y;
-    }
-
-    [DllImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool PeekMessageW(out Msg message, nint window, uint first, uint last, uint remove);
-
-    [DllImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool TranslateMessage(ref Msg message);
-
-    [DllImport("user32.dll")]
-    private static extern nint DispatchMessageW(ref Msg message);
-
-    /// <summary>
-    /// Drain the queue, because synthesized input goes there and a window whose thread never
-    /// pumps never sees it. A pattern act needs no pump — it reaches the window procedure
-    /// directly — which is one more way the two kinds of act are not the same act.
-    /// </summary>
-    private static void Pump(int milliseconds = 400)
-    {
-        var until = System.Diagnostics.Stopwatch.StartNew();
-        while (until.ElapsedMilliseconds < milliseconds)
-        {
-            while (PeekMessageW(out var message, 0, 0, 0, remove: 1))
-            {
-                TranslateMessage(ref message);
-                DispatchMessageW(ref message);
-            }
-
-            Thread.Sleep(10);
-        }
-    }
 
     public void Dispose()
     {
-        for (var index = created.Count - 1; index >= 0; index--)
-            DestroyWindow(created[index]);
+        foreach (var decoy in decoys)
+            decoy.Dispose();
 
+        dialog.Dispose();
         cursor.Restore();
     }
 
-    private nint Create(string className, string? title, uint style, int x, int y, int w, int h, nint parent = 0)
+    /// <summary>Another pumped window, because only a thread that owns one gets the foreground.</summary>
+    private void Decoy()
     {
-        var window = CreateWindowExW(0, className, title, style, x, y, w, h, parent, 0, 0, 0);
-        Assert.NotEqual(0, window);
-        created.Add(window);
-        return window;
+        var decoy = PumpedDialog.Open("winwright decoy");
+        decoys.Add(decoy);
+        Assert.Equal(ForegroundState.Ours, Foreground.Check(decoy.Frame).State);
     }
 
-    private nint Dialog()
-    {
-        var frame = Create("Static", "winwright statistics", WsPopup | WsVisible, 60, 60, 480, 320);
-        Create("Button", "Wrap lines", WsChild | WsVisible | BsAutoCheckBox, 20, 20, 160, 30, frame);
-        return frame;
-    }
-
-    private static Subject On(nint frame, string locator) =>
-        new(AutomationElement.FromHandle(frame), Locator.Parse(locator), 2000, pollMs: 20);
+    private Subject On(string locator) =>
+        new(dialog.Root, Locator.Parse(locator), deadlineMs: 2000, pollMs: 20);
 
     [Fact]
     public void A_click_lands_where_the_element_is_when_the_window_owns_the_desktop()
     {
-        var frame = Dialog();
-        var checkbox = On(frame, """CheckBox[name="Wrap lines"]""");
-
-        // Creating a visible top-level window activates it, so the dialog owns the foreground.
-        Assert.Equal(ForegroundState.Ours, Foreground.Check(frame).State);
+        var checkbox = On("""CheckBox[name="Wrap lines"]""");
+        Assert.Equal(ForegroundState.Ours, Foreground.Check(dialog.Frame).State);
         Assert.Equal("Off", checkbox.ReadOnce().Values.Toggle);
 
         var clicked = Pointer.Click(checkbox);
+
         Assert.True(clicked.Landed);
         Assert.Equal(160, clicked.At.Width);
-
-        Pump();
-        Assert.Equal("On", checkbox.ReadOnce().Values.Toggle);
+        Assert.True(
+            Attempt.UntilTrue(() => checkbox.ReadOnce().Values.Toggle == "On", 2000, 20).Happened,
+            "the click never reached the checkbox");
     }
 
     [Fact]
     public void A_click_with_the_desktop_elsewhere_sends_nothing_and_names_the_intruder()
     {
-        var frame = Dialog();
-        var checkbox = On(frame, """CheckBox[name="Wrap lines"]""");
-        Create("Static", "winwright decoy", WsPopup | WsVisible, 60, 60, 200, 120);
+        var checkbox = On("""CheckBox[name="Wrap lines"]""");
+        Decoy();
 
         var clicked = Pointer.Click(checkbox);
 
         Assert.False(clicked.Landed);
         Assert.False(clicked.Foreground.Satisfied);
         Assert.Contains("winwright decoy", clicked.Foreground.Absence);
-
-        // And nothing was sent: the control is where it was, even after a pump.
-        Pump(100);
         Assert.Equal("Off", checkbox.ReadOnce().Values.Toggle);
     }
 
     [Fact]
     public void Input_sent_nowhere_is_a_hole_in_the_trace_rather_than_a_step_that_ran()
     {
-        var frame = Dialog();
-        var checkbox = On(frame, """CheckBox[name="Wrap lines"]""");
-        Create("Static", "winwright decoy", WsPopup | WsVisible, 60, 60, 200, 120);
+        var checkbox = On("""CheckBox[name="Wrap lines"]""");
+        Decoy();
 
         var step = Pointer.Click(checkbox).AsTraceStep();
 
@@ -159,9 +103,7 @@ public sealed class PointerTests : IDisposable
     [Fact]
     public void Nothing_in_this_project_falls_back_to_a_pointer_when_a_pattern_is_missing()
     {
-        var frame = Dialog();
-        Create("Static", "a label", WsChild | WsVisible, 20, 80, 120, 20, frame);
-        var label = On(frame, """Text[name="a label"]""");
+        var label = On("""Text[name="a label"]""");
 
         // Invoke refuses rather than quietly clicking, which is the whole of this task.
         var refusal = Assert.Throws<NotActionableException>(() => Act.Invoke(label));
@@ -169,14 +111,13 @@ public sealed class PointerTests : IDisposable
 
         // The pointer is reachable, but only by asking for it by name.
         Assert.True(Pointer.Click(label).Landed);
-        Pump(100);
     }
 
     [Fact]
     public void A_pointer_act_still_needs_the_element_to_be_there_and_on_screen()
     {
         var refusal = Assert.Throws<NotActionableException>(
-            () => Pointer.Click(On(Dialog(), """Button[name="Publish"]""")));
+            () => Pointer.Click(On("""Button[name="Publish"]""")));
 
         Assert.Equal(Actionable.NotInTree, refusal.Missing);
     }
@@ -207,8 +148,7 @@ public sealed class PointerTests : IDisposable
     [Fact]
     public void A_click_count_of_nothing_is_refused()
     {
-        var frame = Dialog();
-        var checkbox = On(frame, """CheckBox[name="Wrap lines"]""");
+        var checkbox = On("""CheckBox[name="Wrap lines"]""");
 
         Assert.Throws<ArgumentOutOfRangeException>(
             () => Pointer.Run(new PointerAct("click", checkbox.Locator, MouseButton.Left, 0), checkbox));

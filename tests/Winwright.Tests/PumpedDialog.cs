@@ -12,6 +12,10 @@ namespace Winwright.Tests;
 /// keys travel the queue by definition, so proving anything about them needs a window that
 /// behaves like one somebody is using.
 /// </para>
+/// <para>
+/// It also takes the foreground from its own thread. A decoy that has to hold the desktop is
+/// another one of these rather than a bare window created by the test, for the same reason.
+/// </para>
 /// </summary>
 internal sealed class PumpedDialog : IDisposable
 {
@@ -57,6 +61,17 @@ internal sealed class PumpedDialog : IDisposable
     [DllImport("kernel32.dll")]
     private static extern uint GetCurrentThreadId();
 
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsDialogMessageW(nint dialog, ref Msg message);
+
+    [DllImport("comctl32.dll")]
+    private static extern void InitCommonControls();
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(nint window);
+
     private readonly Thread thread;
     private readonly List<nint> created = [];
     private uint threadId;
@@ -67,14 +82,30 @@ internal sealed class PumpedDialog : IDisposable
         thread = new Thread(() =>
         {
             threadId = GetCurrentThreadId();
+
+            // The common controls have to be loaded before a trackbar can be created at all.
+            InitCommonControls();
+
             Frame = Make("Static", title, WsPopup | WsVisible, 60, 60, 520, 360, 0);
             foreach (var child in children)
                 Make(child.ClassName, child.Title, child.Style, child.X, child.Y, child.Width, child.Height, Frame);
+
+            // From this thread, because it owns the window it just created — which is the one
+            // case Windows grants the foreground to. Asked from the test thread it is refused,
+            // and then whichever window the desk already had keeps it. That refusal is WW13's
+            // subject, and a fixture that needs the desktop has to be the process holding it.
+            SetForegroundWindow(Frame);
 
             ready.Set();
 
             while (GetMessageW(out var message, 0, 0, 0) > 0)
             {
+                // Through the dialog manager, because that is what makes Tab traverse. Measured:
+                // without it the key reaches the focused control and focus never moves, which
+                // reads as the window taking no keyboard input when the window is fine.
+                if (IsDialogMessageW(Frame, ref message))
+                    continue;
+
                 TranslateMessage(ref message);
                 DispatchMessageW(ref message);
             }

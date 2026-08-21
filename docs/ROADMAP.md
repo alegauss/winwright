@@ -17,7 +17,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW27** (deps: —) **keyboard traversal has no observable at all** — Focus is read after a traversal key and named by what holds it, which is how a window accepting no keyboard input is caught while every picture of it looks perfect. → §WW27
 - 📋 **WW28** (deps: —) **a picker walked to a value passes through every value on the way** — The route and the number of selection changes are part of the answer, because an observation about one switch is void when the walk made several. → §WW28
 - 📋 **WW29** (deps: —) **a menu is driven by clicks a shell does not always deliver** — Opened, read and expanded the way a keyboard user does, with a destructive entry never invoked, since invoking one of them ends the run or launches a terminal. → §WW29
 - 📋 **WW30** (deps: —) **a flaky act is hidden behind a retry that runs until it passes** — Attempts are capped and counted and the count reaches the record, so an act that genuinely stopped working still goes red and merely stops doing so at random. → §WW30

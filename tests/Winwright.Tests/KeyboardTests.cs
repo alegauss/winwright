@@ -1,6 +1,3 @@
-using System.Runtime.InteropServices;
-using System.Windows.Automation;
-
 using Winwright.Acting;
 using Winwright.Locating;
 using Winwright.Windowing;
@@ -28,7 +25,6 @@ public sealed class KeyboardTests : IDisposable
 {
     private const uint WsVisible = 0x10000000;
     private const uint WsChild = 0x40000000;
-    private const uint WsPopup = 0x80000000;
     private const uint EsReadOnly = 0x0800;
 
     private readonly PumpedDialog dialog = PumpedDialog.Open(
@@ -37,31 +33,22 @@ public sealed class KeyboardTests : IDisposable
         new PumpedDialog.ChildWindow("Edit", "locked", WsChild | WsVisible | EsReadOnly, 20, 60, 220, 24),
         new PumpedDialog.ChildWindow("Static", "a label", WsChild | WsVisible, 20, 100, 120, 20));
 
-    private readonly List<nint> decoys = [];
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern nint CreateWindowExW(
-        uint exStyle, string className, string? windowName, uint style,
-        int x, int y, int width, int height, nint parent, nint menu, nint instance, nint parameter);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool DestroyWindow(nint window);
+    private readonly List<PumpedDialog> decoys = [];
 
     public void Dispose()
     {
         foreach (var decoy in decoys)
-            DestroyWindow(decoy);
+            decoy.Dispose();
 
         dialog.Dispose();
     }
 
+    /// <summary>Another pumped window, because only a thread that owns one gets the foreground.</summary>
     private void Decoy()
     {
-        var window = CreateWindowExW(
-            0, "Static", "winwright decoy", WsPopup | WsVisible, 60, 60, 200, 120, 0, 0, 0, 0);
-        Assert.NotEqual(0, window);
-        decoys.Add(window);
+        var decoy = PumpedDialog.Open("winwright decoy");
+        decoys.Add(decoy);
+        Assert.Equal(ForegroundState.Ours, Foreground.Check(decoy.Frame).State);
     }
 
     private Subject On(string locator) =>

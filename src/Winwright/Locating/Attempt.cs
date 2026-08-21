@@ -73,6 +73,36 @@ public static class Attempt
     }
 
     /// <summary>
+    /// Wait for a condition rather than for a thing. The same deadline, the same absence of a
+    /// default, and the same report of what it cost — for the waits whose answer is a number or a
+    /// state rather than an object, which a sighting has nowhere to put.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Where the deadline is not positive.</exception>
+    public static Waited UntilTrue(Func<bool> condition, int deadlineMs, int pollMs = 25)
+    {
+        ArgumentNullException.ThrowIfNull(condition);
+        if (deadlineMs <= 0)
+            throw new ArgumentOutOfRangeException(
+                nameof(deadlineMs), deadlineMs, "a deadline of nothing is a single look, which is Attempt.Once");
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pollMs);
+
+        var clock = Stopwatch.StartNew();
+        var polls = 0;
+        while (true)
+        {
+            polls++;
+            if (condition())
+                return new Waited(true, (int)clock.ElapsedMilliseconds, polls);
+
+            var left = deadlineMs - (int)clock.ElapsedMilliseconds;
+            if (left <= 0)
+                return new Waited(false, (int)clock.ElapsedMilliseconds, polls);
+
+            Thread.Sleep(Math.Min(pollMs, left));
+        }
+    }
+
+    /// <summary>
     /// The same, with the deadline and the poll interval read from what the project declared —
     /// which is where a number belongs, so a scenario never carries one.
     /// </summary>
