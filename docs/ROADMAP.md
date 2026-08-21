@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW6** (deps: —) **a summary can say every check passed while one of them never ran** — The word every is earned rather than default: it is refused whenever the unchecked list is non-empty, which is how a dropped assertion stops riding out in an info line. → §WW6
 - 📋 **WW7** (deps: —) **a step that threw is indistinguishable from one that failed its assertion** — A thrown exception is its own outcome carrying the step it came from, so a broken harness is never reported as a broken build. → §WW7
 
 ## Block B — Attach, launch, and leave nothing behind

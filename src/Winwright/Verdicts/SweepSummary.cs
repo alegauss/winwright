@@ -38,6 +38,28 @@ public static class SweepSummary
     }
 
     /// <summary>
+    /// The sweep in one sentence. As with a single run, the word <em>every</em> is earned: a
+    /// sweep that met a hole anywhere names it instead, deduped, so the sentence stays a reading
+    /// of the whole walk rather than of whichever environment happened to be clean.
+    /// </summary>
+    public static string Sentence(SweepVerdict verdict)
+    {
+        ArgumentNullException.ThrowIfNull(verdict);
+
+        var walked = VerdictSummary.Plural(verdict.Environments.Count, "environment");
+        if (Coverage.EarnsEvery(verdict))
+            return $"every assertion passed in {walked}.";
+
+        var clauses = new List<string> { $"{walked} walked" };
+        if (verdict.Failures.Count > 0)
+            clauses.Add($"{verdict.Failures.Count} failed: {string.Join(", ", Coverage.Failed(verdict))}");
+        if (verdict.Unchecked.Count > 0)
+            clauses.Add($"{verdict.Unchecked.Count} never ran: {string.Join(", ", Coverage.NotRun(verdict))}");
+
+        return string.Join("; ", clauses) + ".";
+    }
+
+    /// <summary>
     /// One line per occurrence — failures first, holes after them — each carrying the environment
     /// it happened in, so three sightings of one hole read as one hole in three places.
     /// </summary>

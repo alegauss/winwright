@@ -36,6 +36,23 @@ public static class VerdictSummary
     }
 
     /// <summary>
+    /// The run in one sentence, for whoever prints a banner rather than a table. The word
+    /// <em>every</em> appears here only where <see cref="Coverage.EarnsEvery(RunVerdict)"/> says
+    /// it was earned; otherwise what did not run is named, not counted, because a count is what a
+    /// dropped assertion rides out in.
+    /// </summary>
+    public static string Sentence(RunVerdict verdict)
+    {
+        ArgumentNullException.ThrowIfNull(verdict);
+
+        if (Coverage.EarnsEvery(verdict))
+            return $"every assertion passed ({verdict.Results.Count} of {verdict.Results.Count}).";
+
+        var passed = verdict.Results.Count - verdict.Failures.Count - verdict.Unchecked.Count;
+        return Composed(passed, verdict.Results.Count, Coverage.Failed(verdict), Coverage.NotRun(verdict));
+    }
+
+    /// <summary>
     /// One line per assertion that did not pass, failures first and holes after them, each naming
     /// the assertion and the sentence that explains it.
     /// </summary>
@@ -74,4 +91,19 @@ public static class VerdictSummary
     /// <summary>Count and noun, agreeing. Used by every headline this project renders.</summary>
     public static string Plural(int count, string noun) =>
         count == 1 ? $"1 {noun}" : $"{count} {noun}s";
+
+    /// <summary>
+    /// The unearned sentence: what passed as a fraction, then what failed and what never ran, each
+    /// named. Shared with the sweep, so one hole reads the same way whichever summary printed it.
+    /// </summary>
+    internal static string Composed(int passed, int total, IReadOnlyList<string> failed, IReadOnlyList<string> notRun)
+    {
+        var clauses = new List<string> { $"{passed} of {Plural(total, "assertion")} passed" };
+        if (failed.Count > 0)
+            clauses.Add($"{failed.Count} failed: {string.Join(", ", failed)}");
+        if (notRun.Count > 0)
+            clauses.Add($"{notRun.Count} never ran: {string.Join(", ", notRun)}");
+
+        return string.Join("; ", clauses) + ".";
+    }
 }

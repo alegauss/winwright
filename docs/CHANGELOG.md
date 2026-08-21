@@ -7,6 +7,7 @@
 - ✅ **WW3** **a run records what it concluded and not what it observed** — Each step is written as one JSONL line the moment it happens, carrying the locator, what it resolved to, the pattern, the read-back, the wait and the polls, flushed so a run that dies keeps it.
 - ✅ **WW4** **the same unrun assertion is tallied once per environment a sweep walks** — A sweep tallies each assertion once by name and keeps every occurrence under it, so one hole met in three environments reads as one hole and still prints three lines, each naming its environment.
 - ✅ **WW5** **every path, timeout and language file is typed into the scenario that needs it** — A winwright.json found by walking up from the scenario carries the executable, source root, language files and timeouts, resolved against its own directory, and refuses by name what it omits.
+- ✅ **WW6** **a summary can say every check passed while one of them never ran** — The summary refuses the word while anything is unchecked and names what is on the list, and Coverage.RequireEvery is the gate an adopting project's own green asks first.
 
 ## Block B — Attach, launch, and leave nothing behind
 

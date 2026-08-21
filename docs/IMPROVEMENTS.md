@@ -2,13 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW6 The word every is earned
-
-A run where an assertion could not be evaluated is not the same run as one where all of
-them passed, and printing the same green line for both is how a timing assertion got
-dropped into an info line nobody reads. The summary refuses the word while the unchecked
-list is non-empty, and names what is on it rather than counting it.
-
 ### §WW7 A broken harness is not a broken build
 
 A pattern that throws, an assembly that will not load, a locator that cannot be parsed -
