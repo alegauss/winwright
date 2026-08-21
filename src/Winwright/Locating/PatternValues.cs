@@ -54,6 +54,18 @@ public sealed record PatternValues
     public static PatternValues None { get; } = new();
 
     /// <summary>
+    /// The one value worth showing in a line, or null where the element reports none. The order is
+    /// what a reader looks at first: what it says, then where it sits, then what state it is in.
+    /// </summary>
+    public string? Reading() =>
+        Value
+        ?? Range?.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        ?? Toggle
+        ?? (IsSelected is { } selected ? selected ? "selected" : "not selected" : null)
+        ?? ExpandCollapse
+        ?? Text;
+
+    /// <summary>
     /// Read every pattern this element offers into values, now. A pattern that throws while being
     /// read leaves its own field null rather than losing the ones already read: the element is
     /// going away, and half a reading of what it was is better than none of it.

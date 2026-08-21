@@ -129,15 +129,6 @@ inspect printed resolves, whichever line the reader started from.
 
 ## Block D — Act — patterns before pointers
 
-### §WW24 Invoked, not clicked
-
-pportal's harness states the rule and the reason in its own header: a synthesised mouse
-click lands on whatever is drawn at a point, so it needs the window in the foreground,
-and Windows refuses the foreground to a process that does not already own it - which
-means a run started from an editor or an agent drives somebody else's window. The invoke
-pattern asks the control directly: no pointer, no foreground, nothing on top to be
-confused with. That is what lets these run unattended, which is the whole point of them.
-
 ### §WW25 A pointer act is declared, never inferred
 
 Some controls have no pattern at all: a bare border with no automation peer, a

@@ -34,6 +34,8 @@
 
 ## Block D — Act — patterns before pointers
 
+- ✅ **WW24** **an act needs the foreground, so a run started from an editor drives somebody else's window** — Invoke, toggle, value, range, selection and expand each re-resolve, require actionability, act through the pattern and read back, proven with the foreground held elsewhere.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
