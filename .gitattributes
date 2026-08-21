@@ -1,0 +1,11 @@
+# Text is stored LF and checked out however this platform wants it. Without this, every commit
+# from a Windows editor warns that CRLF will be replaced, once per file, which is a warning
+# nobody reads and therefore one that hides the next real one.
+* text=auto eol=lf
+
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+*.png binary
+*.ico binary
+*.woff2 binary
