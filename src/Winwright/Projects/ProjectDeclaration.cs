@@ -1,0 +1,139 @@
+using System.Collections.ObjectModel;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace Winwright.Projects;
+
+/// <summary>
+/// What is true of a project rather than of a case: the executable, the source root the staleness
+/// check compares against, the language files, the default timeouts and the store to fingerprint.
+/// A scenario carrying one of these is a scenario that runs on exactly one checkout, which is how
+/// a harness becomes unmovable and then unowned — so they are declared once, in <c>winwright.json</c>
+/// at the project root, and every relative path in it resolves against that file's own directory.
+/// </summary>
+public sealed class ProjectDeclaration
+{
+    /// <summary>The file a project declares itself in, looked for by walking up from a directory.</summary>
+    public const string FileName = "winwright.json";
+
+    private static readonly JsonSerializerOptions ReadAs = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true,
+    };
+
+    private readonly string? executable;
+    private readonly string? sourceRoot;
+    private readonly string? fingerprintStore;
+
+    private ProjectDeclaration(string path, Shape shape)
+    {
+        Path = path;
+        Root = System.IO.Path.GetDirectoryName(path)!;
+        executable = Resolve(shape.Executable);
+        sourceRoot = Resolve(shape.SourceRoot);
+        fingerprintStore = Resolve(shape.FingerprintStore);
+        LanguageFiles = new ReadOnlyCollection<string>(
+            (shape.LanguageFiles ?? []).Select(Resolve).OfType<string>().ToList());
+        Timeouts = Timeouts.Declared(shape.Timeouts, path);
+    }
+
+    /// <summary>The declaration file that was read.</summary>
+    public string Path { get; }
+
+    /// <summary>The directory it sits in, which every relative path in it is resolved against.</summary>
+    public string Root { get; }
+
+    /// <summary>The language files this project ships, resolved. Empty where none are declared.</summary>
+    public IReadOnlyList<string> LanguageFiles { get; }
+
+    /// <summary>How long this project waits, by name, with the engine's defaults folded under it.</summary>
+    public Timeouts Timeouts { get; }
+
+    /// <summary>The application under test.</summary>
+    /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
+    public string Executable => Require(executable, "executable", "launching the application under test");
+
+    /// <summary>The source root a staleness check compares the built binary against.</summary>
+    /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
+    public string SourceRoot => Require(sourceRoot, "sourceRoot", "checking whether the binary is stale");
+
+    /// <summary>Where image fingerprints are kept between runs.</summary>
+    /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
+    public string FingerprintStore => Require(fingerprintStore, "fingerprintStore", "comparing a capture with the last one");
+
+    /// <summary>Whether the project declared a value for that key at all, without refusing.</summary>
+    public bool Declares(string key) => key switch
+    {
+        "executable" => executable is not null,
+        "sourceRoot" => sourceRoot is not null,
+        "fingerprintStore" => fingerprintStore is not null,
+        "languageFiles" => LanguageFiles.Count > 0,
+        _ => Timeouts.All.ContainsKey(key.StartsWith("timeouts.", StringComparison.Ordinal) ? key[9..] : key),
+    };
+
+    /// <summary>Read one declaration file.</summary>
+    /// <exception cref="DeclarationMissingException">Where the file is not there.</exception>
+    public static ProjectDeclaration Load(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        var full = System.IO.Path.GetFullPath(path);
+        if (!File.Exists(full))
+            throw new DeclarationMissingException(FileName, full, "every scenario in this project");
+
+        var shape = JsonSerializer.Deserialize<Shape>(File.ReadAllText(full), ReadAs)
+            ?? throw new JsonException($"{full} is empty, and an empty declaration declares nothing");
+
+        return new ProjectDeclaration(full, shape);
+    }
+
+    /// <summary>
+    /// Walk up from <paramref name="startingAt"/> until a declaration turns up. This is what lets
+    /// a scenario be moved to another checkout unchanged: it names what it drives, and where that
+    /// lives is answered by whichever project the file happens to be sitting in.
+    /// </summary>
+    /// <exception cref="DeclarationMissingException">Where no ancestor directory declares one.</exception>
+    public static ProjectDeclaration Find(string startingAt)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(startingAt);
+
+        var directory = new DirectoryInfo(System.IO.Path.GetFullPath(startingAt));
+        for (var walking = directory; walking is not null; walking = walking.Parent)
+        {
+            var candidate = System.IO.Path.Combine(walking.FullName, FileName);
+            if (File.Exists(candidate))
+                return Load(candidate);
+        }
+
+        throw new DeclarationMissingException(
+            FileName, $"{directory.FullName} and every directory above it", "every scenario in this project");
+    }
+
+    private string? Resolve(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        var expanded = System.Environment.ExpandEnvironmentVariables(path.Trim());
+        return System.IO.Path.GetFullPath(expanded, Root);
+    }
+
+    private string Require(string? value, string key, string wanted) =>
+        value ?? throw new DeclarationMissingException(key, Path, wanted);
+
+    private sealed record Shape
+    {
+        [JsonPropertyName("executable")] public string? Executable { get; init; }
+
+        [JsonPropertyName("sourceRoot")] public string? SourceRoot { get; init; }
+
+        [JsonPropertyName("fingerprintStore")] public string? FingerprintStore { get; init; }
+
+        [JsonPropertyName("languageFiles")] public IReadOnlyList<string>? LanguageFiles { get; init; }
+
+        [JsonPropertyName("timeouts")] public Dictionary<string, int>? Timeouts { get; init; }
+    }
+}

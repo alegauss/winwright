@@ -2,14 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW5 The declaration is per project
-
-roadkeep's sixth law, applied here. The executable, the source root the staleness check
-compares against, the language files, the default timeouts and the store to fingerprint
-are all facts about a project and none of them about a case. A scenario carrying one is
-a scenario that runs on exactly one checkout, which is how a harness becomes unmovable
-and then unowned.
-
 ### §WW6 The word every is earned
 
 A run where an assertion could not be evaluated is not the same run as one where all of
