@@ -17,6 +17,7 @@ namespace Winwright.Tests;
 /// enumerating by process id does.
 /// </para>
 /// </summary>
+[Collection(WindowFixture.Serial)]
 public sealed class TopLevelWindowsTests : IDisposable
 {
     private const uint WsPopup = 0x80000000;

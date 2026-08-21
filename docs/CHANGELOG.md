@@ -16,6 +16,7 @@
 - ✅ **WW9** **a build that failed leaves the previous exe in place and the run reports on code that is not in the tree** — The binary's write time is compared against the newest source outside build output, and older yields an absent precondition carrying both stamps rather than a failure.
 - ✅ **WW10** **attaching to a running instance checks whatever binary is up, not the one that was named** — The running instance is identified by file version and then write time, and a mismatch becomes an absent precondition naming both, with the version difference preferred.
 - ✅ **WW11** **a borderless window is invisible to the launcher, because its main window handle stays zero** — Top-level windows are enumerated by process id with a size floor, largest first, so an owned borderless popup the main window handle skips is found with its class, title and bounds.
+- ✅ **WW12** **a second window of the app under test can sit on top of the one being driven** — Only an instance showing a top-level window stops the run, and the refusal names each one and the override; a resident instance showing nothing is reported and never refused.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

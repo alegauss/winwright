@@ -41,14 +41,6 @@ is the line that has content and is not a step.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW12 Another window of the same app is the wrong picture
-
-The failure this refusal exists for returned a picture of another instance's Settings
-window when Statistics had been asked for, printed the size it captured and exited zero.
-Only a windowed instance counts: a resident tray showing nothing is running on every
-developer machine here, and a check that fired on it would make every routine capture
-take an override to work.
-
 ### §WW13 The foreground is a precondition, not a retry
 
 Windows refuses the foreground to a process that does not already own it, so a run
