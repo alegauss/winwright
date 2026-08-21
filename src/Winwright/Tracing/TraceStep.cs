@@ -35,6 +35,12 @@ public sealed record TraceStep
     /// <summary>How many times it polled. Where it resolved at all, the last poll is the one that saw it.</summary>
     public int Polls { get; init; }
 
+    /// <summary>
+    /// How many attempts the act took. One by default, because every step was attempted once — and
+    /// a green step that says three is a finding a green with no count would have thrown away.
+    /// </summary>
+    public int Attempts { get; init; } = 1;
+
     /// <summary>The reading this step earned.</summary>
     public required StepVerdict Verdict { get; init; }
 

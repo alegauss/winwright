@@ -153,15 +153,6 @@ inspect printed resolves, whichever line the reader started from.
 
 ## Block D — Act — patterns before pointers
 
-### §WW30 Bounded, counted, and never until green
-
-One walk and one read is a coin toss against a shell that drops synthesised input: three
-runs in ten reported a submenu that did not expand, against a build with nothing wrong
-with it, wearing the wording of a real defect. What is deliberately not done is retrying
-until it passes - the attempts are capped, so a submenu that genuinely stopped expanding
-still goes red and merely stops doing so at random. The count reaches the output,
-because an act that only ever works on the third attempt is itself a finding.
-
 ### §WW31 The notification-area icon
 
 It has no clickable point - asking for one throws - so its bounding rectangle is used

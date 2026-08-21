@@ -50,6 +50,12 @@ public sealed class ProjectDeclaration
         LanguagePreferenceKey = string.IsNullOrWhiteSpace(shape.Language?.PreferenceKey)
             ? null
             : shape.Language.PreferenceKey.Trim();
+        Attempts = shape.Attempts is { } declared
+            ? declared > 0
+                ? declared
+                : throw new ArgumentException(
+                    $"{path} allows {declared} attempts, and an act nobody may attempt is not an act", nameof(shape))
+            : Acting.Retry.DefaultCap;
         Timeouts = Timeouts.Declared(shape.Timeouts, path);
     }
 
@@ -80,6 +86,12 @@ public sealed class ProjectDeclaration
 
     /// <summary>The key inside that file, dotted for a nested one. Null where none is declared.</summary>
     public string? LanguagePreferenceKey { get; }
+
+    /// <summary>
+    /// How many times a flaky act may be attempted. A number about this project rather than about
+    /// a case, so it is declared once here and never typed into the scenario that needed it.
+    /// </summary>
+    public int Attempts { get; }
 
     /// <summary>The application under test.</summary>
     /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
@@ -168,6 +180,8 @@ public sealed class ProjectDeclaration
         [JsonPropertyName("timeouts")] public Dictionary<string, int>? Timeouts { get; init; }
 
         [JsonPropertyName("language")] public LanguageShape? Language { get; init; }
+
+        [JsonPropertyName("attempts")] public int? Attempts { get; init; }
     }
 
     private sealed record LanguageShape

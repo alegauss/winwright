@@ -40,6 +40,7 @@
 - ✅ **WW27** **keyboard traversal has no observable at all** — A traversal key answers with what holds the focus rather than whether it moved, and a nudge presses away from whichever end the range sits at and says it did.
 - ✅ **WW28** **a picker walked to a value passes through every value on the way** — A pick reports the route it took and every value it stopped on, and the keyboard walk anchors at whichever end is nearer so the count stays as small as the picker allows.
 - ✅ **WW29** **a menu is driven by clicks a shell does not always deliver** — A menu is entered with F10, walked with Down and expanded with Right against a polled deadline, nothing resets between attempts, and this surface has no invoke at all.
+- ✅ **WW30** **a flaky act is hidden behind a retry that runs until it passes** — Attempts are capped, a cap large enough to hide a failure is refused, and the count is stamped onto the trace step so a green that took three goes still says so.
 
 ## Block E — Capture — the picture that proves what it photographed
 
