@@ -24,6 +24,7 @@
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 - ✅ **WW16** **an element is addressed by hand-built automation conditions at every call site** — One grammar parses id, name, type, class, pattern, index and descendant chaining, round-trips, and refuses a control type or pattern UI Automation itself does not have.
+- ✅ **WW17** **a scenario sleeps because there is no way to wait for a condition** — Once looks a single time and sleeps never, Until takes its deadline as a required argument and reports what it spent, and neither is reachable from the other.
 
 ## Block D — Act — patterns before pointers
 

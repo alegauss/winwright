@@ -84,14 +84,6 @@ by forty is the default because it was the first pair of numbers typed.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW17 A deadline, and a form with no wait at all
-
-Both exist in the harnesses already and the second matters more than it looks: a helper
-that retries for two hundred milliseconds folds that sleep into every miss, so a loop
-doing its own waiting ends up measuring its own helper. Asking whether something arrived
-needs a deadline; asking whether it is gone needs a single look, and using the first for
-the second is how a timing observation loses its resolution.
-
 ### §WW18 Actionability, for Windows
 
 Playwright waits for visible, stable, enabled and able to receive events. The Windows

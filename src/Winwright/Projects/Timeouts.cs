@@ -17,6 +17,7 @@ public sealed class Timeouts
             ["act"] = 2000,
             ["launch"] = 15000,
             ["stop"] = 5000,
+            ["poll"] = 25,
         });
 
     private readonly IReadOnlyDictionary<string, int> byName;

@@ -12,7 +12,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-- 📋 **WW17** (deps: —) **a scenario sleeps because there is no way to wait for a condition** — Resolution takes a deadline and polls, and a second form takes no wait at all, which is what asking whether something is gone actually needs. → §WW17
 - 📋 **WW18** (deps: —) **an act runs against an element that is present and not yet actionable** — In the tree, on screen, enabled and carrying the pattern the act needs, checked before the act and reported as which of the four was missing. → §WW18
 - 📋 **WW19** (deps: —) **the control view only prints when a check has already failed** — Inspect is a verb of its own: id, type, name, class and rectangle for a live window, so a locator is written from the tree instead of from the markup. → §WW19
 - 📋 **WW20** (deps: —) **a control missing because its pane is collapsed reads the same as one that is gone** — A pane that is not showing is absent from the tree by design, so the miss says which of the two it is and what would have to be navigated first. → §WW20
