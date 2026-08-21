@@ -84,14 +84,6 @@ by forty is the default because it was the first pair of numbers typed.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW21 Disambiguation is geometry
-
-The sidebar items in claude-tray are bare borders with no automation peer, so they are
-matched by the text inside them - and the page title carries the same words. Sorting by
-the rectangle picks the one on the left. It is a real property of the window and belongs
-in the locator, where the next reader can see the choice was made, rather than in a sort
-call at one call site.
-
 ### §WW22 A pattern's current value is a live view
 
 Holding a pattern and comparing its value before against its value after compares the

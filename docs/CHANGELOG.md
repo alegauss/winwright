@@ -28,6 +28,7 @@
 - ✅ **WW18** **an act runs against an element that is present and not yet actionable** — Presence, on screen, enabled and the pattern the act needs are judged over one snapshot, and the refusal names which of the four was missing with the remedy that is its own.
 - ✅ **WW19** **the control view only prints when a check has already failed** — Inspect walks the control view of a live window and prints one line per element that begins with the locator step addressing it, then its rectangle, state and patterns.
 - ✅ **WW20** **a control missing because its pane is collapsed reads the same as one that is gone** — A miss says whether the step matched elsewhere, whether what it stopped under is shut and must be opened, or that nothing in the window is shut and the control is gone.
+- ✅ **WW21** **two elements carrying the same name cannot be told apart by any condition** — The grammar takes order=left, right, top or bottom and sorts matches by rectangle, and a step matching several without saying which is refused with what it matched.
 
 ## Block D — Act — patterns before pointers
 

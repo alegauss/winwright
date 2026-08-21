@@ -96,7 +96,38 @@ public static class Resolve
             // The subtree went while it was being searched; what was found stands.
         }
 
+        return Ordered(found, step.Order);
+    }
+
+    /// <summary>
+    /// Put matches in the order a step asked for. The tree's own order is whatever the application
+    /// happened to create things in; a rectangle is a real property of the window, which is what
+    /// makes the choice reviewable in the file rather than buried in a sort at one call site.
+    /// </summary>
+    private static IReadOnlyList<AutomationElement> Ordered(
+        List<AutomationElement> found, MatchOrder? order)
+    {
+        if (order is null or MatchOrder.Tree || found.Count < 2)
+            return found;
+
+        var bounds = found.ToDictionary(
+            element => element, element => ElementFacts.Of(element)?.Bounds ?? default);
+
+        found.Sort((left, right) => order switch
+        {
+            MatchOrder.Left => Compare(bounds[left].Left, bounds[right].Left, bounds[left].Top, bounds[right].Top),
+            MatchOrder.Right => Compare(bounds[right].Left, bounds[left].Left, bounds[left].Top, bounds[right].Top),
+            MatchOrder.Top => Compare(bounds[left].Top, bounds[right].Top, bounds[left].Left, bounds[right].Left),
+            _ => Compare(bounds[right].Top, bounds[left].Top, bounds[left].Left, bounds[right].Left),
+        });
+
         return found;
+    }
+
+    private static int Compare(int first, int second, int tieFirst, int tieSecond)
+    {
+        var by = first.CompareTo(second);
+        return by != 0 ? by : tieFirst.CompareTo(tieSecond);
     }
 
     private static AutomationElement? Walk(AutomationElement root, Locator locator)
@@ -105,6 +136,12 @@ public static class Resolve
         foreach (var step in locator.Steps)
         {
             var matches = Matching(here, step);
+
+            // Strict, deliberately: a step matching several elements and saying nothing about
+            // which is a scenario that will one day run against the other one, and be green.
+            if (matches.Count > 1 && !step.Disambiguated)
+                throw new AmbiguousLocatorException(step, matches.Select(Named).ToList());
+
             var wanted = (step.Index ?? 1) - 1;
             if (wanted >= matches.Count)
                 return null;
@@ -113,6 +150,12 @@ public static class Resolve
         }
 
         return here;
+    }
+
+    private static string Named(AutomationElement element)
+    {
+        var facts = ElementFacts.Of(element);
+        return facts is null ? "(gone)" : $"{facts.AsLocatorStep()}  {facts.Bounds}";
     }
 
     private static Resolution Answered(

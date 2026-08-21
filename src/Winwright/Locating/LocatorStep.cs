@@ -3,6 +3,29 @@ using System.Text;
 namespace Winwright.Locating;
 
 /// <summary>
+/// How matches are put in order before an index picks one. The tree's own order is whatever the
+/// application happened to create things in; the other four are properties of the window a reader
+/// can see, which is what makes the choice reviewable in the file.
+/// </summary>
+public enum MatchOrder
+{
+    /// <summary>The order UI Automation walks them in. The default, and the arbitrary one.</summary>
+    Tree,
+
+    /// <summary>Left to right, then top to bottom.</summary>
+    Left,
+
+    /// <summary>Right to left, then top to bottom.</summary>
+    Right,
+
+    /// <summary>Top to bottom, then left to right.</summary>
+    Top,
+
+    /// <summary>Bottom to top, then left to right.</summary>
+    Bottom,
+}
+
+/// <summary>
 /// One hop of a locator: what to match at this level of the tree. Every field is optional on its
 /// own and a step with none of them is refused, because a step that constrains nothing addresses
 /// everything.
@@ -10,7 +33,13 @@ namespace Winwright.Locating;
 public sealed record LocatorStep
 {
     internal LocatorStep(
-        string? controlType, string? automationId, string? name, string? className, string? pattern, int? index)
+        string? controlType,
+        string? automationId,
+        string? name,
+        string? className,
+        string? pattern,
+        int? index,
+        MatchOrder? order = null)
     {
         ControlType = controlType;
         AutomationId = automationId;
@@ -18,6 +47,7 @@ public sealed record LocatorStep
         ClassName = className;
         Pattern = pattern;
         Index = index;
+        Order = order;
     }
 
     /// <summary>The UI Automation control type, spelled as UI Automation spells it.</summary>
@@ -38,6 +68,18 @@ public sealed record LocatorStep
     /// <summary>Which match, counting from one. Null where the step must match exactly one.</summary>
     public int? Index { get; }
 
+    /// <summary>
+    /// The order matches are put in before <see cref="Index"/> picks one. Null where the step
+    /// says nothing about it, which is the tree's own order.
+    /// </summary>
+    public MatchOrder? Order { get; }
+
+    /// <summary>
+    /// Whether this step says which one it means. A step that does not, and that matches more
+    /// than one element, is refused rather than answered with whichever came first.
+    /// </summary>
+    public bool Disambiguated => Index is not null || Order is not null;
+
     /// <summary>The step as the grammar writes it, in a fixed order, so a parse round-trips.</summary>
     public override string ToString()
     {
@@ -52,6 +94,8 @@ public sealed record LocatorStep
             text.Append("[class=").Append(Quoted(ClassName, bare: false)).Append(']');
         if (Pattern is not null)
             text.Append("[pattern=").Append(Pattern).Append(']');
+        if (Order is not null)
+            text.Append("[order=").Append(Order.Value.ToString().ToLowerInvariant()).Append(']');
         if (Index is not null)
             text.Append("[index=").Append(Index.Value).Append(']');
 

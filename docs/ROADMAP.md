@@ -12,7 +12,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-- 📋 **WW21** (deps: —) **two elements carrying the same name cannot be told apart by any condition** — Ordering by the rectangle is the disambiguation the tree does not offer, and it belongs in the locator rather than at the call site that needed it. → §WW21
 - 📋 **WW22** (deps: —) **a resolved element goes stale and the act runs against a handle nobody holds** — An element is re-resolved per act and a pattern read fresh each time, because a live view compared with itself can never fail. → §WW22
 - 📋 **WW23** (deps: —) **there is no way to ask what patterns an element actually offers** — Inspect names them per element, so a scenario reaching for a pattern the control does not carry is a refusal at load rather than a failure at run. → §WW23
 

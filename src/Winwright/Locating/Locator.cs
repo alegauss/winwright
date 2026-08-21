@@ -18,7 +18,8 @@ namespace Winwright.Locating;
 /// Button[name="Save as..."]                     the name
 /// Pane[class=Chrome_WidgetWin_1]                the window class
 /// Button[pattern=Invoke]                        it must carry that pattern
-/// MenuItem[index=2]                             the second match, counting from one
+/// Text[name="Statistics"][order=left]           the leftmost of the ones that match
+/// MenuItem[order=top][index=2]                   the second from the top
 /// Window#main &gt; Pane &gt; Button#save        a descendant of, at any depth
 /// </code>
 /// <para>
@@ -31,7 +32,7 @@ namespace Winwright.Locating;
 /// </remarks>
 public sealed record Locator
 {
-    private const string Keys = "name, class, pattern, index";
+    private const string Keys = "name, class, pattern, order, index";
 
     private Locator(string text, IReadOnlyList<LocatorStep> steps)
     {
@@ -100,6 +101,7 @@ public sealed record Locator
         string? className = null;
         string? pattern = null;
         int? index = null;
+        MatchOrder? order = null;
 
         if (at < text.Length && (char.IsLetter(text[at]) || text[at] == '_'))
         {
@@ -158,6 +160,17 @@ public sealed record Locator
 
                     pattern = value;
                     break;
+                case "order":
+                    Once(text, opened, order?.ToString(), "order");
+                    if (!Enum.TryParse<MatchOrder>(value, ignoreCase: true, out var sorted)
+                        || sorted == MatchOrder.Tree)
+                    {
+                        throw new LocatorSyntaxException(
+                            text, opened, $"'{value}' is no order here; they are left, right, top, bottom");
+                    }
+
+                    order = sorted;
+                    break;
                 case "index":
                     Once(text, opened, index?.ToString(), "index");
                     if (!int.TryParse(value, out var ordinal))
@@ -175,13 +188,13 @@ public sealed record Locator
         }
 
         if (controlType is null && automationId is null && name is null && className is null
-            && pattern is null && index is null)
+            && pattern is null && index is null && order is null)
         {
             throw new LocatorSyntaxException(
                 text, began, "a step that constrains nothing addresses everything, so it is refused");
         }
 
-        return new LocatorStep(controlType, automationId, name, className, pattern, index);
+        return new LocatorStep(controlType, automationId, name, className, pattern, index, order);
     }
 
     private static void Once(string text, int at, string? already, string key)
