@@ -1,4 +1,4 @@
-prefix = "RK"
+prefix = "WW"
 
 # how a rationale section is addressed: "id" derives the pointer from the
 # task's own id, "outline" keeps a hand-numbered anchor
@@ -36,3 +36,7 @@ held = 60
 # the roadmap's other list: declared at all means governed, and `lead` and `why`
 # are the two limits a bullet is held to — 80 and 320 characters unless set here
 [non_goals]
+
+# the third list: what would make a block done, so "the block is finished" is a
+# reading and never a line count reaching zero
+[criteria]
