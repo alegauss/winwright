@@ -41,6 +41,17 @@ public static class UiaVocabulary
     /// <summary>Whether UI Automation has a pattern by that name, spelled exactly.</summary>
     public static bool IsPattern(string name) => KnownPatterns.Contains(name);
 
+    /// <summary>The control type object behind a name the grammar accepted.</summary>
+    /// <exception cref="ArgumentException">Where UI Automation has no such control type.</exception>
+    public static ControlType ControlTypeFor(string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        return typeof(ControlType)
+                .GetField(name, BindingFlags.Public | BindingFlags.Static)
+                ?.GetValue(null) as ControlType
+            ?? throw new ArgumentException($"'{name}' is no UI Automation control type", nameof(name));
+    }
+
     /// <summary>
     /// The names closest to <paramref name="name"/> in <paramref name="vocabulary"/>, so a refusal
     /// over a typo offers the word that was meant instead of the whole list.

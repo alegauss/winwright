@@ -84,14 +84,6 @@ by forty is the default because it was the first pair of numbers typed.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW20 A collapsed pane is not in the tree
-
-A control on a page that is not showing cannot be found by any id, which reads exactly
-like a control that was renamed or removed. The miss says which of the two it is by
-naming what would have to be navigated first, so the answer is a route rather than a
-puzzle. This is the second of the five traps claude-tray's harness header records, and
-it costs a session every time it is rediscovered.
-
 ### §WW21 Disambiguation is geometry
 
 The sidebar items in claude-tray are bare borders with no automation peer, so they are

@@ -27,6 +27,7 @@
 - ✅ **WW17** **a scenario sleeps because there is no way to wait for a condition** — Once looks a single time and sleeps never, Until takes its deadline as a required argument and reports what it spent, and neither is reachable from the other.
 - ✅ **WW18** **an act runs against an element that is present and not yet actionable** — Presence, on screen, enabled and the pattern the act needs are judged over one snapshot, and the refusal names which of the four was missing with the remedy that is its own.
 - ✅ **WW19** **the control view only prints when a check has already failed** — Inspect walks the control view of a live window and prints one line per element that begins with the locator step addressing it, then its rectangle, state and patterns.
+- ✅ **WW20** **a control missing because its pane is collapsed reads the same as one that is gone** — A miss says whether the step matched elsewhere, whether what it stopped under is shut and must be opened, or that nothing in the window is shut and the control is gone.
 
 ## Block D — Act — patterns before pointers
 
