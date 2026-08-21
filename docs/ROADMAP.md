@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW1** (deps: —) **an assertion that could not be evaluated reports the same green as one that passed** — Three outcomes and three exit codes — 0 everything ran and passed, 1 a failure, 2 degraded with each unrun assertion named — so a person or CI tells them apart without reading prose. → §WW1
 - 📋 **WW2** (deps: —) **nothing separates an assertion that should have run from one this project can never observe** — Unchecked is for an absent precondition; an assertion with nothing to match on any machine is refused when the scenario loads, so a check that covers nothing cannot ship. → §WW2
 - 📋 **WW3** (deps: —) **a run records what it concluded and not what it observed** — One line of trace per step carrying the locator, what it resolved to, what was read back and the verdict, so a failure is read from the record instead of reproduced. → §WW3
 - 📋 **WW4** (deps: —) **the same unrun assertion is tallied once per environment a sweep walks** — The line prints at every occurrence, because where it did not run is part of the reading, and the summary dedupes by name so one hole reads as one hole. → §WW4

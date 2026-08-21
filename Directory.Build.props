@@ -1,0 +1,18 @@
+<Project>
+
+  <!-- WW1: every project in this tree targets the Windows Desktop framework, because the engine's
+       only dependencies are UIAutomationClient and UIAutomationTypes, which are in-box there.
+       Setting it once here is what keeps a later project from quietly targeting something else. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+</Project>

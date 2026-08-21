@@ -2,16 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW1 Three outcomes, three exit codes
-
-Two verdicts cannot describe what actually happens on a desk, and claude-tray measured
-that and grew a third: 0 where every assertion ran and passed, 1 where one failed, 2
-where everything that ran passed but something could not be evaluated at all - one
-profile registered, no report rendered, a tray already resident so the menu case had to
-refuse. Every one of those used to be an info line, and an assertion that quietly
-stopped running is the defect two of that project's tasks were filed for. xUnit has no
-vocabulary for it, which is why pportal fails instead and says so in as many words.
-
 ### §WW2 Unchecked is a missing precondition, not a missing check
 
 The distinction is load-bearing and easy to lose. Unchecked means it should have been

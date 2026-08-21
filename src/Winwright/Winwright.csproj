@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Winwright</RootNamespace>
+    <AssemblyName>Winwright</AssemblyName>
+  </PropertyGroup>
+
+  <!-- No PackageReference here, and that is a non-goal rather than an omission: a package in the
+       engine is a package every adopting project inherits. -->
+
+</Project>
