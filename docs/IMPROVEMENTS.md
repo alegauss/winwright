@@ -41,15 +41,6 @@ is the line that has content and is not a step.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW14 Attach is a different promise from launch
-
-Attaching is convenient on a developer machine, where a single-instance mutex makes a
-second launch exit silently. It is also a different claim: what gets checked is whatever
-binary is up. So attach says which one it reached, and every assertion that depended on
-a launch argument is unchecked by construction rather than compared against a value this
-process never received. It is never implied when a running instance is found, because
-implying it moves the check onto a binary nobody named.
-
 ### §WW15 A launch argument does not survive an attach
 
 Measured in claude-tray: verifying a task against a Portuguese tray with the default

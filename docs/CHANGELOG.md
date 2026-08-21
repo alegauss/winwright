@@ -18,6 +18,7 @@
 - ✅ **WW11** **a borderless window is invisible to the launcher, because its main window handle stays zero** — Top-level windows are enumerated by process id with a size floor, largest first, so an owned borderless popup the main window handle skips is found with its class, title and bounds.
 - ✅ **WW12** **a second window of the app under test can sit on top of the one being driven** — Only an instance showing a top-level window stops the run, and the refusal names each one and the override; a resident instance showing nothing is reported and never refused.
 - ✅ **WW13** **a synthesized key press goes to whatever owns the foreground, which is usually the editor** — The foreground is asked once and answered as a met or absent precondition naming what holds it, and the type carries no wait, poll or retry for anything to route around it.
+- ✅ **WW14** **there is no way to drive a process somebody else started** — Attach takes a pid or a window, names the binary it reached, and is its own type with no arguments to read, so a check needing one is a hole rather than a comparison.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
