@@ -16,6 +16,10 @@ public sealed class ProjectDeclaration
     /// <summary>The file a project declares itself in, looked for by walking up from a directory.</summary>
     public const string FileName = "winwright.json";
 
+    /// <summary>What a project gets without declaring anything: build output and tooling state.</summary>
+    public static IReadOnlyList<string> DefaultSourceIgnore { get; } =
+        new ReadOnlyCollection<string>(["bin", "obj", ".git", ".vs", ".idea", "node_modules", "TestResults", ".roadkeep"]);
+
     private static readonly JsonSerializerOptions ReadAs = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -37,6 +41,11 @@ public sealed class ProjectDeclaration
         fingerprintStore = Resolve(shape.FingerprintStore);
         LanguageFiles = new ReadOnlyCollection<string>(
             (shape.LanguageFiles ?? []).Select(Resolve).OfType<string>().ToList());
+        SourceIgnore = new ReadOnlyCollection<string>(
+            (shape.SourceIgnore ?? DefaultSourceIgnore)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Select(name => name.Trim())
+                .ToList());
         Timeouts = Timeouts.Declared(shape.Timeouts, path);
     }
 
@@ -48,6 +57,13 @@ public sealed class ProjectDeclaration
 
     /// <summary>The language files this project ships, resolved. Empty where none are declared.</summary>
     public IReadOnlyList<string> LanguageFiles { get; }
+
+    /// <summary>
+    /// Directory names the staleness check walks past, by simple name at any depth. Build output
+    /// is the one that matters: with `bin` counted as source, the binary is always newer than
+    /// itself and nothing is ever stale, which is the check quietly answering nothing.
+    /// </summary>
+    public IReadOnlyList<string> SourceIgnore { get; }
 
     /// <summary>How long this project waits, by name, with the engine's defaults folded under it.</summary>
     public Timeouts Timeouts { get; }
@@ -133,6 +149,8 @@ public sealed class ProjectDeclaration
         [JsonPropertyName("fingerprintStore")] public string? FingerprintStore { get; init; }
 
         [JsonPropertyName("languageFiles")] public IReadOnlyList<string>? LanguageFiles { get; init; }
+
+        [JsonPropertyName("sourceIgnore")] public IReadOnlyList<string>? SourceIgnore { get; init; }
 
         [JsonPropertyName("timeouts")] public Dictionary<string, int>? Timeouts { get; init; }
     }

@@ -13,6 +13,7 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ✅ **WW8** **a case that returns early leaves its process running and locks the next build** — A LaunchedProcess can only be made by the register, so an early return still stops the process, and whatever was alive at the end is named with its pid and whether it stopped.
+- ✅ **WW9** **a build that failed leaves the previous exe in place and the run reports on code that is not in the tree** — The binary's write time is compared against the newest source outside build output, and older yields an absent precondition carrying both stamps rather than a failure.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

@@ -7,7 +7,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW9** (deps: —) **a build that failed leaves the previous exe in place and the run reports on code that is not in the tree** — The binary is compared against the newest source: older is unchecked, because everything ran and passed, just not about the change the caller came for. → §WW9
 - 📋 **WW10** (deps: —) **attaching to a running instance checks whatever binary is up, not the one that was named** — Version first and write time second, since a Debug and an installed Release carry the same version between releases, and the difference is reported rather than assumed away. → §WW10
 - 📋 **WW11** (deps: —) **a borderless window is invisible to the launcher, because its main window handle stays zero** — Top-level windows are enumerated by process id and filtered by size, which is what reaches a toast, a balloon or a menu the process owns. → §WW11
 - 📋 **WW12** (deps: —) **a second window of the app under test can sit on top of the one being driven** — The run refuses while another of its windows is open, with an override that is named in the output, since a resident tray showing no window is the ordinary case. → §WW12

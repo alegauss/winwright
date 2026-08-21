@@ -41,14 +41,6 @@ is the line that has content and is not a step.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW9 A build that failed leaves the old exe in place
-
-The same wrong reading as driving an unnamed binary, arrived at by accident rather than
-by flag. The binary's write time is compared against the newest source file; older means
-this run is about the previous build. Unchecked rather than failed: everything that ran
-did run and did pass, on a binary. What could not be evaluated is the claim the caller
-actually came for.
-
 ### §WW10 Two keys, because one is not enough
 
 A harness once reported that every check passed against a tray published the previous
