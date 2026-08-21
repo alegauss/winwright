@@ -41,15 +41,6 @@ is the line that has content and is not a step.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW10 Two keys, because one is not enough
-
-A harness once reported that every check passed against a tray published the previous
-afternoon, before the submenu entry being verified existed in it. The file version
-catches the ordinary case and cannot catch that one, because a Debug build and an
-installed Release carry the same version between releases - so the write time is read
-second, and a version difference is reported in preference to it because it is the more
-useful sentence.
-
 ### §WW11 A window with no main window handle
 
 A borderless toast, a balloon or a menu is a top-level window the process owns, and the
