@@ -129,16 +129,6 @@ inspect printed resolves, whichever line the reader started from.
 
 ## Block D — Act — patterns before pointers
 
-### §WW28 The route and the hop count are part of the answer
-
-A claim about one switch is void when the walk made several, because each intermediate
-stop is a switch of its own and the line observed belongs to some other value.
-claude-tray's picker used to normalise to the top and walk down, which silently voided
-the timing assertion whenever the pattern route threw - and that fallback exists
-precisely because the pattern route sometimes does. Anchoring at whichever end is nearer
-costs at most one change for a two-item picker, so the assertion holds on both routes,
-and the count is reported so a reader can tell which was taken.
-
 ### §WW29 A menu is opened the way a keyboard user opens it
 
 Down to the item, Right to expand, and never invoke - invoking one entry launches a

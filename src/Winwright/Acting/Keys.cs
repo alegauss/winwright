@@ -15,10 +15,19 @@ internal static class Keys
 {
     private const ushort VkTab = 0x09;
     private const ushort VkShift = 0x10;
+    private const ushort VkEnd = 0x23;
+    private const ushort VkHome = 0x24;
     private const ushort VkLeft = 0x25;
     private const ushort VkUp = 0x26;
     private const ushort VkRight = 0x27;
     private const ushort VkDown = 0x28;
+
+    /// <summary>Anchor at one end of a list, which is a selection change like any other.</summary>
+    internal static void SendHomeOrEnd(bool home)
+    {
+        var inputs = Tap(home ? VkHome : VkEnd);
+        Win32.SendInput((uint)inputs.Length, inputs, System.Runtime.InteropServices.Marshal.SizeOf<Win32.Input>());
+    }
 
     internal static void Send(TraversalKey key)
     {
