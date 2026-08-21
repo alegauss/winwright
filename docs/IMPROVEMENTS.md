@@ -686,5 +686,237 @@ surfaces assertable at all, and freewilly already built one, for exactly one pag
 
 ## Block J — Adoption — the proof is the deletion
 
+### §WW78 The keyboard case, first
+
+It is the shortest path through the whole framework - launch under a named host,
+navigate by clicking a control with no automation peer, resolve by id, type, read back
+through a pattern, traverse, and drive a range - and it is the case whose absence let a
+window ship with no keyboard input at all. Migrating it first means the engine is
+exercised end to end before anything else about it is claimed.
+
+### §WW79 The panes case runs on every machine
+
+This assertion used to live inside the profiles case, which opens by counting profiles
+and skipping below two. That is right for a round trip and wrong for the property that
+made the round trip readable: a tab body being in the tree has nothing to do with
+profiles, and behind that skip it did not run on a single-profile machine - which is
+most machines and every hosted runner. Migrating it separately is what keeps the two
+apart.
+
+### §WW80 The sessions case is the argument for the whole loop
+
+A popup is its own top-level window, so no render over a page's content can photograph
+it and no published screenshot ever will. Whether that note is readable at all is a
+question only the accessibility tree can answer. The case also waits out an asynchronous
+scan, expands a row into a tree and puts the surface back afterwards, which makes it the
+widest single test of locate, act, wait and restore in one place.
+
+### §WW81 The profiles case is the only thing that drives the picker
+
+Every capture renders one profile, which is structurally incapable of seeing three
+defects that all need a second switch and two of which need it to come back. It also
+carries a timing claim - a line that must never be observed on the way back - and that
+claim is void unless the walk reports how many selection changes it took. Migrating it
+proves the hop count and the watch-while-waiting shape both survive the move.
+
+### §WW82 The menu case reads the notification area
+
+Nothing else in any of these repositories opens a tray menu, and everything hard about
+it is Windows-specific: an icon with no clickable point, an overflow flyout that has to
+be opened before the icon is in the tree at all, a right-click the current shell does
+not deliver, and a submenu that expands only by keyboard. It is also where the
+expectations are derived from the application's own read-out instead of typed by hand.
+
+### §WW83 The switch case rewrites a real setting
+
+Until that case existed, the path that rewrites the setting, re-keys the stores and
+takes the other account's token ran under no check at all. It is refused against a
+resident process, because a pick there would repoint the real icon for real. Migrating
+it inside the store comparison asserts the promise that a run touches nothing at the one
+place most likely to break it.
+
+### §WW84 The names case observes what no screenshot can
+
+A picture cannot see an accessible name, and an unnamed control is invisible to every
+other check. The case sweeps every panel the page declares - derived from the navigation
+labels, so a panel added later is covered with no edit here - and reads every control
+the naming rule is responsible for, covering both the branch that must fire and the
+branch that must not. Getting the second wrong gives three controls in one row the same
+name, which is worse for a screen reader than one unnamed.
+
+### §WW85 The environment sweep, last
+
+It walks one submenu per sampled mode, and it is the case that proves a fixture reaches
+every launch a case makes rather than only the first. It is also the case that produced
+the deduplication rule, by counting one absent assertion three times and reading as
+three holes. Migrating it last means the fixture machinery is already in place and this
+is a use of it rather than the reason to build it.
+
+### §WW86 claude-tray loses both scripts
+
+451 lines of capture and 2,732 lines of interaction, and the argument for this framework
+is that neither should exist inside a product repository. They go once every assertion
+in them is a case, and the line count removed is reported rather than described - a
+saving nobody measured is a saving nobody can check.
+
+### §WW87 freewilly loses its copy and its probe
+
+Its capture script is 382 lines sharing most of their reasoning with claude-tray's 451,
+and differing in two real ways - the backdrop refusal and the flat-colour refusal - both
+of which belong in the engine and neither of which the other project has. The page probe
+is the geometry dump this framework already owns, pointed at an installer surface
+instead of at a window.
+
+### §WW88 pportal loses the harness and the runner
+
+The interaction file becomes scenarios and the twenty-seven copies of the
+single-threaded runner become one package reference, which is the largest single
+deletion the whole adoption produces. It is also the hardest, because a thousand other
+tests sit around it and the migration must not disturb the parallelism setting the
+runner config exists to hold in place.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
+### §WW89 A window that belongs to this repository
+
+Every loop in this framework is currently developed against somebody's shipping product,
+which means a real account, a real transcript directory, a real controller and a machine
+somebody set up by hand. The fixture removes all of it. It is not a demo and not a
+sample: it is the surface this framework's own tests drive, and its design goal is to be
+hard to test in the specific ways Windows is hard.
+
+### §WW90 Every refusal has a flag that provokes it
+
+This framework's value is concentrated in its refusals, and a refusal nobody can provoke
+is a refusal that will quietly stop working. Each one gets a fixture flag: cover this
+region, opt into a backdrop, render nothing, stay loading this long, draw a control with
+no name. The framework's own suite then asserts the red, which is the only thing that
+keeps a refusal real rather than remembered.
+
+### §WW91 The same window under two pumps
+
+The difference between hosting a window under one message pump and another is invisible
+in every picture and decides whether keyboard input arrives at all. claude-tray
+discovered it by shipping windows that took no keystrokes while every screenshot of them
+looked perfect. The fixture ships both hosts behind two flags, which is what makes the
+check for it developable without inheriting a real product's hosting decisions.
+
+### §WW92 One page holding the whole naming rule
+
+A control with no name, one announcing a glyph codepoint, one whose label is a
+neighbouring element, and beside them a button that must keep its own text - both
+branches of the rule on one surface. That is the case set the naming check needs, and
+assembling it out of a real product means waiting for that product to happen to have all
+four at once.
+
+### §WW93 Three kinds of absence
+
+A collapsed pane, a closed popup and an unopened submenu are all missing from the tree
+and all mean different things, and each one cost a real defect somewhere to learn.
+Having the three behind flags is what lets the classification of a miss be developed and
+asserted rather than reasoned about from memory.
+
+### §WW94 Both arms of the backdrop refusal
+
+A refusal with only one arm tested is half a check: it can be right about the window it
+refuses and wrong about everything it lets through. The fixture ships one window that
+opted into a system backdrop and one that never did, so the refusal and the pass beside
+it are both driven - which is what proves the check reads the compositor rather than the
+window's name.
+
+### §WW95 A borderless window with no handle
+
+A toast, a balloon or a menu is a top-level window the process object never reports, and
+that shape exists today in exactly one product here. The fixture raises one on request,
+which makes the enumerating launcher and the frame sequence both developable without
+waiting for somebody's notification to fire on its own schedule.
+
+### §WW96 A page that is loading for as long as the check needs
+
+The loading refusal was discovered on a machine that happened to be slow, and
+reproducing it means finding another one. The fixture takes the duration as a flag, so
+the refusal is asserted at a moment the run chose - and the other arm is covered too, a
+page that finishes inside the wait and must not be refused for it.
+
+### §WW97 An animation with a known length
+
+A frame sequence is currently checked by opening the frames, which is the thing this
+framework exists to avoid. The fixture plays an animation of a declared duration with a
+declared number of visible states, so the sequence is checked against numbers: how many
+frames, at what interval, and that the states arrive in the order they were declared in.
+
+### §WW98 Something to be identical to
+
+The byte-identical assertion needs a surface fixed by construction: no clock, no machine
+name, no real data, and no theme that follows the desktop unless the case asked for it.
+Producing one is a design constraint rather than an accident, and it doubles as the
+reference for what an adopting project has to do to make its own surfaces comparable at
+all.
+
+### §WW99 A second instance on request
+
+The other-instance refusal and its override are both tested today by remembering to
+leave a window open. The fixture opens a second window on request, so both arms are
+driven - and the distinction that matters is covered too: a resident process showing no
+window must not trip the refusal, because that is the ordinary state of every developer
+machine here.
+
+### §WW100 A store the run is allowed to break
+
+The fingerprint check protects the store of whoever is running it, which makes it the
+one assertion that cannot be developed against a real product without putting somebody's
+settings at risk. The fixture writes a store of its own and offers to mutate it on
+request, so both the clean run and the caught mutation are observable without anything
+real being touched.
+
+### §WW101 The reference implementation of the surface protocol
+
+The protocol exists in one product and would be copied into the next, which is exactly
+how two implementations of one line format come to disagree. The fixture implements it
+and this framework's own suite drives that implementation, so the protocol has an owner
+- and an adopting project has something to copy that is known to be current.
+
+### §WW102 A localized window, including the key that must be refused
+
+The label rule needs several languages to be developed at all, and it needs one specific
+pathological case: a key whose value carries a placeholder, which an exact-name read can
+never match and which has to be refused rather than skipped. Real products have the
+languages and rarely have the pathological key on purpose.
+
+### §WW103 An intruder over a named region
+
+The region check is the most intricate piece of the capture stack, and today it is
+exercised by moving a window by hand and hoping. The fixture puts a topmost window over
+a rectangle the caller names, so the intersection, the naming of the intruder and the
+raise-then-refuse loop are all driven - including the case that must pass, an intruder
+that overlaps nothing.
+
+### §WW104 A surface drawn without automation peers
+
+The geometry dump exists because some surfaces have no tree, and the only example
+available today is an installer page in another repository, behind a compiler that has
+to be installed first. The fixture draws one, so the dump and the layout invariants over
+it are developable here rather than borrowed.
+
+### §WW105 The fixture says what it can do
+
+A catalogue that lives only in source is a catalogue nobody consults, and a flag nobody
+knows about is a shape nobody tests against. The application lists every flag it has and
+the list is asserted against the flags that exist - the same rule claude-tray applies to
+its own preview catalogue, where an unknown name prints the whole table and exits
+non-zero.
+
+### §WW106 A shape exists because a defect existed
+
+A fixture that grows shapes nobody can justify becomes a second product to maintain, and
+then it drifts from the things it stands in for and starts producing false confidence.
+Each surface names the real defect it reproduces. One that can name none is removed, and
+the removal is itself a reading about what this framework no longer has to defend
+against.
+
+### §WW107 The fixture is also for a person
+
+When a case fails, the fastest way to understand it is to look at the thing it is
+talking about, and that must not require writing anything first. Every flag opens the
+surface it names in a window somebody can see, which is the property claude-tray's
+preview flags have and the reason its harness is debuggable at all.
