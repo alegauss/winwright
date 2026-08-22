@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Winwright.InApp</RootNamespace>
+    <AssemblyName>Winwright.InApp</AssemblyName>
+
+    <!-- The in-app half draws, so it needs the presentation stack. The engine does not: it reads
+         trees and copies rectangles, and the two halves are separate assemblies precisely so an
+         application takes the one it needs without inheriting the other. -->
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <!-- Same repair as the engine: UseWPF swaps the SDK's implicit global usings for WPF's set, and
+       System.IO is not in that set. -->
+  <ItemGroup>
+    <Using Include="System.IO" />
+  </ItemGroup>
+
+  <!-- No reference to Winwright, and that is the point rather than an omission. This package is
+       taken by the application under test; the engine is taken by the harness driving it, and an
+       application that referenced the engine would ship a test harness to its users. -->
+
+</Project>

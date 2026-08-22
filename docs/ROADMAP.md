@@ -25,8 +25,8 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW34** (deps: WW71) **a screen copy can photograph anything that happens to be in the rectangle** — The off-screen render is the default: a visual tree rendered with no window shown has no foreground, no z order and no second instance to be confused with. → §WW34
-- 📋 **WW35** (deps: WW71) **a tree that failed to build writes a file that looks like a successful capture** — A render with no pixel carrying an alpha of its own is a blank, which is the difference a caller checking that a file exists cannot see. → §WW35
+- 📋 **WW34** (deps: WW71 ✅) **a screen copy can photograph anything that happens to be in the rectangle** — The off-screen render is the default: a visual tree rendered with no window shown has no foreground, no z order and no second instance to be confused with. → §WW34
+- 📋 **WW35** (deps: WW71 ✅) **a tree that failed to build writes a file that looks like a successful capture** — A render with no pixel carrying an alpha of its own is a blank, which is the difference a caller checking that a file exists cannot see. → §WW35
 - 📋 **WW38** (deps: Block K) **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and each frame intersected with the copy rectangle, which answers for the whole area in one pass and names the intruder. → §WW38
 - 📋 **WW40** (deps: Block K) **a copy trimmed around an intruder is a picture of something nobody asked for** — An overlap fails rather than crops, and the refusal names the intruder, its process and the rectangle it covers, so the cause is actionable instead of mysterious. → §WW40
 - 📋 **WW41** (deps: Block K) **a window with a system backdrop transmits what is behind it through the glass** — Z-order reasoning cannot answer for that, so the compositor is asked directly and a window that opted into one is refused rather than merely warned about. → §WW41
@@ -59,7 +59,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 📋 **WW71** (deps: —) **the render verb is written again in every project that wants one** — One package: measure, arrange, render, compose a background and encode, with a size of nothing refused rather than written as an empty file. → §WW71
 - 📋 **WW72** (deps: —) **a capture is rendered on no background and comes back unreadable** — The theme's own background is looked up and the observed window colour is the fallback, and which of the two answered is printed on every run. → §WW72
 - 📋 **WW73** (deps: —) **a brush shared between capture threads belongs to whichever one reached it first** — Every shared brush is frozen, or the second capture on a second thread is refused for a reason about threading rather than about the picture. → §WW73
 - 📋 **WW74** (deps: —) **the app knows what it drew and nothing asks it** — A reported surface names a rectangle in physical pixels, which is the space the copy already works in, so a capture can assert what it contains. → §WW74

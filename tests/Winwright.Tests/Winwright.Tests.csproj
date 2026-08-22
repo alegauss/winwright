@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Winwright/Winwright.csproj" />
+    <ProjectReference Include="../../src/Winwright.InApp/Winwright.InApp.csproj" />
   </ItemGroup>
 
 </Project>

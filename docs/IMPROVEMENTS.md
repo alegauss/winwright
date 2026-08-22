@@ -458,15 +458,6 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW71 One render, in one package
-
-The measure, the arrange, the update, the render target, the composed background and the
-encoder are the same six steps in every project that wants a picture. pportal's version
-already carries the note that a tree which was never arranged renders as nothing at all
-- an empty picture that looks like a drawing bug and is a calling bug - so the arrange
-belongs inside rather than being expected of the caller. A size of nothing is refused
-rather than written as an empty file.
-
 ### §WW72 The background is not a decoration
 
 The classic system palette was the obvious source and is measurably wrong: it answers

@@ -74,6 +74,8 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
+- ✅ **WW71** **the render verb is written again in every project that wants one** — One package renders a tree with no window shown - measure, arrange, update, target, background, encode - with the arrange inside, and a size of nothing refused rather than written as an empty file.
+
 ## Block J — Adoption — the proof is the deletion
 
 ## Block K — The proving ground — a fixture app built to be hard to test
