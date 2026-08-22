@@ -13,6 +13,7 @@
 - 📋 **WW114** (deps: —) **the suite's input tests compete for a foreground Windows will not always grant them** — The window fixtures run on a desktop of their own, where they are the only windows and the foreground is theirs by definition rather than by contest. → §WW114
 - 📋 **WW119** (deps: —) **the tray fixture returns before the shell has put the icon anywhere a test can find it** — The fixture waits for the icon to be findable rather than for the shell to take the message, so a test never races the placement every one of its assertions depends on. → §WW119
 - 📋 **WW127** (deps: —) **two checks read the live desktop root and assert about whatever the machine is showing** — Both are pointed at a window this suite made, so what they claim about short pattern names is a claim about this project rather than about the desk that ran it. → §WW127
+- 📋 **WW129** (deps: —) **a stopped process is waited off the desktop and not out of the machine, so the next class starts on a busy one** — The settle waits for exit and not only for the windows, since the load a launch leaves outlives the window it drew and is what the next check loses the desktop to. → §WW129
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

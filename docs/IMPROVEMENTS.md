@@ -176,6 +176,27 @@ the fixture already exists to be that window. The desktop root itself is still w
 reading, but as a statement about what the engine does with an element it did not choose
 rather than as an assertion about the element.
 
+### §WW129 Waiting for the window is not waiting for the machine
+
+Measured three times now, and each time the shape was the same: a full run fails a dozen
+or twenty checks that all need the foreground, the next run of the same commit passes
+every one, and the failing run is the one where the machine was busiest. Twice the load
+was this session's own doing; the third time it was the suite alone.
+
+The suite already waits, and waits for the wrong thing. Stopping a register waits until
+no window of those processes is enumerable, which happens well before the processes have
+exited - a stopped application still has a presentation stack to tear down, a compositor
+still has frames to retire, and the shell still has a taskbar to settle. The class that
+follows is usually the one asserting who owns the desktop, and it starts into all of
+that.
+
+The fixture class alone now launches around thirty-five processes and runs for fifty
+seconds, and it grows with every shape this block adds. Waiting for exit rather than for
+the window costs the run a second or two and removes the one variable that has explained
+every unreproducible failure so far. What it will not fix is a machine busy for reasons
+outside the suite, and that limit belongs in the sentence rather than in somebody's
+surprise.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW112 Actionability needs a door, not a convention
