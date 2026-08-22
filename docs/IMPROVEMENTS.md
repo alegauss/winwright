@@ -627,14 +627,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW103 An intruder over a named region
-
-The region check is the most intricate piece of the capture stack, and today it is
-exercised by moving a window by hand and hoping. The fixture puts a topmost window over
-a rectangle the caller names, so the intersection, the naming of the intruder and the
-raise-then-refuse loop are all driven - including the case that must pass, an intruder
-that overlaps nothing.
-
 ### §WW104 A surface drawn without automation peers
 
 The geometry dump exists because some surfaces have no tree, and the only example

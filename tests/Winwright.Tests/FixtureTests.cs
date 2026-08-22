@@ -1181,4 +1181,82 @@ public sealed class FixtureTests : IDisposable
     /// <summary>The strings file the fixture ships for one language, beside its executable.</summary>
     private static string Strings(string culture) =>
         Path.Combine(Path.GetDirectoryName(Executable())!, "strings", $"strings.{culture}.json");
+
+    [Fact]
+    public void An_intruder_lands_on_exactly_the_rectangle_it_was_named_in_physical_pixels()
+    {
+        var pid = LaunchedPid("--intrude=400,300,240,160");
+
+        var intruder = Assert.Single(
+            Waited(pid, howMany: 2), one => one.Title.Length == 0 && one.Bounds.Width == 240);
+
+        // The whole of the placement rule: named in physical pixels and placed with a call that
+        // takes them. Set through the layout's own units it would land at half of this on a
+        // display at two hundred percent, and the check reading it would be right about a window
+        // nobody meant to put there.
+        Assert.Equal(400, intruder.Bounds.Left);
+        Assert.Equal(300, intruder.Bounds.Top);
+        Assert.Equal(240, intruder.Bounds.Width);
+        Assert.Equal(160, intruder.Bounds.Height);
+    }
+
+    [Fact]
+    public void An_intruder_over_the_window_covers_part_of_it_and_one_elsewhere_covers_none()
+    {
+        var over = Placed("--intrude=200,200,300,200");
+        Assert.True(Overlap(over.Window, over.Intruder) > 0, $"{over.Intruder} covers none of {over.Window}");
+
+        // The case that must pass, and the one a check exercised by hand never gets to: an intruder
+        // that is genuinely in the way of nothing.
+        var beside = Placed("--intrude=3000,2000,200,150");
+        Assert.Equal(0, Overlap(beside.Window, beside.Intruder));
+    }
+
+    [Fact]
+    public void An_intruder_is_topmost_so_it_is_over_the_window_and_not_merely_beside_it()
+    {
+        var placed = Placed("--intrude=200,200,300,200");
+
+        // Read off the window rather than assumed from the request: a topmost style that did not
+        // take would leave a window in the right rectangle and behind everything.
+        Assert.True(Topmost(placed.Intruder.Handle), $"{placed.Intruder} is not topmost");
+        Assert.False(Topmost(placed.Window.Handle), "the fixture's own window became topmost");
+    }
+
+    [Fact]
+    public void A_rectangle_that_is_not_four_numbers_is_refused_before_any_window()
+    {
+        Assert.Contains("takes left,top,width,height", Ran("--intrude=200,200,300").Said);
+        Assert.Contains("takes whole numbers", Ran("--intrude=200,200,300,tall").Said);
+
+        // A rectangle of no area covers nothing, so an intruder placed at one provokes the refusal
+        // it exists for exactly never.
+        Assert.Contains("covers nothing", Ran("--intrude=200,200,0,150").Said);
+    }
+
+    /// <summary>Launch with an intruder and hand back both windows.</summary>
+    private (TopLevelWindow Window, TopLevelWindow Intruder) Placed(string flag)
+    {
+        var pid = LaunchedPid(flag);
+        var windows = Waited(pid, howMany: 2);
+
+        return (
+            windows.Single(one => one.Title == "winwright fixture"),
+            windows.Single(one => one.Title.Length == 0));
+    }
+
+    /// <summary>How many pixels the two rectangles share.</summary>
+    private static long Overlap(TopLevelWindow left, TopLevelWindow right)
+    {
+        var width = Math.Min(left.Bounds.Right, right.Bounds.Right) - Math.Max(left.Bounds.Left, right.Bounds.Left);
+        var height = Math.Min(left.Bounds.Bottom, right.Bounds.Bottom) - Math.Max(left.Bounds.Top, right.Bounds.Top);
+
+        return width <= 0 || height <= 0 ? 0 : (long)width * height;
+    }
+
+    /// <summary>Whether that window carries the topmost style, asked of Windows.</summary>
+    private static bool Topmost(nint window) => (GetWindowLongPtrW(window, -20) & 0x00000008) != 0;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint GetWindowLongPtrW(nint window, int index);
 }

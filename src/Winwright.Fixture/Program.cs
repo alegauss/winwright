@@ -108,6 +108,9 @@ public static class Program
         if (shapes.Has("toast"))
             window.Loaded += (_, _) => Toast.Raise(window);
 
+        if (shapes.Value("intrude") is string over)
+            window.ContentRendered += (_, _) => Intruder.Raise(Intruder.Read(over));
+
         return app.Run(window);
     }
 

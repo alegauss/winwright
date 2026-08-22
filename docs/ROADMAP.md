@@ -78,7 +78,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW103** (deps: —) **an intruder covering a rectangle has to be arranged by hand every time** — The fixture puts a topmost window over a named region on request, so the region check is driven rather than reasoned about. → §WW103
 - 📋 **WW104** (deps: —) **a surface with no accessibility tree is only found inside an installer** — The fixture carries one drawn without automation peers, which is what the geometry dump exists for and what nothing else here can produce. → §WW104
 - 📋 **WW105** (deps: —) **the catalogue of what the fixture can do lives only in its own source** — The app lists every flag it has and the list is asserted against the flags that exist, so a shape added later is never one nobody can find. → §WW105
 - 📋 **WW106** (deps: —) **a fixture that drifts from the products it stands in for is worse than none** — Each shape it carries names the real defect it reproduces, so a shape nobody can justify is removed rather than maintained forever. → §WW106

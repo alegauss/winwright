@@ -146,6 +146,11 @@ public sealed record Flags
             "a window labelled from one of the fixture's own string files, including the one key "
                 + "whose value carries a placeholder and which an exact-name read can never match",
             Strings.Cultures),
+        new Flag(
+            "intrude",
+            "left,top,width,height",
+            "a topmost window over exactly that rectangle in physical pixels, so the region check "
+                + "is driven rather than arranged by hand and hoped about"),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>
@@ -225,6 +230,11 @@ public sealed record Flags
 
         // A flag that does nothing without another is a flag that silently does nothing, which is
         // the same green as a misspelt one and just as hard to notice.
+        // Read at insertion, so a rectangle nobody can parse is a refusal before any window rather
+        // than an intruder placed somewhere nobody asked.
+        if (read.TryGetValue("intrude", out var rectangle))
+            Intruder.Read(rectangle);
+
         if (read.ContainsKey("mutate") && !read.ContainsKey("store"))
             throw new UnknownFlagException($"--mutate has nothing to change without --store=<directory>.{Catalogue()}");
 
