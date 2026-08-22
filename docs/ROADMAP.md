@@ -2,8 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW117** (deps: —) **a test host that dies mid-run still prints a pass** — The run compares what was discovered against what executed, so a suite that quietly loses 22 tests is a red instead of a green nobody counted. → §WW117
-
 ## Block B — Attach, launch, and leave nothing behind
 
 - 📋 **WW119** (deps: —) **the tray fixture returns before the shell has put the icon anywhere a test can find it** — The fixture waits for the icon to be findable rather than for the shell to take the message, so a test never races the placement every one of its assertions depends on. → §WW119
@@ -37,13 +35,13 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 📋 **WW57** (deps: Block A, Block C, Block D ✅) **a case is two hundred lines of script that mostly repeats the previous case** — A case is a data file: steps, locators, acts and expectations as fields, with the loop, the waits and the verdicts owned by the engine instead of by the author. → §WW57
-- 📋 **WW58** (deps: Block A, Block C, Block D ✅) **the format is a convention the author is asked to remember** — Every field is validated at insertion, so a refusal costs a retry and never a deletion, which is roadkeep law one applied to a scenario instead of to a line. → §WW58
-- 📋 **WW59** (deps: Block A, Block C, Block D ✅) **there is no way to run one case, or one file, without running the rest** — Run takes a file, a case or a tag and says what it did not run, so a single case is ten seconds when a single act is what changed. → §WW59
-- 📋 **WW60** (deps: Block A, Block C, Block D ✅) **a case that needs a fixture reaches for this machine instead** — Fixtures and sampled environments are declared per case and passed to every launch it makes, or the expectations describe one environment and the window renders another. → §WW60
-- 📋 **WW61** (deps: Block A, Block C, Block D ✅) **a case with an absent precondition goes red for a reason about the desk it ran on** — The precondition is declared, so its absence is unchecked and named instead of a failure nobody reading it can act on. → §WW61
-- 📋 **WW62** (deps: Block A, Block C, Block D ✅) **three cases driving the same window each pay their own launch** — A window is declared shareable and lent to the cases that only read it, while a case run alone still owns its process and its first paint. → §WW62
-- 📋 **WW63** (deps: Block A, Block C, Block D ✅) **a scenario says what to do and never why it is worth doing** — Each case carries the defect it exists to catch, so a case nobody can justify is visible and a case removed by accident is missed. → §WW63
+- 📋 **WW57** (deps: Block A ✅, Block C, Block D) **a case is two hundred lines of script that mostly repeats the previous case** — A case is a data file: steps, locators, acts and expectations as fields, with the loop, the waits and the verdicts owned by the engine instead of by the author. → §WW57
+- 📋 **WW58** (deps: Block A ✅, Block C, Block D) **the format is a convention the author is asked to remember** — Every field is validated at insertion, so a refusal costs a retry and never a deletion, which is roadkeep law one applied to a scenario instead of to a line. → §WW58
+- 📋 **WW59** (deps: Block A ✅, Block C, Block D) **there is no way to run one case, or one file, without running the rest** — Run takes a file, a case or a tag and says what it did not run, so a single case is ten seconds when a single act is what changed. → §WW59
+- 📋 **WW60** (deps: Block A ✅, Block C, Block D) **a case that needs a fixture reaches for this machine instead** — Fixtures and sampled environments are declared per case and passed to every launch it makes, or the expectations describe one environment and the window renders another. → §WW60
+- 📋 **WW61** (deps: Block A ✅, Block C, Block D) **a case with an absent precondition goes red for a reason about the desk it ran on** — The precondition is declared, so its absence is unchecked and named instead of a failure nobody reading it can act on. → §WW61
+- 📋 **WW62** (deps: Block A ✅, Block C, Block D) **three cases driving the same window each pay their own launch** — A window is declared shareable and lent to the cases that only read it, while a case run alone still owns its process and its first paint. → §WW62
+- 📋 **WW63** (deps: Block A ✅, Block C, Block D) **a scenario says what to do and never why it is worth doing** — Each case carries the defect it exists to catch, so a case nobody can justify is visible and a case removed by accident is missed. → §WW63
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

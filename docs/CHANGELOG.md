@@ -11,6 +11,7 @@
 - ✅ **WW7** **a step that threw is indistinguishable from one that failed its assertion** — A throw is recorded as a HarnessError carrying its step and exception, gives the run a fourth outcome that exits 3 and outranks the other three, and reads as threw in the trace.
 - ✅ **WW108** **the summary names an assertion and the trace numbers a step, and nothing joins the two** — One call writes the step and joins it: the result carries the ordinal and the step carries the assertion's name, so neither half can be recorded without the other.
 - ✅ **WW109** **a trace line that does not parse refuses without naming the file or the line it is on** — A line that is not a step is refused by file, by line counted the way an editor counts, and by its own text cut to what a terminal shows - and a blank one is still skipped.
+- ✅ **WW117** **a test host that dies mid-run still prints a pass** — The run now takes a roll call: what discovery listed against what the results file recorded, counted per method, and a suite short of what it found exits non-zero instead of printing a pass.
 
 ## Block B — Attach, launch, and leave nothing behind
 
