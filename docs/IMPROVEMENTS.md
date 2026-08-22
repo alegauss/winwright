@@ -153,14 +153,6 @@ inspect printed resolves, whichever line the reader started from.
 
 ## Block D — Act — patterns before pointers
 
-### §WW33 A case hands the window back as it found it
-
-A popup is a toggle and a tab is a position, and the next case sharing that window asked
-for neither. Restoring is what makes sharing safe; without it, sharing produces
-order-dependent failures that appear only when the whole suite runs and vanish when the
-case is run alone. claude-tray's picker walk already goes out and back for this reason,
-and the rule generalises to every act that changes a surface.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW34 The off-screen render is the default

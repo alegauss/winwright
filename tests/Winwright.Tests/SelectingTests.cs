@@ -24,6 +24,7 @@ public sealed class SelectingTests : IDisposable
 
     private readonly PumpedDialog dialog;
     private readonly List<PumpedDialog> decoys = [];
+    private Restorable asFound = null!;
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern nint SendMessageW(nint window, uint message, nint wParam, string lParam);
@@ -42,23 +43,16 @@ public sealed class SelectingTests : IDisposable
         Assert.NotEqual(0, combo);
         foreach (var value in new[] { "Overview", "Statistics", "Advanced" })
             SendMessageW(combo, CbAddString, 0, value);
+
+        asFound = Surface.AsFound(Combo);
     }
 
     public void Dispose()
     {
-        // Shut the picker first. A dropped-down combo holds the desk in a way that outlives the
-        // window, and the next class to send a key finds the foreground somewhere it cannot name.
-        // This is the next task's subject arriving early: an act leaves the window in a state the
-        // case after it did not ask for.
-        try
-        {
-            if (Combo.ReadOnce().Values.ExpandCollapse == "Expanded")
-                Act.Collapse(Combo);
-        }
-        catch (NotActionableException)
-        {
-            // It has already gone, which is the state that was wanted.
-        }
+        // Hand the window back the way the class found it. A dropped-down combo holds the desk in
+        // a way that outlives the window, and the next class to send a key finds the foreground
+        // somewhere it cannot name — which is the failure this is the shipped answer to.
+        asFound.PutBack();
 
         foreach (var decoy in decoys)
             decoy.Dispose();

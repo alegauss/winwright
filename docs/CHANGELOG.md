@@ -43,6 +43,7 @@
 - ✅ **WW30** **a flaky act is hidden behind a retry that runs until it passes** — Attempts are capped, a cap large enough to hide a failure is refused, and the count is stamped onto the trace step so a green that took three goes still says so.
 - ✅ **WW31** **the notification-area icon has no clickable point and no reliable right-click** — Icons are addressed by rectangle since every taskbar button refuses a clickable point, the overflow is opened through the chevron found by id, and the menu route is focus plus the application key.
 - ✅ **WW32** **a selection that silently does not land leaves the pane it should have built unrealised** — A selection is confirmed against the control and a condition the caller names, the pointer is reached for only after that did not pass, and nothing reports a landing it did not confirm.
+- ✅ **WW33** **an act leaves the window in a state the next case did not ask for** — Surfaces are recorded as a case found them and put back on leaving the scope, only where they moved, and a restore that did not take is reported rather than assumed.
 
 ## Block E — Capture — the picture that proves what it photographed
 
