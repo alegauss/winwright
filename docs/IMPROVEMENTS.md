@@ -304,14 +304,6 @@ code. Three findings about theme handling in that project came from this and fro
 nothing else, and its test suite saw none of them. It also avoids choosing a tolerance,
 which is the argument every other image comparison eventually turns into.
 
-### §WW47 The success line names what it captured
-
-The assertions decide whether a file is written; the line decides whether a wrong one
-reports itself. Naming the window title, the process id and the arguments behind it is
-worth as much as the checks, because the failure that started all of this was caught
-only by a person reading the picture. A capture that says what it is is a capture
-somebody can disbelieve, which is the property a silent success does not have.
-
 ## Block F — Assert — the expectation is derived, never typed
 
 ### §WW48 An expectation reports what it read
