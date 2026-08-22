@@ -93,13 +93,24 @@ public static class Inspect
         return lines;
     }
 
+    /// <summary>What a root's line opens with, so it is never mistaken for one to copy.</summary>
+    public const string RootMark = "(root; locators below are relative to it)";
+
     /// <summary>One element as its own line, without its children.</summary>
-    public static string Line(InspectedElement element)
+    /// <param name="element">What to render.</param>
+    /// <param name="root">
+    /// Whether this is the tree's own root. A step searches the descendants of the root it is
+    /// given and never the root itself, so a reader copying the first line got a miss diagnosed as
+    /// absent — the least helpful answer this tool gives about the most obvious mistake. The root
+    /// is therefore marked as the root rather than printed in the shape of something to copy, and
+    /// what is left on the page is a set of lines every one of which resolves.
+    /// </param>
+    public static string Line(InspectedElement element, bool root = false)
     {
         ArgumentNullException.ThrowIfNull(element);
 
         var facts = element.Facts;
-        var text = new StringBuilder(facts.AsLocatorStep().ToString());
+        var text = new StringBuilder(root ? $"{RootMark} {facts}" : facts.AsLocatorStep().ToString());
         text.Append("  ").Append(facts.Bounds);
         if (facts.IsOffscreen)
             text.Append(" offscreen");
@@ -114,7 +125,7 @@ public static class Inspect
     private static void Render(InspectedElement element, int level, List<string> lines)
     {
         var indent = new string(' ', level * 2);
-        lines.Add(indent + Line(element));
+        lines.Add(indent + Line(element, root: level == 0));
         foreach (var child in element.Children)
             Render(child, level + 1, lines);
 

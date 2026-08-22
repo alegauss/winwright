@@ -188,7 +188,9 @@ public sealed record Diagnosis
 
     private static void Walk(InspectedElement element, int level, ElementFacts? subject, List<DiagnosedLine> lines)
     {
-        var text = new StringBuilder(new string(' ', level * 2)).Append(Inspect.Line(element)).ToString();
+        var text = new StringBuilder(new string(' ', level * 2))
+            .Append(Inspect.Line(element, root: level == 0))
+            .ToString();
         lines.Add(new DiagnosedLine(text, IsSubject(element.Facts, subject)));
 
         foreach (var child in element.Children)

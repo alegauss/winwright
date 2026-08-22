@@ -100,26 +100,6 @@ rather than as an assertion about the element.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW113 The root's line is the one that does not work
-
-Measured while writing the subject tests. A step searches the descendants of the root it
-is given and never the root itself, which is right and is what every other locator
-engine does. The trouble is that inspect prints the root as its first line, in exactly
-the same shape as every other line: a locator step, then the rectangle, then the
-patterns.
-
-So the flow this block exists for - read the tree, copy the line, write the locator -
-has one line in it that quietly does not work. An agent copying the first line gets a
-miss, and the miss is diagnosed as absent, because from the root's own point of view
-nothing under it matches a step describing the root. That is the least helpful answer
-this tool gives about the most obvious mistake.
-
-There are two ways out and the task is not fixing which. The first step could match the
-root or its descendants, which is what a reader copying the line means; or inspect could
-mark the root as the root rather than printing it in the shape of something to copy.
-Either closes it. What must be true afterwards is that a locator assembled from what
-inspect printed resolves, whichever line the reader started from.
-
 ### §WW124 An id is quoted like a name
 
 Found by driving the fixture rather than by reading. Windows gives a window's own system
