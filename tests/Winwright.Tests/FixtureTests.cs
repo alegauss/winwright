@@ -497,4 +497,32 @@ public sealed class FixtureTests : IDisposable
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmGetWindowAttribute(nint window, int attribute, out int value, int size);
+
+    [Fact]
+    public void Raising_the_fixture_does_not_take_the_desktop_from_whoever_had_it()
+    {
+        // WW128, measured by exclusion before it was written: the full run failed twelve checks
+        // and the same run without this class failed one. All eleven need the foreground.
+        var before = Foreground.Now();
+        Assert.NotEqual(0, before.Window);
+
+        var window = Launched();
+
+        var after = Foreground.Now();
+        Assert.Equal(before.Window, after.Window);
+        Assert.NotEqual(window.Handle, after.Window);
+    }
+
+    [Fact]
+    public void Everything_the_fixture_is_for_survives_not_being_activated()
+    {
+        var window = Launched();
+
+        // On screen, composed, enumerable, and readable through the tree. Losing any of those to
+        // save the foreground would be trading the fixture for the thing it exists to be.
+        Assert.True(window.OnScreen, window.ToString());
+        Assert.True(window.Bounds.Area > 0, window.ToString());
+        Assert.Contains(TopLevelWindows.OfProcess(window.Pid), one => one.Handle == window.Handle);
+        Assert.NotNull(Inspect.Window(window.Handle, depth: 4));
+    }
 }

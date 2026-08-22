@@ -1,3 +1,7 @@
+<!-- ShowActivated is False deliberately. An application somebody launched should take the desk;
+     one a suite raises thirty times a run must not, or it decides who owns the foreground for
+     every check that runs after it. Everything the fixture is for survives being unactivated: it
+     is on screen, composed, enumerable and readable through the tree. -->
 <Window x:Class="Winwright.Fixture.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -5,6 +9,7 @@
         Width="640" Height="420"
         WindowStartupLocation="Manual"
         Left="80" Top="80"
+        ShowActivated="False"
         ResizeMode="CanResize"
         Background="{StaticResource Surface}">
 
