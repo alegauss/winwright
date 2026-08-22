@@ -525,4 +525,84 @@ public sealed class FixtureTests : IDisposable
         Assert.Contains(TopLevelWindows.OfProcess(window.Pid), one => one.Handle == window.Handle);
         Assert.NotNull(Inspect.Window(window.Handle, depth: 4));
     }
+    [Fact]
+    public void A_toast_beside_the_main_window_is_found_by_enumeration_and_not_by_the_process()
+    {
+        var pid = LaunchedPid("--toast=beside");
+
+        var windows = Waited(pid, howMany: 2);
+        var toast = Assert.Single(windows, one => one.Title.Length == 0);
+
+        Assert.True(toast.IsOwned, "the toast is unowned, and a real one is owned by the window that raised it");
+        Assert.True(toast.OnScreen, toast.ToString());
+
+        using var process = Process.GetProcessById(pid);
+        process.Refresh();
+        Assert.NotEqual(toast.Handle, process.MainWindowHandle);
+    }
+
+    [Fact]
+    public void A_run_whose_only_window_is_a_toast_has_no_main_window_at_all()
+    {
+        // The whole reason the launcher enumerates. Asked which window it had, this process
+        // answers zero, and a launcher that believed it would conclude nothing was drawn.
+        var pid = LaunchedPid("--toast=only");
+
+        var toast = Assert.Single(Waited(pid, howMany: 1));
+        Assert.Equal("", toast.Title);
+        Assert.True(toast.OnScreen, toast.ToString());
+
+        using var process = Process.GetProcessById(pid);
+        process.Refresh();
+        Assert.Equal(0, process.MainWindowHandle);
+    }
+
+    [Fact]
+    public void A_toast_is_borderless_and_stays_off_the_taskbar()
+    {
+        var pid = LaunchedPid("--toast=only");
+        var toast = Assert.Single(Waited(pid, howMany: 1));
+
+        // Its size is its own and not a frame's. Asserted as a ratio because the display's scaling
+        // multiplies both sides equally and a caption or a resize border would not - either one
+        // adds rows without adding columns, which is what this number would catch.
+        Assert.True(toast.Bounds.Width > 0 && toast.Bounds.Height > 0, toast.ToString());
+        Assert.Equal(320d / 90, (double)toast.Bounds.Width / toast.Bounds.Height, precision: 1);
+        Assert.Equal("", toast.Title);
+    }
+
+    [Fact]
+    public void A_way_of_raising_one_the_fixture_does_not_have_is_refused()
+    {
+        var (code, said) = Ran("--toast=someday");
+
+        Assert.Equal(2, code);
+        Assert.Contains("it takes beside or only", said);
+    }
+
+    /// <summary>Launch and hand back the pid, without waiting on a caption a toast does not have.</summary>
+    private int LaunchedPid(params string[] flags)
+    {
+        var start = new ProcessStartInfo(Executable());
+        foreach (var flag in flags)
+            start.ArgumentList.Add(flag);
+
+        return Attachable.Launch(register, start).Pid;
+    }
+
+    /// <summary>Wait until the process owns that many windows above the size floor.</summary>
+    private static IReadOnlyList<TopLevelWindow> Waited(int pid, int howMany)
+    {
+        for (var attempt = 0; attempt < 200; attempt++)
+        {
+            var windows = TopLevelWindows.OfProcess(pid);
+            if (windows.Count >= howMany)
+                return windows;
+
+            Thread.Sleep(25);
+        }
+
+        Assert.Fail($"pid {pid} never owned {howMany} window(s)");
+        return [];
+    }
 }

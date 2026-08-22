@@ -591,13 +591,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW95 A borderless window with no handle
-
-A toast, a balloon or a menu is a top-level window the process object never reports, and
-that shape exists today in exactly one product here. The fixture raises one on request,
-which makes the enumerating launcher and the frame sequence both developable without
-waiting for somebody's notification to fire on its own schedule.
-
 ### §WW96 A page that is loading for as long as the check needs
 
 The loading refusal was discovered on a machine that happened to be slow, and

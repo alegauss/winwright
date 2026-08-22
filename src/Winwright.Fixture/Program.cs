@@ -45,7 +45,21 @@ public static class Program
     }
 
     /// <summary>The ordinary host: a dispatcher that runs, so input arrives.</summary>
-    private static int Pumped(Flags shapes) => new App().Run(new MainWindow(shapes));
+    private static int Pumped(Flags shapes)
+    {
+        var app = new App();
+
+        // The one arm worth its own branch: a run whose only window is a toast has no main window
+        // for the process object to name, which is what an enumerating launcher exists for.
+        if (shapes.Value("toast") == "only")
+            return app.Run(Toast.Raise(null));
+
+        var window = new MainWindow(shapes);
+        if (shapes.Has("toast"))
+            window.Loaded += (_, _) => Toast.Raise(window);
+
+        return app.Run(window);
+    }
 
     /// <summary>
     /// The host that is wrong in the one way no picture shows. The window is created and shown,

@@ -101,6 +101,12 @@ public sealed record Flags
             "a window that opted into a system backdrop, which transmits what is behind it through "
                 + "the glass and which no amount of z-order reasoning can answer for",
             Backdrop.Names),
+        new Flag(
+            "toast",
+            "way",
+            "a borderless top-level window with no caption, which the process object never names - "
+                + "beside the main window, or as the only window this run has at all",
+            Toast.Ways),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>
