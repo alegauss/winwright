@@ -419,25 +419,6 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW122 One package reference, literally
-
-Read against this block's own criterion after its last line shipped, and the gap is
-plain: nothing in either project declares a package id, a version beyond the tree-wide
-one, or a pack step. The only way to adopt the in-app half today is a project reference
-into this repository - which WW70 already reads as unpinnable by construction, and which
-an application shipping to its users cannot take at all.
-
-The criterion says the adoption is one package reference and that a project taking it
-deletes its own capture, surface and thread helpers. The second half is proved: this
-repository deleted eight copies of one runner in a single commit. The first half is not
-built. So the criterion is met in intent and unmet in fact, which is exactly the state a
-block's criteria exist to surface before somebody calls the block done.
-
-What this owes: a package id, packing in continuous integration, and the agreement
-reading pointed at the packed version rather than at a path. Not a public feed - a
-package an adopter can reference from a local source is still a package, and publishing
-is a decision nobody here has made.
-
 ### §WW123 The separation is asserted, not remembered
 
 Both halves currently reference nothing, and both project files say why in a comment. A

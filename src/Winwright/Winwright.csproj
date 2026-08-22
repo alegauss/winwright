@@ -11,6 +11,23 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <!-- WW122: the harness half. Packed for the same reason as the in-app half and taken by a
+       different party - this one by whoever drives the application, never by the application. What
+       makes the pair worth packing is the agreement check: a version read off a package reference
+       is a version, and one read off a path is whatever the tree it was built from happened to be. -->
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Winwright</PackageId>
+    <Title>Winwright</Title>
+    <Description>Drives a Windows desktop application through UI Automation and answers in three
+      verdicts rather than two, so a check that could not run is never reported as one that passed.
+      No external dependency, and nothing here belongs in the application under test.</Description>
+    <Authors>winwright</Authors>
+    <PackageTags>ui-automation;wpf;testing;windows</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
   <!-- Turning UseWPF on swaps the SDK's implicit global usings for WPF's set, and System.IO is
        not in that set: the tracing and project files stopped compiling the moment the property
        above was added. Naming it back is the whole repair, and it is written down here because

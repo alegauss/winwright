@@ -55,7 +55,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 📋 **WW122** (deps: —) **the in-app half is a project reference, so an adopter cannot pin it or take it at all** — It builds a package with an id and a version, so adopting it is one reference the agreement check can pin rather than a path into somebody else's source tree. → §WW122
 - 📋 **WW123** (deps: —) **nothing refuses a reference between the two halves, and one edit would merge them** — The suite asserts the engine references no in-app package and the in-app package references no engine, since that separation is what makes each half safe to ship where it goes. → §WW123
 
 ## Block J — Adoption — the proof is the deletion

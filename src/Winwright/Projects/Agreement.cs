@@ -277,6 +277,102 @@ public static class Engine
         return new EngineCopy(where, null, Pinning.Absent, $"{Path.GetFileName(full)} does not reference {package}");
     }
 
+    /// <summary>
+    /// The version of a package that was actually built, read out of the nupkg itself.
+    /// <para>
+    /// WW122. Until the two halves were packable there was nothing here but a source tree and a
+    /// path, and a path is unpinnable by construction — so an adopter could neither pin the in-app
+    /// half nor take it at all. This is the copy that closes the loop: what a consuming project
+    /// asked for by <see cref="Pinned"/>, against what the build actually produced.
+    /// </para>
+    /// <para>
+    /// Read from the nuspec inside the archive rather than off the file name. The name carries the
+    /// normalised version and the nuspec carries the declared one, and a check about what a build
+    /// produced should read what the build wrote rather than what the file system was told.
+    /// </para>
+    /// </summary>
+    /// <param name="where">What this copy is, as a report names it.</param>
+    /// <param name="nupkgOrDirectory">A .nupkg, or a directory to find one in.</param>
+    /// <param name="package">The package id, where a directory holds several.</param>
+    public static EngineCopy Packed(string where, string nupkgOrDirectory, string package = "Winwright")
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(where);
+        ArgumentException.ThrowIfNullOrWhiteSpace(nupkgOrDirectory);
+        ArgumentException.ThrowIfNullOrWhiteSpace(package);
+
+        var path = Path.GetFullPath(nupkgOrDirectory.Trim());
+        if (Directory.Exists(path))
+        {
+            // Matched on the id inside each package and not on the file name, because a name is a
+            // prefix: asking a folder for Winwright by name hands back Winwright.InApp as well.
+            // Symbol packages carry the same id and are not the package either — an adopter
+            // references the nupkg, and picking the snupkg answers about the wrong file.
+            var found = Directory
+                .EnumerateFiles(path, $"{package}.*.nupkg")
+                .Where(one => !one.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase))
+                .Where(one => InNuspec(one, package) is not null)
+                .OrderBy(one => one, StringComparer.Ordinal)
+                .ToList();
+
+            if (found.Count == 0)
+                return new EngineCopy(where, null, Pinning.Absent, $"no {package} package was built into {path}");
+
+            if (found.Count > 1)
+            {
+                return new EngineCopy(
+                    where,
+                    null,
+                    Pinning.Unpinnable,
+                    $"{path} holds {found.Count} builds of {package} ({string.Join(", ", found.Select(Path.GetFileName))}), "
+                        + "and which one an adopter would take is not answerable from here");
+            }
+
+            path = found[0];
+        }
+
+        if (!File.Exists(path))
+            return new EngineCopy(where, null, Pinning.Absent, $"{Path.GetFileName(path)} is not there");
+
+        var declared = InNuspec(path, package);
+        return declared is null
+            ? new EngineCopy(where, null, Pinning.Absent, $"{Path.GetFileName(path)} carries no readable nuspec version")
+            : Reading(where, declared, Path.GetFileName(path));
+    }
+
+    /// <summary>The version the nuspec inside a package declares, or null where it cannot be read.</summary>
+    private static string? InNuspec(string nupkg, string package)
+    {
+        try
+        {
+            using var archive = System.IO.Compression.ZipFile.OpenRead(nupkg);
+            var nuspec = archive.Entries.FirstOrDefault(entry =>
+                entry.FullName.EndsWith(".nuspec", StringComparison.OrdinalIgnoreCase)
+                && !entry.FullName.Contains('/', StringComparison.Ordinal));
+
+            if (nuspec is null)
+                return null;
+
+            using var reading = nuspec.Open();
+            var document = XDocument.Load(reading);
+            var metadata = document.Root?.Elements().FirstOrDefault(one => one.Name.LocalName == "metadata");
+            var id = metadata?.Elements().FirstOrDefault(one => one.Name.LocalName == "id")?.Value?.Trim();
+
+            // The id is checked rather than assumed: a file named for one package carrying another
+            // is exactly the confusion this whole reading exists to refuse.
+            if (!string.Equals(id, package, StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            var version = metadata?.Elements().FirstOrDefault(one => one.Name.LocalName == "version")?.Value?.Trim();
+            return string.IsNullOrWhiteSpace(version) ? null : version;
+        }
+        catch (Exception unreadable)
+            when (unreadable is IOException or UnauthorizedAccessException
+                or InvalidDataException or System.Xml.XmlException)
+        {
+            return null;
+        }
+    }
+
     private static EngineCopy Reading(string where, string version, string file)
     {
         // A range, a wildcard or a property nobody expanded is a version this cannot resolve, and

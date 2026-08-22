@@ -10,6 +10,25 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <!-- WW122: this is the half an application under test takes, so it has to be takeable. A project
+       reference into this repository is unpinnable by construction - which the agreement check
+       already says out loud - and an application shipping to its users cannot take one at all.
+       Packing is declared here; publishing anywhere is a decision nobody has made, and a package an
+       adopter references from a local folder is still a package. -->
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Winwright.InApp</PackageId>
+    <Title>Winwright, the in-app half</Title>
+    <Description>What an application under test takes so a harness can read it: dispatcher-bounded
+      work, shareable brushes, per-monitor coordinates, a background nobody can leave transparent,
+      and a geometry dump. No reference to the engine, so nothing here ships a test harness to an
+      application's users.</Description>
+    <Authors>winwright</Authors>
+    <PackageTags>ui-automation;wpf;testing;windows</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
   <!-- Same repair as the engine: UseWPF swaps the SDK's implicit global usings for WPF's set, and
        System.IO is not in that set. -->
   <ItemGroup>

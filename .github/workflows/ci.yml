@@ -65,6 +65,26 @@ jobs:
           --discovered ${{ runner.temp }}/discovered.txt
           --results ${{ runner.temp }}/test-results/winwright.trx
 
+      # WW122: the two halves are packages or they are a path into this repository, and a path is
+      # unpinnable by construction. Packing here is what makes the claim checkable rather than
+      # intended; publishing anywhere is a decision nobody has made.
+      - name: Pack
+        run: dotnet pack Winwright.slnx --configuration Release --no-build --output packages
+
+      # The block's first criterion, as a project rather than a paragraph: an application under
+      # test takes the in-app half by one package reference and by nothing else. It restores from
+      # what was just packed, so a type that is public in the tree and absent from the package
+      # fails here and nowhere else.
+      - name: Build the adopter against the package
+        run: dotnet build samples/Adopter/Adopter.csproj --configuration Release
+
+      - name: Keep the packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages
+          path: packages
+          retention-days: 7
+
       # A red run is only useful if you can see which assertion went red, and the console log
       # truncates. The trx is kept only when there is something to read in it.
       - name: Keep the test results of a failed run

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WW122: this is the proof of the block's first criterion, and it is a project rather than a
+       paragraph. An application under test takes the in-app half by one package reference and by
+       nothing else - no path into this repository, no second package, no reference to the engine.
+       If that ever stops being true, this stops building. -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Adopter</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <UseWPF>true</UseWPF>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- The version is the tree's own, which is what makes the agreement check able to say the
+       adopter and the build are the same thing rather than two versions that happen to be near. -->
+  <ItemGroup>
+    <PackageReference Include="Winwright.InApp" Version="0.1.0" />
+  </ItemGroup>
+
+</Project>
