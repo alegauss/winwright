@@ -35,6 +35,9 @@ public partial class MainWindow : Window
         if (Shapes.Has("absences"))
             AbsencesPane.AddTo(panes);
 
+        if (Shapes.Has("peerless"))
+            Peerless.AddTo(panes);
+
         if (Shapes.Value("loading") is string howLong)
             LoadFor(int.Parse(howLong, System.Globalization.CultureInfo.InvariantCulture));
 

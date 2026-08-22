@@ -151,6 +151,11 @@ public sealed record Flags
             "left,top,width,height",
             "a topmost window over exactly that rectangle in physical pixels, so the region check "
                 + "is driven rather than arranged by hand and hoped about"),
+        new Flag(
+            "peerless",
+            "",
+            "a pane drawn with no automation peers at all, which a locator resolves against "
+                + "nothing and the geometry dump reports in full"),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>

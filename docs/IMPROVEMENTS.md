@@ -627,13 +627,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW104 A surface drawn without automation peers
-
-The geometry dump exists because some surfaces have no tree, and the only example
-available today is an installer page in another repository, behind a compiler that has
-to be installed first. The fixture draws one, so the dump and the layout invariants over
-it are developable here rather than borrowed.
-
 ### §WW105 The fixture says what it can do
 
 A catalogue that lives only in source is a catalogue nobody consults, and a flag nobody

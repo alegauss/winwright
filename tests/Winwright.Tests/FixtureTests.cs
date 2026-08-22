@@ -1259,4 +1259,71 @@ public sealed class FixtureTests : IDisposable
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern nint GetWindowLongPtrW(nint window, int index);
+
+    [Fact]
+    public void A_locator_resolves_against_nothing_on_the_peerless_pane()
+    {
+        var window = Launched("--peerless");
+
+        var ids = Ids(window);
+
+        // The pane itself is a tab and has a peer; everything it holds has none. That is what a
+        // custom-drawn surface looks like from outside, and what an installer page is.
+        Assert.Contains("drawnPane", ids);
+        Assert.DoesNotContain("drawnSurface", ids);
+        Assert.DoesNotContain("drawnHeader", ids);
+        Assert.DoesNotContain("drawnBody", ids);
+    }
+
+    [Fact]
+    public void The_geometry_dump_reports_all_of_what_the_tree_cannot_see()
+    {
+        var geometry = Path.Combine(root, "peerless.tsv");
+        var start = Started("--peerless");
+        start.Environment[GeometryDump.PathVariable] = geometry;
+
+        Attachable.Launch(register, start);
+        for (var attempt = 0; attempt < 200 && !File.Exists(geometry); attempt++)
+            Thread.Sleep(25);
+
+        var read = GeometryDump.Read(geometry);
+
+        // The whole contrast the dump was built for: nothing above found these, and here they are.
+        foreach (var name in new[] { "drawnSurface", "drawnHeader", "drawnBody", "drawnFooter" })
+            Assert.NotEmpty(read.Named(name));
+    }
+
+    [Fact]
+    public void What_the_dump_reports_of_it_is_laid_out_soundly()
+    {
+        var geometry = Path.Combine(root, "peerless-layout.tsv");
+        var start = Started("--peerless");
+        start.Environment[GeometryDump.PathVariable] = geometry;
+
+        Attachable.Launch(register, start);
+        for (var attempt = 0; attempt < 200 && !File.Exists(geometry); attempt++)
+            Thread.Sleep(25);
+
+        var read = GeometryDump.Read(geometry);
+        var surface = Assert.Single(read.Named("drawnSurface"));
+
+        // Every box inside the surface holding them, and none of them overlapping the next - the
+        // invariants a page with no tree can be checked on at all.
+        var boxes = new[] { "drawnHeader", "drawnBody", "drawnFooter" }
+            .Select(one => Assert.Single(read.Named(one)))
+            .ToList();
+
+        Assert.All(boxes, box => Assert.True(
+            box.Bounds.Left >= surface.Bounds.Left && box.Bounds.Right <= surface.Bounds.Right,
+            $"{box} is not inside {surface}"));
+
+        for (var at = 1; at < boxes.Count; at++)
+            Assert.True(boxes[at].Bounds.Top >= boxes[at - 1].Bounds.Bottom, $"{boxes[at]} overlaps {boxes[at - 1]}");
+    }
+
+    [Fact]
+    public void Without_the_flag_there_is_no_peerless_pane_at_all()
+    {
+        Assert.DoesNotContain("drawnPane", Ids(Launched()));
+    }
 }
