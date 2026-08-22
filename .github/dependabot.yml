@@ -1,0 +1,24 @@
+version: 2
+
+updates:
+  # Actions pinned in .github/workflows are the only third-party code that runs with this
+  # repository's credentials, so they are kept current on a schedule rather than on notice.
+  # One group means one pull request a week to read instead of one per action.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: chore
+      include: scope
+    labels:
+      - dependencies
+      - github-actions
