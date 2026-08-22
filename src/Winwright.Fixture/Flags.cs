@@ -34,6 +34,16 @@ public sealed class UnknownFlagException : ArgumentException
 /// stands in for, and starts producing false confidence. One that can name no defect is removed,
 /// and the removal is itself a reading about what this framework no longer has to defend against.
 /// </param>
+/// <param name="Draws">
+/// Whether asking for this shape puts something on the screen. False for the three that
+/// deliberately do not, and said out loud in the catalogue: when a case fails, the fastest way to
+/// understand it is to look at the thing it is talking about, and a flag that quietly shows
+/// nothing costs somebody a minute finding that out.
+/// </param>
+/// <param name="Needs">
+/// Another flag this one is meaningless without, or empty. Said in the catalogue, because a
+/// person driving by hand should not have to launch a shape and read a refusal to learn it.
+/// </param>
 /// <param name="Choices">
 /// The values it accepts, where it accepts a fixed set. Empty means any text. A value outside the
 /// set is refused the same way an unknown flag is: a shape nobody can spell is a shape nobody
@@ -44,6 +54,8 @@ public sealed record Flag(
     string Takes,
     string Provokes,
     string Because,
+    bool Draws = true,
+    string Needs = "",
     IReadOnlyList<string>? Choices = null,
     bool Numeric = false)
 {
@@ -57,7 +69,8 @@ public sealed record Flag(
             ? ""
             : Accepts.Count == 0 ? $"=<{Takes}>" : $"={string.Join("|", Accepts)}";
 
-        return $"--{Name}{takes}  {Provokes}";
+        var alone = Needs.Length == 0 ? "" : $" [needs --{Needs}]";
+        return $"--{Name}{takes}  {Provokes}{alone}{(Draws ? "" : " [draws nothing]")}";
     }
 
     /// <summary>The two lines a catalogue prints: what it does, and why it is here at all.</summary>
@@ -96,8 +109,14 @@ public sealed record Flags
         new Flag(
             "flags",
             "",
-            "print this catalogue and stop, so what the fixture can do is askable without having to misspell something to be told",
-            "a catalogue that lives only in source is one nobody consults, and claude-tray's preview catalogue already prints its whole table on an unknown name and exits non-zero"),
+            "print this catalogue and stop, so what the fixture can do is askable without misspelling something to be told",
+            "a catalogue that lives only in source is one nobody consults, and claude-tray's preview catalogue already prints its whole table on an unknown name and exits non-zero",
+            Draws: false),
+        new Flag(
+            "show",
+            "",
+            "bring the window to the front, which is what a person driving this by hand wants and what a suite raising it thirty times a run must never do",
+            "the fixture stops taking the desk so the suite's foreground checks can run, and a person launching it by hand then gets a window behind whatever they were reading"),
         new Flag(
             "title",
             "text",
@@ -108,7 +127,7 @@ public sealed record Flags
             "host",
             "the same window under a dispatcher that runs and one that never does - the difference no picture can see",
             "claude-tray shipped windows that took no keystrokes while every screenshot of them looked perfect",
-            ["dispatcher", "none"]),
+            Choices: ["dispatcher", "none"]),
         new Flag(
             "names",
             "",
@@ -124,13 +143,13 @@ public sealed record Flags
             "kind",
             "a window that opted into a system backdrop, which transmits what is behind it through the glass",
             "z-order reasoning cannot answer for a backdrop, so every check that decides a copy's contents by walking the windows above it is wrong about that one window",
-            Backdrop.Names),
+            Choices: Backdrop.Names),
         new Flag(
             "toast",
             "way",
             "a borderless top-level window with no caption, which the process object never names",
             "a toast existed here in exactly one product and only when its notification happened to fire, which is not a schedule a check can wait on",
-            Toast.Ways),
+            Choices: Toast.Ways),
         new Flag(
             "loading",
             "milliseconds",
@@ -147,12 +166,14 @@ public sealed record Flags
             "render",
             "path",
             "render the fixed surface to a file and exit, showing no window at all",
-            "the byte-identical comparison had nothing to be identical to, because every surface available read a clock, a machine name or the desktop's theme"),
+            "the byte-identical comparison had nothing to be identical to, because every surface available read a clock, a machine name or the desktop's theme",
+            Draws: false),
         new Flag(
             "resident",
             "",
             "a process that runs and shows nothing, which is the ordinary state of a tray application",
-            "a resident tray showing nothing runs on every developer machine here, and a refusal firing on it would need an override everybody passes always"),
+            "a resident tray showing nothing runs on every developer machine here, and a refusal firing on it would need an override everybody passes always",
+            Draws: false),
         new Flag(
             "store",
             "directory",
@@ -162,13 +183,14 @@ public sealed record Flags
             "mutate",
             "",
             "leave that store changed - the same number of bytes and a different machine",
-            "a settings file rewritten to the same length is the accident the fingerprint exists for: a picker repointed from one profile to another of the same name"),
+            "a settings file rewritten to the same length is the accident the fingerprint exists for: a picker repointed from one profile to another of the same name",
+            Needs: "store"),
         new Flag(
             "language",
             "tag",
             "a window labelled from one of the fixture's own string files",
             "the label rule needs several languages to be developed at all, and one key whose value carries a placeholder that no exact read can ever match",
-            Strings.Cultures),
+            Choices: Strings.Cultures),
         new Flag(
             "intrude",
             "left,top,width,height",
@@ -180,6 +202,10 @@ public sealed record Flags
             "a pane drawn with no automation peers at all, which a locator resolves against nothing",
             "the only surface with no accessibility tree was an installer page in another repository, behind a compiler that has to be installed first"),
     ]);
+
+    /// <summary>The shapes a person driving this by hand can actually look at.</summary>
+    public static IReadOnlyList<Flag> Drawn { get; } =
+        new ReadOnlyCollection<Flag>(Known.Where(one => one.Draws).ToList());
 
     /// <summary>Whether the fixture was asked for that shape.</summary>
     /// <param name="name">The flag, without its dashes.</param>

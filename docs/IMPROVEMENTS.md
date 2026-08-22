@@ -626,10 +626,3 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW107 The fixture is also for a person
-
-When a case fails, the fastest way to understand it is to look at the thing it is
-talking about, and that must not require writing anything first. Every flag opens the
-surface it names in a window somebody can see, which is the property claude-tray's
-preview flags have and the reason its harness is debuggable at all.

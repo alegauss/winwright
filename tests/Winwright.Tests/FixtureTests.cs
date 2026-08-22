@@ -1502,4 +1502,98 @@ public sealed class FixtureTests : IDisposable
 
         return said;
     }
+
+    [Fact]
+    public void Every_shape_that_draws_opens_a_window_somebody_can_look_at()
+    {
+        // Driven for every flag the catalogue lists, not for the ones somebody remembered. When a
+        // case fails the fastest way to understand it is to look at the thing it is talking about,
+        // and a shape that opens nothing costs somebody a minute finding that out.
+        var listed = Lines(Printed("--flags"))
+            .Select(one => one.Trim())
+            .Where(one => one.StartsWith("--", StringComparison.Ordinal))
+            .ToList();
+
+        Assert.True(listed.Count > 10, $"only {listed.Count} shape(s) were listed");
+
+        foreach (var row in listed)
+        {
+            var name = row[2..].Split(['=', ' '])[0];
+            if (row.Contains("[draws nothing]", StringComparison.Ordinal))
+                continue;
+
+            // A shape that says it needs a companion gets one, read off the catalogue rather than
+            // remembered here: launching it alone would be refused and read as drawing nothing.
+            var needs = System.Text.RegularExpressions.Regex.Match(row, @"\[needs --([a-z]+)\]");
+            var arguments = needs.Success
+                ? new[] { $"--{needs.Groups[1].Value}{Value(needs.Groups[1].Value)}", $"--{name}{Value(name)}" }
+                : [$"--{name}{Value(name)}"];
+
+            using var register = new ProcessRegister();
+            var pid = Attachable.Launch(register, Started(arguments)).Pid;
+
+            var drew = false;
+            for (var attempt = 0; attempt < 200 && !drew; attempt++)
+            {
+                drew = TopLevelWindows.OfProcess(pid).Count > 0;
+                if (!drew)
+                    Thread.Sleep(25);
+            }
+
+            Attachable.StopAndSettle(register);
+            Assert.True(drew, $"--{name} opened nothing a person could look at");
+        }
+    }
+
+    [Fact]
+    public void The_three_that_show_nothing_say_so_where_a_person_reads_them()
+    {
+        var said = Printed("--flags");
+
+        // Said out loud rather than left to be discovered by launching one and waiting.
+        foreach (var quiet in new[] { "--flags", "--render", "--resident" })
+        {
+            var row = Assert.Single(
+                Lines(said), one => one.TrimStart().StartsWith(quiet + " ", StringComparison.Ordinal)
+                    || one.TrimStart().StartsWith(quiet + "=", StringComparison.Ordinal));
+
+            Assert.Contains("[draws nothing]", row);
+        }
+    }
+
+    [Fact]
+    public void A_person_can_ask_for_the_window_to_come_forward()
+    {
+        // What is asserted here is that the window asks and is there to be looked at. Whether
+        // Windows grants the foreground is not this fixture's to promise: a process that does not
+        // already own it is refused, which is a policy measured rather than argued - this test
+        // passed alone and failed after eighty others had run, on the same code.
+        var window = Launched("--show");
+
+        Assert.True(window.OnScreen, window.ToString());
+        Assert.False(Minimised(window.Handle), $"{window} came up minimised, which nobody can look at");
+
+        // And the default is still the one the suite needs: unactivated, so raising the fixture
+        // thirty times a run does not decide the foreground for the checks that follow.
+        var quiet = Launched();
+        Assert.NotEqual(quiet.Handle, Foreground.Now().Window);
+    }
+
+    /// <summary>Whether that window is minimised, which is the one state nobody can look at.</summary>
+    private static bool Minimised(nint window) => (GetWindowLongPtrW(window, -16) & 0x20000000) != 0;
+
+    /// <summary>A value one shape needs, or nothing where it takes none.</summary>
+    private string Value(string name) => name switch
+    {
+        "title" => "=by hand",
+        "pump" => "=dispatcher",
+        "backdrop" => "=mica",
+        "toast" => "=beside",
+        "loading" => "=300",
+        "animate" => "=300",
+        "language" => "=en",
+        "store" => $"={Path.Combine(root, "by-hand")}",
+        "intrude" => "=900,700,200,150",
+        _ => "",
+    };
 }

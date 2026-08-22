@@ -87,6 +87,16 @@ public partial class MainWindow : Window
 
         // Here and not on Loaded: content rendered is the first moment every rectangle is the one
         // that was actually drawn, and a surface reported before that is a surface nobody saw.
+        // Asked for and never assumed: the window is unactivated by default so a suite raising it
+        // thirty times a run does not decide the foreground, and a person driving it by hand says
+        // so once and gets the window in front of them.
+        if (Shapes.Has("show"))
+        {
+            Activate();
+            Topmost = true;
+            Topmost = false;
+        }
+
         popups ??= Protocol.Hold(this);
         Protocol.Report(this, panes, panes.SelectedContent as FrameworkElement);
     }
