@@ -60,6 +60,7 @@
 - ✅ **WW50** **labels are matched in English against a window rendering another language** — A label resolves to the language the window is rendering, a value carrying a placeholder is refused outright, and a language nobody declared strings for is named instead of answered in English.
 - ✅ **WW52** **a control announcing its glyph codepoint satisfies every check for a non-empty name** — A name is read for what it is, so a glyph codepoint, an echoed automation id and an unfilled template each fail as themselves and print as escapes rather than as nothing.
 - ✅ **WW53** **a run mutates the store of the user who launched it** — The store is hashed around the case and every file, directory and variable that moved is named, so a rewrite of the same length and the same date is still caught.
+- ✅ **WW54** **no reading and a window that was talking are reported with the same sentence** — A read that ended with nothing says whether the window was working or blank, how many polls saw it, and what to look at, so only one of the two points at the deadline.
 
 ## Block G — The scenario — a case is a data file
 

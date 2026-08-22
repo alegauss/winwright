@@ -316,15 +316,6 @@ because an edit sizes itself to its font and a button does not. Each was found b
 running an installer, which is the most expensive place to find anything. Nothing
 overlaps, nothing starts off the surface, nothing ends past it, nothing measures zero.
 
-### §WW54 Working is not blank
-
-Two timed-out reads look identical to whoever is reading the output and mean opposite
-things. Working means the window was talking the whole time: a slow machine, a cold
-cache, or a report that built and could not be read - which is what a missing template
-part looks like. Blank means nothing was ever in the tree and the window is not being
-read at all. Collapsing the two cost a defect hunt that started at timing and ended
-somewhere else entirely.
-
 ### §WW55 The diagnosis ships with the failure
 
 Diagnosing a missing template part in claude-tray took a throwaway script that dumped
