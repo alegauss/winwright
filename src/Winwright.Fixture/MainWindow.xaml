@@ -40,6 +40,9 @@
           <TextBlock x:Name="reportNote"
                      Text="Every value on this page is fixed by construction: no clock, no machine name, no real data."
                      TextWrapping="Wrap" />
+          <!-- On the pane that is showing, deliberately. A label a case has to open a tab to read
+               is a label the case has to know a tab about, and the rule is about the label. -->
+          <TextBlock x:Name="localizedLabel" Margin="0,8,0,0" />
           <Border x:Name="reportSwatch" Height="60" Margin="0,12,0,0" Background="{StaticResource Accent}" />
         </StackPanel>
       </TabItem>

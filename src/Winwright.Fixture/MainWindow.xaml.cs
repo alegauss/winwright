@@ -38,6 +38,9 @@ public partial class MainWindow : Window
         if (Shapes.Value("loading") is string howLong)
             LoadFor(int.Parse(howLong, System.Globalization.CultureInfo.InvariantCulture));
 
+        if (Shapes.Value("language") is string tag)
+            Speak(Strings.Load(tag));
+
         if (Shapes.Value("animate") is string everySoOften)
         {
             // On the Status pane and selected, because a pane nobody picked is realised into no
@@ -50,6 +53,26 @@ public partial class MainWindow : Window
 
     /// <summary>Held so it is not collected while it is still meant to be running.</summary>
     private Animation? animation;
+
+    /// <summary>What language this window is in, where a run asked for one.</summary>
+    public Strings? Speaking { get; private set; }
+
+    /// <summary>
+    /// Label the window from a set of strings. Every label comes from the file, including the one
+    /// carrying a placeholder — a fixture that quietly left that one out would be a fixture the
+    /// rule it exists for could never be developed against.
+    /// </summary>
+    private void Speak(Strings said)
+    {
+        Speaking = said;
+
+        reportPane.Header = said.Says("tabs.report");
+        statusPane.Header = said.Says("tabs.status");
+        configPane.Header = said.Says("tabs.config");
+        save.Content = said.Says("buttons.save");
+        close.Content = said.Says("buttons.close");
+        localizedLabel.Text = said.Says(Strings.PlaceholderKey);
+    }
 
     /// <summary>Held for the window's life, because letting go puts every popup back.</summary>
     private Winwright.InApp.PopupsHeld? popups;

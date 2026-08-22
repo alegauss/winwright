@@ -1103,4 +1103,82 @@ public sealed class FixtureTests : IDisposable
         Assert.Fail($"pid {launched.Pid} never wrote what it drew");
         return ("", "");
     }
+
+    [Fact]
+    public void The_fixture_ships_more_than_one_language_and_the_window_shows_the_one_asked_for()
+    {
+        // One language is not enough to develop the rule against: a check that only ever saw
+        // English cannot tell a label it read from a label that happens to be the same word.
+        var english = Ids(Launched("--language=en"));
+        Assert.NotEmpty(english);
+
+        var headers = Headers(Launched("--language=pt-BR"));
+        Assert.Equal(["Relatório", "Estado", "Configuração"], headers);
+
+        Assert.Equal(["Bericht", "Status", "Konfiguration"], Headers(Launched("--language=de")));
+    }
+
+    [Fact]
+    public void The_expected_headers_are_derived_from_the_fixture_s_own_strings_and_never_typed()
+    {
+        var window = Launched("--language=de");
+
+        // The whole of the derived-set rule, against a real localized window: the expectation is
+        // read out of the file the application is showing, so it cannot drift from it.
+        var set = DerivedSet.From("the tab headers", Strings("de"), "tabs");
+        var compared = set.Against(Headers(window));
+
+        Assert.True(compared.Held, compared.Sentence());
+        Assert.Equal(3, compared.Matched.Count);
+    }
+
+    [Fact]
+    public void The_one_key_carrying_a_placeholder_is_refused_rather_than_skipped()
+    {
+        // An exact-name read can never match it, and a rule that skipped it would report a green
+        // about a control nobody could have checked.
+        foreach (var culture in new[] { "en", "pt-BR", "de" })
+        {
+            var said = DerivedSet.From("the labels", Strings(culture), "labels").Expected;
+
+            Assert.Contains(said, one => Labels.CarriesAPlaceholder(one));
+        }
+    }
+
+    [Fact]
+    public void A_window_in_that_language_really_shows_the_unmatchable_label()
+    {
+        var window = Launched("--language=pt-BR");
+
+        var shown = Inspect.Window(window.Handle, depth: 12)!
+            .Walk()
+            .Single(one => one.Facts.AutomationId == "localizedLabel")
+            .Facts.Name;
+
+        // Present on the window and unmatchable by an exact read, which is the pair that makes the
+        // refusal developable rather than reasoned about.
+        Assert.Equal("Perfil: {name}", shown);
+        Assert.True(Labels.CarriesAPlaceholder(shown));
+    }
+
+    [Fact]
+    public void A_language_the_fixture_does_not_ship_is_refused_with_the_ones_it_does()
+    {
+        var (code, said) = Ran("--language=fr");
+
+        Assert.Equal(2, code);
+        Assert.Contains("it takes en or pt-BR or de", said);
+    }
+
+    /// <summary>The tab headers the window is showing, in order.</summary>
+    private static IReadOnlyList<string> Headers(TopLevelWindow window) =>
+        Inspect.Window(window.Handle, depth: 12)!
+            .Walk()
+            .Where(one => one.Facts.ControlType == "TabItem")
+            .Select(one => one.Facts.Name)
+            .ToList();
+
+    /// <summary>The strings file the fixture ships for one language, beside its executable.</summary>
+    private static string Strings(string culture) =>
+        Path.Combine(Path.GetDirectoryName(Executable())!, "strings", $"strings.{culture}.json");
 }

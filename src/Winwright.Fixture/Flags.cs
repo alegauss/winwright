@@ -140,6 +140,12 @@ public sealed record Flags
             "",
             "leave that store changed - the same number of bytes and a different machine, which is "
                 + "the accident a comparison by size or by write time calls unchanged"),
+        new Flag(
+            "language",
+            "tag",
+            "a window labelled from one of the fixture's own string files, including the one key "
+                + "whose value carries a placeholder and which an exact-name read can never match",
+            Strings.Cultures),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>

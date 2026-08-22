@@ -25,6 +25,13 @@
     <ProjectReference Include="../Winwright.InApp/Winwright.InApp.csproj" />
   </ItemGroup>
 
+  <!-- The strings, beside the executable. Several languages because the label rule cannot be
+       developed against one, and one of them carrying a key whose value has a placeholder because
+       that is the case an exact-name read can never match and must refuse rather than skip. -->
+  <ItemGroup>
+    <Content Include="strings/*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- No reference to the engine, and that is the whole of the separation. -->
 
 </Project>

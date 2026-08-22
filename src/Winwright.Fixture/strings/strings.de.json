@@ -1,0 +1,15 @@
+{
+  "tabs": {
+    "report": "Bericht",
+    "status": "Status",
+    "config": "Konfiguration"
+  },
+  "buttons": {
+    "save": "Speichern",
+    "close": "Schließen"
+  },
+  "labels": {
+    "heading": "winwright fixture",
+    "profileName": "Profil: {name}"
+  }
+}

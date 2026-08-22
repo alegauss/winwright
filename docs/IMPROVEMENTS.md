@@ -627,13 +627,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW102 A localized window, including the key that must be refused
-
-The label rule needs several languages to be developed at all, and it needs one specific
-pathological case: a key whose value carries a placeholder, which an exact-name read can
-never match and which has to be refused rather than skipped. Real products have the
-languages and rarely have the pathological key on purpose.
-
 ### §WW103 An intruder over a named region
 
 The region check is the most intricate piece of the capture stack, and today it is

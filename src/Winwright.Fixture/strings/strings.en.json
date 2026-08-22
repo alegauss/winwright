@@ -1,0 +1,18 @@
+{
+  "tabs": {
+    "report": "Report",
+    "status": "Status",
+    "config": "Config"
+  },
+  "buttons": {
+    "save": "Save",
+    "close": "Close"
+  },
+  "labels": {
+    "heading": "winwright fixture",
+
+    "//": "The pathological key. An exact-name read can never match this, and a rule that skipped",
+    "//2": "it would report a green about a control nobody could have checked.",
+    "profileName": "Profile: {name}"
+  }
+}
