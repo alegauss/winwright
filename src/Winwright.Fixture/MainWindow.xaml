@@ -33,6 +33,10 @@
       <TabItem x:Name="reportPane" Header="Report">
         <StackPanel x:Name="reportRows" Margin="12">
           <TextBlock x:Name="reportTitle" Text="Report" FontSize="16" Margin="0,0,0,8" />
+
+          <!-- Collapsed unless the loading flag asks for it, and it takes the real content's place
+               rather than sitting beside it: a page that shows both is not a page still loading. -->
+          <TextBlock x:Name="loadingNote" Text="Still loading" Visibility="Collapsed" />
           <TextBlock x:Name="reportNote"
                      Text="Every value on this page is fixed by construction: no clock, no machine name, no real data."
                      TextWrapping="Wrap" />

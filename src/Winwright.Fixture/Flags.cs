@@ -33,7 +33,8 @@ public sealed class UnknownFlagException : ArgumentException
 /// set is refused the same way an unknown flag is: a shape nobody can spell is a shape nobody
 /// takes, and the run that misspells one asserts nothing and says so nowhere.
 /// </param>
-public sealed record Flag(string Name, string Takes, string Provokes, IReadOnlyList<string>? Choices = null)
+public sealed record Flag(
+    string Name, string Takes, string Provokes, IReadOnlyList<string>? Choices = null, bool Numeric = false)
 {
     /// <summary>What it accepts, or nothing where it accepts any text.</summary>
     public IReadOnlyList<string> Accepts => Choices ?? [];
@@ -107,6 +108,12 @@ public sealed record Flags
             "a borderless top-level window with no caption, which the process object never names - "
                 + "beside the main window, or as the only window this run has at all",
             Toast.Ways),
+        new Flag(
+            "loading",
+            "milliseconds",
+            "a page that is still computing for exactly this long, so the loading refusal is asserted "
+                + "at a moment the run chose rather than on a machine that happened to be slow",
+            Numeric: true),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>
@@ -168,6 +175,17 @@ public sealed record Flags
             {
                 throw new UnknownFlagException(
                     $"--{name} does not take '{value}': it takes {string.Join(" or ", known.Accepts)}.{Catalogue()}");
+            }
+
+            // A duration that is not a number would otherwise be taken as zero, and a page asked to
+            // load for 'twoseconds' that loads for none is the shape nobody can provoke again.
+            if (known.Numeric
+                && (!int.TryParse(value, System.Globalization.NumberStyles.Integer,
+                        System.Globalization.CultureInfo.InvariantCulture, out var counted)
+                    || counted < 0))
+            {
+                throw new UnknownFlagException(
+                    $"--{name} takes a whole number of {known.Takes} and was given '{value}'.{Catalogue()}");
             }
 
             read[name] = value;

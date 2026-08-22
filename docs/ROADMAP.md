@@ -76,7 +76,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW96** (deps: —) **a page that is still loading cannot be produced when the check needs one** — The fixture takes the duration as a flag, so the loading refusal is asserted at a moment the run chose rather than on a machine that happened to be slow. → §WW96
 - 📋 **WW97** (deps: —) **an animation with a known length and a known frame count does not exist to capture** — The fixture plays one, so a frame sequence is checked against a number instead of against a picture somebody had to look at. → §WW97
 - 📋 **WW98** (deps: —) **a byte-identical render has nothing to be identical to** — The fixture draws a surface fixed by construction - no clock, no machine name, no real data - which is what makes the comparison mean anything at all. → §WW98
 - 📋 **WW99** (deps: —) **a second instance has to be started by hand to test the refusal that exists for it** — The fixture opens a second window on request, so the other-instance refusal and the override beside it are both actually driven. → §WW99

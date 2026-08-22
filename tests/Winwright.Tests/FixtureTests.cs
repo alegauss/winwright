@@ -605,4 +605,60 @@ public sealed class FixtureTests : IDisposable
         Assert.Fail($"pid {pid} never owned {howMany} window(s)");
         return [];
     }
+
+    [Fact]
+    public void A_page_still_loading_shows_the_note_and_not_the_content()
+    {
+        // The refusal's arm, at a moment this run chose. It was found on a machine that happened
+        // to be slow, and reproducing it meant finding another one.
+        var window = Launched("--loading=6000");
+
+        var names = Ids(window);
+
+        // Read on reportNote and not on reportSwatch: a Border has no automation peer, so
+        // asserting its absence would pass on a page that never loaded at all.
+        Assert.Contains("loadingNote", names);
+        Assert.DoesNotContain("reportNote", names);
+    }
+
+    [Fact]
+    public void A_page_that_finishes_inside_the_wait_must_not_be_refused_for_it()
+    {
+        // The other arm, and the one a one-sided check gets wrong: a page that loaded and then
+        // finished is a page, and refusing it would make the check useless on a slow desk.
+        var window = Launched("--loading=150");
+
+        for (var attempt = 0; attempt < 100; attempt++)
+        {
+            if (Ids(window).Contains("reportNote"))
+            {
+                Assert.DoesNotContain("loadingNote", Ids(window));
+                return;
+            }
+
+            Thread.Sleep(25);
+        }
+
+        Assert.Fail("the page never finished loading, so the shorter duration reached nothing");
+    }
+
+    [Fact]
+    public void A_duration_that_is_not_a_number_is_refused_rather_than_read_as_none()
+    {
+        // Taken as zero it would load for no time at all, which is the shape nobody can provoke
+        // again and a green nobody would question.
+        var (code, said) = Ran("--loading=twoseconds");
+
+        Assert.Equal(2, code);
+        Assert.Contains("--loading takes a whole number of milliseconds and was given 'twoseconds'", said);
+        Assert.Equal(2, Ran("--loading=-5").Code);
+    }
+
+    /// <summary>Every automation id on the window, which is what a page's state reads as.</summary>
+    private static IReadOnlyList<string> Ids(TopLevelWindow window) =>
+        Inspect.Window(window.Handle, depth: 12)!
+            .Walk()
+            .Select(one => one.Facts.AutomationId)
+            .Where(one => one.Length > 0)
+            .ToList();
 }

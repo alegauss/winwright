@@ -591,13 +591,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW96 A page that is loading for as long as the check needs
-
-The loading refusal was discovered on a machine that happened to be slow, and
-reproducing it means finding another one. The fixture takes the duration as a flag, so
-the refusal is asserted at a moment the run chose - and the other arm is covered too, a
-page that finishes inside the wait and must not be refused for it.
-
 ### §WW97 An animation with a known length
 
 A frame sequence is currently checked by opening the frames, which is the thing this

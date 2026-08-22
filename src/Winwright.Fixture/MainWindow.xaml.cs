@@ -34,6 +34,40 @@ public partial class MainWindow : Window
 
         if (Shapes.Has("absences"))
             AbsencesPane.AddTo(panes);
+
+        if (Shapes.Value("loading") is string howLong)
+            LoadFor(int.Parse(howLong, System.Globalization.CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>
+    /// Show the loading note in the report page's place, and swap the real content in after the
+    /// duration this run asked for.
+    /// <para>
+    /// The note replaces the content rather than sitting beside it: a page showing both is not a
+    /// page that is still loading, and a check reading it would be right to say so.
+    /// </para>
+    /// </summary>
+    /// <param name="milliseconds">How long to stay loading. Zero finishes on the first tick.</param>
+    private void LoadFor(int milliseconds)
+    {
+        loadingNote.Visibility = Visibility.Visible;
+        reportNote.Visibility = Visibility.Collapsed;
+        reportSwatch.Visibility = Visibility.Collapsed;
+
+        var timer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(milliseconds),
+        };
+
+        timer.Tick += (sender, _) =>
+        {
+            ((System.Windows.Threading.DispatcherTimer)sender!).Stop();
+            loadingNote.Visibility = Visibility.Collapsed;
+            reportNote.Visibility = Visibility.Visible;
+            reportSwatch.Visibility = Visibility.Visible;
+        };
+
+        timer.Start();
     }
 
     /// <inheritdoc />
