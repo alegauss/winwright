@@ -42,6 +42,7 @@
 - ✅ **WW29** **a menu is driven by clicks a shell does not always deliver** — A menu is entered with F10, walked with Down and expanded with Right against a polled deadline, nothing resets between attempts, and this surface has no invoke at all.
 - ✅ **WW30** **a flaky act is hidden behind a retry that runs until it passes** — Attempts are capped, a cap large enough to hide a failure is refused, and the count is stamped onto the trace step so a green that took three goes still says so.
 - ✅ **WW31** **the notification-area icon has no clickable point and no reliable right-click** — Icons are addressed by rectangle since every taskbar button refuses a clickable point, the overflow is opened through the chevron found by id, and the menu route is focus plus the application key.
+- ✅ **WW32** **a selection that silently does not land leaves the pane it should have built unrealised** — A selection is confirmed against the control and a condition the caller names, the pointer is reached for only after that did not pass, and nothing reports a landing it did not confirm.
 
 ## Block E — Capture — the picture that proves what it photographed
 

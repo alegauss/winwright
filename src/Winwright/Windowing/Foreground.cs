@@ -25,7 +25,11 @@ public enum ForegroundState
 /// <param name="Pid">The process that owns it, or zero.</param>
 /// <param name="Process">That process's name, empty where it would not say.</param>
 /// <param name="Title">The window's caption, empty where it has none.</param>
-public readonly record struct WindowOwner(nint Window, int Pid, string Process, string Title)
+/// <param name="Root">
+/// The top-level window this one belongs to. Zero where it was not read, and then the handles
+/// themselves are compared instead.
+/// </param>
+public readonly record struct WindowOwner(nint Window, int Pid, string Process, string Title, nint Root = 0)
 {
     /// <summary>Nothing at all, which is what a locked desk answers.</summary>
     public static WindowOwner None { get; } = new(0, 0, "", "");
@@ -92,8 +96,15 @@ public sealed record Foreground
     /// <summary>The same judgement over two sightings, which is the rule stated in one place.</summary>
     public static Foreground Between(WindowOwner holder, WindowOwner wanted)
     {
+        // Compared at the top level, and this is a repair rather than a nicety. Focusing a
+        // control through automation makes that control the foreground window as far as Windows
+        // is concerned, so comparing raw handles said the desktop belonged to somebody else while
+        // the keys were landing exactly where they were meant to. Measured: a text box inside the
+        // window under test read as "another window of the same process".
+        var sameRoot = holder.Root != 0 && wanted.Root != 0 && holder.Root == wanted.Root;
+
         var state = holder.Window == 0 ? ForegroundState.Nobody
-            : holder.Window == wanted.Window ? ForegroundState.Ours
+            : holder.Window == wanted.Window || sameRoot ? ForegroundState.Ours
             : holder.Pid != 0 && holder.Pid == wanted.Pid ? ForegroundState.SameProcess
             : ForegroundState.Elsewhere;
 
@@ -125,7 +136,8 @@ public sealed record Foreground
             return WindowOwner.None;
 
         Win32.GetWindowThreadProcessId(window, out var pid);
-        return new WindowOwner(window, (int)pid, NameOf((int)pid), Win32.TextOf(window));
+        return new WindowOwner(
+            window, (int)pid, NameOf((int)pid), Win32.TextOf(window), Win32.GetAncestor(window, Win32.GaRoot));
     }
 
     private static string NameOf(int pid)

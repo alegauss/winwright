@@ -200,6 +200,13 @@ internal sealed class PumpedDialog : IDisposable
     /// <summary>The frame as UI Automation sees it.</summary>
     internal AutomationElement Root => AutomationElement.FromHandle(Frame);
 
+    /// <summary>
+    /// Ask for the desktop again. A test that is about to send input calls this first: another
+    /// class's window may have taken it since this one opened, and a key sent to somebody else is
+    /// a different act entirely.
+    /// </summary>
+    internal void BringToFront() => TakeTheDesktop();
+
     /// <summary>Open one, blocking until its thread has built it and is pumping.</summary>
     internal static PumpedDialog Open(string title, params ChildWindow[] children) => new(title, children, []);
 

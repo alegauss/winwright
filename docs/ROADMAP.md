@@ -18,7 +18,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW32** (deps: —) **a selection that silently does not land leaves the pane it should have built unrealised** — Select, confirm, and fall back to the pointer only then, because the next step otherwise blames a slow scan for a tab that was never opened. → §WW32
 - 📋 **WW33** (deps: —) **an act leaves the window in a state the next case did not ask for** — A toggled surface is put back where the case found it, which is what lets one window be lent to several cases instead of paying a launch for each. → §WW33
 
 ## Block E — Capture — the picture that proves what it photographed

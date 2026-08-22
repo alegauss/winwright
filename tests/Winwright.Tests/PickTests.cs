@@ -47,6 +47,16 @@ public sealed class PickTests : IDisposable
 
     public void Dispose()
     {
+        try
+        {
+            if (Combo.ReadOnce().Values.ExpandCollapse == "Expanded")
+                Act.Collapse(Combo);
+        }
+        catch (NotActionableException)
+        {
+            // Already gone.
+        }
+
         foreach (var decoy in decoys)
             decoy.Dispose();
 

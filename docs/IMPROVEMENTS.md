@@ -153,15 +153,6 @@ inspect printed resolves, whichever line the reader started from.
 
 ## Block D — Act — patterns before pointers
 
-### §WW32 Select, then confirm, then click
-
-A tab control builds a tab's content on its first visit, so a selection that silently
-does not land leaves the list inside it never realised - and the case then blames a
-forty-second scan for a tab it never opened. Seen alternating pass and degrade while the
-case was being written, which is the shape that teaches a reader to re-run rather than
-to look. Confirming that the selection took, and only then falling back to the pointer,
-is what makes the next step's failure mean what it says.
-
 ### §WW33 A case hands the window back as it found it
 
 A popup is a toggle and a tab is a position, and the next case sharing that window asked

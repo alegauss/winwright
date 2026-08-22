@@ -40,9 +40,7 @@ public sealed class NotificationAreaTests : IDisposable
         var found = NotificationArea.Find(Tip);
         Assert.NotNull(found);
 
-        var element = AutomationElement.RootElement.FindFirst(
-            System.Windows.Automation.TreeScope.Subtree,
-            new PropertyCondition(AutomationElement.NameProperty, found.Name));
+        var element = NotificationArea.ElementFor(found);
         Assert.NotNull(element);
 
         Assert.Throws<NoClickablePointException>(() => element.GetClickablePoint());

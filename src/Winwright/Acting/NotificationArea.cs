@@ -144,7 +144,13 @@ public static class NotificationArea
             return false;
         }
 
-        return Attempt.UntilTrue(() => Overflow() is not null, settleMs, pollMs).Happened;
+        // Waiting for the flyout to exist is not waiting for it to be usable: measured, the
+        // window arrives before its icons are laid out, and an icon read in that gap reports a
+        // rectangle of nothing — which is the one address these icons have.
+        return Attempt.UntilTrue(
+            () => Overflow() is not null && Hidden().Any(icon => icon.Rectangle.Width > 0),
+            settleMs,
+            pollMs).Happened;
     }
 
     /// <summary>Shut it again, so a run leaves the taskbar the way it found it.</summary>
@@ -208,7 +214,7 @@ public static class NotificationArea
                 "no icon in the notification area is called that, on the taskbar or in the overflow");
         }
 
-        var element = ElementFor(icon);
+        var element = Live(icon);
         if (element is null)
             return new TrayMenu(icon, false, null, "the icon went away between finding it and asking it");
 
@@ -235,7 +241,14 @@ public static class NotificationArea
     private static bool Matches(TrayIcon icon, string named) =>
         icon.Name.Contains(named, StringComparison.OrdinalIgnoreCase);
 
-    private static AutomationElement? ElementFor(TrayIcon icon)
+    /// <summary>The live element behind an icon, for a caller that needs one.</summary>
+    public static AutomationElement? ElementFor(TrayIcon icon)
+    {
+        ArgumentNullException.ThrowIfNull(icon);
+        return Live(icon);
+    }
+
+    private static AutomationElement? Live(TrayIcon icon)
     {
         var root = icon.Hidden ? Overflow() : Tray();
         if (root is null)

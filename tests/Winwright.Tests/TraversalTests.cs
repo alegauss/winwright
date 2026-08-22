@@ -50,6 +50,9 @@ public sealed class TraversalTests : IDisposable
 
     private void Focus(string locator)
     {
+        // The desktop first: these send keys, and another class's window may hold it by now.
+        dialog.BringToFront();
+
         var element = On(locator).ReadOnce().Resolution.Element;
         Assert.NotNull(element);
         element.SetFocus();
@@ -123,7 +126,7 @@ public sealed class TraversalTests : IDisposable
 
         var traversed = Traversal.Press(dialog.Root, TraversalKey.Right, settleMs: 300, pollMs: 20);
 
-        Assert.True(traversed.Sent);
+        Assert.True(traversed.Sent, traversed.Foreground.Absence);
         Assert.Equal("alpha", traversed.After!.Name);
         Assert.False(traversed.Moved);
         Assert.Equal(Winwright.Tracing.StepVerdict.Failed, traversed.AsTraceStep().Verdict);
