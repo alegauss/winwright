@@ -115,25 +115,6 @@ such promptly, and does not spend a cap discovering what the first attempt estab
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW124 An id is quoted like a name
-
-Found by driving the fixture rather than by reading. Windows gives a window's own system
-menu the automation id `Item 1`, and inspect renders that element as `MenuItem#Item
-1[name="Sistema"]` - which the grammar refuses at the space, reporting that it expected
-`>` or the end and found `1`.
-
-The name field is already quoted for exactly this reason and the id is not, so an id is
-assumed to be an identifier. Nothing this project controls produces one with a space in
-it, which is why it survived: every fixture in the suite names its own controls, and the
-first tree walked that somebody else built broke it on the first line under the title
-bar.
-
-It matters more than a chrome element. The whole claim of the verb is that a line it
-printed can be copied into a scenario, and a line that cannot is worse than no line - it
-is an answer that looks usable and fails at parse time, in a file somebody wrote from
-it. The existing test asserts the property against a window this repository builds,
-which is the shape of check that only ever proves what the author already assumed.
-
 ## Block D — Act — patterns before pointers
 
 ### §WW134 The guard speaks one language

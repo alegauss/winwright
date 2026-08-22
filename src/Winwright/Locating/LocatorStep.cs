@@ -87,7 +87,7 @@ public sealed record LocatorStep
         if (ControlType is not null)
             text.Append(ControlType);
         if (AutomationId is not null)
-            text.Append('#').Append(Quoted(AutomationId, bare: true));
+            text.Append('#').Append(Quoted(AutomationId, bare: Bare(AutomationId)));
         if (Name is not null)
             text.Append("[name=").Append(Quoted(Name, bare: false)).Append(']');
         if (ClassName is not null)
@@ -102,11 +102,43 @@ public sealed record LocatorStep
         return text.ToString();
     }
 
+    /// <summary>
+    /// Whether an id can be written without quotation marks — which is to say, whether the grammar
+    /// would read the whole of it back.
+    /// <para>
+    /// WW124. The name field was quoted for exactly this reason and the id was not, so an id was
+    /// assumed to be an identifier. Windows gives a window's own system menu the id <c>Item 1</c>,
+    /// and a step rendered from it was refused at the space by the grammar that had just written
+    /// it. The whole claim of inspecting is that a line it printed can be copied into a scenario,
+    /// and a line that cannot is worse than no line: it is an answer that looks usable and fails
+    /// at parse time, in a file somebody wrote from it.
+    /// </para>
+    /// </summary>
+    private static bool Bare(string id) =>
+        id.Length > 0 && id.All(one => char.IsLetterOrDigit(one) || one is '_' or '.' or '-');
+
+    /// <summary>
+    /// A value as the grammar writes it. The backslash first, or every escape written after it
+    /// would be escaped again on the next pass.
+    /// <para>
+    /// WW124. The line break is escaped for the same reason the quotation mark is, and it was
+    /// found the same way: a tray icon's name is a tooltip and a real one runs to several lines, so
+    /// a step rendered from one ran to several lines — and a verb whose whole claim is one line per
+    /// element was printing three, of which only the first could be copied anywhere.
+    /// </para>
+    /// </summary>
     private static string Quoted(string value, bool bare)
     {
         if (bare)
             return value;
 
-        return $"\"{value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal)}\"";
+        var escaped = value
+            .Replace("\\", "\\\\", StringComparison.Ordinal)
+            .Replace("\"", "\\\"", StringComparison.Ordinal)
+            .Replace("\r", "\\r", StringComparison.Ordinal)
+            .Replace("\n", "\\n", StringComparison.Ordinal)
+            .Replace("\t", "\\t", StringComparison.Ordinal);
+
+        return $"\"{escaped}\"";
     }
 }

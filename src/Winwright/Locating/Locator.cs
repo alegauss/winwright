@@ -119,7 +119,12 @@ public sealed record Locator
         if (at < text.Length && text[at] == '#')
         {
             at++;
-            automationId = Word(text, ref at);
+
+            // WW124: quoted as well as bare. Windows gives a window's own system menu the id
+            // "Item 1", and an id was assumed to be an identifier because nothing this project
+            // builds produces one with a space in it — so the first tree walked that somebody else
+            // built broke on the first line under the title bar.
+            automationId = at < text.Length && text[at] == '"' ? Quoted(text, ref at) : Word(text, ref at);
             if (automationId.Length == 0)
                 throw new LocatorSyntaxException(text, at, "'#' introduces an automation id and this one is empty");
         }
@@ -236,7 +241,18 @@ public sealed record Locator
         {
             if (text[at] == '\\' && at + 1 < text.Length)
             {
-                value.Append(text[at + 1]);
+                // WW124: the three that carry a line break or a tab are decoded, and anything else
+                // after a backslash is still itself. A tray icon's name is a tooltip and a real one
+                // runs to several lines — rendered raw, the step ran to several lines too, and a
+                // verb whose whole claim is one line per element was printing three.
+                value.Append(text[at + 1] switch
+                {
+                    'n' => '\n',
+                    'r' => '\r',
+                    't' => '\t',
+                    var other => other,
+                });
+
                 at += 2;
                 continue;
             }

@@ -43,6 +43,7 @@
 - ✅ **WW23** **there is no way to ask what patterns an element actually offers** — What an element offers is asked for by locator, and every declared act is checked against it before the run, refusing with the element and the pattern both named.
 - ✅ **WW112** **nothing makes an act go through the actionability check, so a verb that forgets it still runs** — The live element is no longer public: an act reaches one only by being admitted, which resolves, judges the four and refuses first, so no verb can spell the skip.
 - ✅ **WW113** **the first line inspect prints is a locator step that matches nothing when it is used as one** — Inspect marks the root as the root instead of printing it in the copyable shape, so every line still shaped like a locator is one that resolves — under a red too.
+- ✅ **WW124** **an automation id with a space in it renders as a locator step the grammar then refuses** — An id is quoted when the grammar would not read the whole of it, a line break in a name is escaped rather than printed, and the property is checked against chrome nobody here wrote.
 
 ## Block D — Act — patterns before pointers
 
