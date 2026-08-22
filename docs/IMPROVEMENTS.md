@@ -201,6 +201,25 @@ mark the root as the root rather than printing it in the shape of something to c
 Either closes it. What must be true afterwards is that a locator assembled from what
 inspect printed resolves, whichever line the reader started from.
 
+### §WW124 An id is quoted like a name
+
+Found by driving the fixture rather than by reading. Windows gives a window's own system
+menu the automation id `Item 1`, and inspect renders that element as `MenuItem#Item
+1[name="Sistema"]` - which the grammar refuses at the space, reporting that it expected
+`>` or the end and found `1`.
+
+The name field is already quoted for exactly this reason and the id is not, so an id is
+assumed to be an identifier. Nothing this project controls produces one with a space in
+it, which is why it survived: every fixture in the suite names its own controls, and the
+first tree walked that somebody else built broke it on the first line under the title
+bar.
+
+It matters more than a chrome element. The whole claim of the verb is that a line it
+printed can be copied into a scenario, and a line that cannot is worse than no line - it
+is an answer that looks usable and fails at parse time, in a file somebody wrote from
+it. The existing test asserts the property against a window this repository builds,
+which is the shape of check that only ever proves what the author already assumed.
+
 ## Block D — Act — patterns before pointers
 
 ### §WW115 A declared cost with no reason beside it
@@ -551,14 +570,6 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW89 A window that belongs to this repository
-
-Every loop in this framework is currently developed against somebody's shipping product,
-which means a real account, a real transcript directory, a real controller and a machine
-somebody set up by hand. The fixture removes all of it. It is not a demo and not a
-sample: it is the surface this framework's own tests drive, and its design goal is to be
-hard to test in the specific ways Windows is hard.
 
 ### §WW90 Every refusal has a flag that provokes it
 

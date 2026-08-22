@@ -1,0 +1,21 @@
+<Application xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+  <Application.Resources>
+
+    <!-- Fixed by construction. Nothing here reads a theme, a clock, a machine name or a setting,
+         because the whole value of this fixture is that two runs on two desks draw the same
+         pixels — a byte-identical comparison has nothing to be identical to otherwise. -->
+    <SolidColorBrush x:Key="Surface" Color="#FFF6F8FA" />
+    <SolidColorBrush x:Key="Ink" Color="#FF1F2328" />
+    <SolidColorBrush x:Key="Accent" Color="#FF1F6FEB" />
+    <SolidColorBrush x:Key="Line" Color="#FFD0D7DE" />
+
+    <Style TargetType="TextBlock">
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="Foreground" Value="{StaticResource Ink}" />
+      <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+    </Style>
+
+  </Application.Resources>
+</Application>

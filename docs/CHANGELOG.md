@@ -92,3 +92,4 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
+- ✅ **WW89** **there is no window to develop against that is not somebody's shipping product** — A WPF fixture belongs to this repository and the suite launches it, reads its tree and stops it, with nothing on it read off the machine it runs on.

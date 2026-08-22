@@ -1,0 +1,60 @@
+<Window x:Class="Winwright.Fixture.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="winwright fixture"
+        Width="640" Height="420"
+        WindowStartupLocation="Manual"
+        Left="80" Top="80"
+        ResizeMode="CanResize"
+        Background="{StaticResource Surface}">
+
+  <!-- Every control here carries a name, because the whole point of the fixture is that a locator
+       can be written against it and stay written. A surface addressed only by its position is one
+       every layout change breaks. -->
+  <Grid x:Name="page" Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <TextBlock x:Name="heading" Grid.Row="0" Text="winwright fixture" FontSize="22" />
+
+    <TextBlock x:Name="subheading" Grid.Row="1" Margin="0,4,0,12" FontSize="13"
+               Text="A window that belongs to this repository. No account, no transcripts, no second machine." />
+
+    <TabControl x:Name="panes" Grid.Row="2" BorderBrush="{StaticResource Line}">
+      <TabItem x:Name="reportPane" Header="Report">
+        <StackPanel x:Name="reportRows" Margin="12">
+          <TextBlock x:Name="reportTitle" Text="Report" FontSize="16" Margin="0,0,0,8" />
+          <TextBlock x:Name="reportNote"
+                     Text="Every value on this page is fixed by construction: no clock, no machine name, no real data."
+                     TextWrapping="Wrap" />
+          <Border x:Name="reportSwatch" Height="60" Margin="0,12,0,0" Background="{StaticResource Accent}" />
+        </StackPanel>
+      </TabItem>
+
+      <TabItem x:Name="statusPane" Header="Status">
+        <StackPanel x:Name="statusRows" Margin="12">
+          <TextBlock x:Name="statusTitle" Text="Status" FontSize="16" Margin="0,0,0,8" />
+          <TextBlock x:Name="statusValue" Text="Idle" />
+        </StackPanel>
+      </TabItem>
+
+      <TabItem x:Name="configPane" Header="Config">
+        <StackPanel x:Name="configRows" Margin="12">
+          <TextBlock x:Name="configTitle" Text="Config" FontSize="16" Margin="0,0,0,8" />
+          <TextBox x:Name="profile" Width="220" HorizontalAlignment="Left" Text="default" />
+          <CheckBox x:Name="verbose" Margin="0,12,0,0" Content="Verbose" />
+        </StackPanel>
+      </TabItem>
+    </TabControl>
+
+    <StackPanel x:Name="actions" Grid.Row="3" Orientation="Horizontal"
+                HorizontalAlignment="Right" Margin="0,12,0,0">
+      <Button x:Name="save" Content="Save" Width="90" Height="28" />
+      <Button x:Name="close" Content="Close" Width="90" Height="28" Margin="8,0,0,0" Click="OnClose" />
+    </StackPanel>
+  </Grid>
+</Window>

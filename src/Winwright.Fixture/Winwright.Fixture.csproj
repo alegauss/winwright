@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Winwright.Fixture</RootNamespace>
+    <AssemblyName>Winwright.Fixture</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- No reference to the engine, and none to the in-app half yet. The engine is the harness that
+       drives this and would be a test framework shipped inside the thing under test; the in-app
+       half arrives when the surface protocol does, which is its own task. -->
+
+</Project>

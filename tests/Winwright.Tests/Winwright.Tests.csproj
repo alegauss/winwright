@@ -19,6 +19,12 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Winwright/Winwright.csproj" />
     <ProjectReference Include="../../src/Winwright.InApp/Winwright.InApp.csproj" />
+
+    <!-- Referenced so the suite builds the fixture, and copied nowhere: an application under
+         test is launched from its own output, not from a half-copy beside the suite. Copying it
+         brought the apphost without its assembly and every launch died at CLR startup. -->
+    <ProjectReference Include="../../src/Winwright.Fixture/Winwright.Fixture.csproj"
+                      ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
 
 </Project>

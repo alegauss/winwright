@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Winwright/Winwright.csproj" />
     <Project Path="src/Winwright.InApp/Winwright.InApp.csproj" />
+    <Project Path="src/Winwright.Fixture/Winwright.Fixture.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Winwright.Tests/Winwright.Tests.csproj" />
