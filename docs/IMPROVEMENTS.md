@@ -223,15 +223,6 @@ above the window is enumerated and each frame intersected with the copy rectangl
 answers for the whole area in one pass and names the intruder rather than merely
 refusing.
 
-### §WW39 Cloaked is visible and painted by nothing
-
-A window can be visible by its style bits and drawn by nobody: the compositor cloaks
-suspended packaged apps, the shell's hidden host windows and every window belonging to
-another virtual desktop. Without this filter a run on a stock Windows 11 desktop reports
-a screenful of intruders that are not on screen and refuses every capture it is asked
-for, which is a check that has stopped being usable rather than one that found
-something.
-
 ### §WW40 Fail, never crop
 
 An overlap on the edge is now inside real content, because the copied rectangle is the

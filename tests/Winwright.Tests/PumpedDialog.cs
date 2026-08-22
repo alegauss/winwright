@@ -27,6 +27,7 @@ internal sealed class PumpedDialog : IDisposable
     private const uint WmCancelMode = 0x001F;
     private const uint MfString = 0x0000;
     private const uint MfPopup = 0x0010;
+    private const uint CloakAttribute = 13;
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern nint CreateWindowExW(
@@ -101,6 +102,9 @@ internal sealed class PumpedDialog : IDisposable
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool DrawMenuBar(nint window);
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(nint window, uint attribute, ref int value, int size);
 
     private readonly Thread thread;
     private readonly List<nint> created = [];
@@ -220,6 +224,24 @@ internal sealed class PumpedDialog : IDisposable
     /// </summary>
     internal static PumpedDialog OpenFramed(string title, params ChildWindow[] children) =>
         new(title, children, [], overlapped: true);
+
+    /// <summary>
+    /// Take this window off the screen the way the compositor does, leaving every style bit that
+    /// says it is visible exactly as it was.
+    /// <para>
+    /// This is the fixture the cloak refusal needs. A suspended packaged app and a window on
+    /// another virtual desktop are the real cases and neither can be produced on demand from a
+    /// test; <c>DWMWA_CLOAK</c> is a process asking for the same treatment of its own window, and
+    /// the attribute read back afterwards is the one the shell's cloaking sets.
+    /// </para>
+    /// </summary>
+    internal void Cloak()
+    {
+        var on = 1;
+        var result = DwmSetWindowAttribute(Frame, CloakAttribute, ref on, sizeof(int));
+        if (result != 0)
+            throw new InvalidOperationException($"the compositor would not cloak the window: 0x{result:X}");
+    }
 
     /// <summary>
     /// Ask the thread to stop, and wait for it to take its windows with it.

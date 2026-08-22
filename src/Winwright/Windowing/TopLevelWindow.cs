@@ -30,8 +30,11 @@ public readonly record struct WindowBounds(int Left, int Top, int Right, int Bot
 /// <param name="Title">Its caption, empty where it has none — a toast usually has none.</param>
 /// <param name="ClassName">Its window class, which is what tells a menu from a frame.</param>
 /// <param name="Bounds">Where it is, in screen coordinates.</param>
-/// <param name="Visible">Whether Windows considers it visible.</param>
+/// <param name="Visible">Whether Windows considers it visible, which is a reading of style bits.</param>
 /// <param name="Owner">The window that owns it, or zero. A toast has one; a main frame does not.</param>
+/// <param name="Cloak">Who took it off the screen, if anybody. Carried separately from
+/// <paramref name="Visible"/> because the two disagree: a cloaked window keeps every style bit
+/// that says it is visible.</param>
 public sealed record TopLevelWindow(
     nint Handle,
     int Pid,
@@ -39,16 +42,27 @@ public sealed record TopLevelWindow(
     string ClassName,
     WindowBounds Bounds,
     bool Visible,
-    nint Owner)
+    nint Owner,
+    Cloak Cloak = Cloak.NotCloaked)
 {
     /// <summary>Whether something else owns it, which is exactly what the launcher's handle skips.</summary>
     public bool IsOwned => Owner != 0;
+
+    /// <summary>
+    /// Whether a person could see it: visible by its style bits <em>and</em> painted by the
+    /// compositor. This is what "visible" means everywhere outside this record.
+    /// </summary>
+    public bool OnScreen => Visible && Cloak == Cloak.NotCloaked;
 
     /// <summary>The one line a trace or a summary shows.</summary>
     public override string ToString()
     {
         var named = string.IsNullOrEmpty(Title) ? "(untitled)" : $"'{Title}'";
         var owned = IsOwned ? ", owned" : "";
-        return $"{ClassName} {named} [{Bounds}]{owned}";
+
+        // Said out loud whenever it is true, because the rectangle beside it looks perfectly
+        // ordinary and nothing else in the line would tell a reader the window is not there.
+        var hidden = Cloak == Cloak.NotCloaked ? "" : $", cloaked ({Cloaking.Because(Cloak)})";
+        return $"{ClassName} {named} [{Bounds}]{owned}{hidden}";
     }
 }

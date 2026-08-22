@@ -23,7 +23,10 @@ public static class TopLevelWindows
     /// <summary>Every top-level window that process owns, largest first.</summary>
     /// <param name="pid">The process to ask about.</param>
     /// <param name="smallest">The size floor, on a side. Zero reports everything, helpers included.</param>
-    /// <param name="visibleOnly">Whether to skip windows Windows does not consider visible.</param>
+    /// <param name="visibleOnly">Whether to skip windows nobody can see — both the ones Windows
+    /// does not consider visible and the ones the compositor has cloaked. False reports every
+    /// window with its <see cref="TopLevelWindow.Cloak"/> filled in, so the difference stays
+    /// readable rather than being a filter with no way back through it.</param>
     public static IReadOnlyList<TopLevelWindow> OfProcess(
         int pid, int smallest = SmallestInteresting, bool visibleOnly = true)
     {
@@ -41,6 +44,14 @@ public static class TopLevelWindows
                 if (visibleOnly && !visible)
                     return true;
 
+                // The style bits are not the question a caller asking for visible windows is
+                // asking. Measured on a stock Windows 11 desktop: 27 windows call themselves
+                // visible and 12 of them are cloaked, so without this the listing is nearly half
+                // windows that are not on the screen and cannot be photographed.
+                var cloak = Cloaking.Of(window);
+                if (visibleOnly && cloak != Cloak.NotCloaked)
+                    return true;
+
                 if (!Win32.GetWindowRect(window, out var rectangle))
                     return true;
 
@@ -55,7 +66,8 @@ public static class TopLevelWindows
                     Win32.ClassOf(window),
                     bounds,
                     visible,
-                    Win32.GetWindow(window, Win32.GwOwner)));
+                    Win32.GetWindow(window, Win32.GwOwner),
+                    cloak));
 
                 return true;
             },
