@@ -67,7 +67,11 @@ public static class Program
         // here would leave the process waiting for a window that is never going to appear.
         _ = new App();
 
-        var picture = Winwright.InApp.Render.ToFile(FixedPane.Build(), path, FixedPane.Size);
+        // On the background the application itself declares, which is the whole of what the
+        // in-app half asks an adopter for: a key in its resources rather than a colour a harness
+        // guessed. The receipt then names which source answered.
+        var pane = FixedPane.Build();
+        var picture = Winwright.InApp.Render.ToFile(pane, path, Protocol.Background(pane), FixedPane.Size);
         Console.Out.WriteLine(picture.Sentence());
         return 0;
     }

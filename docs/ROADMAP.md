@@ -76,7 +76,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW101** (deps: —) **the surface protocol is implemented in one product and copied into the next** — The fixture is the reference implementation, and this framework's own suite drives it rather than reaching into a real application's flags. → §WW101
 - 📋 **WW102** (deps: —) **a localized window is needed to develop the label rule and no fixture has one** — The fixture ships several language files, one of them carrying a key whose value has a placeholder, which is the case the label rule has to refuse. → §WW102
 - 📋 **WW103** (deps: —) **an intruder covering a rectangle has to be arranged by hand every time** — The fixture puts a topmost window over a named region on request, so the region check is driven rather than reasoned about. → §WW103
 - 📋 **WW104** (deps: —) **a surface with no accessibility tree is only found inside an installer** — The fixture carries one drawn without automation peers, which is what the geometry dump exists for and what nothing else here can produce. → §WW104

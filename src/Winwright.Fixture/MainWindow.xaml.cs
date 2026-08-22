@@ -51,6 +51,20 @@ public partial class MainWindow : Window
     /// <summary>Held so it is not collected while it is still meant to be running.</summary>
     private Animation? animation;
 
+    /// <summary>Held for the window's life, because letting go puts every popup back.</summary>
+    private Winwright.InApp.PopupsHeld? popups;
+
+    /// <inheritdoc />
+    protected override void OnContentRendered(EventArgs e)
+    {
+        base.OnContentRendered(e);
+
+        // Here and not on Loaded: content rendered is the first moment every rectangle is the one
+        // that was actually drawn, and a surface reported before that is a surface nobody saw.
+        popups ??= Protocol.Hold(this);
+        Protocol.Report(this, panes, panes.SelectedContent as FrameworkElement);
+    }
+
     /// <summary>
     /// Show the loading note in the report page's place, and swap the real content in after the
     /// duration this run asked for.

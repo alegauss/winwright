@@ -591,13 +591,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW101 The reference implementation of the surface protocol
-
-The protocol exists in one product and would be copied into the next, which is exactly
-how two implementations of one line format come to disagree. The fixture implements it
-and this framework's own suite drives that implementation, so the protocol has an owner
-- and an adopting project has something to copy that is known to be current.
-
 ### §WW102 A localized window, including the key that must be refused
 
 The label rule needs several languages to be developed at all, and it needs one specific

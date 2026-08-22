@@ -6,6 +6,11 @@
          because the whole value of this fixture is that two runs on two desks draw the same
          pixels — a byte-identical comparison has nothing to be identical to otherwise. -->
     <SolidColorBrush x:Key="Surface" Color="#FFF6F8FA" />
+
+    <!-- The key the in-app half looks for. Declared here rather than left to the fallback, because
+         the fallback reads the window's own brush and a capture of a page is not a capture of a
+         window - an adopting project copying this file is copying the answer to that. -->
+    <SolidColorBrush x:Key="WinwrightCaptureBackground" Color="#FFF6F8FA" />
     <SolidColorBrush x:Key="Ink" Color="#FF1F2328" />
     <SolidColorBrush x:Key="Accent" Color="#FF1F6FEB" />
     <SolidColorBrush x:Key="Line" Color="#FFD0D7DE" />

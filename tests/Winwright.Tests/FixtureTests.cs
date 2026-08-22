@@ -994,4 +994,113 @@ public sealed class FixtureTests : IDisposable
 
         Assert.Throws<ArgumentException>(() => Process.GetProcessById(pid));
     }
+
+    [Fact]
+    public void The_fixture_reports_the_surfaces_it_drew_when_the_harness_asks()
+    {
+        var (surfaces, _) = Driven();
+
+        var window = SurfaceReport.Of(surfaces, "the window");
+        var panes = SurfaceReport.Of(surfaces, "the panes");
+
+        Assert.True(window.Reported, window.Sentence());
+        Assert.True(panes.Reported, panes.Sentence());
+
+        // The panes are inside the window, which is the relation a capture is asserted on.
+        Assert.True(Containment.Of(window.Surface!.Bounds, panes.Surface!).Contains, panes.Sentence());
+    }
+
+    [Fact]
+    public void The_fixture_dumps_the_geometry_it_laid_out()
+    {
+        var (_, geometry) = Driven();
+
+        var read = GeometryDump.Read(geometry);
+
+        Assert.NotNull(read.Root);
+        Assert.True(read.Elements.Count > 10, read.Sentence());
+        Assert.Equal(0, read.Unreadable);
+    }
+
+    [Fact]
+    public void The_dump_the_fixture_writes_is_one_the_layout_check_can_read()
+    {
+        var (_, geometry) = Driven();
+
+        var read = Layout.Of(geometry);
+
+        // Read, not held: a real themed window is not laid out to this check's satisfaction and
+        // that is a fact about the framework rather than about the fixture. Its default tab
+        // template lifts a selected header four pixels outside the panel holding it and two past
+        // the border containing it, and a collapsed element measures nothing on purpose. Both are
+        // filed as gaps in the reading rather than papered over with a narrower assertion here.
+        Assert.True(read.Examined > 10, read.Sentence());
+        Assert.NotNull(read.Root);
+        Assert.Contains(read.Faults, one => one.Kind == Fault.MeasuresNothing);
+    }
+
+    /// <summary>Where the fixture's own sources are.</summary>
+    private static string FixtureSources()
+    {
+        var here = new DirectoryInfo(AppContext.BaseDirectory);
+        while (here is not null && !File.Exists(Path.Combine(here.FullName, "Winwright.slnx")))
+            here = here.Parent;
+
+        Assert.NotNull(here);
+        return Path.Combine(here.FullName, "src", "Winwright.Fixture");
+    }
+
+    [Fact]
+    public void An_application_nobody_asked_reports_nothing_and_dumps_nothing()
+    {
+        // What makes the protocol safe to leave in a release rather than something to remember to
+        // take out: no variable set, no file written, nothing on anybody's disk.
+        var surfaces = Path.Combine(root, "unasked-surfaces.tsv");
+        var geometry = Path.Combine(root, "unasked-geometry.tsv");
+
+        Launched();
+
+        Assert.False(File.Exists(surfaces));
+        Assert.False(File.Exists(geometry));
+    }
+
+    [Fact]
+    public void The_render_is_drawn_on_the_background_the_application_declares()
+    {
+        var path = Path.Combine(root, "declared.png");
+        var start = Started($"--render={path}");
+        start.RedirectStandardOutput = true;
+        start.UseShellExecute = false;
+
+        using var running = Process.Start(start)!;
+        var said = running.StandardOutput.ReadToEnd();
+        Assert.True(running.WaitForExit(30_000), "the render did not finish");
+
+        // Named in the receipt, so a hex value in a report can be traced back to a theme key.
+        Assert.Contains("the theme's 'WinwrightCaptureBackground'", said);
+        Assert.False(Pictures.Of(path).IsBlank);
+    }
+
+    /// <summary>Launch with the harness's own channels open, and hand back where they landed.</summary>
+    private (string Surfaces, string Geometry) Driven()
+    {
+        var surfaces = Path.Combine(root, "driven-surfaces.tsv");
+        var geometry = Path.Combine(root, "driven-geometry.tsv");
+
+        var start = Started();
+        start.Environment[SurfaceReport.PathVariable] = surfaces;
+        start.Environment[GeometryDump.PathVariable] = geometry;
+
+        var launched = Attachable.Launch(register, start);
+        for (var attempt = 0; attempt < 200; attempt++)
+        {
+            if (File.Exists(surfaces) && File.Exists(geometry))
+                return (surfaces, geometry);
+
+            Thread.Sleep(25);
+        }
+
+        Assert.Fail($"pid {launched.Pid} never wrote what it drew");
+        return ("", "");
+    }
 }
