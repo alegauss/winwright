@@ -1,3 +1,5 @@
+using Winwright.Verdicts;
+
 namespace Winwright.Tracing;
 
 /// <summary>
@@ -55,6 +57,27 @@ public sealed class TraceWriter : IDisposable
         writer.Write('\n');
         writer.Flush();
         return numbered;
+    }
+
+    /// <summary>
+    /// Record a step that settled an assertion, and hand back the result joined to it.
+    /// <para>
+    /// One call and not two, deliberately. The join is a property of what a verdict is, and a
+    /// runner left to make it itself would make it one way; the next runner another. Here the step
+    /// carries the assertion's name and the result carries the step's ordinal, and neither half
+    /// can be written without the other.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step, without its ordinal — this writer assigns that.</param>
+    /// <param name="result">What the step settled.</param>
+    /// <returns>The result, carrying the ordinal of the step just written.</returns>
+    public AssertionResult Settled(TraceStep step, AssertionResult result)
+    {
+        ArgumentNullException.ThrowIfNull(step);
+        ArgumentNullException.ThrowIfNull(result);
+
+        var written = Write(step with { Asserted = result.Name });
+        return result.At(written.Step);
     }
 
     /// <summary>Closes the file where this writer opened one, and nothing where it did not.</summary>

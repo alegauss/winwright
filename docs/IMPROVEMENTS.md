@@ -2,25 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW108 The verdict and the trace do not reference each other
-
-Block A shipped both halves and joined neither. A summary line says `failed the report
-renders - the file was never written`; the trace says step 7 was an assert on `#status`
-that waited 240 ms and polled three times. Reading one against the other is a person
-matching prose to prose, which is the re-run this block exists to make unnecessary - the
-criterion "A failure is diagnosed from the record and not from a re-run" is met by what
-the trace contains and not by how a reader reaches it.
-
-What is missing is one field in each direction: a result carrying the ordinal of the
-step that settled it, and a step carrying the assertion's name where the step was an
-assert. The ordinal is already assigned by the writer and returned from the write, so a
-runner holds it at the moment the result is built and nothing has to be looked up
-afterwards.
-
-It is filed under this block rather than under the runner's, because it is a property of
-what a verdict is. A runner left to invent the join would invent a different one, and
-the next runner another.
-
 ### §WW109 A trace that does not parse says which line
 
 The trace reader hands the JSON parser's exception straight out. What a reader gets is a

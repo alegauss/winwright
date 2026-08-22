@@ -89,7 +89,12 @@ public static class VerdictSummary
         var word = result.Outcome == AssertionOutcome.Failed ? "failed    " : "unchecked ";
         var place = string.IsNullOrWhiteSpace(environment) ? "" : $"[{environment.Trim()}] ";
         var why = result.Missing is null ? result.Detail : $"'{result.Missing.Name}' absent: {result.Detail}";
-        return $"  {word} {place}{result.Name} - {why}";
+
+        // The ordinal where there is one, so a failure named here is one grep away from the line
+        // recording what was read back. Left out entirely where nothing joined them, because a
+        // step number nobody assigned would send a reader to whatever line happened to be there.
+        var at = result.Traced ? $"step {result.Step}  " : "";
+        return $"  {word} {at}{place}{result.Name} - {why}";
     }
 
     /// <summary>Count and noun, agreeing. Used by every headline this project renders.</summary>

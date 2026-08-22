@@ -9,6 +9,7 @@
 - ✅ **WW5** **every path, timeout and language file is typed into the scenario that needs it** — A winwright.json found by walking up from the scenario carries the executable, source root, language files and timeouts, resolved against its own directory, and refuses by name what it omits.
 - ✅ **WW6** **a summary can say every check passed while one of them never ran** — The summary refuses the word while anything is unchecked and names what is on the list, and Coverage.RequireEvery is the gate an adopting project's own green asks first.
 - ✅ **WW7** **a step that threw is indistinguishable from one that failed its assertion** — A throw is recorded as a HarnessError carrying its step and exception, gives the run a fourth outcome that exits 3 and outranks the other three, and reads as threw in the trace.
+- ✅ **WW108** **the summary names an assertion and the trace numbers a step, and nothing joins the two** — One call writes the step and joins it: the result carries the ordinal and the step carries the assertion's name, so neither half can be recorded without the other.
 
 ## Block B — Attach, launch, and leave nothing behind
 

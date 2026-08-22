@@ -51,6 +51,13 @@ public sealed record TraceStep
     /// </summary>
     public Provenance? From { get; init; }
 
+    /// <summary>
+    /// The assertion this step settled, where it settled one. The other half of the join: a
+    /// reader who started from the trace reaches the summary line without matching prose, the way
+    /// a reader who started from the summary reaches the step.
+    /// </summary>
+    public string? Asserted { get; init; }
+
     /// <summary>The reading this step earned.</summary>
     public required StepVerdict Verdict { get; init; }
 

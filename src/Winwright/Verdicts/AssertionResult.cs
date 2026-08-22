@@ -57,6 +57,31 @@ public sealed record AssertionResult
         return new AssertionResult(Named(name), AssertionOutcome.Unchecked, missing.Absence, missing);
     }
 
+    /// <summary>
+    /// The ordinal of the trace step that settled this, counted from 1. Zero where nothing joined
+    /// them — and zero is a real answer rather than a default: a result that names no step is one
+    /// a reader has to find by matching prose to prose, which is the re-run this block exists to
+    /// make unnecessary.
+    /// </summary>
+    public int Step { get; private init; }
+
+    /// <summary>Whether a reader can go straight from this line to the step that produced it.</summary>
+    public bool Traced => Step > 0;
+
+    /// <summary>
+    /// The same result, joined to the step that settled it.
+    /// </summary>
+    /// <param name="step">The ordinal the trace writer assigned, which is always at least one.</param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Where the ordinal is not one a trace ever assigns. A join to step zero is a join to
+    /// nothing, and it would read in a summary exactly like a real one.
+    /// </exception>
+    public AssertionResult At(int step)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(step, 1);
+        return this with { Step = step };
+    }
+
     /// <summary>True where this assertion never ran.</summary>
     public bool DidNotRun => Outcome == AssertionOutcome.Unchecked;
 

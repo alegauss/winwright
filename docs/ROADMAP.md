@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW108** (deps: —) **the summary names an assertion and the trace numbers a step, and nothing joins the two** — Each result carries the ordinal of the step that settled it, so a failure named in the summary is one grep away from the line recording what was read back. → §WW108
 - 📋 **WW109** (deps: —) **a trace line that does not parse refuses without naming the file or the line it is on** — The reader raises the JSON parser's own error, so a truncated or hand-edited trace is diagnosed by opening the file and counting lines to a byte offset. → §WW109
 - 📋 **WW117** (deps: —) **a test host that dies mid-run still prints a pass** — The run compares what was discovered against what executed, so a suite that quietly loses 22 tests is a red instead of a green nobody counted. → §WW117
 
@@ -27,12 +26,12 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW38** (deps: Block K ✅) **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and each frame intersected with the copy rectangle, which answers for the whole area in one pass and names the intruder. → §WW38
-- 📋 **WW40** (deps: Block K ✅) **a copy trimmed around an intruder is a picture of something nobody asked for** — An overlap fails rather than crops, and the refusal names the intruder, its process and the rectangle it covers, so the cause is actionable instead of mysterious. → §WW40
-- 📋 **WW41** (deps: Block K ✅) **a window with a system backdrop transmits what is behind it through the glass** — Z-order reasoning cannot answer for that, so the compositor is asked directly and a window that opted into one is refused rather than merely warned about. → §WW41
-- 📋 **WW42** (deps: Block K ✅) **a copy of exactly one colour is written and reported as a capture** — A flat rectangle is not a picture of a window, and a session where nothing was rendering produced one that exited zero. → §WW42
-- 📋 **WW43** (deps: Block K ✅) **a page still computing is photographed and announced as a picture of a report** — The loading strings are read from the project's own language files before anything launches, and a key none of them carries refuses the run instead of matching nothing. → §WW43
-- 📋 **WW46** (deps: Block K ✅) **a change meant to be invisible has no cheap way to prove it was** — Two renders of unchanged code are byte-identical, so a difference is a real difference and no tolerance has to be chosen for a comparison to mean anything. → §WW46
+- 📋 **WW38** (deps: Block K) **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and each frame intersected with the copy rectangle, which answers for the whole area in one pass and names the intruder. → §WW38
+- 📋 **WW40** (deps: Block K) **a copy trimmed around an intruder is a picture of something nobody asked for** — An overlap fails rather than crops, and the refusal names the intruder, its process and the rectangle it covers, so the cause is actionable instead of mysterious. → §WW40
+- 📋 **WW41** (deps: Block K) **a window with a system backdrop transmits what is behind it through the glass** — Z-order reasoning cannot answer for that, so the compositor is asked directly and a window that opted into one is refused rather than merely warned about. → §WW41
+- 📋 **WW42** (deps: Block K) **a copy of exactly one colour is written and reported as a capture** — A flat rectangle is not a picture of a window, and a session where nothing was rendering produced one that exited zero. → §WW42
+- 📋 **WW43** (deps: Block K) **a page still computing is photographed and announced as a picture of a report** — The loading strings are read from the project's own language files before anything launches, and a key none of them carries refuses the run instead of matching nothing. → §WW43
+- 📋 **WW46** (deps: Block K) **a change meant to be invisible has no cheap way to prove it was** — Two renders of unchanged code are byte-identical, so a difference is a real difference and no tolerance has to be chosen for a comparison to mean anything. → §WW46
 
 ## Block F — Assert — the expectation is derived, never typed
 
