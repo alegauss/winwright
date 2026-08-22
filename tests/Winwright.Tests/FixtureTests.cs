@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+using Winwright.Asserting;
 using Winwright.Locating;
 using Winwright.Processes;
 using Winwright.Windowing;
@@ -311,4 +312,63 @@ public sealed class FixtureTests : IDisposable
     [DllImport("user32.dll", SetLastError = true)]
     private static extern nint SendMessageTimeoutW(
         nint window, uint message, nint wParam, nint lParam, uint flags, uint timeoutMs, out nint result);
+
+    [Fact]
+    public void The_names_pane_carries_both_branches_of_the_rule_at_once()
+    {
+        var facts = NamesPane();
+
+        // The four that must fail, each for its own reason, and the one that must not.
+        Assert.Equal(Named.Missing, Names.Of(facts["unnamed"]).Verdict);
+        Assert.Equal(Named.Glyph, Names.Of(facts["glyphOnly"]).Verdict);
+        Assert.Equal(Named.EchoesTheId, Names.Of(facts["echoesTheId"]).Verdict);
+        Assert.Equal(Named.Missing, Names.Of(facts["profileBox"]).Verdict);
+        Assert.Equal(Named.Spoken, Names.Of(facts["spoken"]).Verdict);
+    }
+
+    [Fact]
+    public void The_glyph_control_is_the_worst_case_and_prints_as_an_escape()
+    {
+        var check = Names.Of(NamesPane()["glyphOnly"]);
+
+        // A control announcing a codepoint and nothing else arrives in a report looking exactly
+        // like the empty case it is not, unless the report writes it out.
+        Assert.False(check.IsALabel);
+        Assert.Equal(@"\uE711", check.Printable);
+        Assert.Contains("which is a font glyph and not a label", check.Sentence("the cancel button"));
+    }
+
+    [Fact]
+    public void The_box_whose_label_is_a_neighbour_reads_as_unnamed_and_its_label_reads_fine()
+    {
+        var facts = NamesPane();
+
+        // The shape one real window shipped: two controls reading as unnamed while every
+        // neighbouring button read fine, because a control takes its name from its own content.
+        Assert.False(Names.Of(facts["profileBox"]).IsALabel);
+        Assert.Equal("Profile", facts["profileLabel"].Name);
+        Assert.Contains("its label is likely a separate text block beside it", Names.Of(facts["profileBox"]).Sentence("the profile box"));
+    }
+
+    [Fact]
+    public void Without_the_flag_the_page_carries_none_of_them()
+    {
+        var tree = Inspect.Window(Launched().Handle, depth: 12)!;
+        var ids = tree.Walk().Select(one => one.Facts.AutomationId).ToList();
+
+        Assert.DoesNotContain("namesPane", ids);
+        Assert.DoesNotContain("unnamed", ids);
+    }
+
+    /// <summary>Launch with the naming pane, and read every control on it by its automation id.</summary>
+    private Dictionary<string, ElementFacts> NamesPane()
+    {
+        var tree = Inspect.Window(Launched("--names").Handle, depth: 12)!;
+
+        return tree.Walk()
+            .Select(one => one.Facts)
+            .Where(one => one.AutomationId.Length > 0)
+            .GroupBy(one => one.AutomationId, StringComparer.Ordinal)
+            .ToDictionary(one => one.Key, one => one.First(), StringComparer.Ordinal);
+    }
 }

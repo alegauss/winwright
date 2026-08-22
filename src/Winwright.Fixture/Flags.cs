@@ -85,6 +85,11 @@ public sealed record Flags
             "the same window under a dispatcher that runs and one that never does - the difference "
                 + "no picture can see and the one that decides whether a keystroke arrives",
             ["dispatcher", "none"]),
+        new Flag(
+            "names",
+            "",
+            "a pane carrying the whole naming rule at once - nothing, a glyph, an echoed id, a "
+                + "label that is a neighbouring element, and a button that must keep its own text"),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>

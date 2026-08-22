@@ -28,6 +28,9 @@ public partial class MainWindow : Window
 
         if (Shapes.Value("title") is string named)
             Title = named;
+
+        if (Shapes.Has("names"))
+            NamesPane.AddTo(panes);
     }
 
     /// <summary>What this run was asked to be.</summary>

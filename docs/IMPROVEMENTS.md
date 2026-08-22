@@ -591,14 +591,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW92 One page holding the whole naming rule
-
-A control with no name, one announcing a glyph codepoint, one whose label is a
-neighbouring element, and beside them a button that must keep its own text - both
-branches of the rule on one surface. That is the case set the naming check needs, and
-assembling it out of a real product means waiting for that product to happen to have all
-four at once.
-
 ### §WW93 Three kinds of absence
 
 A collapsed pane, a closed popup and an unopened submenu are all missing from the tree

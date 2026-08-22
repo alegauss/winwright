@@ -76,7 +76,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW92** (deps: —) **a control that announces nothing has to be found inside somebody else's product** — The fixture carries one deliberately unnamed control, one announcing a glyph codepoint and one whose label is a neighbouring element, which is the naming rule in one page. → §WW92
 - 📋 **WW93** (deps: —) **a collapsed pane, a popup and a submenu are three different kinds of absence** — All three are on the fixture, since the tree reports each one differently and each cost a real defect somewhere to learn. → §WW93
 - 📋 **WW94** (deps: —) **the backdrop refusal has only one arm to be tested against** — The fixture ships one window that opted into a system backdrop and one that never did, so both the refusal and the pass beside it are observable. → §WW94
 - 📋 **WW95** (deps: —) **a borderless window with no main window handle exists in only one real product** — The fixture raises a toast that has none, which is what the enumerating launcher is for and what nothing else available here can produce on demand. → §WW95
