@@ -50,6 +50,7 @@
 - ✅ **WW36** **a copy of the window rectangle carries a strip of the desktop down every edge** — The extended frame bounds is what a capture copies, and the run prints the four trims, which on an overlapped window are eleven a side and none at the top.
 - ✅ **WW37** **a capture is offset or scaled on any display that is not at one hundred percent** — Per-monitor awareness is set when the engine assembly loads, so every rectangle and every synthesised click is in the space the window lives in on a display at any scaling.
 - ✅ **WW39** **a window can be visible by its style bits and painted by nothing** — Windows the compositor is not drawing are left out of a listing and carry the reason when one is asked for anyway, so a stock desktop stops reporting 12 intruders in 27 windows.
+- ✅ **WW45** **an animation has no observable, so a transition ships unlooked-at** — Frames land in slots computed from the first one and held against a stopwatch, so one slow capture costs its own frame and not the run, and the sequence reports the drift it measured.
 
 ## Block F — Assert — the expectation is derived, never typed
 

@@ -296,14 +296,6 @@ that the capture contained the surface it was taken for, and nothing could - bec
 only the app knows what it drew and where. So the app prints the rectangle, in physical
 pixels, and the copy asserts it lies inside the area it is about to read.
 
-### §WW45 Frames against a clock
-
-An entrance, a fill or a confetti burst has no observable and ships unlooked-at. Frames
-are copied at a fixed rate into a numbered sequence, with each frame's target time held
-against a stopwatch rather than accumulated out of sleeps, so the sequence records when
-as well as what. What comes out is what an encoder takes, and the frame count is a
-number an assertion can be written against instead of a picture somebody has to open.
-
 ### §WW46 Byte-identical is the cheapest visual assertion
 
 freewilly's window skill states the rule: a change meant to be invisible must produce a

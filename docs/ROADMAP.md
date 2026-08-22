@@ -32,7 +32,6 @@
 - 📋 **WW42** (deps: Block K) **a copy of exactly one colour is written and reported as a capture** — A flat rectangle is not a picture of a window, and a session where nothing was rendering produced one that exited zero. → §WW42
 - 📋 **WW43** (deps: Block K) **a page still computing is photographed and announced as a picture of a report** — The loading strings are read from the project's own language files before anything launches, and a key none of them carries refuses the run instead of matching nothing. → §WW43
 - 📋 **WW44** (deps: WW74) **nothing checks that a capture contains the surface it was taken for** — The app declares the rectangle it drew and the copy asserts it is inside, since a popup is its own top-level window and a correct copy can honestly not contain it. → §WW44
-- 📋 **WW45** (deps: —) **an animation has no observable, so a transition ships unlooked-at** — Frames at a fixed rate into a numbered sequence, with the interval held against a clock rather than accumulated, so the timing of what was captured is known. → §WW45
 - 📋 **WW46** (deps: Block K) **a change meant to be invisible has no cheap way to prove it was** — Two renders of unchanged code are byte-identical, so a difference is a real difference and no tolerance has to be chosen for a comparison to mean anything. → §WW46
 - 📋 **WW47** (deps: —) **a wrong capture is caught only because a person looked at the picture** — The success line names the window, the process and the arguments that produced it, which is what makes the next wrong capture report itself. → §WW47
 
