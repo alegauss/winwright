@@ -245,15 +245,6 @@ scenario that genuinely tests the quit path says so, once, where a reviewer sees
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW34 The off-screen render is the default
-
-A render of a visual tree cannot photograph anything else: there is no foreground, no z
-order and no second instance to be confused with. claude-tray keeps both loops and its
-own notes say which it prefers; pportal chose only the render and wrote down why. The
-screen copy exists for the one case a render cannot reach - a popup, a context menu or a
-balloon, each its own top-level window and none of them in the main window's visual
-tree.
-
 ### §WW35 A blank is not a picture
 
 A tree that failed to build, or one that was never arranged, renders as a rectangle of

@@ -25,7 +25,6 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW34** (deps: WW71 ✅) **a screen copy can photograph anything that happens to be in the rectangle** — The off-screen render is the default: a visual tree rendered with no window shown has no foreground, no z order and no second instance to be confused with. → §WW34
 - 📋 **WW35** (deps: WW71 ✅) **a tree that failed to build writes a file that looks like a successful capture** — A render with no pixel carrying an alpha of its own is a blank, which is the difference a caller checking that a file exists cannot see. → §WW35
 - 📋 **WW38** (deps: Block K) **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and each frame intersected with the copy rectangle, which answers for the whole area in one pass and names the intruder. → §WW38
 - 📋 **WW40** (deps: Block K) **a copy trimmed around an intruder is a picture of something nobody asked for** — An overlap fails rather than crops, and the refusal names the intruder, its process and the rectangle it covers, so the cause is actionable instead of mysterious. → §WW40

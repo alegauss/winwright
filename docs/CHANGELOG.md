@@ -52,6 +52,7 @@
 - ✅ **WW39** **a window can be visible by its style bits and painted by nothing** — Windows the compositor is not drawing are left out of a listing and carry the reason when one is asked for anyway, so a stock desktop stops reporting 12 intruders in 27 windows.
 - ✅ **WW45** **an animation has no observable, so a transition ships unlooked-at** — Frames land in slots computed from the first one and held against a stopwatch, so one slow capture costs its own frame and not the run, and the sequence reports the drift it measured.
 - ✅ **WW47** **a wrong capture is caught only because a person looked at the picture** — A capture states the window, the process and the arguments behind it, and refuses outright when the window belongs to another process or nothing is drawing it.
+- ✅ **WW34** **a screen copy can photograph anything that happens to be in the rectangle** — A capture routes to the off-screen render by default and reaches the screen copy only for a menu, a balloon or an owned popup - or where a caller forced it and said why, which the receipt keeps.
 
 ## Block F — Assert — the expectation is derived, never typed
 

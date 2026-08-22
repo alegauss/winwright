@@ -44,12 +44,13 @@ public sealed class WrongCaptureException : InvalidOperationException
 /// </summary>
 public sealed record CaptureReceipt
 {
-    private CaptureReceipt(string path, TopLevelWindow window, AppTarget target, PaintedFrame? frame)
+    private CaptureReceipt(string path, TopLevelWindow window, AppTarget target, PaintedFrame? frame, CaptureRoute? route)
     {
         Path = path;
         Window = window;
         Target = target;
         Frame = frame;
+        Route = route;
     }
 
     /// <summary>The file that was written.</summary>
@@ -65,6 +66,13 @@ public sealed record CaptureReceipt
     public PaintedFrame? Frame { get; }
 
     /// <summary>
+    /// Which way this picture was got and why, where the caller said. Null on a capture that did
+    /// not route itself — and a null here reads as unrecorded, never as the default having been
+    /// taken, because a screen copy nobody wrote down is exactly the one worth writing down.
+    /// </summary>
+    public CaptureRoute? Route { get; }
+
+    /// <summary>
     /// Whether the arguments behind the picture are knowable. Met on a launch, absent on an
     /// attach — and absent is reported rather than printed as an empty string, because a capture
     /// claiming no arguments and one that cannot know them are different claims.
@@ -78,11 +86,17 @@ public sealed record CaptureReceipt
     /// <param name="window">The window that was photographed.</param>
     /// <param name="target">How this run reached the application.</param>
     /// <param name="frame">What was copied against what the window owns, where it was read.</param>
+    /// <param name="route">Which way the picture was got, and why.</param>
     /// <exception cref="WrongCaptureException">
     /// Where the window belongs to a process this run is not driving, or where nothing was
     /// drawing it. Both are wrong captures that a file on disk looks exactly the same as.
     /// </exception>
-    public static CaptureReceipt Of(string path, TopLevelWindow window, AppTarget target, PaintedFrame? frame = null)
+    public static CaptureReceipt Of(
+        string path,
+        TopLevelWindow window,
+        AppTarget target,
+        PaintedFrame? frame = null,
+        CaptureRoute? route = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(window);
@@ -98,7 +112,7 @@ public sealed record CaptureReceipt
             throw new WrongCaptureException(
                 $"the capture is of {window}, which nothing is drawing: {Cloaking.Because(window.Cloak)}.");
 
-        return new CaptureReceipt(path, window, target, frame);
+        return new CaptureReceipt(path, window, target, frame, route);
     }
 
     /// <summary>
@@ -109,13 +123,16 @@ public sealed record CaptureReceipt
     public string Sentence()
     {
         var said = $"captured {Window} from pid {Target.Pid} to {Path}; {Target.Sentence()}";
+        if (Route is not null)
+            said = $"{said} {Route.Sentence()}";
+
         return Frame is null ? said : $"{said} {Frame.Sentence()}";
     }
 
     /// <summary>The step a trace keeps, addressed by the window rather than by the file.</summary>
     public TraceStep AsTraceStep() => new()
     {
-        Verb = "capture",
+        Verb = Route is null ? "capture" : $"capture ({Route})",
         Locator = Window.Handle == 0 ? "(no window)" : $"0x{Window.Handle:X}",
         Resolved = Window.ToString(),
         ReadBack = Path,
