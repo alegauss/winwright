@@ -1,5 +1,9 @@
 using System.Runtime.InteropServices;
 
+using Winwright.Acting;
+using Winwright.Locating;
+using Winwright.Projects;
+
 namespace Winwright.Tests;
 
 /// <summary>
@@ -94,6 +98,12 @@ internal sealed class TrayIconFixture : IDisposable
     [DllImport("kernel32.dll")]
     private static extern uint GetCurrentThreadId();
 
+    /// <summary>
+    /// How long the shell gets to place an icon it has already accepted. The engine's own resolve
+    /// deadline, because that is what this is: waiting for something to turn up in a tree.
+    /// </summary>
+    private static readonly int PlacedMs = Timeouts.Defaults["resolve"];
+
     private readonly Thread thread;
     private uint threadId;
     private nint owner;
@@ -134,15 +144,59 @@ internal sealed class TrayIconFixture : IDisposable
         thread.Start();
         if (!ready.Wait(TimeSpan.FromSeconds(10)) || !added)
             throw new InvalidOperationException("the tray icon was never added");
+
+        Placed();
+    }
+
+    /// <summary>
+    /// Wait until the shell has put the icon somewhere a reading can find it.
+    /// <para>
+    /// WW119. <c>Shell_NotifyIconW</c> returning true means the shell accepted the message, and
+    /// this fixture used to return on that while claiming it blocked until the shell had it. Those
+    /// are different claims: placing the icon and building the automation tree under it happens
+    /// afterwards, on the shell's own schedule, so a test that looked immediately was racing it.
+    /// Measured across four consecutive full-suite runs on an untouched machine — two green, two
+    /// red with two failures each, every one of them in the notification-area cases.
+    /// </para>
+    /// <para>
+    /// The wait is a deadline on the condition itself and not a sleep, because a sleep long enough
+    /// for a busy machine is one every other run pays for and still loses on the machine after
+    /// that.
+    /// </para>
+    /// </summary>
+    private void Placed()
+    {
+        var found = Attempt.Until(
+            () => NotificationArea.Find(Tip, openingTheOverflow: true, settleMs: 1000, pollMs: 25),
+            PlacedMs,
+            pollMs: 50);
+
+        // Looking may have opened the overflow, so it is shut again. What this fixture promises is
+        // an icon that can be found, never a flyout left standing for the next case to trip on —
+        // and one of the two flakes measured was exactly a case that found one already open.
+        NotificationArea.CloseOverflow();
+
+        if (!found.Found)
+        {
+            throw new InvalidOperationException(
+                $"the shell took '{Tip}' and never put it anywhere a reading could find it within "
+                + $"{PlacedMs} ms, so nothing after this would be about the icon");
+        }
     }
 
     /// <summary>What the shell will call it.</summary>
     internal string Tip { get; }
 
     /// <summary>
-    /// Add one, blocking until the shell has it. The tip it ends up with carries this process, so
-    /// ask this object rather than passing the same string to a reading.
+    /// Add one, blocking until a reading can find it — not until the shell took the message, which
+    /// is the earlier and weaker thing this used to wait for. The tip it ends up with carries this
+    /// process, so ask this object rather than passing the same string to a reading.
     /// </summary>
+    /// <param name="tip">What the shell should call it, before this run's own mark is added.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Where the shell accepted the icon and never placed it, which is a fixture that failed
+    /// rather than a case that did.
+    /// </exception>
     internal static TrayIconFixture Add(string tip) => new(tip);
 
     /// <summary>Take it away, and the window that owned it.</summary>

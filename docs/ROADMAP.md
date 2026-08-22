@@ -7,7 +7,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW119** (deps: —) **the tray fixture returns before the shell has put the icon anywhere a test can find it** — The fixture waits for the icon to be findable rather than for the shell to take the message, so a test never races the placement every one of its assertions depends on. → §WW119
 - 📋 **WW127** (deps: —) **two checks read the live desktop root and assert about whatever the machine is showing** — Both are pointed at a window this suite made, so what they claim about short pattern names is a claim about this project rather than about the desk that ran it. → §WW127
 - 📋 **WW133** (deps: —) **an input case on a busy desk fails about the code, because a refused foreground is not turned into a hole** — A case that needs the desktop and is refused it records a hole naming the desk, which is what this block already promises and what a private desktop cannot give. → §WW133
 

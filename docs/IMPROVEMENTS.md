@@ -49,33 +49,6 @@ check the project has, it is a check the project offers.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW119 The tray fixture waits for the wrong thing
-
-Measured across four consecutive full-suite runs while WW54 was being finished, on an
-untouched machine: two were green at 480, and two were red with two failures each, every
-one of them in `NotificationAreaTests`. Twice it was
-`An_icon_added_now_hides_in_the_overflow_and_is_not_in_the_tree_until_it_is_opened`,
-failing on `Assert.NotNull(found)` — the icon this run had just added was not in the
-overflow at all. Once it was
-`Opening_an_overflow_that_is_already_open_is_answered_rather_than_toggled`. WW54's own
-twelve tests never failed in any of the four.
-
-`TrayIconFixture.Add` waits for `Shell_NotifyIconW` to return true, and its summary says
-it blocks "until the shell has it". Those are different claims. A true return means the
-shell accepted the message; placing the icon in the overflow and building the automation
-tree under it happens afterwards and on the shell's own schedule, so a test that looks
-immediately is racing it.
-
-The repair is the deadline the engine already has: wait until
-`NotificationArea.Find(tip)` answers, with the project's declared timeout, and fail the
-fixture naming the tip where it never turns up. That also removes the temptation to fix
-this with a sleep, which would trade a flake for a slower suite that still flakes on a
-busy machine.
-
-Distinct from WW111 and WW114. Those are about the foreground being contested; this one
-reproduces with the foreground uncontested, because nothing here needs the desktop —
-only the shell's own timing.
-
 ### §WW127 A check reads a window this suite made
 
 Two checks in the actionability file read `AutomationElement.RootElement` and the
