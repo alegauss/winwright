@@ -46,6 +46,9 @@ public static class Program
         if (shapes.Value("render") is string path)
             return Rendered(path);
 
+        if (shapes.Has("resident"))
+            return Resident();
+
         return shapes.Value("pump") == "none" ? Unpumped(shapes) : Pumped(shapes);
     }
 
@@ -62,6 +65,24 @@ public static class Program
         var picture = Winwright.InApp.Render.ToFile(FixedPane.Build(), path, FixedPane.Size);
         Console.Out.WriteLine(picture.Sentence());
         return 0;
+    }
+
+    /// <summary>
+    /// A process that runs and shows nothing. It is the ordinary state of a tray application, it
+    /// runs on every developer machine this tool was written on, and a refusal that fired on it
+    /// would make every capture take an override — which is an override everybody passes always,
+    /// and therefore a check nobody has.
+    /// </summary>
+    private static int Resident()
+    {
+        var app = new App
+        {
+            // Explicit, because the default closes an application the moment its last window goes
+            // and this one never had a first.
+            ShutdownMode = ShutdownMode.OnExplicitShutdown,
+        };
+
+        return app.Run();
     }
 
     /// <summary>The ordinary host: a dispatcher that runs, so input arrives.</summary>

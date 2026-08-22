@@ -125,6 +125,11 @@ public sealed record Flags
             "path",
             "render the fixed surface to a file and exit, showing no window at all - which is what "
                 + "gives a byte-identical comparison something to be identical to"),
+        new Flag(
+            "resident",
+            "",
+            "a process that runs and shows nothing, which is the ordinary state of a tray "
+                + "application and the one thing the other-instance refusal must never fire on"),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>

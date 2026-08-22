@@ -591,14 +591,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW99 A second instance on request
-
-The other-instance refusal and its override are both tested today by remembering to
-leave a window open. The fixture opens a second window on request, so both arms are
-driven - and the distinction that matters is covered too: a resident process showing no
-window must not trip the refusal, because that is the ordinary state of every developer
-machine here.
-
 ### §WW100 A store the run is allowed to break
 
 The fingerprint check protects the store of whoever is running it, which makes it the

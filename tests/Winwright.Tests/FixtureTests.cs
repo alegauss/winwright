@@ -839,4 +839,72 @@ public sealed class FixtureTests : IDisposable
         Assert.NotNull(here);
         return Path.Combine(here.FullName, "src", "Winwright.Fixture");
     }
+
+    [Fact]
+    public void A_second_windowed_instance_is_what_the_refusal_exists_for()
+    {
+        Launched();
+        Launched();
+
+        // Nothing of this run's is named as ours, so both count as other instances.
+        var check = InstanceCheck.Of(Executable());
+
+        Assert.True(check.Windowed.Count >= 2, check.Sentence());
+        Assert.True(check.Refuses, check.Sentence());
+        Assert.Throws<AnotherInstanceException>(check.RequireSole);
+    }
+
+    [Fact]
+    public void The_override_beside_it_is_driven_rather_than_remembered()
+    {
+        Launched();
+        Launched();
+
+        var check = InstanceCheck.Of(Executable(), allowOthers: true);
+
+        Assert.False(check.Refuses);
+        check.RequireSole();
+
+        // Named in the sentence, because an override that does not appear in the output is one
+        // nobody remembers passing.
+        Assert.Contains(InstanceCheck.OverrideName, check.Sentence());
+    }
+
+    [Fact]
+    public void A_process_showing_nothing_must_never_trip_the_refusal()
+    {
+        // The ordinary state of every developer machine this tool was written on. A check that
+        // fired on it would make every capture take an override, which is an override everybody
+        // passes always and therefore a check nobody has.
+        var resident = Attachable.Launch(register, Started("--resident")).Pid;
+
+        for (var attempt = 0; attempt < 200 && TopLevelWindows.OfProcess(resident).Count == 0; attempt++)
+            Thread.Sleep(25);
+
+        var check = InstanceCheck.Of(Executable());
+
+        Assert.Contains(check.Resident, one => one.Pid == resident);
+        Assert.DoesNotContain(check.Windowed, one => one.Pid == resident);
+        Assert.False(check.Refuses, check.Sentence());
+    }
+
+    [Fact]
+    public void A_run_never_counts_its_own_processes_as_another_instance()
+    {
+        var mine = Attachable.Launch(register, Started()).Pid;
+
+        var check = InstanceCheck.Of(Executable(), ours: [mine]);
+
+        Assert.DoesNotContain(check.Others, one => one.Pid == mine);
+    }
+
+    /// <summary>The fixture's start info, with whatever flags this case wants.</summary>
+    private static ProcessStartInfo Started(params string[] flags)
+    {
+        var start = new ProcessStartInfo(Executable());
+        foreach (var flag in flags)
+            start.ArgumentList.Add(flag);
+
+        return start;
+    }
 }
