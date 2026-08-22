@@ -34,7 +34,6 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW51** (deps: WW77 ✅) **a page renders correctly above a screenful of blank space and nothing notices** — Geometry is dumped and checked: nothing overlaps, nothing starts off the surface, nothing ends past it and nothing measures zero. → §WW51
 - 📋 **WW118** (deps: —) **a derived set can carry a placeholder value that no exact read will ever match** — A set refuses a placeholder the way a label already does, so a key that cannot pass is a red at derivation rather than a member nothing in the tree ever equals. → §WW118
 
 ## Block G — The scenario — a case is a data file

@@ -306,16 +306,6 @@ which is the argument every other image comparison eventually turns into.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW51 Geometry, checked
-
-freewilly's installer page was built four times and verified every time by reading the
-script, and the failures that misses are the ones it had already produced: a caption
-assigned before its width wrapped at column zero, a page that rendered correctly above a
-screenful of blank space, and a button standing nine pixels below the box it belongs to,
-because an edit sizes itself to its font and a button does not. Each was found by
-running an installer, which is the most expensive place to find anything. Nothing
-overlaps, nothing starts off the surface, nothing ends past it, nothing measures zero.
-
 ### §WW118 A set refuses a placeholder too
 
 WW50 refuses a label whose value carries a placeholder, because a tree holding

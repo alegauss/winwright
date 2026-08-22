@@ -66,6 +66,7 @@
 - ✅ **WW54** **no reading and a window that was talking are reported with the same sentence** — A read that ended with nothing says whether the window was working or blank, how many polls saw it, and what to look at, so only one of the two points at the deadline.
 - ✅ **WW55** **diagnosing a failure costs a throwaway script that dumps the tree** — A red carries the control view it had in hand - bounded, saying what it cut, marking the element the check read - so the dump that took a throwaway script arrives with the failure.
 - ✅ **WW56** **an assertion is trusted without ever being watched fail** — A case declares the defects its check must catch and each one is run against it, so a check that stayed green with a declared defect in place is a red rather than a line that passes forever.
+- ✅ **WW51** **a page renders correctly above a screenful of blank space and nothing notices** — A dump is checked against itself for the four faults and measured for how much of the surface was drawn on, with every expectation derived from the dump rather than typed into a case.
 
 ## Block G — The scenario — a case is a data file
 
