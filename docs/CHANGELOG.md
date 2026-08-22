@@ -54,6 +54,7 @@
 - ✅ **WW47** **a wrong capture is caught only because a person looked at the picture** — A capture states the window, the process and the arguments behind it, and refuses outright when the window belongs to another process or nothing is drawing it.
 - ✅ **WW34** **a screen copy can photograph anything that happens to be in the rectangle** — A capture routes to the off-screen render by default and reaches the screen copy only for a menu, a balloon or an owned popup - or where a caller forced it and said why, which the receipt keeps.
 - ✅ **WW35** **a tree that failed to build writes a file that looks like a successful capture** — A picture is scanned for any pixel carrying an alpha of its own, so a blank is a red - and one with no alpha channel to read is unchecked rather than passed, because that scan never ran.
+- ✅ **WW44** **nothing checks that a capture contains the surface it was taken for** — A capture is asserted against the rectangle the application said it drew, telling clipped from elsewhere because they are two repairs, and a surface nobody reported is a hole rather than a red.
 
 ## Block F — Assert — the expectation is derived, never typed
 

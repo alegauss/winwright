@@ -296,15 +296,6 @@ strings are read from the project's own language files and asked of the tree ins
 key none of those files carries refuses the run, because a check that silently matches
 nothing is the shape of defect this whole path exists to stop.
 
-### §WW44 Only the app knows what it drew
-
-Verifying one task in claude-tray cost three captures and a full-screen grab, and none
-of the three failed: the script reported success, named the right window each time, and
-the file simply did not contain the note the flag exists to show. Nothing was checking
-that the capture contained the surface it was taken for, and nothing could - because
-only the app knows what it drew and where. So the app prints the rectangle, in physical
-pixels, and the copy asserts it lies inside the area it is about to read.
-
 ### §WW46 Byte-identical is the cheapest visual assertion
 
 freewilly's window skill states the rule: a change meant to be invisible must produce a

@@ -50,6 +50,18 @@ public sealed record SurfaceReading
     public Precondition AsPrecondition() => Reported
         ? Precondition.Met($"a reported surface named '{Name}'")
         : Precondition.Absent($"a reported surface named '{Name}'", Because);
+
+    /// <summary>
+    /// Whether a capture of <paramref name="copy"/> contains this surface. The hole is threaded
+    /// through here rather than left to a caller: a check that asked about a surface nothing ever
+    /// reported did not run, and reporting it as a red would blame the window for the harness.
+    /// </summary>
+    /// <param name="copy">The rectangle the capture read, in physical pixels.</param>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public AssertionResult Within(WindowBounds copy, string named) =>
+        Reported
+            ? Containment.Of(copy, Surface!).AsAssertion(named)
+            : AssertionResult.Unchecked(named, AsPrecondition());
 }
 
 /// <summary>
