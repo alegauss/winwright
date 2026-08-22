@@ -62,6 +62,7 @@
 - ✅ **WW53** **a run mutates the store of the user who launched it** — The store is hashed around the case and every file, directory and variable that moved is named, so a rewrite of the same length and the same date is still caught.
 - ✅ **WW54** **no reading and a window that was talking are reported with the same sentence** — A read that ended with nothing says whether the window was working or blank, how many polls saw it, and what to look at, so only one of the two points at the deadline.
 - ✅ **WW55** **diagnosing a failure costs a throwaway script that dumps the tree** — A red carries the control view it had in hand - bounded, saying what it cut, marking the element the check read - so the dump that took a throwaway script arrives with the failure.
+- ✅ **WW56** **an assertion is trusted without ever being watched fail** — A case declares the defects its check must catch and each one is run against it, so a check that stayed green with a declared defect in place is a red rather than a line that passes forever.
 
 ## Block G — The scenario — a case is a data file
 

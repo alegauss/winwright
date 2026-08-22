@@ -343,15 +343,6 @@ because an edit sizes itself to its font and a button does not. Each was found b
 running an installer, which is the most expensive place to find anything. Nothing
 overlaps, nothing starts off the surface, nothing ends past it, nothing measures zero.
 
-### §WW56 A check that cannot fail
-
-Several tasks across these repositories record assertions being watched go red before
-being trusted, and one of them found a defect in the check itself rather than in the
-code under test. A case may declare the injection that must turn it red - a value
-removed, a name changed, a panel hidden - so the engine can run it and report a check
-that no longer fails. Opt-in, because not every assertion has a cheap injection, and
-naming the ones that do is itself a reading.
-
 ### §WW118 A set refuses a placeholder too
 
 WW50 refuses a label whose value carries a placeholder, because a tree holding
