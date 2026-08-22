@@ -419,25 +419,6 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW123 The separation is asserted, not remembered
-
-Both halves currently reference nothing, and both project files say why in a comment. A
-comment is not a check. One line added in either project would merge them, the build
-would stay green, and the consequence would only be found by whoever shipped a test
-harness inside their product or a presentation stack inside a headless runner.
-
-The separation is load-bearing in both directions. The engine is taken by the harness
-driving an application; the in-app half is taken by that application. An application
-referencing the engine ships a test harness to its users. A harness referencing the
-in-app half inherits a drawing stack it never needed, and the two module initializers
-that each ask for per-monitor awareness stop being independent - which is the reading
-WW121 measured rather than argued.
-
-The check is cheap and belongs to the suite rather than to a reviewer's memory: read
-both project files and refuse a reference either way. This block's own criterion says a
-project that cannot take the package still works, and nothing today would notice the day
-that stopped being true.
-
 ## Block J — Adoption — the proof is the deletion
 
 ### §WW78 The keyboard case, first

@@ -55,8 +55,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 📋 **WW123** (deps: —) **nothing refuses a reference between the two halves, and one edit would merge them** — The suite asserts the engine references no in-app package and the in-app package references no engine, since that separation is what makes each half safe to ship where it goes. → §WW123
-
 ## Block J — Adoption — the proof is the deletion
 
 - 📋 **WW78** (deps: Block G) **the keyboard case is the only observable of a live input path and it lives in a script** — Migrated first: navigate, type, read back, traverse and drive a slider, which is the shortest path through locate, act and assert. → §WW78

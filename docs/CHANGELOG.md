@@ -103,6 +103,7 @@
 - ✅ **WW76** **the same single-threaded runner is copied into every test file that touches a control** — One bounded runner rethrows what the work threw as itself, and this suite's own eight copies of it were deleted in the same commit, which is the saving stated as a deletion.
 - ✅ **WW77** **a surface with no accessibility tree can only be checked by reading its source** — The application dumps every laid-out rectangle with its depth in physical pixels and the engine reads it back, so a surface with no accessibility tree is assertable without reading its source.
 - ✅ **WW122** **the in-app half is a project reference, so an adopter cannot pin it or take it at all** — Both halves declare a package id and pack in continuous integration, a sample adopter compiles against the packed in-app half by one reference, and the agreement check reads the built package.
+- ✅ **WW123** **nothing refuses a reference between the two halves, and one edit would merge them** — The suite reads both project files and both built assemblies and refuses a reference either way, and the same rule is asserted of the fixture and the sample adopter.
 
 ## Block J — Adoption — the proof is the deletion
 
