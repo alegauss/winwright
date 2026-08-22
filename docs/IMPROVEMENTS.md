@@ -2,6 +2,51 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+### §WW137 The roll counts names and not answers
+
+Found in the check the moment after it shipped. The roll reads every result the file
+carries and counts it as a case that answered. A results file records an outcome for
+each one, and NotExecuted is among them - a deliberate skip, or a case the runner listed
+and then abandoned. Both are recorded and neither ran, so the roll would call a run
+whole that executed none of them.
+
+That is the founding defect again, one level in. The check exists because a total of 352
+where the run before had 374 read as a pass; a run where all 374 are recorded and 22 say
+NotExecuted reads as a pass to this check for the same reason - a number that agrees,
+and nobody asking what it is a number of.
+
+The fix is small and the shape is here already. The results file says which outcome each
+case had, so the roll can count answers rather than names: what ran, what was recorded
+and did not, and the second on its own line rather than folded into the first. A
+deliberate skip is then visible, which this project's own non-goal asks for anyway - a
+green never covers an assertion that did not run, and a suite is a pile of assertions.
+
+What must not happen is the two being merged back into one total. A recorded skip and an
+executed pass are different facts, and a check that adds them is the check being
+replaced.
+
+### §WW138 A check beside the run is a habit again
+
+The roll call landed as its own process with its own tests, and it is reached two ways:
+a step in the CI workflow, which is unconditional and therefore real, and a script at
+the root, which is typed by whoever remembers to type it. Every developer running the
+suite runs the middle command of the three, because that is the command every .NET
+project has, and gets the same pass the check exists to withdraw.
+
+The task's own note said it: it belongs on the run rather than in a reviewer's habits.
+Half of it went into a reviewer's habits.
+
+What is wanted is that the ordinary command carries the check. The test project can hang
+a target off the run that lists the tests and compares, so a bare invocation is the
+checked one and there is nothing shorter to type. Two things have to be true of it. It
+must not need a network or a second build - a check that doubles the wait is a check
+somebody disables - and it must be skippable by one obvious switch when a person is
+filtering down to a single case, since a filtered run is short of discovery on purpose
+and reporting that as a lost host is the false red that turns the whole thing off.
+
+The general form is worth stating: a check that has to be invoked separately is not a
+check the project has, it is a check the project offers.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW119 The tray fixture waits for the wrong thing

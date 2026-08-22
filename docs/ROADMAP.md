@@ -2,6 +2,9 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+- 📋 **WW137** (deps: —) **a test recorded as not executed counts as having answered, so the roll call passes a run that skipped them** — The roll separates what ran from what was only recorded, so a run whose tests were listed and never executed is short rather than whole. → §WW137
+- 📋 **WW138** (deps: —) **the roll call runs only when somebody types the script, so a plain dotnet test still prints the old pass** — Taking the roll is part of running the suite rather than a step beside it, so the count is checked whichever way the tests were started. → §WW138
+
 ## Block B — Attach, launch, and leave nothing behind
 
 - 📋 **WW119** (deps: —) **the tray fixture returns before the shell has put the icon anywhere a test can find it** — The fixture waits for the icon to be findable rather than for the shell to take the message, so a test never races the placement every one of its assertions depends on. → §WW119
