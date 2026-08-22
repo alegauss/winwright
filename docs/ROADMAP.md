@@ -37,7 +37,6 @@
 ## Block F — Assert — the expectation is derived, never typed
 
 - 📋 **WW51** (deps: WW77) **a page renders correctly above a screenful of blank space and nothing notices** — Geometry is dumped and checked: nothing overlaps, nothing starts off the surface, nothing ends past it and nothing measures zero. → §WW51
-- 📋 **WW53** (deps: —) **a run mutates the store of the user who launched it** — The state is fingerprinted before and compared after, so a harness that repointed a real profile or rewrote a real setting is caught by the run that did it. → §WW53
 - 📋 **WW54** (deps: —) **no reading and a window that was talking are reported with the same sentence** — Working and blank are separated, with what was last seen and on how many polls, because one is a slow machine and the other is a window nobody is reading. → §WW54
 - 📋 **WW55** (deps: —) **diagnosing a failure costs a throwaway script that dumps the tree** — The control view is attached to the failure, which is work the check was already supposed to have done for whoever reads it. → §WW55
 - 📋 **WW56** (deps: —) **an assertion is trusted without ever being watched fail** — A case may declare the injection that must turn it red, so a check that cannot fail is a finding rather than a line that passes forever. → §WW56

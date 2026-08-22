@@ -316,14 +316,6 @@ because an edit sizes itself to its font and a button does not. Each was found b
 running an installer, which is the most expensive place to find anything. Nothing
 overlaps, nothing starts off the surface, nothing ends past it, nothing measures zero.
 
-### §WW53 The run leaves the machine as it found it
-
-A harness that drives a real picker, a real setting or a real environment variable can
-change the machine of whoever ran it, and the change outlives the run. The store is
-fingerprinted before and compared after, which is the strongest form that promise can
-take - and the comparison is wrapped around the case most likely to break it, rather
-than around the ones that only read.
-
 ### §WW54 Working is not blank
 
 Two timed-out reads look identical to whoever is reading the output and mean opposite
