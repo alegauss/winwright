@@ -431,14 +431,6 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW76 One runner, not twenty-seven
-
-pportal carries the same eight-line single-threaded runner in twenty-seven test files,
-each with its own timeout and its own message for a thread that does not finish.
-Controls cannot be constructed off that apartment, and a suite that hangs on a UI
-primitive reports nothing at all, so the runner is load-bearing - which is exactly why
-it should exist once, bounded, and surfacing whatever the thread threw.
-
 ### §WW77 A surface with no tree
 
 An installer page, a custom-drawn control or an immediate-mode surface has no

@@ -26,34 +26,6 @@ public sealed class PicturesTests : IDisposable
 
     public void Dispose() => Directory.Delete(root, recursive: true);
 
-    private static T OnStaThread<T>(Func<T> work)
-    {
-        T? answer = default;
-        Exception? threw = null;
-
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                answer = work();
-            }
-            catch (Exception broke)
-            {
-                threw = broke;
-            }
-        });
-
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.IsBackground = true;
-        thread.Start();
-        Assert.True(thread.Join(TimeSpan.FromSeconds(30)), "the render thread did not finish");
-
-        if (threw is not null)
-            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(threw).Throw();
-
-        return answer!;
-    }
-
     /// <summary>Something that draws: a sized element with a brush behind it.</summary>
     private static Border Drawing() =>
         new() { Name = "card", Width = 40, Height = 20, Background = new SolidColorBrush(Colors.Red) };
@@ -68,7 +40,7 @@ public sealed class PicturesTests : IDisposable
     private string Rendered(Func<FrameworkElement> element, string name, Func<Brush>? background = null)
     {
         var path = Path.Combine(root, name);
-        OnStaThread(() => Render.ToFile(element(), path, background: background?.Invoke()));
+        Apartment.Run(() => Render.ToFile(element(), path, background: background?.Invoke()));
         return path;
     }
 
@@ -100,7 +72,7 @@ public sealed class PicturesTests : IDisposable
         // The check is about whether anything drew, not about whether the screen is right — so a
         // mostly empty render is a picture, and saying otherwise would be a claim it cannot make.
         var path = Path.Combine(root, "corner.png");
-        OnStaThread(() =>
+        Apartment.Run(() =>
         {
             var canvas = new Canvas { Width = 40, Height = 20 };
             var dot = new Border { Width = 1, Height = 1, Background = new SolidColorBrush(Colors.Black) };
@@ -130,7 +102,7 @@ public sealed class PicturesTests : IDisposable
     [Fact]
     public void A_picture_with_no_alpha_channel_is_unchecked_rather_than_passed()
     {
-        var read = OnStaThread(() =>
+        var read = Apartment.Run(() =>
         {
             var drawn = Render.ToBitmap(Drawing());
             return Pictures.Of(new FormatConvertedBitmap(drawn, PixelFormats.Bgr24, null, 0), "a converted render");
@@ -180,7 +152,7 @@ public sealed class PicturesTests : IDisposable
     [Fact]
     public void A_bitmap_in_hand_is_scanned_without_going_through_a_file()
     {
-        var read = OnStaThread(() => Pictures.Of(Render.ToBitmap(Blank()), "the render"));
+        var read = Apartment.Run(() => Pictures.Of(Render.ToBitmap(Blank()), "the render"));
 
         Assert.True(read.IsBlank);
         Assert.StartsWith("the render is a blank", read.Sentence());

@@ -25,40 +25,6 @@ public sealed class RenderTests : IDisposable
 
     public void Dispose() => Directory.Delete(root, recursive: true);
 
-    /// <summary>
-    /// Run on a thread that owns a message queue. WW76 turns this into a shipped runner; here it
-    /// is the smallest thing that lets a presentation object exist at all.
-    /// </summary>
-    private static T OnStaThread<T>(Func<T> work)
-    {
-        T? answer = default;
-        Exception? threw = null;
-
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                answer = work();
-            }
-            catch (Exception broke)
-            {
-                threw = broke;
-            }
-        });
-
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.IsBackground = true;
-        thread.Start();
-        Assert.True(thread.Join(TimeSpan.FromSeconds(30)), "the render thread did not finish");
-
-        // Rethrown as itself rather than wrapped: a refusal that arrives here as some other
-        // exception is a refusal no test can assert the type of, which is most of their value.
-        if (threw is not null)
-            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(threw).Throw();
-
-        return answer!;
-    }
-
     /// <summary>A panel with a known size and a known colour, which is a picture with known pixels.</summary>
     private static Border Card(double width = 40, double height = 20) => new()
     {
@@ -75,7 +41,7 @@ public sealed class RenderTests : IDisposable
     {
         var path = File("card.png");
 
-        var picture = OnStaThread(() => Render.ToFile(Card(), path));
+        var picture = Apartment.Run(() => Render.ToFile(Card(), path));
 
         Assert.Equal(path, picture.Path);
         Assert.Equal(40, picture.Width);
@@ -91,7 +57,7 @@ public sealed class RenderTests : IDisposable
     {
         // The defect this verb exists over. A caller that measured and forgot to arrange gets a
         // picture of the right size with nothing in it, which looks like the drawing being broken.
-        var pixels = OnStaThread(() =>
+        var pixels = Apartment.Run(() =>
         {
             var picture = Render.ToBitmap(Card());
             var bytes = new byte[picture.PixelWidth * picture.PixelHeight * 4];
@@ -108,7 +74,7 @@ public sealed class RenderTests : IDisposable
         var path = File("nothing.png");
 
         var refused = Assert.Throws<UnrenderableException>(
-            () => OnStaThread(() => Render.ToFile(new Border { Name = "empty" }, path)));
+            () => Apartment.Run(() => Render.ToFile(new Border { Name = "empty" }, path)));
 
         Assert.Contains("there is nothing to render", refused.Message);
         Assert.Contains("only checks a file exists", refused.Message);
@@ -121,7 +87,7 @@ public sealed class RenderTests : IDisposable
         // A Grid with no children and no size measures to infinity against an infinite constraint,
         // which is not a size a picture can have — and rounding it to something would invent one.
         var refused = Assert.Throws<UnrenderableException>(
-            () => OnStaThread(() => Render.ToBitmap(new Border { Child = new Grid(), Name = "stretchy" })));
+            () => Apartment.Run(() => Render.ToBitmap(new Border { Child = new Grid(), Name = "stretchy" })));
 
         Assert.Contains("nothing to render", refused.Message);
     }
@@ -129,7 +95,7 @@ public sealed class RenderTests : IDisposable
     [Fact]
     public void A_named_size_lays_the_element_out_at_that_size_rather_than_at_the_one_it_wants()
     {
-        var picture = OnStaThread(() => Render.ToBitmap(Card(), new Size(100, 60)));
+        var picture = Apartment.Run(() => Render.ToBitmap(Card(), new Size(100, 60)));
 
         Assert.Equal(100, picture.PixelWidth);
         Assert.Equal(60, picture.PixelHeight);
@@ -138,7 +104,7 @@ public sealed class RenderTests : IDisposable
     [Fact]
     public void The_resolution_scales_the_pixels_and_not_the_layout()
     {
-        var picture = OnStaThread(() => Render.ToFile(Card(), File("high.png"), dpi: 192));
+        var picture = Apartment.Run(() => Render.ToFile(Card(), File("high.png"), dpi: 192));
 
         Assert.Equal(40, picture.Width);
         Assert.Equal(20, picture.Height);
@@ -150,7 +116,7 @@ public sealed class RenderTests : IDisposable
     [Fact]
     public void A_background_is_composed_behind_the_element_and_named_in_the_receipt()
     {
-        var picture = OnStaThread(
+        var picture = Apartment.Run(
             () => Render.ToFile(Card(), File("onblue.png"), new Size(60, 40), new SolidColorBrush(Colors.Blue)));
 
         Assert.Contains("#FF0000FF", picture.Background);
@@ -161,7 +127,7 @@ public sealed class RenderTests : IDisposable
     public void Where_the_tree_drew_nothing_the_background_is_what_is_there()
     {
         // The card is 40x20 inside a 60x40 render, so the bottom-right corner is background only.
-        var corner = OnStaThread(() =>
+        var corner = Apartment.Run(() =>
         {
             var picture = Render.ToBitmap(Card(), new Size(60, 40), new SolidColorBrush(Colors.Blue));
             var pixel = new byte[4];
@@ -178,7 +144,7 @@ public sealed class RenderTests : IDisposable
     [Fact]
     public void With_no_background_the_same_corner_is_transparent()
     {
-        var corner = OnStaThread(() =>
+        var corner = Apartment.Run(() =>
         {
             var picture = Render.ToBitmap(Card(), new Size(60, 40));
             var pixel = new byte[4];
@@ -192,7 +158,7 @@ public sealed class RenderTests : IDisposable
     [Fact]
     public void The_picture_is_frozen_so_it_can_cross_to_the_thread_that_wanted_it()
     {
-        var picture = OnStaThread(() => Render.ToBitmap(Card()));
+        var picture = Apartment.Run(() => Render.ToBitmap(Card()));
 
         Assert.True(picture.IsFrozen);
 
@@ -208,7 +174,7 @@ public sealed class RenderTests : IDisposable
         // render is asked for from a worker. A FrameworkElement cannot even be constructed off
         // STA, so this is the only way the guard is ever reached — and reaching it is the point,
         // since what arrives otherwise says nothing about which thread was wrong.
-        var made = OnStaThread<FrameworkElement>(() => new Border { Width = 10, Height = 10 });
+        var made = Apartment.Run<FrameworkElement>(() => new Border { Width = 10, Height = 10 });
 
         var refused = Assert.Throws<ThreadBoundException>(() => Render.ToBitmap(made));
 
@@ -219,9 +185,9 @@ public sealed class RenderTests : IDisposable
     public void The_written_file_is_a_png_that_reads_back_at_the_size_it_claims()
     {
         var path = File("readback.png");
-        OnStaThread(() => Render.ToFile(Card(80, 30), path, dpi: 144));
+        Apartment.Run(() => Render.ToFile(Card(80, 30), path, dpi: 144));
 
-        var read = OnStaThread(() =>
+        var read = Apartment.Run(() =>
         {
             var decoded = new PngBitmapDecoder(
                 new Uri(path), BitmapCreateOptions.None, BitmapCacheOption.OnLoad).Frames[0];
@@ -235,8 +201,8 @@ public sealed class RenderTests : IDisposable
     [Fact]
     public void A_resolution_that_is_not_one_is_refused()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => OnStaThread(() => Render.ToBitmap(Card(), dpi: 0)));
-        Assert.Throws<ArgumentOutOfRangeException>(() => OnStaThread(() => Render.ToBitmap(Card(), dpi: double.NaN)));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Apartment.Run(() => Render.ToBitmap(Card(), dpi: 0)));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Apartment.Run(() => Render.ToBitmap(Card(), dpi: double.NaN)));
     }
 
     [Fact]
@@ -244,7 +210,7 @@ public sealed class RenderTests : IDisposable
     {
         var path = Path.Combine(root, "runs", "first", "card.png");
 
-        OnStaThread(() => Render.ToFile(Card(), path));
+        Apartment.Run(() => Render.ToFile(Card(), path));
 
         Assert.True(System.IO.File.Exists(path));
     }

@@ -84,6 +84,7 @@
 - ✅ **WW73** **a brush shared between capture threads belongs to whichever one reached it first** — A brush handed to a capture is frozen as a copy or refused by name, with both threads stated, instead of the drawing raising an error that names neither the brush nor either thread.
 - ✅ **WW74** **the app knows what it drew and nothing asks it** — The application writes a name and four physical-pixel numbers per surface and the engine reads them back, with a surface nobody reported answering as a named hole rather than a throw.
 - ✅ **WW75** **a popup closes the moment the window is raised to be photographed** — The host walks the logical tree, holds every popup it finds open and puts each one back, so a closed popup is reached at all and no page has to remember the rule for itself.
+- ✅ **WW76** **the same single-threaded runner is copied into every test file that touches a control** — One bounded runner rethrows what the work threw as itself, and this suite's own eight copies of it were deleted in the same commit, which is the saving stated as a deletion.
 
 ## Block J — Adoption — the proof is the deletion
 

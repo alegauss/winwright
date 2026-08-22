@@ -21,34 +21,6 @@ namespace Winwright.Tests;
 /// </summary>
 public sealed class PopupsTests
 {
-    private static T OnStaThread<T>(Func<T> work)
-    {
-        T? answer = default;
-        Exception? threw = null;
-
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                answer = work();
-            }
-            catch (Exception broke)
-            {
-                threw = broke;
-            }
-        });
-
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.IsBackground = true;
-        thread.Start();
-        Assert.True(thread.Join(TimeSpan.FromSeconds(30)), "the thread did not finish");
-
-        if (threw is not null)
-            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(threw).Throw();
-
-        return answer!;
-    }
-
     /// <summary>A page with a closed popup on it, which is the state the walk has to reach.</summary>
     private static (Grid Page, Popup Flyout) Page()
     {
@@ -70,7 +42,7 @@ public sealed class PopupsTests
     [Fact]
     public void A_closed_popup_is_found_because_the_walk_is_logical()
     {
-        var found = OnStaThread(() =>
+        var found = Apartment.Run(() =>
         {
             var (page, flyout) = Page();
             Assert.False(flyout.IsOpen);
@@ -85,7 +57,7 @@ public sealed class PopupsTests
     {
         // A popup inside a popup is real, and a closed outer one puts its whole subtree out of
         // reach of anything walking children the ordinary way.
-        var found = OnStaThread(() =>
+        var found = Apartment.Run(() =>
         {
             var inner = new Popup { Name = "inner", Child = new Border { Width = 10, Height = 10 } };
             var outer = new Popup { Name = "outer", Child = new Grid { Children = { inner } } };
@@ -100,7 +72,7 @@ public sealed class PopupsTests
     [Fact]
     public void Holding_makes_every_popup_stay_open()
     {
-        var (stayed, changed) = OnStaThread(() =>
+        var (stayed, changed) = Apartment.Run(() =>
         {
             var (page, flyout) = Page();
             Assert.False(flyout.StaysOpen);
@@ -118,7 +90,7 @@ public sealed class PopupsTests
     {
         // A host that leaves every popup pinned open has changed the application it was only
         // supposed to photograph.
-        var (during, after) = OnStaThread(() =>
+        var (during, after) = Apartment.Run(() =>
         {
             var (page, flyout) = Page();
             bool held;
@@ -135,7 +107,7 @@ public sealed class PopupsTests
     [Fact]
     public void A_popup_that_already_stayed_open_is_reported_as_unchanged_and_left_that_way()
     {
-        var (changed, after, named) = OnStaThread(() =>
+        var (changed, after, named) = Apartment.Run(() =>
         {
             var (page, flyout) = Page();
             flyout.StaysOpen = true;
@@ -161,7 +133,7 @@ public sealed class PopupsTests
     {
         // The one case the host exists for, arriving late: a page that builds a flyout when it is
         // first needed, which is after whatever raised the window.
-        var (first, second, stayed) = OnStaThread(() =>
+        var (first, second, stayed) = Apartment.Run(() =>
         {
             var page = new Grid();
             using var host = Popups.Hold(page);
@@ -187,7 +159,7 @@ public sealed class PopupsTests
     public void Walking_again_does_not_take_hold_of_the_same_popup_twice()
     {
         // It would record the second reading as what to restore, which is what this already set.
-        var (again, after) = OnStaThread(() =>
+        var (again, after) = Apartment.Run(() =>
         {
             var (page, flyout) = Page();
             int taken;
@@ -204,7 +176,7 @@ public sealed class PopupsTests
     [Fact]
     public void A_page_with_no_popup_says_so_rather_than_reporting_nothing()
     {
-        var said = OnStaThread(() =>
+        var said = Apartment.Run(() =>
         {
             using var host = Popups.Hold(new Grid { Children = { new TextBlock { Text = "the report" } } });
             return host.Sentence();
@@ -216,7 +188,7 @@ public sealed class PopupsTests
     [Fact]
     public void What_is_being_held_is_named_on_every_run()
     {
-        var said = OnStaThread(() =>
+        var said = Apartment.Run(() =>
         {
             var (page, _) = Page();
             using var host = Popups.Hold(page);
@@ -229,7 +201,7 @@ public sealed class PopupsTests
     [Fact]
     public void An_unnamed_popup_is_named_by_what_it_is_holding()
     {
-        var said = OnStaThread(() =>
+        var said = Apartment.Run(() =>
         {
             var page = new Grid { Children = { new Popup { Child = new Border() } } };
             using var host = Popups.Hold(page);
@@ -244,7 +216,7 @@ public sealed class PopupsTests
     {
         // A logical parent that is also reachable as a child is not a thing a page sets out to
         // build, and a walk with no guard against it does not return.
-        var found = OnStaThread(() =>
+        var found = Apartment.Run(() =>
         {
             var page = new Grid();
             var flyout = new Popup { Name = "loop" };
@@ -260,7 +232,7 @@ public sealed class PopupsTests
     [Fact]
     public void A_root_from_another_thread_is_refused_for_a_reason_about_threading()
     {
-        var theirs = OnStaThread<DependencyObject>(() => new Grid());
+        var theirs = Apartment.Run<DependencyObject>(() => new Grid());
 
         Assert.Throws<ThreadBoundException>(() => Popups.Under(theirs));
     }

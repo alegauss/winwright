@@ -30,40 +30,12 @@ public sealed class SurfaceReportTests : IDisposable
 
     private string File(string name = "surfaces.tsv") => Path.Combine(root, name);
 
-    private static T OnStaThread<T>(Func<T> work)
-    {
-        T? answer = default;
-        Exception? threw = null;
-
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                answer = work();
-            }
-            catch (Exception broke)
-            {
-                threw = broke;
-            }
-        });
-
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.IsBackground = true;
-        thread.Start();
-        Assert.True(thread.Join(TimeSpan.FromSeconds(30)), "the reporting thread did not finish");
-
-        if (threw is not null)
-            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(threw).Throw();
-
-        return answer!;
-    }
-
     /// <summary>
     /// An element on a real presentation source, which is what makes PointToScreen answer at all.
     /// A window is never shown: the source is the screen as far as the conversion is concerned.
     /// </summary>
     private static T OnASurface<T>(Func<FrameworkElement, T> work, double width = 120, double height = 60) =>
-        OnStaThread(() =>
+        Apartment.Run(() =>
         {
             var element = new Border
             {
@@ -135,7 +107,7 @@ public sealed class SurfaceReportTests : IDisposable
         var (reported, layoutWidth) = OnASurface(element =>
             (InAppSurfaces.Measure("the report page", element), element.ActualWidth));
 
-        var scale = OnStaThread(() => VisualTreeHelper.GetDpi(new Border()).DpiScaleX);
+        var scale = Apartment.Run(() => VisualTreeHelper.GetDpi(new Border()).DpiScaleX);
 
         Assert.NotNull(reported);
         Assert.Equal((int)Math.Round(layoutWidth * scale), reported.Width);
@@ -160,7 +132,7 @@ public sealed class SurfaceReportTests : IDisposable
     {
         // The never-reported arm at its source: an off-screen element has no screen rectangle, and
         // inventing one from the layout would report a rectangle at the top-left of nothing.
-        var reported = OnStaThread(() => InAppSurfaces.Measure("the report page", new Border { Width = 40, Height = 20 }));
+        var reported = Apartment.Run(() => InAppSurfaces.Measure("the report page", new Border { Width = 40, Height = 20 }));
 
         Assert.Null(reported);
     }

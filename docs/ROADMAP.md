@@ -56,7 +56,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 📋 **WW76** (deps: —) **the same single-threaded runner is copied into every test file that touches a control** — One runner, bounded and surfacing what the thread threw, which is twenty-seven copies in one project becoming a package reference. → §WW76
 - 📋 **WW77** (deps: —) **a surface with no accessibility tree can only be checked by reading its source** — A geometry dump the harness reads, which is what makes an installer page or a custom-drawn surface assertable at all. → §WW77
 
 ## Block J — Adoption — the proof is the deletion
@@ -71,7 +70,7 @@
 - 📋 **WW85** (deps: Block G) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
 - 📋 **WW86** (deps: WW78, WW79, WW80, WW81, WW82, WW83, WW84, WW85, Block E) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - 📋 **WW87** (deps: Block E, WW77) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
-- 📋 **WW88** (deps: Block G, WW76) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
+- 📋 **WW88** (deps: Block G, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

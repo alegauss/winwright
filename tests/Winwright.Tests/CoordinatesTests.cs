@@ -25,34 +25,6 @@ public sealed class CoordinatesTests : IDisposable
 
     public void Dispose() => Directory.Delete(root, recursive: true);
 
-    private static T OnStaThread<T>(Func<T> work)
-    {
-        T? answer = default;
-        Exception? threw = null;
-
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                answer = work();
-            }
-            catch (Exception broke)
-            {
-                threw = broke;
-            }
-        });
-
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.IsBackground = true;
-        thread.Start();
-        Assert.True(thread.Join(TimeSpan.FromSeconds(30)), "the render thread did not finish");
-
-        if (threw is not null)
-            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(threw).Throw();
-
-        return answer!;
-    }
-
     [Fact]
     public void The_in_app_package_asks_for_per_monitor_awareness_when_it_loads()
     {
@@ -73,7 +45,7 @@ public sealed class CoordinatesTests : IDisposable
     {
         // The reproduction. Undeclared by the host, touching WPF here fixed the awareness to
         // system first and the engine's own initializer could no longer change it.
-        OnStaThread(() => Render.ToBitmap(
+        Apartment.Run(() => Render.ToBitmap(
             new Border { Width = 10, Height = 10, Background = new SolidColorBrush(Colors.Red) }));
 
         Assert.Equal(DpiAwareness.PerMonitor, DisplayAwareness.Current());
@@ -82,7 +54,7 @@ public sealed class CoordinatesTests : IDisposable
     [Fact]
     public void Every_receipt_carries_what_the_process_can_actually_see()
     {
-        var picture = OnStaThread(
+        var picture = Apartment.Run(
             () => Render.ToBitmap(new Border { Width = 10, Height = 10 }, new Size(10, 10)));
 
         Assert.Equal(10, picture.PixelWidth);
@@ -90,7 +62,7 @@ public sealed class CoordinatesTests : IDisposable
         // The reading nobody would have gone looking for, on every render rather than on a red:
         // a size drawn by a system-aware process does not mean what it says, and the file cannot
         // be told from one that does.
-        var receipt = OnStaThread(
+        var receipt = Apartment.Run(
             () => Render.ToFile(new Border { Width = 10, Height = 10 }, Picture(), new Size(10, 10)));
 
         Assert.Equal("per-monitor aware", receipt.Sees);
@@ -123,7 +95,7 @@ public sealed class CoordinatesTests : IDisposable
     {
         // What the awareness is for: an unaware process is handed virtualised numbers, so a render
         // asked for at 200 device-independent units would not come back as 200 pixels at 96 dpi.
-        var picture = OnStaThread(
+        var picture = Apartment.Run(
             () => Render.ToBitmap(new Border { Width = 200, Height = 100 }, new Size(200, 100)));
 
         Assert.Equal(200, picture.PixelWidth);

@@ -4,6 +4,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 
 using Winwright.Capturing;
+using Winwright.InApp;
 using Winwright.Verdicts;
 using Winwright.Windowing;
 
@@ -28,7 +29,8 @@ public sealed class ContainmentTests : IDisposable
 
     public void Dispose() => Directory.Delete(root, recursive: true);
 
-    private static ReportedSurface Surface(int left, int top, int right, int bottom, string name = "the report page") =>
+    private static Winwright.Capturing.ReportedSurface Surface(
+        int left, int top, int right, int bottom, string name = "the report page") =>
         new(name, new WindowBounds(left, top, right, bottom));
 
     private static readonly WindowBounds Copy = new(0, 0, 600, 400);
@@ -160,45 +162,25 @@ public sealed class ContainmentTests : IDisposable
         Assert.DoesNotContain("Passed", result.Detail);
     }
 
-    private static T OnASurface<T>(Func<FrameworkElement, T> work)
-    {
-        T? answer = default;
-        Exception? threw = null;
-
-        var thread = new Thread(() =>
+    /// <summary>An element on a real presentation source, at a known place on the desktop.</summary>
+    private static T OnASurface<T>(Func<FrameworkElement, T> work) => Apartment.Run(
+        () =>
         {
-            try
-            {
-                var element = new Border { Width = 120, Height = 60, Background = new SolidColorBrush(Colors.Red) };
-                using var source = new HwndSource(
-                    new HwndSourceParameters("winwright containment")
-                    {
-                        PositionX = 40,
-                        PositionY = 30,
-                        Width = 120,
-                        Height = 60,
-                    })
+            var element = new Border { Width = 120, Height = 60, Background = new SolidColorBrush(Colors.Red) };
+            using var source = new HwndSource(
+                new HwndSourceParameters("winwright containment")
                 {
-                    RootVisual = element,
-                };
-
-                element.UpdateLayout();
-                answer = work(element);
-            }
-            catch (Exception broke)
+                    PositionX = 40,
+                    PositionY = 30,
+                    Width = 120,
+                    Height = 60,
+                })
             {
-                threw = broke;
-            }
-        });
+                RootVisual = element,
+            };
 
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.IsBackground = true;
-        thread.Start();
-        Assert.True(thread.Join(TimeSpan.FromSeconds(30)), "the reporting thread did not finish");
-
-        if (threw is not null)
-            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(threw).Throw();
-
-        return answer!;
-    }
+            element.UpdateLayout();
+            return work(element);
+        },
+        named: "the surface report");
 }
