@@ -42,6 +42,7 @@
 - 📋 **WW54** (deps: —) **no reading and a window that was talking are reported with the same sentence** — Working and blank are separated, with what was last seen and on how many polls, because one is a slow machine and the other is a window nobody is reading. → §WW54
 - 📋 **WW55** (deps: —) **diagnosing a failure costs a throwaway script that dumps the tree** — The control view is attached to the failure, which is work the check was already supposed to have done for whoever reads it. → §WW55
 - 📋 **WW56** (deps: —) **an assertion is trusted without ever being watched fail** — A case may declare the injection that must turn it red, so a check that cannot fail is a finding rather than a line that passes forever. → §WW56
+- 📋 **WW118** (deps: —) **a derived set can carry a placeholder value that no exact read will ever match** — A set refuses a placeholder the way a label already does, so a key that cannot pass is a red at derivation rather than a member nothing in the tree ever equals. → §WW118
 
 ## Block G — The scenario — a case is a data file
 
