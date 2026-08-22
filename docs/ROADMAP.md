@@ -78,7 +78,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW106** (deps: —) **a fixture that drifts from the products it stands in for is worse than none** — Each shape it carries names the real defect it reproduces, so a shape nobody can justify is removed rather than maintained forever. → §WW106
 - 📋 **WW107** (deps: —) **a fixture is only ever driven by the framework that ships with it** — It is also driven by hand: every flag opens the surface it names, so a person can look at the thing a failing case is talking about without writing anything. → §WW107
 
 ## Done when — Block A

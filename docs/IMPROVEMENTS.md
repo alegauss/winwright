@@ -627,14 +627,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW106 A shape exists because a defect existed
-
-A fixture that grows shapes nobody can justify becomes a second product to maintain, and
-then it drifts from the things it stands in for and starts producing false confidence.
-Each surface names the real defect it reproduces. One that can name none is removed, and
-the removal is itself a reading about what this framework no longer has to defend
-against.
-
 ### §WW107 The fixture is also for a person
 
 When a case fails, the fastest way to understand it is to look at the thing it is

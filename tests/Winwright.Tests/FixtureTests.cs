@@ -1422,4 +1422,84 @@ public sealed class FixtureTests : IDisposable
     /// <summary>The lines of a block of text, whatever the machine wrote its newlines as.</summary>
     private static IEnumerable<string> Lines(string said) =>
         said.Split('\n').Select(one => one.TrimEnd('\r'));
+
+    [Fact]
+    public void Every_shape_the_fixture_carries_names_the_defect_it_reproduces()
+    {
+        var said = Printed("--flags");
+
+        // A fixture that grows shapes nobody can justify becomes a second product to maintain,
+        // drifts from the things it stands in for, and starts producing false confidence.
+        var flags = Lines(said).Count(one => one.TrimStart().StartsWith("--", StringComparison.Ordinal));
+        var reasons = Lines(said).Where(one => one.TrimStart().StartsWith("because ", StringComparison.Ordinal)).ToList();
+
+        Assert.True(flags > 10, $"only {flags} shape(s) were listed");
+        Assert.Equal(flags, reasons.Count);
+    }
+
+    [Fact]
+    public void No_reason_is_a_restatement_of_what_the_shape_does()
+    {
+        // The failure this guards is a justification that says the flag's own sentence again,
+        // which is a shape nobody has actually justified. Whether a sentence names a real defect
+        // is a judgement no test can make; whether it repeats the line above it is not.
+        var lines = Lines(Printed("--flags")).Select(one => one.Trim()).ToList();
+
+        for (var at = 1; at < lines.Count; at++)
+        {
+            if (!lines[at].StartsWith("because ", StringComparison.Ordinal))
+                continue;
+
+            var reason = lines[at]["because ".Length..];
+            var does = lines[at - 1];
+
+            Assert.True(reason.Length > 60, $"'{reason}' is too short to have said what happened");
+            Assert.DoesNotContain(reason, does, StringComparison.Ordinal);
+            Assert.True(Shared(reason, does) < 25, $"'{reason}' repeats its own description");
+        }
+    }
+
+    /// <summary>The longest run of characters two sentences have in common.</summary>
+    private static int Shared(string left, string right)
+    {
+        var longest = 0;
+        for (var at = 0; at < left.Length; at++)
+        {
+            for (var length = longest + 1; at + length <= left.Length; length++)
+            {
+                if (!right.Contains(left.AsSpan(at, length), StringComparison.Ordinal))
+                    break;
+
+                longest = length;
+            }
+        }
+
+        return longest;
+    }
+
+    [Fact]
+    public void A_refusal_stays_scannable_and_leaves_the_reasons_out()
+    {
+        // Two audiences: somebody who misspelt a flag wants the list, and somebody who asked for
+        // the catalogue wants the whole story. Printing the story at a refusal buries the list.
+        var refused = Ran("--nope").Said;
+
+        Assert.Contains("This fixture knows:", refused);
+        Assert.DoesNotContain("      because ", refused);
+    }
+
+    /// <summary>Run the fixture to completion and hand back what it wrote to the output stream.</summary>
+    private static string Printed(params string[] flags)
+    {
+        var start = Started(flags);
+        start.RedirectStandardOutput = true;
+        start.UseShellExecute = false;
+
+        using var running = Process.Start(start)!;
+        var said = running.StandardOutput.ReadToEnd();
+        Assert.True(running.WaitForExit(30_000), "the fixture did not finish printing");
+        Assert.Equal(0, running.ExitCode);
+
+        return said;
+    }
 }

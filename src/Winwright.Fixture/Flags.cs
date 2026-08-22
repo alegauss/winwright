@@ -28,13 +28,24 @@ public sealed class UnknownFlagException : ArgumentException
 /// <param name="Name">The flag, without its dashes.</param>
 /// <param name="Takes">What it takes after an equals sign, or empty where it takes nothing.</param>
 /// <param name="Provokes">The refusal or the reading it exists to make possible.</param>
+/// <param name="Because">
+/// The real defect this shape reproduces, and where it happened. Required: a fixture that grows
+/// shapes nobody can justify becomes a second product to maintain, drifts from the things it
+/// stands in for, and starts producing false confidence. One that can name no defect is removed,
+/// and the removal is itself a reading about what this framework no longer has to defend against.
+/// </param>
 /// <param name="Choices">
 /// The values it accepts, where it accepts a fixed set. Empty means any text. A value outside the
 /// set is refused the same way an unknown flag is: a shape nobody can spell is a shape nobody
 /// takes, and the run that misspells one asserts nothing and says so nowhere.
 /// </param>
 public sealed record Flag(
-    string Name, string Takes, string Provokes, IReadOnlyList<string>? Choices = null, bool Numeric = false)
+    string Name,
+    string Takes,
+    string Provokes,
+    string Because,
+    IReadOnlyList<string>? Choices = null,
+    bool Numeric = false)
 {
     /// <summary>What it accepts, or nothing where it accepts any text.</summary>
     public IReadOnlyList<string> Accepts => Choices ?? [];
@@ -48,6 +59,9 @@ public sealed record Flag(
 
         return $"--{Name}{takes}  {Provokes}";
     }
+
+    /// <summary>The two lines a catalogue prints: what it does, and why it is here at all.</summary>
+    public string Justified() => $"{this}\n      because {Because}";
 }
 
 /// <summary>
@@ -82,85 +96,89 @@ public sealed record Flags
         new Flag(
             "flags",
             "",
-            "print this catalogue and stop, so what the fixture can do is askable without having to "
-                + "misspell something to be told"),
-        new Flag("title", "text", "a window titled something other than the default, for a case driving two at once"),
+            "print this catalogue and stop, so what the fixture can do is askable without having to misspell something to be told",
+            "a catalogue that lives only in source is one nobody consults, and claude-tray's preview catalogue already prints its whole table on an unknown name and exits non-zero"),
+        new Flag(
+            "title",
+            "text",
+            "a window titled something other than the default, for a case driving two at once",
+            "the other-instance refusal was tested by remembering to leave a second window open, which is a test nobody runs the same way twice"),
         new Flag(
             "pump",
             "host",
-            "the same window under a dispatcher that runs and one that never does - the difference "
-                + "no picture can see and the one that decides whether a keystroke arrives",
+            "the same window under a dispatcher that runs and one that never does - the difference no picture can see",
+            "claude-tray shipped windows that took no keystrokes while every screenshot of them looked perfect",
             ["dispatcher", "none"]),
         new Flag(
             "names",
             "",
-            "a pane carrying the whole naming rule at once - nothing, a glyph, an echoed id, a "
-                + "label that is a neighbouring element, and a button that must keep its own text"),
+            "a pane carrying the whole naming rule at once - nothing, a glyph, an echoed id, a neighbouring label, and a button that keeps its text",
+            "claude-tray shipped two controls carrying empty names while every neighbouring button read fine, because a control takes its name from its own content and both had none"),
         new Flag(
             "absences",
             "",
-            "a pane carrying the three kinds of absence at once - a collapsed pane, a closed popup "
-                + "and an unopened submenu - which the tree reports differently and nothing else has together"),
+            "a pane carrying the three kinds of absence at once - a collapsed pane, a closed popup and an unopened submenu",
+            "a control on a page that is not showing cannot be found by any id, which reads exactly like one that was renamed or removed"),
         new Flag(
             "backdrop",
             "kind",
-            "a window that opted into a system backdrop, which transmits what is behind it through "
-                + "the glass and which no amount of z-order reasoning can answer for",
+            "a window that opted into a system backdrop, which transmits what is behind it through the glass",
+            "z-order reasoning cannot answer for a backdrop, so every check that decides a copy's contents by walking the windows above it is wrong about that one window",
             Backdrop.Names),
         new Flag(
             "toast",
             "way",
-            "a borderless top-level window with no caption, which the process object never names - "
-                + "beside the main window, or as the only window this run has at all",
+            "a borderless top-level window with no caption, which the process object never names",
+            "a toast existed here in exactly one product and only when its notification happened to fire, which is not a schedule a check can wait on",
             Toast.Ways),
         new Flag(
             "loading",
             "milliseconds",
-            "a page that is still computing for exactly this long, so the loading refusal is asserted "
-                + "at a moment the run chose rather than on a machine that happened to be slow",
+            "a page that is still computing for exactly this long",
+            "the loading refusal was discovered on a machine that happened to be slow, and reproducing it meant finding another one",
             Numeric: true),
         new Flag(
             "animate",
             "milliseconds",
-            "an animation of a declared length whose states announce their own place, so a frame "
-                + "sequence is checked against numbers rather than against pictures somebody opened",
+            "an animation of a declared length whose states announce their own place",
+            "a frame sequence was checked by opening the frames and looking, which is the thing this framework exists to avoid",
             Numeric: true),
         new Flag(
             "render",
             "path",
-            "render the fixed surface to a file and exit, showing no window at all - which is what "
-                + "gives a byte-identical comparison something to be identical to"),
+            "render the fixed surface to a file and exit, showing no window at all",
+            "the byte-identical comparison had nothing to be identical to, because every surface available read a clock, a machine name or the desktop's theme"),
         new Flag(
             "resident",
             "",
-            "a process that runs and shows nothing, which is the ordinary state of a tray "
-                + "application and the one thing the other-instance refusal must never fire on"),
+            "a process that runs and shows nothing, which is the ordinary state of a tray application",
+            "a resident tray showing nothing runs on every developer machine here, and a refusal firing on it would need an override everybody passes always"),
         new Flag(
             "store",
             "directory",
-            "a settings store of the fixture's own, written from constants, which a run may break "
-                + "without anybody's real settings being at risk"),
+            "a settings store of the fixture's own, written from constants, which a run may break",
+            "the fingerprint check protects the store of whoever is running it, so it could not be developed against a real product without risking somebody's settings"),
         new Flag(
             "mutate",
             "",
-            "leave that store changed - the same number of bytes and a different machine, which is "
-                + "the accident a comparison by size or by write time calls unchanged"),
+            "leave that store changed - the same number of bytes and a different machine",
+            "a settings file rewritten to the same length is the accident the fingerprint exists for: a picker repointed from one profile to another of the same name"),
         new Flag(
             "language",
             "tag",
-            "a window labelled from one of the fixture's own string files, including the one key "
-                + "whose value carries a placeholder and which an exact-name read can never match",
+            "a window labelled from one of the fixture's own string files",
+            "the label rule needs several languages to be developed at all, and one key whose value carries a placeholder that no exact read can ever match",
             Strings.Cultures),
         new Flag(
             "intrude",
             "left,top,width,height",
-            "a topmost window over exactly that rectangle in physical pixels, so the region check "
-                + "is driven rather than arranged by hand and hoped about"),
+            "a topmost window over exactly that rectangle in physical pixels",
+            "the region check is the most intricate piece of the capture stack and was exercised by moving a window by hand and hoping"),
         new Flag(
             "peerless",
             "",
-            "a pane drawn with no automation peers at all, which a locator resolves against "
-                + "nothing and the geometry dump reports in full"),
+            "a pane drawn with no automation peers at all, which a locator resolves against nothing",
+            "the only surface with no accessibility tree was an installer page in another repository, behind a compiler that has to be installed first"),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>
@@ -251,7 +269,12 @@ public sealed record Flags
         return new Flags(new ReadOnlyDictionary<string, string>(read));
     }
 
-    /// <summary>Every flag, one per line, as a person driving the fixture by hand reads them.</summary>
-    public static string Catalogue() =>
-        "\nThis fixture knows:\n" + string.Join("\n", Known.Select(one => "  " + one));
+    /// <summary>Every flag, as a person driving the fixture by hand reads them.</summary>
+    /// <param name="justified">
+    /// Whether to say why each shape exists as well as what it does. A refusal wants to be
+    /// scannable and leaves this off; a catalogue somebody asked for wants to be complete.
+    /// </param>
+    public static string Catalogue(bool justified = false) =>
+        "\nThis fixture knows:\n"
+        + string.Join("\n", Known.Select(one => "  " + (justified ? one.Justified() : one.ToString())));
 }

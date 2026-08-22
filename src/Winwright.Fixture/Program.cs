@@ -46,7 +46,7 @@ public static class Program
         // consults, and a flag nobody knows about is a shape nobody tests against.
         if (shapes.Has("flags"))
         {
-            Console.Out.WriteLine(Flags.Catalogue().TrimStart('\n'));
+            Console.Out.WriteLine(Flags.Catalogue(justified: true).TrimStart('\n'));
             return 0;
         }
 
