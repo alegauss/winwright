@@ -78,6 +78,8 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
+- 📋 **WW132** (deps: —) **seventeen refusals are named in the framework and the fixture can provoke six, with nothing saying which** — Each named refusal is paired with the flag that provokes it or with the reason none can, and the pairing is a check rather than a list somebody keeps. → §WW132
+
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine
