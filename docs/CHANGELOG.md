@@ -38,6 +38,7 @@
 - ✅ **WW21** **two elements carrying the same name cannot be told apart by any condition** — The grammar takes order=left, right, top or bottom and sorts matches by rectangle, and a step matching several without saying which is refused with what it matched.
 - ✅ **WW22** **a resolved element goes stale and the act runs against a handle nobody holds** — A subject holds a locator and never an element, resolving again per act, and every pattern is read into plain values so two readings either side of an act can differ.
 - ✅ **WW23** **there is no way to ask what patterns an element actually offers** — What an element offers is asked for by locator, and every declared act is checked against it before the run, refusing with the element and the pattern both named.
+- ✅ **WW112** **nothing makes an act go through the actionability check, so a verb that forgets it still runs** — The live element is no longer public: an act reaches one only by being admitted, which resolves, judges the four and refuses first, so no verb can spell the skip.
 
 ## Block D — Act — patterns before pointers
 

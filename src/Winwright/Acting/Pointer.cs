@@ -117,22 +117,20 @@ public static class Pointer
         ArgumentNullException.ThrowIfNull(subject);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(act.Clicks);
 
-        var reading = subject.Read();
-
         // A pointer act needs no pattern — that is the whole reason it exists — but it does need
-        // the element to be there, on screen and enabled, which is the rest of actionability.
-        var judged = ActionabilityCheck.Of(reading.Facts);
-        judged.Require(subject.Locator.Text);
+        // the element to be there, on screen and enabled, which is the rest of actionability. The
+        // admission is how it is reached at all, so the check cannot be the line somebody drops.
+        var admitted = Admitted.To(subject);
+        var facts = admitted.Facts;
 
-        var window = TopLevelOf(reading.Resolution.Element!);
-        var foreground = Foreground.Check(window).AsPrecondition();
+        var foreground = Foreground.Check(admitted.Window).AsPrecondition();
         if (!foreground.Satisfied)
-            return new PointerResult(act, reading.Facts, foreground, default, PatternValues.None);
+            return new PointerResult(act, facts, foreground, default, PatternValues.None);
 
-        var at = reading.Facts!.Bounds;
+        var at = facts.Bounds;
         Send(at.Left + (at.Width / 2), at.Top + (at.Height / 2), act.Button, act.Clicks);
 
-        return new PointerResult(act, reading.Facts, foreground, at, subject.Read().Values);
+        return new PointerResult(act, facts, foreground, at, subject.Read().Values);
     }
 
     /// <summary>
@@ -146,12 +144,6 @@ public static class Pointer
             ? "no act here needs a real desktop."
             : $"{acts.Count} act{(acts.Count == 1 ? "" : "s")} need a real desktop: "
                 + string.Join(", ", acts.Select(one => one.ToString())) + ".";
-    }
-
-    private static nint TopLevelOf(AutomationElement element)
-    {
-        var handle = (nint)element.Current.NativeWindowHandle;
-        return handle == 0 ? 0 : Win32.GetAncestor(handle, Win32.GaRoot);
     }
 
     private static void Send(int x, int y, MouseButton button, int clicks)

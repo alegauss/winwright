@@ -16,8 +16,13 @@ public sealed record Resolution
         Polls = polls;
     }
 
-    /// <summary>The element, or null where nothing matched.</summary>
-    public AutomationElement? Element { get; }
+    /// <summary>
+    /// The element, or null where nothing matched. Not public: an act reaches its element only
+    /// through <see cref="Admitted"/>, which has already judged actionability, the way a launch
+    /// reaches a process only through the register. Reading is what this stays open for inside the
+    /// engine — a read needs no actionability, and an act cannot be spelled from out here.
+    /// </summary>
+    internal AutomationElement? Element { get; }
 
     /// <summary>What it says about itself, read once at the moment it was found.</summary>
     public ElementFacts? Facts { get; }

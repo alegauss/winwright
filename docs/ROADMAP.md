@@ -12,7 +12,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-- 📋 **WW112** (deps: —) **nothing makes an act go through the actionability check, so a verb that forgets it still runs** — An act reaches its element only through a gate that has already judged it, the way a launch reaches a process only through the register. → §WW112
 - 📋 **WW113** (deps: —) **the first line inspect prints is a locator step that matches nothing when it is used as one** — A locator written from any line inspect printed resolves, including the first one, which today addresses the root and matches nothing. → §WW113
 - 📋 **WW124** (deps: —) **an automation id with a space in it renders as a locator step the grammar then refuses** — An id is quoted the way a name already is, so every line inspect prints parses - which is the property the whole verb exists for and the one nothing was checking. → §WW124
 

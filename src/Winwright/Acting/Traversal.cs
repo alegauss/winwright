@@ -211,13 +211,11 @@ public static class Traversal
     {
         ArgumentNullException.ThrowIfNull(slider);
 
-        var reading = slider.Read();
-        ActionabilityCheck.Of(reading.Facts, "RangeValue").Require(slider.Locator.Text);
-
-        var facts = reading.Facts!;
-        var value = reading.Values.Range!.Value;
-        var minimum = reading.Values.RangeMinimum ?? double.MinValue;
-        var maximum = reading.Values.RangeMaximum ?? double.MaxValue;
+        var admitted = Admitted.To(slider, "RangeValue");
+        var facts = admitted.Facts;
+        var value = admitted.Values.Range!.Value;
+        var minimum = admitted.Values.RangeMinimum ?? double.MinValue;
+        var maximum = admitted.Values.RangeMaximum ?? double.MaxValue;
         if (minimum >= maximum)
         {
             throw new NotActionableException(
@@ -235,12 +233,11 @@ public static class Traversal
             _ => TraversalKey.Right,
         };
 
-        var handle = (nint)reading.Resolution.Element!.Current.NativeWindowHandle;
-        var foreground = Foreground.Check(handle == 0 ? 0 : Win32.GetAncestor(handle, Win32.GaRoot)).AsPrecondition();
+        var foreground = Foreground.Check(admitted.Window).AsPrecondition();
         if (!foreground.Satisfied)
             return new NudgeResult(facts, pressed, value, value, atTheTop, foreground);
 
-        reading.Resolution.Element.SetFocus();
+        admitted.Do(element => element.SetFocus());
         Keys.Send(pressed);
 
         Attempt.UntilTrue(() => slider.ReadOnce().Values.Range != value, slider.ActMs, slider.PollMs);

@@ -134,10 +134,12 @@ public static class Keyboard
         ArgumentNullException.ThrowIfNull(act);
         ArgumentNullException.ThrowIfNull(subject);
 
-        var reading = subject.Read();
-        ActionabilityCheck.Of(reading.Facts).Require(subject.Locator.Text);
+        // Typing needs no one pattern, so the admission asks for none — and then this verb's own
+        // rule runs on top of the four, which is where a verb's extra judgement belongs.
+        var admitted = Admitted.To(subject);
+        var reading = admitted.Reading;
 
-        var facts = reading.Facts!;
+        var facts = admitted.Facts;
         if (!facts.Supports("Value") && !facts.Supports("Text"))
         {
             throw new NotActionableException(
@@ -150,12 +152,11 @@ public static class Keyboard
         var before = reading.Values.Value ?? reading.Values.Text;
         var readOnly = reading.Values.IsReadOnly ?? false;
 
-        var window = TopLevelOf(reading.Resolution.Element!);
-        var foreground = Foreground.Check(window).AsPrecondition();
+        var foreground = Foreground.Check(admitted.Window).AsPrecondition();
         if (!foreground.Satisfied)
             return new TypedResult(act, facts, foreground, Precondition.Met(FocusPreconditionName), before, before, readOnly);
 
-        var focus = TakeFocus(reading.Resolution.Element!, facts);
+        var focus = admitted.Do(element => TakeFocus(element, facts));
         if (!focus.Satisfied)
             return new TypedResult(act, facts, foreground, focus, before, before, readOnly);
 
@@ -210,12 +211,6 @@ public static class Keyboard
         {
             return Precondition.Absent(FocusPreconditionName, $"the focused element went away: {gone.Message}");
         }
-    }
-
-    private static nint TopLevelOf(AutomationElement element)
-    {
-        var handle = (nint)element.Current.NativeWindowHandle;
-        return handle == 0 ? 0 : Win32.GetAncestor(handle, Win32.GaRoot);
     }
 
     /// <summary>

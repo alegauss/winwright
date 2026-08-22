@@ -129,11 +129,11 @@ public static class Pick
         ArgumentNullException.ThrowIfNull(container);
         ArgumentException.ThrowIfNullOrWhiteSpace(wanted);
 
-        var reading = container.Read();
-        ActionabilityCheck.Of(reading.Facts, "Selection").Require(container.Locator.Text);
-
-        var facts = reading.Facts!;
-        var element = reading.Resolution.Element!;
+        // Picking is several acts against the one picker — read its items, press one, read what it
+        // ended up on — so the admission is taken once and the picker is used for the length of it.
+        var admitted = Admitted.To(container, "Selection");
+        var facts = admitted.Facts;
+        var element = admitted.Do(picker => picker);
         var items = Items(element);
         var index = items.FindIndex(item => string.Equals(item.Name, wanted, StringComparison.Ordinal));
         if (index < 0)
@@ -154,9 +154,7 @@ public static class Pick
         }
 
         // The keyboard route needs the desktop; the pattern one never did.
-        var handle = (nint)element.Current.NativeWindowHandle;
-        var foreground = Windowing.Foreground.Check(handle == 0 ? 0 : Win32.GetAncestor(handle, Win32.GaRoot))
-            .AsPrecondition();
+        var foreground = Windowing.Foreground.Check(admitted.Window).AsPrecondition();
         if (!foreground.Satisfied)
             return new PickResult(wanted, facts, PickRoute.Keyboard, [], Selected(element), refused, foreground);
 

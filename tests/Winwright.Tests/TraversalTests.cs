@@ -53,9 +53,9 @@ public sealed class TraversalTests : IDisposable
         // The desktop first: these send keys, and another class's window may hold it by now.
         dialog.BringToFront();
 
-        var element = On(locator).ReadOnce().Resolution.Element;
-        Assert.NotNull(element);
-        element.SetFocus();
+        // Taking the focus is an act, so it goes through the door like every other one: there is
+        // no way from out here to reach the element without having been judged fit to touch it.
+        Admitted.To(On(locator)).Do(element => element.SetFocus());
         Thread.Sleep(120);
     }
 

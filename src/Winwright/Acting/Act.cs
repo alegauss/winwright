@@ -70,10 +70,11 @@ public static class Act
     {
         ArgumentNullException.ThrowIfNull(subject);
 
-        var before = subject.Read();
-        ActionabilityCheck.Of(before.Facts, pattern).Require(subject.Locator.Text);
+        // The element is reached only through the admission, which judged it on the way out.
+        var admitted = Admitted.To(subject, pattern);
+        var before = admitted.Reading;
 
-        doing(before.Resolution.Element!);
+        admitted.Do(doing);
 
         // Read again through the subject rather than through the element just used: the act may
         // have replaced what it addressed, and a handle held across it is a handle to what was.
@@ -82,7 +83,7 @@ public static class Act
             verb,
             subject.Locator,
             pattern,
-            before.Facts!,
+            admitted.Facts,
             before.Values,
             after.Values,
             before.Resolution.WaitedMs,
