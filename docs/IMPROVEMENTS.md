@@ -245,15 +245,6 @@ scenario that genuinely tests the quit path says so, once, where a reviewer sees
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW35 A blank is not a picture
-
-A tree that failed to build, or one that was never arranged, renders as a rectangle of
-transparent pixels, and a caller that checked only that a file was written cannot tell
-the two apart. Scanning for any pixel carrying an alpha of its own is the whole
-assertion. It is not a claim that the screen is correct, and pportal's suite
-deliberately renders an empty element beside it, because a check that has never seen a
-blank cannot claim to tell one.
-
 ### §WW38 A region, not a handful of points
 
 Nine sampled points cannot cover a window: the capture taken to verify one task passed
