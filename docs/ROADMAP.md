@@ -12,6 +12,7 @@
 - 📋 **WW111** (deps: —) **the suite's own window fixtures take the foreground from whoever is working at the machine** — Fixture windows are created off-screen, since a suite that flashes over the desk also perturbs the one reading a task in this block exists to measure. → §WW111
 - 📋 **WW114** (deps: —) **the suite's input tests compete for a foreground Windows will not always grant them** — The window fixtures run on a desktop of their own, where they are the only windows and the foreground is theirs by definition rather than by contest. → §WW114
 - 📋 **WW119** (deps: —) **the tray fixture returns before the shell has put the icon anywhere a test can find it** — The fixture waits for the icon to be findable rather than for the shell to take the message, so a test never races the placement every one of its assertions depends on. → §WW119
+- 📋 **WW125** (deps: —) **a test class that touches the desktop can be written outside the serial collection and nothing says so** — Membership is asserted rather than remembered, so a class creating a window or launching a process runs beside the foreground checks only when somebody meant it to. → §WW125
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

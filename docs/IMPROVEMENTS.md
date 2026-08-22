@@ -156,6 +156,26 @@ Distinct from WW111 and WW114. Those are about the foreground being contested; t
 reproduces with the foreground uncontested, because nothing here needs the desktop —
 only the shell's own timing.
 
+### §WW125 The serial collection is asserted, not remembered
+
+Measured across this session rather than argued. The suite went red three times on runs
+where nothing about the code under test had changed - twenty-one failures once, seven
+another time, three on the run that provoked this - and green on the next run every
+time. Every failure was in a class that needs the foreground: pointer, traversal,
+selecting, actionability, the notification area.
+
+The cause is membership. Some classes that create windows or launch processes declare
+the serial collection and some do not, so xUnit runs the ones that do not beside the
+ones that do. A window taking the foreground in one thread is exactly the condition the
+other thread is trying to measure, and the run that loses reports a failure about the
+code.
+
+This is not the same as running the fixtures off-screen or on a desktop of their own,
+both of which are already filed and both of which are larger. It is the cheap half: a
+check that reads the suite's own sources and refuses a class that touches a window, a
+process or the notification area without joining the collection. The suite already
+carries one check of exactly that shape, so the pattern costs nothing new to adopt.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW112 Actionability needs a door, not a convention
