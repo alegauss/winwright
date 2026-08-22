@@ -42,13 +42,15 @@ public sealed record LayoutReading
         IReadOnlyList<LayoutFault> faults,
         DrawnElement? root,
         WindowBounds covered,
-        IReadOnlyList<DrawnElement>? concealed = null)
+        IReadOnlyList<DrawnElement>? concealed = null,
+        IReadOnlyList<LayoutFault>? chrome = null)
     {
         Examined = examined;
         Faults = faults;
         Root = root;
         Covered = covered;
         Concealed = concealed ?? new ReadOnlyCollection<DrawnElement>([]);
+        Chrome = chrome ?? new ReadOnlyCollection<LayoutFault>([]);
     }
 
     /// <summary>How many elements were examined. Zero is not a pass — see <see cref="AsAssertion"/>.</summary>
@@ -75,6 +77,32 @@ public sealed record LayoutReading
     /// </para>
     /// </summary>
     public IReadOnlyList<DrawnElement> Concealed { get; }
+
+    /// <summary>
+    /// The faults a framework's own template is responsible for, kept apart from the rest.
+    /// <para>
+    /// WW131. Against a real themed window four of forty-five elements are laid out wrongly by every
+    /// rule this check has, and every one is a part of the default tab template drawing a selected
+    /// header over the edge on purpose. Those are true statements about what was drawn and they are
+    /// not what anybody asked: no adopter can fix them, and every adopter would read past them.
+    /// </para>
+    /// <para>
+    /// A fault lands here when either element it is about came out of a template. Both have to be
+    /// the application's for it to be a finding about the application.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<LayoutFault> Chrome { get; }
+
+    /// <summary>
+    /// The same reading with the framework's own faults counted among the rest, for a caller that
+    /// really does mean to assert about somebody else's template.
+    /// </summary>
+    public LayoutReading WithChrome() => new(
+        Examined,
+        new ReadOnlyCollection<LayoutFault>([.. Faults, .. Chrome]),
+        Root,
+        Covered,
+        Concealed);
 
     /// <summary>Whether nothing was found wrong. False on an empty dump, which found nothing at all.</summary>
     public bool Held => Examined > 0 && Faults.Count == 0;
@@ -104,7 +132,8 @@ public sealed record LayoutReading
             new ReadOnlyCollection<LayoutFault>(Faults.Where(one => wanted.Contains(one.Kind)).ToList()),
             Root,
             Covered,
-            Concealed);
+            Concealed,
+            new ReadOnlyCollection<LayoutFault>(Chrome.Where(one => wanted.Contains(one.Kind)).ToList()));
     }
 
     /// <summary>What was checked and what was wrong, said either way.</summary>
@@ -117,6 +146,13 @@ public sealed record LayoutReading
             ? ""
             : $", and {Concealed.Count} the application is not showing left alone "
                 + $"({string.Join(", ", Concealed.Select(one => one.ToString()))})";
+
+        var theirs = Chrome.Count == 0
+            ? ""
+            : $", and {Chrome.Count} left to the framework's own template "
+                + $"({string.Join("; ", Chrome.Select(one => one.Detail))})";
+
+        hidden += theirs;
 
         if (Faults.Count == 0)
             return $"{Examined} element(s) laid out correctly under {Root}{hidden}.";
@@ -242,14 +278,17 @@ public static class Layout
         // are only wrong about each other. Both are found on the same walk.
         Overlapping(elements, faults);
 
+        // WW131: sorted at the end rather than at each site, so the four ways a fault is found stay
+        // one rule each and the question of whose element it is stays one rule too.
         return new LayoutReading(
             elements.Count,
-            new ReadOnlyCollection<LayoutFault>(faults),
+            new ReadOnlyCollection<LayoutFault>(faults.Where(Ours).ToList()),
             root,
             covered.Equals(Nothing)
                 ? new WindowBounds(root.Bounds.Left, root.Bounds.Top, root.Bounds.Left, root.Bounds.Top)
                 : covered,
-            new ReadOnlyCollection<DrawnElement>(concealed));
+            new ReadOnlyCollection<DrawnElement>(concealed),
+            new ReadOnlyCollection<LayoutFault>(faults.Where(one => !Ours(one)).ToList()));
     }
 
     /// <summary>The same, reading the dump off disk first.</summary>
@@ -263,6 +302,13 @@ public static class Layout
         Math.Min(left.Top, right.Top),
         Math.Max(left.Right, right.Right),
         Math.Max(left.Bottom, right.Bottom));
+
+    /// <summary>
+    /// Whether a fault is one the application could do anything about. Both elements have to be
+    /// its own: a tab item the application declared, drawn out of place by the panel its framework
+    /// templated, is a fact about the framework however the application named the item.
+    /// </summary>
+    private static bool Ours(LayoutFault fault) => fault.What.IsOwn && (fault.Against?.IsOwn ?? true);
 
     /// <summary>
     /// The element that explains why this one was not laid out, which is itself or the nearest

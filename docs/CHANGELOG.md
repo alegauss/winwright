@@ -85,6 +85,7 @@
 - ✅ **WW51** **a page renders correctly above a screenful of blank space and nothing notices** — A dump is checked against itself for the four faults and measured for how much of the surface was drawn on, with every expectation derived from the dump rather than typed into a case.
 - ✅ **WW118** **a derived set can carry a placeholder value that no exact read will ever match** — A derived set leaves out the strings carrying a placeholder and names them in the source sentence every verdict prints, and a key where none survives is refused rather than derived empty.
 - ✅ **WW130** **an element collapsed on purpose is reported as laid out and occupying nothing** — The dump carries what the application set and the check leaves an element it is not showing alone, counting it in the sentence — which removed every such fault from the fixture's own window.
+- ✅ **WW131** **a themed control's own chrome is reported as laid out outside the thing containing it** — The dump says who put each element there and the reading keeps a framework template's own faults apart, which left the fixture's window one finding about elements it declared instead of five.
 
 ## Block G — The scenario — a case is a data file
 

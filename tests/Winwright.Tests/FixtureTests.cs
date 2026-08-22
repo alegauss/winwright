@@ -1029,14 +1029,8 @@ public sealed class FixtureTests : IDisposable
 
         var read = Layout.Of(geometry);
 
-        // Read, not held: a real themed window is not laid out to this check's satisfaction and
-        // that is a fact about the framework rather than about the fixture. Its default tab
-        // template lifts a selected header four pixels outside the panel holding it and two past
-        // the border containing it, which is filed as a gap in the reading rather than papered
-        // over with a narrower assertion here.
         Assert.True(read.Examined > 10, read.Sentence());
         Assert.NotNull(read.Root);
-        Assert.Contains(read.Faults, one => one.Kind == Fault.EndsOutside);
 
         // WW130, against the window it was found on: every element this used to report as laid out
         // to no size was one the application had collapsed on purpose. They are left alone now, and
@@ -1044,6 +1038,24 @@ public sealed class FixtureTests : IDisposable
         Assert.DoesNotContain(read.Faults, one => one.Kind == Fault.MeasuresNothing);
         Assert.NotEmpty(read.Concealed);
         Assert.Contains("the application is not showing left alone", read.Sentence());
+
+        // WW131, on the same window: the default tab template lifts a selected header four pixels
+        // outside the panel holding it and two past the border containing it. Those are true
+        // statements about what was drawn and no adopter can fix any of them, so they are the
+        // framework's rather than nobody's.
+        Assert.DoesNotContain(read.Faults, one => one.Kind is Fault.StartsOutside or Fault.EndsOutside);
+        Assert.Contains(read.Chrome, one => one.Kind is Fault.StartsOutside or Fault.EndsOutside);
+        Assert.Contains("left to the framework's own template", read.Sentence());
+        Assert.Contains(read.WithChrome().Faults, one => one.Kind == Fault.EndsOutside);
+
+        // What is left is one thing about elements the fixture itself declared: two tab items
+        // overlapping by the four pixels a selected one is lifted. Overlap is the fault a case
+        // narrows away where a window legitimately has one thing over another, which is what Only
+        // is for — and it is reported rather than assumed away here.
+        var overlap = Assert.Single(read.Faults);
+        Assert.Equal(Fault.Overlaps, overlap.Kind);
+        Assert.True(overlap.What.IsOwn && overlap.Against!.IsOwn, overlap.Detail);
+        Assert.Empty(read.Only(Fault.StartsOutside, Fault.EndsOutside, Fault.MeasuresNothing).Faults);
     }
 
     /// <summary>Where the fixture's own sources are.</summary>

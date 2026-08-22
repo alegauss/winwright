@@ -20,14 +20,34 @@ namespace Winwright.InApp;
 /// caption that wrapped at column zero and a note the page is deliberately not showing produce
 /// exactly the same line.
 /// </param>
+/// <param name="Origin">
+/// Who put it there: Application where the application's own markup or code did, Template where
+/// expanding a control template did. WW131 - four of the fixture's forty-five elements are laid out
+/// wrongly by every rule a geometry check has, and every one is a part of the default tab template
+/// drawing a selected header over the edge on purpose. True statements, and not what anybody asked.
+/// </param>
 public sealed record DrawnElement(
-    int Depth, string Kind, string Name, int Left, int Top, int Right, int Bottom, string Visibility = "Visible")
+    int Depth,
+    string Kind,
+    string Name,
+    int Left,
+    int Top,
+    int Right,
+    int Bottom,
+    string Visibility = "Visible",
+    string Origin = "Application")
 {
     /// <summary>What the format calls an element the application is showing.</summary>
     public const string Visible = "Visible";
 
+    /// <summary>What the format calls an element the application itself put there.</summary>
+    public const string Declared = "Application";
+
     /// <summary>Whether the application is showing it at all.</summary>
     public bool Shown => string.Equals(Visibility, Visible, StringComparison.Ordinal);
+
+    /// <summary>Whether the application itself put it there.</summary>
+    public bool Own => string.Equals(Origin, Declared, StringComparison.Ordinal);
 
     /// <summary>How wide it is.</summary>
     public int Width => Right - Left;
@@ -48,12 +68,14 @@ public sealed record DrawnElement(
         Top.ToString(CultureInfo.InvariantCulture),
         Right.ToString(CultureInfo.InvariantCulture),
         Bottom.ToString(CultureInfo.InvariantCulture),
-        Visibility);
+        Visibility,
+        Origin);
 
     /// <summary>The one phrase a person reads it by.</summary>
     public override string ToString() =>
         $"{Kind}{(Name.Length == 0 ? "" : $" '{Name}'")} {Width}x{Height} at {Left},{Top}"
-        + (Shown ? "" : $" ({Visibility.ToLowerInvariant()})");
+        + (Shown ? "" : $" ({Visibility.ToLowerInvariant()})")
+        + (Own ? "" : " (template)");
 }
 
 /// <summary>What one walk of the visual tree found.</summary>
@@ -205,6 +227,31 @@ public static class Geometry
         }
     }
 
+    /// <summary>
+    /// Who put this element in the tree.
+    /// <para>
+    /// WPF answers it exactly: an element the application's own markup or code created has no
+    /// templated parent, and one produced by expanding a template does. The application declared
+    /// the control; the template drew the part, whoever wrote that template - which is the
+    /// distinction a reader wants, since a part drawn four pixels over the edge on purpose is not
+    /// something an adopter can fix.
+    /// </para>
+    /// <para>
+    /// Content a data template produced is the application's own markup and is counted as such: its
+    /// templated parent is the content presenter that expanded it, which is the one case where a
+    /// templated parent does not mean somebody else's chrome.
+    /// </para>
+    /// </summary>
+    private static string Whose(UIElement element)
+    {
+        if (element is not FrameworkElement framework || framework.TemplatedParent is null)
+            return DrawnElement.Declared;
+
+        return framework.TemplatedParent is System.Windows.Controls.ContentPresenter
+            ? DrawnElement.Declared
+            : "Template";
+    }
+
     private static DrawnElement? Measured(UIElement element, int level)
     {
         // PointToScreen is the whole conversion, the same one a reported surface uses. An element
@@ -227,7 +274,8 @@ public static class Geometry
                 (int)Math.Round(topLeft.Y),
                 (int)Math.Round(bottomRight.X),
                 (int)Math.Round(bottomRight.Y),
-                element.Visibility.ToString());
+                element.Visibility.ToString(),
+                Whose(element));
         }
         catch (InvalidOperationException)
         {

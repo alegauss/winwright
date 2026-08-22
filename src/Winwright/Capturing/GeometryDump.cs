@@ -26,6 +26,25 @@ public enum Shown
     Collapsed,
 }
 
+/// <summary>
+/// Who put an element in the tree, as the application said.
+/// <para>
+/// WW131. A geometry check exists to catch a caption that wrapped and a button nine pixels below
+/// its box - things somebody wrote. Against a real themed window it answered with the framework's
+/// chrome instead: four of forty-five elements laid out wrongly, every one of them a part of the
+/// default tab template drawing a selected header over the edge on purpose. No adopter can fix
+/// those and every adopter would have to read past them.
+/// </para>
+/// </summary>
+public enum Origin
+{
+    /// <summary>The application's own markup or code put it there.</summary>
+    Application,
+
+    /// <summary>Expanding a control template did, whoever wrote that template.</summary>
+    Template,
+}
+
 /// <summary>One element the application under test said it drew, in physical pixels.</summary>
 /// <param name="Depth">How deep under the root it sat.</param>
 /// <param name="Kind">Its type.</param>
@@ -35,9 +54,21 @@ public enum Shown
 /// Whether the application was showing it. Visible where the dump did not say, which is the older
 /// format: a reader that assumed otherwise would quietly stop reporting a real fault.
 /// </param>
+/// <param name="From">
+/// Who put it there. Application where the dump did not say, for the same reason: an older dump
+/// must keep reporting what it always did rather than start excusing.
+/// </param>
 public sealed record DrawnElement(
-    int Depth, string Kind, string Name, WindowBounds Bounds, Shown Visibility = Shown.Visible)
+    int Depth,
+    string Kind,
+    string Name,
+    WindowBounds Bounds,
+    Shown Visibility = Shown.Visible,
+    Origin From = Origin.Application)
 {
+    /// <summary>Whether the application itself put it there.</summary>
+    public bool IsOwn => From == Origin.Application;
+
     /// <summary>Whether it occupies anything at all.</summary>
     public bool Drawn => Bounds.Width > 0 && Bounds.Height > 0;
 
@@ -47,7 +78,8 @@ public sealed record DrawnElement(
     /// <summary>The one phrase a report names it by.</summary>
     public override string ToString() =>
         $"{Kind}{(Name.Length == 0 ? "" : $" '{Name}'")} {Bounds}"
-        + (IsShown ? "" : $" ({Visibility.ToString().ToLowerInvariant()})");
+        + (IsShown ? "" : $" ({Visibility.ToString().ToLowerInvariant()})")
+        + (IsOwn ? "" : " (template)");
 }
 
 /// <summary>What reading one dump found.</summary>
@@ -175,7 +207,7 @@ public static class GeometryDump
         // showing everything, which keeps whatever it would have reported rather than quietly
         // dropping findings the moment the two halves are a version apart.
         var fields = line.TrimEnd('\r').Split('\t');
-        if (fields.Length is not (7 or 8) || string.IsNullOrWhiteSpace(fields[1]))
+        if (fields.Length is not (7 or 8 or 9) || string.IsNullOrWhiteSpace(fields[1]))
             return null;
 
         var numbers = new int[5];
@@ -193,7 +225,8 @@ public static class GeometryDump
             fields[1],
             fields[2],
             new WindowBounds(numbers[1], numbers[2], numbers[3], numbers[4]),
-            fields.Length == 8 ? Visibility(fields[7]) : Shown.Visible);
+            fields.Length >= 8 ? Visibility(fields[7]) : Shown.Visible,
+            fields.Length >= 9 ? Whose(fields[8]) : Origin.Application);
     }
 
     /// <summary>
@@ -207,6 +240,13 @@ public static class GeometryDump
         "Hidden" => Shown.Hidden,
         _ => Shown.Visible,
     };
+
+    /// <summary>
+    /// Who the dump said put an element there. A word this reader does not know is the application,
+    /// for the reason an unknown visibility is Visible: keep reporting rather than start excusing.
+    /// </summary>
+    private static Origin Whose(string written) =>
+        written.Trim() == "Template" ? Origin.Template : Origin.Application;
 
     private static IEnumerable<string> Lines(string full)
     {

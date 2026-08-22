@@ -274,25 +274,6 @@ which is the argument every other image comparison eventually turns into.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW131 The application's elements and the template's parts
-
-Measured against the fixture's own window. Four of forty-five elements are laid out
-wrongly by every rule the check has, and every one of the four is a part of the default
-tab template: a selected header is drawn four pixels outside the panel holding it and
-two past the border containing it, on purpose, because that is how a selected tab lifts
-over the edge. The elements are real, the rectangles are real, and the faults are true
-statements about what was drawn.
-
-They are also not what anybody asked. A geometry check exists to catch a caption that
-wrapped and a button nine pixels below its box - things somebody wrote - and it
-currently answers with the framework's chrome instead, which no adopter can fix and
-every adopter would have to read past.
-
-Narrowing by name does not separate them: the application named the tab item, and the
-template drew it out of place. What separates them is who declared the element, and the
-dump is where that is known - the walk is standing inside the application when it
-happens. A field saying so is cheaper than every reader learning to ignore four lines.
-
 ### §WW139 The notes in the file are not strings
 
 Read off a failing assertion while WW118 was being shipped. JSON has no comments, so a
