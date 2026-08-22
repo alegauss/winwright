@@ -306,16 +306,6 @@ which is the argument every other image comparison eventually turns into.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW49 Derived, never listed
-
-A hardcoded expected set silently stops covering the thing it was written for.
-claude-tray's panes case named three tab headers by hand and the window had carried four
-for some time, so it reported all three tab headers read against a four-tab window, and
-the newest pane had never been asked whether it was in the tree at all. The set is
-derived from the project's own strings - and from the strings rather than from the tree,
-because the tree is what is being asserted and an expectation read out of it could never
-notice a header that had gone missing.
-
 ### §WW50 Labels come from the project's own strings
 
 An assertion matching English words against a window rendering another language is loud

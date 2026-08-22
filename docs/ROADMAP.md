@@ -36,7 +36,6 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW49** (deps: —) **a hardcoded expected set silently stops covering what it was written for** — Sets are derived from the project's own strings or read-outs, so a tab, a panel or a profile added later is swept with no edit to any scenario. → §WW49
 - 📋 **WW50** (deps: —) **labels are matched in English against a window rendering another language** — Labels resolve through the project's language files, and a key whose value carries a placeholder is refused, because an exact-name read can never match one. → §WW50
 - 📋 **WW51** (deps: WW77) **a page renders correctly above a screenful of blank space and nothing notices** — Geometry is dumped and checked: nothing overlaps, nothing starts off the surface, nothing ends past it and nothing measures zero. → §WW51
 - 📋 **WW52** (deps: —) **a control announcing its glyph codepoint satisfies every check for a non-empty name** — The name is asserted to be its own label, and a name the console cannot draw is printed as escapes rather than as the empty string it is not. → §WW52
