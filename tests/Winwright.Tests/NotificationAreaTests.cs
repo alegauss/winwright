@@ -17,9 +17,10 @@ namespace Winwright.Tests;
 [Collection(WindowFixture.Serial)]
 public sealed class NotificationAreaTests : IDisposable
 {
-    private const string Tip = "winwright under test";
+    private readonly TrayIconFixture icon = TrayIconFixture.Add("winwright under test");
 
-    private readonly TrayIconFixture icon = TrayIconFixture.Add(Tip);
+    /// <summary>What the shell calls this run's icon, which is not what any other run's is called.</summary>
+    private string Tip => icon.Tip;
 
     public void Dispose()
     {
@@ -148,7 +149,7 @@ public sealed class NotificationAreaTests : IDisposable
         var found = NotificationArea.Find(Tip);
 
         Assert.NotNull(found);
-        Assert.StartsWith("hidden tray icon 'winwright under test'", found.ToString());
+        Assert.StartsWith($"hidden tray icon '{Tip}'", found.ToString());
         Assert.Contains(" at ", found.ToString());
     }
 }

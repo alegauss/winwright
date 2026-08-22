@@ -27,7 +27,14 @@ public sealed class FixtureTests : IDisposable
 {
     private readonly ProcessRegister register = new();
 
-    public void Dispose() => register.Dispose();
+    public void Dispose()
+    {
+        // Settled and not merely stopped: the next class in this collection is often the one
+        // measuring who owns the foreground, and a window still fading off the desktop is exactly
+        // what that measurement cannot tell from a defect.
+        Attachable.StopAndSettle(register);
+        register.Dispose();
+    }
 
     /// <summary>
     /// The fixture's executable, in its own output directory. Not copied beside the suite: the

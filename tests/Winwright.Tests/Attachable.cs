@@ -36,6 +36,32 @@ public static class Attachable
         return launched;
     }
 
+    /// <summary>
+    /// Stop everything the register started and wait until the desktop no longer shows any of it.
+    /// <para>
+    /// WW126: stopping a process and its windows being gone are two different moments, and a class
+    /// that returned between them hands the next one a desktop with a window still fading off it.
+    /// The next class is usually the one measuring who owns the foreground.
+    /// </para>
+    /// </summary>
+    public static void StopAndSettle(ProcessRegister register)
+    {
+        ArgumentNullException.ThrowIfNull(register);
+
+        var pids = register.Launched.Select(one => one.Pid).ToList();
+        register.StopAll();
+
+        for (var attempt = 0; attempt < 200; attempt++)
+        {
+            if (pids.TrueForAll(pid => Winwright.Windowing.TopLevelWindows.OfProcess(pid).Count == 0))
+                return;
+
+            Thread.Sleep(20);
+        }
+
+        Assert.Fail($"windows of {string.Join(", ", pids)} were still on the desktop after the register stopped them");
+    }
+
     private static bool Readable(int pid)
     {
         try

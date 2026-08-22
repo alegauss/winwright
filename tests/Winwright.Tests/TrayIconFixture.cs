@@ -100,7 +100,11 @@ internal sealed class TrayIconFixture : IDisposable
 
     private TrayIconFixture(string tip)
     {
-        Tip = tip;
+        // WW126: the tip carries this process, because a run that was killed leaves its icon
+        // registered with the shell and nothing in this process can delete somebody else's. A
+        // ghost from a previous run is then found by tip and read as this run's own, which is why
+        // the suite got flakier the more times it was run rather than staying equally flaky.
+        Tip = $"{tip} #{Environment.ProcessId}";
         using var ready = new ManualResetEventSlim();
         var added = false;
 
@@ -135,7 +139,10 @@ internal sealed class TrayIconFixture : IDisposable
     /// <summary>What the shell will call it.</summary>
     internal string Tip { get; }
 
-    /// <summary>Add one, blocking until the shell has it.</summary>
+    /// <summary>
+    /// Add one, blocking until the shell has it. The tip it ends up with carries this process, so
+    /// ask this object rather than passing the same string to a reading.
+    /// </summary>
     internal static TrayIconFixture Add(string tip) => new(tip);
 
     /// <summary>Take it away, and the window that owned it.</summary>

@@ -156,25 +156,6 @@ Distinct from WW111 and WW114. Those are about the foreground being contested; t
 reproduces with the foreground uncontested, because nothing here needs the desktop —
 only the shell's own timing.
 
-### §WW126 The suite leaves the desktop as it found it
-
-Measured, and the measurement is what makes this a task rather than a suspicion. The
-three classes that need the desktop - actionability, the pointer and the notification
-area - were run three times in a row, alone, with nothing changed between the runs:
-thirty-three passed, then thirty-one, then twenty-eight. Each test run is a fresh
-process, so nothing inside one of them explains a run being worse than the one before
-it. The state is on the machine.
-
-The notification area is the likely first source: a run adds a real tray icon through
-the shell and removes it on disposal, and a run that was killed, timed out or crashed
-removes nothing. The next run then sees more icons than it put there and reads one of
-them as its own. Windows outliving a killed run are the same shape.
-
-This project's own non-goal says a run leaves the machine as it found it, and the suite
-that asserts that promise for other people does not keep it for itself. The fingerprint
-machinery to check it already exists here - it was built for exactly this reading - and
-pointing it at the desktop rather than at a settings file is what closes the loop.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW112 Actionability needs a door, not a convention
