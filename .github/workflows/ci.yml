@@ -1,0 +1,56 @@
+name: CI
+
+# The engine targets net10.0-windows and its tests create real windows, so there is no runner
+# choice to make here: windows-latest or nothing. A Linux job would not even restore.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A second push to the same branch makes the first run's answer stale, so it is cancelled rather
+# than left to finish and report on code nobody has any more.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # global.json pins 10.0.303 with rollForward latestPatch; reading it here is what keeps the
+      # runner's SDK and the developer's from being two different answers.
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore Winwright.slnx
+
+      # TreatWarningsAsErrors is on in Directory.Build.props, so a warning fails here on purpose.
+      - name: Build
+        run: dotnet build Winwright.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: >
+          dotnet test Winwright.slnx
+          --configuration Release
+          --no-build
+          --logger "trx;LogFileName=winwright.trx"
+          --results-directory ${{ runner.temp }}/test-results
+
+      # A red run is only useful if you can see which assertion went red, and the console log
+      # truncates. The trx is kept only when there is something to read in it.
+      - name: Keep the test results of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: ${{ runner.temp }}/test-results
+          retention-days: 7
