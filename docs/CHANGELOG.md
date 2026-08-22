@@ -78,6 +78,8 @@
 
 - ✅ **WW71** **the render verb is written again in every project that wants one** — One package renders a tree with no window shown - measure, arrange, update, target, background, encode - with the arrange inside, and a size of nothing refused rather than written as an empty file.
 - ✅ **WW72** **a capture is rendered on no background and comes back unreadable** — The application's own key is asked first and the observed window colour is the fallback, the classic palette is never consulted, and neither answering is stated rather than turned into white.
+- 🗑 **WW120** **the in-app package fixes the process DPI awareness before the engine can ask for its own** — superseded by WW121: Measured before deciding and the premise did not survive: the process is system-aware before any code here runs, so the package is not what fixes it and no initializer could win.
+- ✅ **WW121** **a render says nothing about whether this process can see the display it drew on** — The in-app half asks for per-monitor awareness at load and every receipt now carries what the process actually sees, so a size drawn in the wrong space says so instead of looking correct.
 
 ## Block J — Adoption — the proof is the deletion
 

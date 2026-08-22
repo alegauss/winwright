@@ -38,13 +38,29 @@ public sealed class UnrenderableException : InvalidOperationException
 /// <param name="Lines">Its height in pixels.</param>
 /// <param name="Dpi">The resolution it was drawn at.</param>
 /// <param name="Background">What was composed behind it, in words a report prints.</param>
+/// <param name="Sees">
+/// What this process can see of the display, read at the moment of the render. On the receipt
+/// because a picture drawn by a system-aware process on a scaled display has a size that does not
+/// mean what it says, and nothing else about the file would ever say so.
+/// </param>
 public sealed record RenderedPicture(
-    string Path, double Width, double Height, int Pixels, int Lines, double Dpi, string Background)
+    string Path,
+    double Width,
+    double Height,
+    int Pixels,
+    int Lines,
+    double Dpi,
+    string Background,
+    string Sees = "")
 {
+    /// <summary>Whether the size on this receipt is in the space the window lives in.</summary>
+    public bool Trustworthy => Sees == "per-monitor aware";
+
     /// <summary>The one line a run prints on a render that worked.</summary>
     public string Sentence() =>
         $"rendered {Width:0.##}x{Height:0.##} at {Dpi:0.##} dpi ({Pixels}x{Lines} pixels) on {Background}"
-        + (Path.Length == 0 ? "." : $", written to {Path}.");
+        + (Path.Length == 0 ? "" : $", written to {Path}")
+        + (Sees.Length == 0 ? "." : $"; this process is {Sees}.");
 }
 
 /// <summary>
@@ -187,7 +203,14 @@ public static class Render
         return (
             composed,
             new RenderedPicture(
-                "", settled.Width, settled.Height, pixels, lines, dpi, describedAs ?? Describe(background)));
+                "",
+                settled.Width,
+                settled.Height,
+                pixels,
+                lines,
+                dpi,
+                describedAs ?? Describe(background),
+                Coordinates.Sentence()));
     }
 
     private static BitmapSource Composed(
