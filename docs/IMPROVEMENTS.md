@@ -91,6 +91,28 @@ unmeetable condition here does, rather than go red about the application. The fi
 already declines to insist; what is missing is the sentence on the other side of the
 refusal.
 
+### §WW140 A blip is not a missing assembly
+
+Caught in a full-suite run while WW119 was being verified. The desk reading touches
+AutomationElement.RootElement to find out whether UI Automation is usable at all, and
+catches COMException among the ways it can be unusable. Once in a loaded run it came
+back with "Unexpected HRESULT has been returned from a call to a COM component", the
+reading said this desk cannot observe, and the case asserting the conditions a running
+suite proves went red. The class passes six times of six on its own.
+
+Both halves of the catch are right and they are not the same fact. A machine with no
+automation assemblies fails that call every time; a machine under load fails it once and
+answers the next moment. Reporting them identically is this block's own criterion
+pointed the wrong way - nothing about the desk should be reported as a defect in the
+code, and a blip reported as a missing subsystem is a defect in the desk reported as a
+fact about it.
+
+The remedy is the one the rest of the engine uses. Every other reading that can lose a
+race here is a deadline on a condition rather than a single look, and the retry type is
+capped and counted, so a reading that needed a second attempt says so. What must stay
+true is that a machine which genuinely cannot reach UI Automation is still reported as
+such promptly, and does not spend a cap discovering what the first attempt established.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW124 An id is quoted like a name

@@ -9,6 +9,7 @@
 
 - 📋 **WW127** (deps: —) **two checks read the live desktop root and assert about whatever the machine is showing** — Both are pointed at a window this suite made, so what they claim about short pattern names is a claim about this project rather than about the desk that ran it. → §WW127
 - 📋 **WW133** (deps: —) **an input case on a busy desk fails about the code, because a refused foreground is not turned into a hole** — A case that needs the desktop and is refused it records a hole naming the desk, which is what this block already promises and what a private desktop cannot give. → §WW133
+- 📋 **WW140** (deps: —) **one transient COM error from UI Automation reads as a desk that cannot observe anything at all** — The desk tells a machine without the automation assemblies from a call that failed once under load, so a passing suite is not turned red by a blip. → §WW140
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
