@@ -591,14 +591,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW91 The same window under two pumps
-
-The difference between hosting a window under one message pump and another is invisible
-in every picture and decides whether keyboard input arrives at all. claude-tray
-discovered it by shipping windows that took no keystrokes while every screenshot of them
-looked perfect. The fixture ships both hosts behind two flags, which is what makes the
-check for it developable without inheriting a real product's hosting decisions.
-
 ### §WW92 One page holding the whole naming rule
 
 A control with no name, one announcing a glyph codepoint, one whose label is a

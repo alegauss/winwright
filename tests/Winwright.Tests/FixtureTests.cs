@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 using Winwright.Locating;
 using Winwright.Processes;
@@ -266,4 +267,48 @@ public sealed class FixtureTests : IDisposable
 
         return (running.ExitCode, said);
     }
+
+    [Fact]
+    public void The_same_window_under_a_dispatcher_that_runs_answers_a_message()
+    {
+        var window = Launched("--pump=dispatcher");
+
+        Assert.True(Answers(window.Handle), "the pumped window did not answer a message");
+    }
+
+    [Fact]
+    public void The_same_window_under_a_dispatcher_that_never_runs_looks_perfect_and_answers_nothing()
+    {
+        // The difference no picture can see. One product shipped windows that took no keystrokes
+        // while every screenshot of them looked perfect, and this is that window on demand.
+        var window = Launched("--pump=none");
+
+        Assert.Equal("winwright fixture", window.Title);
+        Assert.True(window.OnScreen, "the unpumped window is not on screen, so no picture of it would look right");
+        Assert.True(window.Bounds.Area > 0, window.ToString());
+
+        Assert.False(Answers(window.Handle), "the unpumped window answered a message, so it is pumping something");
+    }
+
+    [Fact]
+    public void A_value_outside_what_a_flag_takes_is_refused_with_the_ones_it_does()
+    {
+        var (code, said) = Ran("--pump=maybe");
+
+        Assert.Equal(2, code);
+        Assert.Contains("--pump does not take 'maybe': it takes dispatcher or none", said);
+        Assert.Contains("--pump=dispatcher|none", said);
+    }
+
+    /// <summary>
+    /// Whether the window's thread is dispatching at all, asked without needing the foreground:
+    /// a message it must answer, with a bound on how long it may take. This is the one reading
+    /// that tells a live window from a composed picture of a dead one.
+    /// </summary>
+    private static bool Answers(nint window) =>
+        SendMessageTimeoutW(window, 0x0000, 0, 0, 0x0002, 1500, out _) != 0;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint SendMessageTimeoutW(
+        nint window, uint message, nint wParam, nint lParam, uint flags, uint timeoutMs, out nint result);
 }

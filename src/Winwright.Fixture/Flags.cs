@@ -28,11 +28,25 @@ public sealed class UnknownFlagException : ArgumentException
 /// <param name="Name">The flag, without its dashes.</param>
 /// <param name="Takes">What it takes after an equals sign, or empty where it takes nothing.</param>
 /// <param name="Provokes">The refusal or the reading it exists to make possible.</param>
-public sealed record Flag(string Name, string Takes, string Provokes)
+/// <param name="Choices">
+/// The values it accepts, where it accepts a fixed set. Empty means any text. A value outside the
+/// set is refused the same way an unknown flag is: a shape nobody can spell is a shape nobody
+/// takes, and the run that misspells one asserts nothing and says so nowhere.
+/// </param>
+public sealed record Flag(string Name, string Takes, string Provokes, IReadOnlyList<string>? Choices = null)
 {
+    /// <summary>What it accepts, or nothing where it accepts any text.</summary>
+    public IReadOnlyList<string> Accepts => Choices ?? [];
+
     /// <summary>The one line the catalogue prints.</summary>
-    public override string ToString() =>
-        $"--{Name}{(Takes.Length == 0 ? "" : $"=<{Takes}>")}  {Provokes}";
+    public override string ToString()
+    {
+        var takes = Takes.Length == 0
+            ? ""
+            : Accepts.Count == 0 ? $"=<{Takes}>" : $"={string.Join("|", Accepts)}";
+
+        return $"--{Name}{takes}  {Provokes}";
+    }
 }
 
 /// <summary>
@@ -65,6 +79,12 @@ public sealed record Flags
     public static IReadOnlyList<Flag> Known { get; } = new ReadOnlyCollection<Flag>(
     [
         new Flag("title", "text", "a window titled something other than the default, for a case driving two at once"),
+        new Flag(
+            "pump",
+            "host",
+            "the same window under a dispatcher that runs and one that never does - the difference "
+                + "no picture can see and the one that decides whether a keystroke arrives",
+            ["dispatcher", "none"]),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>
@@ -121,6 +141,12 @@ public sealed record Flags
 
             if (known.Takes.Length == 0 && equals >= 0)
                 throw new UnknownFlagException($"--{name} takes nothing, and it was given '{value}'.{Catalogue()}");
+
+            if (known.Accepts.Count > 0 && !known.Accepts.Contains(value, StringComparer.Ordinal))
+            {
+                throw new UnknownFlagException(
+                    $"--{name} does not take '{value}': it takes {string.Join(" or ", known.Accepts)}.{Catalogue()}");
+            }
 
             read[name] = value;
         }
