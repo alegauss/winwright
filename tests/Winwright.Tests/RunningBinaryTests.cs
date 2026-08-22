@@ -11,6 +11,7 @@ namespace Winwright.Tests;
 /// afternoon, before the submenu entry being verified existed in it. Two keys, because one is not
 /// enough — and the version difference is the sentence a reader can act on.
 /// </summary>
+[Collection(WindowFixture.Serial)]
 public class RunningBinaryTests : IDisposable
 {
     private readonly string root = Directory.CreateTempSubdirectory("winwright-attach-").FullName;

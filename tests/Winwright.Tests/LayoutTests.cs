@@ -24,6 +24,7 @@ namespace Winwright.Tests;
 /// stale when the page is redesigned.
 /// </para>
 /// </summary>
+[Collection(WindowFixture.Serial)]
 public sealed class LayoutTests : IDisposable
 {
     private readonly string root = Directory.CreateTempSubdirectory("winwright-layout-").FullName;

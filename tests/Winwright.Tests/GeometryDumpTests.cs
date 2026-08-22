@@ -22,6 +22,7 @@ namespace Winwright.Tests;
 /// other can only be caught disagreeing about the format there.
 /// </para>
 /// </summary>
+[Collection(WindowFixture.Serial)]
 public sealed class GeometryDumpTests : IDisposable
 {
     private readonly string root = Directory.CreateTempSubdirectory("winwright-geometry-").FullName;

@@ -23,6 +23,7 @@ namespace Winwright.Tests;
 /// and a copy rectangle that honestly does not contain it.
 /// </para>
 /// </summary>
+[Collection(WindowFixture.Serial)]
 public sealed class ContainmentTests : IDisposable
 {
     private readonly string root = Directory.CreateTempSubdirectory("winwright-contains-").FullName;

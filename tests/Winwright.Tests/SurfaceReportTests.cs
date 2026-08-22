@@ -22,6 +22,7 @@ namespace Winwright.Tests;
 /// exercised here against one file, which is the only place the two can be caught disagreeing.
 /// </para>
 /// </summary>
+[Collection(WindowFixture.Serial)]
 public sealed class SurfaceReportTests : IDisposable
 {
     private readonly string root = Directory.CreateTempSubdirectory("winwright-surfaces-").FullName;

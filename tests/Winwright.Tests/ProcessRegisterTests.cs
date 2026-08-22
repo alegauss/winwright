@@ -12,6 +12,7 @@ namespace Winwright.Tests;
 /// These drive real processes, because a register that is only unit-tested proves nothing about
 /// what is running on the desk afterwards.
 /// </summary>
+[Collection(WindowFixture.Serial)]
 public class ProcessRegisterTests
 {
     /// <summary>Something that stays alive on its own and needs no console or window.</summary>

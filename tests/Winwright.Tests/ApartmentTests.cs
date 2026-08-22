@@ -15,6 +15,7 @@ namespace Winwright.Tests;
 /// no name. This suite carried eight copies of it before this task, and carries none now.
 /// </para>
 /// </summary>
+[Collection(WindowFixture.Serial)]
 public sealed class ApartmentTests
 {
     [Fact]

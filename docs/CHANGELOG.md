@@ -20,6 +20,7 @@
 - ✅ **WW13** **a synthesized key press goes to whatever owns the foreground, which is usually the editor** — The foreground is asked once and answered as a met or absent precondition naming what holds it, and the type carries no wait, poll or retry for anything to route around it.
 - ✅ **WW14** **there is no way to drive a process somebody else started** — Attach takes a pid or a window, names the binary it reached, and is its own type with no arguments to read, so a check needing one is a hole rather than a comparison.
 - ✅ **WW15** **a launch argument silently does not survive an attach** — The language is resolved saved preference first and display language second, reported out loud with where it was read, and one asked for that the app is not in is a hole.
+- ✅ **WW125** **a test class that touches the desktop can be written outside the serial collection and nothing says so** — Seven classes that put a window or a process in front of the machine now declare the serial collection, and a check reads the suite's own sources so the eighth cannot be written without one.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
