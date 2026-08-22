@@ -213,17 +213,6 @@ assertion. It is not a claim that the screen is correct, and pportal's suite
 deliberately renders an empty element beside it, because a check that has never seen a
 blank cannot claim to tell one.
 
-### §WW36 The painted frame, not the window rect
-
-The window rectangle spans a window's invisible resize border and its drop-shadow
-margin, so every copy of it carries a strip of whatever is behind the window down its
-edges - measured in claude-tray as slivers of the editor along the left, the right and
-the bottom of every capture. The extended frame bounds is the visible frame, in the same
-physical-pixel space. Measured at two hundred percent: 1760 by 1896 owned against 1738
-by 1885 painted, asymmetric because the top has no invisible border to spare. The run
-prints how much it trimmed, because nobody can see the difference by looking at one
-file.
-
 ### §WW37 Per-monitor awareness, in every process that reads a rectangle
 
 Without it the rectangle and the copy sit in different coordinate spaces, and the

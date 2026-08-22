@@ -106,7 +106,8 @@ internal sealed class PumpedDialog : IDisposable
     private readonly List<nint> created = [];
     private uint threadId;
 
-    private PumpedDialog(string title, IReadOnlyList<ChildWindow> children, IReadOnlyList<MenuEntry> menu)
+    private PumpedDialog(
+        string title, IReadOnlyList<ChildWindow> children, IReadOnlyList<MenuEntry> menu, bool overlapped = false)
     {
         using var ready = new ManualResetEventSlim();
         thread = new Thread(() =>
@@ -118,7 +119,7 @@ internal sealed class PumpedDialog : IDisposable
 
             // A menu bar needs a window with a caption, so a dialog carrying one is overlapped
             // rather than a bare popup.
-            var style = menu.Count == 0 ? WsPopup | WsVisible : WsOverlappedWindow | WsVisible;
+            var style = menu.Count == 0 && !overlapped ? WsPopup | WsVisible : WsOverlappedWindow | WsVisible;
             Frame = Make("Static", title, style, 60, 60, 520, 360, 0);
             foreach (var child in children)
                 Make(child.ClassName, child.Title, child.Style, child.X, child.Y, child.Width, child.Height, Frame);
@@ -212,6 +213,13 @@ internal sealed class PumpedDialog : IDisposable
 
     /// <summary>Open one carrying a real menu bar, which is what a keyboard user walks.</summary>
     internal static PumpedDialog OpenWithMenu(string title, params MenuEntry[] bar) => new(title, [], bar);
+
+    /// <summary>
+    /// Open an overlapped one — a caption, a sizing border and the drop shadow that comes with
+    /// them. A bare popup has none of those, which is exactly the difference a capture cares about.
+    /// </summary>
+    internal static PumpedDialog OpenFramed(string title, params ChildWindow[] children) =>
+        new(title, children, [], overlapped: true);
 
     /// <summary>
     /// Ask the thread to stop, and wait for it to take its windows with it.

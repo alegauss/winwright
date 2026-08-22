@@ -47,6 +47,8 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
+- ✅ **WW36** **a copy of the window rectangle carries a strip of the desktop down every edge** — The extended frame bounds is what a capture copies, and the run prints the four trims, which on an overlapped window are eleven a side and none at the top.
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
