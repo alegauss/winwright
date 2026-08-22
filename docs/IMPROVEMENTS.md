@@ -27,25 +27,6 @@ value.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW111 The suite leaves the foreground somewhere else
-
-Found while writing WW13. Creating a top-level window with WS_VISIBLE activates it, so
-every fixture in this suite that needs a visible window takes the foreground for as long
-as it lives. On a developer machine that is a flash over whatever was being typed into,
-several times a run.
-
-It is filed under this block rather than dismissed as test hygiene for two reasons. The
-theme here is leaving nothing behind, and a foreground handed to a window that has since
-been destroyed is something left behind. And the tool measures the foreground: a suite
-that moves it is a suite whose own readings of it are taken on a desk the suite
-disturbed, which is the shape of a test that agrees with itself.
-
-The fix is small. A fixture window can be created at coordinates outside every monitor's
-bounds, which keeps it visible to the enumeration under test and invisible to the person
-at the keyboard. Where a test genuinely needs a window on screen, it can say so and
-place it deliberately. What should not survive is the current arrangement, where forty
-by forty is the default because it was the first pair of numbers typed.
-
 ### §WW114 The fixtures need a desk of their own
 
 Measured while WW29 was being written, and it cost most of that task. Every fixture that

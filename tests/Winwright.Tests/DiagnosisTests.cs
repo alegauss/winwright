@@ -44,7 +44,7 @@ public sealed class DiagnosisTests : IDisposable
 
     private nint Create(string className, string? title, uint style, nint parent = 0)
     {
-        var window = CreateWindowExW(0, className, title, style, 20, 20, 320, 200, parent, 0, 0, 0);
+        var window = CreateWindowExW(0, className, title, style, parent == 0 ? OffScreen.Left : 20, parent == 0 ? OffScreen.Top : 20, 320, 200, parent, 0, 0, 0);
         Assert.NotEqual(0, window);
         created.Add(window);
         return window;

@@ -28,6 +28,14 @@ public sealed class LocatorMissTests : IDisposable
 
     private readonly List<nint> created = [];
 
+    /// <summary>
+    /// Whether this case needs its window where a person could see it. Off by default: a suite
+    /// that moves the foreground takes its own readings of the foreground on a desk it disturbed.
+    /// On for the cases that read actionability, because a window outside every monitor is one UI
+    /// Automation reports as offscreen - correctly, and that is what those cases would measure.
+    /// </summary>
+    private bool onScreen;
+
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern nint CreateWindowExW(
         uint exStyle, string className, string? windowName, uint style,
@@ -48,7 +56,7 @@ public sealed class LocatorMissTests : IDisposable
 
     private nint Create(string className, string? title, uint style, int width, int height, nint parent = 0)
     {
-        var window = CreateWindowExW(0, className, title, style, 20, 20, width, height, parent, 0, 0, 0);
+        var window = CreateWindowExW(0, className, title, style, parent == 0 && !onScreen ? OffScreen.Left : 20, parent == 0 && !onScreen ? OffScreen.Top : 20, width, height, parent, 0, 0, 0);
         Assert.NotEqual(0, window);
         created.Add(window);
         return window;
@@ -186,6 +194,7 @@ public sealed class LocatorMissTests : IDisposable
     [Fact]
     public void What_resolves_is_what_actionability_then_judges()
     {
+        onScreen = true;
         var resolution = Resolve.Once(Dialog(), Locator.Parse("""Button[name="Save"]"""));
 
         Assert.True(ActionabilityCheck.Of(resolution.Facts, "Invoke").CanAct);

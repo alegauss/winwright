@@ -111,7 +111,11 @@ internal sealed class PumpedDialog : IDisposable
     private uint threadId;
 
     private PumpedDialog(
-        string title, IReadOnlyList<ChildWindow> children, IReadOnlyList<MenuEntry> menu, bool overlapped = false)
+        string title,
+        IReadOnlyList<ChildWindow> children,
+        IReadOnlyList<MenuEntry> menu,
+        bool overlapped = false,
+        bool offScreen = false)
     {
         using var ready = new ManualResetEventSlim();
         thread = new Thread(() =>
@@ -124,7 +128,13 @@ internal sealed class PumpedDialog : IDisposable
             // A menu bar needs a window with a caption, so a dialog carrying one is overlapped
             // rather than a bare popup.
             var style = menu.Count == 0 && !overlapped ? WsPopup | WsVisible : WsOverlappedWindow | WsVisible;
-            Frame = Make("Static", title, style, 60, 60, 520, 360, 0);
+            // On screen, and measured rather than assumed: a window outside every monitor is one
+            // UI Automation reports as offscreen, and this framework refuses to act on an offscreen
+            // element - correctly. Every case built on this one drives a control, so this fixture
+            // is the one that genuinely needs the desk and says so.
+            var left = offScreen ? OffScreen.Left : 60;
+            var top = offScreen ? OffScreen.Top : 60;
+            Frame = Make("Static", title, style, left, top, 520, 360, 0);
             foreach (var child in children)
                 Make(child.ClassName, child.Title, child.Style, child.X, child.Y, child.Width, child.Height, Frame);
 

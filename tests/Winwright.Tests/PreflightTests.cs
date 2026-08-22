@@ -38,7 +38,7 @@ public sealed class PreflightTests : IDisposable
 
     private nint Create(string className, string? title, uint style, int width, int height, nint parent = 0)
     {
-        var window = CreateWindowExW(0, className, title, style, 20, 20, width, height, parent, 0, 0, 0);
+        var window = CreateWindowExW(0, className, title, style, parent == 0 ? OffScreen.Left : 20, parent == 0 ? OffScreen.Top : 20, width, height, parent, 0, 0, 0);
         Assert.NotEqual(0, window);
         created.Add(window);
         return window;

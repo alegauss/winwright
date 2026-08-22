@@ -110,7 +110,7 @@ public sealed class AppTargetTests : IDisposable
     [Fact]
     public void Attaching_by_window_reaches_the_process_that_owns_it()
     {
-        var window = CreateWindowExW(0, "Static", "winwright statistics", WsPopup, 40, 40, 320, 200, 0, 0, 0, 0);
+        var window = CreateWindowExW(0, "Static", "winwright statistics", WsPopup, OffScreen.Left, OffScreen.Top, 320, 200, 0, 0, 0, 0);
         Assert.NotEqual(0, window);
         created.Add(window);
 

@@ -34,7 +34,7 @@ public sealed class InstanceCheckTests : IDisposable
 
     private void Show(int width, int height)
     {
-        var window = CreateWindowExW(0, "Static", "winwright settings", WsPopup | WsVisible, 40, 40, width, height, 0, 0, 0, 0);
+        var window = CreateWindowExW(0, "Static", "winwright settings", WsPopup | WsVisible, OffScreen.Left, OffScreen.Top, width, height, 0, 0, 0, 0);
         Assert.NotEqual(0, window);
         created.Add(window);
     }
