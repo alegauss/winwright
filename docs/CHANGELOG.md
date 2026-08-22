@@ -55,6 +55,8 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
+- ✅ **WW48** **an assertion is a boolean, so a failure says nothing about what was there instead** — An expectation reports every reading it saw, the wait and the polls, so a subject that answered the wrong thing throughout is never reported as one that never answered.
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

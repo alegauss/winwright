@@ -306,15 +306,6 @@ which is the argument every other image comparison eventually turns into.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW48 An expectation reports what it read
-
-The first version of a timed-out read in claude-tray reported no panes and no status
-line after 25 seconds, while the status line had been up for the whole 25 seconds saying
-it was computing - and the real fault was elsewhere entirely, a missing template part.
-The message pointed at timing and cost a throwaway script to get past. Every expectation
-now carries what it read, how long it waited and how many of its polls saw it, because
-the reason is what decides between a re-run and a hunt.
-
 ### §WW49 Derived, never listed
 
 A hardcoded expected set silently stops covering the thing it was written for.
