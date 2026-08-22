@@ -57,7 +57,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 📋 **WW73** (deps: —) **a brush shared between capture threads belongs to whichever one reached it first** — Every shared brush is frozen, or the second capture on a second thread is refused for a reason about threading rather than about the picture. → §WW73
 - 📋 **WW74** (deps: —) **the app knows what it drew and nothing asks it** — A reported surface names a rectangle in physical pixels, which is the space the copy already works in, so a capture can assert what it contains. → §WW74
 - 📋 **WW75** (deps: —) **a popup closes the moment the window is raised to be photographed** — The preview host holds every popup open by construction, so the rule belongs to the host and not to whichever page happens to own one. → §WW75
 - 📋 **WW76** (deps: —) **the same single-threaded runner is copied into every test file that touches a control** — One runner, bounded and surfacing what the thread threw, which is twenty-seven copies in one project becoming a package reference. → §WW76

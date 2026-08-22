@@ -440,14 +440,6 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW73 A shared brush is frozen or it belongs to one thread
-
-A brush is a freezable and an unfrozen one belongs to the thread that made it, so a
-static one belongs to whichever thread reached the class first and every capture thread
-after that is refused. Captures run on their own single-threaded apartment by nature, so
-the second one throws. Found by the first run of pportal's capture tests rather than by
-reading, and asserted there ever since.
-
 ### §WW74 The app says what it drew
 
 The rectangle is reported in physical pixels, because layout happens in

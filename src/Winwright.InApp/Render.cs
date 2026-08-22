@@ -175,10 +175,16 @@ public static class Render
         // filter that says nothing about the thread this was called on.
         if (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
         {
-            throw new UnrenderableException(
+            throw new ThreadBoundException(
                 "this render was called from a thread that is not STA, and the presentation stack has no "
                     + "meaning on one — run it on a thread that owns a message queue");
         }
+
+        // Both before the layout, and both refused for a reason about threading rather than about
+        // the picture: what arrives otherwise is raised from inside the drawing and names neither
+        // the object nor either thread.
+        Freezables.Insist(element, "the element being rendered");
+        Freezables.Insist(background, "the background brush");
 
         // Measure, arrange, update: all three, in this order, and none of them optional. The
         // arrange is why this verb exists — see the note on the type.

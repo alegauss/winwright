@@ -210,7 +210,7 @@ public sealed class RenderTests : IDisposable
         // since what arrives otherwise says nothing about which thread was wrong.
         var made = OnStaThread<FrameworkElement>(() => new Border { Width = 10, Height = 10 });
 
-        var refused = Assert.Throws<UnrenderableException>(() => Render.ToBitmap(made));
+        var refused = Assert.Throws<ThreadBoundException>(() => Render.ToBitmap(made));
 
         Assert.Contains("is not STA", refused.Message);
     }

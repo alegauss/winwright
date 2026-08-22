@@ -128,24 +128,32 @@ public static class Backgrounds
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         var wanted = key.Trim();
 
-        var declared = Resource(element, wanted);
-        if (Painted(declared) is Brush themed)
-            return new ChosenBackground(Backdrop.Theme, Frozen(themed), wanted, $"declared under '{wanted}'");
+        var unshareable = "";
+
+        if (Painted(Resource(element, wanted)) is Brush themed)
+        {
+            // A brush that cannot cross to a capture thread is not an answer a capture can use, so
+            // it falls through to the window rather than being handed back as a background of null.
+            if (Frozen(themed) is Brush shared)
+                return new ChosenBackground(Backdrop.Theme, shared, wanted, $"declared under '{wanted}'");
+
+            unshareable = $"'{wanted}' is a {themed.GetType().Name}, which cannot be frozen for a capture thread; ";
+        }
 
         var window = element is null ? MainWindow() : Window.GetWindow(element) ?? MainWindow();
-        if (Painted(window?.Background) is Brush observed)
+        if (Painted(window?.Background) is Brush observed && Frozen(observed) is Brush shareable)
         {
             return new ChosenBackground(
-                Backdrop.ObservedWindow, Frozen(observed), wanted, "read off the window's own brush");
+                Backdrop.ObservedWindow, shareable, wanted, "read off the window's own brush");
         }
 
         return new ChosenBackground(
             Backdrop.Unanswered,
             null,
             wanted,
-            window is null
+            unshareable + (window is null
                 ? $"nothing declares '{wanted}' and this element is in no window to read a colour off"
-                : $"nothing declares '{wanted}' and the window is painted with no brush of its own");
+                : $"nothing declares '{wanted}' and the window is painted with no brush this capture can use"));
     }
 
     /// <summary>
@@ -207,18 +215,9 @@ public static class Backgrounds
     };
 
     /// <summary>
-    /// A copy, frozen. Copied first and deliberately: the brush found in the resources belongs to
-    /// the application, and freezing that one would make its own theme switch throw later.
+    /// A copy that any capture thread may share. One rule, in one place: the brush found in the
+    /// resources belongs to the application, and freezing that one would make its own theme switch
+    /// throw later.
     /// </summary>
-    private static Brush Frozen(Brush brush)
-    {
-        if (brush.IsFrozen)
-            return brush;
-
-        var copy = brush.Clone();
-        if (copy.CanFreeze)
-            copy.Freeze();
-
-        return copy;
-    }
+    private static Brush? Frozen(Brush brush) => Freezables.Shareable(brush);
 }

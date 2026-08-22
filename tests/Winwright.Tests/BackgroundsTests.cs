@@ -140,7 +140,7 @@ public sealed class BackgroundsTests : IDisposable
         });
 
         Assert.False(chosen.Answered);
-        Assert.Contains("painted with no brush of its own", chosen.Because);
+        Assert.Contains("painted with no brush this capture can use", chosen.Because);
     }
 
     [Fact]
