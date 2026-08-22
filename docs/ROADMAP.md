@@ -16,7 +16,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW115** (deps: —) **a pointer act says what it clicks and never why the pattern route was unavailable** — Each declared pointer act carries the reason it needs a desktop, so what a scenario costs reads as a list of reasons rather than as a list of locators. → §WW115
 - 📋 **WW116** (deps: —) **nothing declares which entries are destructive, and invoke will press any of them** — Destructive entries are named per project and refused by invoke unless the act says it means that one, so no check can end the run by pressing something. → §WW116
 
 ## Block E — Capture — the picture that proves what it photographed

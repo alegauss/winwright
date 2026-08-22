@@ -54,6 +54,7 @@
 - ✅ **WW31** **the notification-area icon has no clickable point and no reliable right-click** — Icons are addressed by rectangle since every taskbar button refuses a clickable point, the overflow is opened through the chevron found by id, and the menu route is focus plus the application key.
 - ✅ **WW32** **a selection that silently does not land leaves the pane it should have built unrealised** — A selection is confirmed against the control and a condition the caller names, the pointer is reached for only after that did not pass, and nothing reports a landing it did not confirm.
 - ✅ **WW33** **an act leaves the window in a state the next case did not ask for** — Surfaces are recorded as a case found them and put back on leaving the scope, only where they moved, and a restore that did not take is reported rather than assumed.
+- ✅ **WW115** **a pointer act says what it clicks and never why the pattern route was unavailable** — A pointer act now states why the pattern route was unavailable, the summary groups the cost by reason and names what a peer would remove, and preflight reads each claim back against the tree.
 
 ## Block E — Capture — the picture that proves what it photographed
 

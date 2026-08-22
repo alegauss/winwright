@@ -21,16 +21,58 @@ public enum MouseButton
 }
 
 /// <summary>
+/// Why a scenario reached for the pointer rather than for a pattern.
+/// <para>
+/// The count was the cheap half of the question. A reader deciding whether a scenario can run
+/// unattended wanted to know that this one is a bare border with no automation peer, that one a
+/// notification-area icon, and the third a segment of a custom template — three different futures,
+/// the first of which may get a peer and the second of which never will, flattened by a list of
+/// locators into one number.
+/// </para>
+/// </summary>
+public enum PointerReason
+{
+    /// <summary>No automation peer at all, so nothing to ask. The one that may change.</summary>
+    NoAutomationPeer,
+
+    /// <summary>A notification-area icon: drawn by the shell, exposed by nobody. It never will.</summary>
+    NotificationArea,
+
+    /// <summary>A segment of a custom template, drawn without a peer of its own.</summary>
+    CustomTemplate,
+
+    /// <summary>The act is about the pointer itself, so no pattern would express it anyway.</summary>
+    PointerIsTheAct,
+
+    /// <summary>The control offers the pattern and it did not take; this is the escalation.</summary>
+    PatternDidNotTake,
+}
+
+/// <summary>
 /// One pointer act as a scenario declares it. It is a separate kind from the pattern acts on
 /// purpose: what needs a real desktop is then countable by reading the file, rather than
-/// discovered on the run where the desktop was busy.
+/// discovered on the run where the desktop was busy — and each one carries the reason it is one,
+/// stated where somebody chose it rather than inferred later from a locator.
 /// </summary>
 /// <param name="Verb">What the act is, as the scenario names it.</param>
 /// <param name="Locator">What it addresses.</param>
+/// <param name="Because">Why the pattern route was unavailable.</param>
+/// <param name="Note">What is specific about this one, or empty to let the reason speak alone.</param>
 /// <param name="Button">Which button it presses.</param>
 /// <param name="Clicks">How many times, which is how a double click is said.</param>
-public sealed record PointerAct(string Verb, Locator Locator, MouseButton Button = MouseButton.Left, int Clicks = 1)
+public sealed record PointerAct(
+    string Verb,
+    Locator Locator,
+    PointerReason Because,
+    string Note = "",
+    MouseButton Button = MouseButton.Left,
+    int Clicks = 1)
 {
+    /// <summary>The reason as a person says it, with this act's own note where it has one.</summary>
+    public string Reason => string.IsNullOrWhiteSpace(Note)
+        ? Pointer.Worded(Because)
+        : $"{Pointer.Worded(Because)} ({Note.Trim()})";
+
     /// <summary>The one line a report names it by.</summary>
     public override string ToString() =>
         $"{Verb} {Locator} ({Clicks} {Button.ToString().ToLowerInvariant()} click{(Clicks == 1 ? "" : "s")})";
@@ -84,6 +126,57 @@ public sealed record PointerResult
     };
 }
 
+/// <summary>A stated reason the tree disagrees with.</summary>
+/// <param name="Act">The act that was checked.</param>
+/// <param name="Element">What its locator resolved to.</param>
+/// <param name="Offered">What that element does offer, in alphabetical order.</param>
+public sealed record DisputedReason(
+    PointerAct Act, ElementFacts Element, IReadOnlyList<string> Offered)
+{
+    /// <summary>The sentence the author has to act on, with the claim and the tree both named.</summary>
+    public string Because =>
+        $"{Act.Verb} {Act.Locator} says {Act.Reason}, and {Element} offers "
+        + string.Join(", ", Offered);
+}
+
+/// <summary>
+/// What checking the declared reasons found: the ones the tree disputes, the ones nothing here
+/// could read, and the ones it agrees with.
+/// </summary>
+/// <param name="Disputed">Acts whose control offers a pattern after all.</param>
+/// <param name="Unchecked">Acts whose reason claims nothing about this tree, or whose locator is not in it.</param>
+/// <param name="Agreed">Acts whose control does offer nothing, as they said.</param>
+public sealed record ReasonsChecked(
+    IReadOnlyList<DisputedReason> Disputed,
+    IReadOnlyList<PointerAct> Unchecked,
+    IReadOnlyList<PointerAct> Agreed)
+{
+    /// <summary>Whether the tree disagrees with anything the file says.</summary>
+    public bool Disputes => Disputed.Count > 0;
+
+    /// <summary>
+    /// The reading in one sentence, which never says every reason was checked while any was not.
+    /// </summary>
+    public string Sentence()
+    {
+        var total = Disputed.Count + Unchecked.Count + Agreed.Count;
+        if (total == 0)
+            return "no pointer act declares a reason to check.";
+
+        var clauses = new List<string>();
+        if (Disputed.Count > 0)
+            clauses.Add($"{Disputed.Count} disputed: {string.Join("; ", Disputed.Select(one => one.Because))}");
+        if (Unchecked.Count > 0)
+            clauses.Add(
+                $"{Unchecked.Count} not checked, their reasons claiming nothing this tree can answer: "
+                + string.Join(", ", Unchecked.Select(one => one.Locator.ToString())));
+
+        return clauses.Count == 0
+            ? $"all {total} stated reasons are what the tree says too."
+            : $"{Agreed.Count} of {total} reasons agreed with the tree; " + string.Join("; ", clauses) + ".";
+    }
+}
+
 /// <summary>
 /// Synthesized pointer input, for the controls that have no pattern at all: a bare border with no
 /// automation peer, a notification-area icon, a segment of a custom template.
@@ -96,15 +189,49 @@ public sealed record PointerResult
 public static class Pointer
 {
     /// <summary>Press once with the primary button.</summary>
-    public static PointerResult Click(Subject subject, MouseButton button = MouseButton.Left, int clicks = 1)
+    /// <param name="subject">What to press.</param>
+    /// <param name="because">Why the pattern route was unavailable. Stated, never inferred.</param>
+    /// <param name="button">Which button.</param>
+    /// <param name="clicks">How many presses.</param>
+    /// <param name="note">What is specific about this one, where the reason alone is not enough.</param>
+    public static PointerResult Click(
+        Subject subject,
+        PointerReason because,
+        MouseButton button = MouseButton.Left,
+        int clicks = 1,
+        string note = "")
     {
         ArgumentNullException.ThrowIfNull(subject);
-        return Run(new PointerAct("click", subject.Locator, button, clicks), subject);
+        return Run(new PointerAct("click", subject.Locator, because, note, button, clicks), subject);
     }
 
     /// <summary>Press twice, which some templates need and no pattern expresses.</summary>
-    public static PointerResult DoubleClick(Subject subject, MouseButton button = MouseButton.Left) =>
-        Click(subject, button, clicks: 2);
+    /// <param name="subject">What to press.</param>
+    /// <param name="because">Why the pattern route was unavailable.</param>
+    /// <param name="button">Which button.</param>
+    /// <param name="note">What is specific about this one.</param>
+    public static PointerResult DoubleClick(
+        Subject subject, PointerReason because, MouseButton button = MouseButton.Left, string note = "") =>
+        Click(subject, because, button, clicks: 2, note: note);
+
+    /// <summary>One reason as a person says it, rather than as the enum spells it.</summary>
+    /// <param name="because">The reason.</param>
+    public static string Worded(PointerReason because) => because switch
+    {
+        PointerReason.NoAutomationPeer => "the control has no automation peer, so there is nothing to ask",
+        PointerReason.NotificationArea => "it is a notification-area icon, drawn by the shell and exposed by nobody",
+        PointerReason.CustomTemplate => "it is a segment of a custom template, drawn without a peer of its own",
+        PointerReason.PointerIsTheAct => "the act is about the pointer itself, so no pattern would express it",
+        _ => "the control offers the pattern and it did not take, so this is the escalation",
+    };
+
+    /// <summary>
+    /// Whether a peer could one day make this act unnecessary. The three futures the count used to
+    /// flatten: a bare border may get a peer, and a notification-area icon never will.
+    /// </summary>
+    /// <param name="because">The reason.</param>
+    public static bool MayGetAPeer(PointerReason because) =>
+        because is PointerReason.NoAutomationPeer or PointerReason.CustomTemplate;
 
     /// <summary>
     /// Run a declared act against its subject. The element must be actionable and the window must
@@ -136,14 +263,96 @@ public static class Pointer
     /// <summary>
     /// What in a scenario needs a real desktop, said out loud. This is the point of declaring
     /// them: the cost lands where the reader is instead of on the run where it was discovered.
+    /// <para>
+    /// Grouped by reason rather than listed by locator. Three clicks is a number; two of them
+    /// because nothing drew a peer and one because the shell owns the icon is a decision — the
+    /// first pair may go away when the application grows one, and the third never will.
+    /// </para>
     /// </summary>
+    /// <param name="acts">Every pointer act the scenario declares.</param>
+    public static IReadOnlyList<string> Reasons(IReadOnlyList<PointerAct> acts)
+    {
+        ArgumentNullException.ThrowIfNull(acts);
+        if (acts.Count == 0)
+            return [];
+
+        return acts
+            .GroupBy(one => one.Reason, StringComparer.Ordinal)
+            .OrderByDescending(group => group.Count())
+            .ThenBy(group => group.Key, StringComparer.Ordinal)
+            .Select(group =>
+                $"  {group.Count()} because {group.Key}: {string.Join(", ", group.Select(one => one.ToString()))}")
+            .ToList();
+    }
+
+    /// <summary>The whole cost in one block: the count, then one line per reason.</summary>
+    /// <param name="acts">Every pointer act the scenario declares.</param>
     public static string Summarise(IReadOnlyList<PointerAct> acts)
     {
         ArgumentNullException.ThrowIfNull(acts);
-        return acts.Count == 0
-            ? "no act here needs a real desktop."
-            : $"{acts.Count} act{(acts.Count == 1 ? "" : "s")} need a real desktop: "
-                + string.Join(", ", acts.Select(one => one.ToString())) + ".";
+        if (acts.Count == 0)
+            return "no act here needs a real desktop.";
+
+        var reasons = Reasons(acts);
+        var reachable = acts.Count(one => MayGetAPeer(one.Because));
+        var future = reachable == 0
+            ? ""
+            : $" {reachable} of them would go away if the application drew a peer.";
+
+        return $"{acts.Count} {(acts.Count == 1 ? "act needs" : "acts need")} a real desktop, "
+            + $"for {reasons.Count} reason{(reasons.Count == 1 ? "" : "s")}.{future}\n"
+            + string.Join('\n', reasons);
+    }
+
+    /// <summary>
+    /// Every declared reason, checked against what the controls actually offer.
+    /// <para>
+    /// The other half worth wiring: a reason stated in the file is an assertion about the tree,
+    /// and the tree is right here. An act that says its control has no peer, against a control
+    /// offering Invoke, is a declaration that was true once — and reading it back at the one
+    /// moment there is something to read it against is cheaper than believing it for a year.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The window under test.</param>
+    /// <param name="acts">Every pointer act the scenario declares.</param>
+    public static ReasonsChecked Check(AutomationElement root, IEnumerable<PointerAct> acts)
+    {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(acts);
+
+        var disputed = new List<DisputedReason>();
+        var unchecked_ = new List<PointerAct>();
+        var agreed = new List<PointerAct>();
+
+        foreach (var act in acts)
+        {
+            // Only two of the five claim anything about the tree. The rest are claims about what
+            // somebody wanted, and a check that pretended to have read them would be the green
+            // this project exists to withdraw.
+            if (act.Because is not (PointerReason.NoAutomationPeer or PointerReason.CustomTemplate))
+            {
+                unchecked_.Add(act);
+                continue;
+            }
+
+            var facts = Resolve.Once(root, act.Locator).Facts;
+            if (facts is null)
+            {
+                unchecked_.Add(act);
+                continue;
+            }
+
+            if (facts.Patterns.Count == 0)
+            {
+                agreed.Add(act);
+                continue;
+            }
+
+            disputed.Add(new DisputedReason(
+                act, facts, facts.Patterns.OrderBy(name => name, StringComparer.Ordinal).ToList()));
+        }
+
+        return new ReasonsChecked(disputed, unchecked_, agreed);
     }
 
     private static void Send(int x, int y, MouseButton button, int clicks)

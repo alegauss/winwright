@@ -119,26 +119,6 @@ which is the shape of check that only ever proves what the author already assume
 
 ## Block D — Act — patterns before pointers
 
-### §WW115 A declared cost with no reason beside it
-
-Read back against this block's own criterion, which asks that the acts unable to go
-through a pattern be "declared as pointer acts and carry the reason for it in the file".
-Half of that shipped. A pointer act is its own type, nothing falls back to it, and the
-set of them can be summarised before a run. What none of them carries is why it is one.
-
-The summary as it stands lists three locators and three buttons. A reader deciding
-whether a scenario can run unattended gets the count, which is the cheap half of the
-question; what they wanted was that this one is a bare border with no automation peer,
-that one a notification-area icon, and the third a segment of a custom template. Those
-are three different futures - the first may get a peer, the second never will - and the
-list flattens them into one number.
-
-The field is small and the discipline is the same one the declaration already has: the
-act says what it needs and why, at the point where somebody chose it. Preflight is the
-other half worth wiring, since it already resolves each act's element and could say
-plainly that the control offers no pattern at all - which is the reason, checked rather
-than asserted, at the one moment the tree is there to check it against.
-
 ### §WW116 The menu is safe and the verb beside it is not
 
 This block's criterion says destructive entries are "named in the scenario and reached

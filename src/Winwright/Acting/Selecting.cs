@@ -124,7 +124,9 @@ public static class Selecting
         PointerResult clicked;
         try
         {
-            clicked = Pointer.Click(item);
+            // The one escalation in the project: the control offered the pattern and it did not
+            // take, which is a different reason from every other pointer act and says so.
+            clicked = Pointer.Click(item, PointerReason.PatternDidNotTake);
         }
         catch (NotActionableException refused)
         {

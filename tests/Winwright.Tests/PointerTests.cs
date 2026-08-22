@@ -64,7 +64,7 @@ public sealed class PointerTests : IDisposable
         Assert.Equal(ForegroundState.Ours, Foreground.Check(dialog.Frame).State);
         Assert.Equal("Off", checkbox.ReadOnce().Values.Toggle);
 
-        var clicked = Pointer.Click(checkbox);
+        var clicked = Pointer.Click(checkbox, PointerReason.PointerIsTheAct);
 
         Assert.True(clicked.Landed);
         Assert.Equal(160, clicked.At.Width);
@@ -79,7 +79,7 @@ public sealed class PointerTests : IDisposable
         var checkbox = On("""CheckBox[name="Wrap lines"]""");
         Decoy();
 
-        var clicked = Pointer.Click(checkbox);
+        var clicked = Pointer.Click(checkbox, PointerReason.PointerIsTheAct);
 
         Assert.False(clicked.Landed);
         Assert.False(clicked.Foreground.Satisfied);
@@ -93,7 +93,7 @@ public sealed class PointerTests : IDisposable
         var checkbox = On("""CheckBox[name="Wrap lines"]""");
         Decoy();
 
-        var step = Pointer.Click(checkbox).AsTraceStep();
+        var step = Pointer.Click(checkbox, PointerReason.PointerIsTheAct).AsTraceStep();
 
         Assert.Equal(Winwright.Tracing.StepVerdict.Unchecked, step.Verdict);
         Assert.Contains("winwright decoy", step.Detail);
@@ -110,14 +110,14 @@ public sealed class PointerTests : IDisposable
         Assert.Equal(Actionable.PatternMissing, refusal.Missing);
 
         // The pointer is reachable, but only by asking for it by name.
-        Assert.True(Pointer.Click(label).Landed);
+        Assert.True(Pointer.Click(label, PointerReason.NoAutomationPeer).Landed);
     }
 
     [Fact]
     public void A_pointer_act_still_needs_the_element_to_be_there_and_on_screen()
     {
         var refusal = Assert.Throws<NotActionableException>(
-            () => Pointer.Click(On("""Button[name="Publish"]""")));
+            () => Pointer.Click(On("""Button[name="Publish"]"""), PointerReason.PointerIsTheAct));
 
         Assert.Equal(Actionable.NotInTree, refusal.Missing);
     }
@@ -127,14 +127,14 @@ public sealed class PointerTests : IDisposable
     {
         var declared = new List<PointerAct>
         {
-            new("click", Locator.Parse("Custom#tray")),
-            new("right-click", Locator.Parse("Custom#tray"), MouseButton.Right),
-            new("double-click", Locator.Parse("Pane#canvas"), MouseButton.Left, 2),
+            new("click", Locator.Parse("Custom#tray"), PointerReason.NotificationArea),
+            new("right-click", Locator.Parse("Custom#tray"), PointerReason.NotificationArea, Button: MouseButton.Right),
+            new("double-click", Locator.Parse("Pane#canvas"), PointerReason.CustomTemplate, Button: MouseButton.Left, Clicks: 2),
         };
 
         var said = Pointer.Summarise(declared);
 
-        Assert.StartsWith("3 acts need a real desktop:", said);
+        Assert.StartsWith("3 acts need a real desktop, for 2 reasons.", said);
         Assert.Contains("right-click Custom#tray (1 right click)", said);
         Assert.Contains("double-click Pane#canvas (2 left clicks)", said);
     }
@@ -151,13 +151,13 @@ public sealed class PointerTests : IDisposable
         var checkbox = On("""CheckBox[name="Wrap lines"]""");
 
         Assert.Throws<ArgumentOutOfRangeException>(
-            () => Pointer.Run(new PointerAct("click", checkbox.Locator, MouseButton.Left, 0), checkbox));
+            () => Pointer.Run(new PointerAct("click", checkbox.Locator, PointerReason.PointerIsTheAct, Button: MouseButton.Left, Clicks: 0), checkbox));
     }
 
     [Fact]
     public void A_double_click_is_two_presses_and_says_so()
     {
-        var act = new PointerAct("double-click", Locator.Parse("Pane#canvas"), MouseButton.Left, 2);
+        var act = new PointerAct("double-click", Locator.Parse("Pane#canvas"), PointerReason.CustomTemplate, Button: MouseButton.Left, Clicks: 2);
 
         Assert.Equal(2, act.Clicks);
         Assert.Contains("2 left clicks", act.ToString());

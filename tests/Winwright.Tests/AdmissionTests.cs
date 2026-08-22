@@ -193,7 +193,7 @@ public sealed class AdmissionTests : IDisposable
         Assert.Equal(Actionable.Disabled, Assert.Throws<NotActionableException>(() => Act.Toggle(disabled)).Missing);
         Assert.Equal(Actionable.Disabled, Assert.Throws<NotActionableException>(() => Act.Invoke(disabled)).Missing);
         Assert.Equal(Actionable.Disabled, Assert.Throws<NotActionableException>(() => Keyboard.Type(disabled, "x")).Missing);
-        Assert.Equal(Actionable.Disabled, Assert.Throws<NotActionableException>(() => Acting.Pointer.Click(disabled)).Missing);
+        Assert.Equal(Actionable.Disabled, Assert.Throws<NotActionableException>(() => Acting.Pointer.Click(disabled, PointerReason.PointerIsTheAct)).Missing);
         Assert.Equal(Actionable.Disabled, Assert.Throws<NotActionableException>(() => Pick.Value(disabled, "Alpha")).Missing);
         Assert.Equal(Actionable.Disabled, Assert.Throws<NotActionableException>(() => Traversal.Nudge(disabled)).Missing);
     }
