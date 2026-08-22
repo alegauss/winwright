@@ -81,6 +81,7 @@
 - 🗑 **WW120** **the in-app package fixes the process DPI awareness before the engine can ask for its own** — superseded by WW121: Measured before deciding and the premise did not survive: the process is system-aware before any code here runs, so the package is not what fixes it and no initializer could win.
 - ✅ **WW121** **a render says nothing about whether this process can see the display it drew on** — The in-app half asks for per-monitor awareness at load and every receipt now carries what the process actually sees, so a size drawn in the wrong space says so instead of looking correct.
 - ✅ **WW73** **a brush shared between capture threads belongs to whichever one reached it first** — A brush handed to a capture is frozen as a copy or refused by name, with both threads stated, instead of the drawing raising an error that names neither the brush nor either thread.
+- ✅ **WW74** **the app knows what it drew and nothing asks it** — The application writes a name and four physical-pixel numbers per surface and the engine reads them back, with a surface nobody reported answering as a named hole rather than a throw.
 
 ## Block J — Adoption — the proof is the deletion
 

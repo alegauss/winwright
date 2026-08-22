@@ -30,7 +30,7 @@
 - 📋 **WW41** (deps: Block K) **a window with a system backdrop transmits what is behind it through the glass** — Z-order reasoning cannot answer for that, so the compositor is asked directly and a window that opted into one is refused rather than merely warned about. → §WW41
 - 📋 **WW42** (deps: Block K) **a copy of exactly one colour is written and reported as a capture** — A flat rectangle is not a picture of a window, and a session where nothing was rendering produced one that exited zero. → §WW42
 - 📋 **WW43** (deps: Block K) **a page still computing is photographed and announced as a picture of a report** — The loading strings are read from the project's own language files before anything launches, and a key none of them carries refuses the run instead of matching nothing. → §WW43
-- 📋 **WW44** (deps: WW74) **nothing checks that a capture contains the surface it was taken for** — The app declares the rectangle it drew and the copy asserts it is inside, since a popup is its own top-level window and a correct copy can honestly not contain it. → §WW44
+- 📋 **WW44** (deps: WW74 ✅) **nothing checks that a capture contains the surface it was taken for** — The app declares the rectangle it drew and the copy asserts it is inside, since a popup is its own top-level window and a correct copy can honestly not contain it. → §WW44
 - 📋 **WW46** (deps: Block K) **a change meant to be invisible has no cheap way to prove it was** — Two renders of unchanged code are byte-identical, so a difference is a real difference and no tolerance has to be chosen for a comparison to mean anything. → §WW46
 
 ## Block F — Assert — the expectation is derived, never typed
@@ -57,7 +57,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 📋 **WW74** (deps: —) **the app knows what it drew and nothing asks it** — A reported surface names a rectangle in physical pixels, which is the space the copy already works in, so a capture can assert what it contains. → §WW74
 - 📋 **WW75** (deps: —) **a popup closes the moment the window is raised to be photographed** — The preview host holds every popup open by construction, so the rule belongs to the host and not to whichever page happens to own one. → §WW75
 - 📋 **WW76** (deps: —) **the same single-threaded runner is copied into every test file that touches a control** — One runner, bounded and surfacing what the thread threw, which is twenty-seven copies in one project becoming a package reference. → §WW76
 - 📋 **WW77** (deps: —) **a surface with no accessibility tree can only be checked by reading its source** — A geometry dump the harness reads, which is what makes an installer page or a custom-drawn surface assertable at all. → §WW77

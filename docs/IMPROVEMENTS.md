@@ -440,15 +440,6 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW74 The app says what it drew
-
-The rectangle is reported in physical pixels, because layout happens in
-device-independent units and the copy works in pixels - so a rectangle handed over in
-the wrong one is right at one hundred percent and wrong at every scaling a developer
-here actually runs. Deliberately dull and machine-first: a name, then four numbers. A
-preview that cannot report is caught by the never-reported arm rather than by an
-exception nobody sees.
-
 ### §WW75 The host holds popups open
 
 A popup that closes when it loses mouse capture is right for a person and fatal for a
