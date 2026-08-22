@@ -50,6 +50,9 @@ public sealed class ProjectDeclaration
         LanguagePreferenceKey = string.IsNullOrWhiteSpace(shape.Language?.PreferenceKey)
             ? null
             : shape.Language.PreferenceKey.Trim();
+        LanguageFallback = string.IsNullOrWhiteSpace(shape.Language?.Fallback)
+            ? null
+            : shape.Language.Fallback.Trim();
         Attempts = shape.Attempts is { } declared
             ? declared > 0
                 ? declared
@@ -88,6 +91,13 @@ public sealed class ProjectDeclaration
     public string? LanguagePreferenceKey { get; }
 
     /// <summary>
+    /// The language the application itself falls back to when it ships no strings for the one the
+    /// machine is in. Null where the project declares none, and then there is no fallback to make
+    /// — reading a label in a language nobody declared is refused rather than answered in English.
+    /// </summary>
+    public string? LanguageFallback { get; }
+
+    /// <summary>
     /// How many times a flaky act may be attempted. A number about this project rather than about
     /// a case, so it is declared once here and never typed into the scenario that needed it.
     /// </summary>
@@ -112,6 +122,7 @@ public sealed class ProjectDeclaration
         "sourceRoot" => sourceRoot is not null,
         "fingerprintStore" => fingerprintStore is not null,
         "languageFiles" => LanguageFiles.Count > 0,
+        "language.fallback" => LanguageFallback is not null,
         _ => Timeouts.All.ContainsKey(key.StartsWith("timeouts.", StringComparison.Ordinal) ? key[9..] : key),
     };
 
@@ -189,5 +200,7 @@ public sealed class ProjectDeclaration
         [JsonPropertyName("preferenceFile")] public string? PreferenceFile { get; init; }
 
         [JsonPropertyName("preferenceKey")] public string? PreferenceKey { get; init; }
+
+        [JsonPropertyName("fallback")] public string? Fallback { get; init; }
     }
 }

@@ -306,15 +306,6 @@ which is the argument every other image comparison eventually turns into.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW50 Labels come from the project's own strings
-
-An assertion matching English words against a window rendering another language is loud
-when it fails and silent one step over, where it matches nothing and passes. Labels
-resolve through the project's language files with the same fallback the app itself uses.
-A value carrying a placeholder is refused rather than skipped: an exact-name read of a
-tree holding it already filled in can never match it, and skipping it in silence is the
-failure this whole rule exists to prevent.
-
 ### §WW51 Geometry, checked
 
 freewilly's installer page was built four times and verified every time by reading the

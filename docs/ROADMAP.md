@@ -36,7 +36,6 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW50** (deps: —) **labels are matched in English against a window rendering another language** — Labels resolve through the project's language files, and a key whose value carries a placeholder is refused, because an exact-name read can never match one. → §WW50
 - 📋 **WW51** (deps: WW77) **a page renders correctly above a screenful of blank space and nothing notices** — Geometry is dumped and checked: nothing overlaps, nothing starts off the surface, nothing ends past it and nothing measures zero. → §WW51
 - 📋 **WW52** (deps: —) **a control announcing its glyph codepoint satisfies every check for a non-empty name** — The name is asserted to be its own label, and a name the console cannot draw is printed as escapes rather than as the empty string it is not. → §WW52
 - 📋 **WW53** (deps: —) **a run mutates the store of the user who launched it** — The state is fingerprinted before and compared after, so a harness that repointed a real profile or rewrote a real setting is caught by the run that did it. → §WW53
