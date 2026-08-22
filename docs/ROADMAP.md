@@ -56,7 +56,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 📋 **WW75** (deps: —) **a popup closes the moment the window is raised to be photographed** — The preview host holds every popup open by construction, so the rule belongs to the host and not to whichever page happens to own one. → §WW75
 - 📋 **WW76** (deps: —) **the same single-threaded runner is copied into every test file that touches a control** — One runner, bounded and surfacing what the thread threw, which is twenty-seven copies in one project becoming a package reference. → §WW76
 - 📋 **WW77** (deps: —) **a surface with no accessibility tree can only be checked by reading its source** — A geometry dump the harness reads, which is what makes an installer page or a custom-drawn surface assertable at all. → §WW77
 

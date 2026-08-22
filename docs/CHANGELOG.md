@@ -83,6 +83,7 @@
 - ✅ **WW121** **a render says nothing about whether this process can see the display it drew on** — The in-app half asks for per-monitor awareness at load and every receipt now carries what the process actually sees, so a size drawn in the wrong space says so instead of looking correct.
 - ✅ **WW73** **a brush shared between capture threads belongs to whichever one reached it first** — A brush handed to a capture is frozen as a copy or refused by name, with both threads stated, instead of the drawing raising an error that names neither the brush nor either thread.
 - ✅ **WW74** **the app knows what it drew and nothing asks it** — The application writes a name and four physical-pixel numbers per surface and the engine reads them back, with a surface nobody reported answering as a named hole rather than a throw.
+- ✅ **WW75** **a popup closes the moment the window is raised to be photographed** — The host walks the logical tree, holds every popup it finds open and puts each one back, so a closed popup is reached at all and no page has to remember the rule for itself.
 
 ## Block J — Adoption — the proof is the deletion
 

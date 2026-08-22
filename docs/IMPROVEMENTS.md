@@ -431,15 +431,6 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW75 The host holds popups open
-
-A popup that closes when it loses mouse capture is right for a person and fatal for a
-capture: the window is raised to the foreground, the popup goes, and the copy is a
-correct picture of a window without it. Fixing that at one call site left the next popup
-preview to rediscover it. A preview has no hand to click with, so the rule belongs to
-the host - and it walks the logical tree, because a closed popup's child is not in the
-visual tree at all, which is exactly the state it has to be reached in.
-
 ### §WW76 One runner, not twenty-seven
 
 pportal carries the same eight-line single-threaded runner in twenty-seven test files,
