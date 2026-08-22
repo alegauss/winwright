@@ -627,14 +627,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW105 The fixture says what it can do
-
-A catalogue that lives only in source is a catalogue nobody consults, and a flag nobody
-knows about is a shape nobody tests against. The application lists every flag it has and
-the list is asserted against the flags that exist - the same rule claude-tray applies to
-its own preview catalogue, where an unknown name prints the whole table and exits
-non-zero.
-
 ### §WW106 A shape exists because a defect existed
 
 A fixture that grows shapes nobody can justify becomes a second product to maintain, and

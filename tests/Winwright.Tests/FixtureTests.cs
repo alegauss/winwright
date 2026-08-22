@@ -1326,4 +1326,100 @@ public sealed class FixtureTests : IDisposable
     {
         Assert.DoesNotContain("drawnPane", Ids(Launched()));
     }
+
+    [Fact]
+    public void The_fixture_prints_its_catalogue_without_having_to_be_misspelt_at()
+    {
+        var start = Started("--flags");
+        start.RedirectStandardOutput = true;
+        start.UseShellExecute = false;
+
+        using var running = Process.Start(start)!;
+        var said = running.StandardOutput.ReadToEnd();
+        Assert.True(running.WaitForExit(30_000), "the catalogue never finished printing");
+
+        // An answer and not a refusal: exit zero, on the output stream, without a window.
+        Assert.Equal(0, running.ExitCode);
+        Assert.StartsWith("This fixture knows:", said);
+        Assert.Contains("--flags", said);
+    }
+
+    [Fact]
+    public void Every_flag_the_fixture_reads_is_one_the_catalogue_lists()
+    {
+        var (catalogue, read) = Catalogued();
+
+        // A flag acted on and not listed is a shape nobody can find, which is the whole failure
+        // this task exists over.
+        var unlisted = read.Except(catalogue, StringComparer.Ordinal).Order(StringComparer.Ordinal).ToList();
+
+        Assert.True(unlisted.Count == 0, $"read but not listed: {string.Join(", ", unlisted)}");
+    }
+
+    [Fact]
+    public void Every_flag_the_catalogue_lists_is_one_the_fixture_reads()
+    {
+        var (catalogue, read) = Catalogued();
+
+        // The other direction, and the one a catalogue kept by hand always breaks first: a row
+        // nobody reads is a shape a run can ask for and never get.
+        var dead = catalogue.Except(read, StringComparer.Ordinal).Order(StringComparer.Ordinal).ToList();
+
+        Assert.True(dead.Count == 0, $"listed but never read: {string.Join(", ", dead)}");
+    }
+
+    [Fact]
+    public void Every_row_in_the_catalogue_says_what_it_is_for()
+    {
+        var start = Started("--flags");
+        start.RedirectStandardOutput = true;
+        start.UseShellExecute = false;
+
+        using var running = Process.Start(start)!;
+        var said = running.StandardOutput.ReadToEnd();
+        running.WaitForExit(30_000);
+
+        // A name with no sentence beside it is a row that tells a reader nothing they could not
+        // have guessed from the name.
+        foreach (var line in Lines(said).Where(one => one.TrimStart().StartsWith("--", StringComparison.Ordinal)))
+            Assert.True(line.Trim().Length > 40, $"'{line.Trim()}' says nothing about what it is for");
+    }
+
+    /// <summary>
+    /// What the fixture lists against what it reads, both taken from the fixture itself: the
+    /// catalogue from the running application, and the reads from its own sources.
+    /// </summary>
+    private static (IReadOnlySet<string> Catalogue, IReadOnlySet<string> Read) Catalogued()
+    {
+        var start = Started("--flags");
+        start.RedirectStandardOutput = true;
+        start.UseShellExecute = false;
+
+        using var running = Process.Start(start)!;
+        var said = running.StandardOutput.ReadToEnd();
+        Assert.True(running.WaitForExit(30_000), "the catalogue never finished printing");
+
+        var catalogue = System.Text.RegularExpressions.Regex
+            .Matches(said, "^ *--([A-Za-z]+)", System.Text.RegularExpressions.RegexOptions.Multiline)
+            .Select(one => one.Groups[1].Value)
+            .ToHashSet(StringComparer.Ordinal);
+
+        var read = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var file in Directory.EnumerateFiles(FixtureSources(), "*.cs"))
+        {
+            foreach (System.Text.RegularExpressions.Match one in System.Text.RegularExpressions.Regex
+                .Matches(File.ReadAllText(file), "hapes\\.(?:Has|Value)\\(\"([A-Za-z]+)\""))
+            {
+                read.Add(one.Groups[1].Value);
+            }
+        }
+
+        Assert.NotEmpty(catalogue);
+        Assert.NotEmpty(read);
+        return (catalogue, read);
+    }
+
+    /// <summary>The lines of a block of text, whatever the machine wrote its newlines as.</summary>
+    private static IEnumerable<string> Lines(string said) =>
+        said.Split('\n').Select(one => one.TrimEnd('\r'));
 }

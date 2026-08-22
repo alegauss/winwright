@@ -79,6 +79,11 @@ public sealed record Flags
     /// </summary>
     public static IReadOnlyList<Flag> Known { get; } = new ReadOnlyCollection<Flag>(
     [
+        new Flag(
+            "flags",
+            "",
+            "print this catalogue and stop, so what the fixture can do is askable without having to "
+                + "misspell something to be told"),
         new Flag("title", "text", "a window titled something other than the default, for a case driving two at once"),
         new Flag(
             "pump",

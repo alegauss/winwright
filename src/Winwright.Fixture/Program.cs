@@ -41,6 +41,15 @@ public static class Program
             return UnknownFlag;
         }
 
+        // First of all, and on the output stream rather than the error one: this is an answer and
+        // not a refusal. A catalogue only reachable by misspelling something is a catalogue nobody
+        // consults, and a flag nobody knows about is a shape nobody tests against.
+        if (shapes.Has("flags"))
+        {
+            Console.Out.WriteLine(Flags.Catalogue().TrimStart('\n'));
+            return 0;
+        }
+
         // Before any window and before any render: a check that fingerprints around a launch must
         // see the whole write, not the part that happened to finish first.
         if (shapes.Value("store") is string where)
