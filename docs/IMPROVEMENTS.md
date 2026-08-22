@@ -213,15 +213,6 @@ assertion. It is not a claim that the screen is correct, and pportal's suite
 deliberately renders an empty element beside it, because a check that has never seen a
 blank cannot claim to tell one.
 
-### §WW37 Per-monitor awareness, in every process that reads a rectangle
-
-Without it the rectangle and the copy sit in different coordinate spaces, and the
-capture is offset or scaled on any display at 125 to 200 percent. It matters as much for
-synthesised input: a bounding rectangle is reported in physical pixels and the cursor
-call takes them, so every click lands somewhere else on a scaled display. Both harnesses
-set it as the first thing they do, with a fallback to the older call before giving up,
-and it belongs in the engine so no author has to remember it.
-
 ### §WW38 A region, not a handful of points
 
 Nine sampled points cannot cover a window: the capture taken to verify one task passed

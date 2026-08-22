@@ -48,6 +48,7 @@
 ## Block E — Capture — the picture that proves what it photographed
 
 - ✅ **WW36** **a copy of the window rectangle carries a strip of the desktop down every edge** — The extended frame bounds is what a capture copies, and the run prints the four trims, which on an overlapped window are eleven a side and none at the top.
+- ✅ **WW37** **a capture is offset or scaled on any display that is not at one hundred percent** — Per-monitor awareness is set when the engine assembly loads, so every rectangle and every synthesised click is in the space the window lives in on a display at any scaling.
 
 ## Block F — Assert — the expectation is derived, never typed
 
