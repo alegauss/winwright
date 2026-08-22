@@ -41,6 +41,11 @@ public static class Program
             return UnknownFlag;
         }
 
+        // Before any window and before any render: a check that fingerprints around a launch must
+        // see the whole write, not the part that happened to finish first.
+        if (shapes.Value("store") is string where)
+            Store.Write(where, shapes.Has("mutate"));
+
         // Before any window: a render of a fixed surface needs no window shown, which is the same
         // reading the harness makes about every capture it takes.
         if (shapes.Value("render") is string path)

@@ -591,14 +591,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW100 A store the run is allowed to break
-
-The fingerprint check protects the store of whoever is running it, which makes it the
-one assertion that cannot be developed against a real product without putting somebody's
-settings at risk. The fixture writes a store of its own and offers to mutate it on
-request, so both the clean run and the caught mutation are observable without anything
-real being touched.
-
 ### §WW101 The reference implementation of the surface protocol
 
 The protocol exists in one product and would be copied into the next, which is exactly

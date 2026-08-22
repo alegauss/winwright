@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Automation;
 
 using Winwright.Asserting;
+using Winwright.Capturing;
 using Winwright.Locating;
 using Winwright.Processes;
 using Winwright.Windowing;
@@ -906,5 +907,75 @@ public sealed class FixtureTests : IDisposable
             start.ArgumentList.Add(flag);
 
         return start;
+    }
+
+    [Fact]
+    public void A_run_that_writes_its_store_the_same_way_twice_left_the_machine_as_it_found_it()
+    {
+        var store = Path.Combine(root, "clean");
+        Launched($"--store={store}");
+
+        // Fingerprinted around a second launch that writes the same constants. This is the arm a
+        // one-sided check gets wrong: a run that touches a file and leaves it identical is clean.
+        var change = Untouched.Around([store], () => Launched($"--store={store}"));
+
+        Assert.True(change.Untouched, change.Sentence());
+        Assert.Contains("left the machine as it found it", change.Sentence());
+    }
+
+    [Fact]
+    public void A_run_that_changed_the_store_is_caught_and_the_file_is_named()
+    {
+        var store = Path.Combine(root, "dirty");
+        Launched($"--store={store}");
+
+        var change = Untouched.Around([store], () => Launched($"--store={store}", "--mutate"));
+
+        Assert.False(change.Untouched);
+        Assert.Equal(1, change.Moved);
+        Assert.Contains("settings.json", change.Changed[0]);
+        Assert.Contains("was rewritten", change.Sentence());
+    }
+
+    [Fact]
+    public void The_mutation_is_the_same_number_of_bytes_as_what_it_replaced()
+    {
+        // The exact accident the fingerprint exists for: a settings file repointed from one
+        // profile to another of the same name, which size or write time calls unchanged.
+        var settled = Path.Combine(root, "sized-clean");
+        var mutated = Path.Combine(root, "sized-dirty");
+
+        Launched($"--store={settled}");
+        Launched($"--store={mutated}", "--mutate");
+
+        var before = new FileInfo(Path.Combine(settled, "settings.json"));
+        var after = new FileInfo(Path.Combine(mutated, "settings.json"));
+
+        Assert.Equal(before.Length, after.Length);
+        Assert.NotEqual(File.ReadAllText(before.FullName), File.ReadAllText(after.FullName));
+    }
+
+    [Fact]
+    public void A_store_this_run_never_wrote_is_reported_as_appearing_rather_than_as_untouched()
+    {
+        var store = Path.Combine(root, "fresh");
+        Directory.CreateDirectory(store);
+
+        var change = Untouched.Around([store], () => Launched($"--store={store}"));
+
+        Assert.False(change.Untouched);
+        Assert.Equal(2, change.Appeared.Count);
+        Assert.Contains("were created", change.Sentence());
+    }
+
+    [Fact]
+    public void Mutating_with_no_store_to_mutate_is_refused()
+    {
+        // A flag that does nothing without another is a flag that silently does nothing, which is
+        // the same green as a misspelt one and just as hard to notice.
+        var (code, said) = Ran("--mutate");
+
+        Assert.Equal(2, code);
+        Assert.Contains("--mutate has nothing to change without --store=<directory>", said);
     }
 }

@@ -76,7 +76,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW100** (deps: —) **the store a run must not touch belongs to whoever is running it** — The fixture writes a store of its own and offers to mutate it, so the fingerprint check is asserted without putting anybody's real settings at risk. → §WW100
 - 📋 **WW101** (deps: —) **the surface protocol is implemented in one product and copied into the next** — The fixture is the reference implementation, and this framework's own suite drives it rather than reaching into a real application's flags. → §WW101
 - 📋 **WW102** (deps: —) **a localized window is needed to develop the label rule and no fixture has one** — The fixture ships several language files, one of them carrying a key whose value has a placeholder, which is the case the label rule has to refuse. → §WW102
 - 📋 **WW103** (deps: —) **an intruder covering a rectangle has to be arranged by hand every time** — The fixture puts a topmost window over a named region on request, so the region check is driven rather than reasoned about. → §WW103

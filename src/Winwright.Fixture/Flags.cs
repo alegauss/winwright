@@ -130,6 +130,16 @@ public sealed record Flags
             "",
             "a process that runs and shows nothing, which is the ordinary state of a tray "
                 + "application and the one thing the other-instance refusal must never fire on"),
+        new Flag(
+            "store",
+            "directory",
+            "a settings store of the fixture's own, written from constants, which a run may break "
+                + "without anybody's real settings being at risk"),
+        new Flag(
+            "mutate",
+            "",
+            "leave that store changed - the same number of bytes and a different machine, which is "
+                + "the accident a comparison by size or by write time calls unchanged"),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>
@@ -206,6 +216,11 @@ public sealed record Flags
 
             read[name] = value;
         }
+
+        // A flag that does nothing without another is a flag that silently does nothing, which is
+        // the same green as a misspelt one and just as hard to notice.
+        if (read.ContainsKey("mutate") && !read.ContainsKey("store"))
+            throw new UnknownFlagException($"--mutate has nothing to change without --store=<directory>.{Catalogue()}");
 
         return new Flags(new ReadOnlyDictionary<string, string>(read));
     }
