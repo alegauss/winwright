@@ -367,6 +367,42 @@ exclude the placeholder members and say so in `Source`, which keeps the set usab
 keeps the exclusion visible — a count that is not silent is not the defect. Decide it
 against a real strings file before writing either.
 
+### §WW130 Collapsed is not the same as measuring nothing
+
+Found by running the layout check against a real window rather than against a dump
+somebody typed. The fixture's loading note is collapsed unless a run asks for it, so it
+lays out to nothing - correctly, deliberately, and on every page that hides anything.
+The check reports it as an element laid out to no size, which is the fault it exists to
+catch, and on a real page it fires on every hidden thing at once.
+
+Nothing distinguishes the two today because the dump does not carry visibility. A
+rectangle of no area is all a reader gets, and a caption that wrapped at column zero and
+a note the page is deliberately not showing produce exactly the same line.
+
+So the dump carries it and the check reads it: an element the application collapsed is
+left alone, and one that is visible and still measures nothing is the finding it always
+was. The cost is one field in a format two packages have to agree about, which is the
+same price every other honest reading in this project has paid.
+
+### §WW131 The application's elements and the template's parts
+
+Measured against the fixture's own window. Four of forty-five elements are laid out
+wrongly by every rule the check has, and every one of the four is a part of the default
+tab template: a selected header is drawn four pixels outside the panel holding it and
+two past the border containing it, on purpose, because that is how a selected tab lifts
+over the edge. The elements are real, the rectangles are real, and the faults are true
+statements about what was drawn.
+
+They are also not what anybody asked. A geometry check exists to catch a caption that
+wrapped and a button nine pixels below its box - things somebody wrote - and it
+currently answers with the framework's chrome instead, which no adopter can fix and
+every adopter would have to read past.
+
+Narrowing by name does not separate them: the application named the tab item, and the
+template drew it out of place. What separates them is who declared the element, and the
+dump is where that is known - the walk is standing inside the application when it
+happens. A field saying so is cheaper than every reader learning to ignore four lines.
+
 ## Block G — The scenario — a case is a data file
 
 ### §WW57 A case is data

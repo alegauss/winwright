@@ -37,6 +37,8 @@
 ## Block F — Assert — the expectation is derived, never typed
 
 - 📋 **WW118** (deps: —) **a derived set can carry a placeholder value that no exact read will ever match** — A set refuses a placeholder the way a label already does, so a key that cannot pass is a red at derivation rather than a member nothing in the tree ever equals. → §WW118
+- 📋 **WW130** (deps: —) **an element collapsed on purpose is reported as laid out and occupying nothing** — The dump says which elements were collapsed and the layout check leaves those alone, since a page hiding a note it is not showing is not a page with a defect on it. → §WW130
+- 📋 **WW131** (deps: —) **a themed control's own chrome is reported as laid out outside the thing containing it** — A reading tells the elements an application declared from the parts its framework's template drew, so a check about a page is not answered by the tab strip around it. → §WW131
 
 ## Block G — The scenario — a case is a data file
 
