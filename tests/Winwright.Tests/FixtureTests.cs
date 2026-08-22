@@ -978,4 +978,20 @@ public sealed class FixtureTests : IDisposable
         Assert.Equal(2, code);
         Assert.Contains("--mutate has nothing to change without --store=<directory>", said);
     }
+
+    [Fact]
+    public void Settling_waits_for_the_process_to_be_gone_and_not_only_for_its_window()
+    {
+        // WW129, measured: no window of a stopped process is enumerable well before the process
+        // has exited, and the class that follows is usually the one asserting who owns the desk.
+        using var register = new ProcessRegister();
+        var pid = Attachable.Launch(register, Started()).Pid;
+
+        for (var attempt = 0; attempt < 200 && TopLevelWindows.OfProcess(pid).Count == 0; attempt++)
+            Thread.Sleep(25);
+
+        Attachable.StopAndSettle(register);
+
+        Assert.Throws<ArgumentException>(() => Process.GetProcessById(pid));
+    }
 }

@@ -22,6 +22,7 @@
 - ✅ **WW15** **a launch argument silently does not survive an attach** — The language is resolved saved preference first and display language second, reported out loud with where it was read, and one asked for that the app is not in is a hole.
 - ✅ **WW125** **a test class that touches the desktop can be written outside the serial collection and nothing says so** — Seven classes that put a window or a process in front of the machine now declare the serial collection, and a check reads the suite's own sources so the eighth cannot be written without one.
 - ✅ **WW126** **the suite gets flakier the more times it is run, so state is outliving the process that made it** — A run's tray icon carries its own process id so a ghost from a killed run cannot be read as this one's, and windows are waited off the desktop rather than only stopped.
+- ✅ **WW129** **a stopped process is waited off the desktop and not out of the machine, so the next class starts on a busy one** — The settle waits for the processes to have exited, and the suite went from a dozen unreproducible foreground failures on a busy run to three clean runs in a row.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
