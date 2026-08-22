@@ -9,6 +9,15 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <!-- There is no App.xaml, and that is the point: an ApplicationDefinition generates its own
+       entry point, and this project needs its own. A flag the fixture does not know has to be
+       refused before the presentation stack starts - refusing from inside Startup leaves a message
+       loop running with no window to close, and the process hangs until something kills it. The
+       resources live in a dictionary the application merges instead. -->
+  <PropertyGroup>
+    <StartupObject>Winwright.Fixture.Program</StartupObject>
+  </PropertyGroup>
+
   <!-- No reference to the engine, and none to the in-app half yet. The engine is the harness that
        drives this and would be a test framework shipped inside the thing under test; the in-app
        half arrives when the surface protocol does, which is its own task. -->

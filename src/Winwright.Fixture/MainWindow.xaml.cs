@@ -19,8 +19,19 @@ namespace Winwright.Fixture;
 /// </summary>
 public partial class MainWindow : Window
 {
-    /// <summary>Build the window.</summary>
-    public MainWindow() => InitializeComponent();
+    /// <summary>Build the window in whatever shape this run was asked for.</summary>
+    /// <param name="shapes">The flags the run carried, or null for the default surface.</param>
+    public MainWindow(Flags? shapes = null)
+    {
+        Shapes = shapes ?? Flags.Read([]);
+        InitializeComponent();
+
+        if (Shapes.Value("title") is string named)
+            Title = named;
+    }
+
+    /// <summary>What this run was asked to be.</summary>
+    public Flags Shapes { get; }
 
     private void OnClose(object sender, RoutedEventArgs e) => Close();
 }

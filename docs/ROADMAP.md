@@ -75,7 +75,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW90** (deps: —) **every refusal the framework makes is asserted only against a defect nobody can reproduce** — The fixture provokes each one on demand behind a flag, so a refusal that quietly stopped working is a red run rather than a silence nobody notices. → §WW90
 - 📋 **WW91** (deps: —) **a window hosted under two different message pumps is the difference no picture can see** — The fixture ships the same window under both, which is the only way to develop the check that catches a keyboard path that arrives dead. → §WW91
 - 📋 **WW92** (deps: —) **a control that announces nothing has to be found inside somebody else's product** — The fixture carries one deliberately unnamed control, one announcing a glyph codepoint and one whose label is a neighbouring element, which is the naming rule in one page. → §WW92
 - 📋 **WW93** (deps: —) **a collapsed pane, a popup and a submenu are three different kinds of absence** — All three are on the fixture, since the tree reports each one differently and each cost a real defect somewhere to learn. → §WW93

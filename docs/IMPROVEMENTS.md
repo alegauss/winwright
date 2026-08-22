@@ -571,14 +571,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW90 Every refusal has a flag that provokes it
-
-This framework's value is concentrated in its refusals, and a refusal nobody can provoke
-is a refusal that will quietly stop working. Each one gets a fixture flag: cover this
-region, opt into a backdrop, render nothing, stay loading this long, draw a control with
-no name. The framework's own suite then asserts the red, which is the only thing that
-keeps a refusal real rather than remembered.
-
 ### §WW91 The same window under two pumps
 
 The difference between hosting a window under one message pump and another is invisible

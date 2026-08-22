@@ -93,3 +93,4 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ✅ **WW89** **there is no window to develop against that is not somebody's shipping product** — A WPF fixture belongs to this repository and the suite launches it, reads its tree and stops it, with nothing on it read off the machine it runs on.
+- ✅ **WW90** **every refusal the framework makes is asserted only against a defect nobody can reproduce** — The fixture takes flags and refuses one it does not know before the presentation stack starts, naming its whole catalogue, so a misspelt shape is a red exit rather than a silent default.

@@ -49,9 +49,13 @@ public sealed class FixtureTests : IDisposable
     }
 
     /// <summary>Launch it and wait for the window it draws, which is the only signal worth waiting on.</summary>
-    private TopLevelWindow Launched()
+    private TopLevelWindow Launched(params string[] flags)
     {
-        var launched = Attachable.Launch(register, new ProcessStartInfo(Executable()));
+        var start = new ProcessStartInfo(Executable());
+        foreach (var flag in flags)
+            start.ArgumentList.Add(flag);
+
+        var launched = Attachable.Launch(register, start);
 
         for (var attempt = 0; attempt < 200; attempt++)
         {
@@ -205,5 +209,61 @@ public sealed class FixtureTests : IDisposable
         {
             return false;
         }
+    }
+
+    [Fact]
+    public void A_flag_it_knows_reaches_the_window()
+    {
+        var window = Launched("--title=winwright fixture, second");
+
+        Assert.Equal("winwright fixture, second", window.Title);
+    }
+
+    [Fact]
+    public void A_flag_it_does_not_know_is_refused_rather_than_ignored()
+    {
+        // The worst possible green: a misspelt flag silently does nothing, the shape is never
+        // taken, the refusal never fires, and the case passes having asserted nothing.
+        var (code, said) = Ran("--backdrp");
+
+        Assert.Equal(2, code);
+        Assert.Contains("--backdrp is not a shape this fixture has", said);
+        Assert.Contains("This fixture knows:", said);
+        Assert.Contains("--title=<text>", said);
+    }
+
+    [Fact]
+    public void A_flag_given_no_value_and_one_given_too_much_are_both_refused()
+    {
+        Assert.Contains("takes a value", Ran("--title").Said);
+        Assert.Contains("every argument begins with --", Ran("title=x").Said);
+    }
+
+    [Fact]
+    public void A_refused_run_draws_no_window_at_all()
+    {
+        var (code, _) = Ran("--nope");
+
+        // Not a window somebody could photograph and mistake for the shape they asked for.
+        Assert.Equal(2, code);
+    }
+
+    /// <summary>Run it to completion, reading what it refused with.</summary>
+    private (int Code, string Said) Ran(params string[] flags)
+    {
+        var start = new ProcessStartInfo(Executable())
+        {
+            RedirectStandardError = true,
+            UseShellExecute = false,
+        };
+
+        foreach (var flag in flags)
+            start.ArgumentList.Add(flag);
+
+        using var running = Process.Start(start)!;
+        var said = running.StandardError.ReadToEnd();
+        Assert.True(running.WaitForExit(20_000), "the fixture did not exit after being refused");
+
+        return (running.ExitCode, said);
     }
 }
