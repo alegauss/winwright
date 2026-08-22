@@ -16,6 +16,10 @@
 
 ## Block D — Act — patterns before pointers
 
+- 📋 **WW134** (deps: —) **a destructive entry declared by name stops being refused once the application shows another language** — A destructive entry is declared by something a translation cannot change, so the guard holds in every language the application ships. → §WW134
+- 📋 **WW135** (deps: —) **a subject built from the timeouts alone carries no destructive list, so the guard depends on which constructor was typed** — A subject cannot be made without what the project declared about it, the way an act cannot reach an element without having been judged first. → §WW135
+- 📋 **WW136** (deps: —) **nothing a run calls checks the declared pointer reasons, so a reason that went stale survives every run** — A run reads its declared pointer reasons back against the tree the way it reads its six conditions, so a reason nobody checked is not one a report may quote. → §WW136
+
 ## Block E — Capture — the picture that proves what it photographed
 
 - 📋 **WW38** (deps: Block K) **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and each frame intersected with the copy rectangle, which answers for the whole area in one pass and names the intruder. → §WW38

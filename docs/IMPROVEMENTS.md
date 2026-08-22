@@ -119,6 +119,74 @@ which is the shape of check that only ever proves what the author already assume
 
 ## Block D — Act — patterns before pointers
 
+### §WW134 The guard speaks one language
+
+Found while shipping the guard itself. A declared entry is matched against the
+automation id first and the displayed name second, and the second is the one every
+project will reach for, because the name is what an author reading a menu can see. It is
+also the one field a translation rewrites.
+
+So a project declaring "Quit" is guarded on an English desk and unguarded the moment the
+same application comes up in pt-BR showing "Sair" - and unguarded silently, because
+nothing about a name that matched nothing looks different from a name that was never
+dangerous. The failure mode is the worst available: the run presses the entry that ends
+the run, on the machine where somebody was least expecting it.
+
+This tool already knows how to resolve a string across languages. It reads the project's
+language files, resolves which one the application is showing, and has a precondition
+about the answer. The destructive list is the one place that knowledge is not being
+used, and the fix is small: declare the entry by whatever a translation cannot move -
+the automation id, or a key the language files resolve to the displayed text - and
+refuse a declaration that can only be matched by a name where the project ships more
+than one language.
+
+The general rule underneath is worth keeping: a safety check compared against text a
+person sees is a safety check with an expiry date, and the expiry is whenever somebody
+translates the application.
+
+### §WW135 A guard the caller may decline by accident
+
+The refusal landed on the door every act passes through, which is right, and it reads
+the list off the subject, which is where the trouble is. Three constructors make a
+subject and only one carries a declaration; the other two carry a bare deadline or a
+bare Timeouts, and a subject made either way has an empty list and refuses nothing.
+
+That would be fine if the declaration-carrying one were the obvious one. It is not. A
+scenario author with a project in hand writes the timeouts out of it - that is what the
+type is for - and reaches for the constructor that takes them, and the guard is gone
+with no line anywhere saying so. This project has closed exactly this shape twice: a
+process cannot be launched outside the register, and an act cannot reach an element
+without an admission. Both work because the weaker route does not exist.
+
+What is wanted is the same: the subject a scenario makes against a declared project is
+the one shape that is reachable, and a subject built from a bare deadline is what a test
+of the locating machinery uses and says so. Whether the answer is folding the timeouts
+constructor into the declaration one, or carrying the list separately so every route
+takes it, is the task's to decide. What must be true afterwards is that no scenario
+silently loses the guard by writing the constructor that was easier to reach.
+
+### §WW136 A check that shipped and was never joined
+
+Filed against the thing that had just shipped. A pointer act now states why the pattern
+route was unavailable, and there is a check that reads each stated reason back against
+the live tree and answers with what agreed, what the tree disputes, and what claimed
+nothing it could answer. Nothing calls it.
+
+That is this project's founding defect wearing a new subject, and the block before this
+one closed the same shape by making one list: five measurements had shipped and none of
+them was joined, so a run's claim about the machine was met three times over by three
+sentences and therefore not once. Here it is met zero times. A reason recorded in the
+file, never read back, is exactly the sort of comment that is true on the day it is
+written and quietly false a year later - and the report will keep printing it as though
+somebody had checked.
+
+The join is small and the place is decided: the reading the run already takes before it
+starts is where the machine is described, and what the file claims about the
+application's controls belongs beside what the machine claims about itself. A disputed
+reason is not a failure of the run - the act still works, that is the point of a pointer
+- so it is a finding in the preamble rather than a red. What it must not be is absent,
+because absent and checked read the same to whoever skims.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW38 A region, not a handful of points
