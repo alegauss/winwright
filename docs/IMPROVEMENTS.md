@@ -39,6 +39,29 @@ The blank line is deliberately skipped and stays skipped: a trace ended by a cra
 finishes on one, and that is the reader working rather than failing. What this is about
 is the line that has content and is not a step.
 
+### §WW117 A crashed host is not a pass
+
+Measured here while building WW39. A test declared a sixteen-byte `RECT` as an
+eight-byte `long`, so the call corrupted the stack and the host died partway through an
+unrelated class. `dotnet test` printed `Aprovado!` with `Com falha: 0` and a total of
+352 where the run before it had 374 — twenty-two tests gone, and the only sign was a
+number nobody had a reason to read.
+
+This is the defect this project was started over, in the suite that is supposed to prove
+the project does not have it. A green that covers tests which never ran is exactly the
+hole WW6 exists to close, and it is worth nothing if the harness proving WW6 has the
+same hole.
+
+The count is the check: discovery already reports how many tests there are, and the run
+reports how many executed. When they disagree the run is broken rather than passed, and
+the message says how many are missing and where the host stopped. Nothing here tries to
+diagnose the crash — a fatal error has no managed stack to read — only to refuse to call
+the result a pass.
+
+It belongs on the run rather than in a reviewer's habits. The number moved by six
+percent and two consecutive readers, both of them me, took the word `Aprovado` at face
+value.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW110 The run has no preamble
