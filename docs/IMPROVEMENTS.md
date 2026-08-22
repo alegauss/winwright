@@ -156,6 +156,26 @@ Distinct from WW111 and WW114. Those are about the foreground being contested; t
 reproduces with the foreground uncontested, because nothing here needs the desktop —
 only the shell's own timing.
 
+### §WW127 A check reads a window this suite made
+
+Two checks in the actionability file read `AutomationElement.RootElement` and the
+desktop's first child, and assert about the control type and the pattern names that come
+back. What they are really asserting is that this machine, at this instant, was showing
+something whose patterns are all in the locator grammar's vocabulary.
+
+Measured across this session: one of them went red on a run where nothing had changed
+and green on the next two, and it is the last remaining source of a failure the code
+under test cannot explain. Whatever is first under the desktop is whatever the person or
+the run happened to open, and a custom control in somebody else's application can report
+any pattern it likes.
+
+The property they check is worth checking - short names and a vocabulary the grammar
+accepts are both real claims. The subject is what is wrong. Pointed at a window this
+suite creates, both become claims about this project, reproducible on every desk, and
+the fixture already exists to be that window. The desktop root itself is still worth one
+reading, but as a statement about what the engine does with an element it did not choose
+rather than as an assertion about the element.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW112 Actionability needs a door, not a convention
