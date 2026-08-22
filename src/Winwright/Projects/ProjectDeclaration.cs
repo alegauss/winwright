@@ -60,6 +60,7 @@ public sealed class ProjectDeclaration
                     $"{path} allows {declared} attempts, and an act nobody may attempt is not an act", nameof(shape))
             : Acting.Retry.DefaultCap;
         Timeouts = Timeouts.Declared(shape.Timeouts, path);
+        Destructive = Destructive.Of(shape.Destructive);
     }
 
     /// <summary>The declaration file that was read.</summary>
@@ -80,6 +81,12 @@ public sealed class ProjectDeclaration
 
     /// <summary>How long this project waits, by name, with the engine's defaults folded under it.</summary>
     public Timeouts Timeouts { get; }
+
+    /// <summary>
+    /// The entries that end the run, named here because which one quits is a fact about the
+    /// application. Empty where the project declares none, and then nothing is refused.
+    /// </summary>
+    public Destructive Destructive { get; }
 
     /// <summary>
     /// The JSON file this application saves the user's chosen language in, resolved. Null where
@@ -123,6 +130,7 @@ public sealed class ProjectDeclaration
         "fingerprintStore" => fingerprintStore is not null,
         "languageFiles" => LanguageFiles.Count > 0,
         "language.fallback" => LanguageFallback is not null,
+        "destructive" => Destructive.Any,
         _ => Timeouts.All.ContainsKey(key.StartsWith("timeouts.", StringComparison.Ordinal) ? key[9..] : key),
     };
 
@@ -193,6 +201,8 @@ public sealed class ProjectDeclaration
         [JsonPropertyName("language")] public LanguageShape? Language { get; init; }
 
         [JsonPropertyName("attempts")] public int? Attempts { get; init; }
+
+        [JsonPropertyName("destructive")] public IReadOnlyList<string>? Destructive { get; init; }
     }
 
     private sealed record LanguageShape

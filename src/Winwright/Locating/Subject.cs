@@ -47,6 +47,31 @@ public sealed class Subject
         Locator = locator;
     }
 
+    /// <summary>
+    /// A subject that knows the whole declaration, which is the timeouts and the entries this
+    /// project says end the run. The only shape that carries the refusal, and therefore the one
+    /// worth reaching for.
+    /// </summary>
+    /// <param name="root">What to resolve under.</param>
+    /// <param name="locator">What this subject is.</param>
+    /// <param name="declaration">The project.</param>
+    public Subject(AutomationElement root, Locator locator, ProjectDeclaration declaration)
+        : this(root, locator, (declaration ?? throw new ArgumentNullException(nameof(declaration))).Timeouts)
+    {
+        Destructive = declaration.Destructive;
+    }
+
+    private Subject(Subject was, bool meansIt)
+    {
+        root = was.root;
+        timeouts = was.timeouts;
+        deadlineMs = was.deadlineMs;
+        pollMs = was.pollMs;
+        Locator = was.Locator;
+        Destructive = was.Destructive;
+        MeansIt = meansIt;
+    }
+
     /// <summary>A subject with the deadline spelled out, for a caller that has no declaration.</summary>
     public Subject(AutomationElement root, Locator locator, int deadlineMs, int pollMs = 25)
     {
@@ -63,6 +88,29 @@ public sealed class Subject
 
     /// <summary>What this subject is, as the scenario wrote it.</summary>
     public Locator Locator { get; }
+
+    /// <summary>
+    /// The entries this project says end the run. Empty for a subject built without a declaration,
+    /// and then nothing about this subject is refused.
+    /// </summary>
+    public Destructive Destructive { get; } = Destructive.None;
+
+    /// <summary>
+    /// Whether the scenario has said out loud that it means the destructive entry. False unless
+    /// <see cref="MeaningIt"/> was called, which is the sentence a reviewer is looking for.
+    /// </summary>
+    public bool MeansIt { get; }
+
+    /// <summary>
+    /// The same subject, having said that it means the entry it names.
+    /// <para>
+    /// It sits on the subject rather than on each verb on purpose: a flag per verb is five flags
+    /// that drift, and what a reviewer wants to find is one sentence at the place the dangerous
+    /// thing is named — <c>Act.Invoke(quit.MeaningIt())</c> — rather than a parameter buried in
+    /// the call that presses it.
+    /// </para>
+    /// </summary>
+    public Subject MeaningIt() => new(this, meansIt: true);
 
     /// <summary>
     /// How long an act on this subject waits for what it did to show up, in milliseconds. Input

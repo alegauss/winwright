@@ -119,26 +119,6 @@ which is the shape of check that only ever proves what the author already assume
 
 ## Block D — Act — patterns before pointers
 
-### §WW116 The menu is safe and the verb beside it is not
-
-This block's criterion says destructive entries are "named in the scenario and reached
-only by traversal". The second half shipped and the first did not. Walking a menu cannot
-invoke anything - there is no such method on that surface, and a test asserts it - so
-the route this rule was written about is closed. The route beside it is wide open: the
-general invoke will press a menu item called Quit exactly as willingly as one called
-Open, and nothing anywhere in the project knows the difference.
-
-That gap is the same shape as the one the pointer acts closed. What makes a click safe
-there is not that it is hard to reach, it is that reaching it is a thing the file says
-out loud. Here nothing says anything, so the safety rests on the author of every
-scenario remembering which entry ends the run - which on claude-tray is one entry, and
-on the next adopting project is a different one nobody has met yet.
-
-Naming them per project is where the list belongs, beside the executable and the
-timeouts, since which entry quits is a fact about the application. Then invoke refuses
-one of them unless the act says it means that one, and the refusal names the entry. A
-scenario that genuinely tests the quit path says so, once, where a reviewer sees it.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW38 A region, not a handful of points

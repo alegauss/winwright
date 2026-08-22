@@ -101,6 +101,18 @@ public sealed class Admitted
         ArgumentNullException.ThrowIfNull(reading);
 
         var judged = ActionabilityCheck.Of(reading.Facts, pattern);
+
+        // Before actionability rather than after it, and only once there is something to read: a
+        // disabled Quit refused for being disabled is a refusal that hides which button it was,
+        // and which button it was is the fact the reader needs. Here rather than in each verb
+        // because the entry that ends the run is reached the same way a harmless one is, and a
+        // guard on invoke alone leaves the click beside it pressing Quit as willingly as Open.
+        if (reading.Facts is { } facts && !subject.MeansIt
+            && subject.Destructive.Matched(facts.Name, facts.AutomationId) is { } entry)
+        {
+            throw new DestructiveEntryException(subject.Locator.Text, entry, facts.ToString());
+        }
+
         judged.Require(subject.Locator.Text);
 
         return new Admitted(subject, reading, judged, reading.Resolution.Element!);
