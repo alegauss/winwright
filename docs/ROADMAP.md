@@ -56,7 +56,6 @@
 - 📋 **WW66** (deps: Block G) **the schema of a case arrives as flag names typed from memory** — The tools carry this project's scenario schema as their input schema, which is the difference between a refusal and a guess. → §WW66
 - 📋 **WW67** (deps: Block G) **a hand-written harness script is the path of least resistance** — A hook denies one and names the verb that replaces it, which is the same guard roadkeep puts in front of a governed file. → §WW67
 - 📋 **WW69** (deps: Block G) **the skill is loaded on every turn against a budget it does not need** — It loads when a window is in play and says which loop answers which question, which is the whole of what an agent needs to reach the right verb. → §WW69
-- 📋 **WW70** (deps: —) **three copies of the engine can be in play and quietly disagree** — The version the plugin carries, the one continuous integration gates on and the one being called are read together, and a disagreement is a refusal. → §WW70
 
 ## Block I — The in-app half — the app cooperates with the harness
 

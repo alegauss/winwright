@@ -456,14 +456,6 @@ the harness reads. The skill says which loop answers which question - a picture 
 layout, an interaction proves input, a render proves determinism - and what it costs a
 session is measured rather than assumed to be small.
 
-### §WW70 Three copies can disagree
-
-The version the plugin carries, the one continuous integration gates on and the one
-being called are allowed to differ, and a stale copy does not fail - it agrees with a
-rule that has moved. roadkeep reads all three and answers agreed, behind or unpinnable,
-exiting non-zero on the two that are not agreement. The same hazard arrives here the
-moment a project vendors the engine instead of taking the plugin.
-
 ## Block I — The in-app half — the app cooperates with the harness
 
 ### §WW71 One render, in one package
