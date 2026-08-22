@@ -34,7 +34,7 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW51** (deps: WW77) **a page renders correctly above a screenful of blank space and nothing notices** — Geometry is dumped and checked: nothing overlaps, nothing starts off the surface, nothing ends past it and nothing measures zero. → §WW51
+- 📋 **WW51** (deps: WW77 ✅) **a page renders correctly above a screenful of blank space and nothing notices** — Geometry is dumped and checked: nothing overlaps, nothing starts off the surface, nothing ends past it and nothing measures zero. → §WW51
 - 📋 **WW118** (deps: —) **a derived set can carry a placeholder value that no exact read will ever match** — A set refuses a placeholder the way a label already does, so a key that cannot pass is a red at derivation rather than a member nothing in the tree ever equals. → §WW118
 
 ## Block G — The scenario — a case is a data file
@@ -56,8 +56,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 📋 **WW77** (deps: —) **a surface with no accessibility tree can only be checked by reading its source** — A geometry dump the harness reads, which is what makes an installer page or a custom-drawn surface assertable at all. → §WW77
-
 ## Block J — Adoption — the proof is the deletion
 
 - 📋 **WW78** (deps: Block G) **the keyboard case is the only observable of a live input path and it lives in a script** — Migrated first: navigate, type, read back, traverse and drive a slider, which is the shortest path through locate, act and assert. → §WW78
@@ -69,7 +67,7 @@
 - 📋 **WW84** (deps: Block G) **the names case observes what no screenshot can** — Migrated with the derived panel sweep and the exact-label reads, including the rule that must fire and the one that must not. → §WW84
 - 📋 **WW85** (deps: Block G) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
 - 📋 **WW86** (deps: WW78, WW79, WW80, WW81, WW82, WW83, WW84, WW85, Block E) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
-- 📋 **WW87** (deps: Block E, WW77) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
+- 📋 **WW87** (deps: Block E, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 
 ## Block K — The proving ground — a fixture app built to be hard to test

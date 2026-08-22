@@ -431,14 +431,6 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW77 A surface with no tree
-
-An installer page, a custom-drawn control or an immediate-mode surface has no
-accessibility tree to read, and the only check available today is reading the source -
-which misses the caption that wrapped, the page that rendered above blank space and the
-button nine pixels out of place. A geometry dump the harness reads is what makes those
-surfaces assertable at all, and freewilly already built one, for exactly one page.
-
 ## Block J — Adoption — the proof is the deletion
 
 ### §WW78 The keyboard case, first

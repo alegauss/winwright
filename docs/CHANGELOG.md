@@ -85,6 +85,7 @@
 - ✅ **WW74** **the app knows what it drew and nothing asks it** — The application writes a name and four physical-pixel numbers per surface and the engine reads them back, with a surface nobody reported answering as a named hole rather than a throw.
 - ✅ **WW75** **a popup closes the moment the window is raised to be photographed** — The host walks the logical tree, holds every popup it finds open and puts each one back, so a closed popup is reached at all and no page has to remember the rule for itself.
 - ✅ **WW76** **the same single-threaded runner is copied into every test file that touches a control** — One bounded runner rethrows what the work threw as itself, and this suite's own eight copies of it were deleted in the same commit, which is the saving stated as a deletion.
+- ✅ **WW77** **a surface with no accessibility tree can only be checked by reading its source** — The application dumps every laid-out rectangle with its depth in physical pixels and the engine reads it back, so a surface with no accessibility tree is assertable without reading its source.
 
 ## Block J — Adoption — the proof is the deletion
 
