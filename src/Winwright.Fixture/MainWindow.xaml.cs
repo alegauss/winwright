@@ -36,6 +36,17 @@ public partial class MainWindow : Window
             AbsencesPane.AddTo(panes);
     }
 
+    /// <inheritdoc />
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+
+        // Here and nowhere earlier: a window has no handle until its source exists, and the
+        // compositor is asked about a handle.
+        if (Shapes.Value("backdrop") is string kind)
+            Backdrop.Set(new System.Windows.Interop.WindowInteropHelper(this).Handle, kind);
+    }
+
     /// <summary>What this run was asked to be.</summary>
     public Flags Shapes { get; }
 

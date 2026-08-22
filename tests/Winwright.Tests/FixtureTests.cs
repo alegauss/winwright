@@ -446,4 +446,48 @@ public sealed class FixtureTests : IDisposable
 
     /// <summary>Launch with the three absences and hand back the window to resolve against.</summary>
     private AutomationElement Absences() => AutomationElement.FromHandle(Launched("--absences").Handle);
+
+    [Fact]
+    public void A_window_that_opted_into_a_backdrop_says_so_to_the_compositor()
+    {
+        var window = Launched("--backdrop=mica");
+
+        // Read from the compositor and not from the fixture: what a window asked for and what it
+        // has are different claims, and only the second one decides what a copy of it contains.
+        Assert.Equal(2, SystemBackdrop(window.Handle));
+    }
+
+    [Fact]
+    public void A_window_that_never_asked_is_told_apart_from_one_that_asked_for_nothing()
+    {
+        // The arm a one-sided check gets wrong. Auto is the compositor deciding; none is the
+        // window having decided. A refusal that read them as the same would let one through.
+        Assert.Equal(0, SystemBackdrop(Launched().Handle));
+        Assert.Equal(1, SystemBackdrop(Launched("--backdrop=none").Handle));
+    }
+
+    [Fact]
+    public void Every_backdrop_the_catalogue_offers_is_one_the_compositor_takes()
+    {
+        // A name in the catalogue that the compositor refuses is a shape nobody can provoke, which
+        // is the whole failure this block exists to stop.
+        Assert.Equal(3, SystemBackdrop(Launched("--backdrop=acrylic").Handle));
+        Assert.Equal(4, SystemBackdrop(Launched("--backdrop=tabbed").Handle));
+    }
+
+    [Fact]
+    public void A_backdrop_the_fixture_does_not_have_is_refused_with_the_ones_it_does()
+    {
+        var (code, said) = Ran("--backdrop=frosted");
+
+        Assert.Equal(2, code);
+        Assert.Contains("it takes none or mica or acrylic or tabbed", said);
+    }
+
+    /// <summary>DWMWA_SYSTEMBACKDROP_TYPE, asked of the compositor rather than of the window.</summary>
+    private static int SystemBackdrop(nint window) =>
+        DwmGetWindowAttribute(window, 38, out var read, sizeof(int)) == 0 ? read : -1;
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmGetWindowAttribute(nint window, int attribute, out int value, int size);
 }

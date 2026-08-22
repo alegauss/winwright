@@ -95,6 +95,12 @@ public sealed record Flags
             "",
             "a pane carrying the three kinds of absence at once - a collapsed pane, a closed popup "
                 + "and an unopened submenu - which the tree reports differently and nothing else has together"),
+        new Flag(
+            "backdrop",
+            "kind",
+            "a window that opted into a system backdrop, which transmits what is behind it through "
+                + "the glass and which no amount of z-order reasoning can answer for",
+            Backdrop.Names),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>

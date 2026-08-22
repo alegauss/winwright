@@ -590,14 +590,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW94 Both arms of the backdrop refusal
-
-A refusal with only one arm tested is half a check: it can be right about the window it
-refuses and wrong about everything it lets through. The fixture ships one window that
-opted into a system backdrop and one that never did, so the refusal and the pass beside
-it are both driven - which is what proves the check reads the compositor rather than the
-window's name.
-
 ### §WW95 A borderless window with no handle
 
 A toast, a balloon or a menu is a top-level window the process object never reports, and
