@@ -308,6 +308,29 @@ template drew it out of place. What separates them is who declared the element, 
 dump is where that is known - the walk is standing inside the application when it
 happens. A field saying so is cheaper than every reader learning to ignore four lines.
 
+### §WW139 The notes in the file are not strings
+
+Read off a failing assertion while WW118 was being shipped. JSON has no comments, so a
+strings file that wants one writes a key nobody reads - the convention is a key named
+"//", and the fixture's own file uses it twice. The derivation takes every string under
+the key, so both notes join the expectation, and the set demands that a window somewhere
+displays the sentence "The pathological key. An exact-name read can never match this".
+
+It is the founding defect pointing the other way. A set with two members nothing can
+ever read is red on every run for a reason that has nothing to do with the application,
+and a red nobody can fix is a red people learn to ignore - which is how the green that
+covers a missing tab header gets shipped next.
+
+The fix is small and the judgement is where the work is. Skipping a key named "//" is
+the convention and covers the file here; "//2", "_comment" and "$comment" are the same
+convention spelled differently. What must not happen is silent removal: WW118
+established that what a derivation leaves out is named in the source sentence every
+verdict prints, and a skipped note belongs in that list rather than in a rule nobody
+sees the effect of.
+
+Worth checking whether the label reader has the same hole, since it walks the same files
+by key and would answer a comment as a label.
+
 ## Block G — The scenario — a case is a data file
 
 ### §WW57 A case is data
