@@ -448,15 +448,6 @@ that replaces it, which is the same shape roadkeep puts in front of a governed f
 and the reason it works is that the refusal arrives before the work rather than after
 it.
 
-### §WW68 Doctor answers for the desk
-
-A machine with no interactive session, no foreground to take, a display that renders
-nothing, or missing automation assemblies cannot observe anything at all - and every one
-of those currently arrives dressed as a failing assertion about the code. Asked once and
-up front, the answer is a report about the machine. On a hosted runner it either changes
-nothing or names a condition that was being suffered in silence, and which of the two is
-a reading nobody has taken.
-
 ### §WW69 The skill loads when a window is in play
 
 The whole content of an instruction file is loaded on every turn against a budget, which

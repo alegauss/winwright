@@ -69,6 +69,7 @@
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 - ✅ **WW64** **an answer has to be verified by reading the file the command already read** — Every answer carries where it came from as fields - file, line, key, element, pattern - so a missing header reads as strings.en.json:6 and the trace keeps it, rather than a reader opening the file.
+- ✅ **WW68** **a machine that can observe nothing reports a build failure** — Six conditions are read before anything launches - session, desktop, display, coordinates, automation, foreground - and a desk lacking one excuses a check as a named hole instead of a red.
 
 ## Block I — The in-app half — the app cooperates with the harness
 

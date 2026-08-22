@@ -130,6 +130,44 @@ internal static class Win32
     internal const int VirtualScreenWidth = 78;
     internal const int VirtualScreenHeight = 79;
 
+    /// <summary>SM_CMONITORS: how many displays are attached. Zero is a desk that draws nothing.</summary>
+    internal const int MonitorCount = 80;
+
+    /// <summary>SM_REMOTESESSION: whether this session is being served over a remote connection.</summary>
+    internal const int RemoteSession = 0x1000;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern nint GetProcessWindowStation();
+
+    /// <summary>UOI_FLAGS: the flags of a window station or desktop, which is where WSF_VISIBLE lives.</summary>
+    internal const int UserObjectFlags = 1;
+
+    /// <summary>WSF_VISIBLE: the station has a visible desktop. A service's station does not.</summary>
+    internal const int StationVisible = 0x0001;
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct UserObjectFlagsInfo
+    {
+        public int Inherit;
+        public int Reserved;
+        public int Flags;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetUserObjectInformationW(
+        nint handle, int index, out UserObjectFlagsInfo info, int length, out int needed);
+
+    /// <summary>DESKTOP_READOBJECTS: the least this run can ask for and still have opened the desktop.</summary>
+    internal const uint DesktopReadObjects = 0x0001;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern nint OpenInputDesktop(uint flags, [MarshalAs(UnmanagedType.Bool)] bool inherit, uint access);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool CloseDesktop(nint desktop);
+
     [StructLayout(LayoutKind.Sequential)]
     internal struct Point
     {
