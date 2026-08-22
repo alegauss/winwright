@@ -11,6 +11,7 @@
 - 📋 **WW110** (deps: —) **nothing enumerates what a run measured, so a runner that forgets a precondition stops checking it** — One reading collects the conditions this tool measures and the sentences they produce, so what a run checked is a list it can print rather than five calls to remember. → §WW110
 - 📋 **WW111** (deps: —) **the suite's own window fixtures take the foreground from whoever is working at the machine** — Fixture windows are created off-screen, since a suite that flashes over the desk also perturbs the one reading a task in this block exists to measure. → §WW111
 - 📋 **WW114** (deps: —) **the suite's input tests compete for a foreground Windows will not always grant them** — The window fixtures run on a desktop of their own, where they are the only windows and the foreground is theirs by definition rather than by contest. → §WW114
+- 📋 **WW119** (deps: —) **the tray fixture returns before the shell has put the icon anywhere a test can find it** — The fixture waits for the icon to be findable rather than for the shell to take the message, so a test never races the placement every one of its assertions depends on. → §WW119
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
