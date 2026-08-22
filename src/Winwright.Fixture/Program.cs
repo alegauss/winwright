@@ -41,7 +41,27 @@ public static class Program
             return UnknownFlag;
         }
 
+        // Before any window: a render of a fixed surface needs no window shown, which is the same
+        // reading the harness makes about every capture it takes.
+        if (shapes.Value("render") is string path)
+            return Rendered(path);
+
         return shapes.Value("pump") == "none" ? Unpumped(shapes) : Pumped(shapes);
+    }
+
+    /// <summary>
+    /// Render the fixed surface and stop. No window is shown, nothing is activated, and the same
+    /// call twice writes the same bytes — which is the whole of what makes the comparison a check.
+    /// </summary>
+    private static int Rendered(string path)
+    {
+        // The application is constructed so the resources exist, and never run: a dispatcher loop
+        // here would leave the process waiting for a window that is never going to appear.
+        _ = new App();
+
+        var picture = Winwright.InApp.Render.ToFile(FixedPane.Build(), path, FixedPane.Size);
+        Console.Out.WriteLine(picture.Sentence());
+        return 0;
     }
 
     /// <summary>The ordinary host: a dispatcher that runs, so input arrives.</summary>

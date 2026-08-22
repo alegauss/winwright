@@ -591,14 +591,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW98 Something to be identical to
-
-The byte-identical assertion needs a surface fixed by construction: no clock, no machine
-name, no real data, and no theme that follows the desktop unless the case asked for it.
-Producing one is a design constraint rather than an accident, and it doubles as the
-reference for what an adopting project has to do to make its own surfaces comparable at
-all.
-
 ### §WW99 A second instance on request
 
 The other-instance refusal and its override are both tested today by remembering to

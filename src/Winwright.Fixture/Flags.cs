@@ -120,6 +120,11 @@ public sealed record Flags
             "an animation of a declared length whose states announce their own place, so a frame "
                 + "sequence is checked against numbers rather than against pictures somebody opened",
             Numeric: true),
+        new Flag(
+            "render",
+            "path",
+            "render the fixed surface to a file and exit, showing no window at all - which is what "
+                + "gives a byte-identical comparison something to be identical to"),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>

@@ -18,8 +18,13 @@
     <StartupObject>Winwright.Fixture.Program</StartupObject>
   </PropertyGroup>
 
-  <!-- No reference to the engine, and none to the in-app half yet. The engine is the harness that
-       drives this and would be a test framework shipped inside the thing under test; the in-app
-       half arrives when the surface protocol does, which is its own task. -->
+  <!-- The in-app half, which is what an adopting application takes. Not the engine: that is the
+       harness driving this, and an application referencing it would ship a test harness to its
+       users. This fixture is the reference for what an adopter does, so it takes what they take. -->
+  <ItemGroup>
+    <ProjectReference Include="../Winwright.InApp/Winwright.InApp.csproj" />
+  </ItemGroup>
+
+  <!-- No reference to the engine, and that is the whole of the separation. -->
 
 </Project>

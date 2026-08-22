@@ -34,6 +34,7 @@ public sealed class FixtureTests : IDisposable
         // what that measurement cannot tell from a defect.
         Attachable.StopAndSettle(register);
         register.Dispose();
+        Directory.Delete(root, recursive: true);
     }
 
     /// <summary>
@@ -763,5 +764,79 @@ public sealed class FixtureTests : IDisposable
         }
 
         return changes;
+    }
+
+    [Fact]
+    public void Two_renders_of_the_fixed_surface_are_byte_identical()
+    {
+        // The whole point of the shape: a comparison needs something to be identical to, and a
+        // surface reading a clock, a machine name or the desktop's theme is never identical twice.
+        var first = Rendered("first.png");
+        var second = Rendered("second.png");
+
+        Assert.Equal(File.ReadAllBytes(first), File.ReadAllBytes(second));
+        Assert.True(new FileInfo(first).Length > 0, "the render wrote an empty file");
+    }
+
+    [Fact]
+    public void The_render_shows_no_window_and_says_what_it_drew()
+    {
+        var start = new ProcessStartInfo(Executable())
+        {
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+        };
+
+        start.ArgumentList.Add($"--render={Path.Combine(root, "quiet.png")}");
+
+        using var running = Process.Start(start)!;
+        var said = running.StandardOutput.ReadToEnd();
+        Assert.True(running.WaitForExit(30_000), "the render did not finish");
+
+        Assert.Equal(0, running.ExitCode);
+        Assert.Contains("rendered 360x200", said);
+
+        // No window was ever shown, so nothing about this run could take the desktop.
+        Assert.Empty(TopLevelWindows.OfProcess(running.Id));
+    }
+
+    [Fact]
+    public void The_fixed_surface_is_drawn_with_no_themed_control_on_it()
+    {
+        // The one that is easy to miss: a button, a tab header or a text box draws its chrome from
+        // the desktop's theme and accent colour, so a pane holding one renders differently on two
+        // desks while every value on it is fixed.
+        var source = File.ReadAllText(Path.Combine(Sources(), "FixedPane.cs"));
+
+        foreach (var themed in new[] { "new Button", "new TabItem", "new TextBox", "new CheckBox", "SystemColors" })
+            Assert.DoesNotContain(themed, source, StringComparison.Ordinal);
+    }
+
+    /// <summary>Render the fixed surface to a file of its own and hand back the path.</summary>
+    private string Rendered(string name)
+    {
+        var path = Path.Combine(root, name);
+        var start = new ProcessStartInfo(Executable());
+        start.ArgumentList.Add($"--render={path}");
+
+        using var running = Process.Start(start)!;
+        Assert.True(running.WaitForExit(30_000), "the render did not finish");
+        Assert.Equal(0, running.ExitCode);
+        Assert.True(File.Exists(path), $"the render wrote nothing to {path}");
+
+        return path;
+    }
+
+    private readonly string root = Directory.CreateTempSubdirectory("winwright-fixed-").FullName;
+
+    /// <summary>Where the fixture's own sources are, for the check that reads them.</summary>
+    private static string Sources()
+    {
+        var here = new DirectoryInfo(AppContext.BaseDirectory);
+        while (here is not null && !File.Exists(Path.Combine(here.FullName, "Winwright.slnx")))
+            here = here.Parent;
+
+        Assert.NotNull(here);
+        return Path.Combine(here.FullName, "src", "Winwright.Fixture");
     }
 }
