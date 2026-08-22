@@ -316,16 +316,6 @@ because an edit sizes itself to its font and a button does not. Each was found b
 running an installer, which is the most expensive place to find anything. Nothing
 overlaps, nothing starts off the surface, nothing ends past it, nothing measures zero.
 
-### §WW52 A name is its label, not merely non-empty
-
-A placeholder, an automation id echoed back or a glyph codepoint would all satisfy
-non-empty, and none of them is what a screen reader should say. claude-tray found two
-controls carrying empty names while every neighbouring button read fine, because a
-control derives its name from its own content and both of those had none - one's label
-was a separate text block, the other's content was a font glyph. A name the console
-cannot draw is printed as escapes, or the worst case in the whole check reads as the
-empty case it is not.
-
 ### §WW53 The run leaves the machine as it found it
 
 A harness that drives a real picker, a real setting or a real environment variable can

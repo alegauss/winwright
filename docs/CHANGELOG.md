@@ -58,6 +58,7 @@
 - ✅ **WW48** **an assertion is a boolean, so a failure says nothing about what was there instead** — An expectation reports every reading it saw, the wait and the polls, so a subject that answered the wrong thing throughout is never reported as one that never answered.
 - ✅ **WW49** **a hardcoded expected set silently stops covering what it was written for** — Expected sets come from the project's own strings and never from the tree being asserted, and a key that declares nothing is refused rather than passing against an empty window.
 - ✅ **WW50** **labels are matched in English against a window rendering another language** — A label resolves to the language the window is rendering, a value carrying a placeholder is refused outright, and a language nobody declared strings for is named instead of answered in English.
+- ✅ **WW52** **a control announcing its glyph codepoint satisfies every check for a non-empty name** — A name is read for what it is, so a glyph codepoint, an echoed automation id and an unfilled template each fail as themselves and print as escapes rather than as nothing.
 
 ## Block G — The scenario — a case is a data file
 
