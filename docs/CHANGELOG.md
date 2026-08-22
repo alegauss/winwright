@@ -77,6 +77,7 @@
 ## Block I — The in-app half — the app cooperates with the harness
 
 - ✅ **WW71** **the render verb is written again in every project that wants one** — One package renders a tree with no window shown - measure, arrange, update, target, background, encode - with the arrange inside, and a size of nothing refused rather than written as an empty file.
+- ✅ **WW72** **a capture is rendered on no background and comes back unreadable** — The application's own key is asked first and the observed window colour is the fallback, the classic palette is never consulted, and neither answering is stated rather than turned into white.
 
 ## Block J — Adoption — the proof is the deletion
 

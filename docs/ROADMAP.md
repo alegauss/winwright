@@ -57,7 +57,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 📋 **WW72** (deps: —) **a capture is rendered on no background and comes back unreadable** — The theme's own background is looked up and the observed window colour is the fallback, and which of the two answered is printed on every run. → §WW72
 - 📋 **WW73** (deps: —) **a brush shared between capture threads belongs to whichever one reached it first** — Every shared brush is frozen, or the second capture on a second thread is refused for a reason about threading rather than about the picture. → §WW73
 - 📋 **WW74** (deps: —) **the app knows what it drew and nothing asks it** — A reported surface names a rectangle in physical pixels, which is the space the copy already works in, so a capture can assert what it contains. → §WW74
 - 📋 **WW75** (deps: —) **a popup closes the moment the window is raised to be photographed** — The preview host holds every popup open by construction, so the rule belongs to the host and not to whichever page happens to own one. → §WW75

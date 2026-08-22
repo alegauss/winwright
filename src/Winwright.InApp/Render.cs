@@ -89,20 +89,34 @@ public static class Render
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
         var full = Path.GetFullPath(path.Trim());
-        var picture = Rendered(element, size, background, dpi);
+        var picture = Rendered(element, size, background, dpi, null);
+        Write(full, picture.Image);
+        return picture.Facts with { Path = full };
+    }
 
-        var directory = Path.GetDirectoryName(full);
-        if (!string.IsNullOrEmpty(directory))
-            Directory.CreateDirectory(directory);
+    /// <summary>
+    /// The same, on the background the application itself chose. The receipt then names which
+    /// source answered rather than only the colour, which is the difference between a run that can
+    /// be diagnosed and a hex value nobody can trace back to a theme.
+    /// </summary>
+    /// <param name="element">The element to render.</param>
+    /// <param name="path">Where to write the PNG.</param>
+    /// <param name="background">What the application said to draw it on.</param>
+    /// <param name="size">The size to lay it out at, or null to take the size it asks for.</param>
+    /// <param name="dpi">The resolution to draw at.</param>
+    public static RenderedPicture ToFile(
+        FrameworkElement element,
+        string path,
+        ChosenBackground background,
+        Size? size = null,
+        double dpi = DefaultDpi)
+    {
+        ArgumentNullException.ThrowIfNull(background);
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
-        var encoder = new PngBitmapEncoder();
-        encoder.Frames.Add(BitmapFrame.Create(picture.Image));
-
-        // Written through a stream that is closed before the receipt is returned: a caller told a
-        // file exists and then finding it half-written is the same lie as an empty one.
-        using (var file = File.Create(full))
-            encoder.Save(file);
-
+        var full = Path.GetFullPath(path.Trim());
+        var picture = Rendered(element, size, background.Brush, dpi, background.ToString());
+        Write(full, picture.Image);
         return picture.Facts with { Path = full };
     }
 
@@ -117,10 +131,25 @@ public static class Render
     /// <param name="dpi">The resolution to draw at.</param>
     public static BitmapSource ToBitmap(
         FrameworkElement element, Size? size = null, Brush? background = null, double dpi = DefaultDpi) =>
-        Rendered(element, size, background, dpi).Image;
+        Rendered(element, size, background, dpi, null).Image;
+
+    private static void Write(string full, BitmapSource image)
+    {
+        var directory = Path.GetDirectoryName(full);
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
+
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(image));
+
+        // Written through a stream that is closed before the receipt is returned: a caller told a
+        // file exists and then finding it half-written is the same lie as an empty one.
+        using var file = File.Create(full);
+        encoder.Save(file);
+    }
 
     private static (BitmapSource Image, RenderedPicture Facts) Rendered(
-        FrameworkElement element, Size? size, Brush? background, double dpi)
+        FrameworkElement element, Size? size, Brush? background, double dpi, string? describedAs)
     {
         ArgumentNullException.ThrowIfNull(element);
         if (!double.IsFinite(dpi) || dpi <= 0)
@@ -157,7 +186,8 @@ public static class Render
 
         return (
             composed,
-            new RenderedPicture("", settled.Width, settled.Height, pixels, lines, dpi, Describe(background)));
+            new RenderedPicture(
+                "", settled.Width, settled.Height, pixels, lines, dpi, describedAs ?? Describe(background)));
     }
 
     private static BitmapSource Composed(

@@ -440,15 +440,6 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW72 The background is not a decoration
-
-The classic system palette was the obvious source and is measurably wrong: it answers
-white on a machine whose application window is dark, so the first capture taken that way
-came back as pale text on nothing, correct in every respect and unreadable. The theme's
-own key is asked first and the observed window colour is the fallback, and which of the
-two answered is printed on every run, because the difference between them is a picture
-nobody can read.
-
 ### §WW73 A shared brush is frozen or it belongs to one thread
 
 A brush is a freezable and an unfrozen one belongs to the thread that made it, so a
