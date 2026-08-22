@@ -123,7 +123,12 @@ public class TraceTests
         var steps = TraceLog.Read(new StringReader(TraceFormat.Line(Resolved("#save")) + "\n\n"));
         Assert.Single(steps);
 
-        Assert.ThrowsAny<Exception>(() => TraceLog.Read(new StringReader("{\"verb\":")));
+        // Named rather than merely thrown: what this used to assert was that something happened,
+        // which was the tell that nothing about the refusal was worth naming.
+        var refused = Assert.Throws<UnreadableTraceException>(
+            () => TraceLog.Read(new StringReader("{\"verb\":")));
+
+        Assert.Equal(1, refused.Line);
     }
 
     [Fact]
@@ -148,5 +153,79 @@ public class TraceTests
         {
             Directory.Delete(Path.GetDirectoryName(path)!, recursive: true);
         }
+    }
+
+    [Fact]
+    public void A_line_that_is_not_a_step_says_which_file_and_which_line()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"winwright-trace-{Guid.NewGuid():N}", "run.trace.jsonl");
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+
+        try
+        {
+            File.WriteAllText(
+                path,
+                TraceFormat.Line(Resolved("#save")) + "\n"
+                + TraceFormat.Line(Resolved("#open")) + "\n"
+                + "this was never a trace step\n");
+
+            var refused = Assert.Throws<UnreadableTraceException>(() => TraceLog.ReadFile(path));
+
+            // The three facts worth having, and the ones the parser's own exception has none of.
+            Assert.Equal(path, refused.File);
+            Assert.Equal(3, refused.Line);
+            Assert.Equal("this was never a trace step", refused.Text);
+            Assert.Contains($"{path}:3", refused.Message);
+        }
+        finally
+        {
+            Directory.Delete(Path.GetDirectoryName(path)!, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void The_line_it_shows_is_cut_so_the_file_and_the_number_are_not_buried()
+    {
+        var enormous = "{\"verb\":\"" + new string('x', 4000);
+
+        var refused = Assert.Throws<UnreadableTraceException>(() => TraceLog.Read(new StringReader(enormous)));
+
+        // Cut and not wrapped: a trace line holding a whole element tree would push the file and
+        // the number off the top of a terminal, which is the two facts a reader came for.
+        Assert.Equal(enormous, refused.Text);
+        Assert.True(refused.Message.Length < UnreadableTraceException.Shown + 200, "the refusal buried its own first line");
+        Assert.EndsWith("…", refused.Message);
+    }
+
+    [Fact]
+    public void A_reader_with_no_file_is_still_named_something()
+    {
+        var refused = Assert.Throws<UnreadableTraceException>(() => TraceLog.Read(new StringReader("not a step")));
+
+        Assert.Contains("a trace with no file", refused.File);
+        Assert.Contains(":1 is not a trace step", refused.Message);
+    }
+
+    [Fact]
+    public void The_line_is_counted_the_way_an_editor_counts_including_the_blanks_it_skipped()
+    {
+        // The blank is skipped as a step and counted as a line, because a reader told line four is
+        // going to open the file and look at line four.
+        var text = TraceFormat.Line(Resolved("#save")) + "\n\n\n" + "still not a step\n";
+
+        var refused = Assert.Throws<UnreadableTraceException>(() => TraceLog.Read(new StringReader(text)));
+
+        Assert.Equal(4, refused.Line);
+    }
+
+    [Fact]
+    public void What_the_parser_said_is_kept_and_its_own_line_number_is_not()
+    {
+        var refused = Assert.Throws<UnreadableTraceException>(() => TraceLog.Read(new StringReader("{\"verb\":")));
+
+        // The parser counts lines inside the fragment it was given, which is one line, and this
+        // refusal already says which. Two line numbers in one sentence is one too many.
+        Assert.NotEmpty(refused.Because);
+        Assert.DoesNotContain("LineNumber", refused.Message, StringComparison.Ordinal);
     }
 }

@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW109** (deps: —) **a trace line that does not parse refuses without naming the file or the line it is on** — The reader raises the JSON parser's own error, so a truncated or hand-edited trace is diagnosed by opening the file and counting lines to a byte offset. → §WW109
 - 📋 **WW117** (deps: —) **a test host that dies mid-run still prints a pass** — The run compares what was discovered against what executed, so a suite that quietly loses 22 tests is a red instead of a green nobody counted. → §WW117
 
 ## Block B — Attach, launch, and leave nothing behind
