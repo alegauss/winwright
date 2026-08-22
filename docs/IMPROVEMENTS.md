@@ -153,16 +153,6 @@ inspect printed resolves, whichever line the reader started from.
 
 ## Block D — Act — patterns before pointers
 
-### §WW31 The notification-area icon
-
-It has no clickable point - asking for one throws - so its bounding rectangle is used
-instead. It may sit inside the overflow flyout, which has to be opened before the icon
-exists in the tree at all, and the chevron that opens it is identified by its class
-rather than by its position among the other tray buttons. Worse on the current shell: a
-synthesised right-click on the icon does not open the menu at all, observed on Windows
-11 build 26200, and the route that works is focus through automation plus the
-application key - the path a keyboard user already has.
-
 ### §WW32 Select, then confirm, then click
 
 A tab control builds a tab's content on its first visit, so a selection that silently

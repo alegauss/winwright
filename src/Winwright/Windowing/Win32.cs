@@ -47,6 +47,9 @@ internal static class Win32
     [DllImport("user32.dll")]
     internal static extern nint GetForegroundWindow();
 
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern nint FindWindowW(string? className, string? title);
+
     [DllImport("user32.dll", SetLastError = true)]
     internal static extern nint GetAncestor(nint window, uint what);
 

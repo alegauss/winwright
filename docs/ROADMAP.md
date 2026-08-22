@@ -18,7 +18,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW31** (deps: —) **the notification-area icon has no clickable point and no reliable right-click** — Its rectangle is used instead, the overflow flyout is opened first where it hides there, and focus plus the application key is the route that works on the current shell. → §WW31
 - 📋 **WW32** (deps: —) **a selection that silently does not land leaves the pane it should have built unrealised** — Select, confirm, and fall back to the pointer only then, because the next step otherwise blames a slow scan for a tab that was never opened. → §WW32
 - 📋 **WW33** (deps: —) **an act leaves the window in a state the next case did not ask for** — A toggled surface is put back where the case found it, which is what lets one window be lent to several cases instead of paying a launch for each. → §WW33
 

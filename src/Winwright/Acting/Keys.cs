@@ -19,6 +19,7 @@ internal static class Keys
     private const ushort VkHome = 0x24;
     private const ushort VkEscape = 0x1B;
     private const ushort VkF10 = 0x79;
+    private const ushort VkApps = 0x5D;
     private const ushort VkLeft = 0x25;
     private const ushort VkUp = 0x26;
     private const ushort VkRight = 0x27;
@@ -29,6 +30,13 @@ internal static class Keys
     /// needs no modifier to be held, and a modifier is a thing another process has to agree about.
     /// </summary>
     internal static void SendMenuBar() => Press(Tap(VkF10));
+
+    /// <summary>
+    /// The application key — the one between the right Alt and Ctrl on a full keyboard. It is the
+    /// route a keyboard user already has to a context menu, and on this shell it is the only one
+    /// that reaches a notification-area icon at all.
+    /// </summary>
+    internal static void SendApplicationKey() => Press(Tap(VkApps));
 
     /// <summary>Escape, which backs out of a menu. Backing out is not the same as invoking.</summary>
     internal static void SendEscape() => Press(Tap(VkEscape));
