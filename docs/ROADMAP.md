@@ -76,7 +76,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW93** (deps: —) **a collapsed pane, a popup and a submenu are three different kinds of absence** — All three are on the fixture, since the tree reports each one differently and each cost a real defect somewhere to learn. → §WW93
 - 📋 **WW94** (deps: —) **the backdrop refusal has only one arm to be tested against** — The fixture ships one window that opted into a system backdrop and one that never did, so both the refusal and the pass beside it are observable. → §WW94
 - 📋 **WW95** (deps: —) **a borderless window with no main window handle exists in only one real product** — The fixture raises a toast that has none, which is what the enumerating launcher is for and what nothing else available here can produce on demand. → §WW95
 - 📋 **WW96** (deps: —) **a page that is still loading cannot be produced when the check needs one** — The fixture takes the duration as a flag, so the loading refusal is asserted at a moment the run chose rather than on a machine that happened to be slow. → §WW96

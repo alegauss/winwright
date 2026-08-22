@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+using System.Windows.Automation;
+
 using Winwright.Asserting;
 using Winwright.Locating;
 using Winwright.Processes;
@@ -371,4 +373,77 @@ public sealed class FixtureTests : IDisposable
             .GroupBy(one => one.AutomationId, StringComparer.Ordinal)
             .ToDictionary(one => one.Key, one => one.First(), StringComparer.Ordinal);
     }
+
+    [Fact]
+    public void A_collapsed_pane_is_a_door_that_says_how_it_opens()
+    {
+        var root = Absences();
+
+        var miss = Resolve.Once(root, Locator.Parse("""Group#collapsedPane > Button[name="Inside the pane"]""")).Miss!;
+
+        Assert.Equal(MissKind.NavigationNeeded, miss.Kind);
+        Assert.Contains("is expanded", miss.Route);
+        Assert.Contains("it will not be until", miss.Sentence());
+    }
+
+    [Fact]
+    public void An_unopened_submenu_is_the_same_kind_of_absence_and_a_different_door()
+    {
+        var root = Absences();
+
+        var miss = Resolve.Once(root, Locator.Parse("""MenuItem#fileMenu > MenuItem[name="Recent"]""")).Miss!;
+
+        Assert.Equal(MissKind.NavigationNeeded, miss.Kind);
+        Assert.Contains("is expanded", miss.Route);
+    }
+
+    [Fact]
+    public void A_closed_popup_leaves_nothing_behind_at_all_not_even_itself()
+    {
+        // The one that reads differently from the other two. A collapsed pane and an unopened
+        // submenu are both in the tree announcing that they are shut; a closed popup is not there,
+        // so nothing in the window says what is missing or how to reach it.
+        var root = Absences();
+
+        Assert.Null(Resolve.Once(root, Locator.Parse("#closedFlyout")).Facts);
+
+        var miss = Resolve.Once(root, Locator.Parse("""Button[name="Inside the flyout"]""")).Miss!;
+
+        Assert.Equal(MissKind.Absent, miss.Kind);
+
+        // Nothing in the window is a door onto it. The collapsed pane and the file menu are both
+        // offered as leads and neither is where it went, which is the honest shape of this miss.
+        Assert.DoesNotContain(miss.ClosedDoors, one => one.What.Contains("flyout", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void What_is_shut_in_the_window_is_offered_as_leads_on_a_miss_nothing_explains()
+    {
+        var root = Absences();
+
+        var miss = Resolve.Once(root, Locator.Parse("""Button[name="Inside the flyout"]""")).Miss!;
+
+        // Leads rather than an answer: each is a true statement about the window, and none of them
+        // claims to hold what was looked for.
+        var doors = miss.ClosedDoors.Select(one => one.ToString()).ToList();
+        Assert.Contains(doors, one => one.Contains("collapsedPane (expanded)", StringComparison.Ordinal));
+        Assert.Contains(doors, one => one.Contains("fileMenu (expanded)", StringComparison.Ordinal));
+
+        // The panes nobody picked are doors too, and they open a different way. Two kinds of shut
+        // in one list is exactly why the lead says how rather than only what.
+        Assert.Contains(doors, one => one.Contains("statusPane (selected)", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void What_is_present_beside_them_still_resolves()
+    {
+        // A classification that has never seen a hit cannot be trusted about a miss.
+        var resolution = Resolve.Once(Absences(), Locator.Parse("""Button[name="Showing"]"""));
+
+        Assert.True(resolution.Found);
+        Assert.Null(resolution.Miss);
+    }
+
+    /// <summary>Launch with the three absences and hand back the window to resolve against.</summary>
+    private AutomationElement Absences() => AutomationElement.FromHandle(Launched("--absences").Handle);
 }

@@ -90,6 +90,11 @@ public sealed record Flags
             "",
             "a pane carrying the whole naming rule at once - nothing, a glyph, an echoed id, a "
                 + "label that is a neighbouring element, and a button that must keep its own text"),
+        new Flag(
+            "absences",
+            "",
+            "a pane carrying the three kinds of absence at once - a collapsed pane, a closed popup "
+                + "and an unopened submenu - which the tree reports differently and nothing else has together"),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>

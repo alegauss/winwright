@@ -590,13 +590,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW93 Three kinds of absence
-
-A collapsed pane, a closed popup and an unopened submenu are all missing from the tree
-and all mean different things, and each one cost a real defect somewhere to learn.
-Having the three behind flags is what lets the classification of a miss be developed and
-asserted rather than reasoned about from memory.
-
 ### §WW94 Both arms of the backdrop refusal
 
 A refusal with only one arm tested is half a check: it can be right about the window it
