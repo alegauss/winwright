@@ -28,6 +28,17 @@ public sealed class UnderivableSetException : InvalidOperationException
     }
 }
 
+/// <summary>A string the strings declare that no exact read could ever match.</summary>
+/// <param name="Key">The key it sits under.</param>
+/// <param name="Value">What it says, placeholder and all.</param>
+/// <param name="Where">The file and line it is declared on.</param>
+public sealed record Templated(string Key, string Value, Provenance Where)
+{
+    /// <summary>The one line a source or a refusal names it by.</summary>
+    public override string ToString() =>
+        Where.Known ? $"'{Key}' = '{Value}' ({Where})" : $"'{Key}' = '{Value}'";
+}
+
 /// <summary>What a set derived from the project's strings turned out to be, compared with what was read.</summary>
 /// <param name="Set">The set that was expected, and where it came from.</param>
 /// <param name="Matched">Values that were expected and read, in the set's own order.</param>
@@ -105,7 +116,8 @@ public sealed record DerivedSet
         IReadOnlyList<string> keys,
         IReadOnlyList<string> expected,
         Provenance origin,
-        IReadOnlyList<Provenance> origins)
+        IReadOnlyList<Provenance> origins,
+        IReadOnlyList<Templated> excluded)
     {
         Named = named;
         Source = source;
@@ -113,6 +125,7 @@ public sealed record DerivedSet
         Expected = expected;
         Origin = origin;
         Origins = origins;
+        Excluded = excluded;
     }
 
     /// <summary>What this is a set of, as the scenario names it.</summary>
@@ -141,6 +154,25 @@ public sealed record DerivedSet
     /// that no value in the set is one nobody can trace.
     /// </summary>
     public IReadOnlyList<Provenance> Origins { get; }
+
+    /// <summary>
+    /// The strings under this key that carry a placeholder, left out of the expectation and
+    /// recorded rather than dropped.
+    /// <para>
+    /// A tree holding <c>Profile: Alexandre</c> can never equal <c>Profile: {name}</c>, so such a
+    /// value in the set is a member nothing reads: an unfixable red on every run, or worse a green
+    /// where some control happens to render the literal braces. Refusing the whole derivation was
+    /// the other reading and it was measured against a real strings file: the fixture's own
+    /// <c>labels</c> holds two ordinary strings and one templated one, and refusing would make
+    /// that key underivable for the sake of a value nobody could have asserted anyway.
+    /// </para>
+    /// <para>
+    /// So they are excluded and said out loud — in <see cref="Source"/>, which every verdict
+    /// sentence carries, so the exclusion appears under each run rather than in this comment. A
+    /// count that is not silent is not the defect this project exists about.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<Templated> Excluded { get; }
 
     /// <summary>Where one expected value came from, or <see cref="Provenance.Unknown"/> for a value not in the set.</summary>
     public Provenance Whence(string value)
@@ -192,20 +224,44 @@ public sealed record DerivedSet
                 $"{named}: '{key}' in {full} declares no strings, and an empty expected set is met by an "
                     + "empty window — which is the hole this set exists to close");
 
-        var keys = found.Select(pair => pair.Key).ToList();
+        var declared = found.Select(pair => pair.Key).ToList();
 
         // One pass over the file for every key at once: a lookup per value would read a strings
         // file as many times as it has strings, which is the cost this whole rule exists to avoid.
-        var lines = JsonSource.LinesOf(full, [key, .. keys]);
+        var lines = JsonSource.LinesOf(full, [key, .. declared]);
+
+        var excluded = found
+            .Where(pair => Labels.CarriesAPlaceholder(pair.Value))
+            .Select(pair => new Templated(
+                pair.Key, pair.Value, Provenance.InFile(full, lines.GetValueOrDefault(pair.Key), pair.Key)))
+            .ToList();
+
+        var kept = found.Where(pair => !Labels.CarriesAPlaceholder(pair.Value)).ToList();
+        if (kept.Count == 0)
+        {
+            // The same rule as an empty key, said as what it is: every string under here carries a
+            // placeholder, so the set that survives is empty and an empty set is met by an empty
+            // window. Named apart from "declares no strings" because the remedy is a different one.
+            throw new UnderivableSetException(
+                $"{named}: every one of the {excluded.Count} strings under '{key}' in {full} carries a "
+                    + $"placeholder ({string.Join("; ", excluded.Select(one => one.ToString()))}), so nothing "
+                    + "is left that an exact read could ever match");
+        }
+
+        var keys = kept.Select(pair => pair.Key).ToList();
 
         return new DerivedSet(
             named.Trim(),
-            where,
+            excluded.Count == 0
+                ? where
+                : $"{where}, less {excluded.Count} carrying a placeholder "
+                    + $"({string.Join("; ", excluded.Select(one => $"'{one.Key}'"))})",
             new ReadOnlyCollection<string>(keys),
-            new ReadOnlyCollection<string>(found.Select(pair => pair.Value).ToList()),
+            new ReadOnlyCollection<string>(kept.Select(pair => pair.Value).ToList()),
             Provenance.InFile(full, lines.GetValueOrDefault(key), key),
             new ReadOnlyCollection<Provenance>(
-                keys.Select(one => Provenance.InFile(full, lines.GetValueOrDefault(one), one)).ToList()));
+                keys.Select(one => Provenance.InFile(full, lines.GetValueOrDefault(one), one)).ToList()),
+            new ReadOnlyCollection<Templated>(excluded));
     }
 
     /// <summary>

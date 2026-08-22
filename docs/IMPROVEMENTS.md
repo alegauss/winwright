@@ -272,28 +272,6 @@ which is the argument every other image comparison eventually turns into.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW118 A set refuses a placeholder too
-
-WW50 refuses a label whose value carries a placeholder, because a tree holding
-`Bem-vindo, Alexandre` can never equal `Bem-vindo, {0}`, and skipping it in silence is
-an assertion that did not run reported as one that passed. WW49 derives a whole set out
-of the same files and has exactly the same hazard with none of the guard: a key under
-`tabs` whose value is `{0} items` joins the expected set, is never read from any window,
-and lands in `Missing` on every run as an unfixable red — or worse, is quietly matched
-by a control that happens to render the literal braces.
-
-It was left out of WW49 on purpose rather than missed. Widening a shipped task to cover
-a case found afterwards is how the ledger stops describing what was actually built, and
-`Labels.CarriesAPlaceholder` was made public at WW50's altitude precisely so this one
-has something to call rather than a second regular expression to keep in step.
-
-What is open is where the refusal goes. Refusing the whole derivation is the loud
-reading and matches the label, but a project with one templated string under an
-otherwise good key would then be unable to derive that set at all. The alternative is to
-exclude the placeholder members and say so in `Source`, which keeps the set usable and
-keeps the exclusion visible — a count that is not silent is not the defect. Decide it
-against a real strings file before writing either.
-
 ### §WW130 Collapsed is not the same as measuring nothing
 
 Found by running the layout check against a real window rather than against a dump

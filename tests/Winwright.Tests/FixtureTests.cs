@@ -1133,15 +1133,19 @@ public sealed class FixtureTests : IDisposable
     }
 
     [Fact]
-    public void The_one_key_carrying_a_placeholder_is_refused_rather_than_skipped()
+    public void The_one_key_carrying_a_placeholder_is_left_out_and_said_out_loud()
     {
-        // An exact-name read can never match it, and a rule that skipped it would report a green
-        // about a control nobody could have checked.
+        // WW118, in all three languages the fixture ships. An exact-name read can never match it,
+        // so it is no member of the expectation — and a rule that dropped it silently would be the
+        // green about a control nobody could have checked, which is what the recording prevents.
         foreach (var culture in new[] { "en", "pt-BR", "de" })
         {
-            var said = DerivedSet.From("the labels", Strings(culture), "labels").Expected;
+            var set = DerivedSet.From("the labels", Strings(culture), "labels");
 
-            Assert.Contains(said, one => Labels.CarriesAPlaceholder(one));
+            Assert.DoesNotContain(set.Expected, Labels.CarriesAPlaceholder);
+            Assert.Equal("labels.profileName", Assert.Single(set.Excluded).Key);
+            Assert.True(Labels.CarriesAPlaceholder(set.Excluded[0].Value));
+            Assert.Contains("less 1 carrying a placeholder", set.Source);
         }
     }
 
