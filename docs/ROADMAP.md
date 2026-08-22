@@ -52,7 +52,6 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-- 📋 **WW64** (deps: —) **an answer has to be verified by reading the file the command already read** — Every verb takes a machine-readable form carrying which file, line and element the answer came from, so an agent audits it without a second read. → §WW64
 - 📋 **WW65** (deps: Block G) **adopting the tool is a per-machine install somebody has to remember** — It ships as a Claude Code plugin, so two commands in the repository wire it and every clone is wired, with nothing added to any path. → §WW65
 - 📋 **WW66** (deps: Block G) **the schema of a case arrives as flag names typed from memory** — The tools carry this project's scenario schema as their input schema, which is the difference between a refusal and a guess. → §WW66
 - 📋 **WW67** (deps: Block G) **a hand-written harness script is the path of least resistance** — A hook denies one and names the verb that replaces it, which is the same guard roadkeep puts in front of a governed file. → §WW67

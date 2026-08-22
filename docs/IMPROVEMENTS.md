@@ -425,14 +425,6 @@ a commit message.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW64 Query instead of read
-
-roadkeep's fifth law. An answer an agent cannot audit gets verified by reading the file,
-which is the cost the command existed to remove - reading a backlog end to end to find
-one ready task cost about five thousand tokens in that repository. Every verb answers
-with provenance: which file, which line, which element, which pattern. The same
-arithmetic applies here, where the alternative to a verb is reading a 2,732-line script.
-
 ### §WW65 The plugin is the installation
 
 Two commands in the adopting repository write both declarations into its settings, and

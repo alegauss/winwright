@@ -1,3 +1,5 @@
+using Winwright.Verdicts;
+
 namespace Winwright.Tracing;
 
 /// <summary>
@@ -40,6 +42,14 @@ public sealed record TraceStep
     /// a green step that says three is a finding a green with no count would have thrown away.
     /// </summary>
     public int Attempts { get; init; } = 1;
+
+    /// <summary>
+    /// Where the value this step compared against came from — the file and line, or the element
+    /// and pattern. Null where the step compared against nothing, which is most acts; present on
+    /// every assert, because an expectation whose origin the trace does not record is one a reader
+    /// audits by opening the file the run already read.
+    /// </summary>
+    public Provenance? From { get; init; }
 
     /// <summary>The reading this step earned.</summary>
     public required StepVerdict Verdict { get; init; }

@@ -56,7 +56,7 @@ public sealed class DerivedSetTests : IDisposable
         Assert.False(compared.Held);
         Assert.Equal(["Logs"], compared.Missing);
         Assert.Empty(compared.Unexpected);
-        Assert.Contains("'Logs' is declared and was not read", compared.Sentence());
+        Assert.Contains("'Logs' (strings.en.json:6 'tabs.logs') is declared and was not read", compared.Sentence());
 
         // The sentence a hand-written set printed against the same window, and the one this may
         // never print while anything is missing.
@@ -100,7 +100,9 @@ public sealed class DerivedSetTests : IDisposable
 
         Assert.Equal(["Config", "Logs"], compared.Missing);
         Assert.Equal(["Debug"], compared.Unexpected);
-        Assert.Contains("'Config', 'Logs' are declared", compared.Sentence());
+        Assert.Contains(
+            "'Config' (strings.en.json:5 'tabs.config'), 'Logs' (strings.en.json:6 'tabs.logs') are declared",
+            compared.Sentence());
         Assert.Contains("'Debug' was read", compared.Sentence());
         Assert.Contains("2 of 4 matched", compared.Sentence());
     }
@@ -192,7 +194,8 @@ public sealed class DerivedSetTests : IDisposable
 
         Assert.Equal(AssertionOutcome.Failed, failed.Outcome);
         Assert.Equal("the tab headers", failed.Name);
-        Assert.Contains("'Status', 'Config', 'Logs' are declared", failed.Detail);
+        Assert.Contains("'Status' (strings.en.json:4 'tabs.status')", failed.Detail);
+        Assert.Contains("'Logs' (strings.en.json:6 'tabs.logs') are declared", failed.Detail);
         Assert.Equal(AssertionOutcome.Passed, passed.Outcome);
     }
 

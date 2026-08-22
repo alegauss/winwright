@@ -53,8 +53,11 @@ public sealed record SetComparison(
             return $"{Set.Named}: all {Matched.Count} of {Listed(Matched)} were read, {Set.Source}.";
 
         var parts = new List<string>();
+
+        // The missing ones carry their line and the unexpected ones cannot: a value the strings
+        // declare has somewhere to be looked at, and one that was only ever read has nowhere.
         if (Missing.Count > 0)
-            parts.Add($"{Listed(Missing)} {(Missing.Count == 1 ? "is" : "are")} declared and was not read");
+            parts.Add($"{Traced(Missing)} {(Missing.Count == 1 ? "is" : "are")} declared and was not read");
 
         if (Unexpected.Count > 0)
             parts.Add($"{Listed(Unexpected)} {(Unexpected.Count == 1 ? "was" : "were")} read and is declared nowhere");
@@ -67,6 +70,15 @@ public sealed record SetComparison(
         Held ? AssertionResult.Pass(Set.Named, Sentence()) : AssertionResult.Fail(Set.Named, Sentence());
 
     private static string Listed(IReadOnlyList<string> values) => string.Join(", ", values.Select(value => $"'{value}'"));
+
+    /// <summary>The same, each value followed by the file and line the strings declare it on.</summary>
+    private string Traced(IReadOnlyList<string> values) => string.Join(
+        ", ",
+        values.Select(value =>
+        {
+            var from = Set.Whence(value);
+            return from.Known ? $"'{value}' ({from})" : $"'{value}'";
+        }));
 }
 
 /// <summary>
@@ -87,12 +99,20 @@ public sealed record SetComparison(
 /// </summary>
 public sealed record DerivedSet
 {
-    private DerivedSet(string named, string source, IReadOnlyList<string> keys, IReadOnlyList<string> expected)
+    private DerivedSet(
+        string named,
+        string source,
+        IReadOnlyList<string> keys,
+        IReadOnlyList<string> expected,
+        Provenance origin,
+        IReadOnlyList<Provenance> origins)
     {
         Named = named;
         Source = source;
         Keys = keys;
         Expected = expected;
+        Origin = origin;
+        Origins = origins;
     }
 
     /// <summary>What this is a set of, as the scenario names it.</summary>
@@ -107,6 +127,27 @@ public sealed record DerivedSet
 
     /// <summary>The values, in the same order.</summary>
     public IReadOnlyList<string> Expected { get; }
+
+    /// <summary>
+    /// The file and line the whole set was derived from, as a field rather than as prose. It is
+    /// what lets a reader check that the expectation came from anywhere at all without opening the
+    /// strings file to find out.
+    /// </summary>
+    public Provenance Origin { get; }
+
+    /// <summary>
+    /// Where each expected value is declared, in the same order as <see cref="Expected"/>. A value
+    /// whose line could not be numbered still names its file, since the point of the reading is
+    /// that no value in the set is one nobody can trace.
+    /// </summary>
+    public IReadOnlyList<Provenance> Origins { get; }
+
+    /// <summary>Where one expected value came from, or <see cref="Provenance.Unknown"/> for a value not in the set.</summary>
+    public Provenance Whence(string value)
+    {
+        var at = Expected.ToList().IndexOf(value);
+        return at < 0 ? Provenance.Unknown : Origins[at];
+    }
 
     /// <summary>
     /// Derive one from a language file, taking every string under <paramref name="under"/>.
@@ -151,11 +192,20 @@ public sealed record DerivedSet
                 $"{named}: '{key}' in {full} declares no strings, and an empty expected set is met by an "
                     + "empty window — which is the hole this set exists to close");
 
+        var keys = found.Select(pair => pair.Key).ToList();
+
+        // One pass over the file for every key at once: a lookup per value would read a strings
+        // file as many times as it has strings, which is the cost this whole rule exists to avoid.
+        var lines = JsonSource.LinesOf(full, [key, .. keys]);
+
         return new DerivedSet(
             named.Trim(),
             where,
-            new ReadOnlyCollection<string>(found.Select(pair => pair.Key).ToList()),
-            new ReadOnlyCollection<string>(found.Select(pair => pair.Value).ToList()));
+            new ReadOnlyCollection<string>(keys),
+            new ReadOnlyCollection<string>(found.Select(pair => pair.Value).ToList()),
+            Provenance.InFile(full, lines.GetValueOrDefault(key), key),
+            new ReadOnlyCollection<Provenance>(
+                keys.Select(one => Provenance.InFile(full, lines.GetValueOrDefault(one), one)).ToList()));
     }
 
     /// <summary>

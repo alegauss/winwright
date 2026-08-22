@@ -68,6 +68,8 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
+- ✅ **WW64** **an answer has to be verified by reading the file the command already read** — Every answer carries where it came from as fields - file, line, key, element, pattern - so a missing header reads as strings.en.json:6 and the trace keeps it, rather than a reader opening the file.
+
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
