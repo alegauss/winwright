@@ -115,6 +115,52 @@ such promptly, and does not spend a cap discovering what the first attempt estab
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+### §WW143 The suite does not take its own advice
+
+Counted while closing this block against its own criterion, which says no scenario
+carries a sleep and every wait is a deadline on a condition with the time it took
+recorded. The engine keeps that. The suite does not: eighteen hand-rolled loops across
+five files, each a for loop over a fixed count with a Thread.Sleep in it, and one bare
+sleep of 120 ms in the traversal cases waiting for a focus change with no condition.
+
+They are not wrong so much as unowned. Each is the engine's Attempt written out longhand
+with a different cap and poll, so the two things the criterion asks for are absent from
+all: none reports how long it took, and none fails saying what it waited for. When one
+is slightly too short on a busy machine the result is a red about the application, which
+is the misattribution WW119 measured.
+
+The work is mechanical and the judgement is in two places. A loop waiting on a file to
+appear and one waiting on a window to be drawn want different deadlines, and the
+declared timeouts already name several - taking one wholesale would make a fixture wait
+a launch timeout to notice a file. And the bare sleep has no condition to convert, so it
+needs one written: what it waits for is a focus that moved.
+
+The suite is this project's own demonstration, and a demonstration that breaks its own
+rule eighteen times is an argument against the rule.
+
+### §WW144 The line is not a structure
+
+Noticed twice in one block, which is the signal. Inspect renders each element as a
+string that begins with the locator step and continues with the rectangle and the
+patterns, and anything wanting the locator back has to find where it ends. Two test
+files now carry the same helper for that, and the second was rewritten mid-task when a
+name turned out to contain a run of spaces: the separator is two spaces, and two spaces
+occur inside a name somebody else wrote.
+
+The helper that works scans for a double space outside the quotation marks, honouring
+backslash escapes. That is a small parser, written twice, to recover something the
+renderer had in its hand a moment earlier. It is the shape of code that is correct until
+the day the format gains a field.
+
+What is wanted is that the rendered form carries its parts. A rendered element with the
+step, the indent and the whole line on it costs nothing to produce, keeps the line
+exactly as it prints today, and means nothing downstream has to know where the fields
+meet - the diagnosis view, the copied-line checks and anything an adopter writes.
+
+There is a second reader worth converting at the same time: the check that every printed
+line parses is the check most likely to be defeated by the format changing under it, and
+it is the one that should be reading a field rather than a substring.
+
 ## Block D — Act — patterns before pointers
 
 ### §WW134 The guard speaks one language
