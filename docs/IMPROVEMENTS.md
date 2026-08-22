@@ -431,6 +431,44 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
+### §WW122 One package reference, literally
+
+Read against this block's own criterion after its last line shipped, and the gap is
+plain: nothing in either project declares a package id, a version beyond the tree-wide
+one, or a pack step. The only way to adopt the in-app half today is a project reference
+into this repository - which WW70 already reads as unpinnable by construction, and which
+an application shipping to its users cannot take at all.
+
+The criterion says the adoption is one package reference and that a project taking it
+deletes its own capture, surface and thread helpers. The second half is proved: this
+repository deleted eight copies of one runner in a single commit. The first half is not
+built. So the criterion is met in intent and unmet in fact, which is exactly the state a
+block's criteria exist to surface before somebody calls the block done.
+
+What this owes: a package id, packing in continuous integration, and the agreement
+reading pointed at the packed version rather than at a path. Not a public feed - a
+package an adopter can reference from a local source is still a package, and publishing
+is a decision nobody here has made.
+
+### §WW123 The separation is asserted, not remembered
+
+Both halves currently reference nothing, and both project files say why in a comment. A
+comment is not a check. One line added in either project would merge them, the build
+would stay green, and the consequence would only be found by whoever shipped a test
+harness inside their product or a presentation stack inside a headless runner.
+
+The separation is load-bearing in both directions. The engine is taken by the harness
+driving an application; the in-app half is taken by that application. An application
+referencing the engine ships a test harness to its users. A harness referencing the
+in-app half inherits a drawing stack it never needed, and the two module initializers
+that each ask for per-monitor awareness stop being independent - which is the reading
+WW121 measured rather than argued.
+
+The check is cheap and belongs to the suite rather than to a reviewer's memory: read
+both project files and refuse a reference either way. This block's own criterion says a
+project that cannot take the package still works, and nothing today would notice the day
+that stopped being true.
+
 ## Block J — Adoption — the proof is the deletion
 
 ### §WW78 The keyboard case, first
