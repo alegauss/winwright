@@ -591,13 +591,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW97 An animation with a known length
-
-A frame sequence is currently checked by opening the frames, which is the thing this
-framework exists to avoid. The fixture plays an animation of a declared duration with a
-declared number of visible states, so the sequence is checked against numbers: how many
-frames, at what interval, and that the states arrive in the order they were declared in.
-
 ### §WW98 Something to be identical to
 
 The byte-identical assertion needs a surface fixed by construction: no clock, no machine

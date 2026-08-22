@@ -661,4 +661,107 @@ public sealed class FixtureTests : IDisposable
             .Select(one => one.Facts.AutomationId)
             .Where(one => one.Length > 0)
             .ToList();
+
+    [Fact]
+    public void The_animation_says_how_many_states_it_has_so_nothing_has_to_be_told()
+    {
+        var window = Launched("--animate=200");
+
+        var said = Sampled(window, TimeSpan.FromSeconds(3));
+
+        // Read off the window, never typed: an expectation typed into a case is one that goes
+        // stale the day the animation gains a state.
+        var count = Assert.Single(said.Select(one => one.Split(" of ")[1]).Distinct(StringComparer.Ordinal));
+        var declared = int.Parse(count, System.Globalization.CultureInfo.InvariantCulture);
+
+        Assert.True(declared > 1, $"an animation of {declared} state(s) is not one");
+        Assert.Equal(declared, said.Select(one => one.Split(' ')[0]).Distinct(StringComparer.Ordinal).Count());
+    }
+
+    [Fact]
+    public void The_states_arrive_in_the_order_they_were_declared_in_and_come_round_again()
+    {
+        // Five hundred and not one fifty, measured: reading the tree of another process costs
+        // more than a state stands for at that speed, so the sampler skipped one and the order
+        // read as broken when it was the reading that could not keep up. A frame sequence cannot
+        // be checked faster than it can be read, and that is a property of the check.
+        var window = Launched("--animate=500");
+        var seen = Changes(Sampled(window, TimeSpan.FromSeconds(5)));
+
+        Assert.True(seen.Count >= 4, $"only {seen.Count} state change(s) were seen");
+
+        var declared = int.Parse(
+            seen[0].Split(" of ")[1], System.Globalization.CultureInfo.InvariantCulture);
+
+        for (var at = 1; at < seen.Count; at++)
+        {
+            var previous = int.Parse(seen[at - 1].Split(' ')[0], System.Globalization.CultureInfo.InvariantCulture);
+            var now = int.Parse(seen[at].Split(' ')[0], System.Globalization.CultureInfo.InvariantCulture);
+
+            Assert.Equal(previous % declared + 1, now);
+        }
+    }
+
+    [Fact]
+    public void A_full_cycle_takes_about_as_long_as_the_length_the_run_declared()
+    {
+        // Loosely, and deliberately: a live window sampled from another process cannot be timed to
+        // the millisecond. The band is wide enough to survive a busy desk and narrow enough to
+        // catch an animation that is not running, or one running ten times too fast.
+        const int every = 200;
+        var window = Launched($"--animate={every}");
+
+        var started = System.Diagnostics.Stopwatch.StartNew();
+        var seen = Changes(Sampled(window, TimeSpan.FromSeconds(5)));
+        var elapsed = started.Elapsed;
+
+        var declared = int.Parse(seen[0].Split(" of ")[1], System.Globalization.CultureInfo.InvariantCulture);
+        var perState = elapsed.TotalMilliseconds / Math.Max(1, seen.Count - 1);
+
+        Assert.True(
+            perState > every * 0.4 && perState < every * 3,
+            $"{seen.Count} change(s) over {elapsed.TotalMilliseconds:0}ms is {perState:0}ms each, against {every}");
+        Assert.True(declared > 1);
+    }
+
+    [Fact]
+    public void Without_the_flag_nothing_is_animating()
+    {
+        var window = Launched();
+
+        Assert.DoesNotContain("animationState", Ids(window));
+    }
+
+    /// <summary>Read what the animation is showing, over and over, for as long as this is given.</summary>
+    private static IReadOnlyList<string> Sampled(TopLevelWindow window, TimeSpan howLong)
+    {
+        var said = new List<string>();
+        var until = DateTime.UtcNow + howLong;
+
+        while (DateTime.UtcNow < until)
+        {
+            var tree = Inspect.Window(window.Handle, depth: 12);
+            var state = tree?.Walk().FirstOrDefault(one => one.Facts.AutomationId == "animationState");
+            if (state is not null && state.Facts.Name.Contains(" of ", StringComparison.Ordinal))
+                said.Add(state.Facts.Name);
+
+            Thread.Sleep(30);
+        }
+
+        Assert.NotEmpty(said);
+        return said;
+    }
+
+    /// <summary>The samples with the repeats removed, which is the sequence rather than the poll.</summary>
+    private static IReadOnlyList<string> Changes(IReadOnlyList<string> sampled)
+    {
+        var changes = new List<string>();
+        foreach (var one in sampled)
+        {
+            if (changes.Count == 0 || !string.Equals(changes[^1], one, StringComparison.Ordinal))
+                changes.Add(one);
+        }
+
+        return changes;
+    }
 }

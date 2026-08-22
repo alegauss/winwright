@@ -37,7 +37,19 @@ public partial class MainWindow : Window
 
         if (Shapes.Value("loading") is string howLong)
             LoadFor(int.Parse(howLong, System.Globalization.CultureInfo.InvariantCulture));
+
+        if (Shapes.Value("animate") is string everySoOften)
+        {
+            // On the Status pane and selected, because a pane nobody picked is realised into no
+            // tree at all - which would be an animation running where nothing can read it.
+            panes.SelectedItem = statusPane;
+            animation = Animation.On(
+                animationState, int.Parse(everySoOften, System.Globalization.CultureInfo.InvariantCulture));
+        }
     }
+
+    /// <summary>Held so it is not collected while it is still meant to be running.</summary>
+    private Animation? animation;
 
     /// <summary>
     /// Show the loading note in the report page's place, and swap the real content in after the

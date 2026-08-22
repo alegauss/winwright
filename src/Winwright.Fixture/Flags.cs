@@ -114,6 +114,12 @@ public sealed record Flags
             "a page that is still computing for exactly this long, so the loading refusal is asserted "
                 + "at a moment the run chose rather than on a machine that happened to be slow",
             Numeric: true),
+        new Flag(
+            "animate",
+            "milliseconds",
+            "an animation of a declared length whose states announce their own place, so a frame "
+                + "sequence is checked against numbers rather than against pictures somebody opened",
+            Numeric: true),
     ]);
 
     /// <summary>Whether the fixture was asked for that shape.</summary>
