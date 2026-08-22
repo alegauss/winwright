@@ -27,6 +27,7 @@
 - ✅ **WW129** **a stopped process is waited off the desktop and not out of the machine, so the next class starts on a busy one** — The settle waits for the processes to have exited, and the suite went from a dozen unreproducible foreground failures on a busy run to three clean runs in a row.
 - ✅ **WW110** **nothing enumerates what a run measured, so a runner that forgets a precondition stops checking it** — One reading takes all six conditions at once and renders the preamble a summary opens with, and a measurement it could not take is recorded as unread rather than left out.
 - ✅ **WW111** **the suite's own window fixtures take the foreground from whoever is working at the machine** — The fixtures that only read are created past every monitor, and the ones that act stay on the desk and say why - a window outside the monitors is one UI Automation calls offscreen.
+- 🗑 **WW114** **the suite's input tests compete for a foreground Windows will not always grant them** — superseded by WW133: Measured and refuted: a desktop that is not the input desktop grants no foreground at all and refuses SendInput outright, and an STA thread cannot even enter one.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

@@ -27,30 +27,6 @@ value.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW114 The fixtures need a desk of their own
-
-Measured while WW29 was being written, and it cost most of that task. Every fixture that
-synthesizes input needs this process to own the foreground. Windows grants that to a
-thread holding a window it has just created - usually. Once the process has been refused
-once, it stops being granted, and from then on a fixture that opens a window is simply
-not activated.
-
-The evidence was unambiguous. Making the fixture insist on the foreground before
-returning turned one busy desktop into forty-seven failures in a single run, each
-costing four seconds of waiting first. Softening it back to a request made the suite
-green again and left the fragility exactly where it was: whether these tests pass is
-partly a question about what else is on the screen.
-
-A second finding of the same afternoon has the same answer. An open menu holds its
-thread inside a modal loop, so the quit posted to it is never read and its window
-outlives the test - and the class that then counts what this process is showing fails
-about a window it never touched. Repaired, but the same shape: one process, one desktop,
-every fixture sharing both.
-
-A desktop created for the run is where this ends. The fixtures are the only windows on
-it, the foreground is theirs because there is nothing to lose it to, and nothing they do
-reaches the person at the keyboard - which is what WW111 asks for from the other side.
-
 ### §WW119 The tray fixture waits for the wrong thing
 
 Measured across four consecutive full-suite runs while WW54 was being finished, on an
@@ -97,6 +73,28 @@ suite creates, both become claims about this project, reproducible on every desk
 the fixture already exists to be that window. The desktop root itself is still worth one
 reading, but as a statement about what the engine does with an element it did not choose
 rather than as an assertion about the element.
+
+### §WW133 A refused foreground is a fact about the desk
+
+WW114 asked for a desktop of the fixtures' own and the measurement killed it. A desktop
+made with CreateDesktop takes windows, and UI Automation reads them from either side of
+the boundary. Three readings decide it. An STA thread cannot enter one at all: the
+apartment already owns a window, so the call comes back ERROR_BUSY, and the pumped
+fixture is STA by design. SetForegroundWindow on a desktop that is not the input desktop
+returns false and GetForegroundWindow answers zero, so the fixtures would go from
+sometimes refused the foreground to always refused it. And SendInput from a thread on
+one fails with ERROR_ACCESS_DENIED, so the input tests the idea existed to steady could
+not send a key. Only SwitchDesktop makes it the input desktop, and that blacks the
+screen of the person at the keyboard for the length of the run - the one thing the same
+idea promised not to do.
+
+What the complaint underneath was right about stands: whether these tests pass is partly
+a question about what else is on the screen. The answer is this block's own criterion,
+that nothing about the desk is reported as a defect in the code. A case that needs the
+foreground and is refused it should record a hole naming the desk, the way every other
+unmeetable condition here does, rather than go red about the application. The fixture
+already declines to insist; what is missing is the sentence on the other side of the
+refusal.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
