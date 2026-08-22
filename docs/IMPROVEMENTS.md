@@ -419,6 +419,52 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
+### §WW141 The uncooperative application is nobody's case
+
+Read against this block's second criterion once its last line shipped. It says every
+verb needing no cooperation runs against an application that references nothing, which
+is what keeps this usable on a product nobody here owns. In fact hundreds of cases do
+exactly that - they build a bare Win32 window and drive it - so the criterion holds
+today by accident of how the fixtures were written, and no case anywhere states it.
+
+That is the shape this project keeps closing. A rule met by whoever remembers is met by
+nobody: the day a verb quietly starts reading something only the in-app half provides,
+every one of those hundreds still passes against fixtures that happen to have it, and
+the first person to find out owns a product this cannot drive.
+
+What is wanted is a list and a run over it. The verbs that claim to need no cooperation
+are nameable - resolve, inspect, the pattern acts, the readings - and an application
+referencing nothing is a fixture this suite already knows how to build. Driving the list
+against it in one case makes the claim checkable, and adding a verb to the engine
+without adding it to the list should be the thing that fails.
+
+Its opposite is worth naming in the same breath: the verbs that do need the in-app half
+are a set too, and one that is written down is one an adopter can read before deciding
+what the package buys them.
+
+### §WW142 A gate with nothing standing in it
+
+The agreement reading has an ExitCode property whose own comment says the difference
+between a gate and advice is the number it leaves behind. Nothing leaves it behind.
+Outside its own tests the whole reading is called by nobody, so the copies of the engine
+in play are compared exactly as often as somebody opens the file.
+
+It was not buildable before now, and that is worth recording rather than treating as an
+oversight: until the halves packed there was a source tree and a path, one copy of two,
+and the reading refuses fewer than two copies on purpose. WW122 supplied the second -
+what the build actually produced, read out of the nuspec - so a real comparison exists
+for the first time.
+
+What it owes is one step that reads the copies this repository can name and stops on
+anything but agreement: the version the tree declares, the version that was packed, and
+the version the sample adopter pins. Those three moving apart is the exact failure the
+type describes - a stale copy does not fail, it agrees with a rule that has moved - and
+today the sample's pinned version is a literal somebody has to remember to bump.
+
+The same step is what an adopting project would run, which makes it worth building here
+in the form they would take rather than as something only this repository's layout
+understands.
+
 ## Block J — Adoption — the proof is the deletion
 
 ### §WW78 The keyboard case, first
