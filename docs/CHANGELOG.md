@@ -61,6 +61,7 @@
 - ✅ **WW52** **a control announcing its glyph codepoint satisfies every check for a non-empty name** — A name is read for what it is, so a glyph codepoint, an echoed automation id and an unfilled template each fail as themselves and print as escapes rather than as nothing.
 - ✅ **WW53** **a run mutates the store of the user who launched it** — The store is hashed around the case and every file, directory and variable that moved is named, so a rewrite of the same length and the same date is still caught.
 - ✅ **WW54** **no reading and a window that was talking are reported with the same sentence** — A read that ended with nothing says whether the window was working or blank, how many polls saw it, and what to look at, so only one of the two points at the deadline.
+- ✅ **WW55** **diagnosing a failure costs a throwaway script that dumps the tree** — A red carries the control view it had in hand - bounded, saying what it cut, marking the element the check read - so the dump that took a throwaway script arrives with the failure.
 
 ## Block G — The scenario — a case is a data file
 

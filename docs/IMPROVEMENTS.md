@@ -343,14 +343,6 @@ because an edit sizes itself to its font and a button does not. Each was found b
 running an installer, which is the most expensive place to find anything. Nothing
 overlaps, nothing starts off the surface, nothing ends past it, nothing measures zero.
 
-### §WW55 The diagnosis ships with the failure
-
-Diagnosing a missing template part in claude-tray took a throwaway script that dumped
-the control view - id, type and name per element - and the defect was obvious the moment
-somebody looked at the output. That is work the check was already supposed to have done.
-Attaching the dump to the failure is the difference between a red run that ends an
-investigation and one that starts it.
-
 ### §WW56 A check that cannot fail
 
 Several tasks across these repositories record assertions being watched go red before
