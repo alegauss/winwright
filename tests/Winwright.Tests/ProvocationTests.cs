@@ -1,0 +1,146 @@
+using System.Diagnostics;
+
+using Xunit;
+
+namespace Winwright.Tests;
+
+/// <summary>
+/// WW132. Counted while reading this block's own criterion: the framework names nineteen refusals
+/// and the fixture reaches four of them. The rest are asserted against hand-built windows, against
+/// arguments passed in a test, or not at all.
+/// <para>
+/// Some need no shape and saying so is the point. Others need one the fixture cannot take — a
+/// render that lays out to nothing, a capture with no background declared, a picture nothing drew —
+/// and the fixture always does the right thing, so it can never make any of them happen.
+/// </para>
+/// <para>
+/// The durable half is the pairing. The catalogue and the exception types were two lists nobody
+/// compared, so a refusal added later started unprovokable and stayed that way. These read both.
+/// </para>
+/// </summary>
+[Collection(WindowFixture.Serial)]
+public sealed class ProvocationTests
+{
+    /// <summary>The built fixture, which is where its catalogue is read from.</summary>
+    private static string Executable()
+    {
+        var here = new DirectoryInfo(AppContext.BaseDirectory);
+        var framework = here.Name;
+        var configuration = here.Parent!.Name;
+
+        var repository = here;
+        while (repository is not null && !File.Exists(Path.Combine(repository.FullName, "Winwright.slnx")))
+            repository = repository.Parent;
+
+        Assert.NotNull(repository);
+        var path = Path.Combine(
+            repository.FullName, "src", "Winwright.Fixture", "bin", configuration, framework, "Winwright.Fixture.exe");
+
+        Assert.True(File.Exists(path), $"the fixture was not built: {path}");
+        return path;
+    }
+
+    [Fact]
+    public void Every_refusal_the_framework_names_is_paired_with_something()
+    {
+        var named = Provocation.Named();
+        var paired = Provocation.Known.Select(one => one.Refusal).ToList();
+
+        // The check the criterion was missing: a refusal added later fails here until somebody says
+        // which flag reaches it or why none can.
+        Assert.Empty(named.Except(paired, StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public void Nothing_is_paired_that_the_framework_no_longer_names()
+    {
+        // The other direction, and the one that rots quietly: an entry for a type somebody deleted
+        // reads as coverage of a refusal that is not there.
+        var named = Provocation.Named();
+
+        Assert.Empty(Provocation.Known.Select(one => one.Refusal).Except(named, StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public void No_refusal_is_paired_twice()
+    {
+        var paired = Provocation.Known.Select(one => one.Refusal).ToList();
+
+        Assert.Equal(paired.Count, paired.Distinct(StringComparer.Ordinal).Count());
+    }
+
+    [Fact]
+    public void A_flag_named_here_is_one_the_fixture_actually_has()
+    {
+        // The second pair of lists nobody compared. A flag renamed in the fixture would leave this
+        // pairing pointing at a shape nobody can ask for — and the flags are read out of the built
+        // fixture rather than a reference to it, so what is checked is what an adopter would run.
+        var flags = Provocation.FlagsOf(Executable());
+
+        Assert.NotEmpty(flags);
+        foreach (var provoked in Provocation.Reachable())
+            Assert.Contains(provoked.Flag, flags);
+    }
+
+    [Fact]
+    public void Every_pairing_says_why_in_a_sentence_somebody_can_act_on()
+    {
+        Assert.All(Provocation.Known, one => Assert.False(string.IsNullOrWhiteSpace(one.Because)));
+
+        // Exactly one of the two: a flag, or a stated reason there is none. Neither, or both, is
+        // an entry that says nothing.
+        Assert.All(
+            Provocation.Known,
+            one => Assert.True(one.ThroughTheFixture ^ (one.Why is not null), one.Refusal));
+    }
+
+    [Fact]
+    public void What_the_fixture_cannot_provoke_is_counted_rather_than_left_off()
+    {
+        // The bucket that must not grow. Raising this number is a decision somebody makes here,
+        // where the four are named, rather than by adding a refusal nothing can reach.
+        Assert.Equal(4, Provocation.Unreachable().Count);
+        Assert.All(Provocation.Unreachable(), one => Assert.Equal(Without.NotYet, one.Why));
+    }
+
+    [Fact]
+    public void The_fixtures_own_refusal_is_provoked_by_running_it()
+    {
+        // Not in the pairing and it cannot be: the suite sees the fixture as an executable rather
+        // than as an assembly, on purpose. So it is provoked the way an adopter would provoke it.
+        var start = new ProcessStartInfo(Executable()) { RedirectStandardError = true, UseShellExecute = false };
+        start.ArgumentList.Add("--nosuchshape");
+
+        using var running = Process.Start(start)!;
+        var said = running.StandardError.ReadToEnd();
+        Assert.True(running.WaitForExit(30_000), "the fixture did not exit after being refused");
+
+        Assert.Equal(2, running.ExitCode);
+        Assert.Contains("--nosuchshape is not a shape this fixture has", said);
+        Assert.Contains("This fixture knows:", said);
+    }
+
+    [Fact]
+    public void The_pairing_reads_as_a_count_and_then_a_line_each()
+    {
+        var rendered = Provocation.Render();
+
+        Assert.Equal(Provocation.Known.Count + 1, rendered.Count);
+        Assert.StartsWith($"{Provocation.Known.Count} refusals:", rendered[0]);
+        Assert.Contains("needing a shape it cannot take", rendered[0]);
+        Assert.All(rendered.Skip(1), one => Assert.StartsWith("  ", one));
+    }
+
+    [Fact]
+    public void A_flag_that_provokes_nothing_named_here_is_still_a_shape_worth_having()
+    {
+        // Deliberately not the reverse check. Most flags exist to make a reading possible rather
+        // than a refusal — a backdrop, an animation, a peerless pane — and demanding a refusal per
+        // flag would be a rule that deleted the useful half of the catalogue.
+        var provoking = Provocation.Reachable().Select(one => one.Flag).ToHashSet(StringComparer.Ordinal);
+
+        Assert.True(
+            provoking.Count < Provocation.FlagsOf(Executable()).Count,
+            "every flag provokes a refusal, which is unexpected");
+    }
+}

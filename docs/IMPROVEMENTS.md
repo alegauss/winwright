@@ -528,24 +528,3 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW132 Every refusal against the flag that provokes it
-
-Counted while reading this block's own criterion after its last line shipped. The
-framework names seventeen refusals; the fixture has a flag that provokes six of them -
-another instance, a store that moved, an unknown flag, a backdrop, a page still loading,
-a region covered. The other eleven are asserted against hand-built windows, against
-arguments passed in a test, or not at all.
-
-Some of the eleven need no flag and saying so is the point: a locator that does not
-parse is a string, and no window has to exist for it. Others do and cannot be provoked
-here today - a render that lays out to nothing, a capture with no background declared, a
-picture nothing drew. The fixture always does the right thing, so it can never make any
-of them happen, and each is a refusal that will quietly stop working with nothing to
-notice.
-
-The durable half is the pairing itself. The catalogue and the exception types are two
-lists nobody compares, and a refusal added later starts unprovokable and stays that way.
-A check that reads both, and a declaration on each refusal saying which flag reaches it
-or why none can, turns this block's criterion from a sentence into something that fails
-when it stops being true.
