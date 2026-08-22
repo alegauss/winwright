@@ -1032,11 +1032,18 @@ public sealed class FixtureTests : IDisposable
         // Read, not held: a real themed window is not laid out to this check's satisfaction and
         // that is a fact about the framework rather than about the fixture. Its default tab
         // template lifts a selected header four pixels outside the panel holding it and two past
-        // the border containing it, and a collapsed element measures nothing on purpose. Both are
-        // filed as gaps in the reading rather than papered over with a narrower assertion here.
+        // the border containing it, which is filed as a gap in the reading rather than papered
+        // over with a narrower assertion here.
         Assert.True(read.Examined > 10, read.Sentence());
         Assert.NotNull(read.Root);
-        Assert.Contains(read.Faults, one => one.Kind == Fault.MeasuresNothing);
+        Assert.Contains(read.Faults, one => one.Kind == Fault.EndsOutside);
+
+        // WW130, against the window it was found on: every element this used to report as laid out
+        // to no size was one the application had collapsed on purpose. They are left alone now, and
+        // counted rather than dropped — a page hiding a note is not a page with a defect on it.
+        Assert.DoesNotContain(read.Faults, one => one.Kind == Fault.MeasuresNothing);
+        Assert.NotEmpty(read.Concealed);
+        Assert.Contains("the application is not showing left alone", read.Sentence());
     }
 
     /// <summary>Where the fixture's own sources are.</summary>

@@ -37,12 +37,18 @@ public sealed record LayoutFault(Fault Kind, DrawnElement What, DrawnElement? Ag
 /// <summary>What checking one geometry dump turned out to say.</summary>
 public sealed record LayoutReading
 {
-    internal LayoutReading(int examined, IReadOnlyList<LayoutFault> faults, DrawnElement? root, WindowBounds covered)
+    internal LayoutReading(
+        int examined,
+        IReadOnlyList<LayoutFault> faults,
+        DrawnElement? root,
+        WindowBounds covered,
+        IReadOnlyList<DrawnElement>? concealed = null)
     {
         Examined = examined;
         Faults = faults;
         Root = root;
         Covered = covered;
+        Concealed = concealed ?? new ReadOnlyCollection<DrawnElement>([]);
     }
 
     /// <summary>How many elements were examined. Zero is not a pass — see <see cref="AsAssertion"/>.</summary>
@@ -59,6 +65,16 @@ public sealed record LayoutReading
     /// page-above-a-screenful-of-blank-space failure looks like as a number.
     /// </summary>
     public WindowBounds Covered { get; }
+
+    /// <summary>
+    /// The elements the application was not showing, which this reading deliberately left alone.
+    /// <para>
+    /// WW130. A collapsed element lays out to nothing correctly, and on a real page the check fired
+    /// on every hidden thing at once. They are recorded rather than dropped: a page hiding a note is
+    /// not a page with a defect on it, and a count that is not silent is not a defect either.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<DrawnElement> Concealed { get; }
 
     /// <summary>Whether nothing was found wrong. False on an empty dump, which found nothing at all.</summary>
     public bool Held => Examined > 0 && Faults.Count == 0;
@@ -87,7 +103,8 @@ public sealed record LayoutReading
             Examined,
             new ReadOnlyCollection<LayoutFault>(Faults.Where(one => wanted.Contains(one.Kind)).ToList()),
             Root,
-            Covered);
+            Covered,
+            Concealed);
     }
 
     /// <summary>What was checked and what was wrong, said either way.</summary>
@@ -96,11 +113,16 @@ public sealed record LayoutReading
         if (Examined == 0)
             return "there was no geometry to check.";
 
+        var hidden = Concealed.Count == 0
+            ? ""
+            : $", and {Concealed.Count} the application is not showing left alone "
+                + $"({string.Join(", ", Concealed.Select(one => one.ToString()))})";
+
         if (Faults.Count == 0)
-            return $"{Examined} element(s) laid out correctly under {Root}.";
+            return $"{Examined} element(s) laid out correctly under {Root}{hidden}.";
 
         return $"{Faults.Count} of {Examined} element(s) are laid out wrongly: "
-            + string.Join("; ", Faults.Select(one => one.Detail)) + ".";
+            + string.Join("; ", Faults.Select(one => one.Detail)) + hidden + ".";
     }
 
     /// <summary>
@@ -183,6 +205,7 @@ public static class Layout
 
         var root = elements[0];
         var faults = new List<LayoutFault>();
+        var concealed = new List<DrawnElement>();
         var covered = Nothing;
 
         for (var at = 0; at < elements.Count; at++)
@@ -192,10 +215,20 @@ public static class Layout
             // The root is left out of the covering box on purpose: it is the surface, not
             // something drawn on it, and including it makes every page read as entirely filled.
             if (element.Drawn && at > 0)
+            {
                 covered = Union(covered, element.Bounds);
+            }
+            else if (at > 0 && Concealing(elements, at) is not null)
+            {
+                // WW130: not laid out because the application is not showing it, or is not showing
+                // something above it. That is the page working, not the fault this check is for.
+                concealed.Add(element);
+            }
             else if (at > 0)
+            {
                 faults.Add(new LayoutFault(
                     Fault.MeasuresNothing, element, null, $"{element} was laid out and occupies nothing"));
+            }
 
             if (at == 0)
                 continue;
@@ -215,7 +248,8 @@ public static class Layout
             root,
             covered.Equals(Nothing)
                 ? new WindowBounds(root.Bounds.Left, root.Bounds.Top, root.Bounds.Left, root.Bounds.Top)
-                : covered);
+                : covered,
+            new ReadOnlyCollection<DrawnElement>(concealed));
     }
 
     /// <summary>The same, reading the dump off disk first.</summary>
@@ -229,6 +263,34 @@ public static class Layout
         Math.Min(left.Top, right.Top),
         Math.Max(left.Right, right.Right),
         Math.Max(left.Bottom, right.Bottom));
+
+    /// <summary>
+    /// The element that explains why this one was not laid out, which is itself or the nearest
+    /// ancestor the application is not showing. Null where nothing explains it.
+    /// <para>
+    /// The ancestry is walked because a child of a collapsed panel is Visible in its own right and
+    /// still measures nothing — the panel is why, and only the panel says so.
+    /// </para>
+    /// </summary>
+    private static DrawnElement? Concealing(IReadOnlyList<DrawnElement> elements, int at)
+    {
+        if (!elements[at].IsShown)
+            return elements[at];
+
+        var depth = elements[at].Depth;
+        for (var back = at - 1; back >= 0 && depth > 0; back--)
+        {
+            if (elements[back].Depth != depth - 1)
+                continue;
+
+            if (!elements[back].IsShown)
+                return elements[back];
+
+            depth--;
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// The parent, found by walking back to the nearest element one level shallower. That is what

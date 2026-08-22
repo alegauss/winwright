@@ -274,23 +274,6 @@ which is the argument every other image comparison eventually turns into.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW130 Collapsed is not the same as measuring nothing
-
-Found by running the layout check against a real window rather than against a dump
-somebody typed. The fixture's loading note is collapsed unless a run asks for it, so it
-lays out to nothing - correctly, deliberately, and on every page that hides anything.
-The check reports it as an element laid out to no size, which is the fault it exists to
-catch, and on a real page it fires on every hidden thing at once.
-
-Nothing distinguishes the two today because the dump does not carry visibility. A
-rectangle of no area is all a reader gets, and a caption that wrapped at column zero and
-a note the page is deliberately not showing produce exactly the same line.
-
-So the dump carries it and the check reads it: an element the application collapsed is
-left alone, and one that is visible and still measures nothing is the finding it always
-was. The cost is one field in a format two packages have to agree about, which is the
-same price every other honest reading in this project has paid.
-
 ### §WW131 The application's elements and the template's parts
 
 Measured against the fixture's own window. Four of forty-five elements are laid out

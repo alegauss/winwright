@@ -6,19 +6,48 @@ using Winwright.Windowing;
 
 namespace Winwright.Capturing;
 
+/// <summary>
+/// Whether the application was showing an element at all, as it said.
+/// <para>
+/// WW130. A collapsed element lays out to nothing correctly, deliberately, and on every page that
+/// hides anything — so without this the layout check fires on every hidden thing at once, and a
+/// caption that wrapped at column zero reads exactly like a note the page is not showing.
+/// </para>
+/// </summary>
+public enum Shown
+{
+    /// <summary>The application is showing it, so what it measures is what a person sees.</summary>
+    Visible,
+
+    /// <summary>It reserves its space and draws nothing.</summary>
+    Hidden,
+
+    /// <summary>It is not laid out at all, which is why it measures nothing.</summary>
+    Collapsed,
+}
+
 /// <summary>One element the application under test said it drew, in physical pixels.</summary>
 /// <param name="Depth">How deep under the root it sat.</param>
 /// <param name="Kind">Its type.</param>
 /// <param name="Name">Its name, empty where it had none.</param>
 /// <param name="Bounds">Where it was, in the space a copy works in.</param>
-public sealed record DrawnElement(int Depth, string Kind, string Name, WindowBounds Bounds)
+/// <param name="Visibility">
+/// Whether the application was showing it. Visible where the dump did not say, which is the older
+/// format: a reader that assumed otherwise would quietly stop reporting a real fault.
+/// </param>
+public sealed record DrawnElement(
+    int Depth, string Kind, string Name, WindowBounds Bounds, Shown Visibility = Shown.Visible)
 {
     /// <summary>Whether it occupies anything at all.</summary>
     public bool Drawn => Bounds.Width > 0 && Bounds.Height > 0;
 
+    /// <summary>Whether the application was showing it.</summary>
+    public bool IsShown => Visibility == Shown.Visible;
+
     /// <summary>The one phrase a report names it by.</summary>
     public override string ToString() =>
-        $"{Kind}{(Name.Length == 0 ? "" : $" '{Name}'")} {Bounds}";
+        $"{Kind}{(Name.Length == 0 ? "" : $" '{Name}'")} {Bounds}"
+        + (IsShown ? "" : $" ({Visibility.ToString().ToLowerInvariant()})");
 }
 
 /// <summary>What reading one dump found.</summary>
@@ -142,8 +171,11 @@ public static class GeometryDump
     {
         ArgumentNullException.ThrowIfNull(line);
 
+        // Seven fields or eight. A dump written before the visibility field existed is read as
+        // showing everything, which keeps whatever it would have reported rather than quietly
+        // dropping findings the moment the two halves are a version apart.
         var fields = line.TrimEnd('\r').Split('\t');
-        if (fields.Length != 7 || string.IsNullOrWhiteSpace(fields[1]))
+        if (fields.Length is not (7 or 8) || string.IsNullOrWhiteSpace(fields[1]))
             return null;
 
         var numbers = new int[5];
@@ -160,8 +192,21 @@ public static class GeometryDump
             numbers[0],
             fields[1],
             fields[2],
-            new WindowBounds(numbers[1], numbers[2], numbers[3], numbers[4]));
+            new WindowBounds(numbers[1], numbers[2], numbers[3], numbers[4]),
+            fields.Length == 8 ? Visibility(fields[7]) : Shown.Visible);
     }
+
+    /// <summary>
+    /// What the dump called an element's visibility. A word this reader does not know is Visible:
+    /// the two halves may be a version apart, and the direction that stays honest is the one that
+    /// keeps reporting rather than the one that starts excusing.
+    /// </summary>
+    private static Shown Visibility(string written) => written.Trim() switch
+    {
+        "Collapsed" => Shown.Collapsed,
+        "Hidden" => Shown.Hidden,
+        _ => Shown.Visible,
+    };
 
     private static IEnumerable<string> Lines(string full)
     {

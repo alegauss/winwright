@@ -14,8 +14,21 @@ namespace Winwright.InApp;
 /// <param name="Top">Its top edge.</param>
 /// <param name="Right">Its right edge, exclusive.</param>
 /// <param name="Bottom">Its bottom edge, exclusive.</param>
-public sealed record DrawnElement(int Depth, string Kind, string Name, int Left, int Top, int Right, int Bottom)
+/// <param name="Visibility">
+/// What the application set: Visible, Hidden or Collapsed. WW130 - a collapsed element lays out to
+/// nothing correctly, deliberately, and on every page that hides anything, and without this field a
+/// caption that wrapped at column zero and a note the page is deliberately not showing produce
+/// exactly the same line.
+/// </param>
+public sealed record DrawnElement(
+    int Depth, string Kind, string Name, int Left, int Top, int Right, int Bottom, string Visibility = "Visible")
 {
+    /// <summary>What the format calls an element the application is showing.</summary>
+    public const string Visible = "Visible";
+
+    /// <summary>Whether the application is showing it at all.</summary>
+    public bool Shown => string.Equals(Visibility, Visible, StringComparison.Ordinal);
+
     /// <summary>How wide it is.</summary>
     public int Width => Right - Left;
 
@@ -34,11 +47,13 @@ public sealed record DrawnElement(int Depth, string Kind, string Name, int Left,
         Left.ToString(CultureInfo.InvariantCulture),
         Top.ToString(CultureInfo.InvariantCulture),
         Right.ToString(CultureInfo.InvariantCulture),
-        Bottom.ToString(CultureInfo.InvariantCulture));
+        Bottom.ToString(CultureInfo.InvariantCulture),
+        Visibility);
 
     /// <summary>The one phrase a person reads it by.</summary>
     public override string ToString() =>
-        $"{Kind}{(Name.Length == 0 ? "" : $" '{Name}'")} {Width}x{Height} at {Left},{Top}";
+        $"{Kind}{(Name.Length == 0 ? "" : $" '{Name}'")} {Width}x{Height} at {Left},{Top}"
+        + (Shown ? "" : $" ({Visibility.ToLowerInvariant()})");
 }
 
 /// <summary>What one walk of the visual tree found.</summary>
@@ -211,7 +226,8 @@ public static class Geometry
                 (int)Math.Round(topLeft.X),
                 (int)Math.Round(topLeft.Y),
                 (int)Math.Round(bottomRight.X),
-                (int)Math.Round(bottomRight.Y));
+                (int)Math.Round(bottomRight.Y),
+                element.Visibility.ToString());
         }
         catch (InvalidOperationException)
         {

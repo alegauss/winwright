@@ -84,6 +84,7 @@
 - ✅ **WW56** **an assertion is trusted without ever being watched fail** — A case declares the defects its check must catch and each one is run against it, so a check that stayed green with a declared defect in place is a red rather than a line that passes forever.
 - ✅ **WW51** **a page renders correctly above a screenful of blank space and nothing notices** — A dump is checked against itself for the four faults and measured for how much of the surface was drawn on, with every expectation derived from the dump rather than typed into a case.
 - ✅ **WW118** **a derived set can carry a placeholder value that no exact read will ever match** — A derived set leaves out the strings carrying a placeholder and names them in the source sentence every verdict prints, and a key where none survives is refused rather than derived empty.
+- ✅ **WW130** **an element collapsed on purpose is reported as laid out and occupying nothing** — The dump carries what the application set and the check leaves an element it is not showing alone, counting it in the sentence — which removed every such fault from the fixture's own window.
 
 ## Block G — The scenario — a case is a data file
 
