@@ -74,6 +74,74 @@ Worth saying where this really lands. Block G builds the thing that takes a run,
 dependencies are now all finished; whoever builds it inherits this, and this line is
 what tells them the claim is owed rather than met.
 
+### §WW156 The desk is read once, before anything blames it
+
+Desk already takes this reading, and its own doc says why: a report about the machine,
+taken before a scenario blames a repository for the desk it ran on. Nothing calls it.
+Across src, tools and tests the only callers are DeskTests and BlipTests, which assert
+the reading is well formed and throw it away.
+
+That is WW138's distinction pointed at the desk rather than at the count: a check that
+has to be invoked separately is not a check the project has, it is a check it offers. A
+machine with no input desktop runs every case and reports on each, when one sentence at
+the start answers for all of them at once.
+
+So the run takes the reading before the first case and stops on FirstAbsent - one named
+absence, in the vocabulary Block A already has for a hole, rather than N holes each
+rediscovering the same fact. Met conditions are printed either way, because which of the
+six is being suffered in silence has never been measured.
+
+The refusal is the whole run and not a case, and that is the part excusing assertions
+one at a time cannot reach. A suite that produced results on a desk incapable of
+producing them is indistinguishable from a real one afterwards, which is the green this
+project exists to withdraw.
+
+### §WW157 A desk that can observe is not yet a desk of one's own
+
+The six conditions ask one question - can this desk observe - and all six are met on a
+desk with somebody working at it. That desk then loses the foreground halfway through,
+and the run either goes red for a reason about the code or produces a BusyDesk hole
+attributed to Foreground.PreconditionName. Both are wrong the same way: the name given
+is the symptom the run saw, not the fact that a person moved the mouse.
+
+Measured here: a full suite is 999 cases over about two and a half minutes - two and a
+half minutes the operator cannot use their own machine without changing the result. The
+answer people reach for is a second machine, and it is the right one; but a second
+machine with a console session open has the same person in front of it and the same
+silence about it.
+
+GetLastInputInfo separates the two in one call: input this run synthesised against input
+it did not, since the run began. Absent, the condition names what it is, and the run
+stops saying anything about the code.
+
+This is a seventh condition, not a new subsystem. Block B's criterion already reads that
+nothing about the desk is reported as a defect in the code, and a person at the keyboard
+is the case it does not yet cover.
+
+### §WW158 A display that renders is not a display that is attached
+
+Display() reads three things and none of them is rendering: GetSystemMetrics for the
+monitor count, for the virtual screen width and height, and SM_REMOTESESSION as a suffix
+on a failure it has already decided. All three are proxies. The condition is named a
+display that renders and answers a different question - is a display attached, and does
+it measure something.
+
+WW42 is the measurement that settles it. A copy of the notification area came back as
+exactly one distinct colour, with the session present, the shell running and the
+environment reporting an interactive desktop. This reading would have called that desk
+met. It was caught by the capture, per capture and after the fact, and only because
+somebody looked.
+
+Read from the desk instead, the same fact answers once and answers first, which is what
+the whole reading is for: the flat rectangle is refused before 999 cases run on the desk
+that produces it, rather than once per picture afterwards.
+
+The evidence is composition state and what the desk actually draws, never a named pixel
+- the non-goal about individual pixels binds this as it binds Block E, and a colour
+count is not a claim about a coordinate. WW42 stays where it is: the capture keeps its
+own refusal, because a desk that renders can still be photographed while nothing is on
+it.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
