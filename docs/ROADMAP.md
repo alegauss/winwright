@@ -18,7 +18,7 @@
 
 - 📋 **WW147** (deps: —) **the one act that retries throws the attempt count away, so a third-attempt success reaches no trace** — The count an act needed reaches the step a trace records, because a green that took three goes is a finding and a green that hid it is the defect this project is about. → §WW147
 - 📋 **WW148** (deps: —) **a destructive list can still be built from bare names by an overload that names no project and refuses nothing** — The shape that gives the language guard up says so in its name, the way the subject that gives the destructive guard up already does. → §WW148
-- 📋 **WW155** (deps: —) **the menu reading names whatever holds the desk, so a walk can report an entry from another window** — A menu answer is about the window the walk was asked about, so a desk that changed hands mid-walk is a hole and never a claim about this application's menu. → §WW155
+- 📋 **WW155** (deps: —) **the menu reading names whatever holds the desk, so a walk can report an entry from another window** — The focus reading under both menus and tab order is the whole desktop's, so an answer can name another application's window and go red about this one. → §WW155
 
 ## Block E — Capture — the picture that proves what it photographed
 
