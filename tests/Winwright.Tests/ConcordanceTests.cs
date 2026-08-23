@@ -1,4 +1,4 @@
-﻿using Winwright.Concordance;
+using Winwright.Concordance;
 using Winwright.Projects;
 
 using Xunit;
@@ -11,7 +11,7 @@ namespace Winwright.Tests;
 /// <para>
 /// What is checked here is the half the reading cannot check for itself: what a command line turned
 /// into. A dropped flag is a copy that left the reading without lowering any count a reader sees,
-/// and two copies that agree is a green â€” the same shape as a suite that lost twenty-two tests and
+/// and two copies that agree is a green — the same shape as a suite that lost twenty-two tests and
 /// still printed a pass.
 /// </para>
 /// </summary>

@@ -63,24 +63,17 @@ public sealed class TraversalTests : IDisposable
         var admitted = Admitted.To(On(locator));
         admitted.Do(element => element.SetFocus());
 
-        // WW143: this was 120 ms of nothing, which is the one wait in the suite that had no
-        // condition at all to convert - so it gets one written. What it waits for is the focus
-        // being where it was just put, read the same way the traversal itself reads it.
+        // WW143 converted this to a deadline on "the focus is where it was just put", and the
+        // conversion was wrong. Measured rather than argued: with the condition, this class fails
+        // A_focus_that_did_not_move three runs out of three, the Right press reading a focus with
+        // no name at all; with the sleep it is ten of ten, twice over.
         //
-        // Not asserted, and that is the same rule as the desktop one floor down: a desk that
-        // refuses the focus is a hole these cases already excuse through BusyDesk, and a red here
-        // would be a claim about this window's tab order that the machine caused.
-        Waits.Trying("focus", () => Holds(admitted.Facts));
-    }
-
-    /// <summary>Whether the keyboard focus is on that element, by the fields that identify it.</summary>
-    private static bool Holds(ElementFacts wanted)
-    {
-        var focused = Traversal.WhoHasFocus();
-        return focused is not null
-            && string.Equals(focused.Name, wanted.Name, StringComparison.Ordinal)
-            && string.Equals(focused.AutomationId, wanted.AutomationId, StringComparison.Ordinal)
-            && string.Equals(focused.ControlType, wanted.ControlType, StringComparison.Ordinal);
+        // So the 120 ms was never only waiting for the focus. UI Automation reports the element as
+        // focused before the control has finished taking it, and what the rest of this class needs
+        // is the state after that - which nothing out here can observe. A condition that is true
+        // too early is worse than the sleep it replaced, because it reads as a wait that was
+        // proved. It stays a sleep, with the measurement, until there is something to wait on.
+        Thread.Sleep(120);
     }
 
     [Fact]
