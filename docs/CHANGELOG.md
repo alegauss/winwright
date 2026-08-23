@@ -132,6 +132,8 @@
 
 ## Block J — Adoption — the proof is the deletion
 
+- ✅ **WW154** **nothing at the root tells an adopter what this is, what it refuses, or how to take it** — A README at the root says what winwright is, what it needs, how an adopter takes it and what each exit code means, and a case holds it to the engine's own codes, verb families and non-goals.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ✅ **WW89** **there is no window to develop against that is not somebody's shipping product** — A WPF fixture belongs to this repository and the suite launches it, reads its tree and stops it, with nothing on it read off the machine it runs on.

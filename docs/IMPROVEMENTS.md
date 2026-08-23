@@ -398,29 +398,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW154 The tool nobody outside this backlog can read about
-
-There is no README. `docs/` holds the roadmap, the ledger and the rationale - all three
-written for whoever is building this - and the repository root holds a solution, a props
-file and two scripts. An adopting project meets winwright through a package id and a
-path into somebody else's tree.
-
-This is not a documentation preference. The shipping rule in
-`.claude/skills/roadmap-docs` runs a decision on every task that ships: would an adopter
-do something differently because this shipped, and if so, hit the surfaces that exist -
-naming the README's feature list first. That clause has been answered by the surface not
-existing, every time, for every task so far. The verbs, the locator grammar, the exit
-codes, the refusals an adopter can hit and the two package ids they take are all
-decided, and none of them are written anywhere a reader outside this backlog would look.
-
-What it owes is one file at the root answering what this is, what it needs (Windows, the
-Desktop framework, the two packages), what a scenario looks like, and what each exit
-code means - written against what has actually shipped, read out of the ledger rather
-than out of the roadmap, so it never promises a verb that is still a line.
-
-It is then held by the same gate every other adopter-facing surface is: the task that
-changes an exit code changes this in the same commit.
-
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW159 The animation check is a race, and a loaded desk loses it
