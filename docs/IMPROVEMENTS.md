@@ -490,3 +490,64 @@ It is then held by the same gate every other adopter-facing surface is: the task
 changes an exit code changes this in the same commit.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW159 The animation check is a race, and a loaded desk loses it
+
+Measured while closing WW146: the case ran three times alone on the host and passed, ran
+once on a loaded host and saw four of five states, and ran in the VMware guest and saw
+three. Nothing in it had changed, and neither had the fixture.
+
+The check samples the window for three seconds and asserts that the number of distinct
+states it saw equals the number the window declares. At two hundred milliseconds a state
+that is fifteen states inside the window and five distinct ones, which is generous right
+up until the reading is slower than the state. Reading another process's automation tree
+costs more than a state stands for at that speed - the sibling case says exactly that in
+its own comment, and uses five hundred milliseconds for the reason.
+
+So the failure is about the reader and not about the animation, and a red naming the
+animation sends somebody to the wrong file. A longer window is not the fix: it only
+moves which machine loses. The check waits until it has seen every declared state or a
+deadline passes, and says which states it never saw where the deadline wins. That turns
+a race into a deadline on a named condition, which is what WW143 did to every other wait
+in this suite.
+
+### §WW160 The half of the pairing nobody drives
+
+WW132 paired every refusal the framework names with the flag that provokes it or the
+reason none can, and WW145 wrote a case per reachable entry because a pairing nobody
+drives is a claim held up by having been written down. WW146 closed the last gap on the
+flag side: three shapes were built and the fourth was moved up rather than faked.
+
+What was never checked is the other half of the list. Sixteen entries now say some
+version of a case builds this - a locator that does not parse, a trace that is not a
+trace, a receipt over a window and a target a case hands it - and nothing anywhere
+asserts that such a case exists. The suite does contain most of them, which is exactly
+what makes the gap quiet: the entries were true when they were written, and an entry
+whose case somebody deleted reads identically to one whose case still runs.
+
+This is the same defect one level up from the one WW145 fixed, and the same remedy fits.
+Each no-shape entry names the case that provokes it, and a check reads the suite for
+that name. Naming one is cheap - the pairing already carries a sentence per entry. What
+it buys is that deleting a case fails the pairing rather than quietly shrinking what the
+refusals are worth.
+
+### §WW161 The two exit codes the catalogue does not print
+
+WW146 gave the fixture an exit code of its own: three, for a shape that provoked the
+refusal it exists to provoke. It is deliberately not two, which means the fixture was
+driven wrong - a run that cannot tell those apart reads the fixture working as the
+fixture being misspelt.
+
+Nothing a person reads says so. The catalogue prints every shape, what it takes, what it
+provokes, what it needs and whether it draws anything, and says nothing about what any
+of it exits with. So both codes are learnt by reading Program.cs, and the suite's own
+cases carry three as a private constant copied out of the fixture - which is the second
+transcription of the same fact, and the exact shape the flag catalogue was built to
+stop.
+
+The catalogue is the place for it. It is already what the built fixture says about
+itself rather than what a compile-time reference would have said, and the suite already
+reads the flag names out of it for that reason. A shape that ends in a refusal says
+which code it ends with, the codes are listed once where a person driving by hand meets
+them, and a case asserting three reads it off the article instead of holding a copy that
+nothing compares.

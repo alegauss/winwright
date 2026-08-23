@@ -20,12 +20,12 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW38** (deps: Block K ✅) **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and each frame intersected with the copy rectangle, which answers for the whole area in one pass and names the intruder. → §WW38
-- 📋 **WW40** (deps: Block K ✅) **a copy trimmed around an intruder is a picture of something nobody asked for** — An overlap fails rather than crops, and the refusal names the intruder, its process and the rectangle it covers, so the cause is actionable instead of mysterious. → §WW40
-- 📋 **WW41** (deps: Block K ✅) **a window with a system backdrop transmits what is behind it through the glass** — Z-order reasoning cannot answer for that, so the compositor is asked directly and a window that opted into one is refused rather than merely warned about. → §WW41
-- 📋 **WW42** (deps: Block K ✅) **a copy of exactly one colour is written and reported as a capture** — A flat rectangle is not a picture of a window, and a session where nothing was rendering produced one that exited zero. → §WW42
-- 📋 **WW43** (deps: Block K ✅) **a page still computing is photographed and announced as a picture of a report** — The loading strings are read from the project's own language files before anything launches, and a key none of them carries refuses the run instead of matching nothing. → §WW43
-- 📋 **WW46** (deps: Block K ✅) **a change meant to be invisible has no cheap way to prove it was** — Two renders of unchanged code are byte-identical, so a difference is a real difference and no tolerance has to be chosen for a comparison to mean anything. → §WW46
+- 📋 **WW38** (deps: Block K) **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and each frame intersected with the copy rectangle, which answers for the whole area in one pass and names the intruder. → §WW38
+- 📋 **WW40** (deps: Block K) **a copy trimmed around an intruder is a picture of something nobody asked for** — An overlap fails rather than crops, and the refusal names the intruder, its process and the rectangle it covers, so the cause is actionable instead of mysterious. → §WW40
+- 📋 **WW41** (deps: Block K) **a window with a system backdrop transmits what is behind it through the glass** — Z-order reasoning cannot answer for that, so the compositor is asked directly and a window that opted into one is refused rather than merely warned about. → §WW41
+- 📋 **WW42** (deps: Block K) **a copy of exactly one colour is written and reported as a capture** — A flat rectangle is not a picture of a window, and a session where nothing was rendering produced one that exited zero. → §WW42
+- 📋 **WW43** (deps: Block K) **a page still computing is photographed and announced as a picture of a report** — The loading strings are read from the project's own language files before anything launches, and a key none of them carries refuses the run instead of matching nothing. → §WW43
+- 📋 **WW46** (deps: Block K) **a change meant to be invisible has no cheap way to prove it was** — Two renders of unchanged code are byte-identical, so a difference is a real difference and no tolerance has to be chosen for a comparison to mean anything. → §WW46
 
 ## Block F — Assert — the expectation is derived, never typed
 
@@ -68,6 +68,10 @@
 - 📋 **WW154** (deps: —) **nothing at the root tells an adopter what this is, what it refuses, or how to take it** — An adopting project meets this through a package id and a path into somebody else's tree, so every verb, exit code and refusal decided so far is knowledge nobody wrote down. → §WW154
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+- 📋 **WW159** (deps: —) **the animation check demands every declared state inside a fixed window, and a loaded machine loses one** — The check waits until it has seen every declared state or a deadline passes and names the ones it never saw, because a red about the reader's speed is a red about nothing. → §WW159
+- 📋 **WW160** (deps: —) **sixteen refusals claim a case builds what provokes them, and nothing checks that any such case exists** — Each no-shape entry names the case that provokes it and a check reads the suite for that name, because WW145 already proved a claim held up only by having been written down. → §WW160
+- 📋 **WW161** (deps: —) **a shape that ends in a refusal exits 3, and nothing a person or a case reads says so** — The catalogue prints what each shape exits with, because the code is otherwise learnt by running one and the suite holds a copy of the number instead of reading it. → §WW161
 
 ## Done when — Block A
 
