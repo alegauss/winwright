@@ -349,29 +349,6 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW141 The uncooperative application is nobody's case
-
-Read against this block's second criterion once its last line shipped. It says every
-verb needing no cooperation runs against an application that references nothing, which
-is what keeps this usable on a product nobody here owns. In fact hundreds of cases do
-exactly that - they build a bare Win32 window and drive it - so the criterion holds
-today by accident of how the fixtures were written, and no case anywhere states it.
-
-That is the shape this project keeps closing. A rule met by whoever remembers is met by
-nobody: the day a verb quietly starts reading something only the in-app half provides,
-every one of those hundreds still passes against fixtures that happen to have it, and
-the first person to find out owns a product this cannot drive.
-
-What is wanted is a list and a run over it. The verbs that claim to need no cooperation
-are nameable - resolve, inspect, the pattern acts, the readings - and an application
-referencing nothing is a fixture this suite already knows how to build. Driving the list
-against it in one case makes the claim checkable, and adding a verb to the engine
-without adding it to the list should be the thing that fails.
-
-Its opposite is worth naming in the same breath: the verbs that do need the in-app half
-are a set too, and one that is written down is one an adopter can read before deciding
-what the package buys them.
-
 ### §WW142 A gate with nothing standing in it
 
 The agreement reading has an ExitCode property whose own comment says the difference

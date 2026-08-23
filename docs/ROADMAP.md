@@ -51,7 +51,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 📋 **WW141** (deps: —) **nothing names which verbs need no cooperation, so a verb that starts needing the in-app half goes unnoticed** — The suite drives an application referencing nothing through every verb that claims to need no cooperation, so the claim is a run rather than a memory. → §WW141
 - 📋 **WW142** (deps: —) **the agreement check carries an exit code for a gate and no gate anywhere runs it** — Continuous integration reads the copies of the engine in play and stops on a disagreement, which is the difference between a gate and advice. → §WW142
 
 ## Block J — Adoption — the proof is the deletion
