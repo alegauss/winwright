@@ -2,6 +2,52 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+### §WW149 Two verdicts about different runs
+
+Seen the moment the check became part of the ordinary command. The roll call's entry
+point is exercised directly by the suite - which is right, since the exit codes are the
+thing being asserted - and it writes what it found to the console as it goes. Those
+sentences now appear in the middle of a real run, above the real one.
+
+A reader skimming a failed run sees "4 of 4 were recorded and never ran" and then "all
+957 discovered cases ran", and only the second is about the run they are looking at. The
+first is a fixture answering about four names in a temporary file. This block's
+criterion asks that a degraded run be legible without reading the log, and two
+contradicting verdicts in one output is the opposite of legible.
+
+The entry point should write where the caller says rather than to the console it happens
+to find. A writer passed in, defaulting to the console, costs one parameter and lets the
+cases assert what was written instead of leaking it - a better test as well as a quieter
+run, since nothing today checks the words that reach a reader at all.
+
+Worth keeping in mind for the next tool: anything with a Main that a test calls directly
+will do this, and the reason to fix it here rather than tolerate it is that the
+sentences are about the same subject and differ only in which run they describe.
+
+### §WW150 One directory, however many runs
+
+Filed against the check the moment it stopped being optional. The roll compares a
+discovery listing with a results file, and both now default to one fixed directory at
+the root of the repository. One run is fine. Two are not: a developer running the suite
+while an agent runs it in another shell has both writing discovered.txt and
+winwright.trx, and whichever finishes second reads a listing from one run against
+results from the other.
+
+What comes out of that is a phantom - names discovery found in one run missing from the
+other's results - and the shape of the answer is exactly the shape of a host that died.
+So the check invented to stop a false green would produce a false red, and the reader's
+correct response is to run it again, which is the habit this whole thing exists to
+break.
+
+The repair is a directory per run rather than a lock: a lock makes the second run wait
+for the first, which is slower and still wrong if either is killed. What names it is the
+task's to decide - the process, a stamp, whatever the runner already has - so long as
+two runs started a second apart cannot collide.
+
+Worth noting the check has no way to notice this today. A listing and a results file
+carry nothing that ties them to one run, and if they carried it the mismatch would be a
+refusal rather than a phantom shortfall.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW140 A blip is not a missing assembly

@@ -2,6 +2,9 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+- 📋 **WW149** (deps: —) **the roll call's own tests print roll call verdicts into the run, so the output carries sentences about nothing** — What a run prints about its own completeness is the one the run took, because two of them in the output is a reader acting on the wrong number. → §WW149
+- 📋 **WW150** (deps: —) **two runs on one machine share one results directory, so each roll call reads the other run's files** — A run compares the two files it wrote itself, so a second run in another shell cannot make the first report a shortfall that never happened. → §WW150
+
 ## Block B — Attach, launch, and leave nothing behind
 
 - 📋 **WW140** (deps: —) **one transient COM error from UI Automation reads as a desk that cannot observe anything at all** — The desk tells a machine without the automation assemblies from a call that failed once under load, so a passing suite is not turned red by a blip. → §WW140
