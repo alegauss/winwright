@@ -26,6 +26,30 @@ So what is owed is the join, verb by verb, and a check that a verb answering wit
 recording is a red. Block A empties either way. What it must not do is empty while the
 criterion it declares is met by nobody.
 
+### §WW167 The output nobody reads back
+
+Two of these were found in two days, both by accident. WW149 moved the roll call off the
+console it happened to find, and the finding underneath was that nothing had ever
+checked the words it printed - a tool whose entire output is a sentence somebody acts
+on, with no case asserting any of it. WW153 fixed an agreement report that printed a
+version no file in the tree holds, in a column too narrow to hold it, and that had
+shipped because nothing asserted the report either.
+
+The engine names forty of these across thirty-six types: a Render that answers lines, a
+Sentence that answers one. Some are thoroughly checked. How many are not is unknown, and
+the obvious way of asking is worthless - every one of those thirty-six types is
+referenced by at least one test file, and Agreement was referenced by two while its
+report was asserted by none.
+
+This block's criterion is that a degraded run is legible without reading the log.
+Legible is a property of the text, so a rendering nothing reads back is a criterion held
+up by whoever last looked.
+
+The remedy is the shape this project already uses twice: WW132 paired every refusal with
+what provokes it, and WW145 made the pairing drive a case each. Pair the renderings the
+same way, so the count is arithmetic rather than a promise, and a rendering added later
+starts unasserted and says so.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
