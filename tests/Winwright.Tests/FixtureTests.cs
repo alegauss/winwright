@@ -43,23 +43,7 @@ public sealed class FixtureTests : IDisposable
     /// copy brought the apphost without its assembly, and every launch died at CLR startup with a
     /// number that says nothing about which file was missing.
     /// </summary>
-    private static string Executable()
-    {
-        var here = new DirectoryInfo(AppContext.BaseDirectory);
-        var framework = here.Name;
-        var configuration = here.Parent!.Name;
-
-        var repository = here;
-        while (repository is not null && !File.Exists(Path.Combine(repository.FullName, "Winwright.slnx")))
-            repository = repository.Parent;
-
-        Assert.NotNull(repository);
-        var path = Path.Combine(
-            repository.FullName, "src", "Winwright.Fixture", "bin", configuration, framework, "Winwright.Fixture.exe");
-
-        Assert.True(File.Exists(path), $"the fixture was not built: {path}");
-        return path;
-    }
+    private static string Executable() => Fixture.Executable();
 
     /// <summary>Launch it and wait for the window it draws, which is the only signal worth waiting on.</summary>
     private TopLevelWindow Launched(params string[] flags)

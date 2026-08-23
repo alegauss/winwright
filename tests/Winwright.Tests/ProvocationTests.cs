@@ -22,23 +22,7 @@ namespace Winwright.Tests;
 public sealed class ProvocationTests
 {
     /// <summary>The built fixture, which is where its catalogue is read from.</summary>
-    private static string Executable()
-    {
-        var here = new DirectoryInfo(AppContext.BaseDirectory);
-        var framework = here.Name;
-        var configuration = here.Parent!.Name;
-
-        var repository = here;
-        while (repository is not null && !File.Exists(Path.Combine(repository.FullName, "Winwright.slnx")))
-            repository = repository.Parent;
-
-        Assert.NotNull(repository);
-        var path = Path.Combine(
-            repository.FullName, "src", "Winwright.Fixture", "bin", configuration, framework, "Winwright.Fixture.exe");
-
-        Assert.True(File.Exists(path), $"the fixture was not built: {path}");
-        return path;
-    }
+    private static string Executable() => Fixture.Executable();
 
     [Fact]
     public void Every_refusal_the_framework_names_is_paired_with_something()

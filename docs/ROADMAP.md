@@ -71,7 +71,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW145** (deps: —) **a pairing names the flag that reaches a refusal and nothing checks that the flag reaches it** — Each pairing naming a flag is proved by a case that provokes that refusal through that flag, so the pairing is a run rather than a claim about one. → §WW145
 - 📋 **WW146** (deps: —) **four refusals need a shape the fixture cannot take, so nothing will notice when they stop working** — The fixture grows the four shapes that reach them, because this block says a refusal with no flag is a finding it closes rather than a gap nobody sees. → §WW146
 
 ## Done when — Block A

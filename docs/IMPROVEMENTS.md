@@ -535,30 +535,6 @@ changes an exit code changes this in the same commit.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW145 The pairing is checked one way only
-
-Filed against WW132 the moment it shipped, which is where this kind of gap is cheapest
-to see. The pairing now compares two lists that nobody compared before - the refusals
-the assemblies name against the entries, and the entries against the flags the built
-fixture prints - and both directions are real. The claim in the middle is not checked at
-all.
-
-An entry says --language reaches the unusable-label refusal. What holds that up is that
-somebody wrote it down. Renaming a flag is caught; changing what the flag draws is not,
-and neither is an entry that was wrong when it was written. Three of the four entries
-naming a flag are provoked in the suite by building the situation directly rather than
-by running the fixture with that flag, so the sentence and the evidence are about
-different things.
-
-What closes it is a case per entry: launch the fixture with the flag, drive the thing
-the refusal is about, and assert the refusal. Four today, and the number is small
-because the count of reachable refusals is small - which is the other half of why this
-is worth doing now rather than at forty.
-
-The shape to avoid is a case that catches any exception and calls the pairing proved.
-The refusal type is named in the entry, so the case can insist on that type and nothing
-else, and a refusal arriving for a different reason is a red rather than a pass.
-
 ### §WW146 The four the fixture cannot be
 
 Counted by WW132 and left standing by it. Four refusals need a shape the fixture cannot
