@@ -628,15 +628,14 @@ public sealed class FixtureTests : IDisposable
     {
         var window = Launched("--animate=200");
 
-        var said = Sampled(window, TimeSpan.FromSeconds(3));
-
-        // Read off the window, never typed: an expectation typed into a case is one that goes
-        // stale the day the animation gains a state.
-        var count = Assert.Single(said.Select(one => one.Split(" of ")[1]).Distinct(StringComparer.Ordinal));
-        var declared = int.Parse(count, System.Globalization.CultureInfo.InvariantCulture);
+        // WW159: sampled until the cycle has shown everything rather than for a fixed three
+        // seconds. The count is still read off the window and never typed — an expectation typed
+        // into a case is one that goes stale the day the animation gains a state.
+        var (said, declared) = Cycled(window);
 
         Assert.True(declared > 1, $"an animation of {declared} state(s) is not one");
-        Assert.Equal(declared, said.Select(one => one.Split(' ')[0]).Distinct(StringComparer.Ordinal).Count());
+        Assert.Single(said.Select(one => one.Split(" of ")[1]).Distinct(StringComparer.Ordinal));
+        Assert.Equal(declared, said.Select(Ordinal).Distinct(StringComparer.Ordinal).Count());
     }
 
     [Fact]
@@ -703,17 +702,32 @@ public sealed class FixtureTests : IDisposable
     /// converting it to a deadline would delete the observation.
     /// </para>
     /// </summary>
+    /// <summary>
+    /// What the animation state reads right now, or null where it does not read as one.
+    /// <para>
+    /// WW159. This used to be a walk of the whole tree to depth twelve, per sample, and reading
+    /// another process's tree costs more than a state stands for at two hundred milliseconds — so a
+    /// loaded machine sampled every second or third state and the case went red about an animation
+    /// that was cycling exactly as asked. One locator resolved by automation id is a find and a
+    /// property read, which is what a sampler is entitled to cost.
+    /// </para>
+    /// </summary>
+    private static string? AnimationState(AutomationElement root)
+    {
+        var name = Resolve.Once(root, Locator.Parse("#animationState")).Facts?.Name;
+        return name is not null && name.Contains(" of ", StringComparison.Ordinal) ? name : null;
+    }
+
     private static IReadOnlyList<string> Sampled(TopLevelWindow window, TimeSpan howLong)
     {
+        var root = AutomationElement.FromHandle(window.Handle);
         var said = new List<string>();
         var until = DateTime.UtcNow + howLong;
 
         while (DateTime.UtcNow < until)
         {
-            var tree = Inspect.Window(window.Handle, depth: 12);
-            var state = tree?.Walk().FirstOrDefault(one => one.Facts.AutomationId == "animationState");
-            if (state is not null && state.Facts.Name.Contains(" of ", StringComparison.Ordinal))
-                said.Add(state.Facts.Name);
+            if (AnimationState(root) is { } state)
+                said.Add(state);
 
             Thread.Sleep(30);
         }
@@ -721,6 +735,53 @@ public sealed class FixtureTests : IDisposable
         Assert.NotEmpty(said);
         return said;
     }
+
+    /// <summary>
+    /// Every state the animation showed, sampled until it has shown all of them.
+    /// <para>
+    /// WW159. A fixed window is a race the reader loses on a busy machine, and lengthening it only
+    /// moves which machine loses. This stops when the cycle has shown everything it declares, so
+    /// the fast case costs one cycle and the slow one gets the looks it needs — and where the
+    /// deadline wins it says which states were never seen, which is the difference between a red
+    /// about the fixture and a red about the desk it ran on.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The fixture's window, drawn and animating.</param>
+    private static (IReadOnlyList<string> Said, int Declared) Cycled(TopLevelWindow window)
+    {
+        var root = AutomationElement.FromHandle(window.Handle);
+        var first = Waits.Until("draw", "the fixture never showed an animation state", () => AnimationState(root));
+        var declared = int.Parse(first.Split(" of ")[1], System.Globalization.CultureInfo.InvariantCulture);
+
+        var said = new List<string> { first };
+        var seen = new HashSet<string>(StringComparer.Ordinal) { Ordinal(first) };
+
+        var waited = Waits.Trying("cycle", () =>
+        {
+            if (AnimationState(root) is { } now)
+            {
+                said.Add(now);
+                seen.Add(Ordinal(now));
+            }
+
+            return seen.Count >= declared;
+        });
+
+        var never = Enumerable.Range(1, declared)
+            .Select(one => one.ToString(System.Globalization.CultureInfo.InvariantCulture))
+            .Where(one => !seen.Contains(one))
+            .ToList();
+
+        Assert.True(
+            never.Count == 0,
+            $"the animation showed {seen.Count} of {declared} state(s) over {waited.Polls} look(s) in "
+                + $"{waited.WaitedMs}ms, and never showed: {string.Join(", ", never)}");
+
+        return (said, declared);
+    }
+
+    /// <summary>Which state a reading is, out of the "n of m" the window announces itself with.</summary>
+    private static string Ordinal(string said) => said.Split(' ')[0];
 
     /// <summary>The samples with the repeats removed, which is the sequence rather than the poll.</summary>
     private static IReadOnlyList<string> Changes(IReadOnlyList<string> sampled)

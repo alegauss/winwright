@@ -375,26 +375,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW159 The animation check is a race, and a loaded desk loses it
-
-Measured while closing WW146: the case ran three times alone on the host and passed, ran
-once on a loaded host and saw four of five states, and ran in the VMware guest and saw
-three. Nothing in it had changed, and neither had the fixture.
-
-The check samples the window for three seconds and asserts that the number of distinct
-states it saw equals the number the window declares. At two hundred milliseconds a state
-that is fifteen states inside the window and five distinct ones, which is generous right
-up until the reading is slower than the state. Reading another process's automation tree
-costs more than a state stands for at that speed - the sibling case says exactly that in
-its own comment, and uses five hundred milliseconds for the reason.
-
-So the failure is about the reader and not about the animation, and a red naming the
-animation sends somebody to the wrong file. A longer window is not the fix: it only
-moves which machine loses. The check waits until it has seen every declared state or a
-deadline passes, and says which states it never saw where the deadline wins. That turns
-a race into a deadline on a named condition, which is what WW143 did to every other wait
-in this suite.
-
 ### §WW160 The half of the pairing nobody drives
 
 WW132 paired every refusal the framework names with the flag that provokes it or the

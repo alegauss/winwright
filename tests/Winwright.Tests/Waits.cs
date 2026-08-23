@@ -52,6 +52,12 @@ internal static class Waits
             // A menu letting go of the desk after Escape.
             ["dismiss"] = 1500,
 
+            // WW159. An animation showing every state it declares. Long, and deliberately: the
+            // check stops the moment it has seen them all, so this is only ever paid by a machine
+            // slow enough to need it — and the alternative was a fixed window that a loaded desk
+            // lost, which reds about an animation that was cycling exactly as asked.
+            ["cycle"] = 8000,
+
             // The desktop changing hands, which Windows does asynchronously and not always.
             ["desktop"] = 500,
         },
