@@ -231,6 +231,29 @@ which is the argument every other image comparison eventually turns into.
 
 ## Block F — Assert — the expectation is derived, never typed
 
+### §WW151 A fingerprint nobody takes
+
+Read against this block's criterion once its last line shipped. The criterion says the
+fingerprint taken before the run matches the one taken after, on every scenario,
+including the ones that drive a real setting. The type that takes a fingerprint exists,
+it is thorough, and outside its own tests nothing calls it.
+
+So the claim holds exactly as often as an author remembers to write both halves, and the
+half that gets forgotten is the second one - the run is over, the assertions passed, and
+nobody is looking. A settings file rewritten to the same length is the accident the
+whole type was built for, and it is invisible unless somebody asked twice.
+
+The place is decided now in a way it was not when this was filed. The preamble carries
+findings beside its conditions, and a store that changed is exactly a finding: not a
+failure of the scenario, since the application did what it was driven to do, and not a
+precondition either, since nothing may be excused by it. The before reading belongs
+where the run describes the machine and the after reading beside it.
+
+What must stay true is the difference between the two absences. A run that took no
+fingerprint because the project declared no store is a run with nothing to say; a run
+that took one and found it moved is a run with something to say. Reporting them the same
+way is the shape this project keeps refusing.
+
 ## Block G — The scenario — a case is a data file
 
 ### §WW57 A case is data

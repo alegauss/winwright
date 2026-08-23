@@ -30,6 +30,8 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
+- 📋 **WW151** (deps: —) **nothing a run calls takes the store fingerprint, so leaving the machine as it was is met by whoever remembers** — A run takes the fingerprint itself and reports the two readings, so a scenario that changed a setting says so without anybody having asked it to. → §WW151
+
 ## Block G — The scenario — a case is a data file
 
 - 📋 **WW57** (deps: Block A, Block C, Block D) **a case is two hundred lines of script that mostly repeats the previous case** — A case is a data file: steps, locators, acts and expectations as fields, with the loop, the waits and the verdicts owned by the engine instead of by the author. → §WW57
