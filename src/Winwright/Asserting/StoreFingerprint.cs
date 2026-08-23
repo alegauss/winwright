@@ -35,6 +35,12 @@ public sealed class StoreTouchedException : InvalidOperationException
 public sealed record StoreChange(
     IReadOnlyList<string> Appeared, IReadOnlyList<string> Gone, IReadOnlyList<string> Changed)
 {
+    /// <summary>
+    /// What this reading is called wherever it is reported. One spelling, because a run's preamble
+    /// and a run's verdict naming it two ways are two things a reader has to match up by hand.
+    /// </summary>
+    public const string Named = "the run leaves the machine as it found it";
+
     /// <summary>Whether the run left the machine as it found it.</summary>
     public bool Untouched => Appeared.Count == 0 && Gone.Count == 0 && Changed.Count == 0;
 
@@ -64,7 +70,7 @@ public sealed record StoreChange(
     }
 
     /// <summary>The result a verdict counts, carrying that sentence as its detail.</summary>
-    public AssertionResult AsAssertion(string named = "the run leaves the machine as it found it") =>
+    public AssertionResult AsAssertion(string named = Named) =>
         Untouched ? AssertionResult.Pass(named, Sentence()) : AssertionResult.Fail(named, Sentence());
 
     private static string Listed(IReadOnlyList<string> what) => string.Join(", ", what);
@@ -89,10 +95,19 @@ public sealed record StoreChange(
 /// </summary>
 public sealed record StoreFingerprint
 {
-    private StoreFingerprint(IReadOnlyDictionary<string, string?> entries, IReadOnlyList<string> watched)
+    private readonly IReadOnlyList<string> paths;
+    private readonly IReadOnlyList<string> environment;
+
+    private StoreFingerprint(
+        IReadOnlyDictionary<string, string?> entries,
+        IReadOnlyList<string> watched,
+        IReadOnlyList<string> paths,
+        IReadOnlyList<string> environment)
     {
         Entries = entries;
         Watched = watched;
+        this.paths = paths;
+        this.environment = environment;
     }
 
     /// <summary>Every thing that was read, against its digest — null where it was not there.</summary>
@@ -159,8 +174,22 @@ public sealed record StoreFingerprint
         }
 
         return new StoreFingerprint(
-            new ReadOnlyDictionary<string, string?>(entries), new ReadOnlyCollection<string>(watched));
+            new ReadOnlyDictionary<string, string?>(entries),
+            new ReadOnlyCollection<string>(watched),
+            new ReadOnlyCollection<string>([.. paths]),
+            new ReadOnlyCollection<string>([.. environment]));
     }
+
+    /// <summary>
+    /// Read the same things again.
+    /// <para>
+    /// WW151. The one call that cannot compare a reading of one list against a reading of another,
+    /// which is what every caller spelling both readings out is one edit away from doing — and the
+    /// resulting change is a file that appeared or went, which is to say a report of a run dirtying
+    /// a machine it never touched.
+    /// </para>
+    /// </summary>
+    public StoreFingerprint Again() => Of(paths, environment);
 
     /// <summary>What moved between this reading and <paramref name="after"/>.</summary>
     public StoreChange Against(StoreFingerprint after)
@@ -235,7 +264,11 @@ public static class Untouched
 
         var before = StoreFingerprint.Of(paths, environment);
         run();
-        return before.Against(StoreFingerprint.Of(paths, environment));
+
+        // Asked to read itself again rather than spelled a second time: the two lists here are one
+        // edit away from being different lists, and a comparison across those reports a run
+        // dirtying a machine it never touched.
+        return before.Against(before.Again());
     }
 
     /// <summary>

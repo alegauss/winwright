@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 
+using Winwright.Asserting;
 using Winwright.Processes;
 using Winwright.Projects;
 using Winwright.Windowing;
@@ -34,12 +35,26 @@ public sealed record Measured(string Name, Precondition? Condition, string Sente
 /// </para>
 /// </summary>
 /// <param name="Named">What was read.</param>
-/// <param name="Holds">Whether what the file said is what the application says.</param>
-/// <param name="Sentence">The reading, in the line a preamble prints.</param>
-public sealed record Finding(string Named, bool Holds, string Sentence)
+/// <param name="Holds">
+/// Whether what the file said is what the application says, and null where this run could not read
+/// it at all.
+/// <para>
+/// WW151. The third state is the one the store reading needed: a run that took no fingerprint
+/// because no project declared a store has nothing to say, and a run that took one and found it
+/// moved has something to say. Reporting them the same way is the shape this project keeps
+/// refusing, and two states could only ever report them the same way.
+/// </para>
+/// </param>
+/// <param name="Sentence">The reading, or why it was not taken.</param>
+public sealed record Finding(string Named, bool? Holds, string Sentence)
 {
+    /// <summary>Whether this run read it at all.</summary>
+    public bool Was => Holds is not null;
+
     /// <summary>The one line the preamble shows.</summary>
-    public override string ToString() => $"  {(Holds ? "agrees  " : "differs ")}{Named}: {Sentence}";
+    public override string ToString() => Was
+        ? $"  {(Holds == true ? "agrees  " : "differs ")}{Named}: {Sentence}"
+        : $"  not read {Named}: {Sentence}";
 }
 
 /// <summary>
@@ -65,11 +80,18 @@ public sealed record Finding(string Named, bool Holds, string Sentence)
 /// </summary>
 public sealed record Preamble
 {
-    private Preamble(Desk machine, IReadOnlyList<Measured> measurements, IReadOnlyList<Finding> findings)
+    private Preamble(
+        Desk machine,
+        IReadOnlyList<Measured> measurements,
+        IReadOnlyList<Finding> findings,
+        StoreFingerprint? store,
+        string storeAbsence)
     {
         Machine = machine;
         Measurements = measurements;
         Findings = findings;
+        Store = store;
+        StoreAbsence = storeAbsence;
     }
 
     /// <summary>
@@ -92,9 +114,60 @@ public sealed record Preamble
     /// </summary>
     public IReadOnlyList<Finding> Findings { get; }
 
+    /// <summary>
+    /// The store as it read before the run, or null where no project declared one to fingerprint.
+    /// <para>
+    /// WW151. Taken here rather than by whoever remembers, which is what this block's criterion
+    /// asked for and what nothing did: the type that takes a fingerprint is thorough and outside
+    /// its own tests nothing called it, so the promise held exactly as often as an author wrote
+    /// both halves — and the half that gets forgotten is the second one, when the run is over, the
+    /// assertions passed and nobody is looking.
+    /// </para>
+    /// </summary>
+    public StoreFingerprint? Store { get; }
+
+    /// <summary>Why no fingerprint was taken, where none was. Empty where one was.</summary>
+    public string StoreAbsence { get; }
+
     /// <summary>The findings the application disagrees with.</summary>
     public IReadOnlyList<Finding> Differing => new ReadOnlyCollection<Finding>(
-        Findings.Where(one => !one.Holds).ToList());
+        Findings.Where(one => one.Holds == false).ToList());
+
+    /// <summary>The findings this run could not read at all.</summary>
+    public IReadOnlyList<Finding> Unfound => new ReadOnlyCollection<Finding>(
+        Findings.Where(one => !one.Was).ToList());
+
+    /// <summary>
+    /// Read the store again and answer what moved, as a finding to be joined with
+    /// <see cref="Including" />.
+    /// <para>
+    /// A finding and not an assertion: the application did what it was driven to do, so nothing
+    /// failed. A finding and not a precondition either: nothing may be excused by it. What it is is
+    /// a thing a reader has to be told, and the whole defect was that nobody was.
+    /// </para>
+    /// <para>
+    /// Where no store was declared this answers a reading that was not taken, which is a different
+    /// sentence from one taken and clean. A run with nothing to say and a run with something to say
+    /// are not reported the same way.
+    /// </para>
+    /// </summary>
+    public Finding LeftAsFound()
+    {
+        if (Store is null)
+            return new Finding(StoreChange.Named, null, StoreAbsence);
+
+        try
+        {
+            // Asked to read itself again, so the after reading cannot be of a different list than
+            // the before one — a comparison across two lists reports files appearing and going.
+            var change = Store.Against(Store.Again());
+            return new Finding(StoreChange.Named, change.Untouched, change.Sentence());
+        }
+        catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
+        {
+            return new Finding(StoreChange.Named, null, $"the store could not be read again: {unreadable.Message}");
+        }
+    }
 
     /// <summary>
     /// The same reading, carrying what was read about the declarations too.
@@ -111,7 +184,9 @@ public sealed record Preamble
         return new Preamble(
             Machine,
             Measurements,
-            new ReadOnlyCollection<Finding>([.. Findings, .. findings.Where(one => one is not null)]));
+            new ReadOnlyCollection<Finding>([.. Findings, .. findings.Where(one => one is not null)]),
+            Store,
+            StoreAbsence);
     }
 
     /// <summary>
@@ -208,7 +283,35 @@ public sealed record Preamble
         var alone = ForeignInput.Read();
         taken.Add(new Measured(ForeignInput.PreconditionName, alone.AsPrecondition(), alone.Sentence()));
 
-        return new Preamble(machine, new ReadOnlyCollection<Measured>(taken), new ReadOnlyCollection<Finding>([]));
+        // WW151. The before reading, taken here for the reason every other reading is taken here: a
+        // reading reached by its own call is one a runner is free to forget, and this is the one
+        // that gets forgotten, because its other half falls due when the run is already over.
+        var (store, absence) = Fingerprinted(declaration);
+
+        return new Preamble(
+            machine, new ReadOnlyCollection<Measured>(taken), new ReadOnlyCollection<Finding>([]), store, absence);
+    }
+
+    /// <summary>
+    /// The store as it reads now, or why it was not read. Never thrown from: a project that
+    /// declared no store is an ordinary project, and a store this run cannot read is a fact about
+    /// the machine rather than an error in the run.
+    /// </summary>
+    /// <param name="declaration">The project, where one was loaded.</param>
+    private static (StoreFingerprint? Store, string Absence) Fingerprinted(ProjectDeclaration? declaration)
+    {
+        if (declaration is null || !declaration.Declares("fingerprintStore"))
+            return (null, "no project declared a store this run must leave as it found it");
+
+        try
+        {
+            return (StoreFingerprint.Of([declaration.FingerprintStore], []), "");
+        }
+        catch (Exception unreadable)
+            when (unreadable is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return (null, $"the declared store could not be read: {unreadable.Message}");
+        }
     }
 
     /// <summary>The preamble a summary opens with: one line per measurement, taken or not.</summary>
@@ -225,10 +328,21 @@ public sealed record Preamble
     {
         // A finding never makes the machine unclear and is never left out of the sentence either:
         // absent and checked read the same to whoever skims, which is the whole reason it is here.
-        var found = Differing.Count == 0
-            ? ""
-            : $" {Differing.Count} of {Findings.Count} declared reading(s) differ from the application: "
-                + string.Join("; ", Differing.Select(one => one.Sentence));
+        var about = new List<string>();
+        if (Differing.Count > 0)
+        {
+            about.Add(
+                $"{Differing.Count} of {Findings.Count - Unfound.Count} declared reading(s) differ from the "
+                    + $"application: {string.Join("; ", Differing.Select(one => one.Sentence))}");
+        }
+
+        // WW151: and a reading nobody took is said as well, for the reason the not-read measurements
+        // are. A run with nothing to say and a run with something to say are different runs, and a
+        // sentence that mentions neither reads as the second one.
+        if (Unfound.Count > 0)
+            about.Add($"{Unfound.Count} reading(s) not taken: {string.Join(", ", Unfound.Select(one => one.Named))}");
+
+        var found = about.Count == 0 ? "" : " " + string.Join(" ", about);
 
         if (Clear)
             return $"this run measured all {Measurements.Count} conditions and every one of them held.{found}";

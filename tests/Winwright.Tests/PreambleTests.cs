@@ -1,5 +1,6 @@
 using System.Diagnostics;
 
+using Winwright.Asserting;
 using Winwright.Processes;
 using Winwright.Projects;
 using Winwright.Verdicts;
@@ -164,11 +165,83 @@ public sealed class PreambleTests : IDisposable
         Assert.Throws<ArgumentException>(() => read.Find(" "));
     }
 
+    [Fact]
+    public void A_run_with_no_store_declared_says_it_took_no_fingerprint_rather_than_nothing()
+    {
+        // WW151, and the half that is easy to get wrong. A run that took no fingerprint because no
+        // project declared a store has nothing to say; a run that took one and found it clean has
+        // something to say. Reporting them the same way is the shape this project keeps refusing.
+        var read = Preamble.Of(Attached());
+
+        Assert.Null(read.Store);
+        var finding = read.LeftAsFound();
+
+        Assert.False(finding.Was);
+        Assert.Null(finding.Holds);
+        Assert.Contains("no project declared a store", finding.Sentence, StringComparison.Ordinal);
+        Assert.StartsWith("  not read ", finding.ToString(), StringComparison.Ordinal);
+
+        // And it reaches the one line a reader skims, not only the line-per-finding list below it.
+        var joined = read.Including(finding);
+        Assert.Contains("1 reading(s) not taken", joined.Sentence(), StringComparison.Ordinal);
+        Assert.Contains(joined.Render(), one => one.StartsWith("  not read " + StoreChange.Named, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void A_run_that_left_the_declared_store_alone_says_so_without_being_asked()
+    {
+        // The fingerprint is taken by the reading every run takes, so nothing here calls for it —
+        // which is the whole task: the promise used to hold exactly as often as an author wrote
+        // both halves, and the forgotten half is the second one.
+        var read = Preamble.Of(Attached(), Declared());
+
+        Assert.NotNull(read.Store);
+        Assert.Equal("", read.StoreAbsence);
+
+        var finding = read.LeftAsFound();
+
+        Assert.True(finding.Holds, finding.Sentence);
+        Assert.Contains("left the machine as it found it", finding.Sentence, StringComparison.Ordinal);
+        Assert.StartsWith("  agrees  ", finding.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_run_that_rewrote_a_setting_is_a_finding_and_never_a_failed_assertion()
+    {
+        // The accident the whole type was built for: the same number of bytes and a different
+        // machine. It is not a failure — the application did what it was driven to do — and not a
+        // precondition either, since nothing may be excused by it.
+        var declaration = Declared();
+        var read = Preamble.Of(Attached(), declaration);
+        Assert.NotNull(read.Store);
+
+        var settings = Path.Combine(declaration.FingerprintStore, "settings.json");
+        var was = File.ReadAllText(settings);
+        File.WriteAllText(settings, was.Replace("alpha", "gamma", StringComparison.Ordinal));
+        Assert.Equal(was.Length, File.ReadAllText(settings).Length);
+
+        var finding = read.LeftAsFound();
+
+        Assert.False(finding.Holds);
+        Assert.Contains("changed the machine of whoever ran it", finding.Sentence, StringComparison.Ordinal);
+        Assert.Contains("settings.json", finding.Sentence, StringComparison.Ordinal);
+
+        // A finding, so it never excuses an assertion and never enters the condition set.
+        var joined = read.Including(finding);
+        Assert.DoesNotContain(joined.Conditions, one => one.Name == StoreChange.Named);
+        Assert.Contains(joined.Differing, one => one.Named == StoreChange.Named);
+    }
+
     /// <summary>A project declaring enough for the measurements that need one.</summary>
     private ProjectDeclaration Declared()
     {
         var strings = Path.Combine(root, "strings.en.json");
         File.WriteAllText(strings, """{ "tabs": { "report": "Report" } }""");
+
+        // WW151: a store of this case's own, so the fingerprint has something real to read and
+        // nothing anybody owns is at risk of being read, let alone reported as moved.
+        var store = Directory.CreateDirectory(Path.Combine(root, "store")).FullName;
+        File.WriteAllText(Path.Combine(store, "settings.json"), """{ "profile": "alpha" }""");
 
         var path = Path.Combine(root, "winwright.json");
         File.WriteAllText(
@@ -177,6 +250,7 @@ public sealed class PreambleTests : IDisposable
             {
               "executable": {{System.Text.Json.JsonSerializer.Serialize(Environment.ProcessPath)}},
               "sourceRoot": {{System.Text.Json.JsonSerializer.Serialize(root)}},
+              "fingerprintStore": {{System.Text.Json.JsonSerializer.Serialize(store)}},
               "languageFiles": [{{System.Text.Json.JsonSerializer.Serialize(strings)}}]
             }
             """);

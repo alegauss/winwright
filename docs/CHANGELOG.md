@@ -102,6 +102,7 @@
 - ✅ **WW130** **an element collapsed on purpose is reported as laid out and occupying nothing** — The dump carries what the application set and the check leaves an element it is not showing alone, counting it in the sentence — which removed every such fault from the fixture's own window.
 - ✅ **WW131** **a themed control's own chrome is reported as laid out outside the thing containing it** — The dump says who put each element there and the reading keeps a framework template's own faults apart, which left the fixture's window one finding about elements it declared instead of five.
 - ✅ **WW139** **a comment key in a strings file joins the derived set, so the expectation demands a window shows the comment** — A derivation leaves out the keys that are notes rather than strings, and names how many of each reason it left out in the source sentence every verdict prints.
+- ✅ **WW151** **nothing a run calls takes the store fingerprint, so leaving the machine as it was is met by whoever remembers** — The run's own reading takes the fingerprint and reports what moved as a finding, so a scenario that changed a setting says so and one that declared no store says that instead of nothing.
 
 ## Block G — The scenario — a case is a data file
 

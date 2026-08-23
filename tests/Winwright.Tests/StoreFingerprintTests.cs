@@ -186,6 +186,36 @@ public sealed class StoreFingerprintTests : IDisposable
         Assert.Equal(AssertionOutcome.Failed, dirty.Outcome);
         Assert.Contains("settings.json", dirty.Detail);
         Assert.Equal(AssertionOutcome.Passed, clean.Outcome);
-        Assert.Equal("the run leaves the machine as it found it", clean.Name);
+        Assert.Equal(StoreChange.Named, clean.Name);
+    }
+
+    [Fact]
+    public void A_reading_can_be_taken_again_of_exactly_what_it_read()
+    {
+        // WW151. Every caller spelling both readings out is one edit away from comparing a reading
+        // of one list against a reading of another, and what comes out of that is files appearing
+        // and going — a report of a run dirtying a machine it never touched.
+        var file = Settings();
+        var before = StoreFingerprint.Of([file], ["PATH"]);
+
+        var again = before.Again();
+
+        Assert.Equal(before.Watched, again.Watched);
+        Assert.True(before.Against(again).Untouched, before.Against(again).Sentence());
+
+        // And it is a reading and not a copy: what the file says now is what it reports now.
+        File.WriteAllText(file, "{ \"profile\": \"gamma\" }");
+        Assert.Equal([file], before.Against(before.Again()).Changed);
+    }
+
+    [Fact]
+    public void An_environment_variable_survives_being_read_again_as_a_variable()
+    {
+        // The one the merged list could not have carried: %PATH% read back as a path would be a
+        // file nobody has, so the second reading would call it gone.
+        var before = StoreFingerprint.Of([], ["PATH"]);
+
+        Assert.True(before.Against(before.Again()).Untouched);
+        Assert.Equal(["%PATH%"], before.Again().Watched);
     }
 }
