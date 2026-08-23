@@ -4,6 +4,16 @@ using System.Xml.Linq;
 
 namespace Winwright.RollCall;
 
+/// <summary>One case a run wrote down, and whether writing it down meant running it.</summary>
+/// <param name="Name">The case, as the results file spells it.</param>
+/// <param name="Outcome">What the run called it — Passed, Failed, NotExecuted.</param>
+/// <param name="Ran">Whether it executed at all.</param>
+public sealed record Recorded(string Name, string Outcome, bool Ran)
+{
+    /// <summary>The one line a report names it by.</summary>
+    public override string ToString() => Ran ? Name : $"{Name} ({Outcome})";
+}
+
 /// <summary>
 /// Reading the two lists this check compares.
 /// <para>
@@ -59,7 +69,28 @@ public static class Readers
     }
 
     /// <summary>
-    /// The names a run recorded a result for, in the order they finished.
+    /// The outcomes that mean a case was written down and never executed.
+    /// <para>
+    /// WW137. A deliberate skip, or a case the runner listed and then abandoned. Both are recorded
+    /// and neither ran, and counting them as answers is the founding defect one level in: a run
+    /// where every name is present and twenty-two say NotExecuted reads as a pass for exactly the
+    /// reason 352 of 374 did — a number that agrees, and nobody asking what it is a number of.
+    /// </para>
+    /// <para>
+    /// Named rather than derived from a list of the ones that did run: an outcome this reader has
+    /// never heard of counts as having run, which keeps it reporting rather than excusing.
+    /// </para>
+    /// </summary>
+    private static readonly HashSet<string> NeverRan = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "NotExecuted",
+        "NotRunnable",
+        "Pending",
+        "Disconnected",
+    };
+
+    /// <summary>
+    /// Every case a run recorded, in the order they finished, each saying whether it ran.
     /// <para>
     /// Ordered by when each ended rather than by where it sits in the file: what the roll wants
     /// from this list is which name answered last, and the document's order is the runner's
@@ -68,7 +99,7 @@ public static class Readers
     /// </summary>
     /// <param name="trx">The results file.</param>
     /// <exception cref="InvalidDataException">Where the file is not a results document.</exception>
-    public static IReadOnlyList<string> AnsweredIn(string trx)
+    public static IReadOnlyList<Recorded> RecordedIn(string trx)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(trx);
 
@@ -92,13 +123,14 @@ public static class Readers
             .Where(node => node.Name.LocalName == "UnitTestResult")
             .Select(node => (
                 Name: (string?)node.Attribute("testName"),
+                Outcome: (string?)node.Attribute("outcome") ?? "",
                 Ended: Moment((string?)node.Attribute("endTime"))))
             .Where(one => !string.IsNullOrWhiteSpace(one.Name))
             .OrderBy(one => one.Ended)
-            .Select(one => one.Name!.Trim())
+            .Select(one => new Recorded(one.Name!.Trim(), one.Outcome.Trim(), !NeverRan.Contains(one.Outcome.Trim())))
             .ToList();
 
-        return new ReadOnlyCollection<string>(results);
+        return new ReadOnlyCollection<Recorded>(results);
     }
 
     private static DateTimeOffset Moment(string? written) =>

@@ -54,7 +54,7 @@ public static class Program
         Roll roll;
         try
         {
-            roll = Roll.Of(Readers.DiscoveredIn(listing), Readers.AnsweredIn(results));
+            roll = Roll.Of(Readers.DiscoveredIn(listing), Readers.RecordedIn(results));
         }
         catch (Exception unreadable) when (unreadable is IOException or InvalidDataException or UnauthorizedAccessException)
         {
@@ -64,10 +64,11 @@ public static class Program
             return Unreadable;
         }
 
-        var complete = roll.Complete && roll.Unexpected.Count == 0 && roll.Discovered.Count > 0;
+        // Asked rather than restated. This used to spell the rule again here, and when the roll
+        // learned that a recorded skip is not an answer, the exit code went on saying it was.
         foreach (var line in roll.Render(most))
-            (complete ? Console.Out : Console.Error).WriteLine(line);
+            (roll.Whole ? Console.Out : Console.Error).WriteLine(line);
 
-        return complete ? 0 : Short;
+        return roll.Whole ? 0 : Short;
     }
 }

@@ -2,21 +2,33 @@ using System.Collections.ObjectModel;
 
 namespace Winwright.RollCall;
 
-/// <summary>One test method, with how many of its cases were found and how many answered.</summary>
+/// <summary>One test method, with how many of its cases were found, ran, and were only written down.</summary>
 /// <param name="Method">The test, without its arguments.</param>
 /// <param name="Discovered">How many cases discovery found.</param>
-/// <param name="Answered">How many the run recorded a result for.</param>
-public sealed record Attendance(string Method, int Discovered, int Answered)
+/// <param name="Ran">How many actually executed.</param>
+/// <param name="Skipped">
+/// How many the run recorded and never executed. WW137 - a recorded skip and an executed pass are
+/// different facts, and a check that adds them is the check being replaced.
+/// </param>
+public sealed record Attendance(string Method, int Discovered, int Ran, int Skipped = 0)
 {
-    /// <summary>How many were found and never answered. Negative where more answered than were found.</summary>
-    public int Absent => Discovered - Answered;
+    /// <summary>How many were found and never written down at all, which is a run that lost them.</summary>
+    public int Absent => Math.Max(0, Discovered - Ran - Skipped);
+
+    /// <summary>How many answers this method owes, whichever way it failed to give them.</summary>
+    public int Short => Absent + Skipped;
 
     /// <summary>The one line a report names it by.</summary>
-    public override string ToString() => Answered == 0
-        ? $"{Method} never ran ({Cases(Discovered)})"
-        : Discovered == 0
-            ? $"{Method} answered {Cases(Answered)} that discovery never found"
-            : $"{Method} ran {Answered} of {Cases(Discovered)}";
+    public override string ToString()
+    {
+        if (Discovered == 0)
+            return $"{Method} answered {Cases(Ran + Skipped)} that discovery never found";
+
+        var kept = Skipped == 0 ? "" : $", {Skipped} recorded without running";
+        return Ran == 0 && Skipped == 0
+            ? $"{Method} never ran ({Cases(Discovered)})"
+            : $"{Method} ran {Ran} of {Cases(Discovered)}{kept}";
+    }
 
     private static string Cases(int many) => $"{many} case{(many == 1 ? "" : "s")}";
 }
@@ -44,6 +56,13 @@ public sealed record Attendance(string Method, int Discovered, int Answered)
 /// a method that answered three of four.
 /// </para>
 /// <para>
+/// WW137: and it counts answers rather than names. A results file records an outcome for each case
+/// and NotExecuted is among them — a deliberate skip, or one the runner listed and abandoned. Both
+/// are recorded and neither ran, so counting them as answers would let a run where every name is
+/// present and twenty-two say NotExecuted read as whole, for exactly the reason 352 of 374 did.
+/// They are kept on their own line: a recorded skip and an executed pass are different facts.
+/// </para>
+/// <para>
 /// Nothing here diagnoses the crash. A fatal error has no managed stack to read, and the last name
 /// that answered is the whole of what can honestly be said about where it stopped. What this
 /// refuses to do is call the result a pass.
@@ -53,14 +72,16 @@ public sealed record Roll
 {
     private Roll(
         IReadOnlyList<string> discovered,
-        IReadOnlyList<string> answered,
+        IReadOnlyList<Recorded> recorded,
         IReadOnlyList<Attendance> missing,
+        IReadOnlyList<Attendance> skipping,
         IReadOnlyList<Attendance> unexpected,
         string? lastAnswered)
     {
         Discovered = discovered;
-        Answered = answered;
+        Recorded = recorded;
         Missing = missing;
+        Skipping = skipping;
         Unexpected = unexpected;
         LastAnswered = lastAnswered;
     }
@@ -68,11 +89,21 @@ public sealed record Roll
     /// <summary>Every case discovery found, in the order it found them.</summary>
     public IReadOnlyList<string> Discovered { get; }
 
-    /// <summary>Every case the run recorded a result for, in the order they finished.</summary>
-    public IReadOnlyList<string> Answered { get; }
+    /// <summary>Every case the run wrote down, in the order they finished, ran or not.</summary>
+    public IReadOnlyList<Recorded> Recorded { get; }
 
-    /// <summary>The methods that answered with fewer cases than were found, in discovery order.</summary>
+    /// <summary>Every case that actually executed.</summary>
+    public IReadOnlyList<Recorded> Answered => new ReadOnlyCollection<Recorded>(
+        Recorded.Where(one => one.Ran).ToList());
+
+    /// <summary>The methods with cases discovery found and the run never wrote down.</summary>
     public IReadOnlyList<Attendance> Missing { get; }
+
+    /// <summary>
+    /// The methods with cases the run wrote down and never executed. Their own list, because a
+    /// skip and a lost host are different things and a reader's next move differs for each.
+    /// </summary>
+    public IReadOnlyList<Attendance> Skipping { get; }
 
     /// <summary>The methods that answered with more cases than were found, or with none found at all.</summary>
     public IReadOnlyList<Attendance> Unexpected { get; }
@@ -83,14 +114,18 @@ public sealed record Roll
     /// </summary>
     public string? LastAnswered { get; }
 
-    /// <summary>How many cases were found and never answered.</summary>
+    /// <summary>How many cases were found and never written down.</summary>
     public int Absent => Missing.Sum(one => one.Absent);
 
-    /// <summary>Whether everybody who was discovered answered.</summary>
+    /// <summary>How many were written down and never executed.</summary>
+    public int Skipped => Skipping.Sum(one => one.Skipped);
+
+    /// <summary>Whether everybody who was discovered was written down.</summary>
     public bool Complete => Missing.Count == 0;
 
     /// <summary>Whether this is a run that may be called a pass at all.</summary>
-    public bool Whole => Complete && Unexpected.Count == 0 && Discovered.Count > 0;
+    public bool Whole =>
+        Complete && Skipping.Count == 0 && Unexpected.Count == 0 && Discovered.Count > 0;
 
     /// <summary>
     /// Take the roll.
@@ -101,39 +136,55 @@ public sealed record Roll
     /// </para>
     /// </summary>
     /// <param name="discovered">The cases discovery reported.</param>
-    /// <param name="answered">The cases the run recorded a result for.</param>
-    public static Roll Of(IEnumerable<string> discovered, IEnumerable<string> answered)
+    /// <param name="recorded">The cases the run wrote down, each saying whether it ran.</param>
+    public static Roll Of(IEnumerable<string> discovered, IEnumerable<Recorded> recorded)
     {
         ArgumentNullException.ThrowIfNull(discovered);
-        ArgumentNullException.ThrowIfNull(answered);
+        ArgumentNullException.ThrowIfNull(recorded);
 
         var found = Named(discovered);
-        var ran = Named(answered);
+        var written = recorded
+            .Where(one => one is not null && !string.IsNullOrWhiteSpace(one.Name))
+            .Select(one => one with { Name = one.Name.Trim() })
+            .ToList();
 
         var foundBy = Counted(found);
-        var ranBy = Counted(ran);
+        var ranBy = Counted(written.Where(one => one.Ran).Select(one => one.Name));
+        var skippedBy = Counted(written.Where(one => !one.Ran).Select(one => one.Name));
 
         var missing = new List<Attendance>();
+        var skipping = new List<Attendance>();
         foreach (var method in found.Select(Method).Distinct(StringComparer.Ordinal))
         {
             var was = foundBy[method];
             var came = ranBy.GetValueOrDefault(method);
-            if (came < was)
-                missing.Add(new Attendance(method, was, came));
+            var kept = skippedBy.GetValueOrDefault(method);
+            var attendance = new Attendance(method, was, came, kept);
+
+            if (attendance.Absent > 0)
+                missing.Add(attendance);
+
+            if (kept > 0)
+                skipping.Add(attendance);
         }
 
-        var unexpected = ranBy
-            .Where(one => one.Value > foundBy.GetValueOrDefault(one.Key))
-            .Select(one => new Attendance(one.Key, foundBy.GetValueOrDefault(one.Key), one.Value))
+        var everyMethod = ranBy.Keys.Concat(skippedBy.Keys).Distinct(StringComparer.Ordinal);
+        var unexpected = everyMethod
+            .Select(one => new Attendance(
+                one, foundBy.GetValueOrDefault(one), ranBy.GetValueOrDefault(one), skippedBy.GetValueOrDefault(one)))
+            .Where(one => one.Ran + one.Skipped > one.Discovered)
             .OrderBy(one => one.Method, StringComparer.Ordinal)
             .ToList();
 
+        var answered = written.Where(one => one.Ran).ToList();
+
         return new Roll(
             found,
-            ran,
+            new ReadOnlyCollection<Recorded>(written),
             new ReadOnlyCollection<Attendance>(missing),
+            new ReadOnlyCollection<Attendance>(skipping),
             new ReadOnlyCollection<Attendance>(unexpected),
-            ran.Count == 0 ? null : ran[^1]);
+            answered.Count == 0 ? null : answered[^1].Name);
     }
 
     /// <summary>What the roll found, in the one sentence a reader skims.</summary>
@@ -143,15 +194,20 @@ public sealed record Roll
             return "discovery found no test at all, which is not a suite that passed.";
 
         if (Whole)
-            return $"all {Discovered.Count} discovered cases answered.";
+            return $"all {Discovered.Count} discovered cases ran.";
 
         var parts = new List<string>();
         if (Missing.Count > 0)
         {
             parts.Add(
-                $"{Absent} of {Discovered.Count} never ran"
+                $"{Absent} of {Discovered.Count} were never recorded at all"
                 + (LastAnswered is null ? ", and nothing ran at all" : $", the last to answer being {LastAnswered}"));
         }
+
+        // Its own clause and never added to the one above: a recorded skip and a lost host are
+        // different facts, and the reader's next move differs for each.
+        if (Skipping.Count > 0)
+            parts.Add($"{Skipped} of {Discovered.Count} were recorded and never ran");
 
         if (Unexpected.Count > 0)
             parts.Add($"{Unexpected.Count} method(s) answered with cases discovery never found");
@@ -167,6 +223,7 @@ public sealed record Roll
 
         var lines = new List<string> { Sentence() };
         lines.AddRange(Listed(Missing, most));
+        lines.AddRange(Listed(Skipping, most));
         lines.AddRange(Listed(Unexpected, most));
         return new ReadOnlyCollection<string>(lines);
     }

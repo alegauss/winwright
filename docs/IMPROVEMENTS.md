@@ -2,29 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW137 The roll counts names and not answers
-
-Found in the check the moment after it shipped. The roll reads every result the file
-carries and counts it as a case that answered. A results file records an outcome for
-each one, and NotExecuted is among them - a deliberate skip, or a case the runner listed
-and then abandoned. Both are recorded and neither ran, so the roll would call a run
-whole that executed none of them.
-
-That is the founding defect again, one level in. The check exists because a total of 352
-where the run before had 374 read as a pass; a run where all 374 are recorded and 22 say
-NotExecuted reads as a pass to this check for the same reason - a number that agrees,
-and nobody asking what it is a number of.
-
-The fix is small and the shape is here already. The results file says which outcome each
-case had, so the roll can count answers rather than names: what ran, what was recorded
-and did not, and the second on its own line rather than folded into the first. A
-deliberate skip is then visible, which this project's own non-goal asks for anyway - a
-green never covers an assertion that did not run, and a suite is a pile of assertions.
-
-What must not happen is the two being merged back into one total. A recorded skip and an
-executed pass are different facts, and a check that adds them is the check being
-replaced.
-
 ### §WW138 A check beside the run is a habit again
 
 The roll call landed as its own process with its own tests, and it is reached two ways:
