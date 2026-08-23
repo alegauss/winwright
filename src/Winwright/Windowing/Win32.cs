@@ -167,6 +167,48 @@ internal static class Win32
     /// <summary>SM_REMOTESESSION: whether this session is being served over a remote connection.</summary>
     internal const int RemoteSession = 0x1000;
 
+    /// <summary>
+    /// WW158. Whether the desktop is being composed at all. A desk that is not composing draws
+    /// nothing, whatever the monitor count says about displays being attached.
+    /// </summary>
+    [DllImport("dwmapi.dll")]
+    internal static extern int DwmIsCompositionEnabled([MarshalAs(UnmanagedType.Bool)] out bool enabled);
+
+    /// <summary>WTS_CURRENT_SERVER_HANDLE: this machine, which is the only one this ever asks about.</summary>
+    internal static readonly nint CurrentServer = 0;
+
+    /// <summary>WTS_CURRENT_SESSION: the session this process is in.</summary>
+    internal const uint CurrentSession = unchecked((uint)-1);
+
+    /// <summary>WTSConnectState: what the session is doing, which is the fact a monitor count proxies for.</summary>
+    internal const int SessionConnectState = 8;
+
+    /// <summary>
+    /// WTS_CONNECTSTATE_CLASS, in the order the header declares. Only two of them mean a desk that
+    /// somebody could be looking at.
+    /// </summary>
+    internal enum ConnectState
+    {
+        Active = 0,
+        Connected = 1,
+        ConnectQuery = 2,
+        Shadow = 3,
+        Disconnected = 4,
+        Idle = 5,
+        Listen = 6,
+        Reset = 7,
+        Down = 8,
+        Init = 9,
+    }
+
+    [DllImport("wtsapi32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool WTSQuerySessionInformationW(
+        nint server, uint session, int what, out nint buffer, out uint bytes);
+
+    [DllImport("wtsapi32.dll")]
+    internal static extern void WTSFreeMemory(nint memory);
+
     [DllImport("user32.dll", SetLastError = true)]
     internal static extern nint GetProcessWindowStation();
 

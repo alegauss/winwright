@@ -7,7 +7,7 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW158** (deps: —) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — A condition named for rendering is met on the desk that produced the flat rectangle, so the one absence a whole run depends on is the one read from proxies. → §WW158
+- ⏳ **WW158** (deps: —) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading, the guest having no way to disconnect a session and reconnect it. → §WW158
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

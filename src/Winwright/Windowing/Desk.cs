@@ -234,6 +234,26 @@ public sealed record Desk
         return Precondition.Met(InputDesktop);
     }
 
+    /// <summary>
+    /// Whether this desk draws.
+    /// <para>
+    /// WW158. This used to read three things and none of them was rendering: the monitor count, the
+    /// virtual screen size, and the remote-session flag as a suffix on a failure it had already
+    /// decided. All three are proxies for a display being <em>attached</em>, and the condition is
+    /// named for one that <em>renders</em> — so the session WW42 was measured on passed it, with the
+    /// session present, the shell running and the environment reporting an interactive desktop.
+    /// </para>
+    /// <para>
+    /// Two facts are read instead, and neither is a proxy. A session that is not connected to
+    /// anything has nothing drawing it, whatever it reports about displays; and a desktop that is
+    /// not being composed is not being drawn either. Both are asked of the thing itself.
+    /// </para>
+    /// <para>
+    /// Never a named pixel. The non-goal about individual pixels binds this as it binds the capture
+    /// block, and the capture keeps its own refusal for its own reason: a desk that renders can
+    /// still be photographed while nothing is on it.
+    /// </para>
+    /// </summary>
     private static Precondition Display()
     {
         var monitors = Win32.GetSystemMetrics(Win32.MonitorCount);
@@ -244,10 +264,78 @@ public sealed record Desk
         if (monitors <= 0)
             return Precondition.Absent(RenderingDisplay, $"no display is attached{remote}");
 
-        return width > 0 && height > 0
-            ? Precondition.Met(RenderingDisplay)
-            : Precondition.Absent(
-                RenderingDisplay, $"{monitors} display(s) are attached and the virtual screen measures {width}x{height}{remote}");
+        if (width <= 0 || height <= 0)
+        {
+            return Precondition.Absent(
+                RenderingDisplay,
+                $"{monitors} display(s) are attached and the virtual screen measures {width}x{height}{remote}");
+        }
+
+        // The first of the two facts, and the one the measured session would have failed: a session
+        // nobody is connected to is a session nothing is drawing, and it goes on reporting displays.
+        var connected = Connection();
+        if (connected is { } state && state is not (Win32.ConnectState.Active or Win32.ConnectState.Shadow))
+        {
+            return Precondition.Absent(
+                RenderingDisplay,
+                $"this session is {state.ToString().ToLowerInvariant()}, so nothing is drawing it — "
+                    + $"{monitors} display(s) are still reported{remote}");
+        }
+
+        // The second. Read after the session, because a disconnected session is the more specific
+        // answer and a reader wants the most specific one this desk can give.
+        if (Composing() == false)
+        {
+            return Precondition.Absent(
+                RenderingDisplay,
+                $"the desktop is not being composed, so nothing is drawing it — "
+                    + $"{monitors} display(s) are still reported{remote}");
+        }
+
+        return Precondition.Met(RenderingDisplay);
+    }
+
+    /// <summary>
+    /// What this session is doing, or null where it could not be asked. Null is not an absence: a
+    /// machine that will not answer this question has not said its desk is dark.
+    /// </summary>
+    private static Win32.ConnectState? Connection()
+    {
+        var buffer = nint.Zero;
+        try
+        {
+            if (!Win32.WTSQuerySessionInformationW(
+                    Win32.CurrentServer, Win32.CurrentSession, Win32.SessionConnectState, out buffer, out var bytes)
+                || buffer == nint.Zero
+                || bytes < sizeof(int))
+            {
+                return null;
+            }
+
+            return (Win32.ConnectState)System.Runtime.InteropServices.Marshal.ReadInt32(buffer);
+        }
+        catch (Exception unavailable) when (unavailable is DllNotFoundException or EntryPointNotFoundException)
+        {
+            return null;
+        }
+        finally
+        {
+            if (buffer != nint.Zero)
+                Win32.WTSFreeMemory(buffer);
+        }
+    }
+
+    /// <summary>Whether the desktop is being composed, or null where the answer could not be had.</summary>
+    private static bool? Composing()
+    {
+        try
+        {
+            return Win32.DwmIsCompositionEnabled(out var enabled) == 0 ? enabled : null;
+        }
+        catch (Exception unavailable) when (unavailable is DllNotFoundException or EntryPointNotFoundException)
+        {
+            return null;
+        }
     }
 
     private static Precondition Coordinates()
