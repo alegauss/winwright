@@ -33,13 +33,19 @@ public enum TraversalKey
 public sealed record TraversalResult
 {
     internal TraversalResult(
-        TraversalKey key, ElementFacts? before, ElementFacts? after, bool moved, Precondition foreground)
+        TraversalKey key,
+        ElementFacts? before,
+        ElementFacts? after,
+        bool moved,
+        Precondition foreground,
+        FocusReading focus)
     {
         Key = key;
         Before = before;
         After = after;
         Moved = moved;
         Foreground = foreground;
+        Focus = focus;
     }
 
     /// <summary>Which key was pressed.</summary>
@@ -57,14 +63,30 @@ public sealed record TraversalResult
     /// <summary>Whether the window owned the desktop. Absent means no key was sent.</summary>
     public Precondition Foreground { get; }
 
+    /// <summary>
+    /// Whether the focus was still this application's when it was read.
+    /// <para>
+    /// WW155. The foreground is read once before the key is sent, and the focus is then polled for
+    /// up to two seconds — during which the desk is free to change hands. A tab that lands on
+    /// another application's window is not this application's tab order being wrong.
+    /// </para>
+    /// </summary>
+    public FocusReading Focus { get; }
+
     /// <summary>Whether a key was sent at all.</summary>
     public bool Sent => Foreground.Satisfied;
+
+    /// <summary>Whether this result can say anything about the application at all.</summary>
+    public bool Observed => Sent && Focus.Inside;
 
     /// <summary>Where the focus went, said either way.</summary>
     public override string ToString()
     {
         if (!Sent)
             return $"{Key} was not sent: {Foreground.Absence}.";
+
+        if (!Focus.Inside)
+            return $"{Key} was sent and then the focus left this application: {Focus.Because}.";
 
         return Moved
             ? $"{Key} moved the focus from {Named(Before)} to {Named(After)}."
@@ -88,6 +110,12 @@ public sealed record TraversalResult
         if (!Foreground.Satisfied)
             return AssertionResult.Unchecked(named, Foreground);
 
+        // WW155: and the same for a focus that left while this was polling. Comparing against an
+        // element belonging to somebody else's window is a red about this application that nobody
+        // can reproduce, which is worse than saying the check did not run.
+        if (!Focus.Inside)
+            return AssertionResult.Unchecked(named, Focus.AsPrecondition());
+
         return Moved
             ? AssertionResult.Pass(named, ToString())
             : AssertionResult.Fail(named, ToString());
@@ -101,8 +129,8 @@ public sealed record TraversalResult
         Resolved = Named(After),
         Pattern = "synthesized keyboard",
         ReadBack = Named(After),
-        Verdict = !Sent ? StepVerdict.Unchecked : Moved ? StepVerdict.Ok : StepVerdict.Failed,
-        Detail = Sent && Moved ? null : ToString(),
+        Verdict = Observed ? (Moved ? StepVerdict.Ok : StepVerdict.Failed) : StepVerdict.Unchecked,
+        Detail = Observed && Moved ? null : ToString(),
     };
 
     private static string Named(ElementFacts? facts) => facts?.ToString() ?? "nothing";
@@ -215,7 +243,10 @@ public static class Traversal
         var foreground = Foreground.Check(handle == 0 ? 0 : Win32.GetAncestor(handle, Win32.GaRoot)).AsPrecondition();
         var before = FocusedElement();
         if (!foreground.Satisfied)
-            return new TraversalResult(key, ElementFacts.Of(before), ElementFacts.Of(before), false, foreground);
+        {
+            return new TraversalResult(
+                key, ElementFacts.Of(before), ElementFacts.Of(before), false, foreground, Focus.In(handle));
+        }
 
         Keys.Send(key);
 
@@ -228,8 +259,13 @@ public static class Traversal
             settleMs,
             pollMs);
 
+        // Read against the application rather than off the desk, and read once: the answer and the
+        // reading that says whether it is an answer at all cannot be two different moments.
+        var focus = Focus.In(handle);
         var after = moved.Value ?? FocusedElement();
-        return new TraversalResult(key, ElementFacts.Of(before), ElementFacts.Of(after), moved.Found, foreground);
+
+        return new TraversalResult(
+            key, ElementFacts.Of(before), ElementFacts.Of(after), moved.Found, foreground, focus);
     }
 
     /// <summary>

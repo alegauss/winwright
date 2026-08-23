@@ -36,7 +36,7 @@ public sealed class MenuTests : IDisposable
         // loop, so the WM_QUIT the dialog posts is never read and the window outlives the test.
         // The class that then asks whether another instance of this executable is showing a
         // window finds that one, and fails about something it has nothing to do with.
-        for (var attempt = 0; attempt < 6 && Menu.Highlighted() is not null; attempt++)
+        for (var attempt = 0; attempt < 6 && Menu.Highlighted(dialog.Frame) is not null; attempt++)
             Menu.Dismiss(1);
 
         foreach (var decoy in decoys)
@@ -141,7 +141,7 @@ public sealed class MenuTests : IDisposable
         Assert.Equal("Quit", walked.Highlighted);
 
         // The run is still here, which is the assertion: highlighting is not invoking.
-        Assert.Equal("Quit", Menu.Highlighted());
+        Assert.Equal("Quit", Menu.Highlighted(dialog.Frame));
     }
 
     [Fact]
@@ -156,8 +156,8 @@ public sealed class MenuTests : IDisposable
 
         // Nothing was pressed to normalise, so the menu survived the miss. Left on a top-level
         // entry would have dismissed it, and then a retry walks a menu that is no longer there.
-        Assert.NotNull(Menu.Highlighted());
-        Assert.Contains(Menu.Highlighted(), walked.Passed);
+        Assert.NotNull(Menu.Highlighted(dialog.Frame));
+        Assert.Contains(Menu.Highlighted(dialog.Frame), walked.Passed);
     }
 
     [Fact]

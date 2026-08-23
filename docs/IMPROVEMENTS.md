@@ -80,31 +80,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW155 The menu that is only implied
-
-`Menu.Highlighted` is `Traversal.WhoHasFocus()?.Name`, which is the focused element of
-the whole desktop. Nothing narrows it to the window that was asked about. `Enter`, `To`
-and `Expand` are built on it, and `MenuWalk.Reached` compares it against the wanted
-entry - so what a case asserts on is whatever holds the focus, and the menu is only
-implied. `TraversalResult.After` is the same reading, so tab order carries the same
-defect.
-
-The foreground is checked, and that is not the same guard. It is read once before the
-keys are sent, so `Sent` is honest about the moment the act began; the walk then polls
-for up to two seconds, during which the desk is free to change hands.
-
-Measured twice rather than supposed. Shipping WW143:
-`Right_expands_the_submenu_and_the_arrival_is_waited_for` went red with `Expected:
-"one.txt"` against `Actual: "1 Yes"`. Shipping WW145: `Shift_tab_goes_back` went red
-with `Expected: "alpha"` against `Actual: "Mostrar Ícones Ocultos ..."`, which is the
-notification area's overflow button. Neither string exists anywhere in this repository,
-and both classes were green on the next run - which is what a misattribution looks like
-from the inside: a red about the application that nobody can reproduce.
-
-What it owes is a reading scoped to the window it is about, so an element belonging to
-somebody else's window is reported the way a refused foreground already is - a hole
-naming what held the desk, and never a failed comparison.
-
 ### §WW165 The one verb in this block that answers yes or no
 
 Seen on a loaded guest while shipping WW150, and the flake is not the finding. The case

@@ -228,15 +228,28 @@ public static class NotificationArea
             return new TrayMenu(icon, false, null, $"it would not take the focus: {refused.Message}");
         }
 
-        var before = Menu.Highlighted();
+        var before = OnTheDesk();
         Keys.SendApplicationKey();
         var came = Attempt.UntilTrue(
-            () => Menu.Highlighted() is { } now && now != before && now != icon.Name, settleMs, pollMs);
+            () => OnTheDesk() is { } now && now != before && now != icon.Name, settleMs, pollMs);
 
         return came.Happened
-            ? new TrayMenu(icon, true, Menu.Highlighted(), null)
+            ? new TrayMenu(icon, true, OnTheDesk(), null)
             : new TrayMenu(icon, false, null, $"nothing was highlighted within {came.WaitedMs} ms of the application key");
     }
+
+    /// <summary>
+    /// What the desk is highlighting, read desktop-wide on purpose.
+    /// <para>
+    /// WW155 scoped every menu reading to the application under test, and this is the one place
+    /// that would be wrong. The notification area is the shell's, and the menu an icon opens is
+    /// drawn by whichever process owns the icon — so a reading scoped to the application this run
+    /// is driving would reject the very menu this verb exists to open. Named here rather than
+    /// reached through the menu's own verb, so the call site says which reading it is taking.
+    /// </para>
+    /// </summary>
+    private static string? OnTheDesk() =>
+        Traversal.WhoHasFocus()?.Name is { Length: > 0 } name ? name : null;
 
     private static bool Matches(TrayIcon icon, string named) =>
         icon.Name.Contains(named, StringComparison.OrdinalIgnoreCase);

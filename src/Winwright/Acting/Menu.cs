@@ -11,13 +11,19 @@ namespace Winwright.Acting;
 public sealed record MenuWalk
 {
     internal MenuWalk(
-        string what, string? wanted, string? highlighted, IReadOnlyList<string> passed, Precondition foreground)
+        string what,
+        string? wanted,
+        string? highlighted,
+        IReadOnlyList<string> passed,
+        Precondition foreground,
+        FocusReading focus)
     {
         What = what;
         Wanted = wanted;
         Highlighted = highlighted;
         Passed = passed;
         Foreground = foreground;
+        Focus = focus;
     }
 
     /// <summary>What was asked of the menu — entered, walked to something, expanded.</summary>
@@ -35,11 +41,25 @@ public sealed record MenuWalk
     /// <summary>Whether the window owned the desktop. Absent means no key was sent.</summary>
     public Precondition Foreground { get; }
 
+    /// <summary>
+    /// Whether the focus was still this application's when the walk stopped.
+    /// <para>
+    /// WW155. The foreground is checked once, before the keys are sent, so <see cref="Sent"/> is
+    /// honest about the moment the act began — and the walk then polls for up to two seconds,
+    /// during which the desk is free to change hands. This is the second guard, read at the end.
+    /// </para>
+    /// </summary>
+    public FocusReading Focus { get; }
+
     /// <summary>Whether a key was sent at all.</summary>
     public bool Sent => Foreground.Satisfied;
 
+    /// <summary>Whether this walk can say anything about the application at all.</summary>
+    public bool Observed => Sent && Focus.Inside;
+
     /// <summary>Whether the walk reached what it was after.</summary>
-    public bool Reached => Sent && (Wanted is null || string.Equals(Highlighted, Wanted, StringComparison.Ordinal));
+    public bool Reached =>
+        Observed && (Wanted is null || string.Equals(Highlighted, Wanted, StringComparison.Ordinal));
 
     /// <summary>How many entries were highlighted getting here.</summary>
     public int Hops => Passed.Count;
@@ -48,12 +68,20 @@ public sealed record MenuWalk
     /// <summary>
     /// The result a verdict counts. A desk that refused the foreground is a <em>hole</em> and never
     /// a failure: nothing was sent, so nothing about the application was checked at all.
+    /// <para>
+    /// WW155: and so is a focus that left the application while the walk was polling. An element
+    /// belonging to somebody else's window compared against a wanted entry is a red about this
+    /// application that nobody can reproduce, which is worse than no answer.
+    /// </para>
     /// </summary>
     /// <param name="named">What the assertion claims, as the scenario spells it.</param>
     public AssertionResult AsAssertion(string named)
     {
         if (!Foreground.Satisfied)
             return AssertionResult.Unchecked(named, Foreground);
+
+        if (!Focus.Inside)
+            return AssertionResult.Unchecked(named, Focus.AsPrecondition());
 
         return Reached
             ? AssertionResult.Pass(named, ToString())
@@ -66,6 +94,9 @@ public sealed record MenuWalk
             return $"{What} was not sent: {Foreground.Absence}.";
 
         var route = Passed.Count == 0 ? "nothing" : string.Join(" -> ", Passed);
+        if (!Focus.Inside)
+            return $"{What} walked {route} and then the focus left this application: {Focus.Because}.";
+
         return Reached
             ? $"{What} reached \"{Highlighted}\" through {route}."
             : $"{What} did not reach \"{Wanted}\"; it walked {route} and stopped on \"{Highlighted}\".";
@@ -80,8 +111,8 @@ public sealed record MenuWalk
         Pattern = "synthesized keyboard",
         ReadBack = Highlighted,
         Polls = Hops,
-        Verdict = !Sent ? StepVerdict.Unchecked : Reached ? StepVerdict.Ok : StepVerdict.Failed,
-        Detail = Sent && Reached ? null : ToString(),
+        Verdict = Observed ? (Reached ? StepVerdict.Ok : StepVerdict.Failed) : StepVerdict.Unchecked,
+        Detail = Reached ? null : ToString(),
     };
 }
 
@@ -106,22 +137,37 @@ public static class Menu
     /// <summary>A backstop on the walk, so a menu that never repeats cannot spin forever.</summary>
     public const int MostEntries = 64;
 
-    /// <summary>What is highlighted in the menu right now, which is what holds the focus.</summary>
-    public static string? Highlighted() => Traversal.WhoHasFocus()?.Name is { Length: > 0 } name ? name : null;
+    /// <summary>
+    /// What is highlighted in this application's menu right now.
+    /// <para>
+    /// WW155. This took no window and answered the focused element of the whole desktop, so what a
+    /// case asserted on was whatever held the desk and the menu was only implied. It takes the
+    /// window now, and an element belonging to another application is not an answer about this
+    /// menu — <see cref="Traversal.WhoHasFocus"/> is still there for a caller who wants the desk.
+    /// </para>
+    /// </summary>
+    /// <param name="window">Any window of the application whose menu this is about.</param>
+    public static string? Highlighted(nint window) =>
+        Focus.Held(window)?.Name is { Length: > 0 } name ? name : null;
 
     /// <summary>Enter the menu bar, the way F10 does for a keyboard user.</summary>
     public static MenuWalk Enter(nint window, int settleMs = 2000, int pollMs = 25)
     {
         var foreground = Foreground.Check(Top(window)).AsPrecondition();
         if (!foreground.Satisfied)
-            return new MenuWalk("enter the menu", null, Highlighted(), [], foreground);
+            return new MenuWalk("enter the menu", null, Highlighted(window), [], foreground, Focus.In(window));
 
-        var before = Highlighted();
+        var before = Highlighted(window);
         Keys.SendMenuBar();
-        Attempt.UntilTrue(() => Highlighted() is { } now && now != before, settleMs, pollMs);
+        Attempt.UntilTrue(() => Highlighted(window) is { } now && now != before, settleMs, pollMs);
 
-        var landed = Highlighted();
-        return new MenuWalk("enter the menu", null, landed, landed is null ? [] : [landed], foreground);
+        // Read once at the end and carried, so the answer and the reading behind it cannot be two
+        // different moments — which is the whole shape of the defect this fixed.
+        var focus = Focus.In(window);
+        var landed = focus.Held?.Name is { Length: > 0 } name ? name : null;
+
+        return new MenuWalk(
+            "enter the menu", null, landed, landed is null ? [] : [landed], foreground, focus);
     }
 
     /// <summary>
@@ -135,26 +181,31 @@ public static class Menu
 
         var foreground = Foreground.Check(Top(window)).AsPrecondition();
         if (!foreground.Satisfied)
-            return new MenuWalk("walk to", entry, Highlighted(), [], foreground);
+            return new MenuWalk("walk to", entry, Highlighted(window), [], foreground, Focus.In(window));
 
         var passed = new List<string>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
-        var here = Highlighted();
+        var here = Highlighted(window);
         if (here is not null)
         {
             passed.Add(here);
             seen.Add(here);
             if (string.Equals(here, entry, StringComparison.Ordinal))
-                return new MenuWalk("walk to", entry, here, new ReadOnlyCollection<string>(passed), foreground);
+            {
+                return new MenuWalk(
+                    "walk to", entry, here, new ReadOnlyCollection<string>(passed), foreground, Focus.In(window));
+            }
         }
 
         for (var hop = 0; hop < MostEntries; hop++)
         {
             var was = here;
             Keys.Send(TraversalKey.Down);
-            Attempt.UntilTrue(() => Highlighted() is { } now && now != was, settleMs, pollMs);
+            Attempt.UntilTrue(() => Highlighted(window) is { } now && now != was, settleMs, pollMs);
 
-            here = Highlighted();
+            // The walk stops where the focus leaves the application as readily as where the menu
+            // comes round: an entry read off somebody else's window is not an entry this walked.
+            here = Highlighted(window);
             if (here is null || !seen.Add(here))
                 break;
 
@@ -163,7 +214,8 @@ public static class Menu
                 break;
         }
 
-        return new MenuWalk("walk to", entry, here, new ReadOnlyCollection<string>(passed), foreground);
+        return new MenuWalk(
+            "walk to", entry, here, new ReadOnlyCollection<string>(passed), foreground, Focus.In(window));
     }
 
     /// <summary>
@@ -174,21 +226,24 @@ public static class Menu
     public static MenuWalk Expand(nint window, int settleMs = 2000, int pollMs = 25)
     {
         var foreground = Foreground.Check(Top(window)).AsPrecondition();
-        var opening = Highlighted();
+        var opening = Highlighted(window);
         if (!foreground.Satisfied)
-            return new MenuWalk("expand", opening, opening, [], foreground);
+            return new MenuWalk("expand", opening, opening, [], foreground, Focus.In(window));
 
         Keys.Send(TraversalKey.Right);
-        Attempt.UntilTrue(() => Highlighted() is { } now && now != opening, settleMs, pollMs);
+        Attempt.UntilTrue(() => Highlighted(window) is { } now && now != opening, settleMs, pollMs);
 
-        var landed = Highlighted();
+        var focus = Focus.In(window);
+        var landed = focus.Held?.Name is { Length: > 0 } name ? name : null;
         var moved = landed is not null && landed != opening;
+
         return new MenuWalk(
             "expand",
             moved ? landed : opening,
             landed,
             moved ? [opening ?? "", landed!] : [],
-            foreground);
+            foreground,
+            focus);
     }
 
     /// <summary>

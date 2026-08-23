@@ -97,6 +97,8 @@ internal static class Cooperating
         new("Attempt.UntilTrue", Cooperation.None, false, "a deadline on a condition"),
         new("Retry.Bounded", Cooperation.None, false, "an act attempted to a cap and counted"),
         new("Retry.Recorded", Cooperation.None, false, "that count stamped onto the step a trace records"),
+        new("Focus.In", Cooperation.None, false, "what holds the focus, read against the application under test"),
+        new("Focus.Held", Cooperation.None, false, "the same, or nothing where the focus went somewhere else"),
         new("Preflight.Check", Cooperation.None, false, "what each declared act needs against the tree"),
         new("Preflight.Offers", Cooperation.None, false, "what one locator's element offers"),
         new("Preflight.Require", Cooperation.None, false, "the same, stopping on a refusal"),

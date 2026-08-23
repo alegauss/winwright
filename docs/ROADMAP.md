@@ -13,7 +13,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW155** (deps: —) **the menu reading names whatever holds the desk, so a walk can report an entry from another window** — The focus reading under both menus and tab order is the whole desktop's, so an answer can name another application's window and go red about this one. → §WW155
 - 📋 **WW165** (deps: —) **opening the notification overflow answers a bare bool, so a run that could not open it says only false** — It answers a reading carrying the reason and the step its sibling already answers with, because a red naming no cause sends a reader to a re-run rather than to the shell. → §WW165
 
 ## Block E — Capture — the picture that proves what it photographed

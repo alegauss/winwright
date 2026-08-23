@@ -152,7 +152,7 @@ public sealed class CaptureRouteTests
             var menu = windows.FirstOrDefault(one => one.ClassName == "#32768");
             Assert.True(
                 menu is not null,
-                $"the shell put no menu window on this desk; highlighted={Menu.Highlighted()}; "
+                $"the shell put no menu window on this desk; highlighted={Menu.Highlighted(dialog.Frame)}; "
                     + string.Join(" | ", windows.Select(one => one.ToString())));
 
             var main = windows.Single(one => one.Handle == dialog.Frame);
@@ -163,7 +163,7 @@ public sealed class CaptureRouteTests
         }
         finally
         {
-            for (var attempt = 0; attempt < 6 && Menu.Highlighted() is not null; attempt++)
+            for (var attempt = 0; attempt < 6 && Menu.Highlighted(dialog.Frame) is not null; attempt++)
                 Menu.Dismiss(1);
         }
     }

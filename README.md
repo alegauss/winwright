@@ -73,6 +73,7 @@ directions — a verb added without an entry is a red.
 | `Surface` | record controls as a case found them and put them back |
 | `Pointer` | synthesised mouse input, and the declared readings about why an act needs it |
 | `Keyboard` / `Traversal` | synthesised keys, traversal keys at a window, and what holds the focus |
+| `Focus` | what holds the focus, read against the application under test rather than the whole desk |
 | `Menu` | enter a menu bar the way a keyboard user does, walk to an entry, open a submenu, dismiss |
 | `NotificationArea` | the tray, the overflow flyout, the icons on either, and an icon's context menu |
 
@@ -144,6 +145,11 @@ and CI reads the number rather than the word.
 did not fail — it never ran, it is named in the summary by name, and collapsing it into either of the
 other two is the thing winwright will not do. `3` outranks the rest, because a reader told the build
 failed opens the wrong repository.
+
+Two things a scenario meets often are holes rather than failures, and both are about the desk rather
+than about your application: a foreground Windows would not grant, and a focus that left the
+application while a menu walk or a traversal was polling. Neither is your code being wrong, so
+neither goes red — the answer names what held the desk instead.
 
 Before the assertions, a run takes one reading of the machine: the desk it is on, which binary it is
 driving, whether that binary is stale, the resolved language, the foreground, the launch arguments,

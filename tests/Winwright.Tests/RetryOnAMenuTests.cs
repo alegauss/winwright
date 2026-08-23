@@ -20,7 +20,7 @@ public sealed class RetryOnAMenuTests : IDisposable
 
     public void Dispose()
     {
-        for (var attempt = 0; attempt < 6 && Menu.Highlighted() is not null; attempt++)
+        for (var attempt = 0; attempt < 6 && Menu.Highlighted(dialog.Frame) is not null; attempt++)
             Menu.Dismiss(1);
 
         dialog.Dispose();
