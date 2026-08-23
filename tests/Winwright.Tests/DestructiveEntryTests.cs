@@ -189,12 +189,27 @@ public sealed class DestructiveEntryTests : IDisposable
     public void A_subject_built_without_a_declaration_refuses_nothing()
     {
         // The engine has no opinion about which entry quits; a project that never said is a
-        // project where nothing is refused, and that is stated rather than assumed.
+        // project where nothing is refused, and that is stated rather than assumed. WW135: the
+        // shape that gives the guard up is not a constructor and says so in its name.
         var frame = Dialog();
-        var quit = new Subject(AutomationElement.FromHandle(frame), Locator.Parse("""Button[name="Quit"]"""), 2000);
+        var quit = Subject.Unguarded(AutomationElement.FromHandle(frame), Locator.Parse("""Button[name="Quit"]"""), 2000);
 
         Assert.False(quit.Destructive.Any);
         Assert.Equal("invoke", Act.Invoke(quit).Verb);
+    }
+
+    [Fact]
+    public void The_only_way_to_make_a_subject_is_with_a_project_behind_it()
+    {
+        // WW135. There used to be a constructor taking a bare Timeouts, and it was the one a
+        // scenario author would have reached for: with a project in hand you write the timeouts out
+        // of it. A subject made that way refused nothing, and no line anywhere said so.
+        var constructors = typeof(Subject).GetConstructors();
+
+        var only = Assert.Single(constructors);
+        Assert.Equal(
+            [typeof(AutomationElement), typeof(Locator), typeof(ProjectDeclaration)],
+            only.GetParameters().Select(one => one.ParameterType));
     }
 
     [Fact]

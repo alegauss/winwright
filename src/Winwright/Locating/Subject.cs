@@ -35,29 +35,34 @@ public sealed class Subject
     private readonly int deadlineMs;
     private readonly int pollMs;
 
-    /// <summary>A subject resolved against what the project declared.</summary>
-    public Subject(AutomationElement root, Locator locator, Timeouts timeouts)
-    {
-        ArgumentNullException.ThrowIfNull(root);
-        ArgumentNullException.ThrowIfNull(locator);
-        ArgumentNullException.ThrowIfNull(timeouts);
-
-        this.root = root;
-        this.timeouts = timeouts;
-        Locator = locator;
-    }
-
     /// <summary>
-    /// A subject that knows the whole declaration, which is the timeouts and the entries this
-    /// project says end the run. The only shape that carries the refusal, and therefore the one
-    /// worth reaching for.
+    /// A subject against a declared project, which is the only constructor there is.
+    /// <para>
+    /// WW135. There used to be one taking a bare <see cref="Timeouts"/>, and it was the one a
+    /// scenario author would have reached for: with a project in hand you write the timeouts out of
+    /// it, because that is what the type is for. A subject made that way carried no destructive
+    /// list and refused nothing, with no line anywhere saying so — the guard was declined by
+    /// whichever constructor happened to be easier to type.
+    /// </para>
+    /// <para>
+    /// This project has closed the same shape twice: a process cannot be launched outside the
+    /// register, and an act cannot reach an element without an admission. Both work because the
+    /// weaker route does not exist, so the weaker route here does not exist either. What is left is
+    /// <see cref="Unguarded"/>, which is not a constructor and says in its name what it gives up.
+    /// </para>
     /// </summary>
     /// <param name="root">What to resolve under.</param>
     /// <param name="locator">What this subject is.</param>
     /// <param name="declaration">The project.</param>
     public Subject(AutomationElement root, Locator locator, ProjectDeclaration declaration)
-        : this(root, locator, (declaration ?? throw new ArgumentNullException(nameof(declaration))).Timeouts)
     {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(locator);
+        ArgumentNullException.ThrowIfNull(declaration);
+
+        this.root = root;
+        timeouts = declaration.Timeouts;
+        Locator = locator;
         Destructive = declaration.Destructive;
     }
 
@@ -72,8 +77,7 @@ public sealed class Subject
         MeansIt = meansIt;
     }
 
-    /// <summary>A subject with the deadline spelled out, for a caller that has no declaration.</summary>
-    public Subject(AutomationElement root, Locator locator, int deadlineMs, int pollMs = 25)
+    private Subject(AutomationElement root, Locator locator, int deadlineMs, int pollMs)
     {
         ArgumentNullException.ThrowIfNull(root);
         ArgumentNullException.ThrowIfNull(locator);
@@ -85,6 +89,22 @@ public sealed class Subject
         this.pollMs = pollMs;
         Locator = locator;
     }
+
+    /// <summary>
+    /// A subject with the deadline spelled out and no project behind it, which is what a test of
+    /// the locating machinery uses.
+    /// <para>
+    /// Named rather than offered as a constructor, and named for what it gives up: it carries no
+    /// destructive list, so nothing about it is ever refused. A scenario driving a real application
+    /// wants the constructor above; this is for a caller that has no declaration and is saying so.
+    /// </para>
+    /// </summary>
+    /// <param name="root">What to resolve under.</param>
+    /// <param name="locator">What this subject is.</param>
+    /// <param name="deadlineMs">How long resolving waits.</param>
+    /// <param name="pollMs">How often it looks again.</param>
+    public static Subject Unguarded(AutomationElement root, Locator locator, int deadlineMs, int pollMs = 25) =>
+        new(root, locator, deadlineMs, pollMs);
 
     /// <summary>What this subject is, as the scenario wrote it.</summary>
     public Locator Locator { get; }

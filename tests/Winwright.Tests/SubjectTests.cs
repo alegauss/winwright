@@ -59,7 +59,7 @@ public sealed class SubjectTests : IDisposable
     }
 
     private Subject SubjectFor(nint frame, string locator) =>
-        new(AutomationElement.FromHandle(frame), Locator.Parse(locator), 2000, pollMs: 20);
+        Subject.Unguarded(AutomationElement.FromHandle(frame), Locator.Parse(locator), 2000, pollMs: 20);
 
     [Fact]
     public void A_reading_is_a_value_and_the_live_view_beside_it_is_not()
@@ -188,6 +188,6 @@ public sealed class SubjectTests : IDisposable
         var (frame, _) = Dialog();
         var root = AutomationElement.FromHandle(frame);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => new Subject(root, Locator.Parse("Edit"), 0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Subject.Unguarded(root, Locator.Parse("Edit"), 0));
     }
 }

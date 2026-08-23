@@ -54,7 +54,7 @@ public sealed class SurfaceTests : IDisposable
     public void Dispose() => dialog.Dispose();
 
     private Subject On(string locator) =>
-        new(dialog.Root, Locator.Parse(locator), deadlineMs: 2000, pollMs: 20);
+        Subject.Unguarded(dialog.Root, Locator.Parse(locator), deadlineMs: 2000, pollMs: 20);
 
     private Subject Combo => On("ComboBox");
 

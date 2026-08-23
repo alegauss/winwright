@@ -73,7 +73,7 @@ public sealed class PickTests : IDisposable
         Assert.NotEqual(ForegroundState.Ours, Foreground.Check(dialog.Frame).State);
     }
 
-    private Subject Combo => new(dialog.Root, Locator.Parse("ComboBox"), deadlineMs: 2000, pollMs: 20);
+    private Subject Combo => Subject.Unguarded(dialog.Root, Locator.Parse("ComboBox"), deadlineMs: 2000, pollMs: 20);
 
     [Fact]
     public void The_pattern_route_is_one_switch_and_the_answer_says_so()

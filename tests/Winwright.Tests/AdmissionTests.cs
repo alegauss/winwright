@@ -67,7 +67,7 @@ public sealed class AdmissionTests : IDisposable
     }
 
     private static Subject On(nint frame, string locator) =>
-        new(AutomationElement.FromHandle(frame), Locator.Parse(locator), 2000, pollMs: 20);
+        Subject.Unguarded(AutomationElement.FromHandle(frame), Locator.Parse(locator), 2000, pollMs: 20);
 
     [Fact]
     public void Nothing_public_hands_out_the_element_a_verb_would_act_on()

@@ -60,7 +60,7 @@ public sealed class PointerTests : IDisposable
     }
 
     private Subject On(string locator) =>
-        new(dialog.Root, Locator.Parse(locator), deadlineMs: 2000, pollMs: 20);
+        Subject.Unguarded(dialog.Root, Locator.Parse(locator), deadlineMs: 2000, pollMs: 20);
 
     [Fact]
     public void A_click_lands_where_the_element_is_when_the_window_owns_the_desktop()

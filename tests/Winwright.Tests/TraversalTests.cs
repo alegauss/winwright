@@ -51,7 +51,7 @@ public sealed class TraversalTests : IDisposable
     }
 
     private Subject On(string locator) =>
-        new(dialog.Root, Locator.Parse(locator), deadlineMs: 2000, pollMs: 20);
+        Subject.Unguarded(dialog.Root, Locator.Parse(locator), deadlineMs: 2000, pollMs: 20);
 
     private void Focus(string locator)
     {

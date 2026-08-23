@@ -56,7 +56,7 @@ public sealed class KeyboardTests : IDisposable
     }
 
     private Subject On(string locator) =>
-        new(dialog.Root, Locator.Parse(locator), deadlineMs: 2000, pollMs: 20);
+        Subject.Unguarded(dialog.Root, Locator.Parse(locator), deadlineMs: 2000, pollMs: 20);
 
     [Fact]
     public void Text_typed_through_the_keyboard_is_read_back_from_the_control()

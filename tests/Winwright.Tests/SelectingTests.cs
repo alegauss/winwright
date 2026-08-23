@@ -73,9 +73,9 @@ public sealed class SelectingTests : IDisposable
     }
 
     private Subject Item(string name) =>
-        new(dialog.Root, Locator.Parse($"""ListItem[name="{name}"]"""), deadlineMs: 2000, pollMs: 20);
+        Subject.Unguarded(dialog.Root, Locator.Parse($"""ListItem[name="{name}"]"""), deadlineMs: 2000, pollMs: 20);
 
-    private Subject Combo => new(dialog.Root, Locator.Parse("ComboBox"), deadlineMs: 2000, pollMs: 20);
+    private Subject Combo => Subject.Unguarded(dialog.Root, Locator.Parse("ComboBox"), deadlineMs: 2000, pollMs: 20);
 
     /// <summary>
     /// Open the picker first. An item of a shut combo is offscreen, so actionability refuses to

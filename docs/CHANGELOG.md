@@ -62,6 +62,7 @@
 - ✅ **WW115** **a pointer act says what it clicks and never why the pattern route was unavailable** — A pointer act now states why the pattern route was unavailable, the summary groups the cost by reason and names what a peer would remove, and preflight reads each claim back against the tree.
 - ✅ **WW116** **nothing declares which entries are destructive, and invoke will press any of them** — A project names what ends the run beside its executable, and the door every act passes through refuses those entries until a subject says MeaningIt once, where a reviewer reads it.
 - ✅ **WW134** **a destructive entry declared by name stops being refused once the application shows another language** — An entry is declared by an automation id or by a strings key resolved in every language the project ships, and a bare name is refused where more than one is shipped.
+- ✅ **WW135** **a subject built from the timeouts alone carries no destructive list, so the guard depends on which constructor was typed** — The bare-timeouts constructor is gone and the only one left takes a declaration, so the shape that gives the guard up is named for what it gives up.
 
 ## Block E — Capture — the picture that proves what it photographed
 

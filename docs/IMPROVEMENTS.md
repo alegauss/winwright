@@ -121,27 +121,6 @@ it is the one that should be reading a field rather than a substring.
 
 ## Block D — Act — patterns before pointers
 
-### §WW135 A guard the caller may decline by accident
-
-The refusal landed on the door every act passes through, which is right, and it reads
-the list off the subject, which is where the trouble is. Three constructors make a
-subject and only one carries a declaration; the other two carry a bare deadline or a
-bare Timeouts, and a subject made either way has an empty list and refuses nothing.
-
-That would be fine if the declaration-carrying one were the obvious one. It is not. A
-scenario author with a project in hand writes the timeouts out of it - that is what the
-type is for - and reaches for the constructor that takes them, and the guard is gone
-with no line anywhere saying so. This project has closed exactly this shape twice: a
-process cannot be launched outside the register, and an act cannot reach an element
-without an admission. Both work because the weaker route does not exist.
-
-What is wanted is the same: the subject a scenario makes against a declared project is
-the one shape that is reachable, and a subject built from a bare deadline is what a test
-of the locating machinery uses and says so. Whether the answer is folding the timeouts
-constructor into the declaration one, or carrying the list separately so every route
-takes it, is the task's to decide. What must be true afterwards is that no scenario
-silently loses the guard by writing the constructor that was easier to reach.
-
 ### §WW136 A check that shipped and was never joined
 
 Filed against the thing that had just shipped. A pointer act now states why the pattern

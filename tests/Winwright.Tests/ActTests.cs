@@ -75,7 +75,7 @@ public sealed class ActTests : IDisposable
     }
 
     private static Subject On(nint frame, string locator) =>
-        new(AutomationElement.FromHandle(frame), Locator.Parse(locator), 2000, pollMs: 20);
+        Subject.Unguarded(AutomationElement.FromHandle(frame), Locator.Parse(locator), 2000, pollMs: 20);
 
     [Fact]
     public void A_toggle_lands_while_the_foreground_belongs_to_another_window()

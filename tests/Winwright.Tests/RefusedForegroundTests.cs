@@ -60,7 +60,7 @@ public sealed class RefusedForegroundTests : IDisposable
     }
 
     private Subject On(string locator) =>
-        new(dialog.Root, Locator.Parse(locator), deadlineMs: 2000, pollMs: 20);
+        Subject.Unguarded(dialog.Root, Locator.Parse(locator), deadlineMs: 2000, pollMs: 20);
 
     [Fact]
     public void A_click_that_could_not_be_sent_is_a_hole_naming_the_desk()
