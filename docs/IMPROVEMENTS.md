@@ -374,3 +374,27 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW169 The justification nobody reads back
+
+Read against this block's criteria the moment its last open line shipped. Two hold and
+are checked. The third says a shape exists because a defect existed - every surface the
+fixture carries names the real defect it reproduces, and one that can name none is
+removed instead of maintained forever.
+
+The field is there and required by the compiler: a row cannot be written without a
+Because, and the catalogue prints it under the row when a person asks for the whole
+story. What is missing is anybody reading it back. The suite checks that every row says
+what it is for, by length, and it checks that a refusal leaves the reasons out - which
+is the only assertion in the suite mentioning the word, and it is the negative one.
+Nothing asserts that a single Because is there, or that it says anything.
+
+So a row added later with a Because of a full stop compiles, prints and passes. That is
+the same shape as the twelve entries WW160 closed one file over: a claim the compiler
+holds up and nobody reads.
+
+What is owed is the read-back, and the fixture already prints what it needs: the
+justified catalogue is what the built article says about itself, and the suite already
+parses it for the flag names and the exit codes. A row whose reason is missing or is too
+short to name anything fails, and the criterion stops resting on whoever wrote the row
+last.

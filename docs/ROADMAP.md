@@ -17,12 +17,12 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW38** (deps: Block K ✅) **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and each frame intersected with the copy rectangle, which answers for the whole area in one pass and names the intruder. → §WW38
-- 📋 **WW40** (deps: Block K ✅) **a copy trimmed around an intruder is a picture of something nobody asked for** — An overlap fails rather than crops, and the refusal names the intruder, its process and the rectangle it covers, so the cause is actionable instead of mysterious. → §WW40
-- 📋 **WW41** (deps: Block K ✅) **a window with a system backdrop transmits what is behind it through the glass** — Z-order reasoning cannot answer for that, so the compositor is asked directly and a window that opted into one is refused rather than merely warned about. → §WW41
-- 📋 **WW42** (deps: Block K ✅) **a copy of exactly one colour is written and reported as a capture** — A flat rectangle is not a picture of a window, and a session where nothing was rendering produced one that exited zero. → §WW42
-- 📋 **WW43** (deps: Block K ✅) **a page still computing is photographed and announced as a picture of a report** — The loading strings are read from the project's own language files before anything launches, and a key none of them carries refuses the run instead of matching nothing. → §WW43
-- 📋 **WW46** (deps: Block K ✅) **a change meant to be invisible has no cheap way to prove it was** — Two renders of unchanged code are byte-identical, so a difference is a real difference and no tolerance has to be chosen for a comparison to mean anything. → §WW46
+- 📋 **WW38** (deps: Block K) **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and each frame intersected with the copy rectangle, which answers for the whole area in one pass and names the intruder. → §WW38
+- 📋 **WW40** (deps: Block K) **a copy trimmed around an intruder is a picture of something nobody asked for** — An overlap fails rather than crops, and the refusal names the intruder, its process and the rectangle it covers, so the cause is actionable instead of mysterious. → §WW40
+- 📋 **WW41** (deps: Block K) **a window with a system backdrop transmits what is behind it through the glass** — Z-order reasoning cannot answer for that, so the compositor is asked directly and a window that opted into one is refused rather than merely warned about. → §WW41
+- 📋 **WW42** (deps: Block K) **a copy of exactly one colour is written and reported as a capture** — A flat rectangle is not a picture of a window, and a session where nothing was rendering produced one that exited zero. → §WW42
+- 📋 **WW43** (deps: Block K) **a page still computing is photographed and announced as a picture of a report** — The loading strings are read from the project's own language files before anything launches, and a key none of them carries refuses the run instead of matching nothing. → §WW43
+- 📋 **WW46** (deps: Block K) **a change meant to be invisible has no cheap way to prove it was** — Two renders of unchanged code are byte-identical, so a difference is a real difference and no tolerance has to be chosen for a comparison to mean anything. → §WW46
 
 ## Block F — Assert — the expectation is derived, never typed
 
@@ -62,6 +62,8 @@
 - 📋 **WW88** (deps: Block G, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+- 📋 **WW169** (deps: —) **every shape claims the defect it reproduces and nothing checks that any row makes the claim** — The catalogue is read for a defect on every row, because a shape that can name none is one this block says is removed rather than maintained forever. → §WW169
 
 ## Done when — Block A
 
@@ -175,9 +177,11 @@
 
 ## Done when — Block K
 
-- **Every refusal has something that provokes it** Each named refusal in this framework
-  maps to a fixture flag, and a refusal with no flag is a finding the fixture closes
-  rather than a gap nobody sees.
+- **Every refusal has something that provokes it** Each named refusal maps to a fixture
+  flag or to the case that builds it, both checked against the assemblies and against
+  the built fixture. WW146 settled the difference: a receipt about the wrong window is
+  the harness handing over the wrong handle, so faking one would reproduce that bug in
+  the thing it is pointed at.
 - **The fixture needs nothing from the machine** It runs with no account, no network, no
   second display and no real data, on a clean checkout of this repository alone.
 - **A shape exists because a defect existed** Every surface the fixture carries names
