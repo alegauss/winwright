@@ -117,6 +117,7 @@
 - ✅ **WW122** **the in-app half is a project reference, so an adopter cannot pin it or take it at all** — Both halves declare a package id and pack in continuous integration, a sample adopter compiles against the packed in-app half by one reference, and the agreement check reads the built package.
 - ✅ **WW123** **nothing refuses a reference between the two halves, and one edit would merge them** — The suite reads both project files and both built assemblies and refuses a reference either way, and the same rule is asserted of the fixture and the sample adopter.
 - ✅ **WW141** **nothing names which verbs need no cooperation, so a verb that starts needing the in-app half goes unnoticed** — Every verb is catalogued against what it needs from the application, checked against the engine's surface, and those a bare window suffices for are driven against one.
+- ✅ **WW142** **the agreement check carries an exit code for a gate and no gate anywhere runs it** — Continuous integration reads the tree's version, the assembly it loaded, both packages it built and the adopter's pinned reference, and exits 1 on any disagreement.
 
 ## Block J — Adoption — the proof is the deletion
 

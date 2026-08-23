@@ -349,29 +349,6 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW142 A gate with nothing standing in it
-
-The agreement reading has an ExitCode property whose own comment says the difference
-between a gate and advice is the number it leaves behind. Nothing leaves it behind.
-Outside its own tests the whole reading is called by nobody, so the copies of the engine
-in play are compared exactly as often as somebody opens the file.
-
-It was not buildable before now, and that is worth recording rather than treating as an
-oversight: until the halves packed there was a source tree and a path, one copy of two,
-and the reading refuses fewer than two copies on purpose. WW122 supplied the second -
-what the build actually produced, read out of the nuspec - so a real comparison exists
-for the first time.
-
-What it owes is one step that reads the copies this repository can name and stops on
-anything but agreement: the version the tree declares, the version that was packed, and
-the version the sample adopter pins. Those three moving apart is the exact failure the
-type describes - a stale copy does not fail, it agrees with a rule that has moved - and
-today the sample's pinned version is a literal somebody has to remember to bump.
-
-The same step is what an adopting project would run, which makes it worth building here
-in the form they would take rather than as something only this repository's layout
-understands.
-
 ## Block J — Adoption — the proof is the deletion
 
 ### §WW78 The keyboard case, first

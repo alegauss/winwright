@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WW142: the gate the agreement reading was written for. Its own process, because what it is
+       asked to compare includes the engine assembly that is actually going to run - and reading
+       that from inside the suite would be reading it from a host that loaded a different copy. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Winwright.Concordance</RootNamespace>
+    <AssemblyName>Winwright.Concordance</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Winwright\Winwright.csproj" />
+  </ItemGroup>
+
+</Project>

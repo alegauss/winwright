@@ -60,6 +60,21 @@ jobs:
       - name: Build the adopter against the package
         run: dotnet build samples/Adopter/Adopter.csproj --configuration Release
 
+      # WW142: the copies of the engine in play, read against each other, with the exit code the
+      # agreement reading has carried since WW70 and nothing ever left behind. It runs after Pack
+      # because one of the copies is what the build actually produced, and before the packages are
+      # kept because a disagreement is not an artifact worth publishing. The adopter's pinned
+      # version is a literal somebody has to remember to bump - this is what remembers.
+      - name: Check the copies of the engine agree
+        run: >
+          dotnet exec tools/Winwright.Concordance/bin/Release/net10.0-windows/Winwright.Concordance.dll
+          --declared Directory.Build.props
+          --running
+          --packed packages
+          --package Winwright.InApp
+          --packed packages
+          --pinned samples/Adopter/Adopter.csproj
+
       - name: Keep the packages
         uses: actions/upload-artifact@v7
         with:
