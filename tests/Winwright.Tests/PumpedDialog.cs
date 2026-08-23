@@ -192,15 +192,17 @@ internal sealed class PumpedDialog : IDisposable
     /// insisting. Making it insist turned one busy desktop into forty-seven failures at once.
     /// </para>
     /// </summary>
-    private void TakeTheDesktop()
+    private void TakeTheDesktop() => Waits.Trying("desktop", () =>
     {
-        var until = System.Diagnostics.Stopwatch.StartNew();
-        while (until.ElapsedMilliseconds < 500 && GetForegroundWindow() != Frame)
-        {
-            SetForegroundWindow(Frame);
-            Thread.Sleep(20);
-        }
-    }
+        // The ask goes in the condition, after the look: asking and reading in the same breath is
+        // the race the remarks name, so each poll reads what the last ask produced and then asks
+        // again. Not asserted, for the reason above it.
+        if (GetForegroundWindow() == Frame)
+            return true;
+
+        SetForegroundWindow(Frame);
+        return false;
+    });
 
     /// <summary>One child control to build inside the frame.</summary>
     internal sealed record ChildWindow(

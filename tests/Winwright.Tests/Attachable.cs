@@ -24,15 +24,7 @@ public static class Attachable
         ArgumentNullException.ThrowIfNull(register);
 
         var launched = register.Launch(start);
-        for (var attempt = 0; attempt < 100; attempt++)
-        {
-            if (Readable(launched.Pid))
-                return launched;
-
-            Thread.Sleep(20);
-        }
-
-        Assert.Fail($"pid {launched.Pid} never said what it was running");
+        Waits.Until("readable", $"pid {launched.Pid} never said what it was running", () => Readable(launched.Pid));
         return launched;
     }
 
@@ -58,15 +50,10 @@ public static class Attachable
         var pids = register.Launched.Select(one => one.Pid).ToList();
         register.StopAll();
 
-        for (var attempt = 0; attempt < 400; attempt++)
-        {
-            if (pids.TrueForAll(Gone))
-                return;
-
-            Thread.Sleep(20);
-        }
-
-        Assert.Fail($"{string.Join(", ", pids)} were still running after the register stopped them");
+        Waits.Until(
+            "gone",
+            $"{string.Join(", ", pids)} were still running after the register stopped them",
+            () => pids.TrueForAll(Gone));
     }
 
     /// <summary>

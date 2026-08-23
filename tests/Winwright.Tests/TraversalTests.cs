@@ -60,8 +60,27 @@ public sealed class TraversalTests : IDisposable
 
         // Taking the focus is an act, so it goes through the door like every other one: there is
         // no way from out here to reach the element without having been judged fit to touch it.
-        Admitted.To(On(locator)).Do(element => element.SetFocus());
-        Thread.Sleep(120);
+        var admitted = Admitted.To(On(locator));
+        admitted.Do(element => element.SetFocus());
+
+        // WW143: this was 120 ms of nothing, which is the one wait in the suite that had no
+        // condition at all to convert - so it gets one written. What it waits for is the focus
+        // being where it was just put, read the same way the traversal itself reads it.
+        //
+        // Not asserted, and that is the same rule as the desktop one floor down: a desk that
+        // refuses the focus is a hole these cases already excuse through BusyDesk, and a red here
+        // would be a claim about this window's tab order that the machine caused.
+        Waits.Trying("focus", () => Holds(admitted.Facts));
+    }
+
+    /// <summary>Whether the keyboard focus is on that element, by the fields that identify it.</summary>
+    private static bool Holds(ElementFacts wanted)
+    {
+        var focused = Traversal.WhoHasFocus();
+        return focused is not null
+            && string.Equals(focused.Name, wanted.Name, StringComparison.Ordinal)
+            && string.Equals(focused.AutomationId, wanted.AutomationId, StringComparison.Ordinal)
+            && string.Equals(focused.ControlType, wanted.ControlType, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -76,29 +76,6 @@ what tells them the claim is owed rather than met.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW143 The suite does not take its own advice
-
-Counted while closing this block against its own criterion, which says no scenario
-carries a sleep and every wait is a deadline on a condition with the time it took
-recorded. The engine keeps that. The suite does not: eighteen hand-rolled loops across
-five files, each a for loop over a fixed count with a Thread.Sleep in it, and one bare
-sleep of 120 ms in the traversal cases waiting for a focus change with no condition.
-
-They are not wrong so much as unowned. Each is the engine's Attempt written out longhand
-with a different cap and poll, so the two things the criterion asks for are absent from
-all: none reports how long it took, and none fails saying what it waited for. When one
-is slightly too short on a busy machine the result is a red about the application, which
-is the misattribution WW119 measured.
-
-The work is mechanical and the judgement is in two places. A loop waiting on a file to
-appear and one waiting on a window to be drawn want different deadlines, and the
-declared timeouts already name several - taking one wholesale would make a fixture wait
-a launch timeout to notice a file. And the bare sleep has no condition to convert, so it
-needs one written: what it waits for is a focus that moved.
-
-The suite is this project's own demonstration, and a demonstration that breaks its own
-rule eighteen times is an argument against the rule.
-
 ### §WW144 The line is not a structure
 
 Noticed twice in one block, which is the signal. Inspect renders each element as a

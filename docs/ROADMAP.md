@@ -11,7 +11,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-- 📋 **WW143** (deps: —) **the suite spells the engine's own waiting rule by hand eighteen times, and one of them is a bare sleep** — Every wait in this repository is a deadline on a condition taken through the engine's own attempt, so the suite obeys the rule it exists to prove. → §WW143
 - 📋 **WW144** (deps: —) **a rendered line hides its locator in the middle of a string, so every reader parses it back out by hand** — A rendered element hands over its locator and its line separately, so nothing has to find where one ends by counting spaces outside quotation marks. → §WW144
 
 ## Block D — Act — patterns before pointers

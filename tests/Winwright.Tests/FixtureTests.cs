@@ -70,17 +70,14 @@ public sealed class FixtureTests : IDisposable
 
         var launched = Attachable.Launch(register, start);
 
-        for (var attempt = 0; attempt < 200; attempt++)
-        {
-            var window = TopLevelWindows.Largest(launched.Pid);
-            if (window is not null && window.Title.Length > 0)
-                return window;
-
-            Thread.Sleep(25);
-        }
-
-        Assert.Fail($"the fixture never drew a window (pid {launched.Pid})");
-        return null!;
+        return Waits.Until(
+            "draw",
+            $"the fixture never drew a window (pid {launched.Pid})",
+            () =>
+            {
+                var window = TopLevelWindows.Largest(launched.Pid);
+                return window is not null && window.Title.Length > 0 ? window : null;
+            });
     }
 
     [Fact]
@@ -105,15 +102,10 @@ public sealed class FixtureTests : IDisposable
 
         var launched = Attachable.Launch(register, start);
 
-        TopLevelWindow? window = null;
-        for (var attempt = 0; attempt < 200 && window is null; attempt++)
-        {
-            window = TopLevelWindows.Largest(launched.Pid);
-            if (window is null)
-                Thread.Sleep(25);
-        }
-
-        Assert.NotNull(window);
+        Waits.Until(
+            "draw",
+            $"the fixture drew nothing from a bare environment (pid {launched.Pid})",
+            () => TopLevelWindows.Largest(launched.Pid));
     }
 
     [Fact]
@@ -198,15 +190,7 @@ public sealed class FixtureTests : IDisposable
 
         register.StopAll();
 
-        for (var attempt = 0; attempt < 100; attempt++)
-        {
-            if (!Alive(pid))
-                return;
-
-            Thread.Sleep(20);
-        }
-
-        Assert.Fail($"pid {pid} was still running after the register stopped everything");
+        Waits.Until("gone", $"pid {pid} was still running after the register stopped everything", () => !Alive(pid));
     }
 
     private static void Win32Pid(TopLevelWindow window, out int pid) => pid = window.Pid;
@@ -595,17 +579,14 @@ public sealed class FixtureTests : IDisposable
     /// <summary>Wait until the process owns that many windows above the size floor.</summary>
     private static IReadOnlyList<TopLevelWindow> Waited(int pid, int howMany)
     {
-        for (var attempt = 0; attempt < 200; attempt++)
-        {
-            var windows = TopLevelWindows.OfProcess(pid);
-            if (windows.Count >= howMany)
-                return windows;
-
-            Thread.Sleep(25);
-        }
-
-        Assert.Fail($"pid {pid} never owned {howMany} window(s)");
-        return [];
+        return Waits.Until(
+            "draw",
+            $"pid {pid} never owned {howMany} window(s)",
+            () =>
+            {
+                var windows = TopLevelWindows.OfProcess(pid);
+                return windows.Count >= howMany ? windows : null;
+            });
     }
 
     [Fact]
@@ -630,18 +611,12 @@ public sealed class FixtureTests : IDisposable
         // finished is a page, and refusing it would make the check useless on a slow desk.
         var window = Launched("--loading=150");
 
-        for (var attempt = 0; attempt < 100; attempt++)
-        {
-            if (Ids(window).Contains("reportNote"))
-            {
-                Assert.DoesNotContain("loadingNote", Ids(window));
-                return;
-            }
+        Waits.Until(
+            "loaded",
+            "the page never finished loading, so the shorter duration reached nothing",
+            () => Ids(window).Contains("reportNote"));
 
-            Thread.Sleep(25);
-        }
-
-        Assert.Fail("the page never finished loading, so the shorter duration reached nothing");
+        Assert.DoesNotContain("loadingNote", Ids(window));
     }
 
     [Fact]
@@ -734,7 +709,16 @@ public sealed class FixtureTests : IDisposable
         Assert.DoesNotContain("animationState", Ids(window));
     }
 
-    /// <summary>Read what the animation is showing, over and over, for as long as this is given.</summary>
+    /// <summary>
+    /// Read what the animation is showing, over and over, for as long as this is given.
+    /// <para>
+    /// WW143 left this one alone, and said so rather than leaving the exemption to be re-argued.
+    /// It is not a wait: nothing here is waiting for a condition, and there is no early answer to
+    /// return on. It is a sampler, and the whole of what it measures is how many different things
+    /// were showing over a fixed span — so the interval is the resolution of the measurement and
+    /// converting it to a deadline would delete the observation.
+    /// </para>
+    /// </summary>
     private static IReadOnlyList<string> Sampled(TopLevelWindow window, TimeSpan howLong)
     {
         var said = new List<string>();
@@ -879,8 +863,13 @@ public sealed class FixtureTests : IDisposable
         // passes always and therefore a check nobody has.
         var resident = Attachable.Launch(register, Started("--resident")).Pid;
 
-        for (var attempt = 0; attempt < 200 && TopLevelWindows.OfProcess(resident).Count == 0; attempt++)
-            Thread.Sleep(25);
+        // WW143: the loop here waited for a window from the one flag that draws none, so it ran
+        // its cap out every time - five seconds of sleep spelled as a condition that could not come
+        // true. What the case actually needs is the process visible to the check it is about.
+        Waits.Until(
+            "readable",
+            $"pid {resident} never showed up as an instance of the fixture at all",
+            () => InstanceCheck.Of(Executable()).Resident.Any(one => one.Pid == resident));
 
         var check = InstanceCheck.Of(Executable());
 
@@ -987,8 +976,7 @@ public sealed class FixtureTests : IDisposable
         using var register = new ProcessRegister();
         var pid = Attachable.Launch(register, Started()).Pid;
 
-        for (var attempt = 0; attempt < 200 && TopLevelWindows.OfProcess(pid).Count == 0; attempt++)
-            Thread.Sleep(25);
+        Waits.Until("draw", $"pid {pid} drew nothing to be stopped", () => TopLevelWindows.OfProcess(pid).Count > 0);
 
         Attachable.StopAndSettle(register);
 
@@ -1111,16 +1099,12 @@ public sealed class FixtureTests : IDisposable
         start.Environment[GeometryDump.PathVariable] = geometry;
 
         var launched = Attachable.Launch(register, start);
-        for (var attempt = 0; attempt < 200; attempt++)
-        {
-            if (File.Exists(surfaces) && File.Exists(geometry))
-                return (surfaces, geometry);
+        Waits.Until(
+            "wrote",
+            $"pid {launched.Pid} never wrote what it drew",
+            () => File.Exists(surfaces) && File.Exists(geometry));
 
-            Thread.Sleep(25);
-        }
-
-        Assert.Fail($"pid {launched.Pid} never wrote what it drew");
-        return ("", "");
+        return (surfaces, geometry);
     }
 
     [Fact]
@@ -1586,16 +1570,12 @@ public sealed class FixtureTests : IDisposable
             using var register = new ProcessRegister();
             var pid = Attachable.Launch(register, Started(arguments)).Pid;
 
-            var drew = false;
-            for (var attempt = 0; attempt < 200 && !drew; attempt++)
-            {
-                drew = TopLevelWindows.OfProcess(pid).Count > 0;
-                if (!drew)
-                    Thread.Sleep(25);
-            }
+            // Carried rather than asserted here, because the process has to be stopped either way:
+            // a failure that leaves the shape on the desk fails the next case as well.
+            var drew = Waits.Trying("draw", () => TopLevelWindows.OfProcess(pid).Count > 0);
 
             Attachable.StopAndSettle(register);
-            Assert.True(drew, $"--{name} opened nothing a person could look at");
+            Assert.True(drew.Happened, Waits.Missed("draw", $"--{name} opened nothing a person could look at", drew));
         }
     }
 
