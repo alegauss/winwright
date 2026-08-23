@@ -7,6 +7,8 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW152** (deps: —) **nothing reads the survivors a run had to stop, so the summary never names what outlived the scenario** — What the register had to stop reaches the run's own reading, so a scenario that left a process behind says so where the rest of the run is read. → §WW152
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 - 📋 **WW143** (deps: —) **the suite spells the engine's own waiting rule by hand eighteen times, and one of them is a bare sleep** — Every wait in this repository is a deadline on a condition taken through the engine's own attempt, so the suite obeys the rule it exists to prove. → §WW143
