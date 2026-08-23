@@ -121,31 +121,6 @@ it is the one that should be reading a field rather than a substring.
 
 ## Block D — Act — patterns before pointers
 
-### §WW134 The guard speaks one language
-
-Found while shipping the guard itself. A declared entry is matched against the
-automation id first and the displayed name second, and the second is the one every
-project will reach for, because the name is what an author reading a menu can see. It is
-also the one field a translation rewrites.
-
-So a project declaring "Quit" is guarded on an English desk and unguarded the moment the
-same application comes up in pt-BR showing "Sair" - and unguarded silently, because
-nothing about a name that matched nothing looks different from a name that was never
-dangerous. The failure mode is the worst available: the run presses the entry that ends
-the run, on the machine where somebody was least expecting it.
-
-This tool already knows how to resolve a string across languages. It reads the project's
-language files, resolves which one the application is showing, and has a precondition
-about the answer. The destructive list is the one place that knowledge is not being
-used, and the fix is small: declare the entry by whatever a translation cannot move -
-the automation id, or a key the language files resolve to the displayed text - and
-refuse a declaration that can only be matched by a name where the project ships more
-than one language.
-
-The general rule underneath is worth keeping: a safety check compared against text a
-person sees is a safety check with an expiry date, and the expiry is whenever somebody
-translates the application.
-
 ### §WW135 A guard the caller may decline by accident
 
 The refusal landed on the door every act passes through, which is right, and it reads

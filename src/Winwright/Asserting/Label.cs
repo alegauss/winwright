@@ -216,35 +216,20 @@ public static class Labels
         }
     }
 
+    /// <summary>
+    /// One key out of one strings file. The reading itself lives in <see cref="JsonSource"/>, so
+    /// the destructive guard and this answer the same question the same way; what is here is the
+    /// refusal, which is a label's business and not a file reader's.
+    /// </summary>
     private static string? Read(string file, string key)
     {
-        JsonElement element;
         try
         {
-            using var document = JsonDocument.Parse(
-                System.IO.File.ReadAllText(file),
-                new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
-            element = document.RootElement.Clone();
+            return JsonSource.Value(file, key);
         }
         catch (Exception unreadable) when (unreadable is JsonException or IOException)
         {
             throw new UnusableLabelException($"{file} could not be read: {unreadable.Message}");
         }
-
-        var walked = element;
-        foreach (var step in key.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        {
-            if (walked.ValueKind != JsonValueKind.Object || !walked.TryGetProperty(step, out walked))
-                return Flat(element, key);
-        }
-
-        return walked.ValueKind == JsonValueKind.String ? walked.GetString() : Flat(element, key);
     }
-
-    private static string? Flat(JsonElement root, string key) =>
-        root.ValueKind == JsonValueKind.Object
-            && root.TryGetProperty(key.Trim(), out var value)
-            && value.ValueKind == JsonValueKind.String
-                ? value.GetString()
-                : null;
 }

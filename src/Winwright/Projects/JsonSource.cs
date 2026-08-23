@@ -21,6 +21,46 @@ namespace Winwright.Projects;
 public static class JsonSource
 {
     /// <summary>
+    /// The string under <paramref name="key"/>, or null where the file declares none.
+    /// <para>
+    /// Nested first and then flat, because a strings file comes in both shapes and a project using
+    /// one should not have to say which. Lifted here from the label reader when the destructive
+    /// guard needed the same answer: two copies of how this project reads a strings file would be
+    /// two readers that drift, and the second would drift silently.
+    /// </para>
+    /// </summary>
+    /// <param name="file">The JSON file.</param>
+    /// <param name="key">The key, dotted for a nested one.</param>
+    /// <exception cref="IOException">Where the file cannot be read.</exception>
+    /// <exception cref="JsonException">Where it is not JSON.</exception>
+    public static string? Value(string file, string key)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(file);
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+        using var document = JsonDocument.Parse(
+            File.ReadAllText(file),
+            new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+
+        var root = document.RootElement;
+        var walked = root;
+        foreach (var step in key.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (walked.ValueKind != JsonValueKind.Object || !walked.TryGetProperty(step, out walked))
+                return Flat(root, key);
+        }
+
+        return walked.ValueKind == JsonValueKind.String ? walked.GetString() : Flat(root, key);
+    }
+
+    private static string? Flat(JsonElement root, string key) =>
+        root.ValueKind == JsonValueKind.Object
+            && root.TryGetProperty(key.Trim(), out var value)
+            && value.ValueKind == JsonValueKind.String
+                ? value.GetString()
+                : null;
+
+    /// <summary>
     /// The line <paramref name="key"/> is declared on, counted from 1. Zero where the file is not
     /// there, does not parse, or declares no such key — an absence rather than a throw, since a
     /// provenance nobody could read is still an answer about where a value came from.

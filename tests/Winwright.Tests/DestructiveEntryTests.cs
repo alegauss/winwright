@@ -91,7 +91,7 @@ public sealed class DestructiveEntryTests : IDisposable
         var declaration = Declared("Quit", "Delete account");
 
         Assert.True(declaration.Declares("destructive"));
-        Assert.Equal(["Quit", "Delete account"], declaration.Destructive.Entries);
+        Assert.Equal(["Quit", "Delete account"], declaration.Destructive.Entries.Select(one => one.Declared));
         Assert.Contains("2 entries are declared destructive", declaration.Destructive.Sentence());
     }
 
@@ -202,7 +202,7 @@ public sealed class DestructiveEntryTests : IDisposable
     {
         var declared = Destructive.Of(["Quit", "  ", "", "quit"]);
 
-        Assert.Equal(["Quit"], declared.Entries);
+        Assert.Equal(["Quit"], declared.Entries.Select(one => one.Declared));
         Assert.Null(declared.Matched("Open", ""));
         Assert.Null(declared.Matched("", ""));
     }

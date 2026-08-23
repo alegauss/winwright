@@ -60,7 +60,7 @@ public sealed class ProjectDeclaration
                     $"{path} allows {declared} attempts, and an act nobody may attempt is not an act", nameof(shape))
             : Acting.Retry.DefaultCap;
         Timeouts = Timeouts.Declared(shape.Timeouts, path);
-        Destructive = Destructive.Of(shape.Destructive);
+        Destructive = Destructive.Of(shape.Destructive, LanguageFiles, path);
     }
 
     /// <summary>The declaration file that was read.</summary>
@@ -202,7 +202,7 @@ public sealed class ProjectDeclaration
 
         [JsonPropertyName("attempts")] public int? Attempts { get; init; }
 
-        [JsonPropertyName("destructive")] public IReadOnlyList<string>? Destructive { get; init; }
+        [JsonPropertyName("destructive")] public IReadOnlyList<System.Text.Json.JsonElement>? Destructive { get; init; }
     }
 
     private sealed record LanguageShape

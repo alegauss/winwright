@@ -61,6 +61,7 @@
 - ✅ **WW33** **an act leaves the window in a state the next case did not ask for** — Surfaces are recorded as a case found them and put back on leaving the scope, only where they moved, and a restore that did not take is reported rather than assumed.
 - ✅ **WW115** **a pointer act says what it clicks and never why the pattern route was unavailable** — A pointer act now states why the pattern route was unavailable, the summary groups the cost by reason and names what a peer would remove, and preflight reads each claim back against the tree.
 - ✅ **WW116** **nothing declares which entries are destructive, and invoke will press any of them** — A project names what ends the run beside its executable, and the door every act passes through refuses those entries until a subject says MeaningIt once, where a reviewer reads it.
+- ✅ **WW134** **a destructive entry declared by name stops being refused once the application shows another language** — An entry is declared by an automation id or by a strings key resolved in every language the project ships, and a bare name is refused where more than one is shipped.
 
 ## Block E — Capture — the picture that proves what it photographed
 
