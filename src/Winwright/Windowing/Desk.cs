@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Automation;
 
+using Winwright.Locating;
 using Winwright.Verdicts;
 
 namespace Winwright.Windowing;
@@ -42,9 +43,11 @@ public sealed record Desk
     /// <summary>Something owning the keyboard. Absent says nothing does, which is a locked desk.</summary>
     public const string ForegroundToTake = "a foreground to take";
 
-    private Desk(IReadOnlyList<Precondition> conditions)
+    private Desk(IReadOnlyList<Precondition> conditions, int automationLooks, int automationWaitedMs)
     {
         Conditions = conditions;
+        AutomationLooks = automationLooks;
+        AutomationWaitedMs = automationWaitedMs;
     }
 
     /// <summary>Every condition this reading took, met and absent alike, in the order it took them.</summary>
@@ -53,6 +56,22 @@ public sealed record Desk
     /// <summary>The ones this machine does not have, in the same order.</summary>
     public IReadOnlyList<Precondition> Absent =>
         new ReadOnlyCollection<Precondition>(Conditions.Where(one => !one.Satisfied).ToList());
+
+    /// <summary>
+    /// How many looks it took to settle whether UI Automation is reachable, and how long they took.
+    /// <para>
+    /// WW140: a reading that needed a second attempt says so. One look is the ordinary answer; more
+    /// than one means this machine failed the call and then answered, which is a fact about the
+    /// desk worth having in front of whoever is reading a run that behaved oddly.
+    /// </para>
+    /// </summary>
+    public int AutomationLooks { get; }
+
+    /// <summary>How long those looks took, in milliseconds.</summary>
+    public int AutomationWaitedMs { get; }
+
+    /// <summary>Whether reading this desk had to wait for UI Automation to settle.</summary>
+    public bool AutomationSettled => AutomationLooks > 1;
 
     /// <summary>Whether this desk can observe anything at all.</summary>
     public bool CanObserve => Absent.Count == 0;
@@ -65,15 +84,22 @@ public sealed record Desk
     public Precondition? FirstAbsent => Absent.Count == 0 ? null : Absent[0];
 
     /// <summary>Read the desk now.</summary>
-    public static Desk Read() => new(new ReadOnlyCollection<Precondition>(
-    [
-        Session(),
-        Desktop(),
-        Display(),
-        Coordinates(),
-        Automation(),
-        Keyboard(),
-    ]));
+    public static Desk Read()
+    {
+        var automation = Automation();
+        return new Desk(
+            new ReadOnlyCollection<Precondition>(
+            [
+                Session(),
+                Desktop(),
+                Display(),
+                Coordinates(),
+                automation.Condition,
+                Keyboard(),
+            ]),
+            automation.Looks,
+            automation.WaitedMs);
+    }
 
     /// <summary>
     /// The hole an assertion becomes when this desk cannot observe it. Refused where the desk can
@@ -89,10 +115,19 @@ public sealed record Desk
             : AssertionResult.Unchecked(assertion, FirstAbsent);
 
     /// <summary>The whole reading in one sentence, said either way.</summary>
-    public string Sentence() => CanObserve
-        ? $"this desk can be observed: all {Conditions.Count} conditions are met."
-        : $"this desk cannot observe {(Absent.Count == 1 ? "everything" : "much")}: "
-            + string.Join("; ", Absent.Select(one => $"{one.Name} — {one.Absence}")) + ".";
+    public string Sentence()
+    {
+        // Said whichever way the reading went: a desk that answered on the second look is one that
+        // failed on the first, and a run that behaved oddly is read by somebody looking for that.
+        var settled = AutomationSettled
+            ? $" UI Automation answered on look {AutomationLooks} after {AutomationWaitedMs} ms."
+            : "";
+
+        return CanObserve
+            ? $"this desk can be observed: all {Conditions.Count} conditions are met.{settled}"
+            : $"this desk cannot observe {(Absent.Count == 1 ? "everything" : "much")}: "
+                + string.Join("; ", Absent.Select(one => $"{one.Name} — {one.Absence}")) + $".{settled}";
+    }
 
     /// <summary>One line per condition, met ones included, for whoever prints a report.</summary>
     public IReadOnlyList<string> Render() => new ReadOnlyCollection<string>(
@@ -164,23 +199,110 @@ public sealed record Desk
             : Precondition.Absent(TrustworthyCoordinates, DisplayAwareness.Ensure().ToString().TrimEnd('.'));
     }
 
-    private static Precondition Automation()
+    /// <summary>
+    /// Whether a failure to reach UI Automation is one a second look could answer differently.
+    /// <para>
+    /// WW140, and the whole of the decision. An assembly that will not load never will: the file is
+    /// not there, or the type is not in it, or the image is the wrong architecture, and no amount of
+    /// waiting changes any of those. A COM call that failed is the other thing entirely — measured
+    /// once in a loaded run as "Unexpected HRESULT has been returned from a call to a COM
+    /// component", against a machine that answered on the next look and every look after it.
+    /// </para>
+    /// <para>
+    /// Anything not named here is not caught at all. A reading that swallowed every exception would
+    /// report a desk it never managed to look at, which is the shape of green this project exists
+    /// to withdraw.
+    /// </para>
+    /// </summary>
+    /// <param name="failure">What the call threw.</param>
+    public static bool WorthAnotherLook(Exception failure)
     {
-        try
-        {
-            // Touched rather than reflected over: the assemblies load lazily, so a reference that
-            // is present on disk and unusable at run time reads as present until something asks.
-            return AutomationElement.RootElement is null
-                ? Precondition.Absent(AutomationAssemblies, "UI Automation answered with no root element")
-                : Precondition.Met(AutomationAssemblies);
-        }
-        catch (Exception unusable)
-            when (unusable is FileNotFoundException or TypeLoadException or BadImageFormatException
-                or InvalidOperationException or System.Runtime.InteropServices.COMException)
-        {
-            return Precondition.Absent(
-                AutomationAssemblies, $"UI Automation is not usable here: {unusable.GetType().Name} - {unusable.Message}");
-        }
+        ArgumentNullException.ThrowIfNull(failure);
+        return Caught(failure)
+            && failure is InvalidOperationException or System.Runtime.InteropServices.COMException;
+    }
+
+    /// <summary>
+    /// Whether this reading answers for a failure at all, rather than letting it out.
+    /// <para>
+    /// Three outcomes and not two. A failure this catches is either settled — the assemblies are
+    /// not loadable and never will be — or worth another look. A failure it does not catch is
+    /// neither: it leaves, because a reading that swallowed every exception would report a desk it
+    /// never managed to look at, and that is the green this project exists to withdraw.
+    /// </para>
+    /// </summary>
+    /// <param name="failure">What the call threw.</param>
+    public static bool Caught(Exception failure)
+    {
+        ArgumentNullException.ThrowIfNull(failure);
+        return failure is FileNotFoundException or TypeLoadException or BadImageFormatException
+            or InvalidOperationException or System.Runtime.InteropServices.COMException;
+    }
+
+    /// <summary>
+    /// How long a blip gets to pass before this calls UI Automation unusable. Short, because it is
+    /// read once a run and a transient COM failure answers on the next look or not at all.
+    /// </summary>
+    private const int SettleMs = 2000;
+
+    /// <summary>
+    /// Whether UI Automation can be reached, and how many looks it took.
+    /// <para>
+    /// WW140. This caught two different facts with one clause. A machine with no automation
+    /// assemblies fails the call every time; a machine under load fails it once and answers the
+    /// next moment — and reporting them identically is this block's own criterion pointed the wrong
+    /// way, since a blip reported as a missing subsystem is a defect in the desk reported as a fact
+    /// about it. Caught once in a loaded full run, against a class that passes six times of six on
+    /// its own.
+    /// </para>
+    /// <para>
+    /// So the two are told apart by which failure arrived. An assembly that will not load never
+    /// will, and is answered on the first attempt rather than after a deadline; a COM call that
+    /// failed is looked at again, the way every other reading here that can lose a race is.
+    /// </para>
+    /// </summary>
+    private static (Precondition Condition, int Looks, int WaitedMs) Automation()
+    {
+        string? blip = null;
+
+        var seen = Attempt.Until<Precondition>(
+            () =>
+            {
+                try
+                {
+                    // Touched rather than reflected over: the assemblies load lazily, so a
+                    // reference present on disk and unusable at run time reads as present.
+                    return AutomationElement.RootElement is null
+                        ? Precondition.Absent(AutomationAssemblies, "UI Automation answered with no root element")
+                        : Precondition.Met(AutomationAssemblies);
+                }
+                catch (Exception missing) when (Caught(missing) && !WorthAnotherLook(missing))
+                {
+                    // Settled on the first look: no second attempt loads an assembly that is not
+                    // there, and spending a deadline to learn it is the cost this task refuses.
+                    return Precondition.Absent(
+                        AutomationAssemblies,
+                        $"UI Automation is not usable here: {missing.GetType().Name} - {missing.Message}");
+                }
+                catch (Exception unsettled) when (WorthAnotherLook(unsettled))
+                {
+                    blip = $"{unsettled.GetType().Name} - {unsettled.Message}";
+                    return null;
+                }
+            },
+            SettleMs,
+            pollMs: 25);
+
+        if (seen.Found)
+            return (seen.Value!, seen.Polls, seen.WaitedMs);
+
+        // Every look failed the transient way, which after a deadline is not transient any more.
+        return (
+            Precondition.Absent(
+                AutomationAssemblies,
+                $"UI Automation kept failing for {seen.WaitedMs} ms over {seen.Polls} looks: {blip}"),
+            seen.Polls,
+            seen.WaitedMs);
     }
 
     private static Precondition Keyboard()

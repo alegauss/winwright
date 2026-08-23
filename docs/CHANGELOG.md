@@ -34,6 +34,7 @@
 - ✅ **WW119** **the tray fixture returns before the shell has put the icon anywhere a test can find it** — The tray fixture blocks until a reading finds the icon rather than until the shell takes the message, on the engine's own deadline, and shuts the flyout it opened to look.
 - ✅ **WW127** **two checks read the live desktop root and assert about whatever the machine is showing** — Both property checks read a control this suite made, and the desktop root keeps one reading that says what the engine does with an element it did not choose rather than what that element is.
 - ✅ **WW133** **an input case on a busy desk fails about the code, because a refused foreground is not turned into a hole** — Every input result answers with the third verdict, so a desk this run could not have is a hole naming the condition it lacked rather than a red about the application.
+- ✅ **WW140** **one transient COM error from UI Automation reads as a desk that cannot observe anything at all** — An assembly that will not load is answered on the first look and a failed call is looked at again on a deadline, with a reading that needed two saying so.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

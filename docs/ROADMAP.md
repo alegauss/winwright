@@ -7,8 +7,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW140** (deps: —) **one transient COM error from UI Automation reads as a desk that cannot observe anything at all** — The desk tells a machine without the automation assemblies from a call that failed once under load, so a passing suite is not turned red by a blip. → §WW140
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 - 📋 **WW143** (deps: —) **the suite spells the engine's own waiting rule by hand eighteen times, and one of them is a bare sleep** — Every wait in this repository is a deadline on a condition taken through the engine's own attempt, so the suite obeys the rule it exists to prove. → §WW143
