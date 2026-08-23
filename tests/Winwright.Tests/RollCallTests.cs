@@ -303,16 +303,43 @@ public sealed class RollCallTests
         }
     }
 
+    /// <summary>
+    /// Take the roll into a pair of writers of this case's own, and hand back both.
+    /// <para>
+    /// WW149. Every case here used to let the entry point write to the console it found, so a real
+    /// run carried these sentences above its own — two verdicts about different runs, in the one
+    /// output a reader is meant to be able to act on without opening the log.
+    /// </para>
+    /// </summary>
+    /// <param name="args">What the entry point is being given.</param>
+    private static (int Code, string Said, string Wrong) Taking(params string[] args)
+    {
+        using var said = new StringWriter();
+        using var wrong = new StringWriter();
+
+        var code = Program.Take(args, said, wrong);
+        return (code, said.ToString(), wrong.ToString());
+    }
+
     [Fact]
     public void A_roll_that_could_not_be_taken_exits_differently_from_one_that_found_nothing_wrong()
     {
         // The one thing that must not happen: a check that could not run reading as a check that
         // ran and was happy. Three exit codes, and zero is only ever the last of them.
-        Assert.Equal(Program.Unreadable, Program.Main(["--results", "nowhere.trx"]));
-        Assert.Equal(
-            Program.Unreadable,
-            Program.Main(["--discovered", "no-such-listing.txt", "--results", "no-such.trx"]));
+        var missingArguments = Taking("--results", "nowhere.trx");
+        Assert.Equal(Program.Unreadable, missingArguments.Code);
+
+        var missingFiles = Taking("--discovered", "no-such-listing.txt", "--results", "no-such.trx");
+        Assert.Equal(Program.Unreadable, missingFiles.Code);
         Assert.NotEqual(0, Program.Short);
+
+        // And it says which of the two it was, on the stream a reader looks at for a refusal. A
+        // check that could not be taken and one that was taken and was happy differ by these words
+        // as well as by the code, and nothing checked the words at all before this.
+        Assert.Contains("usage: Winwright.RollCall", missingArguments.Wrong);
+        Assert.Contains("the roll could not be taken", missingFiles.Wrong);
+        Assert.Empty(missingArguments.Said);
+        Assert.Empty(missingFiles.Said);
     }
 
     [Fact]
@@ -338,9 +365,26 @@ public sealed class RollCallTests
 
         try
         {
-            Assert.Equal(0, Program.Main(["--discovered", listing, "--results", whole]));
-            Assert.Equal(Program.Short, Program.Main(["--discovered", listing, "--results", short_]));
-            Assert.Equal(Program.Short, Program.Main(["--discovered", listing, "--results", skipped]));
+            var answered = Taking("--discovered", listing, "--results", whole);
+            var lost = Taking("--discovered", listing, "--results", short_);
+            var kept = Taking("--discovered", listing, "--results", skipped);
+
+            Assert.Equal(0, answered.Code);
+            Assert.Equal(Program.Short, lost.Code);
+            Assert.Equal(Program.Short, kept.Code);
+
+            // Which stream carries the verdict is the code said a second way, and it is the half a
+            // reader acts on: a whole roll is an answer and a short one is a refusal.
+            Assert.Equal("all 4 discovered cases ran.", answered.Said.Trim());
+            Assert.Empty(answered.Wrong);
+
+            Assert.Empty(lost.Said);
+            Assert.Contains("3 of 4 were never recorded at all", lost.Wrong);
+
+            // WW137 said in the words as well as in the number: every name written down, none of
+            // them run, and the sentence a reader gets says recorded rather than missing.
+            Assert.Empty(kept.Said);
+            Assert.Contains("4 of 4 were recorded and never ran", kept.Wrong);
         }
         finally
         {
