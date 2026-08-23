@@ -49,13 +49,23 @@ public sealed class MenuTests : IDisposable
     {
         var decoy = PumpedDialog.Open("winwright decoy");
         decoys.Add(decoy);
-        Assert.Equal(ForegroundState.Ours, Foreground.Check(decoy.Frame).State);
+
+        // WW133: what these cases need is that the dialog under test no longer holds the desk, and
+        // not that the decoy took it. Windows makes the second promise only sometimes - once this
+        // process has been refused the foreground it stops being granted - and insisting on it is
+        // the misattribution this block's criterion forbids, one floor down in the fixture.
+        Assert.NotEqual(ForegroundState.Ours, Foreground.Check(dialog.Frame).State);
     }
 
     [Fact]
     public void The_menu_bar_is_entered_the_way_a_keyboard_user_enters_it()
     {
         var entered = Menu.Enter(dialog.Frame);
+
+        // WW133: a menu is walked with keys, so a desk this run could not have is a hole about the
+        // machine rather than a claim about this window's menu bar.
+        if (BusyDesk.Excused(entered.AsAssertion("the menu bar is entered")))
+            return;
 
         Assert.True(entered.Sent);
         Assert.Equal("File", entered.Highlighted);
@@ -67,6 +77,9 @@ public sealed class MenuTests : IDisposable
         Menu.Enter(dialog.Frame);
 
         var walked = Menu.To(dialog.Frame, "Recent");
+
+        if (BusyDesk.Excused(walked.AsAssertion("the walk reaches Recent")))
+            return;
 
         Assert.True(walked.Reached);
         Assert.Equal(["File", "New", "Open", "Recent"], walked.Passed);
@@ -80,6 +93,9 @@ public sealed class MenuTests : IDisposable
         Menu.To(dialog.Frame, "Recent");
 
         var expanded = Menu.Expand(dialog.Frame);
+
+        if (BusyDesk.Excused(expanded.AsAssertion("right expands the submenu")))
+            return;
 
         Assert.True(expanded.Reached);
         Assert.Equal("one.txt", expanded.Highlighted);
@@ -163,7 +179,7 @@ public sealed class MenuTests : IDisposable
         var entered = Menu.Enter(dialog.Frame);
 
         Assert.False(entered.Sent);
-        Assert.Contains("winwright decoy", entered.Foreground.Absence);
+        Assert.True(BusyDesk.Excused(entered.AsAssertion("the menu bar is entered")));
         Assert.Equal(Winwright.Tracing.StepVerdict.Unchecked, entered.AsTraceStep().Verdict);
     }
 

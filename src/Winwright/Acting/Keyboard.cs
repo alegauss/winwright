@@ -86,6 +86,33 @@ public sealed record TypedResult
         return $"{Act}: the control reads \"{ReadBack}\" and not \"{Expected()}\"{because}.";
     }
 
+    /// <summary>
+    /// The result a verdict counts. A desk that refused the foreground is a <em>hole</em> and never
+    /// a failure.
+    /// <para>
+    /// WW133. Input synthesised into somebody else's window is not a weaker version of this act, it
+    /// is a different act against a window nobody asked about — so nothing is sent, and what a case
+    /// then reports has to be that the check did not run rather than that the application is wrong.
+    /// This block's criterion says it outright: nothing about the desk is reported as a defect in
+    /// the code.
+    /// </para>
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public AssertionResult AsAssertion(string named)
+    {
+        // The focus is the second condition and the same kind of fact: a control that would not
+        // take the caret is a desk this run could not arrange, not an application that is wrong.
+        if (!Foreground.Satisfied)
+            return AssertionResult.Unchecked(named, Foreground);
+
+        if (!Focus.Satisfied)
+            return AssertionResult.Unchecked(named, Focus);
+
+        return Arrived
+            ? AssertionResult.Pass(named, ToString())
+            : AssertionResult.Fail(named, ToString());
+    }
+
     /// <summary>The step a trace records, unchecked where no key was sent.</summary>
     public TraceStep AsTraceStep() => new()
     {

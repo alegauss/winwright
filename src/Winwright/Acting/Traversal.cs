@@ -71,6 +71,28 @@ public sealed record TraversalResult
             : $"{Key} left the focus on {Named(After)}.";
     }
 
+    /// <summary>
+    /// The result a verdict counts. A desk that refused the foreground is a <em>hole</em> and never
+    /// a failure.
+    /// <para>
+    /// WW133. Input synthesised into somebody else's window is not a weaker version of this act, it
+    /// is a different act against a window nobody asked about — so nothing is sent, and what a case
+    /// then reports has to be that the check did not run rather than that the application is wrong.
+    /// This block's criterion says it outright: nothing about the desk is reported as a defect in
+    /// the code.
+    /// </para>
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public AssertionResult AsAssertion(string named)
+    {
+        if (!Foreground.Satisfied)
+            return AssertionResult.Unchecked(named, Foreground);
+
+        return Moved
+            ? AssertionResult.Pass(named, ToString())
+            : AssertionResult.Fail(named, ToString());
+    }
+
     /// <summary>The step a trace records.</summary>
     public TraceStep AsTraceStep() => new()
     {
@@ -138,6 +160,21 @@ public sealed record NudgeResult
         return Moved
             ? $"{Element} moved from {Before} to {After}{why}."
             : $"{Element} stayed at {Before}{why}.";
+    }
+
+    /// <summary>
+    /// The result a verdict counts. A desk that refused the foreground is a <em>hole</em> and never
+    /// a failure — see <see cref="TraversalResult.AsAssertion"/> for why.
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public AssertionResult AsAssertion(string named)
+    {
+        if (!Foreground.Satisfied)
+            return AssertionResult.Unchecked(named, Foreground);
+
+        return Moved
+            ? AssertionResult.Pass(named, ToString())
+            : AssertionResult.Fail(named, ToString());
     }
 }
 

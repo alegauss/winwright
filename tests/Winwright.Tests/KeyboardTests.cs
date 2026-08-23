@@ -48,7 +48,11 @@ public sealed class KeyboardTests : IDisposable
     {
         var decoy = PumpedDialog.Open("winwright decoy");
         decoys.Add(decoy);
-        Assert.Equal(ForegroundState.Ours, Foreground.Check(decoy.Frame).State);
+
+        // What these cases need is that the dialog under test no longer holds the desk, and not
+        // that the decoy took it. Windows makes the second promise only sometimes, and insisting
+        // on it is the fragility WW133 is about, reproduced in the helper for it.
+        Assert.NotEqual(ForegroundState.Ours, Foreground.Check(dialog.Frame).State);
     }
 
     private Subject On(string locator) =>
@@ -58,9 +62,15 @@ public sealed class KeyboardTests : IDisposable
     public void Text_typed_through_the_keyboard_is_read_back_from_the_control()
     {
         var edit = On("Edit[order=top]");
-        Assert.Equal(ForegroundState.Ours, Foreground.Check(dialog.Frame).State);
 
         var typed = Keyboard.Type(edit, "beta");
+
+        // WW133: a desk this run could not have is a hole, and the control is untouched either way.
+        if (BusyDesk.Excused(typed.AsAssertion("the box reads beta")))
+        {
+            Assert.Equal("alpha", edit.ReadOnce().Values.Value);
+            return;
+        }
 
         Assert.True(typed.Sent);
         Assert.Equal("beta", typed.ReadBack);
@@ -73,6 +83,12 @@ public sealed class KeyboardTests : IDisposable
         var locked = On("Edit[order=bottom]");
 
         var typed = Keyboard.Type(locked, "beta");
+
+        if (BusyDesk.Excused(typed.AsAssertion("the locked box keeps its value")))
+        {
+            Assert.Equal("locked", locked.ReadOnce().Values.Value);
+            return;
+        }
 
         Assert.True(typed.Sent);
         Assert.False(typed.Arrived);
@@ -104,7 +120,11 @@ public sealed class KeyboardTests : IDisposable
 
         Assert.False(typed.Sent);
         Assert.False(typed.Foreground.Satisfied);
-        Assert.Contains("winwright decoy", typed.Foreground.Absence);
+
+        // Whoever holds it, named. Not the decoy by name: this process may have been refused the
+        // foreground before the decoy opened, and then the desk belongs to whatever was already up.
+        Assert.False(string.IsNullOrWhiteSpace(typed.Foreground.Absence));
+        Assert.True(BusyDesk.Excused(typed.AsAssertion("the box reads beta")));
         Assert.Contains("nothing was sent", typed.ToString());
         Assert.Equal("alpha", edit.ReadOnce().Values.Value);
     }
@@ -131,9 +151,9 @@ public sealed class KeyboardTests : IDisposable
     [Fact]
     public void What_did_not_arrive_is_a_failed_step_and_what_was_never_sent_is_a_hole()
     {
-        Assert.Equal(
-            Winwright.Tracing.StepVerdict.Failed,
-            Keyboard.Type(On("Edit[order=bottom]"), "beta").AsTraceStep().Verdict);
+        var locked = Keyboard.Type(On("Edit[order=bottom]"), "beta");
+        if (!BusyDesk.Excused(locked.AsAssertion("the locked box keeps its value")))
+            Assert.Equal(Winwright.Tracing.StepVerdict.Failed, locked.AsTraceStep().Verdict);
 
         Decoy();
         Assert.Equal(
@@ -148,8 +168,11 @@ public sealed class KeyboardTests : IDisposable
 
         var typed = Keyboard.Run(new TypedAct("type", edit.Locator, "beta", ReplacingWhatIsThere: false), edit);
 
+        // The expectation is arithmetic on what was there and holds whether or not a key was sent;
+        // the arrival needs the desk, so it is checked only where the desk was there to need.
         Assert.Equal("alphabeta", typed.Expected());
-        Assert.True(typed.Arrived);
+        if (!BusyDesk.Excused(typed.AsAssertion("the box reads alphabeta")))
+            Assert.True(typed.Arrived);
     }
 
     [Fact]

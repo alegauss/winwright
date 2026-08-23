@@ -49,28 +49,6 @@ check the project has, it is a check the project offers.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW133 A refused foreground is a fact about the desk
-
-WW114 asked for a desktop of the fixtures' own and the measurement killed it. A desktop
-made with CreateDesktop takes windows, and UI Automation reads them from either side of
-the boundary. Three readings decide it. An STA thread cannot enter one at all: the
-apartment already owns a window, so the call comes back ERROR_BUSY, and the pumped
-fixture is STA by design. SetForegroundWindow on a desktop that is not the input desktop
-returns false and GetForegroundWindow answers zero, so the fixtures would go from
-sometimes refused the foreground to always refused it. And SendInput from a thread on
-one fails with ERROR_ACCESS_DENIED, so the input tests the idea existed to steady could
-not send a key. Only SwitchDesktop makes it the input desktop, and that blacks the
-screen of the person at the keyboard for the length of the run - the one thing the same
-idea promised not to do.
-
-What the complaint underneath was right about stands: whether these tests pass is partly
-a question about what else is on the screen. The answer is this block's own criterion,
-that nothing about the desk is reported as a defect in the code. A case that needs the
-foreground and is refused it should record a hole naming the desk, the way every other
-unmeetable condition here does, rather than go red about the application. The fixture
-already declines to insist; what is missing is the sentence on the other side of the
-refusal.
-
 ### §WW140 A blip is not a missing assembly
 
 Caught in a full-suite run while WW119 was being verified. The desk reading touches

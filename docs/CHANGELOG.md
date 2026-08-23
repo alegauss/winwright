@@ -31,6 +31,7 @@
 - 🗑 **WW114** **the suite's input tests compete for a foreground Windows will not always grant them** — superseded by WW133: Measured and refuted: a desktop that is not the input desktop grants no foreground at all and refuses SendInput outright, and an STA thread cannot even enter one.
 - ✅ **WW119** **the tray fixture returns before the shell has put the icon anywhere a test can find it** — The tray fixture blocks until a reading finds the icon rather than until the shell takes the message, on the engine's own deadline, and shuts the flyout it opened to look.
 - ✅ **WW127** **two checks read the live desktop root and assert about whatever the machine is showing** — Both property checks read a control this suite made, and the desktop root keeps one reading that says what the engine does with an element it did not choose rather than what that element is.
+- ✅ **WW133** **an input case on a busy desk fails about the code, because a refused foreground is not turned into a hole** — Every input result answers with the third verdict, so a desk this run could not have is a hole naming the condition it lacked rather than a red about the application.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

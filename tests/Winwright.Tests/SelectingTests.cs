@@ -64,7 +64,12 @@ public sealed class SelectingTests : IDisposable
     {
         var decoy = PumpedDialog.Open("winwright decoy");
         decoys.Add(decoy);
-        Assert.Equal(ForegroundState.Ours, Foreground.Check(decoy.Frame).State);
+
+        // WW133: what these cases need is that the dialog under test no longer holds the desk, and
+        // not that the decoy took it. Windows makes the second promise only sometimes - once this
+        // process has been refused the foreground it stops being granted - and insisting on it is
+        // the misattribution this block's criterion forbids, one floor down in the fixture.
+        Assert.NotEqual(ForegroundState.Ours, Foreground.Check(dialog.Frame).State);
     }
 
     private Subject Item(string name) =>

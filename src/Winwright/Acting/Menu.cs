@@ -45,6 +45,21 @@ public sealed record MenuWalk
     public int Hops => Passed.Count;
 
     /// <summary>What happened, with the route in it.</summary>
+    /// <summary>
+    /// The result a verdict counts. A desk that refused the foreground is a <em>hole</em> and never
+    /// a failure: nothing was sent, so nothing about the application was checked at all.
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public AssertionResult AsAssertion(string named)
+    {
+        if (!Foreground.Satisfied)
+            return AssertionResult.Unchecked(named, Foreground);
+
+        return Reached
+            ? AssertionResult.Pass(named, ToString())
+            : AssertionResult.Fail(named, ToString());
+    }
+
     public override string ToString()
     {
         if (!Sent)

@@ -113,6 +113,28 @@ public sealed record PointerResult
     /// <summary>Whether input was actually synthesized.</summary>
     public bool Landed => Foreground.Satisfied && Element is not null;
 
+    /// <summary>
+    /// The result a verdict counts. A desk that refused the foreground is a <em>hole</em> and never
+    /// a failure.
+    /// <para>
+    /// WW133. Input synthesised into somebody else's window is not a weaker version of this act, it
+    /// is a different act against a window nobody asked about — so nothing is sent, and what a case
+    /// then reports has to be that the check did not run rather than that the application is wrong.
+    /// This block's criterion says it outright: nothing about the desk is reported as a defect in
+    /// the code.
+    /// </para>
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public AssertionResult AsAssertion(string named)
+    {
+        if (!Foreground.Satisfied)
+            return AssertionResult.Unchecked(named, Foreground);
+
+        return Landed
+            ? AssertionResult.Pass(named, $"{Act} landed on {Element} at {At}")
+            : AssertionResult.Fail(named, $"{Act} reached nothing: no element resolved");
+    }
+
     /// <summary>The step a trace records, unchecked where the desktop was not ours.</summary>
     public TraceStep AsTraceStep() => new()
     {
