@@ -14,6 +14,7 @@
 ## Block D — Act — patterns before pointers
 
 - 📋 **WW165** (deps: —) **opening the notification overflow answers a bare bool, so a run that could not open it says only false** — It answers a reading carrying the reason and the step its sibling already answers with, because a red naming no cause sends a reader to a re-run rather than to the shell. → §WW165
+- 📋 **WW168** (deps: WW165) **finding a tray icon answers null whether the icon is absent or the flyout simply would not open** — Find says which of the two it was, because an icon that is not there and a flyout that would not open are different facts and a caller reading null cannot tell them apart. → §WW168
 
 ## Block E — Capture — the picture that proves what it photographed
 
