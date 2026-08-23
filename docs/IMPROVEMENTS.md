@@ -102,29 +102,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW147 A count that exists for one expression
-
-Read against this block's criterion once its last line shipped. The criterion says a
-retry is bounded and said out loud: no act retries until it passes, the attempt count
-reaches the trace, and an act that only ever works on the third attempt is visible in
-the output. The first clause holds and the other two do not.
-
-The retry type carries both halves. Bounded runs an act to a cap and answers how many
-attempts it took; Recorded stamps that count onto the step a trace records, and says in
-its own comment that a step which took three goes is a different step from one that took
-one even when both are green. Recorded is called by nothing.
-
-The one site that retries is the surface restorer pressing a toggle back to where it
-was. It calls Bounded and drops the answer, so the number exists for the length of one
-expression and then does not. A control that only comes round on the third press is
-invisible, which is the finding the criterion asks to see.
-
-What is owed is the join and not a new mechanism: the restorer keeps what Bounded
-answered, and whatever it reports carries the count. The wider question belongs in the
-same task - whether a restore belongs in a trace at all, being the harness tidying up
-rather than the scenario acting - and if not, the count belongs in what the restore
-reports instead.
-
 ### §WW148 The other weaker route, still unnamed
 
 Left standing by WW134 and pointed at by WW135, which closed the same shape one type

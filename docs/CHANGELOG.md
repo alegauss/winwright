@@ -71,6 +71,7 @@
 - ✅ **WW134** **a destructive entry declared by name stops being refused once the application shows another language** — An entry is declared by an automation id or by a strings key resolved in every language the project ships, and a bare name is refused where more than one is shipped.
 - ✅ **WW135** **a subject built from the timeouts alone carries no destructive list, so the guard depends on which constructor was typed** — The bare-timeouts constructor is gone and the only one left takes a declaration, so the shape that gives the guard up is named for what it gives up.
 - ✅ **WW136** **nothing a run calls checks the declared pointer reasons, so a reason that went stale survives every run** — The preamble carries findings beside its conditions, so a declared reason the tree disputes is printed where a reader already looks and excuses nothing.
+- ✅ **WW147** **the one act that retries throws the attempt count away, so a third-attempt success reaches no trace** — A restore keeps what its bounded press answered and offers it as a trace step, so a control that only comes round on the third go is a finding in the report rather than a green that hid it.
 
 ## Block E — Capture — the picture that proves what it photographed
 
