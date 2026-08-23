@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 
 using Winwright.Locating;
+using Winwright.Tracing;
 using Winwright.Verdicts;
 
 namespace Winwright.Asserting;
@@ -84,6 +85,21 @@ public sealed record NameCheck
     /// <summary>The result a verdict counts, carrying that sentence as its detail.</summary>
     public AssertionResult AsAssertion(string named) =>
         IsALabel ? AssertionResult.Pass(named, Sentence(named)) : AssertionResult.Fail(named, Sentence(named));
+
+    /// <summary>
+    /// The step a trace records. WW163: what a control is called is exactly the reading a failure
+    /// about its name has to be diagnosed from, and it used to reach the verdict and stop there.
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public TraceStep AsTraceStep(string named) => new()
+    {
+        Verb = "name",
+        Locator = named,
+        Resolved = string.IsNullOrEmpty(AutomationId) ? null : $"#{AutomationId}",
+        ReadBack = Name,
+        Verdict = IsALabel ? StepVerdict.Ok : StepVerdict.Failed,
+        Detail = IsALabel ? null : Sentence(named),
+    };
 }
 
 /// <summary>Reading a control's name for what it is rather than for whether it is there.</summary>

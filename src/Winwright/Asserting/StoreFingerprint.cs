@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Text;
 
+using Winwright.Tracing;
 using Winwright.Verdicts;
 
 namespace Winwright.Asserting;
@@ -72,6 +73,21 @@ public sealed record StoreChange(
     /// <summary>The result a verdict counts, carrying that sentence as its detail.</summary>
     public AssertionResult AsAssertion(string named = Named) =>
         Untouched ? AssertionResult.Pass(named, Sentence()) : AssertionResult.Fail(named, Sentence());
+
+    /// <summary>
+    /// The step a trace records. WW163: which files moved is the whole value of this reading, and a
+    /// record carrying the verdict alone points nowhere - a count without the names is what this
+    /// type's own sentence refuses to be.
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public TraceStep AsTraceStep(string named = Named) => new()
+    {
+        Verb = "fingerprint",
+        Locator = named,
+        ReadBack = Untouched ? "nothing moved" : $"{Moved} moved",
+        Verdict = Untouched ? StepVerdict.Ok : StepVerdict.Failed,
+        Detail = Untouched ? null : Sentence(),
+    };
 
     private static string Listed(IReadOnlyList<string> what) => string.Join(", ", what);
 

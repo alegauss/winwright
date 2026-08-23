@@ -49,6 +49,14 @@ public sealed class PicturesTests : IDisposable
     {
         var read = Pictures.Of(Rendered(Blank, "blank.png"));
 
+        // WW163: and the step the trace records says the same thing, with the count on it. A
+        // verdict a reader cannot reach the reading behind is the re-run this project refuses.
+        var step = read.AsTraceStep();
+        Assert.Equal(Winwright.Tracing.StepVerdict.Failed, step.Verdict);
+        Assert.Equal("scan", step.Verb);
+        Assert.Contains("0 of ", step.ReadBack);
+        Assert.Contains("is a blank", step.Detail);
+
         Assert.True(read.IsBlank);
         Assert.Equal(0, read.Drawn);
         Assert.Equal(800, read.Pixels);

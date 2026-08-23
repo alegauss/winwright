@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 
 using Winwright.Capturing;
+using Winwright.Tracing;
 using Winwright.Verdicts;
 using Winwright.Windowing;
 
@@ -179,6 +180,21 @@ public sealed record LayoutReading
 
         return Held ? AssertionResult.Pass(named, Sentence()) : AssertionResult.Fail(named, Sentence());
     }
+
+    /// <summary>
+    /// The step a trace records. WW163: how many elements were examined is what tells a green that
+    /// read a page from one that read nothing, and it is the number a verdict alone cannot carry.
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public TraceStep AsTraceStep(string named = "the page is laid out") => new()
+    {
+        Verb = "layout",
+        Locator = named,
+        Resolved = Root?.ToString(),
+        ReadBack = $"{Examined} examined, {Faults.Count} laid out wrongly",
+        Verdict = Examined == 0 ? StepVerdict.Unchecked : Held ? StepVerdict.Ok : StepVerdict.Failed,
+        Detail = Examined > 0 && Held ? null : Sentence(),
+    };
 
     /// <summary>
     /// Whether the surface is filled to at least <paramref name="fraction"/> of its height. This is

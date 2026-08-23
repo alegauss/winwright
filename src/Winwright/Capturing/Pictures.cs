@@ -1,6 +1,7 @@
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
+using Winwright.Tracing;
 using Winwright.Verdicts;
 
 namespace Winwright.Capturing;
@@ -88,6 +89,22 @@ public sealed record PictureCheck
 
         return HasInk ? AssertionResult.Pass(named, Sentence()) : AssertionResult.Fail(named, Sentence());
     }
+
+    /// <summary>
+    /// The step a trace records. WW163: a picture this could not answer for is <em>unchecked</em>
+    /// here as well as in the verdict, because a step that read a format with no alpha channel and
+    /// one that scanned every pixel are different steps whatever they concluded.
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public TraceStep AsTraceStep(string named = "the capture is not a blank") => new()
+    {
+        Verb = "scan",
+        Locator = named,
+        Resolved = What,
+        ReadBack = Tellable ? $"{Drawn} of {Pixels} drawn" : null,
+        Verdict = !Tellable ? StepVerdict.Unchecked : HasInk ? StepVerdict.Ok : StepVerdict.Failed,
+        Detail = Tellable && HasInk ? null : Sentence(),
+    };
 }
 
 /// <summary>

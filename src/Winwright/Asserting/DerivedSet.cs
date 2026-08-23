@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 
 using Winwright.Projects;
+using Winwright.Tracing;
 using Winwright.Verdicts;
 
 namespace Winwright.Asserting;
@@ -93,6 +94,22 @@ public sealed record SetComparison(
     /// <summary>The result a verdict counts, carrying this sentence as its detail.</summary>
     public AssertionResult AsAssertion() =>
         Held ? AssertionResult.Pass(Set.Named, Sentence()) : AssertionResult.Fail(Set.Named, Sentence());
+
+    /// <summary>
+    /// The step a trace records. WW163: a set derived from the project's own strings is a reading a
+    /// run took, and a verdict is the conclusion of readings — one that can answer only the
+    /// conclusion leaves a reader with nothing to reach the observation by.
+    /// </summary>
+    public TraceStep AsTraceStep() => new()
+    {
+        Verb = "derive",
+        Locator = Set.Named,
+        Resolved = Set.Source,
+        ReadBack = $"{Matched.Count} matched, {Missing.Count} missing, {Unexpected.Count} unexpected",
+        From = Set.Origin,
+        Verdict = Held ? StepVerdict.Ok : StepVerdict.Failed,
+        Detail = Held ? null : Sentence(),
+    };
 
     private static string Listed(IReadOnlyList<string> values) => string.Join(", ", values.Select(value => $"'{value}'"));
 

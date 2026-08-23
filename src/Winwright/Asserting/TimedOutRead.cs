@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 
+using Winwright.Tracing;
 using Winwright.Verdicts;
 
 namespace Winwright.Asserting;
@@ -112,6 +113,21 @@ public sealed record TimedOutRead
     public AssertionResult AsAssertion() => Ended == ReadEnded.Arrived
         ? AssertionResult.Pass(Watched.Name, Sentence())
         : AssertionResult.Fail(Watched.Name, Sentence());
+
+    /// <summary>
+    /// The step a trace records. WW163: this is the diagnosis of a read that ended without what it
+    /// wanted, which is the one step a reader most wants the record to have kept.
+    /// </summary>
+    public TraceStep AsTraceStep() => new()
+    {
+        Verb = "read",
+        Locator = Watched.Name,
+        ReadBack = Watched.LastRead,
+        WaitedMs = Watched.WaitedMs,
+        Polls = Watched.Polls,
+        Verdict = Ended == ReadEnded.Arrived ? StepVerdict.Ok : StepVerdict.Failed,
+        Detail = Ended == ReadEnded.Arrived ? null : Sentence(),
+    };
 }
 
 /// <summary>Diagnosing a read that ended without what it wanted.</summary>

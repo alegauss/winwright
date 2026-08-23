@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 
+using Winwright.Tracing;
 using Winwright.Verdicts;
 
 namespace Winwright.Asserting;
@@ -176,6 +177,20 @@ public sealed record Falsification
 
         return CanFail ? AssertionResult.Pass(named, Sentence()) : AssertionResult.Fail(named, Sentence());
     }
+
+    /// <summary>
+    /// The step a trace records. WW163: which injections bit and which the assertion swallowed is
+    /// the reading here, and a record keeping only whether it can fail leaves a reader unable to
+    /// say which mutation the check went on passing through.
+    /// </summary>
+    public TraceStep AsTraceStep() => new()
+    {
+        Verb = "falsify",
+        Locator = Assertion,
+        ReadBack = $"{Injections.Count(one => one.Outcome == Bite.TurnedItRed)} of {Injections.Count} turned it red",
+        Verdict = !WasGreen ? StepVerdict.Unchecked : CanFail ? StepVerdict.Ok : StepVerdict.Failed,
+        Detail = WasGreen && CanFail ? null : Sentence(),
+    };
 
     /// <summary>
     /// Whether the injection handed back the reading it was given. The default comparer settles a

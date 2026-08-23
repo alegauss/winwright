@@ -204,6 +204,22 @@ public sealed record NudgeResult
             ? AssertionResult.Pass(named, ToString())
             : AssertionResult.Fail(named, ToString());
     }
+
+    /// <summary>
+    /// The step a trace records. WW163: a nudge was the one act result answering a verdict and no
+    /// step, so a run that moved a range left the summary able to say what it concluded and the
+    /// record unable to say what it read.
+    /// </summary>
+    public TraceStep AsTraceStep() => new()
+    {
+        Verb = "nudge",
+        Locator = Element.ToString(),
+        Resolved = Element.ToString(),
+        Pattern = "RangeValue",
+        ReadBack = After.ToString(System.Globalization.CultureInfo.InvariantCulture),
+        Verdict = !Sent ? StepVerdict.Unchecked : Moved ? StepVerdict.Ok : StepVerdict.Failed,
+        Detail = Sent && Moved ? null : ToString(),
+    };
 }
 
 /// <summary>

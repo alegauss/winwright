@@ -180,13 +180,23 @@ public sealed class StoreFingerprintTests : IDisposable
     {
         var file = Settings();
 
-        var dirty = Untouched.Around([file], () => File.WriteAllText(file, "x")).AsAssertion();
+        var moved = Untouched.Around([file], () => File.WriteAllText(file, "x"));
+        var dirty = moved.AsAssertion();
         var clean = Untouched.Around([file], () => { }).AsAssertion();
 
         Assert.Equal(AssertionOutcome.Failed, dirty.Outcome);
         Assert.Contains("settings.json", dirty.Detail);
         Assert.Equal(AssertionOutcome.Passed, clean.Outcome);
         Assert.Equal(StoreChange.Named, clean.Name);
+
+        // WW163: and so does the step a trace records, so a reader holding the verdict can reach
+        // the file rather than re-running to find out which one it was.
+        var step = moved.AsTraceStep();
+
+        Assert.Equal(Winwright.Tracing.StepVerdict.Failed, step.Verdict);
+        Assert.Equal("fingerprint", step.Verb);
+        Assert.Contains("settings.json", step.Detail);
+        Assert.Contains("\"verb\":\"fingerprint\"", Winwright.Tracing.TraceFormat.Line(step));
     }
 
     [Fact]

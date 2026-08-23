@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW163** (deps: —) **nothing in the engine writes a trace step for an act, so a failed run has no record to be diagnosed from** — Every act that reaches an element writes the step the trace already defines, because a record nothing fills leaves a re-run as the only way to diagnose a failure. → §WW163
 - 📋 **WW167** (deps: —) **forty reader-facing renderings and nothing pairs them with a case, so two shipped unasserted before anybody noticed** — Each rendering is paired with the case asserting what a reader gets, because the two found unasserted were found by accident rather than by a check. → §WW167
 
 ## Block B — Attach, launch, and leave nothing behind
@@ -27,7 +26,7 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW166** (deps: WW163) **a failed step's diagnosis is built by nobody, so a reader still writes a throwaway script to see what the window had** — A failure carries the view the diagnosis already builds, because a capability with no caller is a criterion met by a type existing rather than by a run. → §WW166
+- 📋 **WW166** (deps: WW163 ✅) **a failed step's diagnosis is built by nobody, so a reader still writes a throwaway script to see what the window had** — A failure carries the view the diagnosis already builds, because a capability with no caller is a criterion met by a type existing rather than by a run. → §WW166
 
 ## Block G — The scenario — a case is a data file
 

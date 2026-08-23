@@ -2,30 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW163 The record nothing writes
-
-Read against this block's criteria the moment its last open line shipped, which is the
-reading that stops a line count reaching zero from meaning finished. Two of the three
-hold. The third does not: it says the trace of a failed run carries the locator, what it
-resolved to, what was read back and the verdict for every step before the one that
-broke.
-
-The machinery is all here. TraceStep names those fields, TraceWriter numbers the steps
-and writes them, TraceFormat renders a line, and the format is asserted both ways. What
-is missing is anybody filling it: the whole engine constructs exactly one TraceStep, and
-WW147 added it a day ago for a restore. No click, no read, no assert, no launch produces
-one, so a failed run's record is empty and the reader's only tool is the re-run this
-block exists to make unnecessary.
-
-Nothing is wrong with the design; the join was never made. The scenario runner that
-would make it is Block G and is not built, which is why this went unnoticed - but a verb
-that writes its own step needs no runner, and every verb already answers something
-carrying what the step wants.
-
-So what is owed is the join, verb by verb, and a check that a verb answering without
-recording is a red. Block A empties either way. What it must not do is empty while the
-criterion it declares is met by nobody.
-
 ### §WW167 The output nobody reads back
 
 Two of these were found in two days, both by accident. WW149 moved the roll call off the

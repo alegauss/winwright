@@ -1,3 +1,4 @@
+using Winwright.Tracing;
 using Winwright.Verdicts;
 using Winwright.Windowing;
 
@@ -114,6 +115,22 @@ public sealed record Containment
     /// <param name="named">What the assertion claims, as the scenario spells it.</param>
     public AssertionResult AsAssertion(string named) =>
         Contains ? AssertionResult.Pass(named, Sentence()) : AssertionResult.Fail(named, Sentence());
+
+    /// <summary>
+    /// The step a trace records. WW163: where a surface sat against the copy taken of it is the
+    /// reading behind the verdict, and a record that kept only the verdict sends a reader back to
+    /// the picture to work out what was measured.
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public TraceStep AsTraceStep(string named) => new()
+    {
+        Verb = "contain",
+        Locator = named,
+        Resolved = Surface.Name,
+        ReadBack = Copy.ToString(),
+        Verdict = Contains ? StepVerdict.Ok : StepVerdict.Failed,
+        Detail = Contains ? null : Sentence(),
+    };
 
     private string Sides()
     {
