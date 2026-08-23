@@ -121,28 +121,6 @@ it is the one that should be reading a field rather than a substring.
 
 ## Block D — Act — patterns before pointers
 
-### §WW136 A check that shipped and was never joined
-
-Filed against the thing that had just shipped. A pointer act now states why the pattern
-route was unavailable, and there is a check that reads each stated reason back against
-the live tree and answers with what agreed, what the tree disputes, and what claimed
-nothing it could answer. Nothing calls it.
-
-That is this project's founding defect wearing a new subject, and the block before this
-one closed the same shape by making one list: five measurements had shipped and none of
-them was joined, so a run's claim about the machine was met three times over by three
-sentences and therefore not once. Here it is met zero times. A reason recorded in the
-file, never read back, is exactly the sort of comment that is true on the day it is
-written and quietly false a year later - and the report will keep printing it as though
-somebody had checked.
-
-The join is small and the place is decided: the reading the run already takes before it
-starts is where the machine is described, and what the file claims about the
-application's controls belongs beside what the machine claims about itself. A disputed
-reason is not a failure of the run - the act still works, that is the point of a pointer
-- so it is a finding in the preamble rather than a red. What it must not be is absent,
-because absent and checked read the same to whoever skims.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW38 A region, not a handful of points

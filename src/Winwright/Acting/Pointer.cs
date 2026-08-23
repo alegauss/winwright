@@ -176,6 +176,24 @@ public sealed record ReasonsChecked(
     /// <summary>Whether the tree disagrees with anything the file says.</summary>
     public bool Disputes => Disputed.Count > 0;
 
+    /// <summary>What this run calls the reading, so a preamble names it the same way every time.</summary>
+    public const string Named = "the pointer acts say why they are pointer acts";
+
+    /// <summary>
+    /// This reading as the preamble carries it.
+    /// <para>
+    /// WW136. The check shipped and nothing called it, which is this project's founding defect
+    /// wearing a new subject: a reason recorded in the file and never read back is the sort of
+    /// comment that is true the day it is written and quietly false a year later, and a report
+    /// keeps printing it as though somebody had checked.
+    /// </para>
+    /// <para>
+    /// A finding rather than a precondition, because a disputed reason is not a failure of the run
+    /// — the act still works, that being the point of a pointer — and nothing may be excused by it.
+    /// </para>
+    /// </summary>
+    public Finding AsFinding() => new(Named, !Disputes, Sentence());
+
     /// <summary>
     /// The reading in one sentence, which never says every reason was checked while any was not.
     /// </summary>

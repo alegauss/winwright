@@ -25,6 +25,24 @@ public sealed record Measured(string Name, Precondition? Condition, string Sente
 }
 
 /// <summary>
+/// One thing a run read about what the scenario declared, rather than about the machine.
+/// <para>
+/// WW136. A precondition is a fact about the desk that an assertion may be excused by; a finding is
+/// not. A pointer act declaring that its control has no automation peer, against a control offering
+/// Invoke, is a file that has gone stale — the act still works, so nothing is excused and nothing
+/// goes red, and a reader who never hears about it keeps quoting a reason nobody checked.
+/// </para>
+/// </summary>
+/// <param name="Named">What was read.</param>
+/// <param name="Holds">Whether what the file said is what the application says.</param>
+/// <param name="Sentence">The reading, in the line a preamble prints.</param>
+public sealed record Finding(string Named, bool Holds, string Sentence)
+{
+    /// <summary>The one line the preamble shows.</summary>
+    public override string ToString() => $"  {(Holds ? "agrees  " : "differs ")}{Named}: {Sentence}";
+}
+
+/// <summary>
 /// Everything a run measured about the machine, in one reading taken once.
 /// <para>
 /// The five measurements shipped and none of them was joined: staleness, the running binary, the
@@ -47,13 +65,41 @@ public sealed record Measured(string Name, Precondition? Condition, string Sente
 /// </summary>
 public sealed record Preamble
 {
-    private Preamble(IReadOnlyList<Measured> measurements)
+    private Preamble(IReadOnlyList<Measured> measurements, IReadOnlyList<Finding> findings)
     {
         Measurements = measurements;
+        Findings = findings;
     }
 
     /// <summary>Every measurement, taken or not, in the order a preamble prints them.</summary>
     public IReadOnlyList<Measured> Measurements { get; }
+
+    /// <summary>
+    /// What this run read about the scenario's own declarations. Never a precondition: a finding
+    /// excuses nothing, and an assertion may not claim to have been checked against one.
+    /// </summary>
+    public IReadOnlyList<Finding> Findings { get; }
+
+    /// <summary>The findings the application disagrees with.</summary>
+    public IReadOnlyList<Finding> Differing => new ReadOnlyCollection<Finding>(
+        Findings.Where(one => !one.Holds).ToList());
+
+    /// <summary>
+    /// The same reading, carrying what was read about the declarations too.
+    /// <para>
+    /// Joined here because this is the one place a run's readings gather, and joined this way round
+    /// because the thing that produces a finding knows about acts and this does not — a preamble
+    /// that reached into the acting half would be a cycle rather than a composition.
+    /// </para>
+    /// </summary>
+    /// <param name="findings">What was read about the file's claims.</param>
+    public Preamble Including(params Finding[] findings)
+    {
+        ArgumentNullException.ThrowIfNull(findings);
+        return new Preamble(
+            Measurements,
+            new ReadOnlyCollection<Finding>([.. Findings, .. findings.Where(one => one is not null)]));
+    }
 
     /// <summary>
     /// The conditions the assertions are resolved against. Only the ones actually measured: a
@@ -122,7 +168,7 @@ public sealed record Preamble
         taken.Add(Read(InstanceCheck.OverrideName, "no project declared the executable to look for",
             () => Instances(Executable(declaration), ours)));
 
-        return new Preamble(new ReadOnlyCollection<Measured>(taken));
+        return new Preamble(new ReadOnlyCollection<Measured>(taken), new ReadOnlyCollection<Finding>([]));
     }
 
     /// <summary>The preamble a summary opens with: one line per measurement, taken or not.</summary>
@@ -130,14 +176,22 @@ public sealed record Preamble
     {
         var lines = new List<string> { Sentence() };
         lines.AddRange(Measurements.Select(one => one.ToString()));
+        lines.AddRange(Findings.Select(one => one.ToString()));
         return new ReadOnlyCollection<string>(lines);
     }
 
     /// <summary>What the machine turned out to be, in the one sentence a reader skims.</summary>
     public string Sentence()
     {
+        // A finding never makes the machine unclear and is never left out of the sentence either:
+        // absent and checked read the same to whoever skims, which is the whole reason it is here.
+        var found = Differing.Count == 0
+            ? ""
+            : $" {Differing.Count} of {Findings.Count} declared reading(s) differ from the application: "
+                + string.Join("; ", Differing.Select(one => one.Sentence));
+
         if (Clear)
-            return $"this run measured all {Measurements.Count} conditions and every one of them held.";
+            return $"this run measured all {Measurements.Count} conditions and every one of them held.{found}";
 
         var parts = new List<string>();
         if (Absent.Count > 0)
@@ -146,7 +200,7 @@ public sealed record Preamble
         if (Unread.Count > 0)
             parts.Add($"{Unread.Count} not read: {string.Join(", ", Unread.Select(one => one.Name))}");
 
-        return $"this run measured {Measurements.Count} conditions, {string.Join("; ", parts)}.";
+        return $"this run measured {Measurements.Count} conditions, {string.Join("; ", parts)}.{found}";
     }
 
     /// <summary>The whole reading as a block of text.</summary>
