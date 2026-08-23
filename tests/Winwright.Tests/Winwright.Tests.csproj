@@ -31,4 +31,49 @@
                       ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
 
+  <!-- WW138: a bare `dotnet test` takes the roll. It landed as a step in the workflow and a script
+       at the root, and every developer runs the command every .NET project has instead - getting
+       the same pass the check exists to withdraw. A check that has to be invoked separately is not
+       a check the project has, it is a check the project offers. -->
+  <PropertyGroup>
+    <RollCall Condition="'$(RollCall)' == ''">true</RollCall>
+    <RollCallResults>$(MSBuildThisFileDirectory)..\..\TestResults</RollCallResults>
+    <RollCallTool>$(MSBuildThisFileDirectory)..\..\tools\Winwright.RollCall\bin\$(Configuration)\$(TargetFramework)\Winwright.RollCall.dll</RollCallTool>
+
+    <!-- A run writes no results file unless somebody asks for one, and the roll reads results. So
+         the default is to ask; naming a logger on the command line still wins. -->
+    <VSTestLogger Condition="'$(VSTestLogger)' == '' and '$(RollCall)' == 'true'">trx%3bLogFileName=winwright.trx</VSTestLogger>
+    <VSTestResultsDirectory Condition="'$(VSTestResultsDirectory)' == '' and '$(RollCall)' == 'true'">$(RollCallResults)</VSTestResultsDirectory>
+  </PropertyGroup>
+
+  <!-- Skipped where a filter was given, and that is not a convenience: a filtered run is short of
+       discovery on purpose, and reporting it as a lost host is the false red that would get the
+       whole thing turned off. `-p:RollCall=false` is the switch for everything else. -->
+  <Target Name="TakeTheRoll"
+          AfterTargets="VSTest"
+          Condition="'$(RollCall)' == 'true' and '$(VSTestTestCaseFilter)' == ''">
+
+    <!-- Discovery from the assembly that was just run, and never a second build. RollCall=false on
+         the inner call because listing the tests runs this target again otherwise. -->
+    <Exec Command="dotnet test &quot;$(MSBuildProjectFullPath)&quot; --no-build --configuration $(Configuration) -p:RollCall=false --list-tests &gt; &quot;$(RollCallResults)\discovered.txt&quot;"
+          StandardOutputImportance="low" />
+
+    <!-- Captured rather than left to fail on its own: MSBuild's own words for a command that
+         exited non-zero are "the command exited with code 1", and this block's criterion is that a
+         degraded run is legible without reading the log. What the roll said is the legible part. -->
+    <Exec Command="dotnet exec &quot;$(RollCallTool)&quot; --discovered &quot;$(RollCallResults)\discovered.txt&quot; --results &quot;$(RollCallResults)\winwright.trx&quot; 2&gt;&amp;1"
+          IgnoreExitCode="true"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="low">
+      <Output TaskParameter="ExitCode" PropertyName="RollCallExit" />
+      <Output TaskParameter="ConsoleOutput" ItemName="RollCallSaid" />
+    </Exec>
+
+    <Error Condition="'$(RollCallExit)' != '0'"
+           Code="WW117"
+           Text="the roll call refused this run: @(RollCallSaid, '%0A')" />
+
+    <Message Condition="'$(RollCallExit)' == '0'" Importance="high" Text="@(RollCallSaid, '%0A')" />
+  </Target>
+
 </Project>

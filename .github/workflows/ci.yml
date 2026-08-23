@@ -37,33 +37,15 @@ jobs:
       - name: Build
         run: dotnet build Winwright.slnx --configuration Release --no-restore
 
-      # WW117: the two lists the roll call compares. Discovery is taken from the same built
-      # assembly the run uses, so a disagreement between them is about the run and not the build.
-      - name: List the tests
+      # WW117 and WW138: one step, because the roll call is part of running the suite rather than a
+      # step beside it. A host that dies mid-run takes its remaining tests with it and the runner
+      # still prints a pass — measured here at 352 of 374, a green covering twenty-two tests that
+      # never ran. This used to be three steps, and the middle one is what every developer types.
+      - name: Test
         run: >
           dotnet test tests/Winwright.Tests/Winwright.Tests.csproj
           --configuration Release
           --no-build
-          --list-tests > ${{ runner.temp }}/discovered.txt
-
-      - name: Test
-        run: >
-          dotnet test Winwright.slnx
-          --configuration Release
-          --no-build
-          --logger "trx;LogFileName=winwright.trx"
-          --results-directory ${{ runner.temp }}/test-results
-
-      # A host that dies mid-run takes its remaining tests with it and the step above still passes:
-      # measured at 352 of 374 here, a green covering twenty-two tests that never ran. Always,
-      # because the run this exists to catch is the one that already reported success.
-      - name: Roll call
-        if: '!cancelled()'
-        run: >
-          dotnet run --project tools/Winwright.RollCall/Winwright.RollCall.csproj
-          --configuration Release --no-build --
-          --discovered ${{ runner.temp }}/discovered.txt
-          --results ${{ runner.temp }}/test-results/winwright.trx
 
       # WW122: the two halves are packages or they are a path into this repository, and a path is
       # unpinnable by construction. Packing here is what makes the claim checkable rather than
@@ -86,11 +68,12 @@ jobs:
           retention-days: 7
 
       # A red run is only useful if you can see which assertion went red, and the console log
-      # truncates. The trx is kept only when there is something to read in it.
+      # truncates. The results and the discovery listing are the two halves the roll compared, so
+      # both are kept — and only when there is something to read in them.
       - name: Keep the test results of a failed run
         if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: test-results
-          path: ${{ runner.temp }}/test-results
+          path: TestResults
           retention-days: 7

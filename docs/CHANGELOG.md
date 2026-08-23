@@ -13,6 +13,7 @@
 - ✅ **WW109** **a trace line that does not parse refuses without naming the file or the line it is on** — A line that is not a step is refused by file, by line counted the way an editor counts, and by its own text cut to what a terminal shows - and a blank one is still skipped.
 - ✅ **WW117** **a test host that dies mid-run still prints a pass** — The run now takes a roll call: what discovery listed against what the results file recorded, counted per method, and a suite short of what it found exits non-zero instead of printing a pass.
 - ✅ **WW137** **a test recorded as not executed counts as having answered, so the roll call passes a run that skipped them** — The roll counts what executed, keeps what was recorded and never ran on its own line, and the exit code asks the roll rather than restating its rule.
+- ✅ **WW138** **the roll call runs only when somebody types the script, so a plain dotnet test still prints the old pass** — A bare dotnet test takes the roll and refuses in the roll's own words, skipping only where a filter made the run short on purpose.
 
 ## Block B — Attach, launch, and leave nothing behind
 

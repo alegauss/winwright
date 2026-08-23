@@ -1306,14 +1306,38 @@ public sealed class FixtureTests : IDisposable
         start.Environment[GeometryDump.PathVariable] = geometry;
 
         Attachable.Launch(register, start);
-        for (var attempt = 0; attempt < 200 && !File.Exists(geometry); attempt++)
-            Thread.Sleep(25);
-
-        var read = GeometryDump.Read(geometry);
+        var read = Dumped(geometry);
 
         // The whole contrast the dump was built for: nothing above found these, and here they are.
         foreach (var name in new[] { "drawnSurface", "drawnHeader", "drawnBody", "drawnFooter" })
             Assert.NotEmpty(read.Named(name));
+    }
+
+    /// <summary>
+    /// The dump the fixture wrote, waited for by what it says rather than by its file existing.
+    /// <para>
+    /// A file is created before it is written, so waiting on the name alone reads an empty one and
+    /// answers with no elements — and the loop that did it gave up silently after five seconds,
+    /// which turned a slow launch into an assertion about the fixture drawing nothing. Measured: it
+    /// went red once in a full run and passed on either side of it.
+    /// </para>
+    /// </summary>
+    private static ReadGeometry Dumped(string geometry)
+    {
+        var found = Attempt.Until(
+            () =>
+            {
+                if (!File.Exists(geometry))
+                    return null;
+
+                var read = GeometryDump.Read(geometry);
+                return read.Elements.Count > 0 ? read : null;
+            },
+            deadlineMs: 15000,
+            pollMs: 25);
+
+        Assert.True(found.Found, $"the fixture never wrote a readable dump to {geometry} within 15s");
+        return found.Value!;
     }
 
     [Fact]
@@ -1324,10 +1348,7 @@ public sealed class FixtureTests : IDisposable
         start.Environment[GeometryDump.PathVariable] = geometry;
 
         Attachable.Launch(register, start);
-        for (var attempt = 0; attempt < 200 && !File.Exists(geometry); attempt++)
-            Thread.Sleep(25);
-
-        var read = GeometryDump.Read(geometry);
+        var read = Dumped(geometry);
         var surface = Assert.Single(read.Named("drawnSurface"));
 
         // Every box inside the surface holding them, and none of them overlapping the next - the

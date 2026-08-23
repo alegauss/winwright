@@ -2,28 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW138 A check beside the run is a habit again
-
-The roll call landed as its own process with its own tests, and it is reached two ways:
-a step in the CI workflow, which is unconditional and therefore real, and a script at
-the root, which is typed by whoever remembers to type it. Every developer running the
-suite runs the middle command of the three, because that is the command every .NET
-project has, and gets the same pass the check exists to withdraw.
-
-The task's own note said it: it belongs on the run rather than in a reviewer's habits.
-Half of it went into a reviewer's habits.
-
-What is wanted is that the ordinary command carries the check. The test project can hang
-a target off the run that lists the tests and compares, so a bare invocation is the
-checked one and there is nothing shorter to type. Two things have to be true of it. It
-must not need a network or a second build - a check that doubles the wait is a check
-somebody disables - and it must be skippable by one obvious switch when a person is
-filtering down to a single case, since a filtered run is short of discovery on purpose
-and reporting that as a lost host is the false red that turns the whole thing off.
-
-The general form is worth stating: a check that has to be invoked separately is not a
-check the project has, it is a check the project offers.
-
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW140 A blip is not a missing assembly
