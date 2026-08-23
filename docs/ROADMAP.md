@@ -70,6 +70,7 @@
 - 📋 **WW159** (deps: —) **the animation check demands every declared state inside a fixed window, and a loaded machine loses one** — The check waits until it has seen every declared state or a deadline passes and names the ones it never saw, because a red about the reader's speed is a red about nothing. → §WW159
 - 📋 **WW160** (deps: —) **sixteen refusals claim a case builds what provokes them, and nothing checks that any such case exists** — Each no-shape entry names the case that provokes it and a check reads the suite for that name, because WW145 already proved a claim held up only by having been written down. → §WW160
 - 📋 **WW161** (deps: —) **a shape that ends in a refusal exits 3, and nothing a person or a case reads says so** — The catalogue prints what each shape exits with, because the code is otherwise learnt by running one and the suite holds a copy of the number instead of reading it. → §WW161
+- 📋 **WW162** (deps: WW159) **the cycle-length check divides by a sample count, so a slow reader reports 653ms a state against a declared 200** — It measures the length against what the reader kept up with and says which that was, because a duration computed from missed samples measures the sampler. → §WW162
 
 ## Done when — Block A
 

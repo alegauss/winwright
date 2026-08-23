@@ -505,3 +505,23 @@ reads the flag names out of it for that reason. A shape that ends in a refusal s
 which code it ends with, the codes are listed once where a person driving by hand meets
 them, and a case asserting three reads it off the article instead of holding a copy that
 nothing compares.
+
+### §WW162 The second case in the same race
+
+Found in the guest run that shipped WW148, and it is WW159's defect wearing different
+arithmetic. Where that case counts distinct states and finds one short, this one divides
+the elapsed time by the number of changes it saw: nine changes over 5225ms is 653ms
+each, against the two hundred the run declared. Both readings are correct about what the
+sampler saw and wrong about the fixture, which was cycling exactly as asked.
+
+The cause is the one WW159 names. Reading another process's automation tree costs more
+than a state stands for at two hundred milliseconds, so a loaded machine skips states -
+and a skipped state does not read as a gap, it reads as a state that lasted twice as
+long. Dividing by a count that lost members is how a missed sample turns into a
+confident number about the application.
+
+So it ships behind WW159 and not beside it: the deadline-on-a-condition that fixes the
+first is what gives this one a sample set worth dividing. What is owed here is the
+second half - the check measures against what the reader actually kept up with, and
+reports that rate, so a run on a slow desk says the reading was too slow rather than
+saying the animation was.
