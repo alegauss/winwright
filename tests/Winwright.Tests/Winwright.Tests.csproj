@@ -41,7 +41,22 @@
        a check the project has, it is a check the project offers. -->
   <PropertyGroup>
     <RollCall Condition="'$(RollCall)' == ''">true</RollCall>
-    <RollCallResults>$(MSBuildThisFileDirectory)..\..\TestResults</RollCallResults>
+
+    <!-- WW150: a directory per run, and never one directory however many runs. Both files used to
+         default to TestResults itself, so a developer running the suite while an agent ran it in
+         another shell had each roll call reading one run's listing against the other's results -
+         which comes out as names discovered and never recorded, the exact shape of a host that
+         died. A check invented to stop a false green would have produced a false red, and the
+         reader's correct response to it is to run it again: the habit this whole thing exists to
+         break.
+         A directory and not a lock: a lock makes the second run wait for the first, which is
+         slower and still wrong if either is killed.
+         The stamp carries milliseconds and six hex, so two runs started a second apart cannot
+         collide. A caller may name its own - the VM runner does, because it has to copy the files
+         back out of the guest by an exact path and cannot guess a stamp - and a caller that names
+         it owns keeping it unique. -->
+    <RollCallRun Condition="'$(RollCallRun)' == ''">$([System.DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss-fff'))-$([System.Guid]::NewGuid().ToString('N').Substring(0, 6))</RollCallRun>
+    <RollCallResults>$(MSBuildThisFileDirectory)..\..\TestResults\$(RollCallRun)</RollCallResults>
     <RollCallTool>$(MSBuildThisFileDirectory)..\..\tools\Winwright.RollCall\bin\$(Configuration)\$(TargetFramework)\Winwright.RollCall.dll</RollCallTool>
 
     <!-- A run writes no results file unless somebody asks for one, and the roll reads results. So
@@ -56,6 +71,11 @@
   <Target Name="TakeTheRoll"
           AfterTargets="VSTest"
           Condition="'$(RollCall)' == 'true' and '$(VSTestTestCaseFilter)' == ''">
+
+    <!-- Made before the redirect writes into it. The results directory is this run's own now, so
+         it exists only because VSTest happened to write the trx there first - which is true today
+         and is not a thing to depend on one target away. -->
+    <MakeDir Directories="$(RollCallResults)" />
 
     <!-- Discovery from the assembly that was just run, and never a second build. RollCall=false on
          the inner call because listing the tests runs this target again otherwise. -->

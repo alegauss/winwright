@@ -73,6 +73,13 @@ $script:RepoRoot = Split-Path -Parent $PSScriptRoot
 $script:GuestSync = 'C:\winwright-sync'
 $script:GuestRepo = 'C:\src\winwright'
 
+# WW150. The suite writes its listing and its results into a directory named for the run, so two
+# runs on one machine cannot read each other's files. The default is a stamp the run picks for
+# itself, which is right for a developer and useless here: the files are copied back out of the
+# guest by exact path, and vmrun cannot glob. So this run names its own and tells the guest what it
+# chose, which is also what stops two guest runs from colliding.
+$script:RunName = 'vm-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')
+
 $script:EnvFileCandidates = @(
     'd:\tmp\winwright-vm.env',
     (Join-Path $script:RepoRoot 'winwright-vm.env')
@@ -302,6 +309,11 @@ rem wrong with them. This block's own criterion is that no process outlives the 
 rem it, and the harness enforcing it was the one breaking it.
 set "MSBUILDDISABLENODEREUSE=1"
 set "DOTNET_CLI_TELEMETRY_OPTOUT=1"
+
+rem WW150: the name this run's results go under, read by MSBuild as a property the way it reads
+rem every environment variable. Set here rather than passed through run-tests.cmd, so the guest
+rem types the same command a developer does.
+set "RollCallRun=$script:RunName"
 dotnet build-server shutdown >nul 2>&1
 
 cd /d "$script:GuestRepo"
@@ -326,7 +338,12 @@ $null = Invoke-VmRun -Guest -Arguments @('createDirectoryInGuest', $vmxPath, $sc
 # Deleted in the guest before the run, never merely overwritten after it. A run that writes nothing
 # leaves the last one's files in place, the copy back succeeds, and the caller is handed a previous
 # afternoon's trx as this run's result - which is worse than an error, because it looks like one.
-foreach ($stale in @('vm-exit.txt', 'vm-run.log', 'sync.log', 'winwright.trx', 'discovered.txt')) {
+#
+# WW150: winwright.trx and discovered.txt used to be on this list and were never on this path - they
+# live under the repository's TestResults, not the sync directory, so deleting them here deleted
+# nothing and the guard everybody read as covering them covered neither. They need no guard now:
+# this run's results directory is named for this run, so there is nothing of an earlier one in it.
+foreach ($stale in @('vm-exit.txt', 'vm-run.log', 'sync.log')) {
     $null = Invoke-VmRun -Guest -Arguments @('deleteFileInGuest', $vmxPath, "$script:GuestSync\$stale")
 }
 
@@ -396,7 +413,9 @@ $code = [int]$said
 $logFile = Join-Path $results 'vm-run.log'
 $null = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\vm-run.log", $logFile)
 
-$got = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestRepo\TestResults\winwright.trx", (Join-Path $results 'winwright.trx'))
+$guestResults = "$script:GuestRepo\TestResults\$script:RunName"
+
+$got = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\winwright.trx", (Join-Path $results 'winwright.trx'))
 if (-not $got.Ok) { Write-Host '  no winwright.trx came back from the guest' -ForegroundColor Yellow }
 
 # Only chased on a green run, and that is a fact about this repository rather than about the guest.
@@ -404,7 +423,7 @@ if (-not $got.Ok) { Write-Host '  no winwright.trx came back from the guest' -Fo
 # discovered.txt - warning about its absence on a red run reports a missing check that was never
 # due, which is noise on exactly the runs already carrying a real answer.
 if ($code -eq 0) {
-    $roll = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestRepo\TestResults\discovered.txt", (Join-Path $results 'discovered.txt'))
+    $roll = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\discovered.txt", (Join-Path $results 'discovered.txt'))
     if (-not $roll.Ok) { Write-Host '  the run passed and no discovered.txt came back: the roll call did not take' -ForegroundColor Yellow }
 }
 

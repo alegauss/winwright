@@ -15,6 +15,7 @@
 - ✅ **WW137** **a test recorded as not executed counts as having answered, so the roll call passes a run that skipped them** — The roll counts what executed, keeps what was recorded and never ran on its own line, and the exit code asks the roll rather than restating its rule.
 - ✅ **WW138** **the roll call runs only when somebody types the script, so a plain dotnet test still prints the old pass** — A bare dotnet test takes the roll and refuses in the roll's own words, skipping only where a filter made the run short on purpose.
 - ✅ **WW149** **the roll call's own tests print roll call verdicts into the run, so the output carries sentences about nothing** — The roll call writes where its caller says, so a run carries one verdict about itself and the cases assert the words a reader gets instead of leaking them above the real one.
+- ✅ **WW150** **two runs on one machine share one results directory, so each roll call reads the other run's files** — The listing and the results land in a directory named for the run, so two runs on one machine cannot read each other's files and no second shell can manufacture a phantom shortfall.
 
 ## Block B — Attach, launch, and leave nothing behind
 

@@ -92,6 +92,40 @@ public sealed class OnTheRunTests
     }
 
     [Fact]
+    public void Each_run_reads_and_writes_a_directory_of_its_own()
+    {
+        // WW150. Both files defaulted to TestResults itself, so two runs on one machine had each
+        // roll call reading one run's listing against the other's results — which comes out as
+        // names discovered and never recorded, the exact shape of a host that died. A check
+        // invented to stop a false green would have produced a false red.
+        var properties = Project()
+            .Elements().Where(one => one.Name.LocalName == "PropertyGroup")
+            .SelectMany(one => one.Elements())
+            .ToList();
+
+        var where = Assert.Single(properties, one => one.Name.LocalName == "RollCallResults");
+
+        // Under TestResults and never TestResults itself, which is the whole of the repair.
+        Assert.EndsWith(@"TestResults\$(RollCallRun)", where.Value, StringComparison.Ordinal);
+
+        // Named by the run and overridable by a caller that has to know the name in advance, which
+        // the VM runner does: it copies the files back out of the guest by an exact path.
+        var named = Assert.Single(properties, one => one.Name.LocalName == "RollCallRun");
+
+        Assert.Contains("'$(RollCallRun)' == ''", named.Attribute("Condition")!.Value);
+        Assert.Contains("HHmmss-fff", named.Value, StringComparison.Ordinal);
+        Assert.Contains("Guid", named.Value, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_listing_is_written_into_a_directory_this_run_made()
+    {
+        // The redirect writes a file into that directory, and it existing because VSTest happened
+        // to put the trx there first is true today and not a thing to depend on one target away.
+        Assert.Contains(Target().Elements(), one => one.Name.LocalName == "MakeDir");
+    }
+
+    [Fact]
     public void Discovery_costs_no_second_build()
     {
         // A check that doubles the wait is a check somebody disables. The listing comes off the
