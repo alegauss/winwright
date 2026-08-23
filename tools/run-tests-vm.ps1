@@ -294,12 +294,28 @@ exit /b %ERRORLEVEL%
 @echo off
 set "DOTNET_ROOT=%LOCALAPPDATA%\Microsoft\dotnet"
 set "PATH=%DOTNET_ROOT%;%PATH%"
+
+rem Node reuse off, and the build servers shut down at both ends. Measured: five dotnet processes
+rem and a VBCSCompiler outlived their runs and accumulated across them, and on a guest of eight
+rem cores they took a suite from 3m18s to 5m53s - which failed three timing cases that had nothing
+rem wrong with them. This block's own criterion is that no process outlives the run that started
+rem it, and the harness enforcing it was the one breaking it.
+set "MSBUILDDISABLENODEREUSE=1"
+set "DOTNET_CLI_TELEMETRY_OPTOUT=1"
+dotnet build-server shutdown >nul 2>&1
+
 cd /d "$script:GuestRepo"
 call "$script:GuestRepo\run-tests.cmd" $Configuration > "$script:GuestSync\vm-run.log" 2>&1
-rem The redirect leads, and that is not a style choice. `echo %ERRORLEVEL%> file` is parsed by cmd
-rem as `echo` redirected to handle %ERRORLEVEL% whenever the code is a single digit, so a run that
-rem exited 1 wrote "ECHO is off." into the file and the host read the suite's verdict as a string.
-> "$script:GuestSync\vm-exit.txt" echo %ERRORLEVEL%
+
+rem Captured before the shutdown and not after. Anything run between the suite and the write takes
+rem %ERRORLEVEL% with it, so the tidying up would have reported its own success as the suite's.
+set "RC=%ERRORLEVEL%"
+dotnet build-server shutdown >nul 2>&1
+
+rem The redirect leads, and that is not a style choice. `echo %RC%> file` is parsed by cmd as
+rem `echo` redirected to handle %RC% whenever the code is a single digit, so a run that exited 1
+rem wrote "ECHO is off." into the file and the host read the suite's verdict as a string.
+> "$script:GuestSync\vm-exit.txt" echo %RC%
 exit /b 0
 "@ | Set-Content -LiteralPath (Join-Path $stage 'run.cmd') -Encoding ascii
 
