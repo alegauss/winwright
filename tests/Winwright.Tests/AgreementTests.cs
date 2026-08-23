@@ -223,6 +223,66 @@ public sealed class AgreementTests : IDisposable
         Assert.True(read.Agreed, read.ToString());
     }
 
+    [Fact]
+    public void The_report_spells_a_version_the_same_way_the_sentence_does()
+    {
+        // WW153. The sentence dropped the build metadata and the report did not, so the gate
+        // printed both spellings at once: all copies are 0.1.0, and the assembly being called is
+        // 0.1.0+694044e37… — a version string no file in the tree holds, beside ones that hold
+        // theirs, leaving a reader to know which half of it is decoration.
+        var read = Agreement.Between(
+            Pinned("the tree", "0.4.1"),
+            Pinned("the assembly being called", "0.4.1+694044e37cdff1f8ad593f1fa3735e05af09d218"));
+
+        Assert.True(read.Agreed, read.ToString());
+
+        var rendered = read.Render();
+        Assert.All(rendered, one => Assert.DoesNotContain("+694044e", one, StringComparison.Ordinal));
+        Assert.All(rendered, one => Assert.Contains(read.Versions[0], one, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void The_build_a_copy_was_made_from_is_moved_rather_than_thrown_away()
+    {
+        // Which commit built the running copy is the whole reason anybody reads this report. It
+        // leaves the column it was breaking and says what it is.
+        var read = Agreement.Between(
+            Pinned("the tree", "0.4.1"),
+            Pinned("the assembly being called", "0.4.1+694044e37cdff1f8ad593f1fa3735e05af09d218"));
+
+        var running = Assert.Single(read.Render(), one => one.Contains("the assembly being called", StringComparison.Ordinal));
+
+        Assert.Contains("(build 694044e37cdff1f8ad593f1fa3735e05af09d218)", running, StringComparison.Ordinal);
+        Assert.DoesNotContain(read.Render(), one => one.Contains("the tree (build", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Every_row_lines_up_whatever_the_longest_version_turns_out_to_be()
+    {
+        // Twelve was the width, and a version somebody is entitled to declare overran it — so the
+        // copy most in need of being read against the others was the one that did not line up.
+        var read = Agreement.Between(
+            Pinned("the tree", "1.0.0-preview.7.24405.7+abcdef0"),
+            Pinned("the package", "1.0.0-preview.7.24405.7"),
+            new EngineCopy("the consumer", null, Pinning.Unpinnable, "it references it by path"));
+
+        var rendered = read.Render();
+
+        // Read off the rows rather than typed: what is asserted is that every description starts
+        // in the same column, and how wide that turns out to be is the versions' business.
+        var columns = new[] { "the tree", "the package", "the consumer" }
+            .Select(name => Assert.Single(rendered, one => one.Contains(name, StringComparison.Ordinal))
+                .IndexOf(name, StringComparison.Ordinal))
+            .ToList();
+
+        Assert.Single(columns.Distinct());
+        Assert.All(rendered, one => Assert.StartsWith("  ", one, StringComparison.Ordinal));
+
+        // And the widest cell is not truncated to fit, which would invent a spelling of its own.
+        Assert.Contains(rendered, one => one.Contains("1.0.0-preview.7.24405.7 ", StringComparison.Ordinal));
+        Assert.Contains(rendered, one => one.Contains("(unpinnable)", StringComparison.Ordinal));
+    }
+
     private static string Repository()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

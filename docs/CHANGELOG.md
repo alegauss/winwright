@@ -128,6 +128,7 @@
 - ✅ **WW123** **nothing refuses a reference between the two halves, and one edit would merge them** — The suite reads both project files and both built assemblies and refuses a reference either way, and the same rule is asserted of the fixture and the sample adopter.
 - ✅ **WW141** **nothing names which verbs need no cooperation, so a verb that starts needing the in-app half goes unnoticed** — Every verb is catalogued against what it needs from the application, checked against the engine's surface, and those a bare window suffices for are driven against one.
 - ✅ **WW142** **the agreement check carries an exit code for a gate and no gate anywhere runs it** — Continuous integration reads the tree's version, the assembly it loaded, both packages it built and the adopter's pinned reference, and exits 1 on any disagreement.
+- ✅ **WW153** **the agreement report prints the +sha its own sentence drops, in a column too narrow to hold it** — The report spells a version the way its own sentence does and names the build separately, in a column as wide as the widest thing in it, so every row lines up whatever a copy declares.
 
 ## Block J — Adoption — the proof is the deletion
 

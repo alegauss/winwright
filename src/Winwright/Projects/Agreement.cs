@@ -151,9 +151,45 @@ public sealed record Agreement
         return $"{string.Join("; ", unreadable.Select(one => one.ToString()))} — {known}.";
     }
 
-    /// <summary>One line per copy, for whoever prints a report rather than a sentence.</summary>
-    public IReadOnlyList<string> Render() => new ReadOnlyCollection<string>(
-        Copies.Select(one => one.Pins ? $"  {one.Version,-12} {one.Where}" : $"  {"(unpinnable)",-12} {one}").ToList());
+    /// <summary>
+    /// One line per copy, for whoever prints a report rather than a sentence.
+    /// <para>
+    /// WW153. The column drops the build metadata for the reason <see cref="Versions"/> drops it,
+    /// and the two used to disagree: the sentence said all five copies were <c>0.1.0</c> and the
+    /// line under it said the assembly being called was <c>0.1.0+694044e37…</c> — a version string
+    /// no file in the tree holds, printed beside four that hold theirs, leaving a reader to know
+    /// which half of it was decoration. One rule, in both places.
+    /// </para>
+    /// <para>
+    /// Kept rather than thrown away, because which commit built the running copy is the whole
+    /// reason anybody reads this report — it moves out of the column and is said to be a build.
+    /// </para>
+    /// <para>
+    /// And the column is as wide as the widest thing in it rather than twelve. Twelve was overrun
+    /// by the forty-seven-character informational version, so the one copy most in need of being
+    /// read against the others was the one whose row did not line up with them. A fixed width can
+    /// always be overrun by a version somebody is entitled to declare; this one cannot.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Render()
+    {
+        var rows = Copies
+            .Select(one => (
+                Cell: one.Pins ? WithoutMetadata(one.Version!) : "(unpinnable)",
+                Said: one.Pins ? Built(one) : one.ToString()))
+            .ToList();
+
+        var width = rows.Max(one => one.Cell.Length);
+        return new ReadOnlyCollection<string>(
+            rows.Select(one => $"  {one.Cell.PadRight(width)} {one.Said}").ToList());
+    }
+
+    /// <summary>What a copy is, with the build it was made from where it carries one.</summary>
+    private static string Built(EngineCopy copy)
+    {
+        var metadata = Metadata(copy.Version!);
+        return metadata.Length == 0 ? copy.Where : $"{copy.Where} (build {metadata})";
+    }
 
     /// <summary>The report as a block of text, the sentence first.</summary>
     public override string ToString() => string.Join('\n', [Sentence(), .. Render()]);
@@ -177,6 +213,14 @@ public sealed record Agreement
         var text = version.Trim();
         var build = text.IndexOf('+', StringComparison.Ordinal);
         return build < 0 ? text : text[..build];
+    }
+
+    /// <summary>The <c>+sha</c> alone, without its plus, or empty where the version carries none.</summary>
+    private static string Metadata(string version)
+    {
+        var text = version.Trim();
+        var build = text.IndexOf('+', StringComparison.Ordinal);
+        return build < 0 ? "" : text[(build + 1)..];
     }
 }
 

@@ -47,8 +47,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 📋 **WW153** (deps: —) **the agreement report prints the +sha its own sentence drops, in a column too narrow to hold it** — A gate's report names a version no file in the tree holds and breaks its own alignment doing it, so what the check leaves behind is harder to read than the run. → §WW153
-
 ## Block J — Adoption — the proof is the deletion
 
 - 📋 **WW78** (deps: Block G) **the keyboard case is the only observable of a live input path and it lives in a script** — Migrated first: navigate, type, read back, traverse and drive a slider, which is the shortest path through locate, act and assert. → §WW78
