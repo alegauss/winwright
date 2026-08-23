@@ -108,8 +108,8 @@ public sealed class TemplatedMemberTests : IDisposable
 
         // An empty expected set is met by an empty window, which is the hole this type exists to
         // close — and the remedy differs from an empty key, so the sentence differs too.
-        Assert.Contains("every one of the 2 strings", refused.Message);
-        Assert.Contains("carries a placeholder", refused.Message);
+        Assert.Contains("nothing under 'toasts'", refused.Message);
+        Assert.Contains("is a string an exact read could match", refused.Message);
         Assert.Contains("Welcome, {name}", refused.Message);
     }
 
@@ -164,6 +164,9 @@ public sealed class TemplatedMemberTests : IDisposable
 
         Assert.Contains("winwright fixture", set.Expected);
         Assert.DoesNotContain(set.Expected, one => one.Contains('{', StringComparison.Ordinal));
-        Assert.Equal("labels.profileName", Assert.Single(set.Excluded).Key);
+        Assert.Equal("labels.profileName", Assert.Single(set.Templated).Key);
+
+        // WW139: and the two notes beside it, which this file writes the way JSON makes you.
+        Assert.Equal(["labels.//", "labels.//2"], set.Notes.Select(one => one.Key));
     }
 }

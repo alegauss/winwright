@@ -28,11 +28,25 @@ public sealed class UnderivableSetException : InvalidOperationException
     }
 }
 
-/// <summary>A string the strings declare that no exact read could ever match.</summary>
+/// <summary>Why a string under the key is not a member of the set derived from it.</summary>
+public enum LeftOutBecause
+{
+    /// <summary>It carries a placeholder, so no exact read could ever match it.</summary>
+    CarriesAPlaceholder,
+
+    /// <summary>
+    /// It is a note rather than a string. JSON has no comments, so a strings file that wants one
+    /// writes a key nobody reads — and the derivation took it as something a window should show.
+    /// </summary>
+    IsANote,
+}
+
+/// <summary>A string the strings declare that the derived set does not take.</summary>
 /// <param name="Key">The key it sits under.</param>
 /// <param name="Value">What it says, placeholder and all.</param>
 /// <param name="Where">The file and line it is declared on.</param>
-public sealed record Templated(string Key, string Value, Provenance Where)
+/// <param name="Why">Which of the two reasons it was left out for.</param>
+public sealed record LeftOut(string Key, string Value, Provenance Where, LeftOutBecause Why)
 {
     /// <summary>The one line a source or a refusal names it by.</summary>
     public override string ToString() =>
@@ -117,7 +131,7 @@ public sealed record DerivedSet
         IReadOnlyList<string> expected,
         Provenance origin,
         IReadOnlyList<Provenance> origins,
-        IReadOnlyList<Templated> excluded)
+        IReadOnlyList<LeftOut> excluded)
     {
         Named = named;
         Source = source;
@@ -172,7 +186,15 @@ public sealed record DerivedSet
     /// count that is not silent is not the defect this project exists about.
     /// </para>
     /// </summary>
-    public IReadOnlyList<Templated> Excluded { get; }
+    public IReadOnlyList<LeftOut> Excluded { get; }
+
+    /// <summary>The ones left out for carrying a placeholder.</summary>
+    public IReadOnlyList<LeftOut> Templated => new ReadOnlyCollection<LeftOut>(
+        Excluded.Where(one => one.Why == LeftOutBecause.CarriesAPlaceholder).ToList());
+
+    /// <summary>The ones left out for being a note rather than a string.</summary>
+    public IReadOnlyList<LeftOut> Notes => new ReadOnlyCollection<LeftOut>(
+        Excluded.Where(one => one.Why == LeftOutBecause.IsANote).ToList());
 
     /// <summary>Where one expected value came from, or <see cref="Provenance.Unknown"/> for a value not in the set.</summary>
     public Provenance Whence(string value)
@@ -231,37 +253,36 @@ public sealed record DerivedSet
         var lines = JsonSource.LinesOf(full, [key, .. declared]);
 
         var excluded = found
-            .Where(pair => Labels.CarriesAPlaceholder(pair.Value))
-            .Select(pair => new Templated(
-                pair.Key, pair.Value, Provenance.InFile(full, lines.GetValueOrDefault(pair.Key), pair.Key)))
+            .Where(pair => Why(pair.Key, pair.Value) is not null)
+            .Select(pair => new LeftOut(
+                pair.Key,
+                pair.Value,
+                Provenance.InFile(full, lines.GetValueOrDefault(pair.Key), pair.Key),
+                Why(pair.Key, pair.Value)!.Value))
             .ToList();
 
-        var kept = found.Where(pair => !Labels.CarriesAPlaceholder(pair.Value)).ToList();
+        var kept = found.Where(pair => Why(pair.Key, pair.Value) is null).ToList();
         if (kept.Count == 0)
         {
-            // The same rule as an empty key, said as what it is: every string under here carries a
-            // placeholder, so the set that survives is empty and an empty set is met by an empty
-            // window. Named apart from "declares no strings" because the remedy is a different one.
+            // The same rule as an empty key, said as what it is: nothing under here is a string a
+            // window could show, so the set that survives is empty and an empty set is met by an
+            // empty window. Named apart from "declares no strings" because the remedy differs.
             throw new UnderivableSetException(
-                $"{named}: every one of the {excluded.Count} strings under '{key}' in {full} carries a "
-                    + $"placeholder ({string.Join("; ", excluded.Select(one => one.ToString()))}), so nothing "
-                    + "is left that an exact read could ever match");
+                $"{named}: nothing under '{key}' in {full} is a string an exact read could match "
+                    + $"({string.Join("; ", excluded.Select(one => one.ToString()))})");
         }
 
         var keys = kept.Select(pair => pair.Key).ToList();
 
         return new DerivedSet(
             named.Trim(),
-            excluded.Count == 0
-                ? where
-                : $"{where}, less {excluded.Count} carrying a placeholder "
-                    + $"({string.Join("; ", excluded.Select(one => $"'{one.Key}'"))})",
+            Derivation(where, excluded),
             new ReadOnlyCollection<string>(keys),
             new ReadOnlyCollection<string>(kept.Select(pair => pair.Value).ToList()),
             Provenance.InFile(full, lines.GetValueOrDefault(key), key),
             new ReadOnlyCollection<Provenance>(
                 keys.Select(one => Provenance.InFile(full, lines.GetValueOrDefault(one), one)).ToList()),
-            new ReadOnlyCollection<Templated>(excluded));
+            new ReadOnlyCollection<LeftOut>(excluded));
     }
 
     /// <summary>
@@ -302,6 +323,67 @@ public sealed record DerivedSet
             new ReadOnlyCollection<string>(Expected.Where(found.Contains).ToList()),
             new ReadOnlyCollection<string>(Expected.Where(value => !found.Contains(value)).ToList()),
             new ReadOnlyCollection<string>(seen.Where(value => !wanted.Contains(value)).Distinct(StringComparer.Ordinal).ToList()));
+    }
+
+    /// <summary>
+    /// Why one string is not a member, or null where it is one.
+    /// <para>
+    /// Two reasons and no third. A placeholder can never be matched by an exact read; a note is not
+    /// a string the application shows at all — JSON has no comments, so a strings file that wants
+    /// one writes a key nobody reads, and the derivation took both notes in this repository's own
+    /// fixture as things a window should display.
+    /// </para>
+    /// </summary>
+    private static LeftOutBecause? Why(string key, string value)
+    {
+        if (IsANote(key))
+            return LeftOutBecause.IsANote;
+
+        return Labels.CarriesAPlaceholder(value) ? LeftOutBecause.CarriesAPlaceholder : null;
+    }
+
+    /// <summary>
+    /// Whether a key is the convention for a comment rather than a name for a string.
+    /// <para>
+    /// Read off the last segment, since a nested key arrives here dotted. Four spellings of one
+    /// convention: <c>//</c> is the common one and <c>//2</c> the way a file carrying two of them
+    /// writes the second, and the underscore and dollar forms are the same idea from other
+    /// ecosystems. A project that genuinely ships a label under a key called <c>//</c> does not
+    /// exist, and one that did would be told by the source sentence rather than left guessing.
+    /// </para>
+    /// </summary>
+    private static bool IsANote(string key)
+    {
+        var last = key.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) is { Length: > 0 } steps
+            ? steps[^1]
+            : key.Trim();
+
+        return last.StartsWith("//", StringComparison.Ordinal)
+            || string.Equals(last, "_comment", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(last, "$comment", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Where the set came from, with what it left out and why. In the source rather than in a
+    /// comment: every verdict prints this sentence, so the exclusion is read under each run.
+    /// </summary>
+    private static string Derivation(string where, IReadOnlyList<LeftOut> excluded)
+    {
+        if (excluded.Count == 0)
+            return where;
+
+        var parts = new List<string>();
+        foreach (var why in new[] { LeftOutBecause.CarriesAPlaceholder, LeftOutBecause.IsANote })
+        {
+            var these = excluded.Where(one => one.Why == why).ToList();
+            if (these.Count == 0)
+                continue;
+
+            var said = why == LeftOutBecause.CarriesAPlaceholder ? "carrying a placeholder" : "a note and not a string";
+            parts.Add($"{these.Count} {said} ({string.Join("; ", these.Select(one => $"'{one.Key}'"))})");
+        }
+
+        return $"{where}, less {string.Join(" and ", parts)}";
     }
 
     private static List<KeyValuePair<string, string>>? Nested(JsonElement root, string key)

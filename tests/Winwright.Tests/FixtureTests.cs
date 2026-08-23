@@ -1162,9 +1162,19 @@ public sealed class FixtureTests : IDisposable
             var set = DerivedSet.From("the labels", Strings(culture), "labels");
 
             Assert.DoesNotContain(set.Expected, Labels.CarriesAPlaceholder);
-            Assert.Equal("labels.profileName", Assert.Single(set.Excluded).Key);
-            Assert.True(Labels.CarriesAPlaceholder(set.Excluded[0].Value));
+            Assert.Equal("labels.profileName", Assert.Single(set.Templated).Key);
+            Assert.True(Labels.CarriesAPlaceholder(set.Templated[0].Value));
             Assert.Contains("less 1 carrying a placeholder", set.Source);
+
+            // WW139: only the English file carries the notes, which is the ordinary way a strings
+            // file ends up — the comment is written once beside the key it explains and nobody
+            // translates it. Both are left out, and the source says how many of each.
+            var notes = culture == "en" ? 2 : 0;
+            Assert.Equal(notes, set.Notes.Count);
+            Assert.DoesNotContain(set.Expected, one => one.StartsWith("The pathological key", StringComparison.Ordinal));
+
+            if (notes > 0)
+                Assert.Contains("2 a note and not a string", set.Source);
         }
     }
 
