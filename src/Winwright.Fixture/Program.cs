@@ -23,6 +23,16 @@ public static class Program
     /// <summary>What a run exits with where it was asked for a shape this fixture does not have.</summary>
     public const int UnknownFlag = 2;
 
+    /// <summary>
+    /// What a run exits with where the shape it was asked for was refused by the in-app half.
+    /// <para>
+    /// Its own code and not <see cref="UnknownFlag" />: a shape that provoked the refusal it exists
+    /// to provoke did what it was asked, and a run that cannot tell that from a misspelt flag is a
+    /// run that would read the fixture working as the fixture being driven wrong.
+    /// </para>
+    /// </summary>
+    public const int Refused = 3;
+
     /// <summary>Read the flags, then draw whatever they asked for.</summary>
     /// <param name="arguments">The command line.</param>
     [STAThread]
@@ -58,7 +68,7 @@ public static class Program
         // Before any window: a render of a fixed surface needs no window shown, which is the same
         // reading the harness makes about every capture it takes.
         if (shapes.Value("render") is string path)
-            return Rendered(path);
+            return Rendered(path, shapes);
 
         if (shapes.Has("resident"))
             return Resident();
@@ -67,21 +77,78 @@ public static class Program
     }
 
     /// <summary>
-    /// Render the fixed surface and stop. No window is shown, nothing is activated, and the same
-    /// call twice writes the same bytes — which is the whole of what makes the comparison a check.
+    /// Render whatever this run asked for and stop. No window is shown, nothing is activated, and
+    /// the default surface twice writes the same bytes — which is the whole of what makes the
+    /// comparison a check.
+    /// <para>
+    /// WW146 put three shapes behind this verb, and each of them ends in a refusal rather than a
+    /// file. The refusal goes to the error stream and the exit code is its own, so a run can tell a
+    /// shape that did what it was asked from a fixture that was driven wrong.
+    /// </para>
     /// </summary>
-    private static int Rendered(string path)
+    /// <param name="path">Where the picture goes, where one is written at all.</param>
+    /// <param name="shapes">What this run asked the render to be.</param>
+    private static int Rendered(string path, Flags shapes)
     {
-        // The application is constructed so the resources exist, and never run: a dispatcher loop
-        // here would leave the process waiting for a window that is never going to appear.
-        _ = new App();
+        // Every arm but one constructs the application so the resources exist, and none of them
+        // runs it: a dispatcher loop here would leave the process waiting for a window that is
+        // never going to appear. --unbacked is the exception, and withholding it is the shape:
+        // the capture background is declared in those resources, so an application that exists
+        // answers the question this run exists to leave unanswered.
+        if (!shapes.Has("unbacked"))
+            _ = new App();
+
+        try
+        {
+            return Drawn(path, shapes);
+        }
+        catch (Exception refusal) when (refusal is Winwright.InApp.UnrenderableException
+            or Winwright.InApp.NoBackgroundException)
+        {
+            // The error stream and never a dialog, for the same reason an unknown flag takes it: a
+            // fixture that stops on a message box in continuous integration is a run that times
+            // out saying nothing at all.
+            //
+            // The type by name and then the sentence. A run reads this across a process boundary,
+            // where an exception is a string and every refusal looks alike — and the pairing this
+            // shape exists for names a type, so a case that could only match prose would be
+            // agreeing with a transcription rather than with the refusal that fired.
+            Console.Error.WriteLine($"{refusal.GetType().Name}: {refusal.Message}");
+            return Refused;
+        }
+    }
+
+    /// <summary>The render itself, in whichever shape was asked for.</summary>
+    /// <param name="path">Where the picture goes.</param>
+    /// <param name="shapes">What this run asked the render to be.</param>
+    private static int Drawn(string path, Flags shapes)
+    {
+        // A page whose every row is collapsed, and no size named: the size is what is being
+        // refused, so naming one here would render the very thing the shape exists to prevent.
+        if (shapes.Has("sizeless"))
+        {
+            Console.Out.WriteLine(Winwright.InApp.Render.ToFile(SizelessPane.Build(), path).Sentence());
+            return 0;
+        }
+
+        // On no background, and that is half the shape: a blank composed onto a colour is opaque
+        // everywhere whatever the tree did. This run writes the file and exits clean — the refusal
+        // it exists for belongs to whoever reads the picture back, which is the harness.
+        if (shapes.Has("blank"))
+        {
+            Console.Out.WriteLine(
+                Winwright.InApp.Render.ToFile(BlankPane.Build(), path, BlankPane.Size).Sentence());
+            return 0;
+        }
 
         // On the background the application itself declares, which is the whole of what the
         // in-app half asks an adopter for: a key in its resources rather than a colour a harness
-        // guessed. The receipt then names which source answered.
+        // guessed. The receipt then names which source answered — and under --unbacked there is no
+        // application and no window, so neither source does.
         var pane = FixedPane.Build();
-        var picture = Winwright.InApp.Render.ToFile(pane, path, Protocol.Background(pane), FixedPane.Size);
-        Console.Out.WriteLine(picture.Sentence());
+        Console.Out.WriteLine(
+            Winwright.InApp.Render.ToFile(pane, path, Protocol.Background(pane), FixedPane.Size).Sentence());
+
         return 0;
     }
 

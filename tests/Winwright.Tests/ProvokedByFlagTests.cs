@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 
 using Winwright.Asserting;
+using Winwright.Capturing;
 using Winwright.InApp;
 using Winwright.Locating;
 using Winwright.Processes;
@@ -28,12 +29,22 @@ namespace Winwright.Tests;
 /// exception and calling the pairing proved — the type is named in the entry, so a refusal
 /// arriving for another reason is a red rather than a pass.
 /// </para>
+/// <para>
+/// WW146 brought three more, and they are the ones whose refusal fires inside the fixture rather
+/// than in this process. A type does not cross a process boundary, so the fixture prints its name
+/// beside the sentence and these match on <c>nameof</c> — which is the type this suite references,
+/// not a word somebody copied out of a message.
+/// </para>
 /// </summary>
 [Collection(WindowFixture.Serial)]
 public sealed class ProvokedByFlagTests : IDisposable
 {
     /// <summary>The flags the cases below launch the fixture with, one each.</summary>
-    private static readonly string[] Driven = ["title", "language", "mutate", "pump"];
+    private static readonly string[] Driven =
+        ["title", "language", "mutate", "pump", "sizeless", "blank", "unbacked"];
+
+    /// <summary>What the fixture exits with where the shape it was asked for was refused.</summary>
+    private const int Refused = 3;
 
     private readonly ProcessRegister register = new();
     private readonly string root = Directory.CreateTempSubdirectory("winwright-provoked-").FullName;
@@ -139,6 +150,85 @@ public sealed class ProvokedByFlagTests : IDisposable
 
         Assert.Contains("did not finish within 0.75s", refused.Message, StringComparison.Ordinal);
         Assert.Contains("still running and cannot safely be stopped", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_page_whose_every_row_is_collapsed_lays_out_to_nothing_and_is_not_written()
+    {
+        // --sizeless, which needs --render. The refusal fires inside the fixture, so what crosses
+        // back is a string — and the type is named in it, so this case matches the refusal that
+        // fired rather than a sentence somebody transcribed.
+        var path = Path.Combine(root, "sizeless.png");
+        var (code, said) = Rendered(path, "--sizeless");
+
+        Assert.Equal(Refused, code);
+        Assert.Contains(nameof(UnrenderableException), said, StringComparison.Ordinal);
+        Assert.Contains("laid out to 0x0", said, StringComparison.Ordinal);
+
+        // The half that makes it worth refusing: an empty file passes everything that only checks
+        // a file exists, so the refusal has to happen before anything is written.
+        Assert.False(File.Exists(path), "the refused render wrote a file anyway");
+    }
+
+    [Fact]
+    public void A_render_with_no_application_above_it_has_nothing_saying_what_to_draw_it_on()
+    {
+        // --unbacked. The shape is the withheld application: the capture background is declared in
+        // its resources, and the element is in no window either, so neither source answers.
+        var path = Path.Combine(root, "unbacked.png");
+        var (code, said) = Rendered(path, "--unbacked");
+
+        Assert.Equal(Refused, code);
+        Assert.Contains(nameof(NoBackgroundException), said, StringComparison.Ordinal);
+        Assert.Contains(Backgrounds.DefaultKey, said, StringComparison.Ordinal);
+        Assert.False(File.Exists(path), "the refused render wrote a file anyway");
+    }
+
+    [Fact]
+    public void A_page_that_paints_nothing_writes_a_picture_nothing_drew()
+    {
+        // --blank. This one the fixture completes: the refusal belongs to whoever reads the
+        // picture back, which is the harness, so the file is the evidence and the type is asserted
+        // here rather than matched in a string.
+        var path = Path.Combine(root, "blank.png");
+        var (code, said) = Rendered(path, "--blank");
+
+        Assert.Equal(0, code);
+        Assert.Contains("nothing, so it is transparent", said, StringComparison.Ordinal);
+        Assert.True(File.Exists(path), $"the fixture wrote no picture to {path}");
+
+        var refused = Assert.Throws<BlankPictureException>(() => Pictures.Insist(path));
+        Assert.Contains("is a blank", refused.Message, StringComparison.Ordinal);
+
+        // Read rather than inferred from the refusal: the picture is the right size and empty,
+        // which is the defect this shape stands in for and not a render that never happened.
+        var scanned = Pictures.Of(path);
+        Assert.Equal(0, scanned.Drawn);
+        Assert.True(scanned.Pixels > 0, scanned.Sentence());
+    }
+
+    /// <summary>
+    /// Render with those flags and hand back what the fixture exited with and said. Both streams
+    /// are read, because a shape here either writes a picture and says so or refuses and says why.
+    /// </summary>
+    /// <param name="path">Where the picture goes.</param>
+    /// <param name="flags">The shape the render takes.</param>
+    private static (int Code, string Said) Rendered(string path, params string[] flags)
+    {
+        var start = Fixture.Started([$"--render={path}", .. flags]);
+        start.RedirectStandardOutput = true;
+        start.RedirectStandardError = true;
+        start.UseShellExecute = false;
+
+        using var running = System.Diagnostics.Process.Start(start)!;
+
+        // Both before the wait: a process filling a redirected pipe nobody is reading blocks on
+        // the write, and this would then time out on a fixture that had already finished its work.
+        var output = running.StandardOutput.ReadToEnd();
+        var error = running.StandardError.ReadToEnd();
+        Assert.True(running.WaitForExit(30_000), $"the render did not finish for {string.Join(' ', flags)}");
+
+        return (running.ExitCode, output + error);
     }
 
     /// <summary>Launch the fixture with those flags and wait for the window it draws.</summary>

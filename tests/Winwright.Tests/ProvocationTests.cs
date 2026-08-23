@@ -6,12 +6,13 @@ namespace Winwright.Tests;
 
 /// <summary>
 /// WW132. Counted while reading this block's own criterion: the framework names nineteen refusals
-/// and the fixture reaches four of them. The rest are asserted against hand-built windows, against
+/// and the fixture reached four of them. The rest are asserted against hand-built windows, against
 /// arguments passed in a test, or not at all.
 /// <para>
-/// Some need no shape and saying so is the point. Others need one the fixture cannot take — a
-/// render that lays out to nothing, a capture with no background declared, a picture nothing drew —
-/// and the fixture always does the right thing, so it can never make any of them happen.
+/// Some need no shape and saying so is the point. Four needed one the fixture could not take — a
+/// render that lays out to nothing, a capture with no background declared, a picture nothing drew,
+/// a receipt about another window — because the fixture always did the right thing. WW146 taught it
+/// to do the wrong one on request, and the fourth was moved rather than faked.
 /// </para>
 /// <para>
 /// The durable half is the pairing. The catalogue and the exception types were two lists nobody
@@ -81,10 +82,19 @@ public sealed class ProvocationTests
     [Fact]
     public void What_the_fixture_cannot_provoke_is_counted_rather_than_left_off()
     {
-        // The bucket that must not grow. Raising this number is a decision somebody makes here,
-        // where the four are named, rather than by adding a refusal nothing can reach.
-        Assert.Equal(4, Provocation.Unreachable().Count);
+        // The bucket that must not grow, and WW146 emptied it. Filling it again is a decision
+        // somebody makes here rather than by adding a refusal nothing can reach: this is the check
+        // that makes the empty answer a measurement instead of a list nobody kept up.
+        Assert.Empty(Provocation.Unreachable());
         Assert.All(Provocation.Unreachable(), one => Assert.Equal(Without.NotYet, one.Why));
+    }
+
+    [Fact]
+    public void The_count_a_reader_sees_still_names_the_bucket_that_is_empty()
+    {
+        // An empty bucket rendered as silence is a reading nobody can distinguish from a reading
+        // nobody took, which is the failure this whole pairing is about.
+        Assert.Contains("0 needing a shape it cannot take", Provocation.Render()[0]);
     }
 
     [Fact]

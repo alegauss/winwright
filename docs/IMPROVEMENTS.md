@@ -490,26 +490,3 @@ It is then held by the same gate every other adopter-facing surface is: the task
 changes an exit code changes this in the same commit.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW146 The four the fixture cannot be
-
-Counted by WW132 and left standing by it. Four refusals need a shape the fixture cannot
-take: a receipt about a window other than the one captured, a picture nothing drew, a
-capture of an element with no background above it, and a render of a tree that lays out
-to nothing. The fixture always does the right thing, so it can never make any of them
-happen, and each will quietly stop working with nothing to notice.
-
-This block's criterion is explicit that a refusal with no flag is a finding the fixture
-closes rather than a gap nobody sees, so the count being visible was the previous task's
-work and closing it is this one's.
-
-Three of the four are one shape apiece and the shapes are the point rather than the
-refusal: a pane that lays out to nothing, a pane with no background above it, and a window
-drawing nothing into the rectangle a capture would take. Each is a real product defect - a
-page that renders empty, an element captured as transparent, a surface that came out blank
-- and the fixture exists to be those on demand.
-
-The fourth may not be a shape at all. A receipt about the wrong window is a harness
-handing over the wrong handle, not an application misbehaving, and the honest answer may
-be to move it to the reasons no flag can reach rather than invent a fixture that lies
-about its own window.

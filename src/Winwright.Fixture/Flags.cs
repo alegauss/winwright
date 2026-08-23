@@ -44,6 +44,12 @@ public sealed class UnknownFlagException : ArgumentException
 /// Another flag this one is meaningless without, or empty. Said in the catalogue, because a
 /// person driving by hand should not have to launch a shape and read a refusal to learn it.
 /// </param>
+/// <param name="Alone">
+/// What it has nothing to do without <paramref name="Needs" />, in the word the refusal uses.
+/// Carried on the row rather than written out per flag: the pair that was checked by hand once is
+/// the pair the next shape added forgets, which is the silent nothing this whole record exists to
+/// stop.
+/// </param>
 /// <param name="Choices">
 /// The values it accepts, where it accepts a fixed set. Empty means any text. A value outside the
 /// set is refused the same way an unknown flag is: a shape nobody can spell is a shape nobody
@@ -56,6 +62,7 @@ public sealed record Flag(
     string Because,
     bool Draws = true,
     string Needs = "",
+    string Alone = "",
     IReadOnlyList<string>? Choices = null,
     bool Numeric = false)
 {
@@ -184,7 +191,32 @@ public sealed record Flags
             "",
             "leave that store changed - the same number of bytes and a different machine",
             "a settings file rewritten to the same length is the accident the fingerprint exists for: a picker repointed from one profile to another of the same name",
-            Needs: "store"),
+            Needs: "store",
+            Alone: "change"),
+        new Flag(
+            "sizeless",
+            "",
+            "render a page whose every row is collapsed, which lays out to nothing at all",
+            "a page that renders empty writes a file, and an empty file is a successful render to everything that only checks a file exists",
+            Draws: false,
+            Needs: "render",
+            Alone: "lay out"),
+        new Flag(
+            "blank",
+            "",
+            "render a page that is the right size and paints nothing, on no background",
+            "a tree measured and never arranged draws a fully transparent picture of exactly the right size, which looks like a drawing bug and is a calling bug",
+            Draws: false,
+            Needs: "render",
+            Alone: "draw"),
+        new Flag(
+            "unbacked",
+            "",
+            "render before the application exists, so nothing anywhere says what to draw the capture on",
+            "a capture taken during startup was drawn on a colour somebody guessed, and the classic palette guesses white on a desk whose windows are dark",
+            Draws: false,
+            Needs: "render",
+            Alone: "draw"),
         new Flag(
             "language",
             "tag",
@@ -282,17 +314,56 @@ public sealed record Flags
             read[name] = value;
         }
 
-        // A flag that does nothing without another is a flag that silently does nothing, which is
-        // the same green as a misspelt one and just as hard to notice.
         // Read at insertion, so a rectangle nobody can parse is a refusal before any window rather
         // than an intruder placed somewhere nobody asked.
         if (read.TryGetValue("intrude", out var rectangle))
             Intruder.Read(rectangle);
 
-        if (read.ContainsKey("mutate") && !read.ContainsKey("store"))
-            throw new UnknownFlagException($"--mutate has nothing to change without --store=<directory>.{Catalogue()}");
-
+        Accompanied(read);
         return new Flags(new ReadOnlyDictionary<string, string>(read));
+    }
+
+    /// <summary>
+    /// The flag the render shapes hang off. Naming it is what makes them exclusive: what a run
+    /// renders is one thing, and a run asking for two of them gets whichever the host checks first.
+    /// </summary>
+    private const string TheRender = "render";
+
+    /// <summary>
+    /// Refuse a shape that was asked for without the one it is meaningless without, and a run that
+    /// asked for two shapes of the same render.
+    /// <para>
+    /// A flag that does nothing without another is a flag that silently does nothing, which is the
+    /// same green as a misspelt one and just as hard to notice. Read off the catalogue rather than
+    /// written out per flag: this was one hand-written pair until three more arrived.
+    /// </para>
+    /// </summary>
+    /// <param name="read">What the command line asked for.</param>
+    /// <exception cref="UnknownFlagException">Where a companion is missing, or two shapes compete.</exception>
+    private static void Accompanied(IReadOnlyDictionary<string, string> read)
+    {
+        var asked = Known.Where(one => read.ContainsKey(one.Name)).ToList();
+
+        foreach (var flag in asked.Where(one => one.Needs.Length > 0 && !read.ContainsKey(one.Needs)))
+        {
+            var companion = Known.First(one => string.Equals(one.Name, flag.Needs, StringComparison.Ordinal));
+            var takes = companion.Takes.Length == 0 ? "" : $"=<{companion.Takes}>";
+
+            throw new UnknownFlagException(
+                $"--{flag.Name} has nothing to {flag.Alone} without --{companion.Name}{takes}.{Catalogue()}");
+        }
+
+        var competing = asked
+            .Where(one => string.Equals(one.Needs, TheRender, StringComparison.Ordinal))
+            .Select(one => $"--{one.Name}")
+            .ToList();
+
+        if (competing.Count > 1)
+        {
+            throw new UnknownFlagException(
+                $"a render draws one thing, and {string.Join(" and ", competing)} are two of them: ask for one."
+                    + Catalogue());
+        }
     }
 
     /// <summary>Every flag, as a person driving the fixture by hand reads them.</summary>

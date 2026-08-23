@@ -7,10 +7,21 @@ namespace Winwright.Tests;
 /// <summary>Why a refusal needs no shape from the fixture, where it needs none.</summary>
 internal enum Without
 {
-    /// <summary>It is about a string, a file or an argument, so no window has to exist for it.</summary>
-    NothingDrawn,
+    /// <summary>
+    /// It needs nothing the fixture can be: a string, a file, an argument, or a window a case
+    /// builds for itself. WW146 widened this from <em>no window at all</em>, which several entries
+    /// under it never claimed — two elements matching one step is a tree, and a hand-built window
+    /// is a tree.
+    /// </summary>
+    NoShape,
 
-    /// <summary>It needs a shape the fixture cannot take. The bucket that must not grow.</summary>
+    /// <summary>
+    /// It needs a shape the fixture cannot take. The bucket that must not grow, and WW146 emptied
+    /// it: three refusals got a shape apiece and the fourth turned out to belong above. It is kept
+    /// rather than deleted because the reading it makes possible — <em>how many refusals can
+    /// nothing reach</em> — is the one this block wanted, and it is only worth anything if the
+    /// answer of nothing is a measurement rather than an absence.
+    /// </summary>
     NotYet,
 }
 
@@ -29,22 +40,38 @@ internal sealed record Provoked(string Refusal, string Flag, Without? Why, strin
     /// <summary>The one line the pairing prints.</summary>
     public override string ToString() => ThroughTheFixture
         ? $"{Refusal,-28} --{Flag}: {Because}"
-        : $"{Refusal,-28} (no flag, {Why.ToString()!.ToLowerInvariant()}): {Because}";
+        : $"{Refusal,-28} (no flag, {Phrase(Why!.Value)}): {Because}";
+
+    /// <summary>
+    /// The reason in words rather than as a member name. Written out because the two are read by a
+    /// person: <em>nothingdrawn</em> was both ugly and, after WW146, untrue of half the list.
+    /// </summary>
+    private static string Phrase(Without why) => why switch
+    {
+        Without.NoShape => "nothing the fixture can be",
+        _ => "a shape the fixture cannot take",
+    };
 }
 
 /// <summary>
 /// Every refusal this framework names, paired with what provokes it.
 /// <para>
-/// WW132. The framework names nineteen refusals and four of them are reached by driving the
+/// WW132. The framework names nineteen refusals and four of them were reached by driving the
 /// fixture. The rest are asserted against hand-built windows, against arguments passed in a test,
 /// or not at all — and the catalogue and the exception types were two lists nobody compared, so a
 /// refusal added later started unprovokable and stayed that way.
 /// </para>
 /// <para>
 /// Some need no shape and saying so is the point: a locator that does not parse is a string, and no
-/// window has to exist for it. Others need one the fixture cannot take, and those are named as such
-/// rather than left off — this framework's value is concentrated in its refusals, and a refusal
-/// nobody can provoke is one that will quietly stop working.
+/// window has to exist for it. Four needed one the fixture could not take, and WW132 named them as
+/// such rather than leaving them off — this framework's value is concentrated in its refusals, and
+/// a refusal nobody can provoke is one that will quietly stop working.
+/// </para>
+/// <para>
+/// WW146 closed that bucket. Three of the four got a shape apiece — a page that lays out to
+/// nothing, a page that paints nothing, a render with no application above it — and the fourth was
+/// moved up: a receipt about the wrong window is the harness handing over the wrong handle rather
+/// than an application misbehaving, so a case builds it and no flag ever will.
 /// </para>
 /// <para>
 /// The pairing is checked rather than kept: the assemblies are read for what they name, and an
@@ -76,38 +103,42 @@ internal static class Provocation
             "a settings file rewritten to the same length, which is the accident the fingerprint exists for"),
         new("ApartmentTimeoutException", "pump", null,
             "a window whose dispatcher never runs, so work handed to it is never taken up"),
+        new("UnrenderableException", "sizeless", null,
+            "a page whose every row is collapsed lays out to nothing, and an empty file is a successful render"),
+        new("BlankPictureException", "blank", null,
+            "a page the right size painting nothing, rendered on no background, which is a picture nothing drew"),
+        new("NoBackgroundException", "unbacked", null,
+            "a render before the application exists, so neither the theme nor a window says what to draw it on"),
 
-        new("LocatorSyntaxException", "", Without.NothingDrawn,
+        new("LocatorSyntaxException", "", Without.NoShape,
             "a locator that does not parse is a string, and no window has to exist for one"),
-        new("AmbiguousLocatorException", "", Without.NothingDrawn,
+        new("AmbiguousLocatorException", "", Without.NoShape,
             "two elements matching one step is a tree, and a hand-built window is a tree"),
-        new("AttachFailedException", "", Without.NothingDrawn,
+        new("AttachFailedException", "", Without.NoShape,
             "attaching to a process that is not there needs no process, which is the whole point of it"),
-        new("DeclarationMissingException", "", Without.NothingDrawn,
+        new("DeclarationMissingException", "", Without.NoShape,
             "a project that declares nothing is a file, and the refusal is about the file"),
-        new("UnreadableTraceException", "", Without.NothingDrawn,
+        new("UnreadableTraceException", "", Without.NoShape,
             "a trace that is not a trace is a file, and reading one back is what this is about"),
-        new("UnearnedGreenException", "", Without.NothingDrawn,
+        new("UnearnedGreenException", "", Without.NoShape,
             "a verdict assembled wrongly is arithmetic on results, with no window anywhere in it"),
-        new("UnderivableSetException", "", Without.NothingDrawn,
+        new("UnderivableSetException", "", Without.NoShape,
             "a strings file declaring nothing under a key is a file, and the refusal is read off it"),
-        new("NotActionableException", "", Without.NothingDrawn,
+        new("NotActionableException", "", Without.NoShape,
             "an element disabled, offscreen or without the pattern is a control, and a hand-built window has controls"),
-        new("DestructiveEntryException", "", Without.NothingDrawn,
+        new("DestructiveEntryException", "", Without.NoShape,
             "a declared entry against a control by that name, both of which a test builds"),
-        new("ScenarioRefusedException", "", Without.NothingDrawn,
+        new("ScenarioRefusedException", "", Without.NoShape,
             "a declared act whose control carries no such pattern, which is a preflight over a tree"),
-        new("ThreadBoundException", "", Without.NothingDrawn,
+        new("ThreadBoundException", "", Without.NoShape,
             "a brush made on one thread and read from another, which needs two threads and no window"),
 
-        new("WrongCaptureException", "", Without.NotYet,
-            "a receipt about a window other than the one captured; nothing here hands over the wrong one"),
-        new("BlankPictureException", "", Without.NotYet,
-            "a picture nothing drew; the fixture always draws something, so it cannot produce one"),
-        new("NoBackgroundException", "", Without.NotYet,
-            "a capture of an element with no background declared anywhere above it"),
-        new("UnrenderableException", "", Without.NotYet,
-            "a render of a tree that lays out to nothing at all"),
+        // WW146 moved this one up rather than inventing a shape for it. A receipt about the wrong
+        // window is the harness handing over the wrong handle, not an application misbehaving, and
+        // a fixture that lied about which window it owns would be reproducing the harness's bug in
+        // the thing the harness is pointed at.
+        new("WrongCaptureException", "", Without.NoShape,
+            "a receipt composed over a window and a target a case hands it, and it already builds both"),
     ]);
 
     /// <summary>One flag's name out of the line the catalogue prints for it.</summary>
@@ -168,7 +199,7 @@ internal static class Provocation
     public static IReadOnlyList<string> Render() => new ReadOnlyCollection<string>(
         [
             $"{Known.Count} refusals: {Reachable().Count} reachable by driving the fixture, "
-                + $"{Known.Count(one => one.Why == Without.NothingDrawn)} needing no window, "
+                + $"{Known.Count(one => one.Why == Without.NoShape)} needing nothing the fixture can be, "
                 + $"{Unreachable().Count} needing a shape it cannot take.",
             .. Known.Select(one => $"  {one}"),
         ]);

@@ -1564,12 +1564,14 @@ public sealed class FixtureTests : IDisposable
     }
 
     [Fact]
-    public void The_three_that_show_nothing_say_so_where_a_person_reads_them()
+    public void The_shapes_that_show_nothing_say_so_where_a_person_reads_them()
     {
         var said = Printed("--flags");
 
-        // Said out loud rather than left to be discovered by launching one and waiting.
-        foreach (var quiet in new[] { "--flags", "--render", "--resident" })
+        // Said out loud rather than left to be discovered by launching one and waiting. Named here
+        // rather than derived from the catalogue's own marker: a list read off the thing it is
+        // checking would agree with itself whatever the fixture did.
+        foreach (var quiet in new[] { "--flags", "--render", "--resident", "--sizeless", "--blank", "--unbacked" })
         {
             var row = Assert.Single(
                 Lines(said), one => one.TrimStart().StartsWith(quiet + " ", StringComparison.Ordinal)
