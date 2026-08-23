@@ -671,16 +671,34 @@ public sealed class FixtureTests : IDisposable
         const int every = 200;
         var window = Launched($"--animate={every}");
 
-        var started = System.Diagnostics.Stopwatch.StartNew();
-        var seen = Changes(Sampled(window, TimeSpan.FromSeconds(5)));
-        var elapsed = started.Elapsed;
+        var watched = Watched(window, TimeSpan.FromSeconds(5));
+        var perLook = PerLook(watched);
 
-        var declared = int.Parse(seen[0].Split(" of ")[1], System.Globalization.CultureInfo.InvariantCulture);
-        var perState = elapsed.TotalMilliseconds / Math.Max(1, seen.Count - 1);
+        // WW162, and read before anything is concluded about the animation. A sampler that looks
+        // less often than a state lasts cannot have seen the sequence, and dividing by a count that
+        // lost members is how a missed sample becomes a confident number about the application:
+        // nine changes over 5225ms read as 653ms each against a declared 200, on a fixture that was
+        // cycling exactly as asked.
+        Assert.True(
+            perLook < every,
+            $"this run looked every {perLook:0}ms at a state that lasts {every}ms, so it could not have observed "
+                + "the sequence — that is the reading being too slow and not the animation");
+
+        var seen = ChangesIn(watched);
+        Assert.True(seen.Count > 1, $"only {seen.Count} change(s) over {watched[^1].AtMs:0}ms of watching");
+
+        // Measured between the first change and the last rather than across the whole watch: the
+        // time before the first and after the last belongs to no state, and counting it in is what
+        // made a five-second window read as a slower animation than it was.
+        var over = seen[^1].AtMs - seen[0].AtMs;
+        var perState = over / (seen.Count - 1);
 
         Assert.True(
             perState > every * 0.4 && perState < every * 3,
-            $"{seen.Count} change(s) over {elapsed.TotalMilliseconds:0}ms is {perState:0}ms each, against {every}");
+            $"{seen.Count} change(s) over {over:0}ms is {perState:0}ms each, against {every}, "
+                + $"and this run looked every {perLook:0}ms");
+
+        var declared = int.Parse(seen[0].Said.Split(" of ")[1], System.Globalization.CultureInfo.InvariantCulture);
         Assert.True(declared > 1);
     }
 
@@ -718,22 +736,58 @@ public sealed class FixtureTests : IDisposable
         return name is not null && name.Contains(" of ", StringComparison.Ordinal) ? name : null;
     }
 
-    private static IReadOnlyList<string> Sampled(TopLevelWindow window, TimeSpan howLong)
+    /// <summary>One reading of the animation, and when this run took it.</summary>
+    /// <param name="Said">What the window announced itself as.</param>
+    /// <param name="AtMs">How far into the watch it was read, in milliseconds.</param>
+    private sealed record Shown(string Said, double AtMs);
+
+    /// <summary>
+    /// Watch the animation, keeping when each reading was taken.
+    /// <para>
+    /// WW162. The times are the half that was missing. A check that divides elapsed time by the
+    /// number of changes it saw cannot tell a slow animation from a slow reader — a skipped state
+    /// does not read as a gap, it reads as a state that lasted twice as long.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<Shown> Watched(TopLevelWindow window, TimeSpan howLong)
     {
         var root = AutomationElement.FromHandle(window.Handle);
-        var said = new List<string>();
-        var until = DateTime.UtcNow + howLong;
+        var said = new List<Shown>();
+        var clock = System.Diagnostics.Stopwatch.StartNew();
 
-        while (DateTime.UtcNow < until)
+        while (clock.Elapsed < howLong)
         {
             if (AnimationState(root) is { } state)
-                said.Add(state);
+                said.Add(new Shown(state, clock.Elapsed.TotalMilliseconds));
 
             Thread.Sleep(30);
         }
 
         Assert.NotEmpty(said);
         return said;
+    }
+
+    private static IReadOnlyList<string> Sampled(TopLevelWindow window, TimeSpan howLong) =>
+        Watched(window, howLong).Select(one => one.Said).ToList();
+
+    /// <summary>
+    /// How often this run actually got a look, which is what decides whether it could have observed
+    /// the sequence at all. A reader slower than a state has not measured the animation.
+    /// </summary>
+    private static double PerLook(IReadOnlyList<Shown> watched) =>
+        watched.Count < 2 ? double.MaxValue : (watched[^1].AtMs - watched[0].AtMs) / (watched.Count - 1);
+
+    /// <summary>The watch with the repeats removed, which is the sequence rather than the poll.</summary>
+    private static IReadOnlyList<Shown> ChangesIn(IReadOnlyList<Shown> watched)
+    {
+        var changes = new List<Shown>();
+        foreach (var one in watched)
+        {
+            if (changes.Count == 0 || !string.Equals(changes[^1].Said, one.Said, StringComparison.Ordinal))
+                changes.Add(one);
+        }
+
+        return changes;
     }
 
     /// <summary>

@@ -64,7 +64,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW162** (deps: WW159 ✅) **the cycle-length check divides by a sample count, so a slow reader reports 653ms a state against a declared 200** — It measures the length against what the reader kept up with and says which that was, because a duration computed from missed samples measures the sampler. → §WW162
 - 📋 **WW164** (deps: —) **the suite waits for the fixture's dumps to exist rather than to be written, so a half-written file reads as an empty one** — It waits for the content it is about to read, because a file that exists and is empty is the half of the write that happened to finish first. → §WW164
 
 ## Done when — Block A
