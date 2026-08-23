@@ -74,6 +74,47 @@ public sealed class RecordedResultTests
         }
     }
 
+    /// <summary>
+    /// The questions in the acting half that may honestly answer yes or no, and why each may.
+    /// <para>
+    /// WW165 asked for the sweep rather than a fourth line later: a verb answering yes or no is a
+    /// verb whose failure has nowhere to put the reason. Two acts were doing it and now answer a
+    /// reading; what is left is a question about a declared reason, which has no failure to explain.
+    /// </para>
+    /// </summary>
+    private static readonly Dictionary<string, string> MayAnswerYesOrNo = new(StringComparer.Ordinal)
+    {
+        ["MayGetAPeer"] = "a question about a declared reason, which presses nothing and cannot fail",
+    };
+
+    [Fact]
+    public void No_act_in_this_half_answers_yes_or_no()
+    {
+        // The rule WW165 leaves behind. A fifth bool fails here until somebody says why it is a
+        // question rather than an act — which is the sentence the entry above is.
+        var answering = typeof(Winwright.Acting.Act).Assembly
+            .GetExportedTypes()
+            .Where(one => one.Namespace == "Winwright.Acting")
+            .SelectMany(one => one.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly))
+            .Where(one => one.ReturnType == typeof(bool))
+            // A record's == and != are the compiler's and not a verb anybody wrote, so they are
+            // not a decision this rule is about.
+            .Where(one => !one.IsSpecialName)
+            .Select(one => one.Name)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        var unexplained = answering.Where(one => !MayAnswerYesOrNo.ContainsKey(one)).ToList();
+
+        Assert.True(
+            unexplained.Count == 0,
+            $"{string.Join(", ", unexplained)} answer(s) yes or no, with nowhere to put the reason a run needs");
+
+        // And the list is not longer than the engine: an entry excusing a method nobody has is an
+        // excuse that outlived what it excused.
+        Assert.All(MayAnswerYesOrNo.Keys, one => Assert.Contains(one, answering));
+    }
+
     [Fact]
     public void The_reading_is_taken_off_the_assembly_and_not_off_a_list_kept_here()
     {

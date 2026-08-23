@@ -2,6 +2,7 @@ using System.Windows.Automation;
 
 using Winwright.Locating;
 using Winwright.Tracing;
+using Winwright.Verdicts;
 using Winwright.Windowing;
 
 namespace Winwright.Acting;
@@ -70,6 +71,73 @@ public sealed record TrayMenu
 }
 
 /// <summary>
+/// What asking the overflow flyout to open or shut turned out to do.
+/// <para>
+/// WW165. These two verbs answered a bare bool, so a run that could not work the flyout said only
+/// <c>false</c> — which of the two calls failed, what the shell was doing, whether the chevron was
+/// there and would not take the act or was never found, none of it survived the return type. Its
+/// sibling one method over already answers a reading with a reason and a step on it.
+/// </para>
+/// </summary>
+public sealed record OverflowState
+{
+    internal OverflowState(string what, bool held, bool already, string? because)
+    {
+        What = what;
+        Held = held;
+        Already = already;
+        Because = because;
+    }
+
+    /// <summary>What was asked of it — opened, or shut.</summary>
+    public string What { get; }
+
+    /// <summary>Whether the flyout ended up the way it was asked to be.</summary>
+    public bool Held { get; }
+
+    /// <summary>
+    /// Whether it was already that way, so nothing was pressed. A real answer and not a detail: a
+    /// run that opened the flyout and one that found it open leave the taskbar differently.
+    /// </summary>
+    public bool Already { get; }
+
+    /// <summary>Why it is not, where it is not. Null where it is.</summary>
+    public string? Because { get; }
+
+    /// <summary>What happened, said either way.</summary>
+    public override string ToString()
+    {
+        if (!Held)
+            return $"the overflow was not {What}: {Because}.";
+
+        return Already
+            ? $"the overflow was already {What}, so nothing was pressed."
+            : $"the overflow was {What}.";
+    }
+
+    /// <summary>
+    /// The result a verdict counts. A shell that would not work the flyout is a fact about the
+    /// desk and never a defect in the code under test, so it is a <em>hole</em> — this block's
+    /// neighbour criterion says nothing about the desk is reported as a defect in the code.
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public AssertionResult AsAssertion(string named) => Held
+        ? AssertionResult.Pass(named, ToString())
+        : AssertionResult.Unchecked(named, Precondition.Absent($"an overflow this run can {What}", Because ?? ToString()));
+
+    /// <summary>The step a trace records.</summary>
+    public TraceStep AsTraceStep(string named) => new()
+    {
+        Verb = $"{What} the overflow",
+        Locator = named,
+        Pattern = "Invoke on the chevron",
+        ReadBack = Held ? (Already ? "it already was" : "it is") : null,
+        Verdict = Held ? StepVerdict.Ok : StepVerdict.Unchecked,
+        Detail = Held ? null : ToString(),
+    };
+}
+
+/// <summary>
 /// The notification area, which is the hardest thing on this desktop to drive.
 /// <para>
 /// Its icons have no clickable point — asking for one throws, and on Windows 11 build 26200 every
@@ -123,16 +191,23 @@ public static class NotificationArea
 
     /// <summary>
     /// Open the overflow through the chevron's invoke pattern, which needs no pointer and no
-    /// foreground. Answers whether the flyout is open, which it also is when it already was.
+    /// foreground.
+    /// <para>
+    /// WW165: answers a reading rather than a bool. A run that could not work the flyout said only
+    /// <c>false</c>, and a red naming no cause sends a reader to a re-run rather than to the shell.
+    /// </para>
     /// </summary>
-    public static bool OpenOverflow(int settleMs = 2000, int pollMs = 25)
+    public static OverflowState OpenOverflow(int settleMs = 2000, int pollMs = 25)
     {
         if (Overflow() is not null)
-            return true;
+            return new OverflowState("opened", true, already: true, null);
 
         var chevron = Chevron();
         if (chevron is null)
-            return false;
+        {
+            return new OverflowState(
+                "opened", false, false, "the taskbar shows no chevron, so there is no flyout to open");
+        }
 
         try
         {
@@ -141,27 +216,43 @@ public static class NotificationArea
         catch (Exception refused)
             when (refused is InvalidOperationException or ElementNotAvailableException)
         {
-            return false;
+            return new OverflowState("opened", false, false, $"the chevron would not take the act: {refused.Message}");
         }
 
         // Waiting for the flyout to exist is not waiting for it to be usable: measured, the
         // window arrives before its icons are laid out, and an icon read in that gap reports a
         // rectangle of nothing — which is the one address these icons have.
-        return Attempt.UntilTrue(
+        var came = Attempt.UntilTrue(
             () => Overflow() is not null && Hidden().Any(icon => icon.Rectangle.Width > 0),
             settleMs,
-            pollMs).Happened;
+            pollMs);
+
+        if (came.Happened)
+            return new OverflowState("opened", true, false, null);
+
+        // The two are told apart, because a reader's next move differs: a flyout that never came
+        // is the shell refusing, and one that came with nothing laid out in it is the gap above.
+        return new OverflowState(
+            "opened",
+            false,
+            false,
+            Overflow() is null
+                ? $"the chevron was pressed and no flyout came within {came.WaitedMs}ms"
+                : $"the flyout came and laid out no icon within {came.WaitedMs}ms");
     }
 
     /// <summary>Shut it again, so a run leaves the taskbar the way it found it.</summary>
-    public static bool CloseOverflow(int settleMs = 2000, int pollMs = 25)
+    public static OverflowState CloseOverflow(int settleMs = 2000, int pollMs = 25)
     {
         if (Overflow() is null)
-            return true;
+            return new OverflowState("shut", true, already: true, null);
 
         var chevron = Chevron();
         if (chevron is null)
-            return false;
+        {
+            return new OverflowState(
+                "shut", false, false, "the flyout is open and the taskbar shows no chevron to shut it with");
+        }
 
         try
         {
@@ -170,10 +261,13 @@ public static class NotificationArea
         catch (Exception refused)
             when (refused is InvalidOperationException or ElementNotAvailableException)
         {
-            return false;
+            return new OverflowState("shut", false, false, $"the chevron would not take the act: {refused.Message}");
         }
 
-        return Attempt.UntilTrue(() => Overflow() is null, settleMs, pollMs).Happened;
+        var went = Attempt.UntilTrue(() => Overflow() is null, settleMs, pollMs);
+        return went.Happened
+            ? new OverflowState("shut", true, false, null)
+            : new OverflowState("shut", false, false, $"the flyout was still there after {went.WaitedMs}ms");
     }
 
     /// <summary>
@@ -190,7 +284,10 @@ public static class NotificationArea
         if (onTheBar is not null || !openingTheOverflow)
             return onTheBar;
 
-        return OpenOverflow(settleMs, pollMs)
+        // WW168 is about what this loses: a flyout that would not open and an icon that is not
+        // there both answer null here, and a caller cannot tell them apart. The reading now
+        // carries the reason, which is what that task hands back.
+        return OpenOverflow(settleMs, pollMs).Held
             ? Hidden().FirstOrDefault(icon => Matches(icon, named))
             : null;
     }

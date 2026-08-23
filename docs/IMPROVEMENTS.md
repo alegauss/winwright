@@ -56,29 +56,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW165 The one verb in this block that answers yes or no
-
-Seen on a loaded guest while shipping WW150, and the flake is not the finding. The case
-opening the overflow twice went red saying "Expected: True, Actual: False", and that
-sentence is the whole of what the run knew: which of the two calls failed, what the
-shell was doing, whether the flyout was there and would not open or was never found -
-none of it survived the return type.
-
-Its sibling in the same file does it properly. Asking a nameless icon for its menu
-answers a reading that carries whether it opened, a Because naming what could not be
-found, and a trace step with a verdict on it, and the case asserts all three. The
-overflow verb answers a bool.
-
-So this is the same repair one verb over, and it is cheap: the reading type exists, the
-reason is already known at the point of failure, and the trace step is a method away.
-What it buys is the difference between a red that names the shell and a red that names
-nothing - which is the reading Block A's own criterion is about, met here by one verb
-and not by its neighbour.
-
-Worth checking the rest of the block for the same shape while this is open rather than
-filing a fourth line later: a verb answering yes or no is a verb whose failure has
-nowhere to put the reason.
-
 ### §WW168 An absent icon and a flyout that would not open
 
 Measured in the guest while shipping WW159: a case that adds two icons of its own and

@@ -146,10 +146,11 @@ did not fail — it never ran, it is named in the summary by name, and collapsin
 other two is the thing winwright will not do. `3` outranks the rest, because a reader told the build
 failed opens the wrong repository.
 
-Two things a scenario meets often are holes rather than failures, and both are about the desk rather
-than about your application: a foreground Windows would not grant, and a focus that left the
-application while a menu walk or a traversal was polling. Neither is your code being wrong, so
-neither goes red — the answer names what held the desk instead.
+Three things a scenario meets often are holes rather than failures, and all of them are about the
+desk rather than about your application: a foreground Windows would not grant, a focus that left the
+application while a menu walk or a traversal was polling, and a notification-area flyout the shell
+would not open. None of them is your code being wrong, so none goes red — the answer names what the
+desk did instead.
 
 Before the assertions, a run takes one reading of the machine: the desk it is on, which binary it is
 driving, whether that binary is stale, the resolved language, the foreground, the launch arguments,

@@ -83,21 +83,63 @@ public sealed class NotificationAreaTests : IDisposable
     [Fact]
     public void The_overflow_opens_through_the_pattern_and_shuts_again()
     {
-        Assert.True(NotificationArea.OpenOverflow());
+        var opened = NotificationArea.OpenOverflow();
+
+        // WW165: the reading and not a bool, so a red on a shell that would not work the flyout
+        // names what it was rather than saying only that something was expected to be true.
+        Assert.True(opened.Held, opened.ToString());
         Assert.NotNull(NotificationArea.Overflow());
         Assert.NotEmpty(NotificationArea.Hidden());
 
-        Assert.True(NotificationArea.CloseOverflow());
+        var shut = NotificationArea.CloseOverflow();
+
+        Assert.True(shut.Held, shut.ToString());
         Assert.Null(NotificationArea.Overflow());
+        Assert.False(shut.Already, "the flyout was already shut, so this proves nothing about shutting it");
     }
 
     [Fact]
     public void Opening_an_overflow_that_is_already_open_is_answered_rather_than_toggled()
     {
-        Assert.True(NotificationArea.OpenOverflow());
-        Assert.True(NotificationArea.OpenOverflow());
+        var first = NotificationArea.OpenOverflow();
+        var again = NotificationArea.OpenOverflow();
 
+        Assert.True(first.Held, first.ToString());
+        Assert.True(again.Held, again.ToString());
         Assert.NotNull(NotificationArea.Overflow());
+
+        // The half a bool could not carry: the second call pressed nothing, and a run that opened
+        // the flyout and one that found it open leave the taskbar differently.
+        Assert.True(again.Already, again.ToString());
+        Assert.Contains("already", again.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_shell_that_will_not_work_the_flyout_is_a_hole_naming_what_it_was()
+    {
+        // The reading a bool had nowhere to put. A flyout this run cannot work is a fact about the
+        // desk and never a defect in the code under test, so the verdict is unchecked and the step
+        // carries the reason — which is what a reader needs instead of "Expected: True".
+        var opened = NotificationArea.OpenOverflow();
+
+        var verdict = opened.AsAssertion("the overflow opens");
+        var step = opened.AsTraceStep("the overflow opens");
+
+        if (opened.Held)
+        {
+            Assert.Equal(Winwright.Verdicts.AssertionOutcome.Passed, verdict.Outcome);
+            Assert.Equal(Winwright.Tracing.StepVerdict.Ok, step.Verdict);
+            Assert.Null(opened.Because);
+            NotificationArea.CloseOverflow();
+            return;
+        }
+
+        // Carried rather than asserted away: this desk refused, and that is the arm the whole
+        // reading exists for.
+        Assert.Equal(Winwright.Verdicts.AssertionOutcome.Unchecked, verdict.Outcome);
+        Assert.Equal(Winwright.Tracing.StepVerdict.Unchecked, step.Verdict);
+        Assert.False(string.IsNullOrWhiteSpace(opened.Because), "the flyout was refused and said nothing about why");
+        Assert.Contains(opened.Because, step.Detail!, StringComparison.Ordinal);
     }
 
     [Fact]
