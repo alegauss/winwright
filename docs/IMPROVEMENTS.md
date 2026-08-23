@@ -28,30 +28,6 @@ criterion it declares is met by nobody.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW152 Survivors nobody reads
-
-Read against this block's criterion once its last line shipped. The criterion says that
-after any scenario ends - passing, failing, throwing or interrupted - nothing it
-launched is alive, and the summary names whatever had to be stopped. The first half is
-built and tested: the register stops what it launched and records each one as stopped,
-killed or already gone. The second half has no reader. Survivors is called by nothing
-outside the register's own tests.
-
-So a run that had to kill a window says so to nobody. That matters most in the case the
-criterion was written for: a process that ignored a close and had to be killed is the
-difference between a scenario that tidied up and one that left the machine in a state
-the next run inherits, and today both print the same nothing.
-
-The place is the same one the pointer reasons went to. A preamble carries findings
-beside its conditions, and what had to be stopped is a finding rather than a
-precondition: it does not excuse an assertion, it is not a failure of the application,
-and it is exactly the sort of thing a reader wants in front of them when the next run
-behaves oddly.
-
-Worth saying where this really lands. Block G builds the thing that takes a run, and its
-dependencies are now all finished; whoever builds it inherits this, and this line is
-what tells them the claim is owed rather than met.
-
 ### §WW158 A display that renders is not a display that is attached
 
 Display() reads three things and none of them is rendering: GetSystemMetrics for the

@@ -6,7 +6,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW152** (deps: —) **nothing reads the survivors a run had to stop, so the summary never names what outlived the scenario** — What the register had to stop reaches the run's own reading, so a scenario that left a process behind says so where the rest of the run is read. → §WW152
 - 📋 **WW158** (deps: —) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — A condition named for rendering is met on the desk that produced the flat rectangle, so the one absence a whole run depends on is the one read from proxies. → §WW158
 
 ## Block C — Locate — the locator grammar and the tree an agent reads

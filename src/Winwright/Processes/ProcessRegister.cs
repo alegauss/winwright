@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 
 using Winwright.Projects;
+using Winwright.Verdicts;
 
 namespace Winwright.Processes;
 
@@ -44,9 +45,41 @@ public sealed class ProcessRegister : IDisposable
 
     /// <summary>
     /// What was still alive when the run ended, once <see cref="StopAll"/> has run. Empty until
-    /// then, and empty afterwards where nothing outlived its case.
+    /// then, and empty afterwards where nothing outlived its case — so read
+    /// <see cref="Stopped"/> before believing an empty list.
     /// </summary>
     public IReadOnlyList<Survivor> Survivors => survivors ?? [];
+
+    /// <summary>
+    /// Whether the roll has been taken at all.
+    /// <para>
+    /// WW152. <see cref="Survivors"/> answers an empty list twice over: once for a register nobody
+    /// has stopped yet, and once for a run that stopped everything and found nothing left. Those
+    /// are a reading not taken and a reading that came back clean, and this project does not report
+    /// them the same way — a caller that could not tell them apart would print <em>nothing
+    /// outlived the run</em> about a run whose processes are all still going.
+    /// </para>
+    /// </summary>
+    public bool Stopped => survivors is not null;
+
+    /// <summary>
+    /// What outlived this run, as a finding for the run's own reading.
+    /// <para>
+    /// A finding and not a precondition: a leftover process excuses no assertion. A finding and not
+    /// a failure either: it is a fact about this desk and never a defect in the code under test,
+    /// and colouring the build red for it would be the opposite of naming it. What it is is the
+    /// thing a reader wants in front of them when the next run behaves oddly — the process that
+    /// would not stop is what locks the next build, and a reader never told about it diagnoses the
+    /// file lock, and then the wrong executable, from scratch.
+    /// </para>
+    /// <para>
+    /// Answered by the register rather than by a caller holding a list, because the register is the
+    /// one thing that cannot be wrong about whether the roll was taken.
+    /// </para>
+    /// </summary>
+    public Finding AsFinding() => Stopped
+        ? new Finding(ProcessSummary.Named, Survivors.Count == 0, ProcessSummary.Sentence(Survivors))
+        : new Finding(ProcessSummary.Named, null, "this register was never asked to stop what it launched");
 
     /// <summary>Start something, registered in the same statement that starts it.</summary>
     public LaunchedProcess Launch(string executable, params string[] arguments)

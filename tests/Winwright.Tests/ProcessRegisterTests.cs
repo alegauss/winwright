@@ -192,4 +192,62 @@ public class ProcessRegisterTests
             Directory.Delete(root, recursive: true);
         }
     }
+
+    [Fact]
+    public void A_register_nobody_stopped_has_taken_no_roll_rather_than_found_nothing()
+    {
+        // WW152. Survivors answers an empty list twice over, and the two are a reading not taken
+        // and a reading that came back clean. A caller that could not tell them apart would print
+        // "nothing outlived the run" about a run whose processes are all still going — which is
+        // this project's founding defect with a different subject.
+        using var register = new ProcessRegister();
+        var pid = register.Launch(LongRunning()).Pid;
+
+        Assert.False(register.Stopped);
+        Assert.Empty(register.Survivors);
+
+        var before = register.AsFinding();
+
+        Assert.False(before.Was);
+        Assert.Null(before.Holds);
+        Assert.Contains("never asked to stop", before.Sentence, StringComparison.Ordinal);
+        Assert.StartsWith("  not read ", before.ToString(), StringComparison.Ordinal);
+
+        // And the process really is still going, which is what makes the empty list a lie a caller
+        // could have told.
+        Assert.True(StillRunning(pid), "the long-running process was not running, so this proves nothing");
+    }
+
+    [Fact]
+    public void A_run_that_had_to_stop_something_says_so_where_the_rest_of_the_run_is_read()
+    {
+        // The case the criterion was written for: a process still alive at the end is the
+        // difference between a scenario that tidied up and one that left the machine in a state
+        // the next run inherits, and both used to print the same nothing.
+        using var register = new ProcessRegister();
+        register.Launch(LongRunning());
+        register.StopAll();
+
+        var finding = register.AsFinding();
+
+        Assert.True(finding.Was);
+        Assert.False(finding.Holds);
+        Assert.Contains("outlived the run", finding.Sentence, StringComparison.Ordinal);
+        Assert.StartsWith("  differs ", finding.ToString(), StringComparison.Ordinal);
+        Assert.Equal(ProcessSummary.Sentence(register.Survivors), finding.Sentence);
+    }
+
+    [Fact]
+    public void A_run_that_left_nothing_behind_says_that_rather_than_saying_nothing()
+    {
+        using var register = new ProcessRegister();
+        register.Launch(Brief()).WaitForExit(10_000);
+        register.StopAll();
+
+        var finding = register.AsFinding();
+
+        Assert.True(finding.Holds);
+        Assert.Empty(register.Survivors);
+        Assert.Equal("no process outlived the run that started it.", finding.Sentence);
+    }
 }

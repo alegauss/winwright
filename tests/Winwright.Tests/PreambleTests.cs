@@ -232,6 +232,30 @@ public sealed class PreambleTests : IDisposable
         Assert.Contains(joined.Differing, one => one.Named == StoreChange.Named);
     }
 
+    [Fact]
+    public void What_the_register_had_to_stop_reaches_the_runs_own_reading()
+    {
+        // WW152. The register stopping what it launched was built and tested; the half that names
+        // what had to be stopped had no reader, so a run that killed a window said so to nobody.
+        var start = new ProcessStartInfo("cmd.exe") { UseShellExecute = false, CreateNoWindow = true };
+        start.ArgumentList.Add("/c");
+        start.ArgumentList.Add("ping -n 120 127.0.0.1");
+
+        using var register = new ProcessRegister();
+        register.Launch(start);
+        register.StopAll();
+
+        var read = Preamble.Of(Attached()).Including(register.AsFinding());
+
+        Assert.Contains(read.Differing, one => one.Named == ProcessSummary.Named);
+        Assert.Contains(read.Render(), one => one.StartsWith("  differs " + ProcessSummary.Named, StringComparison.Ordinal));
+
+        // A finding, so it excuses nothing: a leftover process is a fact about this desk and never
+        // grounds for an assertion claiming it was checked against one.
+        Assert.DoesNotContain(read.Conditions, one => one.Name == ProcessSummary.Named);
+        Assert.Contains("declared reading(s) differ", read.Sentence(), StringComparison.Ordinal);
+    }
+
     /// <summary>A project declaring enough for the measurements that need one.</summary>
     private ProjectDeclaration Declared()
     {

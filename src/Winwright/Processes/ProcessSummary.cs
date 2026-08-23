@@ -7,6 +7,12 @@ namespace Winwright.Processes;
 /// </summary>
 public static class ProcessSummary
 {
+    /// <summary>
+    /// What this reading is called wherever it is reported. One spelling, because a run's preamble
+    /// and a run's summary naming it two ways are two things a reader has to match up by hand.
+    /// </summary>
+    public const string Named = "nothing outlived the run that started it";
+
     /// <summary>One line per process that outlived its case, or nothing where none did.</summary>
     public static IReadOnlyList<string> Detail(IReadOnlyList<Survivor> survivors)
     {
