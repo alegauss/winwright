@@ -349,6 +349,29 @@ session is measured rather than assumed to be small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
+### §WW153 A report that spells a version no file holds
+
+The agreement reading drops the build metadata the SDK appends - `+694044e...` - in
+exactly one place, and its own comment says why: the metadata is already not part of the
+version, so a sentence carrying it would name one copy's decoration as the answer.
+`Versions` drops it. `Render` does not.
+
+So the gate WW142 stood up prints both spellings at once. Run against this repository
+the sentence says all five copies are `0.1.0`, and the line under it says the assembly
+being called is `0.1.0+694044e37cdff1f8ad593f1fa3735e05af09d218` - a version string no
+file in the tree holds, beside four that hold theirs. A reader comparing the two has to
+already know which half of that is decoration.
+
+The alignment goes with it. `Render` writes the version into a twelve-wide column, which
+a forty-seven character informational version overruns, so the one copy most in need of
+being read against the others is the one whose row does not line up with them. Measured
+rather than supposed: it is in the run that shipped WW142.
+
+What it owes is one decision applied in both places - either the report drops the
+metadata as the sentence does, or it keeps it and says it is keeping it, in a column
+wide enough for what it prints. The reading already knows how to drop it; nothing here
+needs a new rule, only the same one twice.
+
 ## Block J — Adoption — the proof is the deletion
 
 ### §WW78 The keyboard case, first
@@ -439,6 +462,29 @@ single-threaded runner become one package reference, which is the largest single
 deletion the whole adoption produces. It is also the hardest, because a thousand other
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
+
+### §WW154 The tool nobody outside this backlog can read about
+
+There is no README. `docs/` holds the roadmap, the ledger and the rationale - all three
+written for whoever is building this - and the repository root holds a solution, a props
+file and two scripts. An adopting project meets winwright through a package id and a
+path into somebody else's tree.
+
+This is not a documentation preference. The shipping rule in
+`.claude/skills/roadmap-docs` runs a decision on every task that ships: would an adopter
+do something differently because this shipped, and if so, hit the surfaces that exist -
+naming the README's feature list first. That clause has been answered by the surface not
+existing, every time, for every task so far. The verbs, the locator grammar, the exit
+codes, the refusals an adopter can hit and the two package ids they take are all
+decided, and none of them are written anywhere a reader outside this backlog would look.
+
+What it owes is one file at the root answering what this is, what it needs (Windows, the
+Desktop framework, the two packages), what a scenario looks like, and what each exit
+code means - written against what has actually shipped, read out of the ledger rather
+than out of the roadmap, so it never promises a verb that is still a line.
+
+It is then held by the same gate every other adopter-facing surface is: the task that
+changes an exit code changes this in the same commit.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
