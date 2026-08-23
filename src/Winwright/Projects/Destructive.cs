@@ -121,9 +121,26 @@ public sealed class Destructive
         return read.Count == 0 ? None : new Destructive(new ReadOnlyCollection<DestructiveEntry>(read));
     }
 
-    /// <summary>The same, from plain names. For a caller with no project and no languages behind it.</summary>
+    /// <summary>
+    /// The same, from plain names, for a caller with no project and no languages behind it.
+    /// <para>
+    /// WW148. Named rather than offered as a second <see cref="Of(IEnumerable{JsonElement}, IReadOnlyList{string}, string)"/>,
+    /// and named for what it gives up: every entry here is declared by name, which is the one field
+    /// a translation rewrites. The refusal above never fires, because nothing was told how many
+    /// languages there are — so this list is a guard that holds in whichever language the caller
+    /// happened to write it in, and stops holding in the rest without saying so.
+    /// </para>
+    /// <para>
+    /// This is the third time this project has closed the same shape, and the rule is worth stating
+    /// because a fourth will come: <em>where a guard can be declined, the declining is a named
+    /// thing a reader sees at the call site, and never a second overload that differs from the
+    /// guarded one by which arguments happened to be to hand.</em> A process cannot be launched
+    /// outside the register, an act cannot reach an element without an admission, and a subject
+    /// without a declaration is <see cref="Locating.Subject.Unguarded" />.
+    /// </para>
+    /// </summary>
     /// <param name="declared">The names or ids.</param>
-    public static Destructive Of(IEnumerable<string>? declared)
+    public static Destructive InOneLanguage(IEnumerable<string>? declared)
     {
         if (declared is null)
             return None;

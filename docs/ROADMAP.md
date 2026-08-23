@@ -14,7 +14,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW148** (deps: —) **a destructive list can still be built from bare names by an overload that names no project and refuses nothing** — The shape that gives the language guard up says so in its name, the way the subject that gives the destructive guard up already does. → §WW148
 - 📋 **WW155** (deps: —) **the menu reading names whatever holds the desk, so a walk can report an entry from another window** — The focus reading under both menus and tab order is the whole desktop's, so an answer can name another application's window and go red about this one. → §WW155
 
 ## Block E — Capture — the picture that proves what it photographed

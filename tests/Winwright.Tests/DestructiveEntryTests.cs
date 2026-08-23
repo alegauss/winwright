@@ -179,7 +179,7 @@ public sealed class DestructiveEntryTests : IDisposable
     [Fact]
     public void The_automation_id_is_matched_first_because_it_is_the_field_the_application_owns()
     {
-        var declared = Destructive.Of(["quitCommand"]);
+        var declared = Destructive.InOneLanguage(["quitCommand"]);
 
         Assert.Equal("quitCommand", declared.Matched("Sair", "quitCommand"));
         Assert.Null(declared.Matched("Quit", "openCommand"));
@@ -215,10 +215,43 @@ public sealed class DestructiveEntryTests : IDisposable
     [Fact]
     public void A_blank_in_a_hand_written_list_is_not_an_entry_that_matches_everything()
     {
-        var declared = Destructive.Of(["Quit", "  ", "", "quit"]);
+        var declared = Destructive.InOneLanguage(["Quit", "  ", "", "quit"]);
 
         Assert.Equal(["Quit"], declared.Entries.Select(one => one.Declared));
         Assert.Null(declared.Matched("Open", ""));
         Assert.Null(declared.Matched("", ""));
+    }
+
+    [Fact]
+    public void The_route_that_declines_the_language_guard_is_not_an_overload_of_the_one_that_keeps_it()
+    {
+        // WW148, and the durable half. The weaker route was spelled as a second Of, which is the
+        // spelling that made the subject's version a trap: a caller reaches it by having strings
+        // rather than a declaration to hand, and nothing at the call site says a guard went with
+        // them. A named route cannot be arrived at by accident, so this asserts the name is the
+        // only door — an overload added back fails here before anybody can call it.
+        var takingStrings = typeof(Destructive).GetMethods()
+            .Where(method => method.Name == nameof(Destructive.Of))
+            .Where(method => method.GetParameters()
+                .Any(parameter => parameter.ParameterType == typeof(IEnumerable<string>)));
+
+        Assert.Empty(takingStrings);
+
+        var named = Assert.Single(
+            typeof(Destructive).GetMethods(),
+            method => method.Name == nameof(Destructive.InOneLanguage));
+
+        Assert.Equal([typeof(IEnumerable<string>)], named.GetParameters().Select(one => one.ParameterType));
+    }
+
+    [Fact]
+    public void A_list_written_without_languages_says_no_entry_on_it_survives_translation()
+    {
+        // What the name is about, read off the list rather than promised by it: every entry made
+        // this way is declared by name, and a name is the one field a translation rewrites.
+        var declared = Destructive.InOneLanguage(["Quit", "quitCommand"]);
+
+        Assert.All(declared.Entries, one => Assert.Equal(DeclaredBy.Name, one.By));
+        Assert.All(declared.Entries, one => Assert.False(one.SurvivesTranslation));
     }
 }

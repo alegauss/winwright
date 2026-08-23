@@ -102,29 +102,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW148 The other weaker route, still unnamed
-
-Left standing by WW134 and pointed at by WW135, which closed the same shape one type
-over. A destructive list is built two ways. One takes what the project declared,
-resolves a key across every language it ships, and refuses a bare name where more than
-one is shipped. The other takes plain strings, makes every one of them a name, and
-refuses nothing.
-
-The second exists because a caller with no project still needs one - the same honest
-need that left a subject constructible without a declaration. WW135 answered that need
-by keeping the shape and naming it for what it gives up, so a reader meets the word
-before the consequence. This one is still spelled as an ordinary overload of the same
-name, which is the spelling that made the subject's version a trap.
-
-So it is the same repair: name it, and let the name carry the loss. Whether it is
-renamed or removed depends on whether anything outside a test wants it, which the task
-should check first rather than assume.
-
-Worth stating the rule this is the third instance of, because a fourth will come. Where
-a guard can be declined, the declining is a named thing a reader sees at the call site,
-and never a second overload that differs from the guarded one by which arguments
-happened to be to hand.
-
 ### §WW155 The menu that is only implied
 
 `Menu.Highlighted` is `Traversal.WhoHasFocus()?.Name`, which is the focused element of
