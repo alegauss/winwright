@@ -124,6 +124,31 @@ a guard can be declined, the declining is a named thing a reader sees at the cal
 and never a second overload that differs from the guarded one by which arguments
 happened to be to hand.
 
+### §WW155 The menu that is only implied
+
+`Menu.Highlighted` is `Traversal.WhoHasFocus()?.Name`, which is the focused element of
+the whole desktop. Nothing narrows it to the window the walk was asked about. `Enter`,
+`To` and `Expand` are all built on it, and `MenuWalk.Reached` compares it against the
+wanted entry - so what a case asserts on is whatever holds the focus, and the menu is
+only implied.
+
+The foreground is checked, and that is not the same guard. It is read once before the
+keys are sent, so `Sent` is honest about the moment the act began; the walk then polls
+for up to two seconds, during which the desk is free to change hands. WW133 established
+the right shape of answer for a key that could not be sent and left the reading
+afterwards unguarded.
+
+Measured while shipping WW143 rather than supposed.
+`Right_expands_the_submenu_and_the_arrival_is_waited_for` went red with `Expected:
+"one.txt"` against `Actual: "1 Yes"`. There is no `Yes` anywhere in this repository -
+the string came off another window on the machine. Re-run alone and then in the whole
+suite it was green both times, which is what a misattribution looks like from the
+inside: a red about the application that nobody can reproduce.
+
+What it owes is a reading scoped to the window it is about, so an entry belonging to
+somebody else's window is reported the way a refused foreground already is - a hole
+naming what held the desk instead, and never a failed comparison.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW38 A region, not a handful of points
