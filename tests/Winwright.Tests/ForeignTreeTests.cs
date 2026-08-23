@@ -38,32 +38,6 @@ public sealed class ForeignTreeTests : IDisposable
         return dialog;
     }
 
-    /// <summary>
-    /// The locator on a rendered line: what is there before the rectangle. The double space is
-    /// looked for outside the quotation marks, because a name is somebody else's string and a real
-    /// one contains runs of spaces.
-    /// </summary>
-    private static string Step(string line)
-    {
-        var text = line.TrimStart();
-        var quoted = false;
-        for (var at = 0; at < text.Length - 1; at++)
-        {
-            if (text[at] == '\\')
-            {
-                at++;
-                continue;
-            }
-
-            if (text[at] == '"')
-                quoted = !quoted;
-            else if (!quoted && text[at] == ' ' && text[at + 1] == ' ')
-                return text[..at];
-        }
-
-        return text;
-    }
-
     [Fact]
     public void An_id_with_a_space_is_rendered_quoted_so_the_grammar_reads_the_whole_of_it()
     {
@@ -170,13 +144,14 @@ public sealed class ForeignTreeTests : IDisposable
         // The claim in full, against the chrome Windows brings rather than the controls this suite
         // creates: whichever line a reader copied, the locator they got works.
         var dialog = Framed();
-        var lines = Inspect.Render(Inspect.Window(dialog.Frame, depth: 4)!);
+        var lines = Inspect.Rendered(Inspect.Window(dialog.Frame, depth: 4)!);
 
-        foreach (var line in lines.Skip(1).Where(one => !one.Contains("not walked", StringComparison.Ordinal)))
-        {
-            var step = Step(line);
+        // WW144: the lines with a step are exactly the lines to copy, so the two filters this used
+        // to spell - skip the root, skip anything saying "not walked" - are one field being null.
+        foreach (var step in lines.Select(one => one.Step).OfType<string>())
             Assert.True(Locator.TryParse(step, out _, out var because), $"inspect printed '{step}', refused: {because}");
-        }
+
+        Assert.Contains(lines, one => one.Step is not null);
     }
 
     [Fact]
@@ -187,12 +162,11 @@ public sealed class ForeignTreeTests : IDisposable
         var tray = Winwright.Acting.NotificationArea.Tray();
         Assert.NotNull(tray);
 
-        var lines = Inspect.Render(Inspect.Under(tray, depth: 4)!);
+        var lines = Inspect.Rendered(Inspect.Under(tray, depth: 4)!);
 
-        foreach (var line in lines.Skip(1).Where(one => !one.Contains("not walked", StringComparison.Ordinal)))
-        {
-            var step = Step(line);
+        foreach (var step in lines.Select(one => one.Step).OfType<string>())
             Assert.True(Locator.TryParse(step, out _, out var because), $"inspect printed '{step}', refused: {because}");
-        }
+
+        Assert.Contains(lines, one => one.Step is not null);
     }
 }

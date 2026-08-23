@@ -50,6 +50,7 @@
 - ✅ **WW113** **the first line inspect prints is a locator step that matches nothing when it is used as one** — Inspect marks the root as the root instead of printing it in the copyable shape, so every line still shaped like a locator is one that resolves — under a red too.
 - ✅ **WW124** **an automation id with a space in it renders as a locator step the grammar then refuses** — An id is quoted when the grammar would not read the whole of it, a line break in a name is escaped rather than printed, and the property is checked against chrome nobody here wrote.
 - ✅ **WW143** **the suite spells the engine's own waiting rule by hand eighteen times, and one of them is a bare sleep** — Every wait in the suite is a deadline on a named condition through the engine's own Attempt, reporting what it waited for and what it cost, with the deadlines declared in one file.
+- ✅ **WW144** **a rendered line hides its locator in the middle of a string, so every reader parses it back out by hand** — Inspect.Rendered hands each line its locator step as a field, so both hand-written parsers are gone and the view under a red is the same rendering rather than a second one.
 
 ## Block D — Act — patterns before pointers
 

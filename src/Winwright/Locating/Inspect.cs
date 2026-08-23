@@ -25,6 +25,32 @@ public sealed record InspectedElement(
 }
 
 /// <summary>
+/// One line of a rendered tree, with its parts kept rather than run together.
+/// <para>
+/// WW144. The line begins with the locator step and continues with the rectangle and the patterns,
+/// separated by two spaces — so anything wanting the step back had to find where it ended, and two
+/// files had grown their own parser for that. The second was rewritten mid-task when a name turned
+/// out to contain a run of spaces: the separator is two spaces, and two spaces occur inside a name
+/// somebody else wrote. The renderer had the step in its hand a moment earlier, so it hands it
+/// over instead.
+/// </para>
+/// </summary>
+/// <param name="Text">The whole line, indent and all, exactly as it prints.</param>
+/// <param name="Step">
+/// The locator step this line addresses its element by, or null where the line is not one to copy
+/// — the root, which is marked rather than printed as a step, and the marker saying how many
+/// children were not walked. That null is the filter downstream wants: a reader keeping the lines
+/// with a step keeps exactly the lines that resolve.
+/// </param>
+/// <param name="Indent">The leading spaces, which are the only thing the depth shows on the page.</param>
+/// <param name="Depth">How deep in the tree this is, the root being zero.</param>
+/// <param name="Element">
+/// What this line describes, or null on the marker line, which describes children that were not.
+/// </param>
+public sealed record RenderedLine(
+    string Text, string? Step, string Indent, int Depth, InspectedElement? Element);
+
+/// <summary>
 /// The control view, as a verb.
 /// <para>
 /// The dump exists in claude-tray and prints only on a failure, after a throwaway script had
@@ -84,17 +110,37 @@ public static class Inspect
     /// The tree as a person reads it: one line per element, indented, each beginning with the
     /// locator step that addresses it and ending with its rectangle and the patterns it offers.
     /// </summary>
-    public static IReadOnlyList<string> Render(InspectedElement tree)
+    public static IReadOnlyList<string> Render(InspectedElement tree) =>
+        new ReadOnlyCollection<string>(Rendered(tree).Select(one => one.Text).ToList());
+
+    /// <summary>
+    /// The same tree, each line with its parts kept. This is the one renderer;
+    /// <see cref="Render(InspectedElement)"/> is its text, so the step a reader is handed cannot
+    /// drift from the step the line opens with.
+    /// </summary>
+    public static IReadOnlyList<RenderedLine> Rendered(InspectedElement tree)
     {
         ArgumentNullException.ThrowIfNull(tree);
 
-        var lines = new List<string>();
+        var lines = new List<RenderedLine>();
         Render(tree, 0, lines);
-        return lines;
+        return new ReadOnlyCollection<RenderedLine>(lines);
     }
 
     /// <summary>What a root's line opens with, so it is never mistaken for one to copy.</summary>
     public const string RootMark = "(root; locators below are relative to it)";
+
+    /// <summary>
+    /// The locator step this element's line opens with, or null where the line is not one to copy.
+    /// <see cref="Line"/> opens with exactly this, which is what keeps the two the same answer.
+    /// </summary>
+    /// <param name="element">What is being rendered.</param>
+    /// <param name="root">Whether this is the tree's own root — see <see cref="Line"/>.</param>
+    public static string? CopyableStep(InspectedElement element, bool root = false)
+    {
+        ArgumentNullException.ThrowIfNull(element);
+        return root ? null : element.Facts.AsLocatorStep().ToString();
+    }
 
     /// <summary>One element as its own line, without its children.</summary>
     /// <param name="element">What to render.</param>
@@ -110,7 +156,7 @@ public static class Inspect
         ArgumentNullException.ThrowIfNull(element);
 
         var facts = element.Facts;
-        var text = new StringBuilder(root ? $"{RootMark} {facts}" : facts.AsLocatorStep().ToString());
+        var text = new StringBuilder(CopyableStep(element, root) ?? $"{RootMark} {facts}");
         text.Append("  ").Append(facts.Bounds);
         if (facts.IsOffscreen)
             text.Append(" offscreen");
@@ -122,15 +168,24 @@ public static class Inspect
         return text.ToString();
     }
 
-    private static void Render(InspectedElement element, int level, List<string> lines)
+    private static void Render(InspectedElement element, int level, List<RenderedLine> lines)
     {
         var indent = new string(' ', level * 2);
-        lines.Add(indent + Line(element, root: level == 0));
+        var root = level == 0;
+        lines.Add(new RenderedLine(
+            indent + Line(element, root), CopyableStep(element, root), indent, level, element));
+
         foreach (var child in element.Children)
             Render(child, level + 1, lines);
 
+        // No step, and that is the field saying so rather than a reader matching on the words: what
+        // this line describes is the children that were not walked, and none of them is addressable.
         if (element.Elided > 0)
-            lines.Add($"{indent}  ... {element.Elided} more not walked");
+        {
+            var deeper = indent + "  ";
+            lines.Add(new RenderedLine(
+                $"{deeper}... {element.Elided} more not walked", null, deeper, level + 1, null));
+        }
     }
 
     private static InspectedElement Walked(AutomationElement element, ElementFacts facts, int depth, int width)

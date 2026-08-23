@@ -64,23 +64,16 @@ public sealed class CopiedLineTests : IDisposable
         return frame;
     }
 
-    /// <summary>The locator on a rendered line: what is there before the rectangle.</summary>
-    private static string Step(string line)
-    {
-        var text = line.TrimStart();
-        var rectangle = text.IndexOf("  ", StringComparison.Ordinal);
-        return rectangle < 0 ? text : text[..rectangle];
-    }
-
     [Fact]
     public void The_root_is_marked_as_the_root_rather_than_printed_as_something_to_copy()
     {
-        var lines = Inspect.Render(Inspect.Window(Dialog())!);
+        var lines = Inspect.Rendered(Inspect.Window(Dialog())!);
 
-        Assert.StartsWith(Inspect.RootMark, lines[0]);
-        Assert.False(
-            Locator.TryParse(Step(lines[0]), out _, out _),
-            "the root's line still reads as a locator, which is the thing that did not work");
+        Assert.StartsWith(Inspect.RootMark, lines[0].Text);
+
+        // WW144: said as the field rather than as a parse that fails. The root has no step, which
+        // is a stronger claim than its text not happening to read as one.
+        Assert.Null(lines[0].Step);
     }
 
     [Fact]
@@ -101,15 +94,16 @@ public sealed class CopiedLineTests : IDisposable
     {
         var frame = Dialog();
         var root = AutomationElement.FromHandle(frame);
-        var lines = Inspect.Render(Inspect.Window(frame)!);
+        var lines = Inspect.Rendered(Inspect.Window(frame)!);
 
         // The claim in full: whichever line a reader started from, the locator they copied works.
-        foreach (var line in lines.Skip(1).Where(one => !one.Contains("not walked", StringComparison.Ordinal)))
+        foreach (var step in lines.Select(one => one.Step).OfType<string>())
         {
-            var step = Step(line);
             Assert.True(Locator.TryParse(step, out var locator, out var because), $"'{step}' is refused: {because}");
             Assert.True(Resolve.Once(root, locator!).Found, $"'{step}' was copied from the tree and matched nothing");
         }
+
+        Assert.Contains(lines, one => one.Step is not null);
     }
 
     [Fact]
@@ -136,12 +130,36 @@ public sealed class CopiedLineTests : IDisposable
         var diagnosed = Diagnosis.Of(AssertionResult.Fail("the cancel button is named", "no name"), tree, subject);
 
         // The tree under a failure is read the same way and copied from the same way, so the line
-        // that does not work would not work there either.
-        var view = diagnosed.View.Select(one => one.Text).ToList();
-        Assert.StartsWith(Inspect.RootMark, view[0]);
+        // that does not work would not work there either. WW144: and it is now literally the same
+        // rendering, so the view carries the steps rather than a reader recovering them.
+        Assert.StartsWith(Inspect.RootMark, diagnosed.View[0].Text);
+        Assert.Null(diagnosed.View[0].Step);
         Assert.All(
-            view.Skip(1).Where(one => !one.Contains("not walked", StringComparison.Ordinal)),
-            one => Assert.True(Locator.TryParse(Step(one), out _, out _), one));
+            diagnosed.View.Select(one => one.Step).OfType<string>(),
+            step => Assert.True(Locator.TryParse(step, out _, out var because), $"'{step}' is refused: {because}"));
+    }
+
+    /// <summary>An element with nothing but a name, which is all this one is about.</summary>
+    private static ElementFacts Facts(string name) => new(
+        name, "", "Button", "", false, true, new Winwright.Windowing.WindowBounds(0, 0, 10, 10),
+        new HashSet<string>(StringComparer.Ordinal));
+
+    [Fact]
+    public void A_name_carrying_two_spaces_does_not_cut_the_step_short()
+    {
+        // WW144, and the reason the field exists rather than a helper. Two spaces separate the step
+        // from the rectangle, and two spaces occur inside a name somebody else wrote - so every
+        // reader recovering the step by scanning for them was one real name away from a wrong
+        // answer, and a wrong answer here is a locator that silently addresses less than it names.
+        var child = new InspectedElement(Facts("Save  as"), [], 0);
+        var tree = new InspectedElement(Facts("winwright statistics"), [child], 0);
+
+        var step = Assert.Single(Inspect.Rendered(tree).Select(one => one.Step).OfType<string>());
+
+        Assert.Equal(child.Facts.AsLocatorStep().ToString(), step);
+        Assert.Contains("Save  as", step, StringComparison.Ordinal);
+        Assert.True(Locator.TryParse(step, out var parsed, out var because), $"'{step}' is refused: {because}");
+        Assert.Equal("Save  as", parsed!.Steps[0].Name);
     }
 
     [Fact]

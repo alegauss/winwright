@@ -10,7 +10,13 @@ namespace Winwright.Asserting;
 /// the element the assertion was about.</summary>
 /// <param name="Text">The line, indented under its parent the way the tree is shaped.</param>
 /// <param name="IsSubject">Whether this is the element the check was reading when it went red.</param>
-public sealed record DiagnosedLine(string Text, bool IsSubject)
+/// <param name="Step">
+/// WW144: the locator step the line opens with, or null where the line is not one to copy — the
+/// root and the marker saying how many children were not walked. Carried rather than recovered,
+/// because a reader parsing it back out of <paramref name="Text"/> has to know where two spaces
+/// separate a field and where two spaces are inside somebody's name.
+/// </param>
+public sealed record DiagnosedLine(string Text, bool IsSubject, string? Step = null)
 {
     /// <summary>The line as a report prints it, the subject carrying the marker that finds it.</summary>
     public override string ToString() => (IsSubject ? "> " : "  ") + Text;
@@ -126,8 +132,14 @@ public sealed record Diagnosis
                 "the control view could not be read: the window was gone, or never reachable, by the time this failed");
         }
 
-        var lines = new List<DiagnosedLine>();
-        Walk(tree, 0, subject, lines);
+        // WW144: rendered by the renderer rather than beside it. This walked the tree itself and
+        // spelled the indent, the root mark and the elided marker a second time, so the view under
+        // a red was one edit away from being a different page than the one `inspect` prints.
+        var lines = Inspect.Rendered(tree)
+            .Select(one => new DiagnosedLine(
+                one.Text, one.Element is not null && IsSubject(one.Element.Facts, subject), one.Step))
+            .ToList();
+
         return Bounded(failure, lines, budget);
     }
 
@@ -185,20 +197,6 @@ public sealed record Diagnosis
     }
 
     private static string Elements(int count) => VerdictSummary.Plural(count, "element") + " not shown";
-
-    private static void Walk(InspectedElement element, int level, ElementFacts? subject, List<DiagnosedLine> lines)
-    {
-        var text = new StringBuilder(new string(' ', level * 2))
-            .Append(Inspect.Line(element, root: level == 0))
-            .ToString();
-        lines.Add(new DiagnosedLine(text, IsSubject(element.Facts, subject)));
-
-        foreach (var child in element.Children)
-            Walk(child, level + 1, subject, lines);
-
-        if (element.Elided > 0)
-            lines.Add(new DiagnosedLine($"{new string(' ', (level + 1) * 2)}... {element.Elided} more not walked", false));
-    }
 
     /// <summary>
     /// Whether this is the element the check was reading. Compared on the step that addresses it

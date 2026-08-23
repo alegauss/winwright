@@ -76,29 +76,6 @@ what tells them the claim is owed rather than met.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW144 The line is not a structure
-
-Noticed twice in one block, which is the signal. Inspect renders each element as a
-string that begins with the locator step and continues with the rectangle and the
-patterns, and anything wanting the locator back has to find where it ends. Two test
-files now carry the same helper for that, and the second was rewritten mid-task when a
-name turned out to contain a run of spaces: the separator is two spaces, and two spaces
-occur inside a name somebody else wrote.
-
-The helper that works scans for a double space outside the quotation marks, honouring
-backslash escapes. That is a small parser, written twice, to recover something the
-renderer had in its hand a moment earlier. It is the shape of code that is correct until
-the day the format gains a field.
-
-What is wanted is that the rendered form carries its parts. A rendered element with the
-step, the indent and the whole line on it costs nothing to produce, keeps the line
-exactly as it prints today, and means nothing downstream has to know where the fields
-meet - the diagnosis view, the copied-line checks and anything an adopter writes.
-
-There is a second reader worth converting at the same time: the check that every printed
-line parses is the check most likely to be defeated by the format changing under it, and
-it is the one that should be reading a field rather than a substring.
-
 ## Block D — Act — patterns before pointers
 
 ### §WW147 A count that exists for one expression
