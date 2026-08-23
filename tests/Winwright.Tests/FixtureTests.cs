@@ -1198,12 +1198,80 @@ public sealed class FixtureTests : IDisposable
         start.Environment[GeometryDump.PathVariable] = geometry;
 
         var launched = Attachable.Launch(register, start);
+
+        // WW164. Waited for what is about to be read and not for the names. Existence is the first
+        // thing a write produces and the last thing that means anything: the file appears empty,
+        // the wait comes back, and the reader gets a dump with nothing in it — which comes out as a
+        // fault about the application, on a run where the application was fine. Measured on a
+        // loaded guest, where the layout case read "there was no geometry to check" against a
+        // fixture that had drawn its window and was still writing the file.
+        //
+        // The same repair WW145 made for the store: read through the write rather than around it.
         Waits.Until(
             "wrote",
-            $"pid {launched.Pid} never wrote what it drew",
-            () => File.Exists(surfaces) && File.Exists(geometry));
+            $"pid {launched.Pid} never wrote what it drew, or wrote it and it read as nothing",
+            () => Readable(surfaces) && Drawn(geometry));
 
         return (surfaces, geometry);
+    }
+
+    [Fact]
+    public void A_dump_that_exists_and_holds_nothing_is_not_one_this_run_may_read()
+    {
+        // WW164, and the confusion provoked directly rather than waited for. A file that exists and
+        // is empty is the half of the write that happened to finish first, and it used to satisfy
+        // the wait — so the reader got a dump with nothing in it and reported a fault about the
+        // application on a run where the application was fine.
+        var empty = Path.Combine(root, "empty-geometry.tsv");
+        File.WriteAllText(empty, "");
+
+        Assert.True(File.Exists(empty), "the empty dump was not written, so this proves nothing");
+        Assert.False(Drawn(empty));
+        Assert.False(Readable(Path.Combine(root, "never-surfaces.tsv")));
+
+        // A line the writer had not finished is answered rather than thrown on: a reader meeting
+        // one would otherwise turn the wait into the failure, which is the same misattribution one
+        // step earlier.
+        var half = Path.Combine(root, "half-geometry.tsv");
+        File.WriteAllText(half, "0\tWindow\twinwright fixt");
+        Assert.False(Drawn(half));
+
+        // And the real ones read as written, so the guard is not simply refusing everything.
+        var (surfaces, geometry) = Driven();
+
+        Assert.True(Readable(surfaces), "the fixture's surface report read as empty");
+        Assert.True(Drawn(geometry), "the fixture's geometry dump read as empty");
+    }
+
+    /// <summary>Whether the surface report holds a surface, rather than merely being there.</summary>
+    private static bool Readable(string surfaces) => Written(surfaces, () => SurfaceReport.Read(surfaces).Count > 0);
+
+    /// <summary>Whether the geometry dump holds a tree, rather than merely being there.</summary>
+    private static bool Drawn(string geometry) =>
+        Written(geometry, () =>
+        {
+            var read = GeometryDump.Read(geometry);
+            return read.Root is not null && read.Elements.Count > 0;
+        });
+
+    /// <summary>
+    /// Read a file the fixture is still writing, answering false rather than throwing. A reader
+    /// that met a half-written line would otherwise turn the wait itself into the failure, which
+    /// is the same misattribution one step earlier.
+    /// </summary>
+    private static bool Written(string path, Func<bool> holds)
+    {
+        if (!File.Exists(path))
+            return false;
+
+        try
+        {
+            return holds();
+        }
+        catch (Exception unfinished) when (unfinished is IOException or FormatException)
+        {
+            return false;
+        }
     }
 
     [Fact]

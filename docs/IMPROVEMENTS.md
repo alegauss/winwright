@@ -374,26 +374,3 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW164 A wait for a name where the content was meant
-
-Measured on a loaded guest while shipping WW150: the layout case read the fixture's
-geometry dump and got "there was no geometry to check", against a fixture that had drawn
-its window and was writing the file. The run before it and the run after it both passed.
-
-The helper every fixture case goes through waits for the two dumps by asking whether
-they exist. Existence is the first thing a write produces and the last thing that means
-anything - the file appears empty, the wait comes back, and the reader gets a dump with
-nothing in it. What comes out is a fault about the application, on a run where the
-application was fine.
-
-This repository has met the same defect once already and wrote the answer down: WW145's
-store helper reads through the write rather than around it, because a file that exists
-and is empty is the half of the write that happened to finish first. That case waits for
-the content to be something other than what it already held. The fixture helper waits
-for a name.
-
-So the repair is the pattern already here: wait for what is about to be read, which for
-a dump is a root and at least one element rather than a byte count. It is the same shape
-as WW159 and WW162 without being the same cause - those lose a sample to a slow reader,
-this one reads a file the writer had not finished.
