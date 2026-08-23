@@ -399,27 +399,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW161 The two exit codes the catalogue does not print
-
-WW146 gave the fixture an exit code of its own: three, for a shape that provoked the
-refusal it exists to provoke. It is deliberately not two, which means the fixture was
-driven wrong - a run that cannot tell those apart reads the fixture working as the
-fixture being misspelt.
-
-Nothing a person reads says so. The catalogue prints every shape, what it takes, what it
-provokes, what it needs and whether it draws anything, and says nothing about what any
-of it exits with. So both codes are learnt by reading Program.cs, and the suite's own
-cases carry three as a private constant copied out of the fixture - which is the second
-transcription of the same fact, and the exact shape the flag catalogue was built to
-stop.
-
-The catalogue is the place for it. It is already what the built fixture says about
-itself rather than what a compile-time reference would have said, and the suite already
-reads the flag names out of it for that reason. A shape that ends in a refusal says
-which code it ends with, the codes are listed once where a person driving by hand meets
-them, and a case asserting three reads it off the article instead of holding a copy that
-nothing compares.
-
 ### §WW162 The second case in the same race
 
 Found in the guest run that shipped WW148, and it is WW159's defect wearing different

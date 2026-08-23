@@ -58,4 +58,42 @@ internal static class Fixture
 
         return start;
     }
+
+    /// <summary>The catalogue, as the built fixture prints it.</summary>
+    public static string Catalogue()
+    {
+        var start = Started("--flags");
+        start.RedirectStandardOutput = true;
+        start.UseShellExecute = false;
+
+        using var running = Process.Start(start)!;
+        var said = running.StandardOutput.ReadToEnd();
+        Assert.True(running.WaitForExit(30_000), "the catalogue never finished printing");
+        Assert.Equal(0, running.ExitCode);
+
+        return said;
+    }
+
+    /// <summary>
+    /// What a run asking for that shape exits with, read off the catalogue.
+    /// <para>
+    /// WW161. The suite used to carry the number as a private constant copied out of the fixture,
+    /// which is a second transcription of the same fact and the exact thing the catalogue was built
+    /// to stop. A case asserting 3 now reads it the way it already reads the flag names: out of the
+    /// article, so a fixture that changed its code fails the case rather than agreeing with a copy.
+    /// </para>
+    /// </summary>
+    /// <param name="flag">The shape, without its dashes.</param>
+    public static int ExitFor(string flag)
+    {
+        var row = Assert.Single(
+            Catalogue().Split('\n').Select(one => one.Trim()),
+            one => one.StartsWith($"--{flag} ", StringComparison.Ordinal)
+                || one.StartsWith($"--{flag}=", StringComparison.Ordinal));
+
+        var says = System.Text.RegularExpressions.Regex.Match(row, @"\[exits (\d+)\]");
+        Assert.True(says.Success, $"the catalogue's row for --{flag} says nothing about what it exits with: {row}");
+
+        return int.Parse(says.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+    }
 }

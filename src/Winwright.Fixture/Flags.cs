@@ -50,6 +50,15 @@ public sealed class UnknownFlagException : ArgumentException
 /// the pair the next shape added forgets, which is the silent nothing this whole record exists to
 /// stop.
 /// </param>
+/// <param name="Exits">
+/// What a run asking for this shape ends with, where it is not the ordinary zero.
+/// <para>
+/// WW161. A shape that provokes the refusal it exists to provoke exits 3, and nothing a person or
+/// a case read said so — the code was learnt by reading the host, and the suite carried its own
+/// copy of the number. Said on the row, so a case asserting 3 reads it off the article the way it
+/// already reads the flag names.
+/// </para>
+/// </param>
 /// <param name="Choices">
 /// The values it accepts, where it accepts a fixed set. Empty means any text. A value outside the
 /// set is refused the same way an unknown flag is: a shape nobody can spell is a shape nobody
@@ -63,6 +72,7 @@ public sealed record Flag(
     bool Draws = true,
     string Needs = "",
     string Alone = "",
+    int Exits = 0,
     IReadOnlyList<string>? Choices = null,
     bool Numeric = false)
 {
@@ -77,7 +87,8 @@ public sealed record Flag(
             : Accepts.Count == 0 ? $"=<{Takes}>" : $"={string.Join("|", Accepts)}";
 
         var alone = Needs.Length == 0 ? "" : $" [needs --{Needs}]";
-        return $"--{Name}{takes}  {Provokes}{alone}{(Draws ? "" : " [draws nothing]")}";
+        var ends = Exits == 0 ? "" : $" [exits {Exits}]";
+        return $"--{Name}{takes}  {Provokes}{alone}{ends}{(Draws ? "" : " [draws nothing]")}";
     }
 
     /// <summary>The two lines a catalogue prints: what it does, and why it is here at all.</summary>
@@ -200,7 +211,8 @@ public sealed record Flags
             "a page that renders empty writes a file, and an empty file is a successful render to everything that only checks a file exists",
             Draws: false,
             Needs: "render",
-            Alone: "lay out"),
+            Alone: "lay out",
+            Exits: Program.Refused),
         new Flag(
             "blank",
             "",
@@ -216,7 +228,8 @@ public sealed record Flags
             "a capture taken during startup was drawn on a colour somebody guessed, and the classic palette guesses white on a desk whose windows are dark",
             Draws: false,
             Needs: "render",
-            Alone: "draw"),
+            Alone: "draw",
+            Exits: Program.Refused),
         new Flag(
             "language",
             "tag",
@@ -373,5 +386,25 @@ public sealed record Flags
     /// </param>
     public static string Catalogue(bool justified = false) =>
         "\nThis fixture knows:\n"
-        + string.Join("\n", Known.Select(one => "  " + (justified ? one.Justified() : one.ToString())));
+        + string.Join("\n", Known.Select(one => "  " + (justified ? one.Justified() : one.ToString())))
+        + "\n" + Codes();
+
+    /// <summary>
+    /// What a run of this fixture ends with, listed once.
+    /// <para>
+    /// WW161. The rows say which shapes end in a refusal; this says what the numbers mean, and it
+    /// prints on a refusal as well as on the catalogue somebody asked for — a person who has just
+    /// been handed a 2 is exactly the person who needs to know that it means the fixture was driven
+    /// wrong rather than that it did something.
+    /// </para>
+    /// <para>
+    /// Read off the host's own constants rather than typed, for the reason the whole catalogue
+    /// exists: a number written down twice is a number that drifts from the thing it describes.
+    /// </para>
+    /// </summary>
+    public static string Codes() =>
+        "It exits:\n"
+        + $"  0  the shape it was asked for did what it does\n"
+        + $"  {Program.UnknownFlag}  a shape this fixture does not have, or one asked for wrongly\n"
+        + $"  {Program.Refused}  a shape that ended in the refusal it exists to provoke";
 }

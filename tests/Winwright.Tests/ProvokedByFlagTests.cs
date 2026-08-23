@@ -43,8 +43,14 @@ public sealed class ProvokedByFlagTests : IDisposable
     private static readonly string[] Driven =
         ["title", "language", "mutate", "pump", "sizeless", "blank", "unbacked"];
 
-    /// <summary>What the fixture exits with where the shape it was asked for was refused.</summary>
-    private const int Refused = 3;
+    /// <summary>
+    /// What the fixture exits with where that shape was refused, read off its own catalogue.
+    /// <para>
+    /// WW161. This was a private 3 copied out of the fixture, which is a second transcription of
+    /// the same fact — so a fixture that changed its code would have gone on agreeing with the copy.
+    /// </para>
+    /// </summary>
+    private static int Refused(string flag) => Fixture.ExitFor(flag);
 
     private readonly ProcessRegister register = new();
     private readonly string root = Directory.CreateTempSubdirectory("winwright-provoked-").FullName;
@@ -161,7 +167,7 @@ public sealed class ProvokedByFlagTests : IDisposable
         var path = Path.Combine(root, "sizeless.png");
         var (code, said) = Rendered(path, "--sizeless");
 
-        Assert.Equal(Refused, code);
+        Assert.Equal(Refused("sizeless"), code);
         Assert.Contains(nameof(UnrenderableException), said, StringComparison.Ordinal);
         Assert.Contains("laid out to 0x0", said, StringComparison.Ordinal);
 
@@ -178,7 +184,7 @@ public sealed class ProvokedByFlagTests : IDisposable
         var path = Path.Combine(root, "unbacked.png");
         var (code, said) = Rendered(path, "--unbacked");
 
-        Assert.Equal(Refused, code);
+        Assert.Equal(Refused("unbacked"), code);
         Assert.Contains(nameof(NoBackgroundException), said, StringComparison.Ordinal);
         Assert.Contains(Backgrounds.DefaultKey, said, StringComparison.Ordinal);
         Assert.False(File.Exists(path), "the refused render wrote a file anyway");

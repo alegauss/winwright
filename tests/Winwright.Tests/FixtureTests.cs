@@ -1561,6 +1561,60 @@ public sealed class FixtureTests : IDisposable
     }
 
     [Fact]
+    public void The_catalogue_says_what_a_run_of_this_fixture_exits_with()
+    {
+        // WW161. The rows said what each shape provokes, what it needs and whether it draws, and
+        // nothing said what any of it exits with — so both codes were learnt by reading the host,
+        // and the suite carried its own copy of the number.
+        var said = Printed("--flags");
+
+        Assert.Contains("It exits:", said, StringComparison.Ordinal);
+        foreach (var code in new[] { "  0  ", "  2  ", "  3  " })
+            Assert.Contains(code, said, StringComparison.Ordinal);
+
+        // The third is the one an adopter has never met: a shape that did what it was asked and a
+        // fixture that was driven wrong are different runs, and the numbers are where that is said.
+        Assert.Contains("does not have", said, StringComparison.Ordinal);
+        Assert.Contains("the refusal it exists to provoke", said, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_shape_that_ends_in_a_refusal_says_so_on_its_own_row()
+    {
+        // Read off the article rather than typed, which is the whole repair: the number lives in
+        // one place and a case wanting it asks the fixture the way a person would.
+        var said = Printed("--flags");
+        var marked = Lines(said)
+            .Select(one => one.Trim())
+            .Where(one => one.StartsWith("--", StringComparison.Ordinal))
+            .Where(one => one.Contains("[exits ", StringComparison.Ordinal))
+            .ToList();
+
+        Assert.NotEmpty(marked);
+        Assert.All(marked, one => Assert.DoesNotContain("[exits 0]", one, StringComparison.Ordinal));
+
+        // And the two that do are the two the suite drives for their refusal.
+        Assert.Equal(3, Fixture.ExitFor("sizeless"));
+        Assert.Equal(3, Fixture.ExitFor("unbacked"));
+
+        // A shape that ends the ordinary way says nothing about it, so the marker means something
+        // rather than being on every row. --blank writes its picture and exits clean: the refusal
+        // it exists for belongs to whoever reads the picture back.
+        var asked = Assert.ThrowsAny<Xunit.Sdk.XunitException>(() => Fixture.ExitFor("blank"));
+        Assert.Contains("--blank says nothing about what it exits with", asked.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_codes_reach_somebody_who_was_just_refused_as_well()
+    {
+        // The person holding a 2 is exactly the person who needs to know it means the fixture was
+        // driven wrong rather than that it did something.
+        var refused = Ran("--nope").Said;
+
+        Assert.Contains("It exits:", refused, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_refusal_stays_scannable_and_leaves_the_reasons_out()
     {
         // Two audiences: somebody who misspelt a flag wants the list, and somebody who asked for
