@@ -68,6 +68,55 @@ public sealed class ProvocationTests
     }
 
     [Fact]
+    public void Every_refusal_no_flag_reaches_names_the_case_that_provokes_it()
+    {
+        // WW160. Twelve entries said some version of "a case builds this" and nothing asserted one
+        // existed. The suite did contain most of them, which is what made the gap quiet: an entry
+        // whose case somebody deleted reads exactly like one whose case still runs.
+        Assert.All(
+            Provocation.ByACase(),
+            one => Assert.False(string.IsNullOrWhiteSpace(one.Case), $"{one.Refusal} names no case"));
+
+        // And the converse, so no entry claims both: one a flag reaches is driven by its own case
+        // in ProvokedByFlagTests, and an entry naming two provocations is an entry saying neither.
+        Assert.All(
+            Provocation.Reachable(),
+            one => Assert.True(one.Case.Length == 0, $"{one.Refusal} names a flag and a case"));
+    }
+
+    [Fact]
+    public void The_case_a_refusal_names_is_one_this_suite_really_runs()
+    {
+        // Read out of the assembly and never believed. A rename fails here, which is the point:
+        // the alternative is a pairing that goes on asserting coverage nothing provides.
+        foreach (var provoked in Provocation.ByACase())
+        {
+            var method = Provocation.CaseNamed(provoked.Case)
+                ?? throw new Xunit.Sdk.XunitException(
+                    $"{provoked.Refusal} names {provoked.Case}, which this suite has not got");
+
+            Assert.True(
+                Provocation.IsACase(method),
+                $"{provoked.Refusal} names {provoked.Case}, which is a method the runner never executes");
+        }
+    }
+
+    [Fact]
+    public void A_case_named_by_the_pairing_is_found_by_name_and_not_by_luck()
+    {
+        // The reading's own control. A check that answered "found" for anything would pass the one
+        // above whatever the entries said, which is the shape of a green covering nothing.
+        Assert.Null(Provocation.CaseNamed("NoSuchTests.No_such_case"));
+        Assert.Null(Provocation.CaseNamed("ProvocationTests.No_such_case"));
+        Assert.Null(Provocation.CaseNamed("nodot"));
+
+        // And a method that is not a case is told from one that is: this class has both.
+        var real = Provocation.CaseNamed($"{nameof(ProvocationTests)}.{nameof(No_refusal_is_paired_twice)}");
+        Assert.NotNull(real);
+        Assert.True(Provocation.IsACase(real));
+    }
+
+    [Fact]
     public void Every_pairing_says_why_in_a_sentence_somebody_can_act_on()
     {
         Assert.All(Provocation.Known, one => Assert.False(string.IsNullOrWhiteSpace(one.Because)));

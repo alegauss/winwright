@@ -64,7 +64,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW160** (deps: —) **sixteen refusals claim a case builds what provokes them, and nothing checks that any such case exists** — Each no-shape entry names the case that provokes it and a check reads the suite for that name, because WW145 already proved a claim held up only by having been written down. → §WW160
 - 📋 **WW161** (deps: —) **a shape that ends in a refusal exits 3, and nothing a person or a case reads says so** — The catalogue prints what each shape exits with, because the code is otherwise learnt by running one and the suite holds a copy of the number instead of reading it. → §WW161
 - 📋 **WW162** (deps: WW159 ✅) **the cycle-length check divides by a sample count, so a slow reader reports 653ms a state against a declared 200** — It measures the length against what the reader kept up with and says which that was, because a duration computed from missed samples measures the sampler. → §WW162
 - 📋 **WW164** (deps: —) **the suite waits for the fixture's dumps to exist rather than to be written, so a half-written file reads as an empty one** — It waits for the content it is about to read, because a file that exists and is empty is the half of the write that happened to finish first. → §WW164

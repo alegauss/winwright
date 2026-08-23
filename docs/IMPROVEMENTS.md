@@ -399,26 +399,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW160 The half of the pairing nobody drives
-
-WW132 paired every refusal the framework names with the flag that provokes it or the
-reason none can, and WW145 wrote a case per reachable entry because a pairing nobody
-drives is a claim held up by having been written down. WW146 closed the last gap on the
-flag side: three shapes were built and the fourth was moved up rather than faked.
-
-What was never checked is the other half of the list. Sixteen entries now say some
-version of a case builds this - a locator that does not parse, a trace that is not a
-trace, a receipt over a window and a target a case hands it - and nothing anywhere
-asserts that such a case exists. The suite does contain most of them, which is exactly
-what makes the gap quiet: the entries were true when they were written, and an entry
-whose case somebody deleted reads identically to one whose case still runs.
-
-This is the same defect one level up from the one WW145 fixed, and the same remedy fits.
-Each no-shape entry names the case that provokes it, and a check reads the suite for
-that name. Naming one is cheap - the pairing already carries a sentence per entry. What
-it buys is that deleting a case fails the pairing rather than quietly shrinking what the
-refusals are worth.
-
 ### §WW161 The two exit codes the catalogue does not print
 
 WW146 gave the fixture an exit code of its own: three, for a shape that provoked the
