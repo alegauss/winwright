@@ -16,6 +16,9 @@
 
 ## Block D — Act — patterns before pointers
 
+- 📋 **WW147** (deps: —) **the one act that retries throws the attempt count away, so a third-attempt success reaches no trace** — The count an act needed reaches the step a trace records, because a green that took three goes is a finding and a green that hid it is the defect this project is about. → §WW147
+- 📋 **WW148** (deps: —) **a destructive list can still be built from bare names by an overload that names no project and refuses nothing** — The shape that gives the language guard up says so in its name, the way the subject that gives the destructive guard up already does. → §WW148
+
 ## Block E — Capture — the picture that proves what it photographed
 
 - 📋 **WW38** (deps: Block K) **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and each frame intersected with the copy rectangle, which answers for the whole area in one pass and names the intruder. → §WW38

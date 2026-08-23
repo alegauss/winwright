@@ -121,6 +121,52 @@ it is the one that should be reading a field rather than a substring.
 
 ## Block D — Act — patterns before pointers
 
+### §WW147 A count that exists for one expression
+
+Read against this block's criterion once its last line shipped. The criterion says a
+retry is bounded and said out loud: no act retries until it passes, the attempt count
+reaches the trace, and an act that only ever works on the third attempt is visible in
+the output. The first clause holds and the other two do not.
+
+The retry type carries both halves. Bounded runs an act to a cap and answers how many
+attempts it took; Recorded stamps that count onto the step a trace records, and says in
+its own comment that a step which took three goes is a different step from one that took
+one even when both are green. Recorded is called by nothing.
+
+The one site that retries is the surface restorer pressing a toggle back to where it
+was. It calls Bounded and drops the answer, so the number exists for the length of one
+expression and then does not. A control that only comes round on the third press is
+invisible, which is the finding the criterion asks to see.
+
+What is owed is the join and not a new mechanism: the restorer keeps what Bounded
+answered, and whatever it reports carries the count. The wider question belongs in the
+same task - whether a restore belongs in a trace at all, being the harness tidying up
+rather than the scenario acting - and if not, the count belongs in what the restore
+reports instead.
+
+### §WW148 The other weaker route, still unnamed
+
+Left standing by WW134 and pointed at by WW135, which closed the same shape one type
+over. A destructive list is built two ways. One takes what the project declared,
+resolves a key across every language it ships, and refuses a bare name where more than
+one is shipped. The other takes plain strings, makes every one of them a name, and
+refuses nothing.
+
+The second exists because a caller with no project still needs one - the same honest
+need that left a subject constructible without a declaration. WW135 answered that need
+by keeping the shape and naming it for what it gives up, so a reader meets the word
+before the consequence. This one is still spelled as an ordinary overload of the same
+name, which is the spelling that made the subject's version a trap.
+
+So it is the same repair: name it, and let the name carry the loss. Whether it is
+renamed or removed depends on whether anything outside a test wants it, which the task
+should check first rather than assume.
+
+Worth stating the rule this is the third instance of, because a fourth will come. Where
+a guard can be declined, the declining is a named thing a reader sees at the call site,
+and never a second overload that differs from the guarded one by which arguments
+happened to be to hand.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW38 A region, not a handful of points
