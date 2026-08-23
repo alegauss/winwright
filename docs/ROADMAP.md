@@ -8,7 +8,6 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - 📋 **WW152** (deps: —) **nothing reads the survivors a run had to stop, so the summary never names what outlived the scenario** — What the register had to stop reaches the run's own reading, so a scenario that left a process behind says so where the rest of the run is read. → §WW152
-- 📋 **WW157** (deps: WW156 ✅) **a person at the keyboard turns a run red, since nothing tells input this run synthesised from input it did not** — The six conditions ask whether the desk can observe and none asks whether it is this run's alone, so a foreground lost to a human reads as a defect in the code. → §WW157
 - 📋 **WW158** (deps: —) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — A condition named for rendering is met on the desk that produced the flat rectangle, so the one absence a whole run depends on is the one read from proxies. → §WW158
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
@@ -192,13 +191,6 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
-
-## Done when — WW157
-
-- **The absence names the person, never the foreground** Proven by touching the mouse
-  during a run: the absence says input arrived that this run did not synthesise, and
-  does not report a lost foreground. Naming the foreground is the misattribution the
-  task exists to remove, so that wording passing is the task failing.
 
 ## Done when — WW158
 

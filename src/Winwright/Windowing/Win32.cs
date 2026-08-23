@@ -113,8 +113,39 @@ internal static class Win32
     internal const uint MouseMiddleDown = 0x0020;
     internal const uint MouseMiddleUp = 0x0040;
 
-    [DllImport("user32.dll", SetLastError = true)]
-    internal static extern uint SendInput(uint count, Input[] inputs, int size);
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SendInput")]
+    private static extern uint SendInputRaw(uint count, Input[] inputs, int size);
+
+    /// <summary>
+    /// Synthesise input, and record that this run was the one that did it.
+    /// <para>
+    /// WW157. The stamp is here rather than at the three call sites because here is the only place
+    /// input leaves this process: a fourth caller added later gets the stamp by construction, and
+    /// one that had to remember would eventually be the one that forgot — at which point the
+    /// reading stops noticing the operator and nobody finds out.
+    /// </para>
+    /// <para>
+    /// Stamped before the call and not after. SendInput returns once the events are queued, so a
+    /// long batch would leave a window in which the operating system has already recorded the
+    /// input and this run has not yet claimed it, which reads exactly like a person.
+    /// </para>
+    /// </summary>
+    internal static uint SendInput(uint count, Input[] inputs, int size)
+    {
+        ForeignInput.Sent();
+        return SendInputRaw(count, inputs, size);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct LastInput
+    {
+        internal uint Size;
+        internal uint Ticks;
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetLastInputInfo(ref LastInput info);
 
     [DllImport("user32.dll")]
     internal static extern int GetSystemMetrics(int index);

@@ -33,14 +33,14 @@ public sealed class PreambleTests : IDisposable
     {
         var read = Preamble.Of(Attached());
 
-        // Twelve, and the count is still the point: a runner cannot list eleven and be right, and
-        // a thirteenth added later is this list rather than an audit of every runner.
+        // Thirteen, and the count is still the point: a runner cannot list twelve and be right,
+        // and a fourteenth added later is this list rather than an audit of every runner.
         //
-        // WW156 made it two groups rather than one. Six are about the desk - can anything be
-        // observed here at all - and six are about the application on it. They are counted
-        // together because a runner asks for the reading once, and told apart by Machine, because
-        // only the first six answer for the run as a whole.
-        Assert.Equal(12, read.Measurements.Count);
+        // Three groups now. Six are about the desk - can anything be observed here at all - six
+        // are about the application on it, and WW157 added one about whether the desk is this
+        // run's alone. Counted together because a runner asks for the reading once; the first six
+        // told apart by Machine, because only they answer for the run as a whole.
+        Assert.Equal(13, read.Measurements.Count);
         Assert.Equal(6, read.Machine.Conditions.Count);
         Assert.Equal(read.Measurements.Count, read.Measurements.Select(one => one.Name).Distinct(StringComparer.Ordinal).Count());
     }
@@ -136,8 +136,12 @@ public sealed class PreambleTests : IDisposable
     {
         var rendered = Preamble.Of(Attached()).Render();
 
-        Assert.Equal(13, rendered.Count);
-        Assert.StartsWith("this run measured 12 conditions", rendered[0]);
+        // Derived, because the absolute number is not what this asserts. It was 7, then 13, then
+        // 14, and each move caught this case for a change it is not about. What it claims is one
+        // line per measurement with the reading above them, and that holds at any count.
+        var read = Preamble.Of(Attached());
+        Assert.Equal(read.Measurements.Count + 1, rendered.Count);
+        Assert.StartsWith($"this run measured {read.Measurements.Count} conditions", rendered[0]);
         Assert.All(rendered.Skip(1), one => Assert.StartsWith("  ", one));
     }
 

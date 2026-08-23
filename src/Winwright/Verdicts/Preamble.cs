@@ -203,6 +203,11 @@ public sealed record Preamble
         taken.Add(Read(InstanceCheck.OverrideName, "no project declared the executable to look for",
             () => Instances(Executable(declaration), ours)));
 
+        // WW157. Beside the desk's six rather than among them: a desk with a person at it can
+        // still be observed, so this excuses an assertion and never refuses a run.
+        var alone = ForeignInput.Read();
+        taken.Add(new Measured(ForeignInput.PreconditionName, alone.AsPrecondition(), alone.Sentence()));
+
         return new Preamble(machine, new ReadOnlyCollection<Measured>(taken), new ReadOnlyCollection<Finding>([]));
     }
 

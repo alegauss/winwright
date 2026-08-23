@@ -74,28 +74,6 @@ Worth saying where this really lands. Block G builds the thing that takes a run,
 dependencies are now all finished; whoever builds it inherits this, and this line is
 what tells them the claim is owed rather than met.
 
-### §WW157 A desk that can observe is not yet a desk of one's own
-
-The six conditions ask one question - can this desk observe - and all six are met on a
-desk with somebody working at it. That desk then loses the foreground halfway through,
-and the run either goes red for a reason about the code or produces a BusyDesk hole
-attributed to Foreground.PreconditionName. Both are wrong the same way: the name given
-is the symptom the run saw, not the fact that a person moved the mouse.
-
-Measured here: a full suite is 999 cases over about two and a half minutes - two and a
-half minutes the operator cannot use their own machine without changing the result. The
-answer people reach for is a second machine, and it is the right one; but a second
-machine with a console session open has the same person in front of it and the same
-silence about it.
-
-GetLastInputInfo separates the two in one call: input this run synthesised against input
-it did not, since the run began. Absent, the condition names what it is, and the run
-stops saying anything about the code.
-
-This is a seventh condition, not a new subsystem. Block B's criterion already reads that
-nothing about the desk is reported as a defect in the code, and a person at the keyboard
-is the case it does not yet cover.
-
 ### §WW158 A display that renders is not a display that is attached
 
 Display() reads three things and none of them is rendering: GetSystemMetrics for the
