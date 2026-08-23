@@ -2,6 +2,30 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+### §WW163 The record nothing writes
+
+Read against this block's criteria the moment its last open line shipped, which is the
+reading that stops a line count reaching zero from meaning finished. Two of the three
+hold. The third does not: it says the trace of a failed run carries the locator, what it
+resolved to, what was read back and the verdict for every step before the one that
+broke.
+
+The machinery is all here. TraceStep names those fields, TraceWriter numbers the steps
+and writes them, TraceFormat renders a line, and the format is asserted both ways. What
+is missing is anybody filling it: the whole engine constructs exactly one TraceStep, and
+WW147 added it a day ago for a restore. No click, no read, no assert, no launch produces
+one, so a failed run's record is empty and the reader's only tool is the re-run this
+block exists to make unnecessary.
+
+Nothing is wrong with the design; the join was never made. The scenario runner that
+would make it is Block G and is not built, which is why this went unnoticed - but a verb
+that writes its own step needs no runner, and every verb already answers something
+carrying what the step wants.
+
+So what is owed is the join, verb by verb, and a check that a verb answering without
+recording is a red. Block A empties either way. What it must not do is empty while the
+criterion it declares is met by nobody.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW152 Survivors nobody reads
@@ -80,6 +104,29 @@ from the inside: a red about the application that nobody can reproduce.
 What it owes is a reading scoped to the window it is about, so an element belonging to
 somebody else's window is reported the way a refused foreground already is - a hole
 naming what held the desk, and never a failed comparison.
+
+### §WW165 The one verb in this block that answers yes or no
+
+Seen on a loaded guest while shipping WW150, and the flake is not the finding. The case
+opening the overflow twice went red saying "Expected: True, Actual: False", and that
+sentence is the whole of what the run knew: which of the two calls failed, what the
+shell was doing, whether the flyout was there and would not open or was never found -
+none of it survived the return type.
+
+Its sibling in the same file does it properly. Asking a nameless icon for its menu
+answers a reading that carries whether it opened, a Because naming what could not be
+found, and a trace step with a verdict on it, and the case asserts all three. The
+overflow verb answers a bool.
+
+So this is the same repair one verb over, and it is cheap: the reading type exists, the
+reason is already known at the point of failure, and the trace step is a method away.
+What it buys is the difference between a red that names the shell and a red that names
+nothing - which is the reading Block A's own criterion is about, met here by one verb
+and not by its neighbour.
+
+Worth checking the rest of the block for the same shape while this is open rather than
+filing a fourth line later: a verb answering yes or no is a verb whose failure has
+nowhere to put the reason.
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -479,3 +526,26 @@ first is what gives this one a sample set worth dividing. What is owed here is t
 second half - the check measures against what the reader actually kept up with, and
 reports that rate, so a run on a slow desk says the reading was too slow rather than
 saying the animation was.
+
+### §WW164 A wait for a name where the content was meant
+
+Measured on a loaded guest while shipping WW150: the layout case read the fixture's
+geometry dump and got "there was no geometry to check", against a fixture that had drawn
+its window and was writing the file. The run before it and the run after it both passed.
+
+The helper every fixture case goes through waits for the two dumps by asking whether
+they exist. Existence is the first thing a write produces and the last thing that means
+anything - the file appears empty, the wait comes back, and the reader gets a dump with
+nothing in it. What comes out is a fault about the application, on a run where the
+application was fine.
+
+This repository has met the same defect once already and wrote the answer down: WW145's
+store helper reads through the write rather than around it, because a file that exists
+and is empty is the half of the write that happened to finish first. That case waits for
+the content to be something other than what it already held. The fixture helper waits
+for a name.
+
+So the repair is the pattern already here: wait for what is about to be read, which for
+a dump is a root and at least one element rather than a byte count. It is the same shape
+as WW159 and WW162 without being the same cause - those lose a sample to a slow reader,
+this one reads a file the writer had not finished.

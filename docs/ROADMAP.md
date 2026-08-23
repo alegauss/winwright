@@ -2,6 +2,8 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+- 📋 **WW163** (deps: —) **nothing in the engine writes a trace step for an act, so a failed run has no record to be diagnosed from** — Every act that reaches an element writes the step the trace already defines, because a record nothing fills leaves a re-run as the only way to diagnose a failure. → §WW163
+
 ## Block B — Attach, launch, and leave nothing behind
 
 - 📋 **WW152** (deps: —) **nothing reads the survivors a run had to stop, so the summary never names what outlived the scenario** — What the register had to stop reaches the run's own reading, so a scenario that left a process behind says so where the rest of the run is read. → §WW152
@@ -12,6 +14,7 @@
 ## Block D — Act — patterns before pointers
 
 - 📋 **WW155** (deps: —) **the menu reading names whatever holds the desk, so a walk can report an entry from another window** — The focus reading under both menus and tab order is the whole desktop's, so an answer can name another application's window and go red about this one. → §WW155
+- 📋 **WW165** (deps: —) **opening the notification overflow answers a bare bool, so a run that could not open it says only false** — It answers a reading carrying the reason and the step its sibling already answers with, because a red naming no cause sends a reader to a re-run rather than to the shell. → §WW165
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -28,13 +31,13 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 📋 **WW57** (deps: Block A ✅, Block C ✅, Block D) **a case is two hundred lines of script that mostly repeats the previous case** — A case is a data file: steps, locators, acts and expectations as fields, with the loop, the waits and the verdicts owned by the engine instead of by the author. → §WW57
-- 📋 **WW58** (deps: Block A ✅, Block C ✅, Block D) **the format is a convention the author is asked to remember** — Every field is validated at insertion, so a refusal costs a retry and never a deletion, which is roadkeep law one applied to a scenario instead of to a line. → §WW58
-- 📋 **WW59** (deps: Block A ✅, Block C ✅, Block D) **there is no way to run one case, or one file, without running the rest** — Run takes a file, a case or a tag and says what it did not run, so a single case is ten seconds when a single act is what changed. → §WW59
-- 📋 **WW60** (deps: Block A ✅, Block C ✅, Block D) **a case that needs a fixture reaches for this machine instead** — Fixtures and sampled environments are declared per case and passed to every launch it makes, or the expectations describe one environment and the window renders another. → §WW60
-- 📋 **WW61** (deps: Block A ✅, Block C ✅, Block D) **a case with an absent precondition goes red for a reason about the desk it ran on** — The precondition is declared, so its absence is unchecked and named instead of a failure nobody reading it can act on. → §WW61
-- 📋 **WW62** (deps: Block A ✅, Block C ✅, Block D) **three cases driving the same window each pay their own launch** — A window is declared shareable and lent to the cases that only read it, while a case run alone still owns its process and its first paint. → §WW62
-- 📋 **WW63** (deps: Block A ✅, Block C ✅, Block D) **a scenario says what to do and never why it is worth doing** — Each case carries the defect it exists to catch, so a case nobody can justify is visible and a case removed by accident is missed. → §WW63
+- 📋 **WW57** (deps: Block A, Block C ✅, Block D) **a case is two hundred lines of script that mostly repeats the previous case** — A case is a data file: steps, locators, acts and expectations as fields, with the loop, the waits and the verdicts owned by the engine instead of by the author. → §WW57
+- 📋 **WW58** (deps: Block A, Block C ✅, Block D) **the format is a convention the author is asked to remember** — Every field is validated at insertion, so a refusal costs a retry and never a deletion, which is roadkeep law one applied to a scenario instead of to a line. → §WW58
+- 📋 **WW59** (deps: Block A, Block C ✅, Block D) **there is no way to run one case, or one file, without running the rest** — Run takes a file, a case or a tag and says what it did not run, so a single case is ten seconds when a single act is what changed. → §WW59
+- 📋 **WW60** (deps: Block A, Block C ✅, Block D) **a case that needs a fixture reaches for this machine instead** — Fixtures and sampled environments are declared per case and passed to every launch it makes, or the expectations describe one environment and the window renders another. → §WW60
+- 📋 **WW61** (deps: Block A, Block C ✅, Block D) **a case with an absent precondition goes red for a reason about the desk it ran on** — The precondition is declared, so its absence is unchecked and named instead of a failure nobody reading it can act on. → §WW61
+- 📋 **WW62** (deps: Block A, Block C ✅, Block D) **three cases driving the same window each pay their own launch** — A window is declared shareable and lent to the cases that only read it, while a case run alone still owns its process and its first paint. → §WW62
+- 📋 **WW63** (deps: Block A, Block C ✅, Block D) **a scenario says what to do and never why it is worth doing** — Each case carries the defect it exists to catch, so a case nobody can justify is visible and a case removed by accident is missed. → §WW63
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
@@ -68,6 +71,7 @@
 - 📋 **WW160** (deps: —) **sixteen refusals claim a case builds what provokes them, and nothing checks that any such case exists** — Each no-shape entry names the case that provokes it and a check reads the suite for that name, because WW145 already proved a claim held up only by having been written down. → §WW160
 - 📋 **WW161** (deps: —) **a shape that ends in a refusal exits 3, and nothing a person or a case reads says so** — The catalogue prints what each shape exits with, because the code is otherwise learnt by running one and the suite holds a copy of the number instead of reading it. → §WW161
 - 📋 **WW162** (deps: WW159) **the cycle-length check divides by a sample count, so a slow reader reports 653ms a state against a declared 200** — It measures the length against what the reader kept up with and says which that was, because a duration computed from missed samples measures the sampler. → §WW162
+- 📋 **WW164** (deps: —) **the suite waits for the fixture's dumps to exist rather than to be written, so a half-written file reads as an empty one** — It waits for the content it is about to read, because a file that exists and is empty is the half of the write that happened to finish first. → §WW164
 
 ## Done when — Block A
 
