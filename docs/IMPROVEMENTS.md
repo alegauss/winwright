@@ -74,28 +74,6 @@ Worth saying where this really lands. Block G builds the thing that takes a run,
 dependencies are now all finished; whoever builds it inherits this, and this line is
 what tells them the claim is owed rather than met.
 
-### §WW156 The desk is read once, before anything blames it
-
-Desk already takes this reading, and its own doc says why: a report about the machine,
-taken before a scenario blames a repository for the desk it ran on. Nothing calls it.
-Across src, tools and tests the only callers are DeskTests and BlipTests, which assert
-the reading is well formed and throw it away.
-
-That is WW138's distinction pointed at the desk rather than at the count: a check that
-has to be invoked separately is not a check the project has, it is a check it offers. A
-machine with no input desktop runs every case and reports on each, when one sentence at
-the start answers for all of them at once.
-
-So the run takes the reading before the first case and stops on FirstAbsent - one named
-absence, in the vocabulary Block A already has for a hole, rather than N holes each
-rediscovering the same fact. Met conditions are printed either way, because which of the
-six is being suffered in silence has never been measured.
-
-The refusal is the whole run and not a case, and that is the part excusing assertions
-one at a time cannot reach. A suite that produced results on a desk incapable of
-producing them is indistinguishable from a real one afterwards, which is the green this
-project exists to withdraw.
-
 ### §WW157 A desk that can observe is not yet a desk of one's own
 
 The six conditions ask one question - can this desk observe - and all six are met on a

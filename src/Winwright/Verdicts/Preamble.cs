@@ -65,11 +65,23 @@ public sealed record Finding(string Named, bool Holds, string Sentence)
 /// </summary>
 public sealed record Preamble
 {
-    private Preamble(IReadOnlyList<Measured> measurements, IReadOnlyList<Finding> findings)
+    private Preamble(Desk machine, IReadOnlyList<Measured> measurements, IReadOnlyList<Finding> findings)
     {
+        Machine = machine;
         Measurements = measurements;
         Findings = findings;
     }
+
+    /// <summary>
+    /// What this run read about the desk itself, as opposed to about the application on it.
+    /// <para>
+    /// WW156. Kept whole beside the flattened measurements, because the two are asked different
+    /// questions. Every other reading here excuses one assertion; these six say whether anything
+    /// could have been observed at all, and that is a statement about the run rather than about a
+    /// check in it.
+    /// </para>
+    /// </summary>
+    public Desk Machine { get; }
 
     /// <summary>Every measurement, taken or not, in the order a preamble prints them.</summary>
     public IReadOnlyList<Measured> Measurements { get; }
@@ -97,9 +109,22 @@ public sealed record Preamble
     {
         ArgumentNullException.ThrowIfNull(findings);
         return new Preamble(
+            Machine,
             Measurements,
             new ReadOnlyCollection<Finding>([.. Findings, .. findings.Where(one => one is not null)]));
     }
+
+    /// <summary>
+    /// The verdict a run gets where the desk it was handed cannot observe anything, and null where
+    /// it can and the run is free to proceed.
+    /// <para>
+    /// WW156. Delegated to <see cref="Windowing.Desk.Refusal(string)"/> rather than decided again
+    /// here: the desk is the subject, and a second copy of the rule is a second thing to keep in
+    /// step. This is the spelling a runner reaches, because a runner already holds a preamble.
+    /// </para>
+    /// </summary>
+    /// <param name="run">What the run would have checked, named as a whole.</param>
+    public RunVerdict? Refusal(string run) => Machine.Refusal(run);
 
     /// <summary>
     /// The conditions the assertions are resolved against. Only the ones actually measured: a
@@ -146,7 +171,17 @@ public sealed record Preamble
     {
         ArgumentNullException.ThrowIfNull(target);
 
-        var taken = new List<Measured>
+        // WW156. The desk first, and in its own order, because these six stop the rest mattering:
+        // a machine with no input desktop has nothing to say about whether the binary it would
+        // have driven was stale. Read here rather than by a runner, for the reason this whole type
+        // exists - a reading reached by its own call is one a runner is free to forget, and the
+        // forgotten one stops being measured while every assertion that needed it starts passing.
+        var machine = Desk.Read();
+        var taken = new List<Measured>(
+            machine.Conditions.Select(one => new Measured(
+                one.Name,
+                one,
+                one.Satisfied ? "this machine has it" : one.Absence)))
         {
             new(AppTarget.LaunchArgumentsPreconditionName, target.LaunchArguments, target.Sentence()),
         };
@@ -168,7 +203,7 @@ public sealed record Preamble
         taken.Add(Read(InstanceCheck.OverrideName, "no project declared the executable to look for",
             () => Instances(Executable(declaration), ours)));
 
-        return new Preamble(new ReadOnlyCollection<Measured>(taken), new ReadOnlyCollection<Finding>([]));
+        return new Preamble(machine, new ReadOnlyCollection<Measured>(taken), new ReadOnlyCollection<Finding>([]));
     }
 
     /// <summary>The preamble a summary opens with: one line per measurement, taken or not.</summary>

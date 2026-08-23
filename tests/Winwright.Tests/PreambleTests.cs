@@ -33,9 +33,15 @@ public sealed class PreambleTests : IDisposable
     {
         var read = Preamble.Of(Attached());
 
-        // Six, and the count is the point: a runner cannot list five and be right, and a sixth
-        // added later is this list rather than an audit of every runner.
-        Assert.Equal(6, read.Measurements.Count);
+        // Twelve, and the count is still the point: a runner cannot list eleven and be right, and
+        // a thirteenth added later is this list rather than an audit of every runner.
+        //
+        // WW156 made it two groups rather than one. Six are about the desk - can anything be
+        // observed here at all - and six are about the application on it. They are counted
+        // together because a runner asks for the reading once, and told apart by Machine, because
+        // only the first six answer for the run as a whole.
+        Assert.Equal(12, read.Measurements.Count);
+        Assert.Equal(6, read.Machine.Conditions.Count);
         Assert.Equal(read.Measurements.Count, read.Measurements.Select(one => one.Name).Distinct(StringComparer.Ordinal).Count());
     }
 
@@ -130,8 +136,8 @@ public sealed class PreambleTests : IDisposable
     {
         var rendered = Preamble.Of(Attached()).Render();
 
-        Assert.Equal(7, rendered.Count);
-        Assert.StartsWith("this run measured 6 conditions", rendered[0]);
+        Assert.Equal(13, rendered.Count);
+        Assert.StartsWith("this run measured 12 conditions", rendered[0]);
         Assert.All(rendered.Skip(1), one => Assert.StartsWith("  ", one));
     }
 

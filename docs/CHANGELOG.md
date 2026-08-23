@@ -35,6 +35,7 @@
 - ✅ **WW127** **two checks read the live desktop root and assert about whatever the machine is showing** — Both property checks read a control this suite made, and the desktop root keeps one reading that says what the engine does with an element it did not choose rather than what that element is.
 - ✅ **WW133** **an input case on a busy desk fails about the code, because a refused foreground is not turned into a hole** — Every input result answers with the third verdict, so a desk this run could not have is a hole naming the condition it lacked rather than a red about the application.
 - ✅ **WW140** **one transient COM error from UI Automation reads as a desk that cannot observe anything at all** — An assembly that will not load is answered on the first look and a failed call is looked at again on a deadline, with a reading that needed two saying so.
+- ✅ **WW156** **nothing reads the desk before a run starts, so a machine that cannot observe still produces results** — The desk's six conditions join the preamble a runner already asks for, and a desk that cannot observe answers the whole run: measured without a session, exit 2 over one hole and no case result.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

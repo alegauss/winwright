@@ -83,6 +83,65 @@ public sealed record Desk
     /// </summary>
     public Precondition? FirstAbsent => Absent.Count == 0 ? null : Absent[0];
 
+    /// <summary>
+    /// A reading already decided against, carrying the one condition that decided it.
+    /// <para>
+    /// WW156. The seam a refusal is provable through, and it opens in one direction only: a
+    /// satisfied precondition is refused, so nothing here can assemble a desk that observes. That
+    /// asymmetry is the whole licence for this being public in a project whose thesis is that a
+    /// green is earned — a fabricated absence costs a run that would have passed, and a fabricated
+    /// presence costs the run's meaning.
+    /// </para>
+    /// <para>
+    /// It exists because none of the six is forceable in process. Coordinates are fixed by the
+    /// module initialiser before anything runs, the assemblies do not break on request, and a
+    /// session or an input desktop would need the workstation locked under the suite. Left with no
+    /// seam, the refusal path is reachable only on a machine nobody has, which is to say never.
+    /// </para>
+    /// </summary>
+    /// <param name="absent">What this desk does not have.</param>
+    /// <exception cref="ArgumentException">Where the precondition is one this machine has.</exception>
+    public static Desk Blocked(Precondition absent)
+    {
+        ArgumentNullException.ThrowIfNull(absent);
+        if (absent.Satisfied)
+        {
+            throw new ArgumentException(
+                $"'{absent.Name}' was met, so it decides nothing and this desk would observe",
+                nameof(absent));
+        }
+
+        return new Desk(new ReadOnlyCollection<Precondition>([absent]), 1, 0);
+    }
+
+    /// <summary>
+    /// The verdict a run gets on this desk, and null where the desk can observe and the run is
+    /// free to proceed.
+    /// <para>
+    /// WW156. One result and not one per case. A suite that ran every check against a machine with
+    /// no input desktop reports N holes that each rediscover the same fact, and a reader has to
+    /// notice they are all the same sentence to learn there was only ever one problem.
+    /// </para>
+    /// <para>
+    /// Degraded, never failed: nothing here is a statement about the application, and exit 1 sends
+    /// a reader to a repository that has done nothing wrong. This is the reading WW1 opened the
+    /// third outcome for.
+    /// </para>
+    /// <para>
+    /// Measured against a real desk rather than a constructed one, in a Windows guest, by running
+    /// the same probe twice. Given a session it read all six met and refused nothing. Denied one,
+    /// two conditions went absent — the input desktop and the foreground — and the verdict came
+    /// back Degraded, exit 2, one result, none run. Two absences and one hole is the part worth
+    /// keeping: the refusal names what stopped the run first, not everything downstream of it.
+    /// </para>
+    /// </summary>
+    /// <param name="run">What the run would have checked, named as a whole.</param>
+    public RunVerdict? Refusal(string run)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(run);
+        return CanObserve ? null : RunVerdict.Over([Excuse(run)]);
+    }
+
     /// <summary>Read the desk now.</summary>
     public static Desk Read()
     {

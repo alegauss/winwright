@@ -100,10 +100,16 @@ public sealed class JoinedReasonsTests : IDisposable
         var root = Dialog();
         var checked_ = Pointer.Check(root, [Act("""Button[name="Publish"]""", PointerReason.NoAutomationPeer)]);
 
-        var rendered = Read().Including(checked_.AsFinding()).Render();
+        var read = Read();
+        var rendered = read.Including(checked_.AsFinding()).Render();
 
         // One line per measurement and then one per finding, so it is read in the same glance.
-        Assert.Equal(8, rendered.Count);
+        //
+        // Counted against the same reading without the finding rather than against a number. The
+        // number was 8, and WW156 put six desk conditions into the preamble and made it 14 - which
+        // caught this case for a change it is not about. What this asserts is that a finding adds
+        // exactly one line, and that is true whatever the reading turns out to measure.
+        Assert.Equal(read.Render().Count + 1, rendered.Count);
         Assert.StartsWith("  differs ", rendered[^1]);
         Assert.Contains(ReasonsChecked.Named, rendered[^1]);
     }
