@@ -30,6 +30,7 @@
 - ✅ **WW192** **a summary counts holes without saying which were the desk's, though the engine now declares which conditions are** — Both headlines divide their holes into the desk's, this run's and unclassified, and every line says which it was — read off the engine's own declared conditions.
 - ✅ **WW197** **a case that excuses the desk once counts as excused for every assertion in it, including the ones that never were** — An excuse now covers the desk fact of the reading it names and nothing else; the finer unit found five cases owing a reason and one owing the repair its own comment predicted.
 - ✅ **WW201** **a case starts a process from a file it then deletes, so its own cleanup throws and the run reports a broken harness** — Four classes deleted a binary they had started, not one; each now settles through a door, and a source-read check names the fifth rather than waiting for a guest run to.
+- ✅ **WW204** **a suite fixture threw away a desk reading and the case downstream reported the shell's refusal as the fixture failing** — Seven discarded desk readings are paired with what downstream could be wronged by them, swept over every member rather than every case — which is where the one that cost a red lived.
 
 ## Block B — Attach, launch, and leave nothing behind
 
