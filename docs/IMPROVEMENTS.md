@@ -2,6 +2,29 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+### §WW172 The suite breaks the promise the engine keeps
+
+Measured, not supposed. A guest run came back with 32 failures across nine classes —
+menus, the notification area, traversal, pick, focus, the capture route. A screenshot of
+the guest's desk showed the Start menu wide open, holding the foreground and covering
+the notification area. Dismissing it took the same tree from 32 failures to 4, and a
+shell restart took it to zero. Nothing in the run said any of that. Every one of the 32
+read as the application being wrong.
+
+This is the defect this project was started over, in the suite that proves the project.
+The engine already knows the answer: a foreground Windows would not grant is a hole and
+not a failure, the run's own reading takes the foreground before any assertion, and
+`Precondition.Absent` is the shape a reading that could not be taken comes back as. The
+cases here reach past all of it and assert directly.
+
+So what is owed is not a new capability. It is the existing one, applied to the suite's
+own desk-dependent cases: a case whose act needed the foreground and did not get it
+resolves unchecked, names what held the desk instead, and exits 2 rather than 1.
+
+The block's first criterion says a degraded run is legible without reading the log.
+Thirty-two reds and a screenshot is the opposite of that, and it was this repository's
+own suite that produced them.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
@@ -27,6 +50,28 @@ The evidence is composition state and what the desk actually draws, never a name
 count is not a claim about a coordinate. WW42 stays where it is: the capture keeps its
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
+
+### §WW173 What a dead run leaves in the shell
+
+Three guest runs of the same tree, in order. The first died with the Start menu holding
+the foreground: 32 failures. The menu was dismissed and nothing else touched; the second
+run came back with 4, every one of them in `TrayPlacementTests`, every one of them
+`TrayIconFixture.Placed` waiting 5000ms and reporting that the shell took the icon and
+never put it anywhere a reading could find. Explorer was restarted in the guest and
+nothing else changed; the third run passed 1087 of 1087.
+
+No process outlived any of the runs — the guest's process list was checked between the
+second and the third and held nothing of this suite's. So what survived was state inside
+the shell, and the run that created it is the run that died.
+
+This block's criterion is that a run leaves the machine as it found it, and the
+notification area is machine. What is owed is the reading: a run that added a tray icon
+says whether the shell still holds one when it finishes, the same way it says what
+processes it had to stop. That is a finding and not an assertion — nothing failed, the
+shell simply kept something — but a finding is what the next run's four reds needed and
+did not have.
+
+Where the icon cannot be withdrawn, saying so is the whole of the repair.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
