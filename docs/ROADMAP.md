@@ -5,6 +5,7 @@
 - 📋 **WW183** (deps: —) **a case reds when somebody touches the machine, though the engine already calls that a desk fact and names it** — The suite's desk facts are the ones the engine declares, because a list kept by hand already misses the reading that measured a person at the keyboard. → §WW183
 - 📋 **WW185** (deps: —) **a sweep records what each environment concluded and nothing about the machine it ran on, which is what a sweep asks** — Each environment carries the reading its own run took, because a hole in one machine and not another is a statement about the machines and neither is described. → §WW185
 - 📋 **WW190** (deps: —) **a case asserting a desk-dependent verdict without excusing the desk is caught by a guest run and by nothing here** — A case that asserts one is red until it says how it excuses the desk, because three have now been found by a full run in the guest and each cost one. → §WW190
+- 📋 **WW191** (deps: —) **the third-state rule reaches only a suite reading that answers a verdict, and the defect it was written for did not** — The rule reaches a reading before it answers a verdict, because the one that shipped a clean desk it never read answered none and would have passed. → §WW191
 
 ## Block B — Attach, launch, and leave nothing behind
 

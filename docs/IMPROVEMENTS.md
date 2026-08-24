@@ -72,6 +72,29 @@ with what its look answers as nothing, read out of the sources. The same reading
 every case that asks a desk-dependent reading for a verdict and pairs it with how it
 excuses the desk — or with a stated reason it needs none.
 
+### §WW191 The rule that would not have caught its own defect
+
+WW182 shipped a check: every suite reading that answers a verdict answers the engine's
+`Finding` too, so the third state is a property of the type rather than something an
+author remembers. It is worth stating what that check would have done about WW181, which
+is nothing.
+
+`TrayGhosts.Showing` answered `IReadOnlyList<string>` and a static `Sentence` taking
+one. No verdict, no `AsAssertion`, nothing for the sweep to find — and a case asserted
+on the list directly, which is how a reading that had never looked reported a clean
+desk. The verdict arrived later, in the repair. So the rule keys on the thing that was
+added *after* the defect.
+
+That is not an argument against the rule. A reading that answers a verdict is one a run
+counts, and governing those is worth doing. It is an argument that the boundary is drawn
+at the wrong moment: the hazard begins when a case asserts on a reading, not when the
+reading learns to produce a verdict.
+
+What is owed is the earlier boundary, and a way to draw it that is not a guess. A
+reading in this suite that swallows an exception and answers a value has a third state
+whether or not it has anywhere to put one — and finding those is the same source-read
+`Deadlines` already does for waits.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
