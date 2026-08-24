@@ -4,11 +4,13 @@
 
 - 📋 **WW176** (deps: —) **32 criteria decide when a block is finished and no case names evidence for any of them, so the reading is a recollection** — Each criterion is paired with what demonstrates it, because a task was filed and designed against a claim that a check was missing when it had shipped. → §WW176
 - 📋 **WW177** (deps: —) **the summary a run exits on never shows what the run read, so the readings and the verdict are two pages that never meet** — The summary carries the reading the run took, because an exit code with no reading beside it sends whoever got it to a second page nothing prints. → §WW177
+- 📋 **WW179** (deps: —) **a desk fact met while building a fixture is thrown, so the case reads as a broken harness rather than a hole** — Setup answers the hole an act already answers, because a throw from a fixture is exit 3 and sends a reader here over a shell that was merely busy. → §WW179
 
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
 - 📋 **WW173** (deps: —) **a run that died with the desk owned leaves the notification area unusable, and the next run reds without saying why** — A run says what it left the shell holding, because four tray cases stayed red across a whole clean run and only a shell restart by hand cleared them. → §WW173
+- 📋 **WW180** (deps: —) **a case counts two processes it launched a moment earlier and sees one, twice in eight guest runs** — The count is taken against processes that have started, because a reading racing a launch reports an instance missing that the machine has. → §WW180
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

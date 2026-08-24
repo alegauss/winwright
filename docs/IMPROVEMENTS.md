@@ -49,6 +49,29 @@ What is owed is the join, and the order it goes in: the reading first, because i
 what makes the verdict underneath it legible, and the summary refusing to print a
 preamble belonging to a different run.
 
+### §WW179 The desk fact that arrives before the act
+
+Measured while shipping WW172. Holding the guest's desk the way the run that produced 32
+failures held it took the same tree to 3, and the three that remained are all the same
+shape: the desk fact arrived during setup, where there is no act to answer it.
+
+Two of them were `TrayIconFixture.Placed`, which waits for the shell to put an icon
+somewhere findable and throws `InvalidOperationException` when it does not. WW168
+already made the search say which it was — the icon is absent, or the overflow could not
+be looked in — and the fixture drops that distinction on the floor by throwing either
+way. The third was `CaptureRouteTests`, whose helper throws "the shell put no menu
+window on this desk".
+
+A throw is not a hole. `RunVerdict` ranks a broken harness above a failure precisely
+because nothing past the throw was observed and the reader is being sent to this
+repository rather than to the one under test — which is the wrong repository when the
+shell was merely covering the taskbar.
+
+What is owed is that setup answers what an act answers. A fixture that could not be
+built because the desk refused carries the reading that says so, and the case excuses
+itself on it exactly as it now does for a foreground it was not granted. The three that
+remain are the list; a fourth found later is the same repair.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
@@ -96,6 +119,30 @@ shell simply kept something — but a finding is what the next run's four reds n
 did not have.
 
 Where the icon cannot be withdrawn, saying so is the whole of the repair.
+
+### §WW180 A count taken before the thing being counted exists
+
+`InstanceCheckTests.A_resident_instance_showing_nothing_is_the_ordinary_case_and_never_stops_a_run`
+copies `cmd.exe` twice, launches both windowless through the register, and immediately
+asks `InstanceCheck.Of` how many are running. It expects two. Twice in eight guest runs
+it saw one.
+
+Measured rather than blamed. The failure appeared while a change to unrelated test files
+was in the tree, so the change was stashed and the same guest ran HEAD green, then ran
+the change green as well — two greens and two reds across the same code, which is a race
+and not a regression. It is filed here rather than left as folklore because the next
+person to see it will spend the same three runs.
+
+What races is the reading against the launch. `InstanceCheck.Of` identifies an instance
+by the binary the process is running, and a process that has been created but has not
+yet mapped its image answers nothing to that question. The register hands back a pid as
+soon as there is one, so the case can reach the count before the second process is
+countable.
+
+The fix belongs in the reading or in the register, not in the case: a count that is
+right only when the machine is fast is the kind of green this project withdraws.
+Whichever end takes it, what the reading owes is that a pid it was given and cannot yet
+identify is said rather than skipped.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
