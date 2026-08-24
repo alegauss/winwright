@@ -207,7 +207,10 @@ the trace step agree, so a record never disagrees with the summary beside it.
 
 Before the assertions, a run takes one reading of the machine: the desk it is on, which binary it is
 driving, whether that binary is stale, the resolved language, the foreground, the launch arguments,
-whether anything else is showing the application, and whether the desk is this run's alone. Each is
+whether anything else is showing the application, and whether the desk is this run's alone. The
+instance reading passes over a process that will not say which binary it is running — refusing on
+those would refuse on an elevated shell somebody left open — and **names how many it passed over**,
+so "nothing else is running this application" is never a claim about a candidate nobody could read. Each is
 reported as measured, absent, or **not read** — an absent line and a missing line read the same to
 somebody skimming, and only one of them is a statement.
 
