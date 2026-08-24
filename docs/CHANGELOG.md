@@ -19,6 +19,7 @@
 - ✅ **WW163** **nine of sixteen results answer an assertion and no trace step, so a run's record loses the steps behind its verdict** — Every result answering a verdict answers the step behind it, paired by reading the assembly, so a tenth added with one half fails rather than quietly narrowing what a trace covers.
 - ✅ **WW167** **forty reader-facing renderings and nothing pairs them with a case, so two shipped unasserted before anybody noticed** — Every rendering the engine answers is paired with the case asserting its text, checked against the assembly both ways, so a new one starts unpaired and the suite says so.
 - ✅ **WW172** **a desk another window owns turns 32 cases red about the application, which is the confusion this tool exists to end** — Every desk-dependent case resolves the hole its own act already answered, so a desk another window owns turned 32 reds into 3 instead of into 32 claims about the application.
+- ✅ **WW176** **32 criteria decide when a block is finished and no case names evidence for any of them, so the reading is a recollection** — Every criterion the roadmap declares is paired with the case that shows it, checked both ways, so what nothing shows is a counted bucket and finishing a block is a reading.
 
 ## Block B — Attach, launch, and leave nothing behind
 

@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW176** (deps: —) **32 criteria decide when a block is finished and no case names evidence for any of them, so the reading is a recollection** — Each criterion is paired with what demonstrates it, because a task was filed and designed against a claim that a check was missing when it had shipped. → §WW176
 - 📋 **WW177** (deps: —) **the summary a run exits on never shows what the run read, so the readings and the verdict are two pages that never meet** — The summary carries the reading the run took, because an exit code with no reading beside it sends whoever got it to a second page nothing prints. → §WW177
 - 📋 **WW179** (deps: —) **a desk fact met while building a fixture is thrown, so the case reads as a broken harness rather than a hole** — Setup answers the hole an act already answers, because a throw from a fixture is exit 3 and sends a reader here over a shell that was merely busy. → §WW179
 - 📋 **WW182** (deps: —) **a suite reading invents its own shape instead of the engine's three-state Finding, and shipped able to say two things** — A suite reading answers a Finding, because the one that invented its own shape reported a desk clean where it had not looked and no check here saw it. → §WW182

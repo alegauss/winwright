@@ -116,7 +116,7 @@ proposal against it for you.
 ### Criteria — the newest of roadkeep's lists, and the one this backlog leans on
 
 `criterion` is recent, so it is easy to work here for a week without noticing it, and this project
-has **32 criteria across all eleven blocks** — three per block, two under Block I. They are the
+has **33 criteria — 32 across all eleven blocks**, three per block and two under Block I, plus one bound to WW158. They are the
 answer to a failure roadkeep measured: a non-goal says what is *not* built, nothing said what would
 make a block **done**, so the only test left was *a line count reaching zero* — and a block declared
 closed that way was reopened six times. A definition of done written into a rationale section is one
@@ -143,12 +143,21 @@ closed that way was reopened six times. A definition of done written into a rati
 - **`criterion list [--block X|--task <id>]` is never refused**, and it says *which* empty it found —
   ungoverned, unasked, or all dropped. Read it **before a block's last open line ships**: "the block
   is finished" is that reading, never a line count reaching zero. And read the `--why` as written —
-  each of the 32 here names a run or an observation that settles it, which is what makes the reading
+  each of the 33 here names a run or an observation that settles it, which is what makes the reading
   a check instead of a mood.
 - **Presence, not enforcement.** roadkeep asserts the list exists and is well formed; whether the
   work *satisfies* a criterion is a judgement it has no model for (L4). Nothing goes red when a
   criterion is untrue, which is exactly why the read-back before shipping is a rule here rather than
   a suggestion.
+- **WW176 wrote the reading down.** `tests/Winwright.Tests/Criteria.cs` pairs every criterion the
+  roadmap declares with the case that demonstrates it, checked against `docs/ROADMAP.md` in both
+  directions, and a criterion added later is red until somebody says what shows it. **Read it beside
+  `criterion list`, not instead of it** — it records what the last reading concluded, and whether
+  that is still true is the judgement roadkeep has no model for either. Two buckets, and they are
+  different admissions: `NotBuilt` is a criterion about a capability that does not exist yet, and
+  `NotYet` is one that shipped with nobody reading the claim back. A `NotYet` names the task carrying
+  it. This reading found a real gap in three blocks running before it was a list — WW177, WW178,
+  WW184 — which is the argument for keeping it one.
 
 ## `ship --why`, or live with it
 
