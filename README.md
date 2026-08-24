@@ -173,6 +173,14 @@ something nobody asked for. Leave the reading off and the receipt says nothing a
 rather than claiming it was clear: a caller who never looked and one who looked and found nothing
 are two different facts.
 
+**Or let the capture ask for you.** `CaptureReceipt.Taking(path, window, target, write)` runs the
+write between the readings and composes the receipt from all of them, so none of these questions
+depends on a caller remembering it — a reading reached by its own call is one that stops being taken
+while every check that needed it starts passing. Which questions apply is the route's business: a
+render is asked only about what was written, because nothing else can reach it. The file is written
+either way, since a picture nobody may trust is still evidence about what went wrong; what a refusal
+withdraws is the claim that it is a capture.
+
 A window's own glass is the other way a copy stops being a picture of it. `Glass.Of` asks the
 compositor which system backdrop the window opted into — mica, acrylic and tabbed all composite what
 is behind the window into it — and a receipt handed that reading refuses too. Z-order reasoning

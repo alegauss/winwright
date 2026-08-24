@@ -18,7 +18,6 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW187** (deps: —) **two capture refusals fire only where the caller remembered to take the reading, and nothing makes anyone take it** — The receipt takes both readings itself, because one reached by its own call is one a caller forgets and an unchecked capture looks exactly like one that passed. → §WW187
 - 📋 **WW188** (deps: —) **one refusal type has five arms now and the pairing records one, so an arm added later is provoked by nobody** — The pairing is per arm, because a block is called finished on every refusal having something that provokes it and four of these five are invisible to the check. → §WW188
 
 ## Block F — Assert — the expectation is derived, never typed

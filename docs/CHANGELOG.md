@@ -115,6 +115,7 @@
 - ✅ **WW43** **a page still computing is photographed and announced as a picture of a report** — A project declares which keys are its loading strings, the text is resolved out of its own language files, and a key none of them carries refuses instead of matching nothing.
 - ✅ **WW46** **a change meant to be invisible has no cheap way to prove it was** — Two renders are compared byte for byte with no tolerance chosen, and where they differ the answer says whether the picture changed with them or only the file did.
 - ✅ **WW194** **a render is refused for a backdrop it cannot transmit, because the refusal keys on reach and not on the route taken** — The backdrop refusal keys on the route taken, so an off-screen render is no longer refused for a hazard the compositor never reaches and a forced copy still is.
+- ✅ **WW187** **two capture refusals fire only where the caller remembered to take the reading, and nothing makes anyone take it** — A capture taken through the door reads the region, the glass and the colours itself and refuses on any, asking only the questions the route it took can be hurt by.
 
 ## Block F — Assert — the expectation is derived, never typed
 

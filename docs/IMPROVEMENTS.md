@@ -127,29 +127,6 @@ is for.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW187 Two refusals behind an optional argument
-
-WW38 and WW41 gave this block two readings a capture needs, and WW40 gave the receipt
-the refusals that fire on them. Both arrive as optional arguments. `CaptureReceipt.Of`
-has four now, and a caller who passes neither gets a receipt that refuses nothing and
-records honestly that nobody asked.
-
-Recording it honestly is the part that works. What does not is that nothing asks. This
-project already argued the case, in `Preamble.Of`'s own comment about the readings a run
-takes: a reading reached by its own call is one a runner is free to forget, and the
-forgotten one stops being measured while every assertion that needed it starts passing.
-Two of these are exactly that, and the third and fourth are coming — WW42's flat colour
-and WW43's page still computing are two more questions a capture has to be asked.
-
-So the composition belongs where WW170 put the run's: in a verb that takes both halves
-at once. A capture taken through it reads the region and the glass, refuses on either,
-and carries what it read into the receipt either way — and a caller who wants the pieces
-separately still has them.
-
-What is owed is that door, and the decision about what it does where a reading cannot be
-taken: a compositor that would not answer is not a window with no backdrop, and the
-receipt already knows the difference.
-
 ### §WW188 Five refusals wearing one name
 
 `Provocation` pairs every refusal the framework names with a fixture flag or a stated

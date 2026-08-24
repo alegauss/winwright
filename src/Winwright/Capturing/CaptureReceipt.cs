@@ -110,6 +110,72 @@ public sealed record CaptureReceipt
     public Precondition Arguments => Target.LaunchArguments;
 
     /// <summary>
+    /// Take a capture and compose its receipt, asking the questions a capture has to be asked
+    /// rather than leaving them to a caller.
+    /// <para>
+    /// WW187. WW38, WW41 and WW42 gave this block three readings a capture needs, and WW40 gave the
+    /// receipt the refusals that fire on them — all as optional arguments, so a caller who passed
+    /// none got a receipt that refused nothing and recorded honestly that nobody asked. Recording it
+    /// honestly is the part that worked. What did not is that nothing asked.
+    /// </para>
+    /// <para>
+    /// The argument is this repository's own, from <c>Preamble.Of</c>: a reading reached by its own
+    /// call is one a runner is free to forget, and the forgotten one stops being measured while
+    /// every assertion that needed it starts passing. So the composition lives here, the way WW170
+    /// put the run's in one place — and <see cref="Of" /> is still there for a caller who wants the
+    /// pieces.
+    /// </para>
+    /// <para>
+    /// Which questions apply is the route's business and not the caller's. A window standing over
+    /// the region and a backdrop transmitting through it are both about a copy of the screen; an
+    /// off-screen render draws the visual tree with the compositor not involved and neither can
+    /// reach it, which is WW194. The colour count applies to whatever was written, because a flat
+    /// rectangle is not a picture of a window however it was got.
+    /// </para>
+    /// </summary>
+    /// <param name="path">Where the capture is to be written.</param>
+    /// <param name="window">The window being photographed.</param>
+    /// <param name="target">How this run reached the application.</param>
+    /// <param name="take">What writes the file. Given the path, and called between the readings.</param>
+    /// <param name="frame">What is being copied against what the window owns, where it was read.</param>
+    /// <param name="route">Which way the picture is being got, and why.</param>
+    /// <exception cref="WrongCaptureException">
+    /// Where any of the questions answers wrongly. The file is written either way, because a
+    /// picture nobody may trust is still evidence about what went wrong — what the refusal withdraws
+    /// is the claim that it is a capture.
+    /// </exception>
+    public static CaptureReceipt Taking(
+        string path,
+        TopLevelWindow window,
+        AppTarget target,
+        Action<string> take,
+        PaintedFrame? frame = null,
+        CaptureRoute? route = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(window);
+        ArgumentNullException.ThrowIfNull(target);
+        ArgumentNullException.ThrowIfNull(take);
+
+        var copied = route?.Renders is not true;
+
+        // Read before the take and never after: what a reader needs is the desk as it stood while
+        // the picture was being got, and a region read afterwards is a reading of a moment the
+        // capture had already passed. The closest observable instant is the one before.
+        var over = copied ? Obstruction.Reading(window.Handle, frame?.Painted ?? window.Bounds) : null;
+        var glass = copied ? Glass.Of(window.Handle) : null;
+
+        take(path);
+
+        // And after, because this one is about the file. A capture that was never written is not a
+        // flat one, and Colours refuses rather than answering — so the absence reaches the caller
+        // as itself instead of as a picture of one colour.
+        var colours = File.Exists(path) ? Capturing.Colours.In(path) : null;
+
+        return Of(path, window, target, frame, route, over, glass, colours);
+    }
+
+    /// <summary>
     /// Compose a receipt, refusing where the facts disagree with each other.
     /// </summary>
     /// <param name="path">The file that was written.</param>
