@@ -163,6 +163,12 @@ public sealed record Flags
             "z-order reasoning cannot answer for a backdrop, so every check that decides a copy's contents by walking the windows above it is wrong about that one window",
             Choices: Backdrop.Names),
         new Flag(
+            "cloak",
+            "",
+            "a window the application has asked the compositor to stop drawing, which keeps every style bit saying it is visible",
+            "a suspended packaged application cloaks itself, and a capture of one is a blank file that looks exactly like a capture",
+            Draws: false),
+        new Flag(
             "toast",
             "way",
             "a borderless top-level window with no caption, which the process object never names",

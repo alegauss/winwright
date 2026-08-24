@@ -1666,6 +1666,40 @@ public sealed class FixtureTests : IDisposable
     }
 
     [Fact]
+    public void A_capture_of_a_window_the_application_cloaked_is_refused_rather_than_written()
+    {
+        // WW199. This arm was argued rather than driven: the pairing said a cloaked window "is a
+        // state the compositor puts a window into", and half of that is wrong — DWMWA_CLOAK is what
+        // a suspended packaged application sets on itself, which is why the reading has a
+        // ByTheApplication arm at all. So the fixture can be one.
+        var pid = LaunchedPid("--cloak");
+
+        // Not through Launched: that asks for visible windows and a cloaked one is exactly what
+        // this desk's own filter leaves out, which is the whole difficulty being reproduced. And it
+        // waits for the cloak rather than for the window, so a fixture that could not cloak itself
+        // says that in the deadline's own sentence instead of failing an assertion further down.
+        var window = Waits.Until(
+            "draw",
+            $"the fixture never cloaked a window (pid {pid})",
+            () => TopLevelWindows.Largest(pid, visibleOnly: false)
+                is { Title.Length: > 0, Cloak: Cloak.ByTheApplication } found ? found : null);
+
+        // The property that makes this worth a shape rather than an argument: the window is off the
+        // screen and its style bits still say it is visible, so every ordinary test for "can this be
+        // photographed" says yes.
+        Assert.True(window.Visible, window.ToString());
+        Assert.False(window.OnScreen, window.ToString());
+
+        var refused = Assert.Throws<WrongCaptureException>(
+            () => CaptureReceipt.Of(
+                Path.Combine(root, "cloaked.png"), window, AppTarget.AttachTo(window.Pid)));
+
+        Assert.Equal(WrongCapture.NothingDrawing, refused.Arm);
+        Assert.Contains("which nothing is drawing", refused.Message, StringComparison.Ordinal);
+        Assert.False(File.Exists(Path.Combine(root, "cloaked.png")), "the file was written anyway");
+    }
+
+    [Fact]
     public void A_capture_of_a_window_with_a_backdrop_is_refused_rather_than_warned_about()
     {
         // A warning is not a refusal and the file gets written either way, which is what the first

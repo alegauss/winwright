@@ -101,6 +101,13 @@ public partial class MainWindow : Window
             Topmost = false;
         }
 
+        // WW199. Here and not where the backdrop is set, which was measured rather than reasoned
+        // about: DWMWA_CLOAK on a window the compositor has not composed yet is accepted and reports
+        // NotCloaked afterwards. Content rendered is the first moment there is something to stop
+        // drawing, which is the same reason the surface is reported here and not on Loaded.
+        if (Shapes.Has("cloak"))
+            Cloak.Set(new System.Windows.Interop.WindowInteropHelper(this).Handle);
+
         popups ??= Protocol.Hold(this);
         Protocol.Report(this, panes, panes.SelectedContent as FrameworkElement);
     }
@@ -144,8 +151,10 @@ public partial class MainWindow : Window
 
         // Here and nowhere earlier: a window has no handle until its source exists, and the
         // compositor is asked about a handle.
+        var window = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+
         if (Shapes.Value("backdrop") is string kind)
-            Backdrop.Set(new System.Windows.Interop.WindowInteropHelper(this).Handle, kind);
+            Backdrop.Set(window, kind);
     }
 
     /// <summary>What this run was asked to be.</summary>

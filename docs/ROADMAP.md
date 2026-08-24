@@ -16,19 +16,17 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW199** (deps: —) **this block promises a fixture provokes every capture refusal, and four of the six arms are provoked by a case instead** — The criterion says what is true and is checked, because a reader takes it at face value and the check under it answers a weaker question. → §WW199
-
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
 
-- 📋 **WW57** (deps: Block A, Block C ✅, Block D ✅) **a case is two hundred lines of script that mostly repeats the previous case** — A case is a data file: steps, locators, acts and expectations as fields, with the loop, the waits and the verdicts owned by the engine instead of by the author. → §WW57
-- 📋 **WW58** (deps: Block A, Block C ✅, Block D ✅) **the format is a convention the author is asked to remember** — Every field is validated at insertion, so a refusal costs a retry and never a deletion, which is roadkeep law one applied to a scenario instead of to a line. → §WW58
-- 📋 **WW59** (deps: Block A, Block C ✅, Block D ✅) **there is no way to run one case, or one file, without running the rest** — Run takes a file, a case or a tag and says what it did not run, so a single case is ten seconds when a single act is what changed. → §WW59
-- 📋 **WW60** (deps: Block A, Block C ✅, Block D ✅) **a case that needs a fixture reaches for this machine instead** — Fixtures and sampled environments are declared per case and passed to every launch it makes, or the expectations describe one environment and the window renders another. → §WW60
-- 📋 **WW61** (deps: Block A, Block C ✅, Block D ✅) **a case with an absent precondition goes red for a reason about the desk it ran on** — The precondition is declared, so its absence is unchecked and named instead of a failure nobody reading it can act on. → §WW61
-- 📋 **WW62** (deps: Block A, Block C ✅, Block D ✅) **three cases driving the same window each pay their own launch** — A window is declared shareable and lent to the cases that only read it, while a case run alone still owns its process and its first paint. → §WW62
-- 📋 **WW63** (deps: Block A, Block C ✅, Block D ✅) **a scenario says what to do and never why it is worth doing** — Each case carries the defect it exists to catch, so a case nobody can justify is visible and a case removed by accident is missed. → §WW63
+- 📋 **WW57** (deps: Block A, Block C, Block D ✅) **a case is two hundred lines of script that mostly repeats the previous case** — A case is a data file: steps, locators, acts and expectations as fields, with the loop, the waits and the verdicts owned by the engine instead of by the author. → §WW57
+- 📋 **WW58** (deps: Block A, Block C, Block D ✅) **the format is a convention the author is asked to remember** — Every field is validated at insertion, so a refusal costs a retry and never a deletion, which is roadkeep law one applied to a scenario instead of to a line. → §WW58
+- 📋 **WW59** (deps: Block A, Block C, Block D ✅) **there is no way to run one case, or one file, without running the rest** — Run takes a file, a case or a tag and says what it did not run, so a single case is ten seconds when a single act is what changed. → §WW59
+- 📋 **WW60** (deps: Block A, Block C, Block D ✅) **a case that needs a fixture reaches for this machine instead** — Fixtures and sampled environments are declared per case and passed to every launch it makes, or the expectations describe one environment and the window renders another. → §WW60
+- 📋 **WW61** (deps: Block A, Block C, Block D ✅) **a case with an absent precondition goes red for a reason about the desk it ran on** — The precondition is declared, so its absence is unchecked and named instead of a failure nobody reading it can act on. → §WW61
+- 📋 **WW62** (deps: Block A, Block C, Block D ✅) **three cases driving the same window each pay their own launch** — A window is declared shareable and lent to the cases that only read it, while a case run alone still owns its process and its first paint. → §WW62
+- 📋 **WW63** (deps: Block A, Block C, Block D ✅) **a scenario says what to do and never why it is worth doing** — Each case carries the defect it exists to catch, so a case nobody can justify is visible and a case removed by accident is missed. → §WW63
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
@@ -49,8 +47,8 @@
 - 📋 **WW83** (deps: Block G) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
 - 📋 **WW84** (deps: Block G) **the names case observes what no screenshot can** — Migrated with the derived panel sweep and the exact-label reads, including the rule that must fire and the one that must not. → §WW84
 - 📋 **WW85** (deps: Block G) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
-- 📋 **WW86** (deps: WW78, WW79, WW80, WW81, WW82, WW83, WW84, WW85, Block E) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
-- 📋 **WW87** (deps: Block E, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
+- 📋 **WW86** (deps: WW78, WW79, WW80, WW81, WW82, WW83, WW84, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
+- 📋 **WW87** (deps: Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 
 ## Block K — The proving ground — a fixture app built to be hard to test
@@ -112,9 +110,11 @@
 - **An off-screen render is the default** The screen copy runs only where a case
   declares a surface a render cannot reach, and the output says which of the two
   produced the file.
-- **Every capture refusal has a fixture that provokes it** Each named refusal is
-  asserted against the proving ground, so one that quietly stopped working is a red run
-  rather than a silence.
+- **Every arm of a capture refusal has something that provokes it** Each of the six is
+  paired with a fixture shape or a written reason no shape can be, checked against the
+  engine's enum both ways and against the built article's own flags. WW199 widened this
+  from "a fixture": three arms have one, and the other three name a defect this proving
+  ground cannot be.
 
 ## Done when — Block F
 

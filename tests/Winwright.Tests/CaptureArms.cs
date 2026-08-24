@@ -46,10 +46,11 @@ internal static class CaptureArms
             "a receipt is composed over a window and a target a case hands it, and a case already "
                 + "builds both — no second application has to exist for one to be of the wrong window",
             "CaptureReceiptTests.A_picture_of_somebody_elses_window_is_refused_and_names_both_processes"),
-        new(WrongCapture.NothingDrawing, "", Without.NoShape,
-            "a cloaked window is a state the compositor puts a window into, and the receipt is "
-                + "composed over the reading of one rather than over the window itself",
-            "CaptureReceiptTests.A_picture_of_somebody_elses_window_is_refused_and_names_both_processes"),
+        new(WrongCapture.NothingDrawing, "cloak", null,
+            "WW199: this said a cloaked window is a state the compositor puts a window into, and "
+                + "half of that was wrong — DWMWA_CLOAK is what a suspended packaged application "
+                + "sets on itself, which is why the reading has a ByTheApplication arm at all",
+            "FixtureTests.A_capture_of_a_window_the_application_cloaked_is_refused_rather_than_written"),
         new(WrongCapture.RegionCovered, "intrude", null,
             "a topmost window over exactly the rectangle a run names, which is what WW103 built the "
                 + "flag for and what the region check is driven against",

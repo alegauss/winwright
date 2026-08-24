@@ -123,9 +123,11 @@ internal static class Criteria
         new("E", "An off-screen render is the default",
             "CaptureRouteTests.The_application_window_is_rendered_and_not_photographed",
             null, "the render is what runs, and the receipt says which of the two produced the file"),
-        new("E", "Every capture refusal has a fixture that provokes it",
-            "ProvocationTests.A_flag_named_here_is_one_the_fixture_actually_has",
-            null, "the pairing is checked against the assemblies and against the built fixture's own flags"),
+        new("E", "Every arm of a capture refusal has something that provokes it",
+            "CaptureArmTests.Every_arm_the_engine_declares_is_paired_with_something",
+            null, "WW199: at the arm, and 'something' rather than 'a fixture' — the check under the "
+                + "old wording asserted that named flags exist, never that every refusal names one, "
+                + "and three of the six name a defect no proving ground can be"),
 
         // --- F, assert ------------------------------------------------------------------------------
         new("F", "No expectation is typed twice",
