@@ -238,6 +238,53 @@ public sealed class NotificationAreaTests : IDisposable
         Assert.NotNull(menu.Because);
         Assert.Contains("winwright under test", menu.ToString());
         Assert.Contains("focus and the application key", menu.AsTraceStep().Pattern);
+
+        // WW174, and both arms assert something real. This icon has no window procedure, so on a
+        // desk that let the run ask, no menu is a statement about the icon and goes red. On a desk
+        // that refused the focus or moved the icon away, nothing was asked and nothing observed.
+        if (menu.Missing is not null)
+        {
+            Assert.True(BusyDesk.Excused(menu.AsAssertion("the icon shows its menu")), menu.ToString());
+            Assert.Equal(Winwright.Tracing.StepVerdict.Unchecked, menu.AsTraceStep().Verdict);
+            return;
+        }
+
+        Assert.Equal(
+            Winwright.Verdicts.AssertionOutcome.Failed,
+            menu.AsAssertion("the icon shows its menu").Outcome);
+        Assert.Equal(Winwright.Tracing.StepVerdict.Failed, menu.AsTraceStep().Verdict);
+    }
+
+    [Fact]
+    public void A_menu_asked_of_an_icon_that_is_not_there_is_a_red_and_never_a_hole()
+    {
+        // The arm that must stay a failure. Both places were looked at and the icon is in neither,
+        // so this is a statement about the notification area and a scenario may act on it — which
+        // is what stops WW174 turning every unopened menu into an excuse.
+        var menu = NotificationArea.OpenMenu("winwright is not here", settleMs: 800, pollMs: 40);
+
+        Assert.False(menu.Opened);
+        Assert.Null(menu.Missing);
+        Assert.Equal(
+            Winwright.Verdicts.AssertionOutcome.Failed,
+            menu.AsAssertion("the icon shows its menu").Outcome);
+        Assert.Equal(Winwright.Tracing.StepVerdict.Failed, menu.AsTraceStep().Verdict);
+    }
+
+    [Fact]
+    public void The_menu_answers_a_verdict_at_all_which_is_what_a_scenario_counts()
+    {
+        // The quieter half of WW174. TrayMenu answered no AsAssertion, so it was invisible to the
+        // pairing RecordedResultTests enforces — that check fires on types that answer a verdict,
+        // and a type answering none is not a type it can find. A scenario asserting that an icon's
+        // menu opens had nothing to count, and whoever wrote one first would invent it at the call.
+        var answering = typeof(TrayMenu).GetMethod(nameof(TrayMenu.AsAssertion));
+        var recording = typeof(TrayMenu).GetMethod(nameof(TrayMenu.AsTraceStep));
+
+        Assert.NotNull(answering);
+        Assert.Equal(typeof(Winwright.Verdicts.AssertionResult), answering.ReturnType);
+        Assert.NotNull(recording);
+        Assert.Equal(typeof(Winwright.Tracing.TraceStep), recording.ReturnType);
     }
 
     [Fact]

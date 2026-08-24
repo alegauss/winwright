@@ -29,16 +29,36 @@ public sealed record TrayIcon(ElementFacts Facts, bool Hidden)
     }
 }
 
-/// <summary>What asking a tray icon for its menu did.</summary>
+/// <summary>
+/// What asking a tray icon for its menu did.
+/// <para>
+/// WW174. This used to answer no verdict at all and a step that read <c>Opened ? Ok : Failed</c>, so
+/// a shell that would not open the flyout, an icon that vanished mid-act and a desk that refused the
+/// focus were all recorded as the application failing to show a menu. WW168 closed that collapse one
+/// call further down and this is where it was still live — in the verb an adopter reaches for more
+/// often than the search underneath it.
+/// </para>
+/// </summary>
 public sealed record TrayMenu
 {
-    internal TrayMenu(TrayIcon icon, bool opened, string? highlighted, string? because)
+    internal TrayMenu(TrayIcon icon, bool opened, string? highlighted, string? because, Precondition? missing = null)
     {
         Icon = icon;
         Opened = opened;
         Highlighted = highlighted;
         Because = because;
+        Missing = missing;
     }
+
+    /// <summary>What this condition is called wherever it is reported.</summary>
+    public const string PreconditionName = "the tray icon can be reached and asked";
+
+    /// <summary>
+    /// The desk fact that stopped this, where one did. Null where the menu opened, and null where it
+    /// did not open for a reason that is about the application — which is the distinction the whole
+    /// type was missing.
+    /// </summary>
+    public Precondition? Missing { get; }
 
     /// <summary>The icon it was asked of.</summary>
     public TrayIcon Icon { get; }
@@ -57,6 +77,34 @@ public sealed record TrayMenu
         ? $"{Icon} opened its menu on \"{Highlighted}\"."
         : $"{Icon} showed no menu: {Because}.";
 
+    /// <summary>
+    /// The result a verdict counts. A menu the application never showed is a failure a scenario
+    /// asked about; a desk that would not let this run ask is a <em>hole</em>, and this block's
+    /// neighbour criterion says nothing about the desk is reported as a defect in the code.
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public AssertionResult AsAssertion(string named)
+    {
+        if (Opened)
+            return AssertionResult.Pass(named, ToString());
+
+        return Missing is not null
+            ? AssertionResult.Unchecked(named, Missing)
+            : AssertionResult.Fail(named, ToString());
+    }
+
+    /// <summary>
+    /// The verdict this carries, spelled once so the assertion and the step beside it cannot drift
+    /// apart — which is what happened when the step decided for itself out of <see cref="Opened" />.
+    /// </summary>
+    private StepVerdict Verdict()
+    {
+        if (Opened)
+            return StepVerdict.Ok;
+
+        return Missing is not null ? StepVerdict.Unchecked : StepVerdict.Failed;
+    }
+
     /// <summary>The step a trace records.</summary>
     public TraceStep AsTraceStep() => new()
     {
@@ -65,7 +113,7 @@ public sealed record TrayMenu
         Resolved = Icon.ToString(),
         Pattern = "focus and the application key",
         ReadBack = Highlighted,
-        Verdict = Opened ? StepVerdict.Ok : StepVerdict.Failed,
+        Verdict = Verdict(),
         Detail = Opened ? null : ToString(),
     };
 }
@@ -450,18 +498,28 @@ public static class NotificationArea
             // WW168: the search's own sentence rather than one typed here. This used to say the icon
             // was on neither the taskbar nor the overflow whatever had happened, which was a
             // statement about the application on the runs where the flyout had simply not opened.
+            // WW174: and the search's verdict too, not only its sentence. A shell that would not
+            // open the flyout never got asked whether the icon is there, so the menu it could not
+            // ask for is a hole under the search's own condition rather than a menu that failed.
             return new TrayMenu(
                 new TrayIcon(new ElementFacts(named, "", "Button", "", false, true, default, new HashSet<string>()), false),
                 false,
                 null,
-                search.Because);
+                search.Because,
+                search.Everywhere ? null : Precondition.Absent(TraySearch.PreconditionName, search.Because));
         }
 
         var icon = search.Icon!;
 
         var element = Live(icon);
         if (element is null)
-            return new TrayMenu(icon, false, null, "the icon went away between finding it and asking it");
+        {
+            // WW174. The icon was there and then was not, which is a fact about a shell rearranging
+            // its own taskbar. Nothing was asked of the application, so nothing about it was
+            // observed — and a red here sends a reader looking for a menu bug that never existed.
+            const string vanished = "the icon went away between finding it and asking it";
+            return new TrayMenu(icon, false, null, vanished, Precondition.Absent(TrayMenu.PreconditionName, vanished));
+        }
 
         try
         {
@@ -470,7 +528,11 @@ public static class NotificationArea
         catch (Exception refused)
             when (refused is InvalidOperationException or ElementNotAvailableException)
         {
-            return new TrayMenu(icon, false, null, $"it would not take the focus: {refused.Message}");
+            // WW174. The route to a tray menu is focus and then the application key, so a desk that
+            // will not give the focus stops the act before it starts. That is the same class of
+            // fact as a foreground Windows would not grant, and it is a hole for the same reason.
+            var because = $"it would not take the focus: {refused.Message}";
+            return new TrayMenu(icon, false, null, because, Precondition.Absent(TrayMenu.PreconditionName, because));
         }
 
         var before = OnTheDesk();

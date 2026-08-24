@@ -173,29 +173,6 @@ condition belongs in `UntilTrue`.
 
 ## Block D — Act — patterns before pointers
 
-### §WW174 The same collapse, one call up
-
-WW168 gave the search for a tray icon a reading that says how far the looking got, so an
-absent icon fails and a flyout that would not open is a hole. `OpenMenu` is the caller
-directly above it, and it takes only half of that.
-
-Two things it does with the other half. It passes the search's sentence into
-`TrayMenu.Because`, which is the improvement WW168 bought and is asserted. Then
-`AsTraceStep` writes `Verdict = Opened ? Ok : Failed`, so a menu that never came up
-because the shell would not open the flyout is recorded as a step the application
-failed. That is the collapse WW168 was filed over, still live one call up, in the verb
-an adopter reaches for more often than the search underneath it.
-
-The second half is quieter. `TrayMenu` answers no `AsAssertion` at all, so it never
-enters the pairing `RecordedResultTests` enforces — that check fires on types that
-answer a verdict, and a type answering none is invisible to it. A scenario asserting
-that an icon's menu opens has nothing to count, and whoever writes one first will invent
-a verdict at the call site.
-
-Both are the same repair. The menu carries the search that produced it, answers `Pass`,
-`Fail` or `Unchecked` from it, and the step agrees with the verdict beside it rather
-than restating `Opened`.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW38 A region, not a handful of points

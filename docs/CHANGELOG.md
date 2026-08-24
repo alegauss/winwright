@@ -85,6 +85,7 @@
 - ✅ **WW155** **the menu reading names whatever holds the desk, so a walk can report an entry from another window** — The focus is read against the application under test, so a walk or a traversal ending on another application's window is a hole naming what took the desk rather than a red about this one.
 - ✅ **WW165** **opening the notification overflow answers a bare bool, so a run that could not open it says only false** — Working the overflow answers a reading with the reason, a hole rather than a red, and a step; and a rule keeps the rest of the block from answering yes or no where a failure has a cause.
 - ✅ **WW168** **finding a tray icon answers null whether the icon is absent or the flyout simply would not open** — Looking for a tray icon answers a reading that says whether every place was looked at, so an absent icon fails and a flyout that would not open is a hole about the desk.
+- ✅ **WW174** **a tray menu that never came up records Failed whether the code or the desk was at fault, and answers no verdict** — A tray menu answers a verdict and a step that agree, so a shell hiding the icon or a desk refusing the focus is a hole and only a menu the icon never showed is red.
 
 ## Block E — Capture — the picture that proves what it photographed
 

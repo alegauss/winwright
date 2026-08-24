@@ -152,10 +152,16 @@ application while a menu walk or a traversal was polling, and a notification-are
 would not open. None of them is your code being wrong, so none goes red — the answer names what the
 desk did instead.
 
-That last one reaches the verb above it: looking for a tray icon answers a reading rather than an
+That last one reaches the verbs above it. Looking for a tray icon answers a reading rather than an
 icon-or-nothing, and where it found none it says whether every place it could have been was looked
 at. Not found everywhere is an answer about your application; not found because the flyout would not
 open is an answer about the desk, and the two never arrive as the same value.
+
+Asking that icon for its menu carries the same distinction up. A menu the icon never showed is a
+failure you can act on; a shell that hid the icon, an icon that vanished between being found and
+being asked, and a desk that would not give it the focus are holes, because the route to a tray menu
+is focus and then the application key and none of those let the run get that far. The verdict and
+the trace step agree, so a record never disagrees with the summary beside it.
 
 Before the assertions, a run takes one reading of the machine: the desk it is on, which binary it is
 driving, whether that binary is stale, the resolved language, the foreground, the launch arguments,

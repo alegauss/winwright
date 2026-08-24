@@ -69,7 +69,7 @@ internal static class BusyDesk
         Assert.False(missing.Satisfied);
         Assert.False(string.IsNullOrWhiteSpace(missing.Absence));
 
-        // The four conditions a desk-dependent act needs and never anything else. The last two are
+        // The five conditions a desk-dependent act needs and never anything else. The last two are
         // WW172's: a focus that left the application under test, and a notification area that could
         // not be searched because the shell was covering it, are the same class of fact as a
         // foreground Windows would not grant — and a case holding one has as little to say.
@@ -81,6 +81,7 @@ internal static class BusyDesk
                 Winwright.Acting.Keyboard.FocusPreconditionName,
                 Winwright.Acting.FocusReading.Named,
                 Winwright.Acting.TraySearch.PreconditionName,
+                Winwright.Acting.TrayMenu.PreconditionName,
             });
     }
 }
