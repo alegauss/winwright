@@ -39,30 +39,39 @@ public sealed class NotificationAreaTests : IDisposable
     public void Asking_a_tray_icon_for_a_clickable_point_throws_which_is_why_the_rectangle_is_used()
     {
         var found = NotificationArea.Find(Tip);
-        Assert.NotNull(found);
+        Assert.True(found.Found, found.Sentence());
 
-        var element = NotificationArea.ElementFor(found);
+        var addressed = found.Icon!;
+        var element = NotificationArea.ElementFor(addressed);
         Assert.NotNull(element);
 
         Assert.Throws<NoClickablePointException>(() => element.GetClickablePoint());
 
         // And the rectangle it is addressed by instead is a real one.
-        Assert.True(found.Rectangle.Width > 0, $"the icon reported {found.Rectangle}");
-        Assert.True(found.Rectangle.Height > 0);
+        Assert.True(addressed.Rectangle.Width > 0, $"the icon reported {addressed.Rectangle}");
+        Assert.True(addressed.Rectangle.Height > 0);
     }
 
     [Fact]
     public void An_icon_added_now_hides_in_the_overflow_and_is_not_in_the_tree_until_it_is_opened()
     {
         // Measured, and the whole reason the overflow is opened first: the shell puts a new icon
-        // out of sight, so looking only at the taskbar finds nothing and says the icon is gone.
-        Assert.Null(NotificationArea.Find(Tip, openingTheOverflow: false));
+        // out of sight, so looking only at the taskbar finds nothing.
+        var onTheBar = NotificationArea.Find(Tip, openingTheOverflow: false);
+
+        Assert.False(onTheBar.Found);
+
+        // WW168, and the point of the whole reading: this is not the icon being absent. The bar was
+        // all that was looked at, so the search says so rather than answering the wider question.
+        Assert.False(onTheBar.Everywhere);
+        Assert.Contains("told not to open the overflow", onTheBar.Because, StringComparison.Ordinal);
 
         var found = NotificationArea.Find(Tip);
 
-        Assert.NotNull(found);
-        Assert.True(found.Hidden);
-        Assert.Contains(Tip, found.Name);
+        Assert.True(found.Found, found.Sentence());
+        Assert.True(found.Everywhere);
+        Assert.True(found.Icon!.Hidden);
+        Assert.Contains(Tip, found.Icon.Name);
     }
 
     [Fact]
@@ -145,7 +154,60 @@ public sealed class NotificationAreaTests : IDisposable
     [Fact]
     public void An_icon_the_shell_does_not_have_is_answered_with_nothing_rather_than_a_throw()
     {
-        Assert.Null(NotificationArea.Find("winwright is not here", settleMs: 800, pollMs: 40));
+        var searched = NotificationArea.Find("winwright is not here", settleMs: 800, pollMs: 40);
+
+        Assert.False(searched.Found);
+
+        // WW168. Both places were looked at, so this one really is a statement about what is in the
+        // notification area — which is what makes it a red a scenario may act on rather than a hole.
+        Assert.True(searched.Everywhere, searched.Sentence());
+        Assert.Contains("neither the taskbar nor the overflow", searched.Because, StringComparison.Ordinal);
+
+        var verdict = searched.AsAssertion("the icon is in the notification area");
+        Assert.Equal(Winwright.Verdicts.AssertionOutcome.Failed, verdict.Outcome);
+    }
+
+    [Fact]
+    public void The_search_says_what_it_found_and_where_rather_than_only_whether()
+    {
+        // WW167's catalogue asked for this the moment the reading existed: a rendering every case
+        // passes as a failure message is text a green never prints and nothing reads back.
+        var found = NotificationArea.Find(Tip);
+
+        Assert.Contains($"answers to '{Tip}'", found.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("tray icon", found.Sentence(), StringComparison.Ordinal);
+
+        var missing = NotificationArea.Find("winwright is not here", settleMs: 800, pollMs: 40);
+
+        // The other way round it names what was asked for and why there is none, in that order —
+        // a reader who gets only "not found" is the reader WW168 was filed for.
+        Assert.StartsWith(
+            "nothing in the notification area answers to 'winwright is not here':",
+            missing.Sentence(),
+            StringComparison.Ordinal);
+        Assert.Contains(missing.Because, missing.Sentence(), StringComparison.Ordinal);
+        Assert.EndsWith(".", missing.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_search_the_overflow_would_not_open_for_is_a_hole_and_never_an_absent_icon()
+    {
+        // The two facts WW168 exists to tell apart, asserted on the same type rather than on two
+        // runs that cannot be provoked in one sitting. A search that reached both places and one
+        // that reached only the bar answer the same `Found`, and must not answer the same verdict.
+        var everywhere = NotificationArea.Find("winwright is not here", settleMs: 800, pollMs: 40);
+        var barAlone = NotificationArea.Find("winwright is not here", openingTheOverflow: false);
+
+        Assert.False(everywhere.Found);
+        Assert.False(barAlone.Found);
+
+        Assert.Equal(Winwright.Verdicts.AssertionOutcome.Failed, everywhere.AsAssertion("it is there").Outcome);
+        Assert.Equal(Winwright.Verdicts.AssertionOutcome.Unchecked, barAlone.AsAssertion("it is there").Outcome);
+
+        // And the step behind each says the same thing, because a trace that disagreed with the
+        // verdict beside it is a record a reader cannot use.
+        Assert.Equal(Winwright.Tracing.StepVerdict.Failed, everywhere.AsTraceStep("it is there").Verdict);
+        Assert.Equal(Winwright.Tracing.StepVerdict.Unchecked, barAlone.AsTraceStep("it is there").Verdict);
     }
 
     [Fact]
@@ -154,7 +216,11 @@ public sealed class NotificationAreaTests : IDisposable
         var menu = NotificationArea.OpenMenu("winwright is not here", settleMs: 800, pollMs: 40);
 
         Assert.False(menu.Opened);
-        Assert.Contains("no icon in the notification area is called that", menu.Because);
+
+        // WW168: the search's own reason rather than one typed here. This used to say the icon was
+        // on neither the taskbar nor the overflow whatever had happened — a statement about the
+        // application on every run where the flyout had simply not opened.
+        Assert.Contains("it is on neither the taskbar nor the overflow", menu.Because);
         Assert.Equal(Winwright.Tracing.StepVerdict.Failed, menu.AsTraceStep().Verdict);
     }
 

@@ -166,8 +166,16 @@ internal sealed class TrayIconFixture : IDisposable
     /// </summary>
     private void Placed()
     {
+        // WW168: the search answers a reading now, and a reading is never null — so the icon itself
+        // is what this waits on. Handing Attempt.Until the search would have made every deadline
+        // here one look long, since the first look already answers something.
+        var last = default(TraySearch);
         var found = Attempt.Until(
-            () => NotificationArea.Find(Tip, openingTheOverflow: true, settleMs: 1000, pollMs: 25),
+            () =>
+            {
+                last = NotificationArea.Find(Tip, openingTheOverflow: true, settleMs: 1000, pollMs: 25);
+                return last.Icon;
+            },
             PlacedMs,
             pollMs: 50);
 
@@ -178,9 +186,12 @@ internal sealed class TrayIconFixture : IDisposable
 
         if (!found.Found)
         {
+            // The last search's own reason, which is the half this used to drop. A shell that would
+            // not open the flyout and a shell that took the icon and placed it nowhere both ended
+            // this sentence the same way, and the difference is the one a reader needs.
             throw new InvalidOperationException(
                 $"the shell took '{Tip}' and never put it anywhere a reading could find it within "
-                + $"{PlacedMs} ms, so nothing after this would be about the icon");
+                + $"{PlacedMs} ms, so nothing after this would be about the icon — {last?.Because}");
         }
     }
 

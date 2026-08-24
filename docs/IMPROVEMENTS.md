@@ -77,30 +77,6 @@ Where the icon cannot be withdrawn, saying so is the whole of the repair.
 
 ## Block D — Act — patterns before pointers
 
-### §WW168 An absent icon and a flyout that would not open
-
-Measured in the guest while shipping WW159: a case that adds two icons of its own and
-asks for each by name went red on one of them, with Assert.NotNull failing. Both icons
-were added by that case moments earlier, and it passed twice on the host straight
-afterwards.
-
-Find looks on the taskbar, and where it does not see the icon it opens the overflow
-flyout and looks there. Opening the flyout is the verb WW165 is about - it answers a
-bare bool and the answer is dropped here - so a flyout that would not open leaves Find
-looking at the taskbar alone and answering null. The caller then reads that as the icon
-not being there.
-
-Those are two different facts reported the same way, which is the shape this whole
-project exists over. An icon that is genuinely absent is a finding about the
-application; a flyout the shell would not open is a fact about the desk, and this
-block's neighbour criterion says nothing about the desk is reported as a defect in the
-code.
-
-So it ships behind WW165 rather than beside it: the reading that verb starts answering
-is what this hands back. What is owed here is that Find answers which of the two it was
-- the icon was not on the bar and not in the flyout, or the flyout never opened and the
-bar was all that could be looked at.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW38 A region, not a handful of points

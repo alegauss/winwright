@@ -138,6 +138,111 @@ public sealed record OverflowState
 }
 
 /// <summary>
+/// What looking for an icon by name turned out to find, and how far the looking got.
+/// <para>
+/// WW168. <c>Find</c> answered <c>TrayIcon?</c>, and null carried two facts that are not the same
+/// one: the icon is not in the notification area, or the flyout would not open and only the taskbar
+/// could be looked at. The first is a finding about the application. The second is a fact about the
+/// desk, and this block's neighbour criterion says nothing about the desk is reported as a defect in
+/// the code — so reporting them the same way is the confusion this whole project exists over,
+/// reproduced one return type down.
+/// </para>
+/// <para>
+/// Measured while shipping WW159: a case that added two icons of its own and asked for each by name
+/// went red on one, and passed twice on the host straight afterwards. What had happened was the
+/// second reading, reported as the first.
+/// </para>
+/// </summary>
+public sealed record TraySearch
+{
+    internal TraySearch(string named, TrayIcon? icon, bool everywhere, OverflowState? overflow, string because)
+    {
+        Named = named;
+        Icon = icon;
+        Everywhere = everywhere;
+        Overflow = overflow;
+        Because = because;
+    }
+
+    /// <summary>What was asked for, as the caller spelled it.</summary>
+    public string Named { get; }
+
+    /// <summary>The icon, where one answered. Null where none did.</summary>
+    public TrayIcon? Icon { get; }
+
+    /// <summary>Whether one answered at all.</summary>
+    public bool Found => Icon is not null;
+
+    /// <summary>
+    /// Whether every place the icon could have been was looked at. This is the field the whole
+    /// reading exists for: not found and <c>true</c> is an answer about the application, and not
+    /// found and <c>false</c> is an answer about the desk.
+    /// </summary>
+    public bool Everywhere { get; }
+
+    /// <summary>
+    /// What working the flyout did, where this search had to work it. Null where the icon was on the
+    /// taskbar, so nothing was pressed, and null where the caller asked for the bar alone.
+    /// </summary>
+    public OverflowState? Overflow { get; }
+
+    /// <summary>Why there is no icon, where there is none. Empty where there is one.</summary>
+    public string Because { get; }
+
+    /// <summary>What the search did, said either way.</summary>
+    public string Sentence()
+    {
+        if (Found)
+            return $"{Icon} answers to '{Named}'.";
+
+        return $"nothing in the notification area answers to '{Named}': {Because}.";
+    }
+
+    /// <inheritdoc cref="Sentence" />
+    public override string ToString() => Sentence();
+
+    /// <summary>
+    /// The result a verdict counts. An icon that is genuinely not there is a failure a scenario
+    /// asked about; a search that could not reach the overflow never got to ask, so it is a
+    /// <em>hole</em> and never a red about the code.
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public AssertionResult AsAssertion(string named)
+    {
+        if (Found)
+            return AssertionResult.Pass(named, Sentence());
+
+        return Everywhere
+            ? AssertionResult.Fail(named, Sentence())
+            : AssertionResult.Unchecked(named, Precondition.Absent($"a notification area this run can search for '{Named}'", Because));
+    }
+
+    /// <summary>
+    /// The verdict this search carries, which is the same three-way answer <see cref="AsAssertion" />
+    /// gives and is spelled once so the two can never drift apart.
+    /// </summary>
+    private StepVerdict Verdict()
+    {
+        if (Found)
+            return StepVerdict.Ok;
+
+        return Everywhere ? StepVerdict.Failed : StepVerdict.Unchecked;
+    }
+
+    /// <summary>The step a trace records.</summary>
+    public TraceStep AsTraceStep(string named) => new()
+    {
+        Verb = "find a tray icon",
+        Locator = Named,
+        Resolved = Icon?.ToString(),
+        Pattern = Everywhere ? "the taskbar and the overflow" : "the taskbar alone",
+        ReadBack = Found ? Icon!.Name.Split('\n')[0].Trim() : null,
+        Verdict = Verdict(),
+        Detail = Found ? null : Sentence(),
+    };
+}
+
+/// <summary>
 /// The notification area, which is the hardest thing on this desktop to drive.
 /// <para>
 /// Its icons have no clickable point — asking for one throws, and on Windows 11 build 26200 every
@@ -275,21 +380,51 @@ public static class NotificationArea
     /// <paramref name="named"/> rather than equalling it, because a tray name is a tooltip and a
     /// real one runs to several lines of status. The overflow is opened when the taskbar does not
     /// hold it, because an icon hiding there is not in the tree until then.
+    /// <para>
+    /// WW168: answers a reading rather than <c>TrayIcon?</c>. Null said both "it is not there" and
+    /// "the flyout would not open, so only half the places were looked at", and a caller had no way
+    /// to tell a finding about the application from a fact about the desk.
+    /// </para>
     /// </summary>
-    public static TrayIcon? Find(string named, bool openingTheOverflow = true, int settleMs = 2000, int pollMs = 25)
+    /// <param name="named">Part of what the shell calls the icon.</param>
+    /// <param name="openingTheOverflow">
+    /// Whether to open the flyout when the taskbar does not hold it. False looks at the bar alone,
+    /// which is a smaller question and is reported as one rather than as an absent icon.
+    /// </param>
+    /// <param name="settleMs">How long working the flyout may take.</param>
+    /// <param name="pollMs">How often that wait looks again.</param>
+    public static TraySearch Find(string named, bool openingTheOverflow = true, int settleMs = 2000, int pollMs = 25)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(named);
 
         var onTheBar = Showing().FirstOrDefault(icon => Matches(icon, named));
-        if (onTheBar is not null || !openingTheOverflow)
-            return onTheBar;
+        if (onTheBar is not null)
+            return new TraySearch(named, onTheBar, everywhere: true, null, "");
 
-        // WW168 is about what this loses: a flyout that would not open and an icon that is not
-        // there both answer null here, and a caller cannot tell them apart. The reading now
-        // carries the reason, which is what that task hands back.
-        return OpenOverflow(settleMs, pollMs).Held
-            ? Hidden().FirstOrDefault(icon => Matches(icon, named))
-            : null;
+        if (!openingTheOverflow)
+        {
+            // Not everywhere, and deliberately so. The caller narrowed the question, and an answer
+            // narrower than the question is still not an answer to the wider one.
+            return new TraySearch(
+                named, null, everywhere: false, null,
+                "it is not on the taskbar, and this search was told not to open the overflow");
+        }
+
+        var flyout = OpenOverflow(settleMs, pollMs);
+        if (!flyout.Held)
+        {
+            // The reading WW165 started answering, handed back rather than dropped. This is the
+            // whole of WW168: the shell would not let this run look, which is not the icon being
+            // absent and must never be reported as though it were.
+            return new TraySearch(
+                named, null, everywhere: false, flyout,
+                $"it is not on the taskbar, and the overflow could not be looked in — {flyout}");
+        }
+
+        var hidden = Hidden().FirstOrDefault(icon => Matches(icon, named));
+        return hidden is not null
+            ? new TraySearch(named, hidden, everywhere: true, flyout, "")
+            : new TraySearch(named, null, everywhere: true, flyout, "it is on neither the taskbar nor the overflow");
     }
 
     /// <summary>
@@ -301,15 +436,20 @@ public static class NotificationArea
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(named);
 
-        var icon = Find(named, openingTheOverflow: true, settleMs, pollMs);
-        if (icon is null)
+        var search = Find(named, openingTheOverflow: true, settleMs, pollMs);
+        if (!search.Found)
         {
+            // WW168: the search's own sentence rather than one typed here. This used to say the icon
+            // was on neither the taskbar nor the overflow whatever had happened, which was a
+            // statement about the application on the runs where the flyout had simply not opened.
             return new TrayMenu(
                 new TrayIcon(new ElementFacts(named, "", "Button", "", false, true, default, new HashSet<string>()), false),
                 false,
                 null,
-                "no icon in the notification area is called that, on the taskbar or in the overflow");
+                search.Because);
         }
+
+        var icon = search.Icon!;
 
         var element = Live(icon);
         if (element is null)

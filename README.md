@@ -152,6 +152,11 @@ application while a menu walk or a traversal was polling, and a notification-are
 would not open. None of them is your code being wrong, so none goes red — the answer names what the
 desk did instead.
 
+That last one reaches the verb above it: looking for a tray icon answers a reading rather than an
+icon-or-nothing, and where it found none it says whether every place it could have been was looked
+at. Not found everywhere is an answer about your application; not found because the flyout would not
+open is an answer about the desk, and the two never arrive as the same value.
+
 Before the assertions, a run takes one reading of the machine: the desk it is on, which binary it is
 driving, whether that binary is stale, the resolved language, the foreground, the launch arguments,
 whether anything else is showing the application, and whether the desk is this run's alone. Each is

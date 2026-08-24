@@ -26,7 +26,8 @@ public sealed class TrayPlacementTests
 
         // No waiting here on purpose. Every case in the suite looks straight after Add, so what
         // has to hold is that looking straight after Add works — not that it works if you wait.
-        Assert.NotNull(NotificationArea.Find(icon.Tip));
+        var searched = NotificationArea.Find(icon.Tip);
+        Assert.True(searched.Found, searched.Sentence());
     }
 
     [Fact]
@@ -49,7 +50,8 @@ public sealed class TrayPlacementTests
         {
             using var icon = TrayIconFixture.Add($"winwright placement {round}");
 
-            Assert.NotNull(NotificationArea.Find(icon.Tip));
+            var searched = NotificationArea.Find(icon.Tip);
+            Assert.True(searched.Found, searched.Sentence());
             NotificationArea.CloseOverflow();
         }
     }
@@ -62,8 +64,11 @@ public sealed class TrayPlacementTests
 
         // Both tips carry the same process, so this also checks the marks tell them apart.
         Assert.NotEqual(first.Tip, second.Tip);
-        Assert.NotNull(NotificationArea.Find(first.Tip));
-        Assert.NotNull(NotificationArea.Find(second.Tip));
+        var one = NotificationArea.Find(first.Tip);
+        var other = NotificationArea.Find(second.Tip);
+
+        Assert.True(one.Found, one.Sentence());
+        Assert.True(other.Found, other.Sentence());
         NotificationArea.CloseOverflow();
     }
 }

@@ -153,6 +153,8 @@ internal static class Rendered
             null, "what a sweep concluded across environments, and what it could not check"),
         new("TimedOutRead.Sentence", "TimedOutReadTests.The_blank_one_is_pointed_at_the_locator_and_never_at_the_deadline",
             null, "why a read ran out, pointed at the locator or at the deadline"),
+        new("TraySearch.Sentence", "NotificationAreaTests.The_search_says_what_it_found_and_where_rather_than_only_whether",
+            null, "which icon answered a name, or why none did and how far the looking got"),
         new("VerdictSummary.Sentence", "CoverageTests.A_run_where_everything_ran_and_passed_earns_the_word",
             null, "what the run concluded, and what it never got to check"),
     ]);
