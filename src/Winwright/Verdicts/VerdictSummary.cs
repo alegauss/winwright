@@ -68,6 +68,11 @@ public static class VerdictSummary
     /// <summary>
     /// The one line CI shows: the outcome, the exit code it is, and how the assertions divided.
     /// The counts are stated separately so that a green with a hole in it cannot read as a green.
+    /// <para>
+    /// WW192. The holes divide again, by whose they were. A reader told three never ran has to know
+    /// whether to clear a machine or open a repository, and until this the line read identically
+    /// either way.
+    /// </para>
     /// </summary>
     public static string Headline(RunVerdict verdict)
     {
@@ -77,7 +82,19 @@ public static class VerdictSummary
         var passed = verdict.Results.Count - verdict.Failures.Count - verdict.Unchecked.Count;
         var broke = verdict.Broke.Count == 0 ? "" : $"; the harness broke {Times(verdict.Broke.Count)}";
         return $"{word} (exit {verdict.ExitCode}) - {Plural(verdict.Results.Count, "assertion")}: "
-            + $"{passed} passed, {verdict.Failures.Count} failed, {verdict.Unchecked.Count} unchecked{broke}";
+            + $"{passed} passed, {verdict.Failures.Count} failed, "
+            + $"{verdict.Unchecked.Count} unchecked{Whose(verdict.Unchecked)}{broke}";
+    }
+
+    /// <summary>
+    /// The division in brackets, or nothing at all where there are no holes to divide. Silent rather
+    /// than "(none)", because a run with nothing unchecked is the run this clause has nothing to
+    /// tell anybody about.
+    /// </summary>
+    internal static string Whose(IEnumerable<AssertionResult> holes)
+    {
+        var divided = Holes.Divide(holes);
+        return divided.Total == 0 ? "" : $" ({divided.Sentence()})";
     }
 
     /// <summary>
@@ -132,7 +149,11 @@ public static class VerdictSummary
 
         var word = result.Outcome == AssertionOutcome.Failed ? "failed    " : "unchecked ";
         var place = string.IsNullOrWhiteSpace(environment) ? "" : $"[{environment.Trim()}] ";
-        var why = result.Missing is null ? result.Detail : $"'{result.Missing.Name}' absent: {result.Detail}";
+
+        // WW192. Whose it was, on the line as well as in the headline. The headline says how many of
+        // each and this says which is which, and a reader with three holes and two counts otherwise
+        // has to work that out from the condition names.
+        var why = Why(result);
 
         // The ordinal where there is one, so a failure named here is one grep away from the line
         // recording what was read back. Left out entirely where nothing joined them, because a
@@ -140,6 +161,17 @@ public static class VerdictSummary
         var at = result.Traced ? $"step {result.Step}  " : "";
         return $"  {word} {at}{place}{result.Name} - {why}";
     }
+
+    /// <summary>
+    /// Why one result did not pass, with whose the absence was where there is one.
+    /// <para>
+    /// WW192. A failure carries no condition and gets no such clause, which is right: a failure is
+    /// the code's by definition and there is nobody else it could belong to.
+    /// </para>
+    /// </summary>
+    private static string Why(AssertionResult result) => result.Missing is null
+        ? result.Detail
+        : $"'{result.Missing.Name}' absent ({Holes.Worded(Holes.Of(result.Missing))}): {result.Detail}";
 
     /// <summary>Count and noun, agreeing. Used by every headline this project renders.</summary>
     public static string Plural(int count, string noun) =>

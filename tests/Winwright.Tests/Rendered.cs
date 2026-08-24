@@ -125,6 +125,8 @@ internal static class Rendered
             null, "whether a page is still showing one of the strings its project declares as loading text"),
         new("LocatorMiss.Sentence", "LocatorMissTests.A_step_under_something_shut_that_is_nowhere_else_names_the_route",
             null, "why a locator matched nothing, and the route that would reach it"),
+        new("HoleDivision.Sentence", "HoleDivisionTests.One_kind_reads_as_all_of_them_rather_than_as_the_same_number_twice",
+            null, "how a run's holes divided by whose they were, with what nobody classified counted"),
         new("NameCheck.Sentence", "NameCheckTests.A_template_nobody_filled_in_is_reported_as_one",
             null, "what a control is called, with a glyph or an unfilled template said plainly"),
         new("Obstruction.Sentence", "FixtureTests.The_region_check_names_the_intruder_rather_than_answering_whether",

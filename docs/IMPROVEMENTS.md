@@ -2,30 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW192 Three unchecked, and no word on whose fault
-
-WW183 gave this engine something it did not have: a written judgement about which of its
-conditions are the desk's, and why each one is. Only the suite reads it.
-
-`VerdictSummary` is where it is worth reading. The headline says how many assertions
-never ran and the detail names each with the precondition that was absent. What it does
-not say is the thing that decides what the reader does next. Three holes because a
-foreground was not granted and a window stood over a capture is a machine to clear.
-Three holes because a binary was stale and a page was still computing is a repository to
-open. The exit code is `2` either way and the lines read the same shape.
-
-`SweepSummary` needs it in the same commit, and that is written here because the
-alternative has already happened once: WW177 joined the reading to the verdict for a
-single run, the sweep did not get it, and WW185 was the repair. A division shipped for
-one summary and not the other is that split again — and a sweep is where whose-fault
-matters most, because a hole in two of five environments is a question about those two
-machines.
-
-This block's first criterion is that a degraded run is legible without reading the log,
-and legible means a reader can act. What is owed is the division, in both headlines,
-with an honest third bucket for a hole whose condition this engine has not classified at
-all.
-
 ### §WW197 One BusyDesk covers the whole case
 
 WW190 reads the suite for cases that ask a desk-dependent reading and pairs the ones

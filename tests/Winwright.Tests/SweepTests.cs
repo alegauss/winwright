@@ -45,7 +45,7 @@ public class SweepTests
     public void The_headline_says_one_hole_and_says_where_it_landed()
     {
         Assert.Equal(
-            "DEGRADED (exit 2) - 3 environments: 0 failed, 1 unchecked (in 3 of them)",
+            "DEGRADED (exit 2) - 3 environments: 0 failed, 1 unchecked (in 3 of them) (all unclassified)",
             SweepSummary.Headline(AbsentInEveryMode()));
     }
 
@@ -59,7 +59,7 @@ public class SweepTests
             ])),
         ]);
 
-        Assert.Equal("DEGRADED (exit 2) - 2 environments: 0 failed, 1 unchecked", SweepSummary.Headline(sweep));
+        Assert.Equal("DEGRADED (exit 2) - 2 environments: 0 failed, 1 unchecked (all unclassified)", SweepSummary.Headline(sweep));
         Assert.Single(SweepSummary.Detail(sweep));
     }
 

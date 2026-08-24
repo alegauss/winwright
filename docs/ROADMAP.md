@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW192** (deps: —) **a summary counts holes without saying which were the desk's, though the engine now declares which conditions are** — The summary divides the holes it names by whose they were, because a reader told three never ran needs to know whether to fix code or clear a desk. → §WW192
 - 📋 **WW197** (deps: —) **a case that excuses the desk once counts as excused for every assertion in it, including the ones that never were** — The pairing is per assertion, because a case excusing its fixture and then asserting a shell fact is counted covered and flaked on the desk anyway. → §WW197
 
 ## Block B — Attach, launch, and leave nothing behind

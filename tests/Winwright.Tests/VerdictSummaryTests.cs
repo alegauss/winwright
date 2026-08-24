@@ -20,8 +20,11 @@ public class VerdictSummaryTests
             AssertionResult.Unchecked("the tray menu opens", FreeNotificationArea),
         ]);
 
+        // WW192: and whose the hole was. These fixtures name conditions this engine declares
+        // nowhere, so the honest answer about them is the third bucket — which is the answer, and
+        // not a gap to be papered over with a nicer-sounding one.
         Assert.Equal(
-            "DEGRADED (exit 2) - 2 assertions: 1 passed, 0 failed, 1 unchecked",
+            "DEGRADED (exit 2) - 2 assertions: 1 passed, 0 failed, 1 unchecked (all unclassified)",
             VerdictSummary.Headline(verdict));
     }
 
@@ -36,8 +39,8 @@ public class VerdictSummaryTests
 
         var summary = VerdictSummary.Render(verdict);
 
-        Assert.Contains("  unchecked  the tray menu opens - 'a free notification area' absent: a tray is already resident", summary);
-        Assert.Contains("  unchecked  the report renders - 'a registered profile' absent: no profile registered", summary);
+        Assert.Contains("  unchecked  the tray menu opens - 'a free notification area' absent (unclassified): a tray is already resident", summary);
+        Assert.Contains("  unchecked  the report renders - 'a registered profile' absent (unclassified): no profile registered", summary);
     }
 
     [Fact]
@@ -50,9 +53,9 @@ public class VerdictSummaryTests
 
         var summary = VerdictSummary.Render(verdict);
 
-        Assert.StartsWith("FAILED (exit 1) - 2 assertions: 0 passed, 1 failed, 1 unchecked", summary);
+        Assert.StartsWith("FAILED (exit 1) - 2 assertions: 0 passed, 1 failed, 1 unchecked (all unclassified)", summary);
         Assert.Contains("  failed     the report renders - the file was never written", summary);
-        Assert.Contains("  unchecked  the tray menu opens - 'a free notification area' absent: a tray is already resident", summary);
+        Assert.Contains("  unchecked  the tray menu opens - 'a free notification area' absent (unclassified): a tray is already resident", summary);
     }
 
     [Fact]

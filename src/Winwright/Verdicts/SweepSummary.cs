@@ -25,6 +25,17 @@ public static class SweepSummary
     /// The deduped reading: how many environments were walked, and how many distinct assertions
     /// failed or never ran, each followed by the number of places it happened where that is more
     /// than one — so a count of holes and a count of occurrences can never be read for each other.
+    /// <para>
+    /// WW192, in the same commit as the single run's, and that is deliberate. WW177 joined the
+    /// reading to the verdict for one run, the sweep did not get it, and WW185 was the repair — a
+    /// division shipped for one summary and not the other would be that split again. A sweep is
+    /// where whose-fault matters most: a hole in two of five environments is a question about those
+    /// two machines, and only if the hole is theirs.
+    /// </para>
+    /// <para>
+    /// Divided over the distinct assertions rather than over the occurrences, which is the rule this
+    /// headline already follows: one hole is one hole however many environments met it.
+    /// </para>
     /// </summary>
     public static string Headline(SweepVerdict verdict)
     {
@@ -34,10 +45,11 @@ public static class SweepSummary
         var broke = verdict.Broke.Count == 0
             ? ""
             : $"; the harness broke {VerdictSummary.Times(verdict.Broke.Count)}";
+        var whose = VerdictSummary.Whose(verdict.Unchecked.Select(one => one.Occurrences[0].Result));
         return $"{word} (exit {verdict.ExitCode}) - "
             + $"{VerdictSummary.Plural(verdict.Environments.Count, "environment")}: "
             + $"{Counted(verdict.Failures.Count, verdict.FailureOccurrences, "failed")}, "
-            + $"{Counted(verdict.Unchecked.Count, verdict.UncheckedOccurrences, "unchecked")}{broke}";
+            + $"{Counted(verdict.Unchecked.Count, verdict.UncheckedOccurrences, "unchecked")}{whose}{broke}";
     }
 
     /// <summary>
