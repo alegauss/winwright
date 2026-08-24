@@ -128,7 +128,10 @@ public sealed class ApartmentTests
         var copies = Directory
             .EnumerateFiles(Sources(), "*.cs")
             .Where(file => Path.GetFileName(file) != $"{nameof(ApartmentTests)}.cs")
-            .Where(file => File.ReadAllText(file).Contains("SetApartmentState", StringComparison.Ordinal))
+            // WW202. Code and never prose: this is the fifth sweep in the suite to be pointed at
+            // the difference, and the first four each found it by going red.
+            .Where(file => File.ReadLines(file).Select(Checkout.Code)
+                .Any(line => line.Contains("SetApartmentState", StringComparison.Ordinal)))
             .Select(Path.GetFileName)
             .Order(StringComparer.Ordinal)
             .ToList();

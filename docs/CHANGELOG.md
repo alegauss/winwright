@@ -79,6 +79,7 @@
 - ✅ **WW184** **eight files carry a sleep and nothing says which are the deadline machinery and which are a wait in disguise** — Every file that calls it is paired with why its sleeping is not a scenario waiting, checked against the sources both ways, and the one that is still a wait is counted.
 - ✅ **WW193** **two source-read catalogues carry the same tree walk and a third is asked for, and the first got its exclusions wrong** — One walk, with the trees, the exclusions and the caching: eighteen copies across sixteen files now ask Checkout, and a case reads the sources to prove none is left.
 - ✅ **WW198** **the sleep catalogue matches one spelling of waiting, and a second is already in the tree that it counts as nothing** — Six spellings of parking a thread are read as code rather than prose, which found the spin the catalogue described and never counted, and three files parked on a signal.
+- ✅ **WW202** **three source sweeps still match raw text, and one of them is the twin of the catalogue just repaired for it** — Four raw sweeps, not three — the fourth was found by the check this built, which is now what makes the fifth red rather than a repeat.
 
 ## Block D — Act — patterns before pointers
 

@@ -90,8 +90,12 @@ internal static class Deadlines
         // at the enumeration. The question below is still this catalogue's own.
         foreach (var file in Checkout.Sources(Checkout.Everything, except: $"{nameof(Deadlines)}.cs"))
         {
-            var text = File.ReadAllText(file);
-            var waits = Occurrences(text, Opening) + Occurrences(text, OpeningTyped);
+            // WW202, and this is the one that mattered most: Sleeps was repaired for exactly this a
+            // task earlier and its twin was left with it. Nothing was miscounted, which is the
+            // point — the next entry explaining itself in prose is what would have broken a count.
+            var waits = File.ReadLines(file)
+                .Select(Checkout.Code)
+                .Sum(line => Occurrences(line, Opening) + Occurrences(line, OpeningTyped));
             if (waits > 0)
                 found.Add(new Deadline(Path.GetFileName(file), waits, ""));
         }

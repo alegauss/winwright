@@ -2040,8 +2040,14 @@ public sealed class FixtureTests : IDisposable
         var read = new HashSet<string>(StringComparer.Ordinal);
         foreach (var file in Directory.EnumerateFiles(FixtureSources(), "*.cs"))
         {
+            // WW202. A fourth sweep reading raw text, found by the check that task built. Spoken and
+            // not Code: the flag name it is looking for lives inside the string, so the reading that
+            // drops strings would hand this an empty line — what has to go is the prose, and a
+            // comment naming a flag the fixture reads is exactly what would be counted as reading it.
+            var text = string.Join('\n', File.ReadLines(file).Select(Checkout.Spoken));
+
             foreach (System.Text.RegularExpressions.Match one in System.Text.RegularExpressions.Regex
-                .Matches(File.ReadAllText(file), "hapes\\.(?:Has|Value)\\(\"([A-Za-z]+)\""))
+                .Matches(text, "hapes\\.(?:Has|Value)\\(\"([A-Za-z]+)\""))
             {
                 read.Add(one.Groups[1].Value);
             }

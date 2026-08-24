@@ -78,31 +78,6 @@ left as a second answer.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW202 The fifth sweep to find this out by going red
-
-Four sweeps in this suite have now read what somebody wrote about a call as the call
-itself, each found by a red and repaired on its own: WW191 in `DeskAsks`, WW197 in
-`Flattening` and again on a doc comment, WW198 in `Sleeps` and in
-`SerialCollectionTests`. `Checkout.Code` is the answer they share, and nothing requires
-the next one to ask for it.
-
-Counted after WW198: eight sweeps match C# source, four go through `Checkout.Code`, and
-three do not. `ApartmentTests` matches `SetApartmentState` in raw text and there are
-four of those in the tree. `FixtureNeedsTests` matches the calls a fixture must not
-make. `Deadlines` counts `Attempt.Until(` occurrences in raw text — which is `Sleeps`
-exactly, the sibling written in the same shape, repaired last task and left with the
-same defect.
-
-Nothing is miscounted today: no comment happens to name those calls. That is what makes
-it worth a task rather than a red — the next catalogue entry explaining itself in prose
-is the one that breaks a count, and the reader meets it as an arithmetic failure in a
-file nobody edited.
-
-What is owed is the rule holding rather than being remembered, which is WW190's shape
-one floor down: a check that reads the sources for a sweep matching source text and does
-not go through the one reading. Whether that is a catalogue with stated exceptions — a
-sweep over markdown needs no such thing — is the judgement.
-
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed

@@ -124,6 +124,22 @@ internal static class Checkout
     /// take the rest of a real line with it.
     /// </para>
     /// </summary>
+    /// <summary>
+    /// The line with what a person wrote about it taken off and its strings kept.
+    /// <para>
+    /// WW202. <see cref="Code" /> is what a sweep for a call wants, and it is the wrong reading for
+    /// a sweep looking for a file pattern: <c>"*.cs"</c> is a string, and stripping strings deletes
+    /// the very thing being looked for. Both are offered rather than one being made to do, because
+    /// a sweep that had to choose between reading comments and reading nothing would choose wrong.
+    /// </para>
+    /// </summary>
+    /// <param name="line">The line as the file spells it.</param>
+    internal static string Spoken(string line)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+        return Uncommented(line);
+    }
+
     private static string Uncommented(string line)
     {
         var trimmed = line.TrimStart();

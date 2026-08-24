@@ -77,7 +77,9 @@ public sealed class FixtureNeedsTests
 
         foreach (var file in Sources())
         {
-            var text = File.ReadAllText(file);
+            // WW202. Read as code, so a comment explaining why the fixture must not reach for
+            // somebody's real data is not itself reported as the fixture reaching for it.
+            var text = string.Join('\n', File.ReadLines(file).Select(Checkout.Code));
             foreach (var (ask, means) in Asks)
             {
                 if (text.Contains(ask, StringComparison.Ordinal))
