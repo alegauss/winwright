@@ -54,6 +54,7 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - 📋 **WW200** (deps: —) **the fixture's own refusal is eleven arms and the suite cannot see its types, so nothing pairs any of them** — The fixture's arms are paired the way its flags already are, because WW196 armed four of the five it named and this is the fifth. → §WW200
+- 📋 **WW203** (deps: —) **two guest runs timed out six milliseconds past a five-second deadline waiting for the fixture to write its dump** — The deadline is set from what the fixture actually takes, because two runs overran it by six and nine milliseconds and both passed on a re-run. → §WW203
 
 ## Done when — Block A
 
