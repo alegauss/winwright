@@ -1501,6 +1501,86 @@ public sealed class FixtureTests : IDisposable
             windows.Single(one => one.Title.Length == 0));
     }
 
+    [Fact]
+    public void The_region_check_names_the_intruder_rather_than_answering_whether()
+    {
+        // WW38, driven against the flag WW103 built for it. Nine sampled points cannot cover a
+        // window: the capture taken to verify one task passed all nine while carrying two windows
+        // of another process across its lower-right corner, so the question is asked about the area.
+        var placed = Placed("--intrude=200,200,300,200");
+
+        var read = Obstruction.Reading(placed.Window.Handle, placed.Window.Bounds);
+
+        Assert.True(read.Was, read.Sentence());
+        Assert.False(read.Clear, read.Sentence());
+        Assert.Contains(read.Over, one => one.Window.Handle == placed.Intruder.Handle);
+
+        // Named, which is the half a boolean loses: a reader handed a covered capture needs to
+        // know which window to move, and "covered" sends them to a screenshot to find out.
+        Assert.Contains($"pid {placed.Intruder.Pid}", read.Sentence(), StringComparison.Ordinal);
+        Assert.Contains($"of its {placed.Window.Bounds.Area} pixel(s)", read.Sentence(), StringComparison.Ordinal);
+
+        // A fact about the desk and never a defect in the code: the picture was not taken, so
+        // nothing about the application was observed.
+        Assert.Equal(
+            Winwright.Verdicts.AssertionOutcome.Unchecked,
+            read.AsAssertion("the window is not covered").Outcome);
+    }
+
+    [Fact]
+    public void The_area_it_answers_with_is_the_area_the_intruder_actually_takes()
+    {
+        // The number, against the one the case works out for itself off two rectangles. A region
+        // check that answered a different number from the arithmetic beside it would be a reading
+        // nobody could check, which is what this whole task is about replacing.
+        var placed = Placed("--intrude=200,200,300,200");
+
+        var read = Obstruction.Reading(placed.Window.Handle, placed.Window.Bounds);
+        var intruder = Assert.Single(read.Over, one => one.Window.Handle == placed.Intruder.Handle);
+
+        Assert.Equal(Overlap(placed.Window, placed.Intruder), intruder.Overlap.Area);
+        Assert.True(read.Covered >= intruder.Overlap.Area, read.Sentence());
+        Assert.True(read.Covered <= placed.Window.Bounds.Area, $"{read.Covered} is more than the window has");
+    }
+
+    [Fact]
+    public void An_intruder_in_the_way_of_nothing_takes_none_of_the_region()
+    {
+        // The case that must pass, and the one a check exercised by hand never gets to. This is
+        // also the arm that fails loudly if the reading ever starts counting the desktop.
+        var beside = Placed("--intrude=3000,2000,200,150");
+
+        var read = Obstruction.Reading(beside.Window.Handle, beside.Window.Bounds);
+
+        Assert.True(read.Was, read.Sentence());
+        Assert.DoesNotContain(read.Over, one => one.Window.Handle == beside.Intruder.Handle);
+    }
+
+    [Fact]
+    public void A_region_with_no_area_and_a_window_that_is_nothing_are_readings_not_taken()
+    {
+        // The two absences, told apart from a clear region. A reading answering "nothing stands
+        // over it" to either would be claiming an emptiness it never looked for, which is the
+        // green this project exists to withdraw.
+        var placed = Placed("--intrude=3000,2000,200,150");
+
+        var nowhere = Obstruction.Reading(placed.Window.Handle, new WindowBounds(10, 10, 10, 10));
+
+        Assert.False(nowhere.Was);
+        Assert.False(nowhere.Clear);
+        Assert.Contains("no area", nowhere.Sentence(), StringComparison.Ordinal);
+
+        var nothing = Obstruction.Reading(0, placed.Window.Bounds);
+
+        Assert.False(nothing.Was);
+        Assert.False(nothing.Clear);
+        Assert.Contains("no window was named", nothing.Sentence(), StringComparison.Ordinal);
+
+        Assert.Equal(
+            Winwright.Verdicts.AssertionOutcome.Unchecked,
+            nowhere.AsAssertion("the region is clear").Outcome);
+    }
+
     /// <summary>How many pixels the two rectangles share.</summary>
     private static long Overlap(TopLevelWindow left, TopLevelWindow right)
     {

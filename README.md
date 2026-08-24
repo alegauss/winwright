@@ -146,11 +146,17 @@ did not fail — it never ran, it is named in the summary by name, and collapsin
 other two is the thing winwright will not do. `3` outranks the rest, because a reader told the build
 failed opens the wrong repository.
 
-Three things a scenario meets often are holes rather than failures, and all of them are about the
+Four things a scenario meets often are holes rather than failures, and all of them are about the
 desk rather than about your application: a foreground Windows would not grant, a focus that left the
-application while a menu walk or a traversal was polling, and a notification-area flyout the shell
-would not open. None of them is your code being wrong, so none goes red — the answer names what the
-desk did instead.
+application while a menu walk or a traversal was polling, a notification-area flyout the shell would
+not open, and a window somebody else left standing over the region a capture was about. None of them
+is your code being wrong, so none goes red — the answer names what the desk did instead.
+
+That last one is a region and never a sample. `Obstruction.Reading` walks the z order down to the
+window being photographed, intersects every frame above it with the capture rectangle, and answers
+how many pixels are taken and by which windows — named, with their process, because a reader handed
+a covered capture needs to know which window to move. Nine sampled points were what this replaced,
+and the capture that verified them carried two windows of another process across its corner.
 
 That last one reaches the verbs above it. Looking for a tray icon answers a reading rather than an
 icon-or-nothing, and where it found none it says whether every place it could have been was looked

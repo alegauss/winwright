@@ -174,16 +174,6 @@ added later is red until somebody says.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW38 A region, not a handful of points
-
-Nine sampled points cannot cover a window: the capture taken to verify one task passed
-all of them while carrying two windows of another process across its lower-right corner.
-More points only move the threshold - the number that finally covers a window is the
-number of pixels in it - so the question is asked about the region instead. The z order
-above the window is enumerated and each frame intersected with the copy rectangle, which
-answers for the whole area in one pass and names the intruder rather than merely
-refusing.
-
 ### §WW40 Fail, never crop
 
 An overlap on the edge is now inside real content, because the copied rectangle is the

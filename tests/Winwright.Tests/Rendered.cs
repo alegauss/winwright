@@ -121,6 +121,8 @@ internal static class Rendered
             null, "why a locator matched nothing, and the route that would reach it"),
         new("NameCheck.Sentence", "NameCheckTests.A_template_nobody_filled_in_is_reported_as_one",
             null, "what a control is called, with a glyph or an unfilled template said plainly"),
+        new("Obstruction.Sentence", "FixtureTests.The_region_check_names_the_intruder_rather_than_answering_whether",
+            null, "which windows stand over the region a capture is about, and how much of it they take"),
         new("PaintedFrame.Sentence", "PaintedFrameTests.A_window_with_no_border_trims_nothing_and_says_so",
             null, "what a capture trimmed off the window rectangle, and on which sides"),
         new("PictureCheck.Sentence", "PicturesTests.A_render_that_drew_nothing_is_a_blank",
