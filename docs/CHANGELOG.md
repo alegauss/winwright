@@ -121,6 +121,7 @@
 - ✅ **WW194** **a render is refused for a backdrop it cannot transmit, because the refusal keys on reach and not on the route taken** — The backdrop refusal keys on the route taken, so an off-screen render is no longer refused for a hazard the compositor never reaches and a forced copy still is.
 - ✅ **WW187** **two capture refusals fire only where the caller remembered to take the reading, and nothing makes anyone take it** — A capture taken through the door reads the region, the glass and the colours itself and refuses on any, asking only the questions the route it took can be hurt by.
 - ✅ **WW188** **one refusal type has five arms now and the pairing records one, so an arm added later is provoked by nobody** — A refusal says which of its five arms it is, and each arm is paired with the fixture shape or the case that provokes it, checked against the engine both ways.
+- ✅ **WW195** **the region is read before a capture and never after, so a window that arrived while it was taken is not seen** — The region is read on both sides of the take, and a window that arrived inside it is a sixth refusal arm with its own sentence rather than a capture reported as clear.
 
 ## Block F — Assert — the expectation is derived, never typed
 

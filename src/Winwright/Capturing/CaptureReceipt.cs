@@ -18,10 +18,11 @@ public sealed class WrongCaptureException : InvalidOperationException
     /// The same, saying which of the ways a capture can be wrong this one is.
     /// <para>
     /// WW188. A refusal is what a reader meets, and a reader meets an arm rather than a type. This
-    /// one is five: another process's window, a window nothing is drawing, a region another window
-    /// stood over, a window whose glass transmits, and a picture of exactly one colour. The
-    /// catalogue that pairs every refusal with something that provokes it counted them as one, so
-    /// four were invisible to it and a sixth would have been too.
+    /// one was five when that was written — another process's window, a window nothing is drawing, a
+    /// region another window stood over, a window whose glass transmits, and a picture of exactly
+    /// one colour — and the catalogue that pairs every refusal with something that provokes it
+    /// counted them as one, so four were invisible to it. WW195 added the sixth, which arrived
+    /// paired because of this.
     /// </para>
     /// </summary>
     /// <param name="arm">Which way this capture is wrong.</param>
@@ -56,7 +57,7 @@ public sealed class WrongCaptureException : InvalidOperationException
 /// <para>
 /// WW188. Named here rather than told apart by the sentence they carry: a case matching a phrase is
 /// one that starts matching a different arm the day somebody rewords a message, and a catalogue
-/// keyed on the type could only ever count five refusals as one.
+/// keyed on the type could only ever count every refusal it has as one.
 /// </para>
 /// </summary>
 public enum WrongCapture
@@ -72,6 +73,13 @@ public enum WrongCapture
 
     /// <summary>Another window stood over the region while it was copied.</summary>
     RegionCovered,
+
+    /// <summary>
+    /// The region was clear when the capture started and covered when it finished, so a window
+    /// arrived inside the take. WW195: distinct from <see cref="RegionCovered" /> because the
+    /// reading that would have refused was taken before the intruder existed.
+    /// </summary>
+    DeskChanged,
 
     /// <summary>The window's own glass carries what is behind it into the copy.</summary>
     GlassTransmits,
@@ -103,7 +111,7 @@ public sealed record CaptureReceipt
         AppTarget target,
         PaintedFrame? frame,
         CaptureRoute? route,
-        Obstruction? over,
+        RegionThroughout? over,
         Glass? glass,
         ColourCheck? colours)
     {
@@ -134,7 +142,7 @@ public sealed record CaptureReceipt
     /// "nothing stood over it": a receipt that could say either from one value would be claiming an
     /// emptiness nobody looked for, which is the shape this project keeps withdrawing.
     /// </summary>
-    public Obstruction? Over { get; }
+    public RegionThroughout? Over { get; }
 
     /// <summary>The file that was written.</summary>
     public string Path { get; }
@@ -212,13 +220,17 @@ public sealed record CaptureReceipt
 
         var copied = route?.Renders is not true;
 
-        // Read before the take and never after: what a reader needs is the desk as it stood while
-        // the picture was being got, and a region read afterwards is a reading of a moment the
-        // capture had already passed. The closest observable instant is the one before.
-        var over = copied ? Obstruction.Reading(window.Handle, frame?.Painted ?? window.Bounds) : null;
+        // WW195. Both sides of the take, and this used to be the instant before it alone. That is
+        // the closest observable instant and it is not the instant the picture was taken: a window
+        // arriving between the reading and the write is in the copy and in nothing else, and the
+        // receipt said the region was clear because it was, a moment earlier.
         var glass = copied ? Glass.Of(window.Handle) : null;
 
-        take(path);
+        RegionThroughout? over = null;
+        if (copied)
+            over = RegionThroughout.Around(window.Handle, frame?.Painted ?? window.Bounds, () => take(path));
+        else
+            take(path);
 
         // And after, because this one is about the file. A capture that was never written is not a
         // flat one, and Colours refuses rather than answering — so the absence reaches the caller
@@ -265,9 +277,9 @@ public sealed record CaptureReceipt
     /// </param>
     /// <exception cref="WrongCaptureException">
     /// Where the window belongs to a process this run is not driving, where nothing was drawing
-    /// it, where another window stood over the region, where its own glass is carrying what is
-    /// behind it, or where the picture is one flat colour. All five are wrong captures that a file
-    /// on disk looks exactly the same as.
+    /// it, where another window stood over the region, where one arrived inside the take, where its
+    /// own glass is carrying what is behind it, or where the picture is one flat colour. Every one
+    /// is a wrong capture that a file on disk looks exactly the same as.
     /// </exception>
     public static CaptureReceipt Of(
         string path,
@@ -275,7 +287,7 @@ public sealed record CaptureReceipt
         AppTarget target,
         PaintedFrame? frame = null,
         CaptureRoute? route = null,
-        Obstruction? over = null,
+        RegionThroughout? over = null,
         Glass? glass = null,
         ColourCheck? colours = null)
     {
@@ -298,9 +310,17 @@ public sealed record CaptureReceipt
         // WW40, and named rather than merely refused: "something else was in the way" is not
         // actionable and a title with a pid is. The reading already carries both, so the refusal
         // hands over its sentence rather than composing a second, thinner one.
-        if (over is { Was: true, Clear: false })
+        if (over is { WasCovered: true })
             throw new WrongCaptureException(
                 WrongCapture.RegionCovered, $"the capture is of {window}, and {over.Sentence()}");
+
+        // WW195, and its own arm rather than the one above. Clear when the capture started and
+        // covered when it finished is a window that arrived inside the take, which the reading
+        // WW40 refuses on was taken too early to see. Second, so a region already covered is
+        // reported as that rather than as the desk having moved.
+        if (over is { Changed: true })
+            throw new WrongCaptureException(
+                WrongCapture.DeskChanged, $"the capture is of {window}, and {over.Sentence()}");
 
         // WW41, and refused rather than warned about: a warning is not a refusal and the file gets
         // written either way. Not for a popup, which is the one thing the screen copy exists for —

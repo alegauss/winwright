@@ -1596,11 +1596,11 @@ public sealed class FixtureTests : IDisposable
                 Path.Combine(root, "covered.png"),
                 placed.Window,
                 AppTarget.AttachTo(placed.Window.Pid),
-                over: read));
+                over: RegionThroughout.Once(read)));
 
         // Actionable and not mysterious: "something else was in the way" sends a reader nowhere,
         // and a title with a pid and a rectangle sends them to the window to move.
-        // WW188: the arm, and then the words. Three of the five open with the same six words, so a
+        // WW188: the arm, and then the words. Three of them open with the same six words, so a
         // case matching only a phrase is one that starts matching a different arm the day somebody
         // rewords a message.
         Assert.Equal(WrongCapture.RegionCovered, refused.Arm);
@@ -1625,7 +1625,7 @@ public sealed class FixtureTests : IDisposable
             Path.Combine(root, "clear.png"),
             beside.Window,
             AppTarget.AttachTo(beside.Window.Pid),
-            over: read);
+            over: RegionThroughout.Once(read));
 
         Assert.NotNull(receipt.Over);
         Assert.True(receipt.Over.Clear);
@@ -1659,7 +1659,7 @@ public sealed class FixtureTests : IDisposable
             Path.Combine(root, "not-read.png"),
             placed.Window,
             AppTarget.AttachTo(placed.Window.Pid),
-            over: unread);
+            over: RegionThroughout.Once(unread));
 
         Assert.NotNull(receipt.Over);
         Assert.False(receipt.Over.Was);

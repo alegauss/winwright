@@ -248,6 +248,11 @@ internal static class DeskAsks
             Unaffected.Shape,
             "the case exists for the refused arm: it asserts the pass where the flyout opened and "
                 + "the hole where it did not, and excusing either would delete half of it"),
+        new("ThroughoutTests.A_region_read_once_says_so_rather_than_standing_for_both_ends",
+            Unaffected.Shape,
+            "every claim here is about the shape of a reading taken once — that it did not look "
+                + "twice, that it will not say the region held still, that its Finding observed "
+                + "nothing — and all of that is true of whatever the one reading found"),
         new("RefusedForegroundTests.The_verdict_tracks_the_desk_rather_than_the_other_way_round",
             Unaffected.Shape,
             "stated as the invariant rather than by insisting the window takes the foreground — the "

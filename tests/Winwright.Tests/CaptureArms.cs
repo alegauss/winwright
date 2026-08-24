@@ -35,7 +35,7 @@ internal sealed record CaptureArm(WrongCapture Arm, string Flag, Without? Why, s
 /// <para>
 /// Keyed on the arm the engine declares and never on the sentence thrown with it. A pairing that
 /// matched a phrase would start matching a different arm the day somebody reworded a message, and
-/// two of these five open with the same six words before they say anything that tells them apart.
+/// two of these open with the same six words before they say anything that tells them apart.
 /// </para>
 /// </summary>
 internal static class CaptureArms
@@ -54,6 +54,11 @@ internal static class CaptureArms
             "a topmost window over exactly the rectangle a run names, which is what WW103 built the "
                 + "flag for and what the region check is driven against",
             "FixtureTests.A_capture_whose_region_was_stood_over_is_refused_and_names_the_intruder"),
+        new(WrongCapture.DeskChanged, "", Without.NoShape,
+            "the take itself opens the window that arrives, which is the defect performed rather "
+                + "than a race waited for — two dialogs of this process take the same rectangle, so "
+                + "the second stands exactly over the first and no fixture shape is needed",
+            "ThroughoutTests.A_region_that_went_from_clear_to_covered_is_refused_as_the_desk_changing"),
         new(WrongCapture.GlassTransmits, "backdrop", null,
             "a window that asked the compositor for mica, acrylic or tabbed, so the refusal and the "
                 + "pass beside it are both driven rather than reasoned about",

@@ -84,28 +84,6 @@ can see changes.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW195 The instant before is not the instant of
-
-WW187 put the readings where a caller cannot forget them, and reads the region and the
-glass immediately before the write. That is the closest observable instant, and it is
-written down as such — but it is not the instant the picture was taken.
-
-A window that arrives between the reading and the write is in the copy and in nothing
-else. The receipt says the region was clear, because it was, a moment earlier. That is a
-smaller hole than the one WW38 closed and it is the same shape: a capture reported as
-proving something it does not.
-
-It is also cheap to close, because the reading is cheap. `Obstruction.Reading` walks the
-z order down to the window under test and stops; taking it twice and comparing costs one
-more walk. A region clear before and clear after is a region that was clear throughout,
-unless something arrived and left inside the take — which is a claim about a window
-nobody could photograph either way.
-
-What is owed is the second reading and the shape it answers in. Clear both times is what
-the receipt already means. Covered afterwards and not before is the case this is about,
-and it wants its own sentence: the desk changed under the capture, which is neither the
-window's fault nor a reading nobody took.
-
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file

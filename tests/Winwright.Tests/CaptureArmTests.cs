@@ -37,15 +37,17 @@ public sealed class CaptureArmTests
     }
 
     [Fact]
-    public void No_arm_is_paired_twice_and_the_count_is_five()
+    public void No_arm_is_paired_twice_and_every_one_the_engine_has_is_counted()
     {
         var paired = CaptureArms.Known.Select(one => one.Arm).ToList();
 
         Assert.Equal(paired.Count, paired.Distinct().Count());
 
-        // Five, which is the number this task is about. Unsaid is not one of them: it is what a
-        // throw that named no arm carries, and nothing provokes a refusal nobody described.
-        Assert.Equal(5, CaptureArms.Declared().Count);
+        // Six. It was five when WW188 wrote this down, and WW195 added one — which is the whole
+        // point of the pairing: the sixth arrived already provoked rather than a task later. Unsaid
+        // is not among them, being what a throw that named no arm carries.
+        Assert.Equal(6, CaptureArms.Declared().Count);
+        Assert.Equal(CaptureArms.Declared().Count, paired.Count);
         Assert.DoesNotContain(WrongCapture.Unsaid, CaptureArms.Declared());
     }
 
@@ -90,14 +92,14 @@ public sealed class CaptureArmTests
     public void A_refusal_says_which_arm_it_is_rather_than_leaving_it_to_the_sentence()
     {
         // The reason this is keyed on the arm. A case matching a phrase starts matching a different
-        // arm the day somebody rewords a message, and three of these five open with the same six
+        // arm the day somebody rewords a message, and three of these open with the same six
         // words before they say anything that tells them apart.
         var refused = new WrongCaptureException(WrongCapture.RegionCovered, "the capture is of a window");
 
         Assert.Equal(WrongCapture.RegionCovered, refused.Arm);
 
         // And one thrown without saying carries Unsaid rather than defaulting into a real arm,
-        // because a refusal that quietly claimed to be one of the five would pair with its check.
+        // because a refusal that quietly claimed to be one of the real arms would pair with its check.
         Assert.Equal(WrongCapture.Unsaid, new WrongCaptureException("the capture is of a window").Arm);
     }
 
