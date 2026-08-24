@@ -165,8 +165,11 @@ internal static class Criteria
 
         // --- K, the proving ground -----------------------------------------------------------------------
         new("K", "Every refusal has something that provokes it",
-            "ProvocationTests.Every_refusal_the_framework_names_is_paired_with_something",
-            null, "the refusals are read off the assemblies and paired both ways with a flag or a case"),
+            "RefusalArmTests.Every_arm_the_engine_declares_is_provoked_by_something",
+            null, "WW196: at the arm and not the type, which is the unit a reader meets — the "
+                + "type-level sweep still runs beside it and catches a type with no entry at all, "
+                + "but a type thrown thirteen times was one entry and this criterion counted it as "
+                + "covered"),
         new("K", "The fixture needs nothing from the machine",
             "FixtureNeedsTests.The_fixture_asks_the_machine_for_nothing_the_criterion_says_it_does_not",
             null, "its sources name no network, account, second display or well-known folder, and its "
