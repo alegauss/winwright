@@ -170,6 +170,30 @@ identify is said rather than skipped.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+### §WW184 The sleeps nobody wrote down
+
+Found by reading Block C's criteria when WW175 emptied it. The second says no scenario
+carries a sleep — every wait is a deadline on a condition, and how long it took is in
+the trace for whoever wants to tune it. Nothing checks it, and `Thread.Sleep` appears in
+eight files: `Attempt`, `Expectation`, `FrameRun` and the fixture's `Program` in the
+engine tree, and `FixtureTests`, `FrameRunTests`, `TraversalTests` and `Waits` in the
+suite's.
+
+Several are certainly right, and their being right is the point. `Attempt` sleeps
+between polls, which is the deadline machinery itself. `FrameRun` samples, and WW143
+already argued that case in writing: the interval is the resolution of the measurement,
+so turning it into a deadline would delete the observation. The fixture sleeps because a
+page that is still computing is the shape `--loading` exists to be.
+
+The others nobody has argued either way, which is the whole finding. This is the
+criterion's own claim, resting on whoever last looked — the reading WW176 is about, met
+a second time in a second block.
+
+The shape is next door and was written yesterday. `Deadlines` pairs every wait in both
+trees with what its look answers as nothing, checked against the sources both ways. A
+sleep is the same question inverted: pair each with why it is not a wait, and a sleep
+added later is red until somebody says.
+
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed
