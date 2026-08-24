@@ -71,6 +71,29 @@ What is owed is that the array stops being the record. A desk fact is what the e
 says is one, read off the assembly the way `Provocation` and `Rendered` read theirs, so
 the sixth is not found by a red nobody can reproduce.
 
+### §WW185 The sweep that never says which machine
+
+WW177 joined the reading to the verdict for a single run. `SweepSummary` is the same
+surface one level up and did not get it: `EnvironmentRun` is a record of an
+environment's name and its `RunVerdict`, and there is nowhere in the type for what that
+environment turned out to be.
+
+A sweep is the place this costs most. A single run's reader can at least ask the machine
+they are sitting at. A sweep exists because the answer differs between machines, so the
+whole point of reading it is to find out which one behaved differently — and what it
+reports is that an assertion was unchecked in two of five environments, deduped and
+counted, with not one word about the five.
+
+The block's first criterion is that a degraded run is legible without reading the log,
+and a sweep is the degraded run a person is least able to reproduce. Its headline
+already refuses to collapse a count of holes into a count of occurrences, because those
+are two properties and reading one for the other is the failure this project is about.
+The environments are a third, and they are collapsed to a name.
+
+What is owed is the same join, per environment: the reading beside the verdict it
+explains, and the sweep's own rule about the word *every* applying to it — a sweep that
+could not read one machine says so rather than reporting five it read.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
