@@ -178,7 +178,9 @@ compositor which system backdrop the window opted into — mica, acrylic and tab
 is behind the window into it — and a receipt handed that reading refuses too. Z-order reasoning
 cannot answer for this: the intruder is not in front of the window, it is showing through it. A
 menu, a balloon or an owned popup is exempt, because those carry a backdrop by design and the copy
-route exists for them.
+route exists for them — and so is an off-screen render, which draws the visual tree with the
+compositor not involved and so carries nothing from behind the window at all. It is the screen copy
+that a backdrop reaches.
 
 And a third question the picture answers about itself: `Colours.In` counts distinct colours and
 refuses a capture that is exactly one. A flat rectangle is not a picture of a window — the session

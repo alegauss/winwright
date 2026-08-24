@@ -184,7 +184,14 @@ public sealed record CaptureReceipt
         // written either way. Not for a popup, which is the one thing the screen copy exists for —
         // a menu on this shell has acrylic by design, so refusing on it would refuse every capture
         // the copy route was built to take.
-        if (glass is { Transmits: true } && route?.Reach is null or OutOfReach.Renderable)
+        //
+        // WW194. On the route taken and never on the reach. This read Reach == Renderable, which an
+        // off-screen render has by definition — and a render is the one capture a backdrop cannot
+        // touch, because it draws the application's own visual tree with no window shown and the
+        // compositor not involved. So the default route was refused for a hazard it does not have.
+        // A forced copy of a renderable window is what the condition was reaching for, and that is
+        // a copy: Renders is the field that separates the two.
+        if (glass is { Transmits: true } && route?.Renders is not true && route?.Reach is null or OutOfReach.Renderable)
             throw new WrongCaptureException($"the capture is of {window}, and {glass.Sentence()}");
 
         // WW42. A flat rectangle is not a picture of a window, and the session that produced one

@@ -1695,6 +1695,46 @@ public sealed class FixtureTests : IDisposable
     }
 
     [Fact]
+    public void A_render_is_not_refused_by_a_backdrop_because_a_render_cannot_transmit_one()
+    {
+        // WW194. The default route, refused for a hazard it does not have. An off-screen render
+        // draws the application's own visual tree with no window shown and the compositor not
+        // involved, so a backdrop composites nothing into it — and CaptureRoute's own comment says
+        // as much: there is no foreground, no z order and no second instance to be confused with.
+        var window = Launched("--backdrop=acrylic");
+        var glass = Glass.Of(window.Handle);
+
+        if (!glass.Transmits)
+            return;
+
+        var rendered = CaptureRoute.For(window, window);
+        Assert.True(rendered.Renders, rendered.Sentence());
+
+        var receipt = CaptureReceipt.Of(
+            Path.Combine(root, "rendered.png"),
+            window,
+            AppTarget.AttachTo(window.Pid),
+            route: rendered,
+            glass: glass);
+
+        Assert.NotNull(receipt.Glass);
+        Assert.True(receipt.Glass.Transmits);
+
+        // And a copy of the very same renderable window still refuses, which is the case the
+        // condition was reaching for and the reason this is a narrowing rather than a deletion.
+        var forced = CaptureRoute.Forced("a case insisted on the screen for this one");
+        Assert.False(forced.Renders);
+
+        Assert.Throws<WrongCaptureException>(
+            () => CaptureReceipt.Of(
+                Path.Combine(root, "forced.png"),
+                window,
+                AppTarget.AttachTo(window.Pid),
+                route: forced,
+                glass: glass));
+    }
+
+    [Fact]
     public void A_popup_is_not_refused_by_a_backdrop_because_it_is_what_the_copy_route_exists_for()
     {
         // The arm that must not be refused. A menu on this shell has acrylic by design, so a
