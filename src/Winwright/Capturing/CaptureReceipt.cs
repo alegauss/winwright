@@ -44,14 +44,28 @@ public sealed class WrongCaptureException : InvalidOperationException
 /// </summary>
 public sealed record CaptureReceipt
 {
-    private CaptureReceipt(string path, TopLevelWindow window, AppTarget target, PaintedFrame? frame, CaptureRoute? route)
+    private CaptureReceipt(
+        string path,
+        TopLevelWindow window,
+        AppTarget target,
+        PaintedFrame? frame,
+        CaptureRoute? route,
+        Obstruction? over)
     {
         Path = path;
         Window = window;
         Target = target;
         Frame = frame;
         Route = route;
+        Over = over;
     }
+
+    /// <summary>
+    /// What stood over the region, where a caller read it. Null where none did — and null is not
+    /// "nothing stood over it": a receipt that could say either from one value would be claiming an
+    /// emptiness nobody looked for, which is the shape this project keeps withdrawing.
+    /// </summary>
+    public Obstruction? Over { get; }
 
     /// <summary>The file that was written.</summary>
     public string Path { get; }
@@ -87,16 +101,28 @@ public sealed record CaptureReceipt
     /// <param name="target">How this run reached the application.</param>
     /// <param name="frame">What was copied against what the window owns, where it was read.</param>
     /// <param name="route">Which way the picture was got, and why.</param>
+    /// <param name="over">
+    /// What stood over the region while it was taken, where a caller read it.
+    /// <para>
+    /// WW40. An overlap fails rather than crops. Since the copied rectangle is the painted frame
+    /// there is no invisible border left for a foreign window to hide in, so an overlap is inside
+    /// real content — and a file quietly trimmed to dodge one is a picture of something nobody
+    /// asked for. Left null by a caller that did not read it, because a receipt claiming nothing
+    /// stood over a region nobody looked at is the third kind of wrong capture.
+    /// </para>
+    /// </param>
     /// <exception cref="WrongCaptureException">
-    /// Where the window belongs to a process this run is not driving, or where nothing was
-    /// drawing it. Both are wrong captures that a file on disk looks exactly the same as.
+    /// Where the window belongs to a process this run is not driving, where nothing was drawing
+    /// it, or where another window stood over the region. All three are wrong captures that a file
+    /// on disk looks exactly the same as.
     /// </exception>
     public static CaptureReceipt Of(
         string path,
         TopLevelWindow window,
         AppTarget target,
         PaintedFrame? frame = null,
-        CaptureRoute? route = null)
+        CaptureRoute? route = null,
+        Obstruction? over = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(window);
@@ -112,7 +138,13 @@ public sealed record CaptureReceipt
             throw new WrongCaptureException(
                 $"the capture is of {window}, which nothing is drawing: {Cloaking.Because(window.Cloak)}.");
 
-        return new CaptureReceipt(path, window, target, frame, route);
+        // WW40, and named rather than merely refused: "something else was in the way" is not
+        // actionable and a title with a pid is. The reading already carries both, so the refusal
+        // hands over its sentence rather than composing a second, thinner one.
+        if (over is { Was: true, Clear: false })
+            throw new WrongCaptureException($"the capture is of {window}, and {over.Sentence()}");
+
+        return new CaptureReceipt(path, window, target, frame, route, over);
     }
 
     /// <summary>

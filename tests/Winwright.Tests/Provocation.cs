@@ -164,7 +164,10 @@ internal static class Provocation
         // a fixture that lied about which window it owns would be reproducing the harness's bug in
         // the thing the harness is pointed at.
         new("WrongCaptureException", "", Without.NoShape,
-            "a receipt composed over a window and a target a case hands it, and it already builds both",
+            "a receipt composed over a window and a target a case hands it, and it already builds both — "
+                + "though WW40's arm, a region another window stood over, is provoked by --intrude and is "
+                + "driven that way, which this entry cannot say while a pairing carries a flag or a reason "
+                + "and never both",
             "CaptureReceiptTests.A_picture_of_somebody_elses_window_is_refused_and_names_both_processes"),
     ]);
 

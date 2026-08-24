@@ -158,6 +158,13 @@ how many pixels are taken and by which windows — named, with their process, be
 a covered capture needs to know which window to move. Nine sampled points were what this replaced,
 and the capture that verified them carried two windows of another process across its corner.
 
+Hand that reading to `CaptureReceipt.Of` and an overlap is **refused rather than cropped**. The
+copied rectangle is the painted frame, so there is no invisible border left for a foreign window to
+hide in — an overlap is inside real content, and a file quietly trimmed to dodge one is a picture of
+something nobody asked for. Leave the reading off and the receipt says nothing about the region
+rather than claiming it was clear: a caller who never looked and one who looked and found nothing
+are two different facts.
+
 That last one reaches the verbs above it. Looking for a tray icon answers a reading rather than an
 icon-or-nothing, and where it found none it says whether every place it could have been was looked
 at. Not found everywhere is an answer about your application; not found because the flyout would not

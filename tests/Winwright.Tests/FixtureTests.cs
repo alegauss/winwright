@@ -1581,6 +1581,87 @@ public sealed class FixtureTests : IDisposable
             nowhere.AsAssertion("the region is clear").Outcome);
     }
 
+    [Fact]
+    public void A_capture_whose_region_was_stood_over_is_refused_and_names_the_intruder()
+    {
+        // WW40. An overlap fails rather than crops. The copied rectangle is the painted frame, so
+        // there is no invisible border left for a foreign window to hide in — an overlap is inside
+        // real content, and a file trimmed to dodge one is a picture of something nobody asked for.
+        var placed = Placed("--intrude=200,200,300,200");
+        var read = Obstruction.Reading(placed.Window.Handle, placed.Window.Bounds);
+
+        Assert.False(read.Clear, read.Sentence());
+
+        var refused = Assert.Throws<WrongCaptureException>(
+            () => CaptureReceipt.Of(
+                Path.Combine(root, "covered.png"),
+                placed.Window,
+                AppTarget.AttachTo(placed.Window.Pid),
+                over: read));
+
+        // Actionable and not mysterious: "something else was in the way" sends a reader nowhere,
+        // and a title with a pid and a rectangle sends them to the window to move.
+        Assert.Contains($"pid {placed.Intruder.Pid}", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("stand over", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("pixel(s)", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_capture_whose_region_was_clear_carries_the_reading_that_says_so()
+    {
+        // The arm the refusal must not catch, and the reason the reading is carried rather than
+        // consumed: a receipt that refused on an overlap and said nothing on a clear region would
+        // leave a reader unable to tell a checked capture from an unchecked one.
+        var beside = Placed("--intrude=3000,2000,200,150");
+        var read = Obstruction.Reading(beside.Window.Handle, beside.Window.Bounds);
+
+        if (!read.Clear)
+            return;
+
+        var receipt = CaptureReceipt.Of(
+            Path.Combine(root, "clear.png"),
+            beside.Window,
+            AppTarget.AttachTo(beside.Window.Pid),
+            over: read);
+
+        Assert.NotNull(receipt.Over);
+        Assert.True(receipt.Over.Clear);
+    }
+
+    [Fact]
+    public void A_capture_nobody_read_the_region_for_says_nothing_rather_than_that_it_was_clear()
+    {
+        // Null is not "nothing stood over it". A caller that never looked and a caller that looked
+        // and found nothing are two different facts, and a receipt answering both from one value
+        // would be the green this project exists to withdraw.
+        var placed = Placed("--intrude=200,200,300,200");
+
+        var receipt = CaptureReceipt.Of(
+            Path.Combine(root, "unread.png"), placed.Window, AppTarget.AttachTo(placed.Window.Pid));
+
+        Assert.Null(receipt.Over);
+    }
+
+    [Fact]
+    public void A_reading_that_was_never_taken_does_not_refuse_a_capture_either()
+    {
+        // The third state carried through. A region with no area is a reading not taken, and
+        // refusing on it would report an intruder nobody saw.
+        var placed = Placed("--intrude=200,200,300,200");
+        var unread = Obstruction.Reading(placed.Window.Handle, new WindowBounds(10, 10, 10, 10));
+
+        Assert.False(unread.Was);
+
+        var receipt = CaptureReceipt.Of(
+            Path.Combine(root, "not-read.png"),
+            placed.Window,
+            AppTarget.AttachTo(placed.Window.Pid),
+            over: unread);
+
+        Assert.NotNull(receipt.Over);
+        Assert.False(receipt.Over.Was);
+    }
+
     /// <summary>How many pixels the two rectangles share.</summary>
     private static long Overlap(TopLevelWindow left, TopLevelWindow right)
     {

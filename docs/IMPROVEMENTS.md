@@ -174,14 +174,6 @@ added later is red until somebody says.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW40 Fail, never crop
-
-An overlap on the edge is now inside real content, because the copied rectangle is the
-painted frame and there is no invisible border left for a foreign window to hide in. A
-file quietly trimmed to dodge an intruder is a picture of something nobody asked for.
-The refusal names the intruder, its process and the rectangle it covers, because
-something else was in the way is not actionable and a title with a pid is.
-
 ### §WW41 A backdrop transmits what is behind it
 
 Measured in freewilly: with nothing overlapping, the copy still carried a blurred image
