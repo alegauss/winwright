@@ -39,18 +39,18 @@ public static class Intruder
         var fields = said.Split(',');
         var numbers = new int[4];
         if (fields.Length != 4)
-            throw new UnknownFlagException($"--intrude takes left,top,width,height and was given '{said}'.");
+            throw new UnknownFlagException(UnknownFlag.MalformedRectangle, $"--intrude takes left,top,width,height and was given '{said}'.");
 
         for (var at = 0; at < 4; at++)
         {
             if (!int.TryParse(fields[at].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out numbers[at]))
-                throw new UnknownFlagException($"--intrude takes whole numbers and '{fields[at].Trim()}' is not one.");
+                throw new UnknownFlagException(UnknownFlag.NotAWholeNumber, $"--intrude takes whole numbers and '{fields[at].Trim()}' is not one.");
         }
 
         // A rectangle of no area covers nothing, so an intruder placed at one would be a shape that
         // provokes the refusal it exists for exactly never.
         if (numbers[2] <= 0 || numbers[3] <= 0)
-            throw new UnknownFlagException($"--intrude was given a size of {numbers[2]}x{numbers[3]}, which covers nothing.");
+            throw new UnknownFlagException(UnknownFlag.CoversNothing, $"--intrude was given a size of {numbers[2]}x{numbers[3]}, which covers nothing.");
 
         return (numbers[0], numbers[1], numbers[2], numbers[3]);
     }

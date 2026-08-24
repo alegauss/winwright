@@ -2,6 +2,61 @@ using System.Collections.ObjectModel;
 
 namespace Winwright.Fixture;
 
+/// <summary>
+/// The ways the fixture can be asked for something it does not know how to be.
+/// <para>
+/// WW200. WW196 armed four refusals of five and left this one, because it lives here rather than in
+/// the engine and the suite references this fixture without its assembly on purpose — an application
+/// under test is launched from its own output, not read from beside the harness. So the shape WW196
+/// built, an enum swept by reflection, had nothing to reflect over.
+/// </para>
+/// <para>
+/// The boundary is crossed the way WW146 crossed it: by running the article and reading what it
+/// says. The arm is named in the refusal and the whole list is printed with the catalogue, so the
+/// suite pairs against what an adopter would actually see rather than against a type it cannot load.
+/// </para>
+/// <para>
+/// Ten arms across eleven throw sites, and the arithmetic is the judgement rather than an oversight.
+/// A flag given a value that is not a whole number and a rectangle field that is not one are the
+/// same refusal carrying a different value: the reader writes a number either way.
+/// </para>
+/// </summary>
+public enum UnknownFlag
+{
+    /// <summary>Thrown without saying which. Pairs with nothing, and the suite refuses it.</summary>
+    Unsaid,
+
+    /// <summary>An argument that does not begin with two dashes, so it names no flag at all.</summary>
+    NotAFlag,
+
+    /// <summary>A flag spelled correctly and belonging to no shape this fixture has.</summary>
+    NoSuchShape,
+
+    /// <summary>A flag that takes a value, given none.</summary>
+    NeedsAValue,
+
+    /// <summary>A flag that takes nothing, given something.</summary>
+    TakesNothing,
+
+    /// <summary>A flag with a fixed set of values, given one outside it.</summary>
+    ValueNotAccepted,
+
+    /// <summary>A value that has to be a whole number and is not one.</summary>
+    NotAWholeNumber,
+
+    /// <summary>A flag that means nothing without another, asked for on its own.</summary>
+    NeedsACompanion,
+
+    /// <summary>Two shapes that each want to be the thing drawn, asked for together.</summary>
+    TwoRendersAtOnce,
+
+    /// <summary>A rectangle that is not four comma-separated fields.</summary>
+    MalformedRectangle,
+
+    /// <summary>A rectangle of no area, which would be a shape that provokes nothing.</summary>
+    CoversNothing,
+}
+
 /// <summary>Raised where the fixture was asked for something it does not know how to be.</summary>
 public sealed class UnknownFlagException : ArgumentException
 {
@@ -10,6 +65,29 @@ public sealed class UnknownFlagException : ArgumentException
         : base(message)
     {
     }
+
+    /// <summary>
+    /// The same, saying which of the ways it was asked wrongly this one is. The arm leads the
+    /// message, because a person reading a refusal is who this is for and a name they can grep is
+    /// worth more to them than a phrase they have to quote exactly.
+    /// </summary>
+    /// <param name="arm">Which way.</param>
+    /// <param name="message">What was asked for and what this knows.</param>
+    public UnknownFlagException(UnknownFlag arm, string message)
+        : base($"{Named(arm)}: {message}")
+    {
+        Arm = arm;
+    }
+
+    /// <summary>How an arm is spelled wherever the fixture prints one.</summary>
+    /// <param name="arm">The arm.</param>
+    public static string Named(UnknownFlag arm) => $"refused {arm}";
+
+    /// <summary>
+    /// Which way it was asked wrongly. <see cref="UnknownFlag.Unsaid" /> where it was thrown without
+    /// saying — a refusal nothing can pair, and the check says so.
+    /// </summary>
+    public UnknownFlag Arm { get; } = UnknownFlag.Unsaid;
 
     /// <summary>Unused. Present because an exception with no default shapes is awkward to catch.</summary>
     public UnknownFlagException()
@@ -297,7 +375,7 @@ public sealed record Flags
                 continue;
 
             if (!text.StartsWith("--", StringComparison.Ordinal))
-                throw new UnknownFlagException($"'{text}' is not a flag: every argument begins with --.{Catalogue()}");
+                throw new UnknownFlagException(UnknownFlag.NotAFlag, $"'{text}' is not a flag: every argument begins with --.{Catalogue()}");
 
             var body = text[2..];
             var equals = body.IndexOf('=', StringComparison.Ordinal);
@@ -305,17 +383,18 @@ public sealed record Flags
             var value = equals < 0 ? "" : body[(equals + 1)..];
 
             var known = Known.FirstOrDefault(one => string.Equals(one.Name, name, StringComparison.Ordinal))
-                ?? throw new UnknownFlagException($"--{name} is not a shape this fixture has.{Catalogue()}");
+                ?? throw new UnknownFlagException(UnknownFlag.NoSuchShape, $"--{name} is not a shape this fixture has.{Catalogue()}");
 
             if (known.Takes.Length > 0 && value.Length == 0)
-                throw new UnknownFlagException($"--{name} takes a value: --{name}=<{known.Takes}>.{Catalogue()}");
+                throw new UnknownFlagException(UnknownFlag.NeedsAValue, $"--{name} takes a value: --{name}=<{known.Takes}>.{Catalogue()}");
 
             if (known.Takes.Length == 0 && equals >= 0)
-                throw new UnknownFlagException($"--{name} takes nothing, and it was given '{value}'.{Catalogue()}");
+                throw new UnknownFlagException(UnknownFlag.TakesNothing, $"--{name} takes nothing, and it was given '{value}'.{Catalogue()}");
 
             if (known.Accepts.Count > 0 && !known.Accepts.Contains(value, StringComparer.Ordinal))
             {
                 throw new UnknownFlagException(
+                    UnknownFlag.ValueNotAccepted,
                     $"--{name} does not take '{value}': it takes {string.Join(" or ", known.Accepts)}.{Catalogue()}");
             }
 
@@ -327,6 +406,7 @@ public sealed record Flags
                     || counted < 0))
             {
                 throw new UnknownFlagException(
+                    UnknownFlag.NotAWholeNumber,
                     $"--{name} takes a whole number of {known.Takes} and was given '{value}'.{Catalogue()}");
             }
 
@@ -369,6 +449,7 @@ public sealed record Flags
             var takes = companion.Takes.Length == 0 ? "" : $"=<{companion.Takes}>";
 
             throw new UnknownFlagException(
+                UnknownFlag.NeedsACompanion,
                 $"--{flag.Name} has nothing to {flag.Alone} without --{companion.Name}{takes}.{Catalogue()}");
         }
 
@@ -380,6 +461,7 @@ public sealed record Flags
         if (competing.Count > 1)
         {
             throw new UnknownFlagException(
+                UnknownFlag.TwoRendersAtOnce,
                 $"a render draws one thing, and {string.Join(" and ", competing)} are two of them: ask for one."
                     + Catalogue());
         }
@@ -393,7 +475,28 @@ public sealed record Flags
     public static string Catalogue(bool justified = false) =>
         "\nThis fixture knows:\n"
         + string.Join("\n", Known.Select(one => "  " + (justified ? one.Justified() : one.ToString())))
-        + "\n" + Codes();
+        + "\n" + Codes() + "\n" + Arms();
+
+    /// <summary>
+    /// Every way this fixture refuses being driven, listed once.
+    /// <para>
+    /// WW200. The suite cannot load this assembly and so cannot sweep the enum, which is why the
+    /// list is printed: the pairing is checked against what an adopter would see rather than against
+    /// a type nothing here can reach. <see cref="UnknownFlag.Unsaid" /> is left off — it is what a
+    /// throw that named no arm carries, and nothing provokes a refusal nobody described.
+    /// </para>
+    /// <para>
+    /// Read off the enum rather than typed, for the reason the whole catalogue exists: a list
+    /// written down twice is a list that drifts from the thing it describes.
+    /// </para>
+    /// </summary>
+    public static string Arms() =>
+        $"It refuses (exit {Program.UnknownFlag}):\n"
+        + string.Join(
+            "\n",
+            Enum.GetValues<UnknownFlag>()
+                .Where(one => one != UnknownFlag.Unsaid)
+                .Select(one => $"  {UnknownFlagException.Named(one)}"));
 
     /// <summary>
     /// What a run of this fixture ends with, listed once.

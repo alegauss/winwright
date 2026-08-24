@@ -270,30 +270,6 @@ runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW200 The fifth type, on the other side of a boundary
-
-WW196 named five refusals thrown from many places and armed four of them: the locator
-grammar, the label reader, the declaration and the actionability check.
-`UnknownFlagException` is the fifth and it is untouched, which is worth saying plainly
-rather than leaving to a reader counting entries.
-
-It is untouched because it lives in the fixture, and `Provocation` says why the suite
-cannot reach it: the fixture is referenced without its assembly on purpose, because an
-application under test is launched from its own output rather than read from beside the
-harness. So the arm shape WW196 built — an enum a type exposes, swept by reflection —
-has nothing to reflect over.
-
-Counted: eleven throw sites across `Flags` and `Intruder`. Not a flag at all, a flag
-this fixture does not have, a flag given no value, one given a value it takes none for,
-one given a value outside what it accepts, a number that is not a number, a flag that
-needs a companion, two renders asked for at once, and two more the intruder adds. A
-person meets each of those with a different thing to fix.
-
-The judgement is how a boundary that exists for a good reason gets crossed for a
-reading. The fixture already prints its catalogue, and WW146's three shapes were
-provoked by running it and matching what it said — so the arms may be text this suite
-matches rather than an enum it reflects over. That choice is the task.
-
 ### §WW203 Six milliseconds over, twice
 
 Measured on two guest runs a task apart.

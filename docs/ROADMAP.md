@@ -48,12 +48,11 @@
 - 📋 **WW84** (deps: Block G) **the names case observes what no screenshot can** — Migrated with the derived panel sweep and the exact-label reads, including the rule that must fire and the one that must not. → §WW84
 - 📋 **WW85** (deps: Block G) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
 - 📋 **WW86** (deps: WW78, WW79, WW80, WW81, WW82, WW83, WW84, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
-- 📋 **WW87** (deps: Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
+- 📋 **WW87** (deps: Block G, Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW200** (deps: —) **the fixture's own refusal is eleven arms and the suite cannot see its types, so nothing pairs any of them** — The fixture's arms are paired the way its flags already are, because WW196 armed four of the five it named and this is the fifth. → §WW200
 - 📋 **WW203** (deps: —) **two guest runs timed out six milliseconds past a five-second deadline waiting for the fixture to write its dump** — The deadline is set from what the fixture actually takes, because two runs overran it by six and nine milliseconds and both passed on a re-run. → §WW203
 
 ## Done when — Block A

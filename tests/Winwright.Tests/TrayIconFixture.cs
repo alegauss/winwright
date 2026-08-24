@@ -183,7 +183,18 @@ internal sealed class TrayIconFixture : IDisposable
         // Looking may have opened the overflow, so it is shut again. What this fixture promises is
         // an icon that can be found, never a flyout left standing for the next case to trip on —
         // and one of the two flakes measured was exactly a case that found one already open.
-        NotificationArea.CloseOverflow();
+        //
+        // WW200 found the reading being thrown away. A shell that would not shut the flyout left it
+        // standing and said so to nobody, and the case asserting this fixture leaves the overflow as
+        // it found it went red about the fixture. Answered as what it is: a desk that will not work
+        // its own flyout is excusable, exactly as one that would not open it already is.
+        var shut = NotificationArea.CloseOverflow();
+        if (!shut.Held)
+        {
+            throw new DeskRefusedException(
+                Precondition.Absent(OverflowState.PreconditionName, shut.Because ?? shut.ToString()),
+                $"the overflow was opened looking for '{Tip}' and would not shut again: {shut}");
+        }
 
         // WW179. The search already says which of the two it was, and this used to throw either
         // way — so a shell covering the taskbar ended the case as a broken harness and sent a

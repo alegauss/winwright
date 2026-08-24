@@ -100,6 +100,11 @@ internal static class Provocation
     /// cannot be: the suite references it without its assembly on purpose, because an application
     /// under test is launched from its own output rather than read from beside the harness. Its own
     /// refusal about an unknown flag is provoked by running it, which is where it belongs.
+    /// <para>
+    /// WW200: and paired there too. That refusal is ten arms, and <c>FixtureArms</c> pairs each with
+    /// the command line that provokes it — checked both ways against the list the fixture prints
+    /// under its catalogue, because a list this suite cannot load is one it can still be told.
+    /// </para>
     /// </summary>
     public static IReadOnlyList<Assembly> Assemblies { get; } = new ReadOnlyCollection<Assembly>(
     [
