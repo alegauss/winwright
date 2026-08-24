@@ -143,6 +143,29 @@ which is the argument every other image comparison eventually turns into.
 
 ## Block F — Assert — the expectation is derived, never typed
 
+### §WW170 The half WW151 could not take
+
+The fourth time this reading has come out the same way. WW163 found the trace built and
+constructed once in the whole engine. WW151 shipped the store fingerprint into the
+reading every run takes and could only take the before half. WW166 found the diagnosis
+with no caller and gave it one. This is the half WW151 left behind.
+
+`Preamble.LeftAsFound` is written, bounded, and catches the two exceptions a store read
+can throw. Its shape is right: it answers a finding and not an assertion, because the
+application did what it was driven to do and so nothing failed, and not a precondition
+either, because nothing may be excused by it. Outside `PreambleTests` nothing calls it.
+
+Block F's third criterion says the fingerprint taken before the run matches the one
+taken after, on every scenario, including the ones that drive a real setting. Read
+literally, nothing in this repository takes an after reading outside a test — so the
+criterion is met by a type existing, which is the failure the criteria were introduced
+to stop, arriving through the door they left open.
+
+What is owed is the call and a place to make it. The before half lives in the run's own
+reading; the after half has no such moment, because nothing composes a run. This is
+where that absence stops being a note in three rationale sections and becomes the work:
+a run ends, and ending it reads the store again.
+
 ## Block G — The scenario — a case is a data file
 
 ### §WW57 A case is data
@@ -352,3 +375,27 @@ justified catalogue is what the built article says about itself, and the suite a
 parses it for the flag names and the exit codes. A row whose reason is missing or is too
 short to name anything fails, and the criterion stops resting on whoever wrote the row
 last.
+
+### §WW171 A guard that fires on a healthy fixture
+
+WW162 shipped a guard, and the guard is right: a sampler that looks less often than a
+state lasts cannot have observed the sequence, and dividing by a count that lost members
+is how a missed sample becomes a confident number about the application.
+
+It fired on a working fixture. A full run on the VMware guest that `run-tests-vm.cmd`
+exists for read the window every 251ms against a declared 200ms state, and
+`A_full_cycle_takes_about_as_long_as_the_length_the_run_declared` went red saying
+exactly that. Nothing was wrong with the animation. Reading the tree of another process
+through UI Automation on that desk simply costs more than 200ms, and the case had asked
+for something no reader here can deliver.
+
+The neighbouring case already learned this and wrote it down:
+`The_states_arrive_in_the_order_they_were_declared_in` launches with `--animate=500`,
+carrying a comment that measured why 150 was not enough. So two cases in one file
+disagree about what this harness can read, and only one of them measured it.
+
+The repair is not to loosen the guard, which is the load-bearing part. It is to declare
+a length this reader keeps up with on the desk the suite is meant to run on, and to say
+in the case that the number is a property of the reading rather than a preference about
+the fixture. A case that goes red on a healthy machine teaches a reader to ignore the
+guard that fired.

@@ -25,6 +25,8 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
+- 📋 **WW170** (deps: —) **the store fingerprint's after half is called only by its own tests, so no run says what it left changed** — A run ends by reading the store again, so the block's third criterion is met by a run rather than by a type existing and being thoroughly tested. → §WW170
+
 ## Block G — The scenario — a case is a data file
 
 - 📋 **WW57** (deps: Block A, Block C ✅, Block D) **a case is two hundred lines of script that mostly repeats the previous case** — A case is a data file: steps, locators, acts and expectations as fields, with the loop, the waits and the verdicts owned by the engine instead of by the author. → §WW57
@@ -61,6 +63,7 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - 📋 **WW169** (deps: —) **every shape claims the defect it reproduces and nothing checks that any row makes the claim** — The catalogue is read for a defect on every row, because a shape that can name none is one this block says is removed rather than maintained forever. → §WW169
+- 📋 **WW171** (deps: —) **the cycle case declares a 200ms animation this harness cannot read that fast, so a guest run goes red about the desk** — The case declares a length the reader can keep up with, because a guard that fires on a working fixture teaches whoever sees it to ignore the guard. → §WW171
 
 ## Done when — Block A
 
