@@ -69,36 +69,112 @@ public sealed class SourceSweepTests
     /// </summary>
     private static readonly string[] Reads = ["Checkout.Code", "Checkout.Spoken"];
 
-    /// <summary>The ones that walk it and read it raw, with why prose cannot reach them.</summary>
-    private static IReadOnlyList<SourceSweep> Excused { get; } = new ReadOnlyCollection<SourceSweep>(
-    [
-        new($"{nameof(Checkout)}.cs", Sweeping.TheReading,
-            "it is the walk and the reading both — asking the file that defines Code to call Code is "
-                + "circular, and it matches nothing in what it walks: it hands the files on"),
-    ]);
+    /// <summary>
+    /// Whether the member opens what it walked, which is what makes it a sweep at all.
+    /// <para>
+    /// WW206. A member that walks and hands the files on cannot misread them — <c>Checkout.Sources</c>
+    /// and <c>FixtureNeedsTests.Sources</c> both do exactly that. Asking those to read as code was
+    /// asking the wrong question, and the first draft of this answered it with two hand-written
+    /// excuses rather than by narrowing what a sweep is.
+    /// </para>
+    /// </summary>
+    private static bool Opens(string text) =>
+        text.Contains("File.ReadLines", StringComparison.Ordinal)
+        || text.Contains("File.ReadAllText", StringComparison.Ordinal)
+        || text.Contains("File.ReadAllLines", StringComparison.Ordinal);
 
-    /// <summary>Every file that walks C# sources, read with its strings kept.</summary>
-    private static IReadOnlyList<string> Sweeps() => Checkout
+    /// <summary>
+    /// The ones that walk it, open it and match it raw, with why prose cannot reach them.
+    /// <para>
+    /// Empty, and that is the reading rather than an absence. Every sweep in this suite reads what it
+    /// walks as code; the list is kept so the day one cannot is the day somebody writes down why,
+    /// which is the argument <c>Without.NotYet</c> makes about its own empty bucket.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<SourceSweep> Excused { get; } =
+        new ReadOnlyCollection<SourceSweep>([]);
+
+    /// <summary>
+    /// Every member that walks C# sources, and whether that member reads what it walks as code.
+    /// <para>
+    /// WW206 moved the unit here. It used to ask the question of a file — does this file walk
+    /// sources, and does it mention a reading anywhere in it — and a file may hold two sweeps.
+    /// <c>FixtureNeedsTests</c> holds exactly two, WW202 repaired one and left the other reading
+    /// raw, and the check called the file clean because the repair was somewhere in it. That is
+    /// WW197's finding in a different file: a rule keyed on a mention credits the whole for one part.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<(string Named, bool AsCode)> Sweeps() => Checkout
         .SourcesIn(Checkout.Suite, except: $"{nameof(SourceSweepTests)}.cs")
-        .Where(one => Walks(Spoken(one)))
-        .Select(Path.GetFileName)
-        .OfType<string>()
-        .OrderBy(one => one, StringComparer.Ordinal)
+        .SelectMany(InFile)
         .ToList();
 
-    private static string Spoken(string file) =>
-        string.Join('\n', File.ReadLines(file).Select(Checkout.Spoken));
+    private static IEnumerable<(string Named, bool AsCode)> InFile(string file)
+    {
+        var owner = Path.GetFileNameWithoutExtension(file);
+        var bodies = Members(File.ReadLines(file).Select(Checkout.Spoken));
 
-    private static bool ReadsAsCode(string named) => Reads.Any(one => File
-        .ReadLines(Path.Combine(Checkout.Suite, "Winwright.Tests", named))
-        .Any(line => line.Contains(one, StringComparison.Ordinal)));
+        // The walk and the reading are often two members, and either can be the one that calls. A
+        // case may ask a helper for the files and open them itself, or a walker may hand each file
+        // to a reader. WW202's check saw one file and asked one question; splitting by member showed
+        // the halves, and a rule that demanded both in one member would have found neither.
+        var walkers = bodies.Where(one => Walks(one.Value)).Select(one => one.Key).ToList();
+
+        return bodies
+            .Where(one => Opens(one.Value))
+            .Where(one => Walks(one.Value)
+                || walkers.Any(walk => one.Value.Contains(walk, StringComparison.Ordinal))
+                || walkers.Any(walk => bodies[walk].Contains(one.Key, StringComparison.Ordinal)))
+            .Select(one => ($"{owner}.{one.Key}", Reads.Any(read => one.Value.Contains(read, StringComparison.Ordinal))));
+    }
+
+    /// <summary>Each member of one file, with the lines under it.</summary>
+    private static Dictionary<string, string> Members(IEnumerable<string> lines)
+    {
+        var found = new Dictionary<string, string>(StringComparer.Ordinal);
+        var member = "";
+        var body = new List<string>();
+
+        foreach (var line in lines)
+        {
+            if (Checkout.Member(line) is { } next)
+            {
+                Close();
+                member = next;
+
+                // The declaring line belongs to the member too. An expression-bodied one carries its
+                // whole body there — `Scan() => Checkout` with `.SourcesIn(` underneath — and a
+                // reader that started below it saw the call and never the thing it was called on.
+                body.Add(line);
+            }
+            else if (member.Length > 0)
+            {
+                body.Add(line);
+            }
+        }
+
+        Close();
+        return found;
+
+        void Close()
+        {
+            if (member.Length > 0)
+                found[member] = string.Join('\n', body);
+
+            member = "";
+            body = [];
+        }
+    }
 
     [Fact]
     public void Every_sweep_over_this_suites_sources_reads_them_as_code()
     {
         var excused = Excused.Select(one => one.File).ToHashSet(StringComparer.Ordinal);
 
-        var raw = Sweeps().Where(one => !excused.Contains(one) && !ReadsAsCode(one)).ToList();
+        var raw = Sweeps()
+            .Where(one => !one.AsCode && !excused.Contains(one.Named))
+            .Select(one => one.Named)
+            .ToList();
 
         Assert.True(
             raw.Count == 0,
@@ -109,17 +185,17 @@ public sealed class SourceSweepTests
     [Fact]
     public void Nothing_is_excused_that_no_longer_sweeps_or_now_reads_as_code()
     {
-        var sweeping = Sweeps().ToHashSet(StringComparer.Ordinal);
+        var sweeping = Sweeps().ToDictionary(one => one.Named, one => one.AsCode, StringComparer.Ordinal);
 
-        // Both directions. An exception left standing after the file it names started reading as
+        // Both directions. An exception left standing after the sweep it names started reading as
         // code is a reason nobody needs, and the next reader takes the list for the state of things.
         var stale = Excused
-            .Where(one => !sweeping.Contains(one.File) || ReadsAsCode(one.File))
+            .Where(one => !sweeping.TryGetValue(one.File, out var code) || code)
             .ToList();
 
         Assert.True(
             stale.Count == 0,
-            $"{stale.Count} excuse(s) name a file that no longer sweeps, or that now reads as code: "
+            $"{stale.Count} excuse(s) name a sweep that no longer walks, or that now reads as code: "
                 + string.Join(", ", stale.Select(one => one.File)));
     }
 
@@ -128,13 +204,28 @@ public sealed class SourceSweepTests
     {
         // A sweep that found nothing would pass the rule above by arithmetic. Named at both ends:
         // the twin WW202 was really about, and a file that reads the roadmap rather than any source.
-        var found = Sweeps();
+        var found = Sweeps().Select(one => one.Named).ToList();
 
-        Assert.Contains($"{nameof(Deadlines)}.cs", found, StringComparer.Ordinal);
-        Assert.Contains($"{nameof(Sleeps)}.cs", found, StringComparer.Ordinal);
-        Assert.Contains($"{nameof(DeskAsks)}.cs", found, StringComparer.Ordinal);
+        Assert.Contains($"{nameof(Deadlines)}.Scan", found, StringComparer.Ordinal);
+        Assert.Contains($"{nameof(Sleeps)}.Scan", found, StringComparer.Ordinal);
+        Assert.Contains($"{nameof(DeskAsks)}.InFile", found, StringComparer.Ordinal);
 
-        Assert.DoesNotContain($"{nameof(Criteria)}.cs", found, StringComparer.Ordinal);
+        Assert.DoesNotContain(found, one => one.StartsWith($"{nameof(Criteria)}.", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void A_file_holding_two_sweeps_is_two_sweeps_here()
+    {
+        // The whole of WW206, as arithmetic. FixtureNeedsTests walks the sources twice — once to
+        // assert the fixture reaches for nothing, once as the control asserting the same reading
+        // finds plenty in the engine — and the rule above used to credit both to whichever of them
+        // had been repaired.
+        var itsOwn = Sweeps()
+            .Where(one => one.Named.StartsWith($"{nameof(FixtureNeedsTests)}.", StringComparison.Ordinal))
+            .ToList();
+
+        Assert.True(itsOwn.Count > 1, $"{nameof(FixtureNeedsTests)} holds {itsOwn.Count} sweep(s), which is unexpected");
+        Assert.All(itsOwn, one => Assert.True(one.AsCode, one.Named));
     }
 
     [Fact]

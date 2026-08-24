@@ -83,6 +83,7 @@
 - ✅ **WW198** **the sleep catalogue matches one spelling of waiting, and a second is already in the tree that it counts as nothing** — Six spellings of parking a thread are read as code rather than prose, which found the spin the catalogue described and never counted, and three files parked on a signal.
 - ✅ **WW202** **three source sweeps still match raw text, and one of them is the twin of the catalogue just repaired for it** — Four raw sweeps, not three — the fourth was found by the check this built, which is now what makes the fifth red rather than a repeat.
 - ✅ **WW207** **four sweeps carry their own copy of the member walk and two of them get a tuple-returning member wrong** — One walk beside the file walk, with the tuple fix the two older copies lacked — and it turned out all four read a field initialised by a call as a member.
+- ✅ **WW206** **the sweep rule is checked per file, so a file holding two sweeps passes on the strength of the one that reads code** — The unit is the sweep, so a file holding two is two: thirteen are found where eight files were, and the excuse list is empty rather than hand-written.
 
 ## Block D — Act — patterns before pointers
 

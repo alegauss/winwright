@@ -110,6 +110,9 @@ internal static class DeskAsks
             "what holds the focus, which may be another application's or may be nothing at all"),
         new("Focus.Held(", Winwright.Acting.FocusReading.Named,
             "the same reading with the sentence dropped"),
+        new("Traversal.WhoHasFocus(", Winwright.Acting.FocusReading.Named,
+            "what holds the focus anywhere on the desk, which this list did not know about until a "
+                + "case asserting on it went red twice on a loaded guest"),
         new("ForeignInput.Read(", Winwright.Windowing.ForeignInput.PreconditionName,
             "whether somebody was using the machine, which is the machine's business"),
         new("Obstruction.Reading(", Winwright.Capturing.Obstruction.PreconditionName,

@@ -30,29 +30,6 @@ it.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW206 One reading covers the whole file
-
-WW202 made every sweep over C# read it as code and built the check that keeps it that
-way. The check asks the question of a file: does this file walk sources, and does it
-mention one of the two readings anywhere in it.
-
-Found immediately, and by hand rather than by the check. `FixtureNeedsTests` holds two
-sweeps — the one asserting the fixture reaches for nothing, and the control asserting
-the same reading finds plenty in the engine. WW202 repaired the first and left the
-second reading raw, and the check called the file clean because the first repair was
-somewhere in it. The control was also hand-rolling the walk WW193 extracted, keeping
-`bin` while excluding `obj`.
-
-Repaired where it was found. What is not repaired is the unit, which is WW197's finding
-in a different file: a rule keyed on a mention rather than on the thing it governs
-credits the whole for one part. That was true of `BusyDesk` and a case, and it is true
-of a reading and a file.
-
-What is owed is the sweep as the unit. A file may hold two, and telling them apart means
-finding where each begins — which is the same judgement `DeskAsks` makes about a case
-and `RefusalArms` makes about a throw site, and is the whole of the task rather than a
-step before it.
-
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed

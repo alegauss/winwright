@@ -146,7 +146,11 @@ public sealed class CheckoutTests
         var naming = Checkout
             .Sources(Checkout.Everything, except: $"{nameof(Checkout)}.cs")
             .Where(one => Path.GetFileName(one) != $"{nameof(CheckoutTests)}.cs")
-            .Where(one => File.ReadAllText(one).Contains(Checkout.Marker, StringComparison.Ordinal))
+            // WW206. Read as code, which the finer unit caught: this looks for the solution's name,
+            // and every file that walks up to it explains why in a comment. Spoken rather than Code,
+            // because the name it looks for is a string and the stricter reading would delete it.
+            .Where(one => File.ReadLines(one).Select(Checkout.Spoken)
+                .Any(line => line.Contains(Checkout.Marker, StringComparison.Ordinal)))
             .Select(Path.GetFileName)
             .ToList();
 
