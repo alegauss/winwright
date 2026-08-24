@@ -19,39 +19,121 @@ namespace Winwright.Tests;
 /// </summary>
 public sealed class WaitedForTests
 {
-    /// <summary>
-    /// The waits that follow a launch and are about a file rather than about the window.
-    /// <para>
-    /// Named rather than swept. Which wait reaches past its own subject is a judgement about what
-    /// the fixture is doing between the launch and the file, and a reading that guessed it would be
-    /// guessing at the very thing that has to be decided.
-    /// </para>
-    /// </summary>
-    private static readonly (string File, string Case)[] AfterALaunch =
-    [
-        ("FixtureTests.cs", "Driven"),
-        ("ProvokedByFlagTests.cs", "Ran"),
-    ];
+    /// <summary>How the deadlines are named where a wait is taken, which is in a string.</summary>
+    private const string ForTheWrite = "\"wrote\"";
+
+    /// <summary>And the one that has to come first.</summary>
+    private const string ForTheWindow = "\"draw\"";
 
     [Fact]
     public void A_wait_for_a_file_the_fixture_writes_waits_for_its_window_first()
     {
-        // The repair, read out of the sources. A caller that waits on `wrote` from a standing start
-        // is asking one budget to cover a cold start, a layout and a write — which is what went red
-        // twice, and what nothing here would have said a word about.
-        foreach (var (file, method) in AfterALaunch)
+        // Swept and not listed. The first draft named the two callers by hand, which is the shape
+        // this repository keeps filing tasks about: a rule applied where it is needed today and
+        // silent about the caller written tomorrow. Whichever method waits on the write is found,
+        // and the window has to have been waited for above it in that same method.
+        var standing = Waiting()
+            .Where(one => one.Writes >= 0 && (one.Draws < 0 || one.Draws > one.Writes))
+            .Select(one => one.Named)
+            .ToList();
+
+        Assert.True(
+            standing.Count == 0,
+            $"{standing.Count} caller(s) wait on 'wrote' without waiting for the window first, so "
+                + $"that budget is covering a cold start as well as the write: {string.Join(", ", standing)}");
+    }
+
+    [Fact]
+    public void The_sweep_finds_the_two_callers_it_was_measured_on()
+    {
+        // A sweep that found nothing would pass the rule above by arithmetic, and both of these are
+        // the ones the guest actually went red on.
+        var named = Waiting().Select(one => one.Named).ToList();
+
+        Assert.Contains("FixtureTests.Driven", named, StringComparer.Ordinal);
+        Assert.Contains("ProvokedByFlagTests.Ran", named, StringComparer.Ordinal);
+    }
+
+    /// <summary>
+    /// Every member of this suite that waits on the write, and where each deadline is named in it.
+    /// </summary>
+    private static IReadOnlyList<(string Named, int Draws, int Writes)> Waiting()
+    {
+        var found = new List<(string Named, int Draws, int Writes)>();
+        foreach (var file in Checkout.SourcesIn(Checkout.Suite, except: $"{nameof(WaitedForTests)}.cs"))
         {
-            var body = Body(file, method);
+            var owner = Path.GetFileNameWithoutExtension(file);
+            var member = "";
+            var draws = -1;
+            var writes = -1;
+            var at = 0;
 
-            var draws = body.FindIndex(one => one.Contains("\"draw\"", StringComparison.Ordinal));
-            var writes = body.FindIndex(one => one.Contains("\"wrote\"", StringComparison.Ordinal));
+            // Spoken and not Code: a deadline is named by a string, and the reading that drops
+            // strings deletes both names. What has to go is the prose, since the comment above each
+            // wait names the other deadline.
+            foreach (var line in File.ReadLines(file).Select(Checkout.Spoken))
+            {
+                at++;
+                if (Declares(line) is { } next)
+                {
+                    Close();
+                    member = next;
+                }
+                else if (member.Length > 0)
+                {
+                    if (draws < 0 && line.Contains(ForTheWindow, StringComparison.Ordinal))
+                        draws = at;
+                    if (writes < 0 && line.Contains(ForTheWrite, StringComparison.Ordinal))
+                        writes = at;
+                }
+            }
 
-            Assert.True(writes >= 0, $"{file}.{method} no longer waits on 'wrote', so this reading is stale");
-            Assert.True(
-                draws >= 0 && draws < writes,
-                $"{file}.{method} waits on 'wrote' without waiting for the window first, so that "
-                    + "budget is covering a cold start as well as the write");
+            Close();
+
+            void Close()
+            {
+                if (member.Length > 0 && writes >= 0)
+                    found.Add(($"{owner}.{member}", draws, writes));
+
+                member = "";
+                draws = -1;
+                writes = -1;
+            }
         }
+
+        return found;
+    }
+
+    /// <summary>The member a line declares, at the one indentation a method of a class sits at.</summary>
+    private static string? Declares(string line)
+    {
+        if (!line.StartsWith("    private ", StringComparison.Ordinal)
+            && !line.StartsWith("    internal ", StringComparison.Ordinal)
+            && !line.StartsWith("    public ", StringComparison.Ordinal))
+            return null;
+
+        // The last bracket an identifier opens, and never the first bracket on the line. A method
+        // returning a tuple opens one before its own name — `private (string A, string B) Driven()`
+        // — and taking the first found no name at all, so the method holding the wait was invisible.
+        // Anything past `=>` is a body rather than a signature.
+        var arrow = line.IndexOf("=>", StringComparison.Ordinal);
+        var signature = arrow < 0 ? line : line[..arrow];
+
+        var named = "";
+        for (var at = 0; at < signature.Length; at++)
+        {
+            if (signature[at] != '(' || at == 0)
+                continue;
+
+            var began = at;
+            while (began > 0 && (char.IsLetterOrDigit(signature[began - 1]) || signature[began - 1] == '_'))
+                began--;
+
+            if (began < at)
+                named = signature[began..at];
+        }
+
+        return named.Length == 0 ? null : named;
     }
 
     [Fact]
@@ -64,44 +146,5 @@ public sealed class WaitedForTests
         var wrote = Waits.Declared.For("wrote");
 
         Assert.True(draw > wrote, $"'draw' is {draw}ms and 'wrote' is {wrote}ms, so the cold start has the lesser budget");
-    }
-
-    [Fact]
-    public void The_reading_finds_a_body_rather_than_an_empty_one()
-    {
-        // A sweep that read nothing would pass the rule above by finding no lines to disagree with.
-        Assert.All(AfterALaunch, one => Assert.NotEmpty(Body(one.File, one.Case)));
-    }
-
-    /// <summary>The lines of one method, as code, from its signature to the next member.</summary>
-    private static List<string> Body(string file, string method)
-    {
-        // Spoken and not Code, which this check got wrong on its first run and said so plainly: a
-        // deadline is named by a string, and the reading that drops strings had deleted both names
-        // and reported that the caller no longer waits at all. WW202 left two readings for exactly
-        // this, and the prose either of them drops is what matters here — the comment above each
-        // wait names the other deadline.
-        var lines = File.ReadLines(Path.Combine(Checkout.Suite, "Winwright.Tests", file))
-            .Select(Checkout.Spoken)
-            .ToList();
-
-        // The declaration and never a call. A case that calls this method mentions it the same way,
-        // and the first draft took the first mention — which handed this the body of whichever case
-        // happened to call it first, and reported that the method no longer waits at all.
-        var began = lines.FindIndex(one =>
-            one.Contains($" {method}(", StringComparison.Ordinal)
-            && (one.StartsWith("    private ", StringComparison.Ordinal)
-                || one.StartsWith("    internal ", StringComparison.Ordinal)
-                || one.StartsWith("    public ", StringComparison.Ordinal)
-                || one.StartsWith("    static ", StringComparison.Ordinal)));
-
-        if (began < 0)
-            return [];
-
-        var body = new List<string>();
-        for (var at = began + 1; at < lines.Count && !lines[at].StartsWith("    }", StringComparison.Ordinal); at++)
-            body.Add(lines[at]);
-
-        return body;
     }
 }
