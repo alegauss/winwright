@@ -94,6 +94,29 @@ What is owed is the same join, per environment: the reading beside the verdict i
 explains, and the sweep's own rule about the word *every* applying to it — a sweep that
 could not read one machine says so rather than reporting five it read.
 
+### §WW190 The guard nothing requires
+
+`BusyDesk` is how this suite answers a desk it did not get, and WW172 applied it across
+every case that needed it at the time. What it did not do — because it could not — is
+make the next case use it.
+
+Three have appeared since, each found the same way. `FocusScopeTests` asserted the focus
+was inside the application. `TrayPlacementTests` asserted an icon was found.
+`NotificationAreaTests` asserted a search that reached both places had failed, and got a
+hole because the shell would not open the flyout. Every one was written after WW172, by
+somebody who had just applied the rule elsewhere, and every one was caught by a full run
+in the guest rather than by anything in the tree.
+
+That is a three-minute run per occurrence, and it is the cheap outcome: the expensive
+one is the same case passing on a quiet desk for a month and then failing on somebody
+else's.
+
+The shape is the one this repository keeps reaching for. `Deadlines` pairs every wait
+with what its look answers as nothing, read out of the sources. The same reading finds
+every case that asks a desk-dependent reading for a verdict and asserts something other
+than a hole, and pairs it with how it excuses the desk — or with a stated reason it
+needs no excuse, which some genuinely do not.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
