@@ -2,29 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW201 Deleting a binary that is still running
-
-Measured on WW196's first guest run. `CaptureReceiptTests` failed with
-`UnauthorizedAccessException: Access to the path 'other.exe' is denied`, thrown out of
-`Directory.Delete(root, recursive: true)` in its own `Dispose`. The re-run passed, which
-is what makes it worth filing rather than fixing in passing.
-
-What it does: `Elsewhere()` copies `cmd.exe` into a temp directory as `other.exe` and
-starts it, so a receipt can be composed against a target in another process. Nothing
-waits for that process to end, and Windows will not delete a running image. The case's
-assertion had already passed.
-
-So the red is about the teardown and says nothing about the code under test, which is
-this block's own criterion pointed at the suite. Worse than a plain failure: a throw out
-of `Dispose` reads as a broken harness, which `RunVerdict` ranks above a failure
-precisely because nothing past it was observed — and it sends the reader to this
-repository over a file handle.
-
-`Attachable` already has the shape: WW126 learned that waiting for windows is the wrong
-moment and waits for the process to leave the machine instead. What is owed is that door
-here, and a look at whether other cases that copy a binary and run it have the same
-teardown. The count is unknown, which is why it is a task rather than a line.
-
 ### §WW204 The reading nobody looked at
 
 Found on a guest run while WW200 was being measured. `TrayIconFixture` opens the

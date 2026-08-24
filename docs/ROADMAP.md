@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW201** (deps: —) **a case starts a process from a file it then deletes, so its own cleanup throws and the run reports a broken harness** — A case waits for what it started before deleting it, because one guest run went red on the teardown and passed on a re-run. → §WW201
 - 📋 **WW204** (deps: —) **a suite fixture threw away a desk reading and the case downstream reported the shell's refusal as the fixture failing** — A discarded desk reading is found rather than met, because one was thrown away here and cost a red about the wrong repository. → §WW204
 
 ## Block B — Attach, launch, and leave nothing behind

@@ -57,6 +57,23 @@ public static class Attachable
     }
 
     /// <summary>
+    /// A register that settles on the way out, for a case that deletes what it ran.
+    /// <para>
+    /// WW201. A <c>using</c> on the register stops what it started, and stopped is not gone: Windows
+    /// will not delete a running image, so a class that copied a binary into its own temp directory
+    /// and started it threw <c>UnauthorizedAccessException</c> out of its own <c>Dispose</c>. That
+    /// reads as a broken harness — ranked above a failure because nothing past it was observed — and
+    /// sends the reader to this repository over a file handle. Measured on WW196's first guest run,
+    /// and four classes here have the shape.
+    /// </para>
+    /// <para>
+    /// A door rather than a habit, for the reason WW190 gives about the desk: applying the rule
+    /// everywhere it is needed today does nothing about the class written tomorrow.
+    /// </para>
+    /// </summary>
+    internal static Settling Settling() => new();
+
+    /// <summary>
     /// Whether that process is out of the machine. A pid nothing can open is gone; one that opens
     /// and says it has exited is gone; anything else is still on its way out and still costing the
     /// desktop something.
@@ -86,5 +103,22 @@ public static class Attachable
         {
             return false;
         }
+    }
+}
+
+/// <summary>
+/// A <see cref="ProcessRegister" /> that waits for what it started to leave the machine before it
+/// lets go. WW201: the register is sealed, so this holds one rather than extending it.
+/// </summary>
+internal sealed class Settling : IDisposable
+{
+    /// <summary>The register itself, which is what a launch is handed.</summary>
+    internal ProcessRegister Register { get; } = new();
+
+    /// <summary>Stop everything, wait until it is gone, and only then let go.</summary>
+    public void Dispose()
+    {
+        Attachable.StopAndSettle(Register);
+        Register.Dispose();
     }
 }

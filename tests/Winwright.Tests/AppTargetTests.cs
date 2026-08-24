@@ -59,7 +59,8 @@ public sealed class AppTargetTests : IDisposable
     [Fact]
     public void A_launch_knows_what_it_passed()
     {
-        using var register = new ProcessRegister();
+        using var running = Attachable.Settling();
+        var register = running.Register;
         var target = AppTarget.FromLaunch(register.Launch(Windowless()), "--profile", "beta");
 
         Assert.True(target.WasLaunched);
@@ -71,7 +72,8 @@ public sealed class AppTargetTests : IDisposable
     [Fact]
     public void An_attach_says_which_binary_it_reached()
     {
-        using var register = new ProcessRegister();
+        using var running = Attachable.Settling();
+        var register = running.Register;
         var launched = Attachable.Launch(register, Windowless());
 
         var target = AppTarget.AttachTo(launched.Pid);
@@ -85,7 +87,8 @@ public sealed class AppTargetTests : IDisposable
     [Fact]
     public void An_attached_target_has_no_arguments_to_read_at_all()
     {
-        using var register = new ProcessRegister();
+        using var running = Attachable.Settling();
+        var register = running.Register;
         var target = AppTarget.AttachTo(Attachable.Launch(register, Windowless()).Pid);
 
         Assert.IsType<AttachedTarget>(target);
@@ -95,7 +98,8 @@ public sealed class AppTargetTests : IDisposable
     [Fact]
     public void An_assertion_that_needed_a_launch_argument_is_a_hole_and_not_a_comparison()
     {
-        using var register = new ProcessRegister();
+        using var running = Attachable.Settling();
+        var register = running.Register;
         var target = AppTarget.AttachTo(Attachable.Launch(register, Windowless()).Pid);
 
         var declaration = AssertionDeclaration.Of(
@@ -151,7 +155,8 @@ public sealed class AppTargetTests : IDisposable
     [Fact]
     public void A_launch_that_passed_nothing_says_so_rather_than_printing_an_empty_tail()
     {
-        using var register = new ProcessRegister();
+        using var running = Attachable.Settling();
+        var register = running.Register;
 
         Assert.Contains("with no arguments.", AppTarget.FromLaunch(register.Launch(Windowless())).Sentence());
     }

@@ -25,7 +25,12 @@ public sealed class CaptureReceiptTests : IDisposable
 
     public void Dispose()
     {
-        register.StopAll();
+        // WW201. Settled and not merely stopped, which is the difference WW126 already measured one
+        // floor up: a stopped process is off the desktop well before it is out of the machine, and
+        // Windows will not delete a running image. This deleted the copy of cmd.exe it had started
+        // and threw UnauthorizedAccessException out of Dispose — which reads as a broken harness,
+        // ranked above a failure because nothing past it was observed, over a file handle.
+        Attachable.StopAndSettle(register);
         Directory.Delete(root, recursive: true);
     }
 

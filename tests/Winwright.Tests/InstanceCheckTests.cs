@@ -148,7 +148,8 @@ public sealed class InstanceCheckTests : IDisposable
             var app = Path.Combine(root, "tray.exe");
             File.Copy(Path.Combine(System.Environment.SystemDirectory, "cmd.exe"), app);
 
-            using var register = new ProcessRegister();
+            using var running = Attachable.Settling();
+            var register = running.Register;
             register.Launch(Windowless(app));
             register.Launch(Windowless(app));
 
@@ -202,7 +203,8 @@ public sealed class InstanceCheckTests : IDisposable
             File.Copy(Path.Combine(System.Environment.SystemDirectory, "cmd.exe"), here);
             File.Copy(here, there);
 
-            using var register = new ProcessRegister();
+            using var running = Attachable.Settling();
+            var register = running.Register;
             register.Launch(Windowless(there));
 
             Assert.Empty(InstanceCheck.Of(here).Others);
