@@ -75,7 +75,54 @@ Where the icon cannot be withdrawn, saying so is the whole of the repair.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+### §WW175 A deadline that quietly stopped being one
+
+`Attempt.Until<T>(Func<T?> look, int deadlineMs, int pollMs)` polls until the look
+answers something other than null. Where `T` is a reference type the caller has made
+non-nullable, the first look always answers something, and the deadline collapses to one
+look. Nothing throws, nothing warns, and the `Sighting` that comes back says it was
+found — because it was.
+
+Measured while shipping WW168, and nearly shipped. `NotificationArea.Find` changed from
+`TrayIcon?` to a reading, and `TrayIconFixture.Placed` waits on it for five seconds to
+prove the shell placed the icon. That wait became one look, and the fixture would have
+gone on passing: the icon is usually there by then. What it would have stopped doing is
+what it exists for, which is failing when the shell is slow — the exact race WW159 was
+filed over.
+
+It was caught by reading the call site rather than by any check. That is the part worth
+fixing: a deadline nobody can see is not being waited is a deadline that decays without
+a red.
+
+What is owed is the refusal. A look whose static type cannot be null is a caller asking
+a poll to do nothing, and the right answer is to say so at the call rather than to
+return a `Sighting` that is true and useless. Where the wait is genuinely wanted, the
+condition belongs in `UntilTrue`.
+
 ## Block D — Act — patterns before pointers
+
+### §WW174 The same collapse, one call up
+
+WW168 gave the search for a tray icon a reading that says how far the looking got, so an
+absent icon fails and a flyout that would not open is a hole. `OpenMenu` is the caller
+directly above it, and it takes only half of that.
+
+Two things it does with the other half. It passes the search's sentence into
+`TrayMenu.Because`, which is the improvement WW168 bought and is asserted. Then
+`AsTraceStep` writes `Verdict = Opened ? Ok : Failed`, so a menu that never came up
+because the shell would not open the flyout is recorded as a step the application
+failed. That is the collapse WW168 was filed over, still live one call up, in the verb
+an adopter reaches for more often than the search underneath it.
+
+The second half is quieter. `TrayMenu` answers no `AsAssertion` at all, so it never
+enters the pairing `RecordedResultTests` enforces — that check fires on types that
+answer a verdict, and a type answering none is invisible to it. A scenario asserting
+that an icon's menu opens has nothing to count, and whoever writes one first will invent
+a verdict at the call site.
+
+Both are the same repair. The menu carries the search that produced it, answers `Pass`,
+`Fail` or `Unchecked` from it, and the step agrees with the verdict beside it rather
+than restating `Opened`.
 
 ## Block E — Capture — the picture that proves what it photographed
 
