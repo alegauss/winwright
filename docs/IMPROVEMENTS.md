@@ -174,14 +174,6 @@ added later is red until somebody says.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW46 Byte-identical is the cheapest visual assertion
-
-freewilly's window skill states the rule: a change meant to be invisible must produce a
-byte-identical file, and the render is deterministic, verified by re-capturing unchanged
-code. Three findings about theme handling in that project came from this and from
-nothing else, and its test suite saw none of them. It also avoids choosing a tolerance,
-which is the argument every other image comparison eventually turns into.
-
 ### §WW187 Two refusals behind an optional argument
 
 WW38 and WW41 gave this block two readings a capture needs, and WW40 gave the receipt

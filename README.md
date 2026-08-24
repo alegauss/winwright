@@ -187,6 +187,13 @@ and the run exited zero. This is a separate reading from the blank check on purp
 the alpha channel and a screen copy has none, so it cannot answer for the very picture this is
 about. Counting stops as soon as the answer cannot change, and says when it stopped early.
 
+For a change meant to be invisible, `Unchanged.Between` compares two renders **byte for byte**. No
+tolerance is chosen, which is the argument every other image comparison eventually turns into — and
+choosing one is choosing how much of a change to stop reporting. Where the files differ it also says
+whether the *picture* did: two files that differ and draw the same thing is an encoder writing
+something of its own, and a reader told only that the render changed would go looking for a visual
+difference, find none, and conclude the check is broken.
+
 That last one reaches the verbs above it. Looking for a tray icon answers a reading rather than an
 icon-or-nothing, and where it found none it says whether every place it could have been was looked
 at. Not found everywhere is an answer about your application; not found because the flyout would not

@@ -139,6 +139,9 @@ internal static class Rendered
             null, "which declared acts the tree can take, never claiming an unchecked one"),
         new("ProcessSummary.Sentence", "ProcessRegisterTests.The_summary_counts_what_stopped_apart_from_what_would_not",
             null, "what the run had to stop, apart from what would not stop"),
+        new("RenderMatch.Sentence", "UnchangedTests.Two_renders_of_unchanged_code_are_byte_identical",
+            null, "whether two renders are the same bytes, and where they are not, whether the picture "
+                + "changed with them"),
         new("ReadGeometry.Sentence", "GeometryDumpTests.A_walk_that_ran_out_says_how_much_it_did_not_reach",
             null, "what a dump held, and how much of the tree the walk did not reach"),
         new("ReasonsChecked.Sentence", "JoinedReasonsTests.A_reason_the_tree_agrees_with_prints_as_agreeing",

@@ -201,13 +201,20 @@ public sealed class NotificationAreaTests : IDisposable
         Assert.False(everywhere.Found);
         Assert.False(barAlone.Found);
 
-        Assert.Equal(Winwright.Verdicts.AssertionOutcome.Failed, everywhere.AsAssertion("it is there").Outcome);
+        // The bar-alone arm is the one this case can always assert: the caller narrowed the
+        // question, so it is a hole whatever the desk was doing.
         Assert.Equal(Winwright.Verdicts.AssertionOutcome.Unchecked, barAlone.AsAssertion("it is there").Outcome);
-
-        // And the step behind each says the same thing, because a trace that disagreed with the
-        // verdict beside it is a record a reader cannot use.
-        Assert.Equal(Winwright.Tracing.StepVerdict.Failed, everywhere.AsTraceStep("it is there").Verdict);
         Assert.Equal(Winwright.Tracing.StepVerdict.Unchecked, barAlone.AsTraceStep("it is there").Verdict);
+
+        // The other arm needs the shell to have opened the flyout, and a desk that would not is the
+        // very fact WW168 is about — so it is excused rather than asserted past. Measured in the
+        // guest: this went red as Unchecked on a run where the taskbar was covered.
+        if (BusyDesk.Excused(everywhere.AsAssertion("it is there")))
+            return;
+
+        Assert.True(everywhere.Everywhere, everywhere.Sentence());
+        Assert.Equal(Winwright.Verdicts.AssertionOutcome.Failed, everywhere.AsAssertion("it is there").Outcome);
+        Assert.Equal(Winwright.Tracing.StepVerdict.Failed, everywhere.AsTraceStep("it is there").Verdict);
     }
 
     [Fact]

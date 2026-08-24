@@ -20,7 +20,6 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW46** (deps: Block K ✅) **a change meant to be invisible has no cheap way to prove it was** — Two renders of unchanged code are byte-identical, so a difference is a real difference and no tolerance has to be chosen for a comparison to mean anything. → §WW46
 - 📋 **WW187** (deps: —) **two capture refusals fire only where the caller remembered to take the reading, and nothing makes anyone take it** — The receipt takes both readings itself, because one reached by its own call is one a caller forgets and an unchecked capture looks exactly like one that passed. → §WW187
 - 📋 **WW188** (deps: —) **one refusal type has five arms now and the pairing records one, so an arm added later is provoked by nobody** — The pairing is per arm, because a block is called finished on every refusal having something that provokes it and four of these five are invisible to the check. → §WW188
 

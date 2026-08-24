@@ -107,6 +107,7 @@
 - ✅ **WW41** **a window with a system backdrop transmits what is behind it through the glass** — The compositor is asked which backdrop a window opted into, and a receipt handed that reading refuses rather than warns, exempting the popups the copy route exists for.
 - ✅ **WW42** **a copy of exactly one colour is written and reported as a capture** — Distinct colours are counted on any picture including the opaque copy the alpha scan cannot answer for, and a capture of exactly one is refused rather than reported.
 - ✅ **WW43** **a page still computing is photographed and announced as a picture of a report** — A project declares which keys are its loading strings, the text is resolved out of its own language files, and a key none of them carries refuses instead of matching nothing.
+- ✅ **WW46** **a change meant to be invisible has no cheap way to prove it was** — Two renders are compared byte for byte with no tolerance chosen, and where they differ the answer says whether the picture changed with them or only the file did.
 
 ## Block F — Assert — the expectation is derived, never typed
 
