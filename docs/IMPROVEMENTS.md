@@ -419,27 +419,3 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW171 A guard that fires on a healthy fixture
-
-WW162 shipped a guard, and the guard is right: a sampler that looks less often than a
-state lasts cannot have observed the sequence, and dividing by a count that lost members
-is how a missed sample becomes a confident number about the application.
-
-It fired on a working fixture. A full run on the VMware guest that `run-tests-vm.cmd`
-exists for read the window every 251ms against a declared 200ms state, and
-`A_full_cycle_takes_about_as_long_as_the_length_the_run_declared` went red saying
-exactly that. Nothing was wrong with the animation. Reading the tree of another process
-through UI Automation on that desk simply costs more than 200ms, and the case had asked
-for something no reader here can deliver.
-
-The neighbouring case already learned this and wrote it down:
-`The_states_arrive_in_the_order_they_were_declared_in` launches with `--animate=500`,
-carrying a comment that measured why 150 was not enough. So two cases in one file
-disagree about what this harness can read, and only one of them measured it.
-
-The repair is not to loosen the guard, which is the load-bearing part. It is to declare
-a length this reader keeps up with on the desk the suite is meant to run on, and to say
-in the case that the number is a property of the reading rather than a preference about
-the fixture. A case that goes red on a healthy machine teaches a reader to ignore the
-guard that fired.

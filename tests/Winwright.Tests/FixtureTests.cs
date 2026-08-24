@@ -625,10 +625,35 @@ public sealed class FixtureTests : IDisposable
             .Where(one => one.Length > 0)
             .ToList();
 
+    /// <summary>
+    /// How long a state must last for this desk's reader to keep up with it, with room to spare.
+    /// <para>
+    /// WW171. A property of the reading and not a preference about the fixture, and one number
+    /// because three cases here used to carry three — 200, 500 and 200 — of which exactly one had
+    /// been measured. Reading the tree of another process through UI Automation is what costs; a
+    /// guest run measured 251ms a look and a case asking for 200 went red about a fixture that was
+    /// cycling exactly as asked, which teaches whoever reads it to distrust the guard that fired.
+    /// </para>
+    /// <para>
+    /// Six hundred, which is the 200ms the old guard compared against times
+    /// <see cref="LooksPerState" /> — so this asks no more of a desk than it used to and gets three
+    /// looks a state instead of one. Five states at this length is a three-second cycle, against the
+    /// eight seconds this suite declares for 'cycle'.
+    /// </para>
+    /// </summary>
+    private const int ReadableMs = 600;
+
+    /// <summary>
+    /// How many looks a state has to get before a sampler may claim it observed a sequence. One is
+    /// sampling at the edge of it: any jitter drops a member, and a count that lost members is how
+    /// a missed sample becomes a confident number about the application.
+    /// </summary>
+    private const int LooksPerState = 3;
+
     [Fact]
     public void The_animation_says_how_many_states_it_has_so_nothing_has_to_be_told()
     {
-        var window = Launched("--animate=200");
+        var window = Launched($"--animate={ReadableMs}");
 
         // WW159: sampled until the cycle has shown everything rather than for a fixed three
         // seconds. The count is still read off the window and never typed — an expectation typed
@@ -643,11 +668,12 @@ public sealed class FixtureTests : IDisposable
     [Fact]
     public void The_states_arrive_in_the_order_they_were_declared_in_and_come_round_again()
     {
-        // Five hundred and not one fifty, measured: reading the tree of another process costs
-        // more than a state stands for at that speed, so the sampler skipped one and the order
-        // read as broken when it was the reading that could not keep up. A frame sequence cannot
-        // be checked faster than it can be read, and that is a property of the check.
-        var window = Launched("--animate=500");
+        // Not a hundred and fifty, measured: reading the tree of another process costs more than a
+        // state stands for at that speed, so the sampler skipped one and the order read as broken
+        // when it was the reading that could not keep up. A frame sequence cannot be checked faster
+        // than it can be read, and that is a property of the check — which is why the number is
+        // ReadableMs and not a fourth constant written here.
+        var window = Launched($"--animate={ReadableMs}");
         var seen = Changes(Sampled(window, TimeSpan.FromSeconds(5)));
 
         Assert.True(seen.Count >= 4, $"only {seen.Count} state change(s) were seen");
@@ -670,21 +696,28 @@ public sealed class FixtureTests : IDisposable
         // Loosely, and deliberately: a live window sampled from another process cannot be timed to
         // the millisecond. The band is wide enough to survive a busy desk and narrow enough to
         // catch an animation that is not running, or one running ten times too fast.
-        const int every = 200;
+        //
+        // WW171. The declared length is a property of the reading and not a preference about the
+        // fixture, which is why it is written as one. This case asked for 200ms and its neighbour
+        // for 500 — two numbers in one file disagreeing about what this harness can read, and only
+        // one of them measured. A guest run read the window every 251ms and went red about a
+        // fixture that was cycling exactly as asked.
+        //
+        // The desk this demands is the same desk as before — ReadableMs over LooksPerState is the 200
+        // the old guard compared against — so nothing that passed this stops passing, and the
+        // sequence underneath is now measured off three looks a state instead of one.
+        const int every = ReadableMs;
         var window = Launched($"--animate={every}");
 
         var watched = Watched(window, TimeSpan.FromSeconds(5));
         var perLook = PerLook(watched);
 
-        // WW162, and read before anything is concluded about the animation. A sampler that looks
-        // less often than a state lasts cannot have seen the sequence, and dividing by a count that
-        // lost members is how a missed sample becomes a confident number about the application:
-        // nine changes over 5225ms read as 653ms each against a declared 200, on a fixture that was
-        // cycling exactly as asked.
+        // WW162, and read before anything is concluded about the animation.
         Assert.True(
-            perLook < every,
-            $"this run looked every {perLook:0}ms at a state that lasts {every}ms, so it could not have observed "
-                + "the sequence — that is the reading being too slow and not the animation");
+            perLook * LooksPerState < every,
+            $"this run looked every {perLook:0}ms at a state that lasts {every}ms, which is fewer than "
+                + $"{LooksPerState} looks each, so it could not have observed the sequence — that is the "
+                + "reading being too slow and not the animation");
 
         var seen = ChangesIn(watched);
         Assert.True(seen.Count > 1, $"only {seen.Count} change(s) over {watched[^1].AtMs:0}ms of watching");
