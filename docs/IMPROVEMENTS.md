@@ -49,6 +49,29 @@ What is owed is the fourth: a criterion, its address, and the case or catalogue 
 demonstrates it — with an honest bucket for the ones nothing demonstrates yet, counted
 rather than left off. Then "the block is finished" is a reading and not a recollection.
 
+### §WW177 Two pages that never meet
+
+`VerdictSummary.Render` takes a `RunVerdict` and nothing else. `Preamble.Render` answers
+its own page. Neither file mentions the other, and no third thing joins them.
+
+So a run now measures thirteen things about the machine before it starts and, since
+WW170, closes the store fingerprint when it ends — and none of it appears in the page a
+person or a CI job is handed. The reader gets the outcome, the exit code, the tally and
+a line per assertion that failed or never ran. What they do not get is the desk it ran
+on, which binary it drove, whether that binary was stale, the resolved language, whether
+anything else was showing the application, whether the desk was this run's alone, or
+what the run left changed.
+
+This block's first criterion is that a degraded run is legible without reading the log.
+A `2` names the assertions that never ran, which is the half WW6 was filed over, and the
+reason each one could not run is a precondition that was measured on the other page. A
+reader holding an exit code and a list of holes still has to go and find the reading,
+and nothing in the output tells them there is one.
+
+What is owed is the join, and the order it goes in: the reading first, because it is
+what makes the verdict underneath it legible, and the summary refusing to print a
+preamble belonging to a different run.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
