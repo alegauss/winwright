@@ -420,28 +420,3 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW178 The criterion that was true and unchecked
-
-Found by doing what this project says to do before calling a block finished: read the
-criteria rather than the line count. Block K's second says the fixture runs with no
-account, no network, no second display and no real data, on a clean checkout of this
-repository alone. Its other two are checked in both directions against the assemblies —
-`Provocation` for the refusals, and WW106's pair for the justifications. This one is
-checked nowhere.
-
-It is also true, which is what makes it worth writing down rather than worth worrying
-about. `Winwright.Fixture.csproj` carries one `ProjectReference`, to the in-app half,
-and no package. Its sources name no HTTP client, no socket, no account, and no screen
-enumeration. So the work is not a repair; it is a read-back, and the difference matters
-because the claim is the one deciding whether a block is finished.
-
-The repository already has the shape. `SeparationTests` asserts that the engine and the
-in-app half reference nothing at all, reading it off both the project files and the
-built assemblies, and carries a case proving the check would notice the day the
-separation stopped holding. The same three questions asked of the fixture answer most of
-this criterion.
-
-The remainder — no real data, a clean checkout — is what the fixture's own store flag
-already stands for, and saying which part is mechanical and which is a reading is itself
-part of what is owed.

@@ -167,9 +167,10 @@ internal static class Criteria
         new("K", "Every refusal has something that provokes it",
             "ProvocationTests.Every_refusal_the_framework_names_is_paired_with_something",
             null, "the refusals are read off the assemblies and paired both ways with a flag or a case"),
-        new("K", "The fixture needs nothing from the machine", "", Unshown.NotYet,
-            "true and checked nowhere, which is WW178 — found by this same reading when WW171 emptied "
-                + "the block, and verified by hand before it was filed"),
+        new("K", "The fixture needs nothing from the machine",
+            "FixtureNeedsTests.The_fixture_asks_the_machine_for_nothing_the_criterion_says_it_does_not",
+            null, "its sources name no network, account, second display or well-known folder, and its "
+                + "project declares one reference and no package — WW178, the first debt this list found"),
         new("K", "A shape exists because a defect existed",
             "FixtureTests.No_reason_is_a_restatement_of_what_the_shape_does",
             null, "every justification clears a length bar and is not a restatement of the row above it"),
