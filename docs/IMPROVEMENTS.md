@@ -2,30 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW190 The guard nothing requires
-
-`BusyDesk` is how this suite answers a desk it did not get, and WW172 applied it across
-every case that needed it at the time. What it did not do — because it could not — is
-make the next case use it.
-
-Now measured rather than counted. Holding the guest's desk after WW179 shipped produced
-nine failures, and every one is this: `NotificationAreaTests` six times, over the
-taskbar holding no icons, the chevron being absent, the overflow refusing to open twice,
-a search that could not look everywhere, and a menu asked of an icon nothing could find;
-`ForeignTreeTests` once, over the shell's own tree; `TraversalTests` once, over what
-holds the focus. Not one was a broken harness — WW179 closed that door — and not one
-excused the desk.
-
-Three of the nine were written after WW172, by somebody who had just applied the rule
-elsewhere. The rest predate it and were simply never reached. Each is a
-three-and-a-half-minute run to find, and that is the cheap outcome: the expensive one is
-the same case passing on a quiet desk for a month and then failing on somebody else's.
-
-The shape is the one this repository keeps reaching for. `Deadlines` pairs every wait
-with what its look answers as nothing, read out of the sources. The same reading finds
-every case that asks a desk-dependent reading for a verdict and pairs it with how it
-excuses the desk — or with a stated reason it needs none.
-
 ### §WW191 The rule that would not have caught its own defect
 
 WW182 shipped a check: every suite reading that answers a verdict answers the engine's
@@ -336,3 +312,26 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW196 One type fixed, five still counting wrong
+
+WW188 gave `WrongCaptureException` an arm it declares and paired the five one by one,
+checked against the engine both ways. It is worth saying plainly that it fixed one type.
+
+Counted after it shipped: `LocatorSyntaxException` is thrown from thirteen places,
+`UnknownFlagException` from eleven, `UnusableLabelException` from six,
+`NotActionableException` and `DeclarationMissingException` from four each. Not every
+throw site is a distinct arm — several are one reason carrying different values — but a
+type thrown thirteen times is not one refusal, and `Provocation` holds one entry for it
+naming one case.
+
+So this block's first criterion is in the same state WW188 found the capture refusal in,
+five times over. The check is honest about what it measures and measures the wrong unit:
+a reader meets an arm, a locator that will not parse for a reason nobody has provoked is
+a refusal that will quietly stop working, and the catalogue would say the type is
+covered.
+
+What is owed is the shape WW188 already built, applied where it earns its keep. Thirteen
+arms is not thirteen enum members somebody invents in an afternoon — the work is
+deciding which throws are one refusal wearing different values and which are different
+refusals, and that judgement is the whole of the task rather than a step before it.

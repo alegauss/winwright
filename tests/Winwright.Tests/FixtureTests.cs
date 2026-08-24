@@ -485,6 +485,12 @@ public sealed class FixtureTests : IDisposable
         // WW128, measured by exclusion before it was written: the full run failed twelve checks
         // and the same run without this class failed one. All eleven need the foreground.
         var before = Foreground.Now();
+
+        // WW190. "Whoever had it" is the premise, and a desk where nobody had it cannot answer
+        // whether the fixture took it from them. The assertion below was a claim about the session.
+        if (BusyDesk.Excused(Foreground.Check(before.Window).AsPrecondition()))
+            return;
+
         Assert.NotEqual(0, before.Window);
 
         var window = Launched();

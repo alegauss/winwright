@@ -64,6 +64,16 @@ public sealed class FocusScopeTests : IDisposable
         Assert.False(read.Inside);
         Assert.Null(read.Held);
 
+        // WW190. There has to be an element in another process for one to be misattributed, and a
+        // desk where nothing holds the keyboard focus has none. The reading says so in as many
+        // words, and this case has nothing to observe rather than a shell that named no pid.
+        if (read.Element is null)
+        {
+            Assert.True(BusyDesk.Excused(read.AsPrecondition()), read.Because);
+            Assert.Contains("nothing on this desk holds", read.Because, StringComparison.Ordinal);
+            return;
+        }
+
         // Named and not merely refused: what took the desk is the whole of what a reader needs.
         Assert.Contains("holds the focus", read.Because, StringComparison.Ordinal);
         Assert.Contains("pid ", read.Because, StringComparison.Ordinal);

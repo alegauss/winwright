@@ -51,6 +51,9 @@ public static class DeskFacts
         new(TraySearch.PreconditionName,
             "the shell decides whether the overflow opens, and a taskbar something is covering has "
                 + "no chevron to open it with"),
+        new(OverflowState.PreconditionName,
+            "the chevron belongs to the shell and so does the flyout it opens, and a taskbar "
+                + "something is covering answers neither"),
         new(TrayMenu.PreconditionName,
             "the route to a tray menu is focus and then the application key, and a desk that gives "
                 + "neither stops the act before it starts"),

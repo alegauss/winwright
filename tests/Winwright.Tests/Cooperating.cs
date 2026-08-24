@@ -145,6 +145,7 @@ internal static class Cooperating
         new("NotificationArea.Showing", Cooperation.None, false, "the icons on the bar"),
         new("NotificationArea.Hidden", Cooperation.None, false, "the icons in the flyout"),
         new("NotificationArea.ElementFor", Cooperation.None, false, "one icon as an element"),
+        new("NotificationArea.Reachable", Cooperation.None, false, "whether there is a notification area to look at"),
         new("NotificationArea.Find", Cooperation.None, true, "an icon by name, opening the flyout to look"),
         new("NotificationArea.OpenOverflow", Cooperation.None, true, "open the flyout"),
         new("NotificationArea.CloseOverflow", Cooperation.None, true, "shut it again"),

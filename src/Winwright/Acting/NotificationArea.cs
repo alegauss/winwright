@@ -164,6 +164,18 @@ public sealed record OverflowState
     }
 
     /// <summary>
+    /// The condition a hole here is about.
+    /// <para>
+    /// WW190. This was composed at the call — <c>"an overflow this run can " + What</c> — so the
+    /// name changed with the verb and matched nothing. A condition spelled differently on every
+    /// path is one no catalogue can hold and no caller can match, which meant the hole this type
+    /// answers could never be recognised as a fact about the desk: <c>DeskFacts</c> names the
+    /// conditions that are the desk's, and a name invented at the throw site is in no list at all.
+    /// </para>
+    /// </summary>
+    public const string PreconditionName = "an overflow flyout this run can work";
+
+    /// <summary>
     /// The result a verdict counts. A shell that would not work the flyout is a fact about the
     /// desk and never a defect in the code under test, so it is a <em>hole</em> — this block's
     /// neighbour criterion says nothing about the desk is reported as a defect in the code.
@@ -171,7 +183,7 @@ public sealed record OverflowState
     /// <param name="named">What the assertion claims, as the scenario spells it.</param>
     public AssertionResult AsAssertion(string named) => Held
         ? AssertionResult.Pass(named, ToString())
-        : AssertionResult.Unchecked(named, Precondition.Absent($"an overflow this run can {What}", Because ?? ToString()));
+        : AssertionResult.Unchecked(named, Precondition.Absent(PreconditionName, Because ?? ToString()));
 
     /// <summary>The step a trace records.</summary>
     public TraceStep AsTraceStep(string named) => new()
@@ -349,6 +361,39 @@ public static class NotificationArea
 
     /// <summary>The icons in the overflow. Empty until it has been opened.</summary>
     public static IReadOnlyList<TrayIcon> Hidden() => Under(Overflow(), hidden: true);
+
+    /// <summary>
+    /// Whether there is a notification area on this desk to look at at all.
+    /// <para>
+    /// WW190. Every other reading here answers a question about an icon, and a run whose taskbar
+    /// was covered had no icon to ask about — so a check on the shell went red about the shell,
+    /// which is a fact about the desk and never a defect in the code under test. Measured: holding
+    /// the guest's desk turned this into six reds naming an empty taskbar, an absent chevron and a
+    /// flyout that would not open.
+    /// </para>
+    /// <para>
+    /// Named as the search's own condition rather than a new one, because that is what it is: a
+    /// desk with no taskbar, no chevron or no icon at all is a desk where the notification area
+    /// cannot be searched. What it is not is a bool — the absence says which of the three it found,
+    /// and a reader handed "the tray is unreachable" has to go and look.
+    /// </para>
+    /// </summary>
+    public static Precondition Reachable()
+    {
+        if (Tray() is null)
+            return Precondition.Absent(
+                TraySearch.PreconditionName, $"no window of class {TrayClassName} is on this desk");
+
+        if (Chevron() is null)
+            return Precondition.Absent(
+                TraySearch.PreconditionName,
+                "the taskbar is there and carries no chevron, so nothing hidden can be reached");
+
+        return Showing().Count > 0
+            ? Precondition.Met(TraySearch.PreconditionName)
+            : Precondition.Absent(
+                TraySearch.PreconditionName, "the taskbar is there and shows no icon at all");
+    }
 
     /// <summary>
     /// Open the overflow through the chevron's invoke pattern, which needs no pointer and no

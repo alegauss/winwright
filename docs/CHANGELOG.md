@@ -25,6 +25,7 @@
 - ✅ **WW182** **a suite reading invents its own shape instead of the engine's three-state Finding, and shipped able to say two things** — The tray census answers the engine's Finding, and a suite reading that answers a verdict without one is red here, so the third state is a property of the type.
 - ✅ **WW183** **a case reds when somebody touches the machine, though the engine already calls that a desk fact and names it** — The engine declares which conditions are the desk's and why each is, so the suite reads them instead of keeping a list that had already missed two.
 - ✅ **WW185** **a sweep records what each environment concluded and nothing about the machine it ran on, which is what a sweep asks** — Each environment carries the reading its own run took, the summary prints one for every machine that had something to explain, and a partial sweep names what it did not read.
+- ✅ **WW190** **a case asserting a desk-dependent verdict without excusing the desk is caught by a guest run and by nothing here** — Every case asking the shell, the foreground or the focus is read out of the sources and paired with how it excuses the desk; sixteen did not, and a held desk now passes.
 
 ## Block B — Attach, launch, and leave nothing behind
 

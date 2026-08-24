@@ -159,6 +159,12 @@ public sealed class ForeignTreeTests : IDisposable
     {
         // The taskbar is another process's window and it is always there. If any shape of id, name
         // or class defeats the grammar, this is where it turns up rather than in a fixture.
+        // WW190. Always there is a claim about the desk, and the guest measured it false: a shell
+        // that was not answering turned "every line the tray prints parses" into a red about the
+        // grammar. The tree this case is about does not exist to be walked, so nothing was read.
+        if (BusyDesk.Excused(Winwright.Acting.NotificationArea.Reachable()))
+            return;
+
         var tray = Winwright.Acting.NotificationArea.Tray();
         Assert.NotNull(tray);
 
