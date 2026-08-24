@@ -62,6 +62,7 @@
 - ✅ **WW124** **an automation id with a space in it renders as a locator step the grammar then refuses** — An id is quoted when the grammar would not read the whole of it, a line break in a name is escaped rather than printed, and the property is checked against chrome nobody here wrote.
 - ✅ **WW143** **the suite spells the engine's own waiting rule by hand eighteen times, and one of them is a bare sleep** — Every hand-rolled wait loop is a deadline on a named condition through the engine's own Attempt, with the deadlines in one file; one sleep stays, measured and said.
 - ✅ **WW144** **a rendered line hides its locator in the middle of a string, so every reader parses it back out by hand** — Inspect.Rendered hands each line its locator step as a field, so both hand-written parsers are gone and the view under a red is the same rendering rather than a second one.
+- ✅ **WW175** **a deadline handed a look that never answers null returns on the first look, and nothing says the wait was skipped** — Every deadline in both trees is catalogued with what its look answers as nothing, checked against the sources both ways, so a wait that cannot answer it is visible when written.
 
 ## Block D — Act — patterns before pointers
 
