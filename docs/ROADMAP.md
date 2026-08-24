@@ -10,6 +10,8 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+- 📋 **WW202** (deps: —) **three source sweeps still match raw text, and one of them is the twin of the catalogue just repaired for it** — Every sweep over source reads code, because four have been repaired one red at a time and nothing makes the fifth follow. → §WW202
+
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed
