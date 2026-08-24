@@ -72,6 +72,28 @@ reading in this suite that swallows an exception and answers a value has a third
 whether or not it has anywhere to put one — and finding those is the same source-read
 `Deadlines` already does for waits.
 
+### §WW192 Three unchecked, and no word on whose fault
+
+WW183 gave this engine something it did not have: a written judgement about which of its
+conditions are the desk's, and why each one is. Only the suite reads it.
+
+`VerdictSummary` is where it is worth reading. The headline says how many assertions
+never ran and the detail names each with the precondition that was absent — which is
+already the half WW6 was filed over. What it does not say is the one thing that decides
+what the reader does next. Three holes because a foreground was not granted and a window
+stood over a capture is a machine to clear. Three holes because a binary was stale and a
+page was still computing is a repository to open. The exit code is `2` either way and
+the lines read the same shape.
+
+This block's first criterion is that a degraded run is legible without reading the log,
+and legible means a reader can act. A tally that leaves them to classify seven condition
+names by hand is one they will classify wrongly on the run that matters, because the run
+that matters is the one where they are in a hurry.
+
+What is owed is the division, in the headline and not only in the detail — and the
+honest third bucket beside it, for a hole whose condition this engine has not classified
+at all.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
