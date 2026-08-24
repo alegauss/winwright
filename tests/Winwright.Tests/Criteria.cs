@@ -98,9 +98,9 @@ internal static class Criteria
         new("C", "An element is addressed without reading the markup", "", Unshown.NotBuilt,
             "the claim is about migrated scenarios and there are none; Inspect is what they would be "
                 + "written from, and InspectTests reads that back"),
-        new("C", "No scenario carries a sleep", "", Unshown.NotYet,
-            "eight files carry a Thread.Sleep and nothing says which are the deadline machinery, "
-                + "which is WW184 — filed the day this list was written, by this reading"),
+        new("C", "No scenario carries a sleep", "SleepTests.A_sleep_that_is_still_a_wait_is_counted_rather_than_argued_away",
+            null, "every file that calls it is paired with why it is not a scenario waiting, checked "
+                + "against the sources both ways — and the one that is still a wait is counted"),
         new("C", "An act never runs against an element that cannot take it",
             "ActionabilityTests.All_four_holding_is_the_only_reading_that_lets_an_act_run",
             null, "present, on screen, enabled and carrying the pattern, with the refusal naming which failed"),
