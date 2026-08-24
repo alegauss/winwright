@@ -5,7 +5,20 @@ namespace Winwright.Verdicts;
 /// <summary>One environment a sweep walked, and the reading that environment earned.</summary>
 /// <param name="Environment">What was varied — the sampled mode, the theme, the DPI.</param>
 /// <param name="Verdict">That environment's own reading, unchanged by the sweep around it.</param>
-public sealed record EnvironmentRun(string Environment, RunVerdict Verdict);
+/// <param name="Reading">
+/// What that environment turned out to be, where the run took a reading of it.
+/// <para>
+/// WW185. A sweep exists because the answer differs between machines, so the whole point of reading
+/// one is to find out which machine behaved differently — and this record used to carry a name and
+/// a verdict, with nowhere at all for what the machine was. Null where nobody read it, which is not
+/// the same as a machine with nothing to say about it.
+/// </para>
+/// </param>
+public sealed record EnvironmentRun(string Environment, RunVerdict Verdict, Preamble? Reading = null)
+{
+    /// <summary>Whether this environment was described as well as judged.</summary>
+    public bool Described => Reading is not null;
+}
 
 /// <summary>One harness error and the environment it was thrown in.</summary>
 /// <param name="Environment">The environment the sweep was walking when it broke.</param>
@@ -57,6 +70,21 @@ public sealed class SweepVerdict
 
     /// <summary>Every environment walked, in the order the sweep walked them.</summary>
     public IReadOnlyList<EnvironmentRun> Environments { get; }
+
+    /// <summary>
+    /// The environments walked with no reading taken of them, in sweep order.
+    /// <para>
+    /// WW185. A sweep that could not read one machine says so rather than reporting the ones it
+    /// read: the environments are the third property this reading keeps, after the count of holes
+    /// and the count of occurrences, and collapsing any of the three into another is the failure
+    /// this whole type was shaped around.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Undescribed => new ReadOnlyCollection<string>(
+        Environments.Where(one => !one.Described).Select(one => one.Environment).ToList());
+
+    /// <summary>Whether every environment the sweep walked was described as well as judged.</summary>
+    public bool Describes => Undescribed.Count == 0;
 
     /// <summary>The distinct assertions that failed somewhere, each with every place it failed.</summary>
     public IReadOnlyList<AssertionTally> Failures { get; }

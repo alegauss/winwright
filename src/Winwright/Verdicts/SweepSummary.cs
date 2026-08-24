@@ -85,6 +85,20 @@ public static class SweepSummary
             foreach (var occurrence in tally.Occurrences)
                 lines.Add(VerdictSummary.Line(occurrence.Result, occurrence.Environment));
 
+        // WW185. One sentence per machine that has something to explain, and only where a reading
+        // was taken. A sweep is read to find out which environment behaved differently, and the
+        // answer used to be a name — the full page for five environments would be sixty-five lines
+        // of measurements, which is why this is the sentence a reader skims and not the page.
+        foreach (var run in verdict.Environments.Where(one => one.Described && one.Verdict.Outcome != RunOutcome.Passed))
+            lines.Add($"  on         [{run.Environment}] {run.Reading!.Sentence()}");
+
+        // And the environments nobody read, named rather than counted — but only where the sweep
+        // read some of them. A sweep that described none claimed nothing, and there are no "on"
+        // lines above for a reader to mistake for the whole set; a sweep that described four of
+        // five is the one where the fifth reads as a machine like the others.
+        if (verdict.Environments.Any(one => one.Described) && !verdict.Describes)
+            lines.Add($"  not read   {verdict.Undescribed.Count} environment(s): {string.Join(", ", verdict.Undescribed)}");
+
         return lines;
     }
 

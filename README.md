@@ -221,6 +221,12 @@ after. A reading that opened a store fingerprint and never closed it is refused 
 it shows the machine as it was before the run touched it, and the verdict beside it is about what
 happened after.
 
+A sweep carries one per environment. `EnvironmentRun` takes the reading that environment earned
+beside the verdict it earned, and the summary prints a sentence for each machine that had something
+to explain — a sweep is read to find out *which* machine behaved differently, and a name alone
+cannot answer that. A sweep that read some machines and not others names the ones it did not; one
+that read none says nothing, because it claimed nothing.
+
 That reading has an end as well as a beginning. Where the project declares a store the run must not
 change, the fingerprint is taken with the rest of the readings and read again when the run finishes,
 and what moved is reported beside them. Wrap the run in `Preamble.Around` and neither half is a call
