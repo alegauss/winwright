@@ -25,6 +25,7 @@
 - 📋 **WW42** (deps: Block K ✅) **a copy of exactly one colour is written and reported as a capture** — A flat rectangle is not a picture of a window, and a session where nothing was rendering produced one that exited zero. → §WW42
 - 📋 **WW43** (deps: Block K ✅) **a page still computing is photographed and announced as a picture of a report** — The loading strings are read from the project's own language files before anything launches, and a key none of them carries refuses the run instead of matching nothing. → §WW43
 - 📋 **WW46** (deps: Block K ✅) **a change meant to be invisible has no cheap way to prove it was** — Two renders of unchanged code are byte-identical, so a difference is a real difference and no tolerance has to be chosen for a comparison to mean anything. → §WW46
+- 📋 **WW186** (deps: —) **the copy route is the one a window can stand over, and it writes its file without asking what did** — A screen copy reads what stands over its region before it writes, because a render cannot be occluded and the copy is the route that can. → §WW186
 
 ## Block F — Assert — the expectation is derived, never typed
 

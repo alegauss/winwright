@@ -223,6 +223,29 @@ code. Three findings about theme handling in that project came from this and fro
 nothing else, and its test suite saw none of them. It also avoids choosing a tolerance,
 which is the argument every other image comparison eventually turns into.
 
+### §WW186 The route that can be covered, and does not ask
+
+WW38 gave this block the reading it was missing: the z order above a window, intersected
+with the capture rectangle, answering how many pixels are taken and by which named
+windows. Nothing in the engine calls it.
+
+That matters more here than the general shape of the complaint, because `CaptureRoute`
+already knows which of its two routes is exposed. An off-screen render draws the visual
+tree and cannot be occluded — the type's own comment says there is no foreground, no z
+order and no second instance to be confused by. A screen copy is the other one, taken
+exactly where a render cannot reach: a menu, a balloon, an owned popup. Those are the
+captures a window standing over the region ruins, and they are the ones taken without
+the question being asked.
+
+This block's first criterion is that a capture proves what it photographed, and every
+written image names the window, the process and the arguments behind it. What it does
+not name is what was in front of it, which is the one thing that makes the picture not
+be of the window at all.
+
+What is owed is the call and where it goes: the copy route reads the region before it
+writes, the receipt carries what stood over it, and a copy taken under another window is
+a hole rather than a file somebody trusts. `Obstruction` already answers all three.
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
