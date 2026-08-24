@@ -59,10 +59,6 @@ internal static class Swallowing
     /// <summary>The ones paired with why they need no third state of their own.</summary>
     internal static IReadOnlyList<Swallow> Known { get; } = new ReadOnlyCollection<Swallow>(
     [
-        new("Attachable.Gone", Swallowed.TheAnswer,
-            "the question is whether a pid this run started is still about, and a process object "
-                + "that refuses to answer is one Windows no longer has — the throw and the true it "
-                + "answers are the same fact, which is why the catch names the two types that mean it"),
         new("Attachable.Readable", Swallowed.TheAnswer,
             "the question is literally whether the module can be read, so a read that threw is the "
                 + "false this answers and there is no third state to lose"),

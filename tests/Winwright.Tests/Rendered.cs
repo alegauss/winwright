@@ -133,6 +133,8 @@ internal static class Rendered
             null, "which windows stand over the region a capture is about, and how much of it they take"),
         new("PaintedFrame.Sentence", "PaintedFrameTests.A_window_with_no_border_trims_nothing_and_says_so",
             null, "what a capture trimmed off the window rectangle, and on which sides"),
+        new("Settled.Sentence", "SettledTests.A_deadline_of_nothing_is_a_reading_that_was_never_taken",
+            null, "whether what a run started has left the machine, or was only stopped, or was never waited for"),
         new("RegionThroughout.Sentence", "ThroughoutTests.A_region_read_once_says_so_rather_than_standing_for_both_ends",
             null, "what stood over the region at each end of the capture, and whether both ends were read"),
         new("PictureCheck.Sentence", "PicturesTests.A_render_that_drew_nothing_is_a_blank",

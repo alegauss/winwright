@@ -28,30 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW205 Stopped is not gone, and only the suite knows
-
-`ProcessRegister.StopAll` stops what a run launched and reports what outlived it, which
-is the promise this block is about. What it does not offer is the next question: has it
-left the machine. WW126 measured the difference — a stopped application is off the
-desktop well before its presentation stack, its compositor frames and its taskbar entry
-are — and WW201 measured the other cost, that Windows will not delete a running image.
-
-Both were answered in the suite. `Attachable.StopAndSettle` walks the pids and waits,
-and WW201 wrapped it in a door because four classes needed it. Neither exists in the
-engine, and the engine is what an adopter has.
-
-So an adopter that launches an application into a temporary directory and clears up
-afterwards meets exactly what four classes here met, with nothing to call. They will
-write the same loop, and the interesting part is that they will write it against
-`Process.GetProcessById` and get it wrong the way the first draft here did: a pid that
-will not open is gone, and treating the throw as anything else reports a process that
-has left as one still running.
-
-Nothing here is missing from the engine for want of the parts. `Attempt.Until` is
-engine-side and is what the suite's version waits with. What is owed is the reading on
-the register: stopped, and gone, told apart — and the suite's copy deleted rather than
-left as a second answer.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW206 One reading covers the whole file

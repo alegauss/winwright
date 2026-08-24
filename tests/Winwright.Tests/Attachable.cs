@@ -42,18 +42,21 @@ public static class Attachable
     /// What this cannot fix is a machine busy for reasons outside the suite. That limit is stated
     /// here rather than left to surprise somebody reading an unreproducible red.
     /// </para>
+    /// <para>
+    /// WW205. The waiting is the engine's now, and the suite's own loop is gone rather than kept
+    /// beside it. This was written here because <c>Waits</c> is here, and the parts never were: the
+    /// engine's own <c>Attempt.UntilTrue</c> is what it waited with, so an adopter meeting the same
+    /// thing had every piece and no door. What is left here is the deadline this suite declares and
+    /// the assertion — which is the half that really is the suite's.
+    /// </para>
     /// </summary>
     public static void StopAndSettle(ProcessRegister register)
     {
         ArgumentNullException.ThrowIfNull(register);
 
-        var pids = register.Launched.Select(one => one.Pid).ToList();
-        register.StopAll();
+        var settled = Settled.Of(register, Waits.Declared.For("gone"));
 
-        Waits.Until(
-            "gone",
-            $"{string.Join(", ", pids)} were still running after the register stopped them",
-            () => pids.TrueForAll(Gone));
+        Assert.True(settled.Gone, settled.Sentence());
     }
 
     /// <summary>
@@ -72,24 +75,6 @@ public static class Attachable
     /// </para>
     /// </summary>
     internal static Settling Settling() => new();
-
-    /// <summary>
-    /// Whether that process is out of the machine. A pid nothing can open is gone; one that opens
-    /// and says it has exited is gone; anything else is still on its way out and still costing the
-    /// desktop something.
-    /// </summary>
-    private static bool Gone(int pid)
-    {
-        try
-        {
-            using var running = Process.GetProcessById(pid);
-            return running.HasExited;
-        }
-        catch (Exception away) when (away is ArgumentException or InvalidOperationException)
-        {
-            return true;
-        }
-    }
 
     private static bool Readable(int pid)
     {
