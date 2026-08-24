@@ -174,15 +174,6 @@ added later is red until somebody says.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW42 One colour is not a window
-
-Measured in freewilly while shipping a task: a copy of the notification area came back
-as exactly one distinct colour, with the session present, the shell running and the
-environment reporting an interactive desktop. The display was simply not rendering
-anything a copy could read. Without this assertion the script would have written that
-file and exited zero, and the reader would have had a picture of nothing that claimed to
-be a picture of something.
-
 ### §WW43 The page is still saying it is loading
 
 Measured in claude-tray: a report on a machine with 213 recent transcript files took

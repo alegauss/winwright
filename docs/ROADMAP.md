@@ -20,7 +20,6 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW42** (deps: Block K ✅) **a copy of exactly one colour is written and reported as a capture** — A flat rectangle is not a picture of a window, and a session where nothing was rendering produced one that exited zero. → §WW42
 - 📋 **WW43** (deps: Block K ✅) **a page still computing is photographed and announced as a picture of a report** — The loading strings are read from the project's own language files before anything launches, and a key none of them carries refuses the run instead of matching nothing. → §WW43
 - 📋 **WW46** (deps: Block K ✅) **a change meant to be invisible has no cheap way to prove it was** — Two renders of unchanged code are byte-identical, so a difference is a real difference and no tolerance has to be chosen for a comparison to mean anything. → §WW46
 - 📋 **WW187** (deps: —) **two capture refusals fire only where the caller remembered to take the reading, and nothing makes anyone take it** — The receipt takes both readings itself, because one reached by its own call is one a caller forgets and an unchecked capture looks exactly like one that passed. → §WW187

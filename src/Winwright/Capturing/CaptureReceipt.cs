@@ -51,7 +51,8 @@ public sealed record CaptureReceipt
         PaintedFrame? frame,
         CaptureRoute? route,
         Obstruction? over,
-        Glass? glass)
+        Glass? glass,
+        ColourCheck? colours)
     {
         Path = path;
         Window = window;
@@ -60,7 +61,14 @@ public sealed record CaptureReceipt
         Route = route;
         Over = over;
         Glass = glass;
+        Colours = colours;
     }
+
+    /// <summary>
+    /// What counting the picture's colours said, where a caller counted. Null where nobody did,
+    /// which is not the same as a picture with more than one colour in it.
+    /// </summary>
+    public ColourCheck? Colours { get; }
 
     /// <summary>
     /// What the window's own glass was doing, where a caller asked. Null where nobody asked, which
@@ -128,10 +136,19 @@ public sealed record CaptureReceipt
     /// <paramref name="over" /> is.
     /// </para>
     /// </param>
+    /// <param name="colours">
+    /// What counting the picture's distinct colours said, where a caller counted.
+    /// <para>
+    /// WW42. A copy of exactly one colour is not a picture of a window, and it is the reading the
+    /// alpha scan cannot take: a screen copy has no alpha channel. Left null by a caller that did
+    /// not count, for the same reason the other two readings are.
+    /// </para>
+    /// </param>
     /// <exception cref="WrongCaptureException">
     /// Where the window belongs to a process this run is not driving, where nothing was drawing
-    /// it, where another window stood over the region, or where its own glass is carrying what is
-    /// behind it. All four are wrong captures that a file on disk looks exactly the same as.
+    /// it, where another window stood over the region, where its own glass is carrying what is
+    /// behind it, or where the picture is one flat colour. All five are wrong captures that a file
+    /// on disk looks exactly the same as.
     /// </exception>
     public static CaptureReceipt Of(
         string path,
@@ -140,7 +157,8 @@ public sealed record CaptureReceipt
         PaintedFrame? frame = null,
         CaptureRoute? route = null,
         Obstruction? over = null,
-        Glass? glass = null)
+        Glass? glass = null,
+        ColourCheck? colours = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(window);
@@ -169,7 +187,14 @@ public sealed record CaptureReceipt
         if (glass is { Transmits: true } && route?.Reach is null or OutOfReach.Renderable)
             throw new WrongCaptureException($"the capture is of {window}, and {glass.Sentence()}");
 
-        return new CaptureReceipt(path, window, target, frame, route, over, glass);
+        // WW42. A flat rectangle is not a picture of a window, and the session that produced one
+        // had everything present and nothing rendering — so the file was written and the run exited
+        // zero. Counted rather than scanned for ink: a screen copy has no alpha channel, and the
+        // reading that answers "did anything draw" cannot answer for it at all.
+        if (colours is { Counted: true, IsFlat: true })
+            throw new WrongCaptureException($"the capture is of {window}, and {colours.Sentence()}");
+
+        return new CaptureReceipt(path, window, target, frame, route, over, glass, colours);
     }
 
     /// <summary>

@@ -172,6 +172,13 @@ cannot answer for this: the intruder is not in front of the window, it is showin
 menu, a balloon or an owned popup is exempt, because those carry a backdrop by design and the copy
 route exists for them.
 
+And a third question the picture answers about itself: `Colours.In` counts distinct colours and
+refuses a capture that is exactly one. A flat rectangle is not a picture of a window — the session
+that produced the measured one had everything present and nothing rendering, so the file was written
+and the run exited zero. This is a separate reading from the blank check on purpose: that one scans
+the alpha channel and a screen copy has none, so it cannot answer for the very picture this is
+about. Counting stops as soon as the answer cannot change, and says when it stopped early.
+
 That last one reaches the verbs above it. Looking for a tray icon answers a reading rather than an
 icon-or-nothing, and where it found none it says whether every place it could have been was looked
 at. Not found everywhere is an answer about your application; not found because the flyout would not

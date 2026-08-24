@@ -93,6 +93,8 @@ internal static class Rendered
             null, "what a picture photographed, and under what the run was driving"),
         new("CaptureRoute.Sentence", "CaptureRouteTests.A_receipt_that_did_route_says_which_way_and_why",
             null, "which way a capture went and why, or that it did not route"),
+        new("ColourCheck.Sentence", "ColoursTests.A_picture_of_exactly_one_colour_is_read_as_one_colour",
+            null, "how many distinct colours a picture carries, and whether it is one flat rectangle"),
         new("Containment.Sentence", "ContainmentTests.A_surface_the_copy_clipped_says_which_sides_and_by_how_much",
             null, "whether a surface sat inside the copy, and which sides clipped it"),
         new("Desk.Sentence", "DeskTests.The_sentence_never_says_the_desk_is_fine_while_anything_is_absent",

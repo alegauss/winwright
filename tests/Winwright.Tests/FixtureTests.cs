@@ -1726,6 +1726,67 @@ public sealed class FixtureTests : IDisposable
         Assert.True(receipt.Glass.Transmits);
     }
 
+    [Fact]
+    public void A_capture_that_is_one_flat_colour_is_refused_rather_than_reported_as_a_picture()
+    {
+        // WW42, against a real window and a real file. The session that produced the measured one
+        // had everything present and nothing rendering, so the file was written and the run exited
+        // zero — and the reader had a picture of nothing that claimed to be a picture of something.
+        var window = Launched();
+        var flat = Path.Combine(root, "flat-capture.png");
+        Flat(flat);
+
+        var counted = Colours.In(flat);
+        Assert.True(counted.IsFlat, counted.Sentence());
+
+        var refused = Assert.Throws<WrongCaptureException>(
+            () => CaptureReceipt.Of(flat, window, AppTarget.AttachTo(window.Pid), colours: counted));
+
+        Assert.Contains("one colour across all", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("not a picture of a window", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_capture_nobody_counted_says_nothing_rather_than_that_it_had_colour_in_it()
+    {
+        // Null is not "it had more than one colour". A caller that never counted and one that
+        // counted and found variety are two facts, and one value answering both is the green this
+        // project exists to withdraw.
+        var window = Launched();
+        var receipt = CaptureReceipt.Of(
+            Path.Combine(root, "uncounted.png"), window, AppTarget.AttachTo(window.Pid));
+
+        Assert.Null(receipt.Colours);
+    }
+
+    /// <summary>Write a PNG of exactly one colour, in a format with no alpha channel.</summary>
+    private static void Flat(string path)
+    {
+        const int side = 16;
+        var source = new System.Windows.Media.Imaging.WriteableBitmap(
+            side, side, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null);
+
+        var stride = side * 4;
+        var pixels = new byte[stride * side];
+        for (var at = 0; at < pixels.Length; at += 4)
+        {
+            pixels[at] = 0x69;
+            pixels[at + 1] = 0x69;
+            pixels[at + 2] = 0x69;
+            pixels[at + 3] = 0xFF;
+        }
+
+        source.WritePixels(new System.Windows.Int32Rect(0, 0, side, side), pixels, stride, 0);
+
+        var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(
+            new System.Windows.Media.Imaging.FormatConvertedBitmap(
+                source, System.Windows.Media.PixelFormats.Bgr24, null, 0)));
+
+        using var file = File.Create(path);
+        encoder.Save(file);
+    }
+
     /// <summary>How many pixels the two rectangles share.</summary>
     private static long Overlap(TopLevelWindow left, TopLevelWindow right)
     {
