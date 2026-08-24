@@ -72,6 +72,29 @@ built because the desk refused carries the reading that says so, and the case ex
 itself on it exactly as it now does for a foreground it was not granted. The three that
 remain are the list; a fourth found later is the same repair.
 
+### §WW182 The shape that was already there
+
+WW181 is the measurement, and it is worth stating plainly: the defect was written,
+reviewed, tested and shipped, and what it did was report a clean desk it had never read.
+That is this project's founding non-goal, committed inside the reading built to stop it.
+
+The cause is not carelessness about the third state. `TrayGhosts` was written with a
+`Sentence` and a list, and a list has no way to say "I did not look" — so the third
+state had nowhere to live and the sentence rounded it down to the second. The engine
+solved this three tasks earlier: `Finding` carries `bool? Holds`, and its own comment
+says why, in the words WW151 used — a run that took no fingerprint and a run that took
+one and found it clean are not the same fact, and two states could only ever report them
+the same way.
+
+Nothing pointed the new reading at the old shape. `RecordedResultTests` reads the engine
+assembly, so the suite's own readings — `Provocation`, `Cooperating`, `Rendered`,
+`BusyDesk`, `TrayCensus` — are governed by nothing at all.
+
+What is owed is the reuse, and then the rule: a suite reading that can fail to observe
+answers the engine's `Finding` rather than a shape of its own, and a check says so. The
+engine's rules stop at its assembly boundary, and the suite is where this project's own
+defects have been shipping.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
