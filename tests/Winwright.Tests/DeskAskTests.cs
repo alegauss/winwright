@@ -122,6 +122,25 @@ public sealed class DeskAskTests
     }
 
     [Fact]
+    public void A_call_named_as_text_is_not_a_call_made()
+    {
+        // WW191 caught this on its first guest run. A case asserting that a call is among the ones
+        // this catalogue sweeps for carries the fragment in a string, and was reported as a case
+        // that opens the overflow — a pairing invented for a case that asks nothing at all.
+        Assert.DoesNotContain(
+            "FlatteningTests.The_producers_are_swept_off_both_assemblies_and_discriminate",
+            DeskAsks.Asking(),
+            StringComparer.Ordinal);
+
+        // And the stripping is not so keen that it deletes the calls beside it: this very class
+        // names one in a string two lines up, and NotificationAreaTests still asks.
+        Assert.Contains(
+            "NotificationAreaTests.The_taskbar_is_found_by_its_class_and_holds_icons",
+            DeskAsks.Asking(),
+            StringComparer.Ordinal);
+    }
+
+    [Fact]
     public void The_pairing_reads_as_a_count_and_then_a_line_each()
     {
         var rendered = DeskAsks.Render();

@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW191** (deps: —) **the third-state rule reaches only a suite reading that answers a verdict, and the defect it was written for did not** — The rule reaches a reading before it answers a verdict, because the one that shipped a clean desk it never read answered none and would have passed. → §WW191
 - 📋 **WW192** (deps: —) **a summary counts holes without saying which were the desk's, though the engine now declares which conditions are** — The summary divides the holes it names by whose they were, because a reader told three never ran needs to know whether to fix code or clear a desk. → §WW192
 
 ## Block B — Attach, launch, and leave nothing behind

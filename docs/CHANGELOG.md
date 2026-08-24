@@ -26,6 +26,7 @@
 - ✅ **WW183** **a case reds when somebody touches the machine, though the engine already calls that a desk fact and names it** — The engine declares which conditions are the desk's and why each is, so the suite reads them instead of keeping a list that had already missed two.
 - ✅ **WW185** **a sweep records what each environment concluded and nothing about the machine it ran on, which is what a sweep asks** — Each environment carries the reading its own run took, the summary prints one for every machine that had something to explain, and a partial sweep names what it did not read.
 - ✅ **WW190** **a case asserting a desk-dependent verdict without excusing the desk is caught by a guest run and by nothing here** — Every case asking the shell, the foreground or the focus is read out of the sources and paired with how it excuses the desk; sixteen did not, and a held desk now passes.
+- ✅ **WW191** **the third-state rule reaches only a suite reading that answers a verdict, and the defect it was written for did not** — Two earlier boundaries read off the assembly: eight readings that swallow and answer a value, and the helper that narrows a three-state one, measured against WW181's kept signature.
 
 ## Block B — Attach, launch, and leave nothing behind
 

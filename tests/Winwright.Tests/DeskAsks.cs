@@ -323,8 +323,9 @@ internal static class DeskAsks
             }
             else if (open.Case.Length > 0)
             {
-                open.Asks |= Calls.Any(one => line.Contains(one.Call, StringComparison.Ordinal));
-                open.Excuses |= line.Contains("BusyDesk.", StringComparison.Ordinal);
+                var code = Code(line);
+                open.Asks |= Calls.Any(one => code.Contains(one.Call, StringComparison.Ordinal));
+                open.Excuses |= code.Contains("BusyDesk.", StringComparison.Ordinal);
             }
         }
 
@@ -338,6 +339,44 @@ internal static class DeskAsks
 
             open = ("", false, false);
         }
+    }
+
+    /// <summary>
+    /// The line with its quoted text taken out, so a call named as data is not read as a call made.
+    /// <para>
+    /// WW191 found this the way everything here gets found: a case asserting that
+    /// <c>NotificationArea.OpenOverflow(</c> is among the calls this catalogue sweeps for was
+    /// reported as a case that opens the overflow. The fragment was in a string, which is the one
+    /// place in a source file where a call is a subject rather than an act.
+    /// </para>
+    /// <para>
+    /// A line whose quotes do not pair is left whole. A raw literal opens on one line and shuts on
+    /// another, and stripping from an unmatched quote to the end of the line would delete real code
+    /// — which turns a case that asks into a case that appears not to, and this list would go quiet
+    /// about it. Reading too much is a red somebody answers; reading too little is not.
+    /// </para>
+    /// </summary>
+    private static string Code(string line)
+    {
+        var quotes = line.Count(one => one == '"');
+        if (quotes == 0 || quotes % 2 != 0)
+            return line;
+
+        var kept = new System.Text.StringBuilder(line.Length);
+        var inside = false;
+        foreach (var letter in line)
+        {
+            if (letter == '"')
+            {
+                inside = !inside;
+                continue;
+            }
+
+            if (!inside)
+                kept.Append(letter);
+        }
+
+        return kept.ToString();
     }
 
     /// <summary>The name a declaration introduces, where the line is one.</summary>
