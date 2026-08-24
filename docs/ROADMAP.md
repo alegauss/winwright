@@ -16,6 +16,8 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
+- 📋 **WW199** (deps: —) **this block promises a fixture provokes every capture refusal, and four of the six arms are provoked by a case instead** — The criterion says what is true and is checked, because a reader takes it at face value and the check under it answers a weaker question. → §WW199
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file

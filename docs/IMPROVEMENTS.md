@@ -84,6 +84,31 @@ can see changes.
 
 ## Block E — Capture — the picture that proves what it photographed
 
+### §WW199 A fixture, or something
+
+Block E's third criterion reads "Every capture refusal has a fixture that provokes it",
+and it is paired with
+`ProvocationTests.A_flag_named_here_is_one_the_fixture_actually_has` — which asserts
+that flags named in the catalogue exist in the built article. That is a real check and
+it is not this claim: it says the flags that are named are good, never that every
+refusal names one.
+
+Counted after WW195. `WrongCaptureException` has six arms; two are provoked by a fixture
+shape (`--intrude`, `--backdrop`) and four by a case that composes the reading. Each of
+the four carries a written reason, which is the `Without.NoShape` mechanism
+`Provocation` has had since WW160 — so the catalogue was always honest and the criterion
+above it was always wider than the catalogue could be.
+
+Block K words the same idea differently: "every refusal has something that provokes it".
+That is the claim this repository actually keeps, and WW188 quoted it while building the
+arm pairing. Two blocks carrying two wordings for one property is how a reader ends up
+believing the stronger one.
+
+The judgement is which way to close it, and that is the task. Amending the criterion to
+what is checked is one line and may be right — a picture of one flat colour is a display
+rendering nothing, which no fixture can be. Building shapes for the arms that could have
+one is the other, and `--intrude` is the precedent for doing that rather than arguing.
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
