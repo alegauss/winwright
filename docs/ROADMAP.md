@@ -7,6 +7,7 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
+- 📋 **WW205** (deps: —) **the register stops what it started and cannot say when it is gone, so every caller needing that writes the wait** — The engine answers stopped and gone, because the suite has written that wait twice and an adopter deleting what it ran has nowhere to ask. → §WW205
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
