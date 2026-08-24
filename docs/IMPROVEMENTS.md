@@ -25,6 +25,30 @@ moment and waits for the process to leave the machine instead. What is owed is t
 here, and a look at whether other cases that copy a binary and run it have the same
 teardown. The count is unknown, which is why it is a task rather than a line.
 
+### §WW204 The reading nobody looked at
+
+Found on a guest run while WW200 was being measured. `TrayIconFixture` opens the
+overflow to confirm its icon was placed and shuts it again — and threw away what
+shutting it answered. A shell that would not shut the flyout left it standing and said
+so to nobody, so
+`TrayPlacementTests.The_fixture_leaves_the_overflow_the_way_it_found_it` went red about
+this fixture over something the shell had decided.
+
+Repaired where it was found: the close is read, and a flyout that would not shut is a
+`DeskRefusedException` exactly as one that would not open already is. What is not
+repaired is the class.
+
+WW197 established the rule at the other end — a reading whose answer is thrown away is
+not a case asking for a verdict, which is why a discarded call is not counted as an ask.
+That is right about cases and it is the reverse of the hazard here: a *helper* that
+discards a desk reading has not asked either, and the cost lands on whoever asserts
+afterwards. Two ends of one shape, and only one has a check.
+
+What is owed is the reading. Every desk-dependent call in this suite whose answer is
+discarded, paired with why discarding it loses nothing — the same both-ways catalogue
+`DeskAsks` already holds, over the calls it currently passes over. `DeskAsks.Calls` is
+the list; what is missing is asking the other question of it.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
