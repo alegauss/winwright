@@ -21,6 +21,7 @@
 - ✅ **WW172** **a desk another window owns turns 32 cases red about the application, which is the confusion this tool exists to end** — Every desk-dependent case resolves the hole its own act already answered, so a desk another window owns turned 32 reds into 3 instead of into 32 claims about the application.
 - ✅ **WW176** **32 criteria decide when a block is finished and no case names evidence for any of them, so the reading is a recollection** — Every criterion the roadmap declares is paired with the case that shows it, checked both ways, so what nothing shows is a counted bucket and finishing a block is a reading.
 - ✅ **WW177** **the summary a run exits on never shows what the run read, so the readings and the verdict are two pages that never meet** — The summary prints what the run read above the verdict it makes legible, and refuses a reading that opened a store fingerprint and never closed it.
+- ✅ **WW179** **a desk fact met while building a fixture is thrown, so the case reads as a broken harness rather than a hole** — A fixture the desk refused answers the reading an act answers and the case excuses itself, so a held desk produced nine ordinary failures and no broken harness at all.
 
 ## Block B — Attach, launch, and leave nothing behind
 

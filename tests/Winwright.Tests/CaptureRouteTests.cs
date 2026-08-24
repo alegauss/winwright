@@ -150,10 +150,22 @@ public sealed class CaptureRouteTests
             using var self = Process.GetCurrentProcess();
             var windows = TopLevelWindows.OfProcess(self.Id, smallest: 0);
             var menu = windows.FirstOrDefault(one => one.ClassName == "#32768");
-            Assert.True(
-                menu is not null,
-                $"the shell put no menu window on this desk; highlighted={Menu.Highlighted(dialog.Frame)}; "
-                    + string.Join(" | ", windows.Select(one => one.ToString())));
+
+            // WW179. A shell that put no menu on the screen is a desk that refused, not a harness
+            // that broke — and this used to end the case as the second. Excused here, so a reader
+            // is sent to their own desk rather than to this repository.
+            if (menu is null)
+            {
+                var because = $"the shell put no menu window on this desk; "
+                    + $"highlighted={Menu.Highlighted(dialog.Frame)}; "
+                    + string.Join(" | ", windows.Select(one => one.ToString()));
+
+                Assert.True(
+                    BusyDesk.Excused(Winwright.Verdicts.Precondition.Absent(Foreground.PreconditionName, because)),
+                    because);
+
+                return;
+            }
 
             var main = windows.Single(one => one.Handle == dialog.Frame);
             var route = CaptureRoute.For(menu!, main);

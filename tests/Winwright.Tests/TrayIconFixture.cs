@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Winwright.Acting;
 using Winwright.Locating;
 using Winwright.Projects;
+using Winwright.Verdicts;
 
 namespace Winwright.Tests;
 
@@ -183,6 +184,17 @@ internal sealed class TrayIconFixture : IDisposable
         // an icon that can be found, never a flyout left standing for the next case to trip on —
         // and one of the two flakes measured was exactly a case that found one already open.
         NotificationArea.CloseOverflow();
+
+        // WW179. The search already says which of the two it was, and this used to throw either
+        // way — so a shell covering the taskbar ended the case as a broken harness and sent a
+        // reader to this repository. A desk that would not let the search look is excusable; a
+        // shell that looked everywhere and placed nothing is the fixture genuinely failing.
+        if (!found.Found && last is { Everywhere: false })
+        {
+            throw new DeskRefusedException(
+                Precondition.Absent(TraySearch.PreconditionName, last.Because),
+                $"'{Tip}' could not be looked for: {last.Because}");
+        }
 
         if (!found.Found)
         {

@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW179** (deps: —) **a desk fact met while building a fixture is thrown, so the case reads as a broken harness rather than a hole** — Setup answers the hole an act already answers, because a throw from a fixture is exit 3 and sends a reader here over a shell that was merely busy. → §WW179
 - 📋 **WW182** (deps: —) **a suite reading invents its own shape instead of the engine's three-state Finding, and shipped able to say two things** — A suite reading answers a Finding, because the one that invented its own shape reported a desk clean where it had not looked and no check here saw it. → §WW182
 - 📋 **WW183** (deps: —) **a case reds when somebody touches the machine, though the engine already calls that a desk fact and names it** — The suite's desk facts are the ones the engine declares, because a list kept by hand already misses the reading that measured a person at the keyboard. → §WW183
 - 📋 **WW185** (deps: —) **a sweep records what each environment concluded and nothing about the machine it ran on, which is what a sweep asks** — Each environment carries the reading its own run took, because a hole in one machine and not another is a statement about the machines and neither is described. → §WW185

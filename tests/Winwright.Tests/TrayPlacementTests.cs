@@ -42,7 +42,10 @@ public sealed class TrayPlacementTests
     [Fact]
     public void When_the_fixture_returns_the_icon_is_already_findable()
     {
-        using var icon = TrayIconFixture.Add("winwright placement");
+        using var icon = BusyDesk.Built(() => TrayIconFixture.Add("winwright placement"));
+        if (icon is null)
+            return;
+
 
         // No waiting here on purpose. Every case in the suite looks straight after Add, so what
         // has to hold is that looking straight after Add works — not that it works if you wait.
@@ -59,7 +62,10 @@ public sealed class TrayPlacementTests
         // It opens the flyout to look, so it shuts it again: what this fixture promises is a
         // findable icon and never a flyout left standing for the next case to trip on. One of the
         // two flakes measured was a case that found one already open.
-        using var icon = TrayIconFixture.Add("winwright placement");
+        using var icon = BusyDesk.Built(() => TrayIconFixture.Add("winwright placement"));
+        if (icon is null)
+            return;
+
 
         Assert.Null(NotificationArea.Overflow());
     }
@@ -71,7 +77,10 @@ public sealed class TrayPlacementTests
         // what the old fixture also produced about half the time.
         for (var round = 0; round < 5; round++)
         {
-            using var icon = TrayIconFixture.Add($"winwright placement {round}");
+            using var icon = BusyDesk.Built(() => TrayIconFixture.Add($"winwright placement {round}"));
+            if (icon is null)
+                return;
+
 
             var searched = NotificationArea.Find(icon.Tip);
             if (BusyDesk.Excused(searched.AsAssertion("the icon this run added can be found")))
@@ -85,8 +94,11 @@ public sealed class TrayPlacementTests
     [Fact]
     public void Two_icons_from_the_same_run_are_each_placed_before_their_own_add_returns()
     {
-        using var first = TrayIconFixture.Add("winwright placement one");
-        using var second = TrayIconFixture.Add("winwright placement two");
+        using var first = BusyDesk.Built(() => TrayIconFixture.Add("winwright placement one"));
+        using var second = BusyDesk.Built(() => TrayIconFixture.Add("winwright placement two"));
+        if (first is null || second is null)
+            return;
+
 
         // Both tips carry the same process, so this also checks the marks tell them apart.
         Assert.NotEqual(first.Tip, second.Tip);

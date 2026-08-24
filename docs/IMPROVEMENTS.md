@@ -2,29 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW179 The desk fact that arrives before the act
-
-Measured while shipping WW172. Holding the guest's desk the way the run that produced 32
-failures held it took the same tree to 3, and the three that remained are all the same
-shape: the desk fact arrived during setup, where there is no act to answer it.
-
-Two of them were `TrayIconFixture.Placed`, which waits for the shell to put an icon
-somewhere findable and throws `InvalidOperationException` when it does not. WW168
-already made the search say which it was — the icon is absent, or the overflow could not
-be looked in — and the fixture drops that distinction on the floor by throwing either
-way. The third was `CaptureRouteTests`, whose helper throws "the shell put no menu
-window on this desk".
-
-A throw is not a hole. `RunVerdict` ranks a broken harness above a failure precisely
-because nothing past the throw was observed and the reader is being sent to this
-repository rather than to the one under test — which is the wrong repository when the
-shell was merely covering the taskbar.
-
-What is owed is that setup answers what an act answers. A fixture that could not be
-built because the desk refused carries the reading that says so, and the case excuses
-itself on it exactly as it now does for a foreground it was not granted. The three that
-remain are the list; a fourth found later is the same repair.
-
 ### §WW182 The shape that was already there
 
 WW181 is the measurement, and it is worth stating plainly: the defect was written,
