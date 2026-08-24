@@ -1,0 +1,194 @@
+# winwright
+
+> A Windows UI test framework for .NET 10 (`net10.0-windows`). It drives a desktop
+> application through UI Automation and Win32, derives its expectations from the
+> application's own declarations, and answers in four verdicts rather than two — so a check
+> that could not be evaluated is named in the summary rather than left out of the count.
+> The engine has no external dependency, and the application under test references at most
+> one optional package.
+
+It exists because of one measurement. A suite reported a pass with no failures and a total
+of 352 where the run before it had 374 — twenty-two checks gone, the host had died partway
+through, and the only sign was a number nobody had a reason to read.
+
+## For agents
+
+This site answers a coding agent in files it can grep, not only in hydrated markup. Every
+route has a Markdown twin beside it — the same page, converted from the same render, with
+the navigation, the footer and the call to action dropped. Read `<route>/index.md` instead
+of the HTML: the landing page is
+[`/index.md`](https://alegauss.github.io/winwright/index.md). The full list of routes,
+their twins and their byte sizes is in
+[`manifest.json`](https://alegauss.github.io/winwright/manifest.json).
+
+## The verdict, and the exit code
+
+The enum member values **are** the process exit codes — a mapping written twice is a mapping
+that drifts, and CI reads the number rather than the word.
+
+| Code | Outcome | What it means |
+| --- | --- | --- |
+| `0` | `Passed` | Every assertion ran, and every one of them held. |
+| `1` | `Failed` | At least one assertion ran and did not hold. |
+| `2` | `Degraded` | Everything that ran passed, and something could not be evaluated at all. |
+| `3` | `Broken` | The harness threw. What it says is about this tool, not about your application. |
+
+`2` is the reason this project exists. An assertion whose precondition was absent did not
+pass and did not fail — it never ran, it is named in the summary by name, and collapsing it
+into either of the other two is the thing winwright will not do. `3` outranks the rest,
+because a reader told the build failed opens the wrong repository.
+
+Three things a scenario meets often are holes rather than failures, and all of them are
+about the desk rather than about your application: a foreground Windows would not grant, a
+focus that left the application while a menu walk or a traversal was polling, and a
+notification-area flyout the shell would not open.
+
+Before the assertions, a run takes one reading of the machine: the desk it is on, which
+binary it is driving, whether that binary is stale, the resolved language, the foreground,
+the launch arguments, whether anything else is showing the application, and whether the desk
+is this run's alone. Each is reported as measured, absent, or **not read**.
+
+## The locator grammar
+
+One grammar, written once, read the same way by every verb.
+
+```
+#saveButton                              the automation id
+Button                                   the control type
+Button#saveButton                        both
+Button[name="Save as..."]                the name
+Pane[class=Chrome_WidgetWin_1]           the window class
+Button[pattern=Invoke]                   it must carry that pattern
+Text[name="Statistics"][order=left]      the leftmost of the ones that match
+MenuItem[order=top][index=2]             the second from the top
+Window#main > Pane > Button#save         a descendant of, at any depth
+```
+
+`>` means **a descendant of**, not a direct child. That is a decision, not a shorthand: UI
+Automation wraps controls in panes that differ between frameworks, between versions of one
+framework, and between a maximised window and a restored one — so a direct-child locator is
+the one that breaks on somebody else's machine. `Locator.Parse` refuses a locator that does
+not parse, naming the position and the reason; `Locator.TryParse` answers without throwing.
+Two elements matching one step is a refusal, not a first match, and a misspelt control type
+is answered with the nearest name UI Automation actually has.
+
+## Features
+
+- **Locate** — resolve one look at a locator, the same polled to a deadline, or every
+  element a step matches; inspect the control view under a window or an element as a tree or
+  as lines a person reads; read what UI Automation says about one element and what each of
+  its patterns holds.
+- **Act** — invoke, toggle, set a value or a range, select, expand, collapse, through the
+  control's own patterns. **A pattern act is the default and needs no foreground.** The verbs
+  that synthesise input (pointer, keyboard, traversal) are marked as needing the foreground
+  in a catalogue checked against the engine in both directions: a verb added without an entry
+  is a red. Actionability answers whether an element can take an act at all and why not where
+  it cannot; a preflight checks what every declared act needs against the tree before
+  anything is pressed.
+- **Menus and the notification area** — enter a menu bar the way a keyboard user does, walk
+  to an entry, open a submenu, dismiss; the tray, the overflow flyout, the icons on either,
+  and an icon's context menu. Finding an icon says which of the two happened — the icon is
+  absent, or the flyout would not open.
+- **Assert** — the expectation is derived, never typed. Labels come from the project's own
+  language files, so switching the resolved language switches the expected set with it and a
+  key none of the files carries refuses the run rather than matching nothing. Every
+  expectation is falsifiable; a timed-out read is recorded as a reading that did not arrive
+  rather than as a default that looks like data; a failing step carries the tree, the
+  element's facts and what its patterns read.
+- **Capture** — a picture that proves what it photographed. The z order above the window is
+  enumerated and intersected with the copy rectangle in one pass; an overlap fails rather
+  than crops and the refusal names the intruder, its process and the rectangle; a window with
+  a system backdrop is refused because glass transmits what is behind it; a copy of exactly
+  one colour is not a picture; a page still computing is not a report. Two renders of
+  unchanged code are byte-identical, so no tolerance has to be chosen for a comparison to
+  mean anything.
+- **Scenarios** — a case is a data file: steps, locators, acts and expectations as fields,
+  with the loop, the waits and the verdicts owned by the engine. Every field is validated at
+  insertion, so a refusal costs a retry and never a deletion. Run a file, a case or a tag,
+  and be told what was not run. Preconditions, fixtures and sampled environments are declared
+  per case and passed to every launch the case makes. A window can be declared shareable.
+  Each case carries the defect it exists to catch.
+- **The project declaration** — `winwright.json`, found by walking up from where a run
+  starts. Every key is optional; a reading that needs one this file does not declare is
+  recorded as not taken, never quietly skipped. `destructive` names the entries that end the
+  run, and a bare name is refused where the project ships more than one language, because a
+  name is the field a translation rewrites.
+- **The Claude Code plugin** — two commands in the repository wire every clone. The MCP
+  tools carry this project's scenario schema as their input schema, so a case an agent
+  writes is refused at insertion rather than at run time; the skill loads when a window is in
+  play rather than on every turn; a hook denies a hand-written harness script and names the
+  verb that replaces it.
+- **The in-app half (optional)** — `Winwright.InApp`, taken by the application under test
+  only if you want the readings a harness cannot take from outside the process: whether this
+  process's idea of the display is trustworthy, an element rendered to a PNG (measured,
+  arranged and updated in that order), the background a capture is drawn on from a brush the
+  application declares, the laid-out tree and what was drawn, and every popup held open for
+  as long as a run lasts. It references the engine not at all, and an application shipped to
+  its users reports nothing and writes no file.
+
+## Non-goals (stated, not accidental)
+
+- Cross-platform — the whole engine is UI Automation and Win32.
+- An external dependency in the engine.
+- An assertion about individual pixels.
+- A recorder that turns clicks into a scenario. The tool never writes the test.
+- A service, a daemon or a database.
+- A green that covers an assertion that did not run.
+
+## Installation
+
+The harness half goes in the project that drives the application:
+
+```xml
+<PackageReference Include="Winwright" Version="0.1.0" />
+```
+
+The in-app half goes in the application under test, and only if you want the readings it can
+only take from inside:
+
+```xml
+<PackageReference Include="Winwright.InApp" Version="0.1.0" />
+```
+
+Windows, .NET 10, `net10.0-windows`. The in-app half needs `<UseWPF>true</UseWPF>`.
+
+## Layout
+
+- `src/Winwright` — the engine: locating, acting, asserting, capturing, tracing, verdicts,
+  windowing, projects and scenarios. No package reference, deliberately.
+- `src/Winwright.InApp` — the in-app half. No reference to the engine, deliberately.
+- `src/Winwright.Fixture` — an application built to be hard to test, which is what every
+  refusal in the engine is paired against.
+- `tools/Winwright.RollCall` — the roll call, so a run short of what discovery found is not
+  reported as a pass.
+- `site/` — this site (Vite + React + Tailwind); its build emits this file, a Markdown twin
+  per route and `manifest.json`.
+- `docs/ROADMAP.md`, `docs/CHANGELOG.md`, `docs/IMPROVEMENTS.md` — governed by
+  [roadkeep](https://github.com/alegauss/roadkeep) and written by that tool, not by hand.
+
+## Data and network
+
+Nothing is uploaded, nothing is measured, and there is no account. A run is a process that
+starts, observes, reports and stops; the store a case writes through is fingerprinted before
+and compared after, so a run that changed the machine of whoever ran it is a refusal rather
+than a surprise.
+
+## Sponsor
+
+Sponsored by **Viglet** (https://www.viglet.org). Open source search and content tools for
+organisations with a lot to publish — run on your own servers, with no per-user licence.
+
+- **Viglet Turing ES** (https://turing.viglet.org) — Search for sites with a lot of content.
+  People ask in their own words and find it, with AI answers using only your own published
+  content.
+- **Viglet Shio CMS** (https://shio.viglet.org) — A content system that takes the page out of
+  the development queue: AI builds it, your communications team reviews and approves it.
+
+## Links
+
+- [Website](https://alegauss.github.io/winwright/): project page
+- [Manifest](https://alegauss.github.io/winwright/manifest.json): the routes and their Markdown twins
+- [GitHub repository](https://github.com/alegauss/winwright): source code
+- [Roadmap](https://github.com/alegauss/winwright/blob/main/docs/ROADMAP.md): what is open, and why each line exists
+- [Changelog](https://github.com/alegauss/winwright/blob/main/docs/CHANGELOG.md): what has shipped
+- [Sponsor](https://www.viglet.org): Viglet, open source search and content management
