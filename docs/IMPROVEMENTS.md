@@ -122,6 +122,28 @@ it.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+### §WW193 The walk that is about to exist three times
+
+`Deadlines` and `Sleeps` both read the sources: walk up to the solution file, enumerate
+`*.cs` under `src` and `tests`, skip `bin` and `obj`, skip the file that names the thing
+it is looking for, count occurrences, cache it once. The rules they apply are different
+and should be. The walk is the same twice.
+
+It is worth extracting because of how the first one went. `Deadlines` shipped recursing
+into `bin` and `obj` — thousands of files instead of two hundred, inside a suite whose
+other cases are waiting on five-second deadlines — and the guest went red twice with two
+different timing failures before the cause was found. The run went from 2m50s to 3m53s
+and back. That was one copy getting one exclusion wrong.
+
+There is already a third asked for. WW190 says in as many words that the reading which
+finds every case asserting a desk verdict without excusing the desk is "the same
+source-read `Deadlines` already does". Writing it against a shared walk costs nothing;
+writing it against a third hand-rolled one is a third chance at the same hour.
+
+What is owed is the walk alone — the trees, the exclusions and the caching — with each
+catalogue keeping its own question. A shared answer would be the opposite of what this
+is for.
+
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed
