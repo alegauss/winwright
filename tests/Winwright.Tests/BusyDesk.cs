@@ -120,19 +120,13 @@ internal static class BusyDesk
         Assert.False(missing.Satisfied);
         Assert.False(string.IsNullOrWhiteSpace(missing.Absence));
 
-        // The five conditions a desk-dependent act needs and never anything else. The last two are
-        // WW172's: a focus that left the application under test, and a notification area that could
-        // not be searched because the shell was covering it, are the same class of fact as a
-        // foreground Windows would not grant — and a case holding one has as little to say.
-        Assert.Contains(
-            missing.Name,
-            new[]
-            {
-                Foreground.PreconditionName,
-                Winwright.Acting.Keyboard.FocusPreconditionName,
-                Winwright.Acting.FocusReading.Named,
-                Winwright.Acting.TraySearch.PreconditionName,
-                Winwright.Acting.TrayMenu.PreconditionName,
-            });
+        // WW183. The engine says which conditions are the desk's, so this no longer keeps a list.
+        // The one it kept had missed two — the reading that measures a person at the keyboard, and
+        // the one WW38 added for a window standing over a capture — and a hole about something the
+        // machine could not have arranged is a hole nobody should accept.
+        Assert.True(
+            DeskFacts.Names(missing.Name),
+            $"'{missing.Name}' is not a fact this engine calls the desk's: "
+                + string.Join("; ", DeskFacts.Named));
     }
 }

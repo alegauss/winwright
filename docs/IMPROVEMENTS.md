@@ -2,29 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW183 The desk fact the list forgot
-
-`BusyDesk` decides whether a red becomes an excuse, and it decides it from five names
-typed into an array. The engine declares twelve conditions and readings; which five are
-desk facts is a judgement, and the judgement is kept nowhere but that array.
-
-It has already missed one. `ForeignInput.PreconditionName` — "no input this run did not
-synthesise" — is the reading WW157 added so a run can say the desk was not its alone,
-and `Preamble` takes it beside the other twelve.
-`ForeignInputTests.Input_this_run_synthesised_does_not_read_as_somebody_else` asserts
-directly against it and went red twice while WW172 was being measured, once on the host
-and once in the guest, both times saying somebody had used the machine and it was not
-this run. Both times that was true: a person was driving the machine.
-
-The case is right, the reading is right, and the red is the misattribution this project
-exists to end — a run that could not observe the thing it was asked about did not
-observe it. The case already guards on whether anything was sent; what it cannot do is
-tell its own typing from a second person's, which is precisely why the answer is a hole.
-
-What is owed is that the array stops being the record. A desk fact is what the engine
-says is one, read off the assembly the way `Provocation` and `Rendered` read theirs, so
-the sixth is not found by a red nobody can reproduce.
-
 ### §WW185 The sweep that never says which machine
 
 WW177 joined the reading to the verdict for a single run. `SweepSummary` is the same

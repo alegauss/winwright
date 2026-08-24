@@ -51,8 +51,17 @@ public sealed class ForeignInputTests : IDisposable
         //
         // Conditional on something having been sent, because the desk may have refused the act -
         // and a case that asserted regardless would go red for the very reason this task exists.
-        if (read.LastSynthesised != 0)
-            Assert.True(read.Alone, read.Sentence());
+        if (read.LastSynthesised == 0)
+            return;
+
+        // WW183. And conditional on nobody else having used the machine, which is the second half
+        // and the one that went red twice while WW172 was being measured. Both times somebody was
+        // driving the desk, both times the reading was right, and this case cannot tell its own
+        // typing from a second person's — which is precisely why the answer is a hole.
+        if (BusyDesk.Excused(read.AsPrecondition()))
+            return;
+
+        Assert.True(read.Alone, read.Sentence());
     }
 
     [Fact]

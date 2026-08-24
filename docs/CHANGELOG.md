@@ -23,6 +23,7 @@
 - ✅ **WW177** **the summary a run exits on never shows what the run read, so the readings and the verdict are two pages that never meet** — The summary prints what the run read above the verdict it makes legible, and refuses a reading that opened a store fingerprint and never closed it.
 - ✅ **WW179** **a desk fact met while building a fixture is thrown, so the case reads as a broken harness rather than a hole** — A fixture the desk refused answers the reading an act answers and the case excuses itself, so a held desk produced nine ordinary failures and no broken harness at all.
 - ✅ **WW182** **a suite reading invents its own shape instead of the engine's three-state Finding, and shipped able to say two things** — The tray census answers the engine's Finding, and a suite reading that answers a verdict without one is red here, so the third state is a property of the type.
+- ✅ **WW183** **a case reds when somebody touches the machine, though the engine already calls that a desk fact and names it** — The engine declares which conditions are the desk's and why each is, so the suite reads them instead of keeping a list that had already missed two.
 
 ## Block B — Attach, launch, and leave nothing behind
 
