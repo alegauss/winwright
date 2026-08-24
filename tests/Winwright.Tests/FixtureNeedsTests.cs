@@ -123,13 +123,16 @@ public sealed class FixtureNeedsTests
         // A check that cannot fail is the green this project exists to withdraw. The engine reads
         // the desk, so it names several of these on purpose — which makes it the control: the same
         // reading pointed at a tree that does ask comes back with something.
-        var engine = Directory
-            .EnumerateFiles(Path.Combine(Repository(), "src", "Winwright"), "*.cs", SearchOption.AllDirectories)
-            .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            .ToList();
+        // WW202. Checkout's walk and Checkout's reading, both. This hand-rolled the enumeration and
+        // left out obj while keeping bin — which is the exclusion WW193 was filed over — and read
+        // the sources raw, which is what that task was about. A control that reads differently from
+        // the check it controls is not a control.
+        var engine = Checkout.SourcesIn(Checkout.Engine).ToList();
 
         var found = engine
-            .SelectMany(file => Asks.Where(ask => File.ReadAllText(file).Contains(ask.Reaching, StringComparison.Ordinal)))
+            .SelectMany(file => Asks.Where(ask => File.ReadLines(file)
+                .Select(Checkout.Code)
+                .Any(line => line.Contains(ask.Reaching, StringComparison.Ordinal))))
             .Select(one => one.Reaching)
             .Distinct(StringComparer.Ordinal)
             .ToList();
