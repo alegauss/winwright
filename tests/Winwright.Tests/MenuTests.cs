@@ -109,6 +109,11 @@ public sealed class MenuTests : IDisposable
 
         var expanded = Menu.Expand(dialog.Frame, settleMs: 400, pollMs: 20);
 
+        // WW172: the walk before this one needed the desk too, so where it never got it there is no
+        // highlight to be anywhere and nothing here is a statement about the menu.
+        if (BusyDesk.Excused(expanded.AsAssertion("right on an entry with no submenu says where it went")))
+            return;
+
         // Right on a top-level menu with no submenu moves to the next menu, which is a real
         // answer and not an error: what it says is where the highlight actually went.
         Assert.NotEqual("Open", expanded.Highlighted);
@@ -136,6 +141,9 @@ public sealed class MenuTests : IDisposable
 
         var walked = Menu.To(dialog.Frame, "Quit");
 
+        if (BusyDesk.Excused(walked.AsAssertion("walking past a destructive entry only highlights it")))
+            return;
+
         Assert.True(walked.Reached);
         Assert.Contains("Terminal", walked.Passed);
         Assert.Equal("Quit", walked.Highlighted);
@@ -150,6 +158,12 @@ public sealed class MenuTests : IDisposable
         Menu.Enter(dialog.Frame);
 
         var walked = Menu.To(dialog.Frame, "Nonexistent");
+
+        // WW172, and the arm easiest to get wrong: this case wants a walk that ran and found
+        // nothing. A walk that was never sent also answers Reached false, and asserting the
+        // sentence past that reports the desk as a defect in the menu.
+        if (BusyDesk.Excused(walked.AsAssertion("a walk that finds nothing leaves the menu open")))
+            return;
 
         Assert.False(walked.Reached);
         Assert.Contains("did not reach", walked.ToString());
@@ -166,6 +180,9 @@ public sealed class MenuTests : IDisposable
         Menu.Enter(dialog.Frame);
 
         var walked = Menu.To(dialog.Frame, "Nonexistent");
+
+        if (BusyDesk.Excused(walked.AsAssertion("the menu coming round is what bounds the walk")))
+            return;
 
         Assert.True(walked.Hops < Menu.MostEntries, $"the walk took {walked.Hops} hops");
         Assert.Equal(walked.Passed.Distinct().Count(), walked.Passed.Count);
@@ -188,7 +205,11 @@ public sealed class MenuTests : IDisposable
     {
         Menu.Enter(dialog.Frame);
 
-        var step = Menu.To(dialog.Frame, "Open").AsTraceStep();
+        var walked = Menu.To(dialog.Frame, "Open");
+        if (BusyDesk.Excused(walked.AsAssertion("a walk that reached its entry is clean")))
+            return;
+
+        var step = walked.AsTraceStep();
 
         Assert.Equal(Winwright.Tracing.StepVerdict.Ok, step.Verdict);
         Assert.Equal("Open", step.ReadBack);

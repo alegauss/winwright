@@ -38,15 +38,49 @@ internal static class BusyDesk
         // A hole with no precondition is worse than a failure: it excuses a check without saying
         // what excused it, which is the shape of green this whole project exists to withdraw.
         Assert.NotNull(verdict.Missing);
-        Assert.False(verdict.Missing.Satisfied);
-        Assert.False(string.IsNullOrWhiteSpace(verdict.Missing.Absence));
-
-        // One of the two conditions an input act needs from the desk, and never anything else: a
-        // hole about something the machine could have arranged is a hole nobody should accept.
-        Assert.Contains(
-            verdict.Missing.Name,
-            new[] { Foreground.PreconditionName, Winwright.Acting.Keyboard.FocusPreconditionName });
+        Excusing(verdict.Missing);
 
         return true;
+    }
+
+    /// <summary>
+    /// The same for a reading that answers a precondition and no verdict — the focus reading, which
+    /// a case holds directly rather than through an act.
+    /// </summary>
+    /// <param name="condition">What the reading turned out to be.</param>
+    /// <returns>True where the desk refused, so the caller has nothing further to check.</returns>
+    internal static bool Excused(Precondition condition)
+    {
+        ArgumentNullException.ThrowIfNull(condition);
+
+        if (condition.Satisfied)
+            return false;
+
+        Excusing(condition);
+        return true;
+    }
+
+    /// <summary>
+    /// That the hole is an honest one, and about the desk rather than about anything the machine
+    /// could have arranged.
+    /// </summary>
+    private static void Excusing(Precondition missing)
+    {
+        Assert.False(missing.Satisfied);
+        Assert.False(string.IsNullOrWhiteSpace(missing.Absence));
+
+        // The four conditions a desk-dependent act needs and never anything else. The last two are
+        // WW172's: a focus that left the application under test, and a notification area that could
+        // not be searched because the shell was covering it, are the same class of fact as a
+        // foreground Windows would not grant — and a case holding one has as little to say.
+        Assert.Contains(
+            missing.Name,
+            new[]
+            {
+                Foreground.PreconditionName,
+                Winwright.Acting.Keyboard.FocusPreconditionName,
+                Winwright.Acting.FocusReading.Named,
+                Winwright.Acting.TraySearch.PreconditionName,
+            });
     }
 }

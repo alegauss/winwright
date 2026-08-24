@@ -41,8 +41,12 @@ public sealed class FocusScopeTests : IDisposable
     {
         var read = Focus.In(dialog.Frame);
 
-        // This process owns the dialog, and this process holds the focus, so the reading is about
-        // something this run is entitled to talk about.
+        // WW172. This process owns the dialog and usually holds the focus — but "usually" is the
+        // whole of it: where something else took the desk, the reading is about that and this case
+        // has nothing to say about scoping. Going red then is the misattribution one floor down.
+        if (BusyDesk.Excused(read.AsPrecondition()))
+            return;
+
         Assert.True(read.Inside, read.Sentence());
         Assert.NotNull(read.Held);
         Assert.Same(read.Element, read.Held);
@@ -72,9 +76,11 @@ public sealed class FocusScopeTests : IDisposable
         // WW167. Every case here passed this text as the message on a failing assertion, which is
         // text a green never prints — so the one rendering the focus reading has was the only one in
         // the engine no case read back. Both ways round, because the sentence is two sentences.
-        var inside = Focus.In(dialog.Frame).Sentence();
+        var held = Focus.In(dialog.Frame);
+        if (BusyDesk.Excused(held.AsPrecondition()))
+            return;
 
-        Assert.Contains("holds the focus, and it is this application's.", inside, StringComparison.Ordinal);
+        Assert.Contains("holds the focus, and it is this application's.", held.Sentence(), StringComparison.Ordinal);
 
         var elsewhere = Focus.In(GetDesktopWindow());
 
@@ -119,6 +125,9 @@ public sealed class FocusScopeTests : IDisposable
         Assert.False(elsewhere.Inside, "the desktop window turned out to be this process's");
 
         var walk = Menu.To(dialog.Frame, "Nonexistent");
+        if (BusyDesk.Excused(walk.AsAssertion("the menu reached it")))
+            return;
+
         Assert.True(walk.Sent, walk.ToString());
 
         // The real walk stayed inside, which is the control: the reading is a fact about the run

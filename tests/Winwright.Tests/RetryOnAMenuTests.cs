@@ -29,7 +29,11 @@ public sealed class RetryOnAMenuTests : IDisposable
     [Fact]
     public void Expanding_a_real_submenu_through_the_cap_reports_what_it_took()
     {
-        Menu.Enter(dialog.Frame);
+        // WW172: everything after this needs the desk, so a menu that was never entered has
+        // nothing to say about what a retry took.
+        if (BusyDesk.Excused(Menu.Enter(dialog.Frame).AsAssertion("the menu bar is entered")))
+            return;
+
         Menu.To(dialog.Frame, "Recent");
 
         var attempted = Retry.Bounded(
@@ -47,7 +51,9 @@ public sealed class RetryOnAMenuTests : IDisposable
     [Fact]
     public void An_entry_that_never_expands_still_goes_red_after_the_cap()
     {
-        Menu.Enter(dialog.Frame);
+        if (BusyDesk.Excused(Menu.Enter(dialog.Frame).AsAssertion("the menu bar is entered")))
+            return;
+
         Menu.To(dialog.Frame, "New");
 
         // "New" has no submenu, so Right walks on to the next top-level menu instead. The point

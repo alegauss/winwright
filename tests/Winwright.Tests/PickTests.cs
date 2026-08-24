@@ -91,6 +91,13 @@ public sealed class PickTests : IDisposable
     {
         var picked = Pick.Value(Combo, "Bravo", byKeyboard: true);
 
+        // WW172. The keyboard route needs the desk, and Pick already answers a hole when it did not
+        // get it. Asserting Landed past that answer is the misattribution this project exists to
+        // end, committed by its own suite: a guest run with the Start menu open turned 32 cases red
+        // about the application, and this was one of them.
+        if (BusyDesk.Excused(picked.AsAssertion("the nearer end anchors the walk down")))
+            return;
+
         Assert.True(picked.Landed);
         Assert.Equal(PickRoute.Keyboard, picked.Route);
         Assert.Equal(["Alpha", "Bravo"], picked.Passed);
@@ -101,6 +108,9 @@ public sealed class PickTests : IDisposable
     public void The_keyboard_route_anchors_at_the_nearer_end_going_up()
     {
         var picked = Pick.Value(Combo, "Delta", byKeyboard: true);
+
+        if (BusyDesk.Excused(picked.AsAssertion("the nearer end anchors the walk up")))
+            return;
 
         Assert.True(picked.Landed);
         Assert.Equal(["Echo", "Delta"], picked.Passed);
@@ -113,6 +123,9 @@ public sealed class PickTests : IDisposable
         // nearer end it is one, and the observation about that one switch survives.
         var picked = Pick.Value(Combo, "Echo", byKeyboard: true);
 
+        if (BusyDesk.Excused(picked.AsAssertion("the walk is bounded by the nearer end")))
+            return;
+
         Assert.Equal(["Echo"], picked.Passed);
         Assert.Equal(1, picked.SelectionChanges);
     }
@@ -122,6 +135,9 @@ public sealed class PickTests : IDisposable
     {
         var picked = Pick.Value(Combo, "Charlie", byKeyboard: true);
 
+        if (BusyDesk.Excused(picked.AsAssertion("the route is part of the answer")))
+            return;
+
         Assert.Contains("Alpha -> Bravo -> Charlie", picked.ToString());
         Assert.Contains("by the keyboard in 3 changes", picked.ToString());
     }
@@ -129,7 +145,11 @@ public sealed class PickTests : IDisposable
     [Fact]
     public void A_walk_of_more_than_one_change_is_carried_into_the_trace()
     {
-        var step = Pick.Value(Combo, "Charlie", byKeyboard: true).AsTraceStep();
+        var walked = Pick.Value(Combo, "Charlie", byKeyboard: true);
+        if (BusyDesk.Excused(walked.AsAssertion("the walk reaches the trace")))
+            return;
+
+        var step = walked.AsTraceStep();
 
         Assert.Equal(3, step.Polls);
         Assert.Contains("3 changes", step.Detail);

@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW172** (deps: —) **a desk another window owns turns 32 cases red about the application, which is the confusion this tool exists to end** — A case the desk would not let this run observe is unchecked and never failed, because a red nobody can reproduce teaches its own reader to distrust every red. → §WW172
 - 📋 **WW176** (deps: —) **32 criteria decide when a block is finished and no case names evidence for any of them, so the reading is a recollection** — Each criterion is paired with what demonstrates it, because a task was filed and designed against a claim that a check was missing when it had shipped. → §WW176
 - 📋 **WW177** (deps: —) **the summary a run exits on never shows what the run read, so the readings and the verdict are two pages that never meet** — The summary carries the reading the run took, because an exit code with no reading beside it sends whoever got it to a second page nothing prints. → §WW177
 

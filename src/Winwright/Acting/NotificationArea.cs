@@ -206,6 +206,14 @@ public sealed record TraySearch
     /// asked about; a search that could not reach the overflow never got to ask, so it is a
     /// <em>hole</em> and never a red about the code.
     /// </summary>
+    /// <summary>
+    /// What the condition is called wherever it is reported. A constant and not a sentence built
+    /// round the icon's name: a precondition is a thing a reader recognises across runs, and one
+    /// spelled differently for every icon is one nothing can be matched against. What was looked
+    /// for is in <see cref="Because" />, where it belongs.
+    /// </summary>
+    public const string PreconditionName = "the notification area can be searched";
+
     /// <param name="named">What the assertion claims, as the scenario spells it.</param>
     public AssertionResult AsAssertion(string named)
     {
@@ -214,7 +222,7 @@ public sealed record TraySearch
 
         return Everywhere
             ? AssertionResult.Fail(named, Sentence())
-            : AssertionResult.Unchecked(named, Precondition.Absent($"a notification area this run can search for '{Named}'", Because));
+            : AssertionResult.Unchecked(named, Precondition.Absent(PreconditionName, Because));
     }
 
     /// <summary>

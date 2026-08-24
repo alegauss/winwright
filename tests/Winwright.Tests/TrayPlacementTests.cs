@@ -27,6 +27,9 @@ public sealed class TrayPlacementTests
         // No waiting here on purpose. Every case in the suite looks straight after Add, so what
         // has to hold is that looking straight after Add works — not that it works if you wait.
         var searched = NotificationArea.Find(icon.Tip);
+        if (BusyDesk.Excused(searched.AsAssertion("the icon this run added can be found")))
+            return;
+
         Assert.True(searched.Found, searched.Sentence());
     }
 
@@ -51,6 +54,9 @@ public sealed class TrayPlacementTests
             using var icon = TrayIconFixture.Add($"winwright placement {round}");
 
             var searched = NotificationArea.Find(icon.Tip);
+            if (BusyDesk.Excused(searched.AsAssertion("the icon this run added can be found")))
+                return;
+
             Assert.True(searched.Found, searched.Sentence());
             NotificationArea.CloseOverflow();
         }
@@ -66,6 +72,12 @@ public sealed class TrayPlacementTests
         Assert.NotEqual(first.Tip, second.Tip);
         var one = NotificationArea.Find(first.Tip);
         var other = NotificationArea.Find(second.Tip);
+
+        if (BusyDesk.Excused(one.AsAssertion("the first icon can be found"))
+            || BusyDesk.Excused(other.AsAssertion("the second icon can be found")))
+        {
+            return;
+        }
 
         Assert.True(one.Found, one.Sentence());
         Assert.True(other.Found, other.Sentence());

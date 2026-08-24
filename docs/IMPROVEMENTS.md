@@ -2,29 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW172 The suite breaks the promise the engine keeps
-
-Measured, not supposed. A guest run came back with 32 failures across nine classes —
-menus, the notification area, traversal, pick, focus, the capture route. A screenshot of
-the guest's desk showed the Start menu wide open, holding the foreground and covering
-the notification area. Dismissing it took the same tree from 32 failures to 4, and a
-shell restart took it to zero. Nothing in the run said any of that. Every one of the 32
-read as the application being wrong.
-
-This is the defect this project was started over, in the suite that proves the project.
-The engine already knows the answer: a foreground Windows would not grant is a hole and
-not a failure, the run's own reading takes the foreground before any assertion, and
-`Precondition.Absent` is the shape a reading that could not be taken comes back as. The
-cases here reach past all of it and assert directly.
-
-So what is owed is not a new capability. It is the existing one, applied to the suite's
-own desk-dependent cases: a case whose act needed the foreground and did not get it
-resolves unchecked, names what held the desk instead, and exits 2 rather than 1.
-
-The block's first criterion says a degraded run is legible without reading the log.
-Thirty-two reds and a screenshot is the opposite of that, and it was this repository's
-own suite that produced them.
-
 ### §WW176 The claim that decides a block, held up by memory
 
 WW169 is the measurement. It was filed with a full design section arguing that the
