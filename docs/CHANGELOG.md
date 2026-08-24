@@ -105,6 +105,7 @@
 - 🗑 **WW186** **the copy route is the one a window can stand over, and it writes its file without asking what did** — superseded by WW40: Filed without reading Block E's open lines, where WW40 had asked the same question since before it: the receipt now refuses an overlap and names it.
 - ✅ **WW41** **a window with a system backdrop transmits what is behind it through the glass** — The compositor is asked which backdrop a window opted into, and a receipt handed that reading refuses rather than warns, exempting the popups the copy route exists for.
 - ✅ **WW42** **a copy of exactly one colour is written and reported as a capture** — Distinct colours are counted on any picture including the opaque copy the alpha scan cannot answer for, and a capture of exactly one is refused rather than reported.
+- ✅ **WW43** **a page still computing is photographed and announced as a picture of a report** — A project declares which keys are its loading strings, the text is resolved out of its own language files, and a key none of them carries refuses instead of matching nothing.
 
 ## Block F — Assert — the expectation is derived, never typed
 

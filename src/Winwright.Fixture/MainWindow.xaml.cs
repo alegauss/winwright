@@ -75,6 +75,10 @@ public partial class MainWindow : Window
         save.Content = said.Says("buttons.save");
         close.Content = said.Says("buttons.close");
         localizedLabel.Text = said.Says(Strings.PlaceholderKey);
+
+        // WW43: the loading note is a declared string like every other caption here, so a check
+        // reading the project's language files finds it rather than matching a hard-coded phrase.
+        loadingNote.Text = said.Says(Strings.LoadingKey);
     }
 
     /// <summary>Held for the window's life, because letting go puts every popup back.</summary>
@@ -112,6 +116,7 @@ public partial class MainWindow : Window
     /// <param name="milliseconds">How long to stay loading. Zero finishes on the first tick.</param>
     private void LoadFor(int milliseconds)
     {
+        loadingNote.Text = (Speaking ?? Strings.Load("en")).Says(Strings.LoadingKey);
         loadingNote.Visibility = Visibility.Visible;
         reportNote.Visibility = Visibility.Collapsed;
         reportSwatch.Visibility = Visibility.Collapsed;

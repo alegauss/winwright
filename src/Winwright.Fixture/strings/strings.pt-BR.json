@@ -9,6 +9,8 @@
     "close": "Fechar"
   },
   "labels": {
+    "loading": "Ainda carregando",
+
     "heading": "winwright fixture",
     "profileName": "Perfil: {name}"
   }

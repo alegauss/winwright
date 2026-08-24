@@ -174,18 +174,6 @@ added later is red until somebody says.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW43 The page is still saying it is loading
-
-Measured in claude-tray: a report on a machine with 213 recent transcript files took
-about 25 seconds to build, and at the default wait the copy came back as a heading, a
-subtitle and the words computing your consumption pace. Two variants captured that way
-are near-identical for the same reason, so comparing them proves nothing, and it was
-caught only because somebody looked. A longer wait is the wrong answer twice - it slows
-every capture and still passes the page that needed longer still - so the loading
-strings are read from the project's own language files and asked of the tree instead. A
-key none of those files carries refuses the run, because a check that silently matches
-nothing is the shape of defect this whole path exists to stop.
-
 ### §WW46 Byte-identical is the cheapest visual assertion
 
 freewilly's window skill states the rule: a change meant to be invisible must produce a

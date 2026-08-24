@@ -34,6 +34,14 @@ public sealed class Strings
     /// <summary>The key whose value carries a placeholder, which the label rule has to refuse.</summary>
     public const string PlaceholderKey = "labels.profileName";
 
+    /// <summary>
+    /// The key the loading note carries. WW43: a check that a page is still computing reads the
+    /// loading strings out of the project's own language files, so the note has to be one of them
+    /// rather than a caption typed into the markup — a fixture whose text nothing declares cannot
+    /// drive the check it exists for.
+    /// </summary>
+    public const string LoadingKey = "labels.loading";
+
     /// <summary>The language these strings are in.</summary>
     public string Culture { get; }
 

@@ -116,12 +116,20 @@ needs one this file does not declare is **recorded as not taken**, never quietly
   "sourceIgnore": ["bin", "obj"],
   "fingerprintStore": "%APPDATA%/YourApp",
   "languageFiles": ["strings.en.json", "strings.pt-BR.json"],
+  "loading": ["report.computing", "common.pleaseWait"],
   "language": { "preferenceFile": "settings.json", "preferenceKey": "ui.language", "fallback": "en" },
   "timeouts": { "resolve": 5000, "stop": 5000 },
   "attempts": 3,
   "destructive": [{ "id": "quitCommand" }, { "key": "menu.exit" }]
 }
 ```
+
+`loading` names the **keys** of the strings your application shows while a page is still computing,
+never the text: a phrase written here is one a translation rewrites, and a check comparing against it
+starts matching nothing the day somebody ships another language. `Loading.In` resolves each key out
+of `languageFiles` for whichever language the run resolved and asks the tree, so a page that is still
+saying it is loading is a failure rather than a photograph. A key none of those files carries
+**refuses the run** — a check that silently matches nothing reports a page as finished forever.
 
 `destructive` names the entries that end the run, and it is the one key with a refusal of its own: a
 bare name is refused where the project ships more than one language, because a name is the field a

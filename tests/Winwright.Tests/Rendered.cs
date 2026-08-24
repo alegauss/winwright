@@ -121,6 +121,8 @@ internal static class Rendered
             null, "what a launch started and what it passed, or that it passed nothing"),
         new("LayoutReading.Sentence", "LayoutTests.A_dump_with_nothing_in_it_is_unchecked_and_never_a_pass",
             null, "whether a page laid out as declared, or was never read at all"),
+        new("LoadingCheck.Sentence", "LoadingTests.A_page_still_computing_says_so_rather_than_being_photographed",
+            null, "whether a page is still showing one of the strings its project declares as loading text"),
         new("LocatorMiss.Sentence", "LocatorMissTests.A_step_under_something_shut_that_is_nowhere_else_names_the_route",
             null, "why a locator matched nothing, and the route that would reach it"),
         new("NameCheck.Sentence", "NameCheckTests.A_template_nobody_filled_in_is_reported_as_one",

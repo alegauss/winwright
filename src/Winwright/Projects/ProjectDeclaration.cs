@@ -41,6 +41,8 @@ public sealed class ProjectDeclaration
         fingerprintStore = Resolve(shape.FingerprintStore);
         LanguageFiles = new ReadOnlyCollection<string>(
             (shape.LanguageFiles ?? []).Select(Resolve).OfType<string>().ToList());
+        Loading = new ReadOnlyCollection<string>(
+            (shape.Loading ?? []).Select(one => one?.Trim() ?? "").Where(one => one.Length > 0).ToList());
         SourceIgnore = new ReadOnlyCollection<string>(
             (shape.SourceIgnore ?? DefaultSourceIgnore)
                 .Where(name => !string.IsNullOrWhiteSpace(name))
@@ -71,6 +73,17 @@ public sealed class ProjectDeclaration
 
     /// <summary>The language files this project ships, resolved. Empty where none are declared.</summary>
     public IReadOnlyList<string> LanguageFiles { get; }
+
+    /// <summary>
+    /// The keys of the strings this application shows while a page is still computing.
+    /// <para>
+    /// WW43. Keys and never the text: a phrase typed here is one a translation rewrites, and a
+    /// check comparing against it starts matching nothing on the day somebody ships another
+    /// language. The text is read from <see cref="LanguageFiles" /> for whichever language the run
+    /// resolved, and a key none of them carries refuses rather than matching nothing.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Loading { get; }
 
     /// <summary>
     /// Directory names the staleness check walks past, by simple name at any depth. Build output
@@ -129,6 +142,7 @@ public sealed class ProjectDeclaration
         "sourceRoot" => sourceRoot is not null,
         "fingerprintStore" => fingerprintStore is not null,
         "languageFiles" => LanguageFiles.Count > 0,
+        "loading" => Loading.Count > 0,
         "language.fallback" => LanguageFallback is not null,
         "destructive" => Destructive.Any,
         _ => Timeouts.All.ContainsKey(key.StartsWith("timeouts.", StringComparison.Ordinal) ? key[9..] : key),
@@ -193,6 +207,8 @@ public sealed class ProjectDeclaration
         [JsonPropertyName("fingerprintStore")] public string? FingerprintStore { get; init; }
 
         [JsonPropertyName("languageFiles")] public IReadOnlyList<string>? LanguageFiles { get; init; }
+
+        [JsonPropertyName("loading")] public IReadOnlyList<string>? Loading { get; init; }
 
         [JsonPropertyName("sourceIgnore")] public IReadOnlyList<string>? SourceIgnore { get; init; }
 

@@ -9,6 +9,8 @@
     "close": "Close"
   },
   "labels": {
+    "loading": "Still loading",
+
     "heading": "winwright fixture",
 
     "//": "The pathological key. An exact-name read can never match this, and a rule that skipped",
