@@ -145,6 +145,61 @@ public sealed class LoadingTests : IDisposable
     }
 
     [Fact]
+    public void A_walk_that_ran_out_is_not_a_page_that_has_finished()
+    {
+        // WW189, and the defect this shipped with an hour earlier. Walked two deep the loading note
+        // is out of reach, so nothing is found — and answering "finished" to that is a green
+        // covering a check that never got to the control it was about.
+        //
+        // Two and not five: five reaches this fixture's note, measured. The depth that truncates is
+        // a property of the tree being walked, which is exactly why a reading cannot decide from a
+        // number whether its own absence means anything.
+        var declaration = Declared("labels.loading");
+        var window = Window("--loading=10000", $"--language={Speaking(declaration)}");
+
+        var shallow = Loading.In(window, declaration, depth: 2);
+
+        Assert.True(shallow.Was, shallow.Sentence());
+        Assert.Empty(shallow.Showing);
+        Assert.False(shallow.Whole, "the walk reached everything at depth two, so this proves nothing");
+        Assert.False(shallow.Settled, shallow.Sentence());
+
+        Assert.Contains("is not settled", shallow.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("element(s) were not walked", shallow.Sentence(), StringComparison.Ordinal);
+
+        var verdict = shallow.AsAssertion();
+        Assert.Equal(AssertionOutcome.Unchecked, verdict.Outcome);
+        Assert.Equal(Winwright.Tracing.StepVerdict.Unchecked, shallow.AsTraceStep().Verdict);
+
+        // And the control: the same window walked deep enough answers, which is what makes the
+        // arm above a statement about the walk rather than about the page.
+        var deep = Loading.In(window, declaration);
+
+        Assert.True(deep.Whole, deep.Sentence());
+        Assert.True(deep.Computing, deep.Sentence());
+    }
+
+    [Fact]
+    public void Finding_the_string_is_proof_and_a_short_walk_cannot_argue_with_it()
+    {
+        // The asymmetry that makes this right rather than merely cautious. Not finding a string is
+        // only an answer where the walk reached everything; finding one is positive evidence, and a
+        // walk that stopped short somewhere else has nothing to say about it.
+        var declaration = Declared("labels.loading");
+        var window = Window("--loading=10000", $"--language={Speaking(declaration)}");
+
+        // Deep enough to reach the note, and shallow enough that something else is left unwalked.
+        var read = Loading.In(window, declaration, depth: 5);
+
+        if (read.Showing.Count == 0)
+            return;
+
+        Assert.True(read.Computing, read.Sentence());
+        Assert.Equal(AssertionOutcome.Failed, read.AsAssertion().Outcome);
+        Assert.Equal(Winwright.Tracing.StepVerdict.Failed, read.AsTraceStep().Verdict);
+    }
+
+    [Fact]
     public void A_key_none_of_the_language_files_carries_refuses_rather_than_matching_nothing()
     {
         // The whole of the second half. A check that silently matches nothing reports a page as

@@ -15,7 +15,6 @@
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 - 📋 **WW184** (deps: —) **eight files carry a sleep and nothing says which are the deadline machinery and which are a wait in disguise** — Every sleep is paired with why it is not a wait, because this block is called finished on a criterion saying none exists and eight files have one. → §WW184
-- 📋 **WW189** (deps: —) **a search over a walk that ran out answers not showing, so a page too deep to reach reports as finished** — A search says it did not reach rather than that it found nothing, because the walk already counts what it elided and dropping that turns a short walk into a green. → §WW189
 
 ## Block D — Act — patterns before pointers
 

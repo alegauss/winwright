@@ -10,12 +10,27 @@ namespace Winwright.Asserting;
 /// <summary>What asking a window whether it is still computing turned out to say.</summary>
 public sealed record LoadingCheck
 {
-    internal LoadingCheck(IReadOnlyList<Label> watched, IReadOnlyList<Label> showing, string absence)
+    internal LoadingCheck(IReadOnlyList<Label> watched, IReadOnlyList<Label> showing, int notWalked, string absence)
     {
         Watched = watched;
         Showing = showing;
+        NotWalked = notWalked;
         Absence = absence;
     }
+
+    /// <summary>
+    /// How many elements the walk did not reach.
+    /// <para>
+    /// WW189. Finding a loading string is positive evidence and a walk that stopped short cannot
+    /// take it away. <em>Not</em> finding one is only an answer where the walk reached everything —
+    /// otherwise the page may be saying it is loading somewhere nobody looked, and reporting that as
+    /// finished is a green covering a check that never got to the control it was about.
+    /// </para>
+    /// </summary>
+    public int NotWalked { get; }
+
+    /// <summary>Whether the walk reached everything, so an absence in it is a real absence.</summary>
+    public bool Whole => NotWalked == 0;
 
     /// <summary>What this reading is called wherever it is reported.</summary>
     public const string PreconditionName = "the page has finished computing";
@@ -32,8 +47,14 @@ public sealed record LoadingCheck
     /// <summary>Whether the reading was taken at all.</summary>
     public bool Was => Absence.Length == 0;
 
-    /// <summary>Whether the page has finished. False on a reading that was never taken.</summary>
-    public bool Settled => Was && Showing.Count == 0;
+    /// <summary>
+    /// Whether the page has finished. False on a reading that was never taken, and false where the
+    /// walk ran out — an absence in a walk that stopped short is not an absence.
+    /// </summary>
+    public bool Settled => Was && Whole && Showing.Count == 0;
+
+    /// <summary>Whether the page is showing loading text, which truncation cannot take away.</summary>
+    public bool Computing => Was && Showing.Count > 0;
 
     /// <summary>What was read, said either way.</summary>
     public string Sentence()
@@ -41,11 +62,19 @@ public sealed record LoadingCheck
         if (!Was)
             return $"whether the page is still computing could not be read: {Absence}.";
 
-        if (Showing.Count == 0)
-            return $"the page is showing none of the {Watched.Count} loading string(s) this project declares.";
+        if (Showing.Count > 0)
+        {
+            var named = string.Join(", ", Showing.Select(one => $"'{one.Text}' ({one.Key})"));
+            return $"the page is still computing: it is showing {named}, which this project declares as loading text.";
+        }
 
-        var named = string.Join(", ", Showing.Select(one => $"'{one.Text}' ({one.Key})"));
-        return $"the page is still computing: it is showing {named}, which this project declares as loading text.";
+        if (!Whole)
+        {
+            return $"whether the page is still computing is not settled: none of the {Watched.Count} loading "
+                + $"string(s) is among the elements walked, and {NotWalked} element(s) were not walked.";
+        }
+
+        return $"the page is showing none of the {Watched.Count} loading string(s) this project declares.";
     }
 
     /// <inheritdoc cref="Sentence" />
@@ -62,7 +91,13 @@ public sealed record LoadingCheck
         if (!Was)
             return AssertionResult.Unchecked(named, Precondition.Absent(PreconditionName, Absence));
 
-        return Settled ? AssertionResult.Pass(named, Sentence()) : AssertionResult.Fail(named, Sentence());
+        // Showing one is proof and a short walk cannot argue with it, so this arm comes first.
+        if (Computing)
+            return AssertionResult.Fail(named, Sentence());
+
+        return Whole
+            ? AssertionResult.Pass(named, Sentence())
+            : AssertionResult.Unchecked(named, Precondition.Absent(PreconditionName, Sentence()));
     }
 
     /// <summary>The step a trace records.</summary>
@@ -72,7 +107,7 @@ public sealed record LoadingCheck
         Verb = "read whether the page is still computing",
         Locator = named,
         Pattern = "the loading strings the project declares",
-        ReadBack = Was ? $"{Showing.Count} of {Watched.Count} showing" : null,
+        ReadBack = Was ? $"{Showing.Count} of {Watched.Count} showing, {NotWalked} not walked" : null,
         Verdict = Verdict(),
         Detail = Settled ? null : Sentence(),
     };
@@ -82,7 +117,10 @@ public sealed record LoadingCheck
         if (!Was)
             return StepVerdict.Unchecked;
 
-        return Settled ? StepVerdict.Ok : StepVerdict.Failed;
+        if (Computing)
+            return StepVerdict.Failed;
+
+        return Whole ? StepVerdict.Ok : StepVerdict.Unchecked;
     }
 }
 
@@ -111,9 +149,15 @@ public sealed record LoadingCheck
 public static class Loading
 {
     /// <summary>
-    /// How deep this walks by default. Measured against the proving ground: its loading note is
-    /// eight levels down, which is what an ordinary tab strip over a stack panel costs, and
-    /// <see cref="Inspect.DefaultDepth" /> would not have reached it.
+    /// How deep this walks by default, and deeper than <see cref="Inspect.DefaultDepth" /> on
+    /// purpose.
+    /// <para>
+    /// Not because the proving ground needs it — its loading note is inside a tab strip and five
+    /// reaches it, measured. Because five is a claim about somebody else's tree shape, and the one
+    /// place this reading is wrong is the place it stops short: an absence in a walk that ran out
+    /// is not an absence. <see cref="LoadingCheck.Whole" /> is what makes that safe rather than
+    /// lucky, and the depth only decides how often a run pays for it.
+    /// </para>
     /// </summary>
     public const int Deep = 12;
 
@@ -141,7 +185,7 @@ public static class Loading
         if (!declaration.Declares("loading"))
         {
             return new LoadingCheck(
-                [], [], $"{declaration.Path} declares no loading strings, so nothing here knows what "
+                [], [], 0, $"{declaration.Path} declares no loading strings, so nothing here knows what "
                     + "this application says while it is still computing");
         }
 
@@ -151,15 +195,19 @@ public static class Loading
         var watched = declaration.Loading.Select(key => Labels.For(key, declaration)).ToList();
 
         List<string> texts;
+        var notWalked = 0;
         try
         {
             var tree = Inspect.Under(root, depth);
             if (tree is null)
             {
                 return new LoadingCheck(
-                    watched, [], "the window has no control view to read, so nothing it is showing can be seen");
+                    watched, [], 0, "the window has no control view to read, so nothing it is showing can be seen");
             }
 
+            // WW189: what the walk did not reach, carried rather than dropped. Above zero, not
+            // finding a loading string is not the same as the page not showing one.
+            notWalked = tree.NotWalked;
             texts = tree
                 .Walk()
                 .Select(one => one.Facts.Name)
@@ -169,13 +217,13 @@ public static class Loading
         catch (Exception gone)
             when (gone is ElementNotAvailableException or InvalidOperationException)
         {
-            return new LoadingCheck(watched, [], $"the window went away while it was being read: {gone.Message}");
+            return new LoadingCheck(watched, [], 0, $"the window went away while it was being read: {gone.Message}");
         }
 
         var showing = watched
             .Where(one => texts.Any(text => text.Contains(one.Text, StringComparison.Ordinal)))
             .ToList();
 
-        return new LoadingCheck(watched, showing, "");
+        return new LoadingCheck(watched, showing, notWalked, "");
     }
 }

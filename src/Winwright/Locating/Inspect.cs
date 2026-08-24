@@ -22,6 +22,22 @@ public sealed record InspectedElement(
             foreach (var deeper in child.Walk())
                 yield return deeper;
     }
+
+    /// <summary>
+    /// How many elements this walk did not reach, anywhere under here.
+    /// <para>
+    /// WW189. <see cref="Elided" /> is per element and <c>Inspect.Render</c> prints it, so a
+    /// person reading the page is told. A caller <em>searching</em> the walk was not: it looked at
+    /// the elements it got and said nothing about the ones it did not, so a control deeper than the
+    /// walk went read as a control that is not there. Above zero, an absence is not a finding.
+    /// </para>
+    /// </summary>
+    public int NotWalked => Walk().Sum(one => one.Elided);
+
+    /// <summary>
+    /// Whether the walk reached everything under here, so an absence in it is a real absence.
+    /// </summary>
+    public bool Whole => NotWalked == 0;
 }
 
 /// <summary>

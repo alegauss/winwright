@@ -25,11 +25,15 @@ public sealed class JoinedSummaryTests
     [Fact]
     public void The_page_carries_the_reading_and_then_the_verdict_it_makes_legible()
     {
-        var page = VerdictSummary.Render(Degraded(), Read());
+        // One reading, used twice. Two readings of a live machine are two different facts — the
+        // foreign-input line changes the moment somebody touches the keyboard — so comparing one
+        // against the other is a case that fails for a reason that is not about the join.
+        var reading = Read();
+        var page = VerdictSummary.Render(Degraded(), reading);
 
         // Both halves, whole: every line the reading answers on its own, and every line the verdict
         // answers on its own. A join that dropped one of them would be a third page.
-        foreach (var line in Read().Render())
+        foreach (var line in reading.Render())
             Assert.Contains(line, page, StringComparison.Ordinal);
 
         Assert.Contains(VerdictSummary.Headline(Degraded()), page, StringComparison.Ordinal);
@@ -42,9 +46,10 @@ public sealed class JoinedSummaryTests
         // The order is the point and not a preference. A reader who has just been told an assertion
         // never ran wants the absent precondition first, and a reading printed after the verdict is
         // one they have already stopped reading.
-        var page = VerdictSummary.Render(Degraded(), Read());
+        var read = Read();
+        var page = VerdictSummary.Render(Degraded(), read);
 
-        var reading = page.IndexOf(Read().Sentence(), StringComparison.Ordinal);
+        var reading = page.IndexOf(read.Sentence(), StringComparison.Ordinal);
         var headline = page.IndexOf("DEGRADED (exit 2)", StringComparison.Ordinal);
 
         Assert.True(reading >= 0, "the reading is not on the page at all");

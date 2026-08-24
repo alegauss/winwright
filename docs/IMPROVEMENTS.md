@@ -170,28 +170,6 @@ trees with what its look answers as nothing, checked against the sources both wa
 sleep is the same question inverted: pair each with why it is not a wait, and a sleep
 added later is red until somebody says.
 
-### §WW189 A walk that ran out is not a tree that was empty
-
-Found in WW43 within an hour of shipping it, which is where it belongs. `Loading.In`
-walks the window, collects every name, and answers whether any of the project's loading
-strings is among them. Where the walk runs out before it reaches the note, none is among
-them and the page reports as finished — a green covering a check that never got to the
-control it was about.
-
-The information is already there and is deliberately not silent. `InspectedElement`
-carries `Elided`, how many children were not walked because the depth or the width ran
-out, and `Inspect.Render` prints it as a line of its own. What is missing is that a
-reading built on the walk drops the number: it searches the elements it got and says
-nothing about the ones it did not.
-
-This is not only WW43's. The default depth is five, and it is a claim about somebody
-else's tree shape — the proving ground's own loading note is eight levels down, which is
-what an ordinary tab strip over a stack panel costs. Anything walking to a default and
-reporting an absence is making the same mistake, and `Diagnosis` walks to it too.
-
-What is owed is the third state these readings already have everywhere else: found, not
-found, and did not reach — with the count the walk already knows.
-
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed
