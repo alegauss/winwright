@@ -17,6 +17,7 @@
 - ✅ **WW149** **the roll call's own tests print roll call verdicts into the run, so the output carries sentences about nothing** — The roll call writes where its caller says, so a run carries one verdict about itself and the cases assert the words a reader gets instead of leaking them above the real one.
 - ✅ **WW150** **two runs on one machine share one results directory, so each roll call reads the other run's files** — The listing and the results land in a directory named for the run, so two runs on one machine cannot read each other's files and no second shell can manufacture a phantom shortfall.
 - ✅ **WW163** **nine of sixteen results answer an assertion and no trace step, so a run's record loses the steps behind its verdict** — Every result answering a verdict answers the step behind it, paired by reading the assembly, so a tenth added with one half fails rather than quietly narrowing what a trace covers.
+- ✅ **WW167** **forty reader-facing renderings and nothing pairs them with a case, so two shipped unasserted before anybody noticed** — Every rendering the engine answers is paired with the case asserting its text, checked against the assembly both ways, so a new one starts unpaired and the suite says so.
 
 ## Block B — Attach, launch, and leave nothing behind
 

@@ -67,6 +67,25 @@ public sealed class FocusScopeTests : IDisposable
     }
 
     [Fact]
+    public void The_sentence_says_which_way_the_reading_went_and_never_only_that_it_went()
+    {
+        // WW167. Every case here passed this text as the message on a failing assertion, which is
+        // text a green never prints — so the one rendering the focus reading has was the only one in
+        // the engine no case read back. Both ways round, because the sentence is two sentences.
+        var inside = Focus.In(dialog.Frame).Sentence();
+
+        Assert.Contains("holds the focus, and it is this application's.", inside, StringComparison.Ordinal);
+
+        var elsewhere = Focus.In(GetDesktopWindow());
+
+        // The other way round it is the reason and nothing else, ending in a stop like the first:
+        // a reader joining these into a report gets two sentences rather than one and a fragment.
+        Assert.Equal(elsewhere.Because + ".", elsewhere.Sentence());
+        Assert.EndsWith(".", elsewhere.Sentence(), StringComparison.Ordinal);
+        Assert.DoesNotContain("this application's", elsewhere.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_focus_that_is_not_this_applications_is_a_hole_and_never_a_failure()
     {
         // This block's criterion, one axis over: nothing about the desk is reported as a defect in
