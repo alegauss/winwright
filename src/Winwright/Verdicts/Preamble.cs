@@ -332,6 +332,16 @@ public sealed record Preamble
     public Preamble Closing() => Including(LeftAsFound());
 
     /// <summary>
+    /// Whether the closing reading has been taken — the store read again and what moved joined in.
+    /// <para>
+    /// WW177. A reading that opened a fingerprint and never closed it is a reading from the middle
+    /// of a run, and printing one under a final verdict shows a reader the machine as it was before
+    /// the run touched it while the verdict beside it is about what happened after.
+    /// </para>
+    /// </summary>
+    public bool Closed => Findings.Any(one => one.Named == StoreChange.Named);
+
+    /// <summary>
     /// Take the reading, run the case, and close the reading — so the half that falls due after the
     /// run has a moment that exists, rather than a call somebody has to remember.
     /// <para>

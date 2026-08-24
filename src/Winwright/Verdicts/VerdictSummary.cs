@@ -22,6 +22,50 @@ public static class VerdictSummary
     }
 
     /// <summary>
+    /// The whole page: what the run read about the machine, then the verdict that reading makes
+    /// legible.
+    /// <para>
+    /// WW177. These were two pages that never met. This file mentioned <see cref="Preamble" />
+    /// nowhere and nothing joined them, so a run measured thirteen things about the machine and
+    /// closed its store fingerprint, and a person handed an exit code got none of it. This block's
+    /// first criterion is that a degraded run is legible without reading the log — and an exit 2
+    /// names the assertions that never ran while the reason each could not run sat on the page
+    /// nothing printed.
+    /// </para>
+    /// <para>
+    /// The reading leads, because it is what makes the verdict underneath it legible: a reader who
+    /// has just been told four assertions never ran wants the absent precondition first, not after.
+    /// </para>
+    /// </summary>
+    /// <param name="verdict">What the run concluded.</param>
+    /// <param name="reading">What it read about the machine, opened before it and closed after.</param>
+    /// <exception cref="ArgumentException">
+    /// Where the reading declared a store and never closed it. That is a reading from the middle of
+    /// a run, and printing one under a final verdict shows the machine as it was before the run
+    /// touched it beside a verdict about what happened after.
+    /// </exception>
+    public static string Render(RunVerdict verdict, Preamble reading)
+    {
+        ArgumentNullException.ThrowIfNull(verdict);
+        ArgumentNullException.ThrowIfNull(reading);
+
+        if (reading.Store is not null && !reading.Closed)
+        {
+            throw new ArgumentException(
+                "this reading opened a store fingerprint and never closed it, so it is from the middle "
+                    + "of a run and not the end of one — call Preamble.Closing, or Preamble.Around to "
+                    + "have both halves taken for you",
+                nameof(reading));
+        }
+
+        var text = new StringBuilder();
+        foreach (var line in reading.Render())
+            text.Append(line).Append('\n');
+
+        return text.Append(Render(verdict)).ToString();
+    }
+
+    /// <summary>
     /// The one line CI shows: the outcome, the exit code it is, and how the assertions divided.
     /// The counts are stated separately so that a green with a hole in it cannot read as a green.
     /// </summary>

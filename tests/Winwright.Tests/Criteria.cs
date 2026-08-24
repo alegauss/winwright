@@ -73,7 +73,8 @@ internal static class Criteria
         // --- A, the verdict -------------------------------------------------------------------
         new("A", "A degraded run is legible without reading the log",
             "VerdictSummaryTests.Each_assertion_that_did_not_run_is_named_with_the_precondition_that_was_absent",
-            null, "the summary names every hole and the precondition behind it, rather than counting them"),
+            null, "the summary names every hole and the precondition behind it, rather than counting them, "
+                + "and since WW177 the reading that measured those preconditions is on the same page"),
         new("A", "Nothing about this machine is typed into a scenario", "", Unshown.NotBuilt,
             "there are no scenarios to move to another checkout; the declaration half is checked by "
                 + "ProvenanceTests and the claim itself waits on Block G"),

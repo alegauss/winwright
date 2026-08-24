@@ -169,6 +169,13 @@ whether anything else is showing the application, and whether the desk is this r
 reported as measured, absent, or **not read** — an absent line and a missing line read the same to
 somebody skimming, and only one of them is a statement.
 
+That reading is on the same page as the verdict, and above it. `VerdictSummary.Render(verdict,
+reading)` prints what the run read first and what it concluded second, because a reader who has just
+been told four assertions never ran wants the absent precondition before the tally rather than
+after. A reading that opened a store fingerprint and never closed it is refused rather than printed:
+it shows the machine as it was before the run touched it, and the verdict beside it is about what
+happened after.
+
 That reading has an end as well as a beginning. Where the project declares a store the run must not
 change, the fingerprint is taken with the rest of the readings and read again when the run finishes,
 and what moved is reported beside them. Wrap the run in `Preamble.Around` and neither half is a call
