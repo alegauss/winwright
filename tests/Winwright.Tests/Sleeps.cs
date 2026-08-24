@@ -22,6 +22,13 @@ internal enum Sleeping
     /// proved. Counted here, and never silently.
     /// </summary>
     StillAWait,
+
+    /// <summary>
+    /// Parked on a signal another thread sets, with a deadline. WW198: the opposite of a sleep and
+    /// counted anyway, because the point of this catalogue is to see every way of parking a thread
+    /// and then say which is which — an unseen one cannot be called right.
+    /// </summary>
+    OnASignal,
 }
 
 /// <summary>
@@ -60,8 +67,30 @@ internal sealed record Sleep(string File, int Sleeps, Sleeping Kind, string Beca
 /// </summary>
 internal static class Sleeps
 {
-    /// <summary>The call this is about, matched in the sources exactly as it is written.</summary>
-    internal const string Calling = "Thread.Sleep(";
+    /// <summary>
+    /// Every way of parking a thread this reading knows, matched in the sources exactly as written.
+    /// <para>
+    /// WW198. This was one spelling, and the doc above argued for a catalogue over a ban in these
+    /// words: a rule admitting no exceptions "would be answered by somebody spelling the sleep
+    /// differently, and then nothing would know about it at all". It was answered from inside.
+    /// <c>FrameRun</c> parks twice — <c>Thread.Sleep</c> for the bulk of the interval and
+    /// <c>Thread.SpinWait</c> for the last sixteen milliseconds — and the count said one.
+    /// </para>
+    /// <para>
+    /// Six now, of which three are in the tree and three are what a reader reaches for next. The
+    /// empty ones are the cheap half: a spelling written down before anybody uses it costs nothing,
+    /// and the one that was not written down cost a count being quietly wrong.
+    /// </para>
+    /// </summary>
+    internal static IReadOnlyList<string> Spellings { get; } = new ReadOnlyCollection<string>(
+    [
+        "Thread.Sleep(",
+        "Thread.SpinWait(",
+        "Task.Delay(",
+        "SpinWait.SpinUntil(",
+        ".WaitOne(",
+        ".Wait(",
+    ]);
 
     internal static IReadOnlyList<Sleep> Known { get; } = new ReadOnlyCollection<Sleep>(
     [
@@ -71,10 +100,12 @@ internal static class Sleeps
                 + "condition one — a deadline that did not sleep would be a spin"),
         new("Expectation.cs", 1, Sleeping.Machinery,
             "the same interval, in the poll an expectation takes while it watches a subject"),
-        new("FrameRun.cs", 1, Sleeping.Resolution,
+        new("FrameRun.cs", 2, Sleeping.Resolution,
             "frames are paced, and WW143 wrote the argument down: the interval is the resolution of "
                 + "the measurement, and the last sixteen milliseconds are spun because the scheduler "
-                + "overshoots by more than a third of an interval at twenty-five frames a second"),
+                + "overshoots by more than a third of an interval at twenty-five frames a second. "
+                + "WW198: two, and the second is that spin — it was described here and counted "
+                + "nowhere, which is the whole of what that task was about"),
         new("Program.cs", 1, Sleeping.UnderTest,
             "the fixture parks a thread without pumping, which is the whole of what --pump=none "
                 + "reproduces: a single-threaded apartment that blocks any other way keeps answering "
@@ -87,6 +118,19 @@ internal static class Sleeps
         new("FrameRunTests.cs", 2, Sleeping.UnderTest,
             "a writer made deliberately slow so the capture falls behind — the sleeping is the "
                 + "condition under test and waiting for it would be waiting for the case's own hand"),
+        // --- parked on a signal, which WW198 widened the reading to see ------------------------------
+        new("ApartmentTests.cs", 2, Sleeping.UnderTest,
+            "an event nobody ever sets, waited on twice so the apartment's own deadline has something "
+                + "that genuinely never finishes to time out on — the parking is the condition under "
+                + "test, and a signal that arrived would delete the case"),
+        new("PumpedDialog.cs", 1, Sleeping.OnASignal,
+            "the thread that owns the window sets this once the window exists, so the constructor "
+                + "hands back a dialog that is really there rather than one that will be shortly — "
+                + "with a ten-second deadline, so a thread that never starts is a refusal and not a hang"),
+        new("TrayIconFixture.cs", 1, Sleeping.OnASignal,
+            "the same shape for the icon: the shell is asked and the add is signalled, which is what "
+                + "lets every case look straight after Add rather than waiting a guessed interval"),
+
         new("TraversalTests.cs", 1, Sleeping.StillAWait,
             "there is nothing out here to observe: the state a traversal settles into is the one "
                 + "after the change, and a condition true too early reads as a wait that was proved. "
@@ -110,8 +154,13 @@ internal static class Sleeps
         // leaving a catalogue's own file out is the same reason this one had.
         foreach (var file in Checkout.Sources(Checkout.Everything, except: $"{nameof(Sleeps)}.cs"))
         {
-            var text = File.ReadAllText(file);
-            var calls = Occurrences(text, Calling);
+            // WW198. Code and never prose, which this file's own doc has claimed since WW184 and now
+            // does: the call with its bracket was chosen so a comment about sleeping was not counted,
+            // and stripping the comment says the same thing without relying on how it was spelled.
+            var calls = File.ReadLines(file)
+                .Select(Checkout.Code)
+                .Sum(line => Spellings.Sum(one => Occurrences(line, one)));
+
             if (calls > 0)
                 found.Add(new Sleep(Path.GetFileName(file), calls, Sleeping.Machinery, ""));
         }

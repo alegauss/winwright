@@ -41,11 +41,15 @@ public sealed class SerialCollectionTests
 
         foreach (var file in Directory.EnumerateFiles(Sources(), "*Tests.cs"))
         {
-            var text = File.ReadAllText(file);
-
             // This file names every marker it looks for, so it would always match itself.
             if (Path.GetFileName(file) == $"{nameof(SerialCollectionTests)}.cs")
                 continue;
+
+            // WW198. Code and never prose. A case that named one of these fixtures in a comment to
+            // explain a catalogue entry was reported as a class that puts a window in front of the
+            // machine — which is the third sweep in this suite to read what somebody wrote about a
+            // call as the call itself, and the reason Checkout carries the answer.
+            var text = string.Join('\n', File.ReadLines(file).Select(Checkout.Code));
 
             if (Touches.Any(one => text.Contains(one, StringComparison.Ordinal))
                 && !text.Contains(nameof(WindowFixture.Serial), StringComparison.Ordinal))

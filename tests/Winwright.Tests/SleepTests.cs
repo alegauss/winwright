@@ -57,10 +57,15 @@ public sealed class SleepTests
         // Two files discuss sleeping in prose — Sleeps itself and Waits, whose whole comment is
         // about the eighteen hand-rolled loops it replaced. A scan matching the words would report
         // the criterion broken by a comment explaining why it is not.
+        //
+        // WW198: said by the reading rather than by the spelling. The call with its bracket was
+        // chosen so prose would not match; the lines are now read as code, so a comment naming the
+        // call exactly is not counted either.
         var found = Sleeps.Found().Select(one => one.File).ToList();
 
         Assert.DoesNotContain("Waits.cs", found);
         Assert.DoesNotContain("Criteria.cs", found);
+        Assert.DoesNotContain("SleepTests.cs", found);
 
         // And it really is reading something, so the two absences above are absences rather than a
         // scan that matched nothing at all.
@@ -97,6 +102,40 @@ public sealed class SleepTests
         // Small, and worth watching. This is the number Block C's criterion is really about, and it
         // is the one that must not quietly grow.
         Assert.True(waiting.Count <= 2, $"{waiting.Count} sleeps are still waits, which is more than this block allows");
+    }
+
+    [Fact]
+    public void More_than_one_spelling_of_parking_a_thread_is_read()
+    {
+        // WW198. The catalogue argued that a ban "would be answered by somebody spelling the sleep
+        // differently, and then nothing would know about it at all" — and it matched one spelling,
+        // so it was answered from inside. FrameRun sleeps for the bulk of an interval and spins for
+        // the last sixteen milliseconds, and the count said one.
+        Assert.Contains("Thread.Sleep(", Sleeps.Spellings, StringComparer.Ordinal);
+        Assert.Contains("Thread.SpinWait(", Sleeps.Spellings, StringComparer.Ordinal);
+        Assert.True(Sleeps.Spellings.Count > 1);
+
+        // The measurement, and it is what makes the widening more than a longer list: this file is
+        // two parkings and was catalogued as one.
+        var frames = Assert.Single(Sleeps.Found(), one => one.File == "FrameRun.cs");
+        Assert.Equal(2, frames.Sleeps);
+    }
+
+    [Fact]
+    public void A_thread_parked_on_a_signal_is_seen_and_then_called_what_it_is()
+    {
+        // The other half of what widening found: three files park on an event, which is the opposite
+        // of a sleep and was invisible to a reading that matched one call. Seen first, judged second
+        // — an unseen parking cannot be called right.
+        var signalled = Sleeps.Known.Where(one => one.Kind == Sleeping.OnASignal).ToList();
+
+        Assert.NotEmpty(signalled);
+        Assert.Contains(signalled, one => one.File == "PumpedDialog.cs");
+        Assert.Contains(signalled, one => one.File == "TrayIconFixture.cs");
+
+        // And none of them is counted among the ones that are still waits, which is the number this
+        // block's criterion is really about and which widening the reading must not inflate.
+        Assert.DoesNotContain(Sleeps.Waiting(), one => one.Kind == Sleeping.OnASignal);
     }
 
     [Fact]
