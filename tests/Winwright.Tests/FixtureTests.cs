@@ -433,7 +433,14 @@ public sealed class FixtureTests : IDisposable
 
         // Read from the compositor and not from the fixture: what a window asked for and what it
         // has are different claims, and only the second one decides what a copy of it contains.
-        Assert.Equal(2, SystemBackdrop(window.Handle));
+        //
+        // WW41: through the engine's own reading, which is where this attribute is now asked. A
+        // second P/Invoke of the same attribute in the suite is two things that can disagree.
+        var glass = Glass.Of(window.Handle);
+
+        Assert.Equal(SystemBackdrop.Mica, glass.Backdrop);
+        Assert.True(glass.Transmits, glass.Sentence());
+        Assert.Contains("mica", glass.Sentence(), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -441,8 +448,17 @@ public sealed class FixtureTests : IDisposable
     {
         // The arm a one-sided check gets wrong. Auto is the compositor deciding; none is the
         // window having decided. A refusal that read them as the same would let one through.
-        Assert.Equal(0, SystemBackdrop(Launched().Handle));
-        Assert.Equal(1, SystemBackdrop(Launched("--backdrop=none").Handle));
+        var never = Glass.Of(Launched().Handle);
+        var asked = Glass.Of(Launched("--backdrop=none").Handle);
+
+        Assert.Equal(SystemBackdrop.Auto, never.Backdrop);
+        Assert.Equal(SystemBackdrop.None, asked.Backdrop);
+
+        // And neither carries anything through, which is the half that decides a capture.
+        Assert.False(never.Transmits, never.Sentence());
+        Assert.False(asked.Transmits, asked.Sentence());
+        Assert.Contains("never asked", never.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("asked for no backdrop", asked.Sentence(), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -450,8 +466,8 @@ public sealed class FixtureTests : IDisposable
     {
         // A name in the catalogue that the compositor refuses is a shape nobody can provoke, which
         // is the whole failure this block exists to stop.
-        Assert.Equal(3, SystemBackdrop(Launched("--backdrop=acrylic").Handle));
-        Assert.Equal(4, SystemBackdrop(Launched("--backdrop=tabbed").Handle));
+        Assert.Equal(SystemBackdrop.Acrylic, Glass.Of(Launched("--backdrop=acrylic").Handle).Backdrop);
+        Assert.Equal(SystemBackdrop.Tabbed, Glass.Of(Launched("--backdrop=tabbed").Handle).Backdrop);
     }
 
     [Fact]
@@ -462,13 +478,6 @@ public sealed class FixtureTests : IDisposable
         Assert.Equal(2, code);
         Assert.Contains("it takes none or mica or acrylic or tabbed", said);
     }
-
-    /// <summary>DWMWA_SYSTEMBACKDROP_TYPE, asked of the compositor rather than of the window.</summary>
-    private static int SystemBackdrop(nint window) =>
-        DwmGetWindowAttribute(window, 38, out var read, sizeof(int)) == 0 ? read : -1;
-
-    [DllImport("dwmapi.dll")]
-    private static extern int DwmGetWindowAttribute(nint window, int attribute, out int value, int size);
 
     [Fact]
     public void Raising_the_fixture_does_not_take_the_desktop_from_whoever_had_it()
@@ -1660,6 +1669,61 @@ public sealed class FixtureTests : IDisposable
 
         Assert.NotNull(receipt.Over);
         Assert.False(receipt.Over.Was);
+    }
+
+    [Fact]
+    public void A_capture_of_a_window_with_a_backdrop_is_refused_rather_than_warned_about()
+    {
+        // A warning is not a refusal and the file gets written either way, which is what the first
+        // response to this got wrong. The refusal names the backdrop, so the reader knows the
+        // picture is carrying the desktop rather than being merely suspect.
+        var window = Launched("--backdrop=acrylic");
+        var glass = Glass.Of(window.Handle);
+
+        if (!glass.Transmits)
+            return;
+
+        var refused = Assert.Throws<WrongCaptureException>(
+            () => CaptureReceipt.Of(
+                Path.Combine(root, "glassy.png"),
+                window,
+                AppTarget.AttachTo(window.Pid),
+                glass: glass));
+
+        Assert.Contains("acrylic", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("through the glass", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_popup_is_not_refused_by_a_backdrop_because_it_is_what_the_copy_route_exists_for()
+    {
+        // The arm that must not be refused. A menu on this shell has acrylic by design, so a
+        // refusal that fired on every backdrop would refuse every capture the copy route was built
+        // to take — and the copy route is the only way to photograph a menu at all.
+        var window = Launched("--backdrop=acrylic");
+        var glass = Glass.Of(window.Handle);
+
+        if (!glass.Transmits)
+            return;
+
+        // A menu window of the same process: its own top-level window, drawn by the system and in
+        // nobody's visual tree, which is exactly why the copy route exists for it.
+        var menu = window with { Handle = window.Handle + 1, ClassName = "#32768" };
+        var route = CaptureRoute.For(menu, window);
+
+        Assert.Equal(OutOfReach.Menu, route.Reach);
+
+        var receipt = CaptureReceipt.Of(
+            Path.Combine(root, "menu.png"),
+            menu,
+            AppTarget.AttachTo(window.Pid),
+            route: route,
+            glass: glass);
+
+        // Carried and not refused: the reader is told the glass transmits, and the capture the
+        // copy route exists to take is still taken.
+        Assert.NotNull(receipt.Glass);
+        Assert.True(receipt.Glass.Transmits);
     }
 
     /// <summary>How many pixels the two rectangles share.</summary>

@@ -67,6 +67,8 @@ internal static class Rendered
             null, "a line per condition this desk was read against"),
         new("Diagnosis.Render", "DiagnosisTests.The_diagnosis_opens_with_the_line_the_summary_would_have_printed_alone",
             null, "the failure's own line, then the control view under it"),
+        new("Glass.Sentence", "FixtureTests.A_window_that_never_asked_is_told_apart_from_one_that_asked_for_nothing",
+            null, "which backdrop a window opted into, and whether its glass carries what is behind it"),
         new("Inspect.Render", "InspectTests.A_walk_that_stops_at_the_depth_says_how_many_it_did_not_walk",
             null, "the control tree as lines, with what the walk did not reach counted"),
         new("Preamble.Render", "PreambleTests.The_preamble_renders_one_line_per_measurement_with_the_reading_first",

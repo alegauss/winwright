@@ -165,6 +165,13 @@ something nobody asked for. Leave the reading off and the receipt says nothing a
 rather than claiming it was clear: a caller who never looked and one who looked and found nothing
 are two different facts.
 
+A window's own glass is the other way a copy stops being a picture of it. `Glass.Of` asks the
+compositor which system backdrop the window opted into — mica, acrylic and tabbed all composite what
+is behind the window into it — and a receipt handed that reading refuses too. Z-order reasoning
+cannot answer for this: the intruder is not in front of the window, it is showing through it. A
+menu, a balloon or an owned popup is exempt, because those carry a backdrop by design and the copy
+route exists for them.
+
 That last one reaches the verbs above it. Looking for a tray icon answers a reading rather than an
 icon-or-nothing, and where it found none it says whether every place it could have been was looked
 at. Not found everywhere is an answer about your application; not found because the flyout would not

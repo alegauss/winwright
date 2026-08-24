@@ -174,18 +174,6 @@ added later is red until somebody says.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW41 A backdrop transmits what is behind it
-
-Measured in freewilly: with nothing overlapping, the copy still carried a blurred image
-of the desktop behind the window - another application's content legible through the
-frame - because a Fluent window's backdrop composites what is behind it by design.
-Z-order reasoning cannot answer for that: the intruder is not in front of the window, it
-is showing through it. The refusal is positive evidence rather than a name, so the
-compositor is asked which backdrop the window opted into, and a popup - the one thing
-the screen copy exists for - is not refused by it. A printed warning was the first
-response and was not enough, because a warning is not a refusal and the file gets
-written either way.
-
 ### §WW42 One colour is not a window
 
 Measured in freewilly while shipping a task: a copy of the notification area came back

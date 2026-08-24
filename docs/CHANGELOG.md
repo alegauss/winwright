@@ -103,6 +103,7 @@
 - ✅ **WW38** **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and every frame intersected with the capture rectangle, so the answer is how many pixels are taken and by which named windows.
 - ✅ **WW40** **a copy trimmed around an intruder is a picture of something nobody asked for** — A receipt handed a reading of what stood over the region refuses rather than accepting a cropped picture, naming the intruder, its process and the pixels it takes.
 - 🗑 **WW186** **the copy route is the one a window can stand over, and it writes its file without asking what did** — superseded by WW40: Filed without reading Block E's open lines, where WW40 had asked the same question since before it: the receipt now refuses an overlap and names it.
+- ✅ **WW41** **a window with a system backdrop transmits what is behind it through the glass** — The compositor is asked which backdrop a window opted into, and a receipt handed that reading refuses rather than warns, exempting the popups the copy route exists for.
 
 ## Block F — Assert — the expectation is derived, never typed
 

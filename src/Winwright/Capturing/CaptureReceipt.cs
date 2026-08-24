@@ -50,7 +50,8 @@ public sealed record CaptureReceipt
         AppTarget target,
         PaintedFrame? frame,
         CaptureRoute? route,
-        Obstruction? over)
+        Obstruction? over,
+        Glass? glass)
     {
         Path = path;
         Window = window;
@@ -58,7 +59,14 @@ public sealed record CaptureReceipt
         Frame = frame;
         Route = route;
         Over = over;
+        Glass = glass;
     }
+
+    /// <summary>
+    /// What the window's own glass was doing, where a caller asked. Null where nobody asked, which
+    /// is not the same as a window carrying nothing through it.
+    /// </summary>
+    public Glass? Glass { get; }
 
     /// <summary>
     /// What stood over the region, where a caller read it. Null where none did — and null is not
@@ -111,10 +119,19 @@ public sealed record CaptureReceipt
     /// stood over a region nobody looked at is the third kind of wrong capture.
     /// </para>
     /// </param>
+    /// <param name="glass">
+    /// What the window's own backdrop was doing, where a caller asked.
+    /// <para>
+    /// WW41. A window with a system backdrop transmits what is behind it through the glass, and
+    /// z-order reasoning cannot answer for that: the intruder is not in front of the window, it is
+    /// showing through it. Left null by a caller that did not ask, for the same reason
+    /// <paramref name="over" /> is.
+    /// </para>
+    /// </param>
     /// <exception cref="WrongCaptureException">
     /// Where the window belongs to a process this run is not driving, where nothing was drawing
-    /// it, or where another window stood over the region. All three are wrong captures that a file
-    /// on disk looks exactly the same as.
+    /// it, where another window stood over the region, or where its own glass is carrying what is
+    /// behind it. All four are wrong captures that a file on disk looks exactly the same as.
     /// </exception>
     public static CaptureReceipt Of(
         string path,
@@ -122,7 +139,8 @@ public sealed record CaptureReceipt
         AppTarget target,
         PaintedFrame? frame = null,
         CaptureRoute? route = null,
-        Obstruction? over = null)
+        Obstruction? over = null,
+        Glass? glass = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(window);
@@ -144,7 +162,14 @@ public sealed record CaptureReceipt
         if (over is { Was: true, Clear: false })
             throw new WrongCaptureException($"the capture is of {window}, and {over.Sentence()}");
 
-        return new CaptureReceipt(path, window, target, frame, route, over);
+        // WW41, and refused rather than warned about: a warning is not a refusal and the file gets
+        // written either way. Not for a popup, which is the one thing the screen copy exists for —
+        // a menu on this shell has acrylic by design, so refusing on it would refuse every capture
+        // the copy route was built to take.
+        if (glass is { Transmits: true } && route?.Reach is null or OutOfReach.Renderable)
+            throw new WrongCaptureException($"the capture is of {window}, and {glass.Sentence()}");
+
+        return new CaptureReceipt(path, window, target, frame, route, over, glass);
     }
 
     /// <summary>
