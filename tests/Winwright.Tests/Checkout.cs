@@ -83,6 +83,82 @@ internal static class Checkout
         Sources([tree], except);
 
     /// <summary>
+    /// One line of source with its quoted text taken out, so a call named as data is not read as a
+    /// call made.
+    /// <para>
+    /// WW191 found this in one scanner: a case asserting that <c>NotificationArea.OpenOverflow(</c>
+    /// is among the calls a catalogue sweeps for was reported as a case that opens the overflow. The
+    /// fragment was in a string, which is the one place in a source file where a call is a subject
+    /// rather than an act.
+    /// </para>
+    /// <para>
+    /// WW197 found it again in a second scanner, on the same file, and that is why it is here rather
+    /// than in either. A catalogue of calls holds every call it knows about as text, so any sweep
+    /// reading it raw finds all of them at once.
+    /// </para>
+    /// <para>
+    /// A line whose quotes do not pair is left whole. A raw literal opens on one line and shuts on
+    /// another, and stripping from an unmatched quote to the end of the line would delete real code
+    /// — which turns a call that was made into one that appears not to be, and a sweep goes quiet
+    /// about it. Reading too much is a red somebody answers; reading too little is not.
+    /// </para>
+    /// </summary>
+    /// <param name="line">The line as the file spells it.</param>
+    internal static string Code(string line)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+
+        return Uncommented(Unquoted(line));
+    }
+
+    /// <summary>
+    /// The line with what a person wrote about it taken off.
+    /// <para>
+    /// Found by WW197 on the doc comment of this very method, which names a call in a <c>see</c> tag
+    /// to explain what it does — and a sweep reading comments reported three helpers that touch
+    /// nothing as reaching for it. Prose about a call is the other place a call is a subject rather
+    /// than an act, and every catalogue here explains itself in prose.
+    /// </para>
+    /// <para>
+    /// After the quotes and never before, so a <c>//</c> inside a string has already gone and cannot
+    /// take the rest of a real line with it.
+    /// </para>
+    /// </summary>
+    private static string Uncommented(string line)
+    {
+        var trimmed = line.TrimStart();
+        if (trimmed.StartsWith("//", StringComparison.Ordinal) || trimmed.StartsWith('*'))
+            return "";
+
+        var at = line.IndexOf("//", StringComparison.Ordinal);
+        return at < 0 ? line : line[..at];
+    }
+
+    /// <summary>The line with its quoted text taken off.</summary>
+    private static string Unquoted(string line)
+    {
+        var quotes = line.Count(one => one == '"');
+        if (quotes == 0 || quotes % 2 != 0)
+            return line;
+
+        var kept = new System.Text.StringBuilder(line.Length);
+        var inside = false;
+        foreach (var letter in line)
+        {
+            if (letter == '"')
+            {
+                inside = !inside;
+                continue;
+            }
+
+            if (!inside)
+                kept.Append(letter);
+        }
+
+        return kept.ToString();
+    }
+
+    /// <summary>
     /// Whether a path is a source somebody wrote rather than a copy a build made. Matched on the
     /// separators either side, so a directory called <c>binding</c> is not mistaken for output.
     /// </summary>

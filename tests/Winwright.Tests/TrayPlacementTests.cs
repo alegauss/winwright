@@ -62,12 +62,19 @@ public sealed class TrayPlacementTests
         // It opens the flyout to look, so it shuts it again: what this fixture promises is a
         // findable icon and never a flyout left standing for the next case to trip on. One of the
         // two flakes measured was a case that found one already open.
+        //
+        // WW197, and "the way it found it" is now literal. This asserted the flyout is shut, which
+        // is a claim about the desk on any run where somebody had left one standing — and it went
+        // red exactly that way on WW191's first guest run, then passed on a re-run. Read either
+        // side instead: whatever the shell was showing, the fixture leaves it showing that.
+        var before = NotificationArea.Overflow() is not null;
+
         using var icon = BusyDesk.Built(() => TrayIconFixture.Add("winwright placement"));
         if (icon is null)
             return;
 
 
-        Assert.Null(NotificationArea.Overflow());
+        Assert.Equal(before, NotificationArea.Overflow() is not null);
     }
 
     [Fact]

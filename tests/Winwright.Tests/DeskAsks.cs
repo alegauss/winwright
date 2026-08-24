@@ -65,9 +65,16 @@ internal sealed record DeskAsk(string Case, Unaffected Kind, string Because)
 /// </para>
 /// <para>
 /// So the same shape <c>Deadlines</c> and <c>Sleeps</c> already use. The sources are read for every
-/// case that makes one of the calls below; a case that mentions <c>BusyDesk</c> has answered the
-/// question and is not listed here; every other one is paired with why the desk cannot reach it.
-/// Both directions, so a pairing for a case that has since been fixed is red as well.
+/// case that asks one of the calls below for a verdict; what it excused is subtracted; every fact
+/// left over is paired here with why the desk cannot reach it. Both directions, so a pairing for a
+/// case that has since been fixed is red as well.
+/// </para>
+/// <para>
+/// WW197 moved the unit. This counted a case as excused where its body mentioned <c>BusyDesk</c>
+/// anywhere, which is the wrong unit by exactly the margin WW190 was about — a case that excused its
+/// fixture and then asserted a shell fact was credited for both, and one of them went red on a desk
+/// somebody had left a flyout open on. An excuse now covers the fact of the reading it names, and
+/// nothing else. Moving it found five more cases owing a reason and one owing a repair.
 /// </para>
 /// <para>
 /// The calls are the judgement and are not pretended to be mechanical. What makes the list checkable
@@ -107,13 +114,20 @@ internal static class DeskAsks
             "whether somebody was using the machine, which is the machine's business"),
         new("Obstruction.Reading(", Winwright.Capturing.Obstruction.PreconditionName,
             "what is standing over a rectangle, which anything on the desk may be"),
+        new("RegionThroughout.Around(", Winwright.Capturing.Obstruction.PreconditionName,
+            "the same reading twice, either side of a take"),
+        new("Foreground.Check(", Winwright.Windowing.Foreground.PreconditionName,
+            "whether a named window holds the keyboard, which on a locked session nothing does"),
 
         // --- the shell, which is another process and always there until it is not ------------------
         new("NotificationArea.Tray(", Winwright.Acting.TraySearch.PreconditionName,
             "the taskbar belongs to the shell, and a shell that is restarting has none"),
         new("NotificationArea.Showing(", Winwright.Acting.TraySearch.PreconditionName,
             "what is on the taskbar, which is whatever this desk happens to be running"),
-        new("NotificationArea.Hidden(", Winwright.Acting.TraySearch.PreconditionName,
+        // WW197 moved this one. What is in the overflow is empty until the shell has opened it, so
+        // the fact it turns on is the flyout and never the search — and a case that excused the
+        // flyout and then read its icons was being asked to excuse a second fact for one reading.
+        new("NotificationArea.Hidden(", Winwright.Acting.OverflowState.PreconditionName,
             "what is in the overflow, which is empty until the shell has opened it"),
         new("NotificationArea.Chevron(", Winwright.Acting.TraySearch.PreconditionName,
             "the button that opens the overflow, absent on a taskbar something is covering"),
@@ -127,6 +141,9 @@ internal static class DeskAsks
         new("NotificationArea.Find(", Winwright.Acting.TraySearch.PreconditionName,
             "a search that could not open the overflow looked at the taskbar alone, which is a "
                 + "different answer from the icon being absent"),
+        new("NotificationArea.Reachable(", Winwright.Acting.TraySearch.PreconditionName,
+            "whether there is a notification area on this desk at all, which WW190 added and which "
+                + "is the reading most of the tray cases excuse on"),
         new("NotificationArea.ElementFor(", Winwright.Acting.TraySearch.PreconditionName,
             "the element behind an icon, which the shell may have moved between the two calls"),
         new("NotificationArea.OpenMenu(", Winwright.Acting.TrayMenu.PreconditionName,
@@ -166,6 +183,21 @@ internal static class DeskAsks
                 + "asked for the desktop"),
 
         // --- nothing is read off the desk ----------------------------------------------------------
+        new("CheckoutTests.A_line_is_read_as_code_and_never_as_what_somebody_wrote_about_it",
+            Unaffected.NoDesk,
+            "it names a tray call as text and never makes one — and it is here rather than invisible "
+                + "because the line proving that an unpaired quote is left whole is itself a line "
+                + "with an unpaired quote, which the stripper leaves whole. That is the trade-off "
+                + "written down: reading too much is a red somebody answers, and this is somebody "
+                + "answering it"),
+        new("ThroughoutTests.A_reading_that_was_never_taken_does_not_refuse_a_capture_either",
+            Unaffected.NoDesk,
+            "the window handle is zero, so both readings are refused for that before anything looks "
+                + "at what is standing anywhere"),
+        new("ThroughoutTests.The_take_runs_between_the_two_readings_and_not_before_them",
+            Unaffected.NoDesk,
+            "the same handle of zero, and what is asserted is the order the take ran in — which is "
+                + "about the door and not about the desk it would have read"),
         new("FixtureTests.A_reading_that_was_never_taken_does_not_refuse_a_capture_either",
             Unaffected.NoDesk,
             "the region handed in has no area, so the reading is refused for that and never looks "
@@ -184,6 +216,15 @@ internal static class DeskAsks
                 + "is the whole reason it is the default"),
 
         // --- the case takes the desk away itself ---------------------------------------------------
+        new("ActTests.A_toggle_lands_while_the_foreground_belongs_to_another_window",
+            Unaffected.Provoked,
+            "the foreground is given away on purpose and then asserted to be elsewhere, which is the "
+                + "premise of the case: a pattern act lands without it"),
+        new("FocusScopeTests.A_walk_whose_focus_left_the_application_is_unchecked_rather_than_red",
+            Unaffected.Provoked,
+            "the reading it leaves unexcused is taken against the desktop window on purpose, so it "
+                + "is never inside the application whatever the desk is doing — the walk's own "
+                + "reading, which the desk can refuse, is excused"),
         new("FixtureTests.A_capture_whose_region_was_stood_over_is_refused_and_names_the_intruder",
             Unaffected.Provoked,
             "--intrude puts a window of this run's own over the rectangle, so the obstruction is "
@@ -221,6 +262,15 @@ internal static class DeskAsks
             "the decoy for the keyboard rather than the pointer, asserting the same hole"),
 
         // --- both arms are written out -------------------------------------------------------------
+        new("ForegroundTests.A_window_that_cannot_hold_the_foreground_reads_as_not_holding_it",
+            Unaffected.Shape,
+            "the window is created hidden and never activated, so it cannot be the foreground on any "
+                + "desk — what is asserted is a negative that holds whoever does hold it"),
+        new("TrayPlacementTests.The_fixture_leaves_the_overflow_the_way_it_found_it",
+            Unaffected.Shape,
+            "WW197 made the claim literal: the flyout is read either side and the two are compared, "
+                + "so whatever the shell was showing is what the fixture has to leave it showing. It "
+                + "asserted the flyout was shut until then, and went red on a desk where it was not"),
         new("FixtureTests.A_person_can_ask_for_the_window_to_come_forward",
             Unaffected.Shape,
             "what is asserted about the foreground is a negative — the quiet launch is not holding "
@@ -269,15 +319,24 @@ internal static class DeskAsks
     /// <summary>Every case in this suite that makes one of those calls, whether or not it excuses.</summary>
     internal static IReadOnlyList<string> Asking() => scanned.Value.Select(one => one.Case).ToList();
 
-    /// <summary>The ones that ask and never mention <c>BusyDesk</c>, which are what this pairs.</summary>
+    /// <summary>
+    /// The ones asking about a desk fact nothing in them excused, which are what this pairs. WW197:
+    /// a case that excused one fact and asked about a second is here for the second.
+    /// </summary>
     internal static IReadOnlyList<string> Bare() =>
-        scanned.Value.Where(one => !one.Excuses).Select(one => one.Case).ToList();
+        scanned.Value.Where(one => one.Missing.Count > 0).Select(one => one.Case).ToList();
+
+    /// <summary>Which facts a case left unexcused, which is what a red here has to say.</summary>
+    internal static IReadOnlyList<string> Unexcused(string named) => scanned.Value
+        .Where(one => string.Equals(one.Case, named, StringComparison.Ordinal))
+        .SelectMany(one => one.Missing)
+        .ToList();
 
     /// <summary>The reading a person gets: the counts first, then a line each.</summary>
     internal static IReadOnlyList<string> Render()
     {
         var asking = scanned.Value.Count;
-        var bare = scanned.Value.Count(one => !one.Excuses);
+        var bare = scanned.Value.Count(one => one.Missing.Count > 0);
         return new ReadOnlyCollection<string>(
         [
             $"{asking} case(s) ask a desk-dependent reading: {asking - bare} excuse the desk, "
@@ -286,7 +345,7 @@ internal static class DeskAsks
         ]);
     }
 
-    private sealed record Found(string Case, bool Excuses);
+    private sealed record Found(string Case, IReadOnlyList<string> Missing, bool Asks);
 
     private static readonly Lazy<IReadOnlyList<Found>> scanned = new(Scan);
 
@@ -305,7 +364,8 @@ internal static class DeskAsks
         var found = new List<Found>();
         var owner = "";
         var caseNext = false;
-        var open = (Case: "", Asks: false, Excuses: false);
+        var open = "";
+        var body = new List<string>();
 
         foreach (var line in File.ReadLines(file))
         {
@@ -320,14 +380,12 @@ internal static class DeskAsks
             else if (Member(line) is { } member)
             {
                 Close();
-                open.Case = caseNext ? member : "";
+                open = caseNext ? member : "";
                 caseNext = false;
             }
-            else if (open.Case.Length > 0)
+            else if (open.Length > 0)
             {
-                var code = Code(line);
-                open.Asks |= Calls.Any(one => code.Contains(one.Call, StringComparison.Ordinal));
-                open.Excuses |= code.Contains("BusyDesk.", StringComparison.Ordinal);
+                body.Add(Checkout.Code(line));
             }
         }
 
@@ -336,49 +394,162 @@ internal static class DeskAsks
 
         void Close()
         {
-            if (open.Case.Length > 0 && open.Asks)
-                found.Add(new Found($"{owner}.{open.Case}", open.Excuses));
+            if (open.Length > 0)
+            {
+                var asked = Facts(body);
+                if (asked.Count > 0)
+                    found.Add(new Found($"{owner}.{open}", [.. asked.Except(Excused(body), StringComparer.Ordinal)], true));
+            }
 
-            open = ("", false, false);
+            open = "";
+            body = [];
         }
     }
 
+    /// <summary>Every desk fact the lines of a case ask about for a verdict.</summary>
+    private static IReadOnlyList<string> Facts(IEnumerable<string> body) => body
+        .SelectMany(AskedOf)
+        .Distinct(StringComparer.Ordinal)
+        .ToList();
+
+    /// <summary>The facts one line asks about, which is none for most lines.</summary>
+    private static IEnumerable<string> FactsOf(string code) => Calls
+        .Where(one => code.Contains(one.Call, StringComparison.Ordinal))
+        .Select(one => one.Fact);
+
     /// <summary>
-    /// The line with its quoted text taken out, so a call named as data is not read as a call made.
+    /// The facts a line asks <em>for a verdict</em>, which is what this rule is about.
     /// <para>
-    /// WW191 found this the way everything here gets found: a case asserting that
-    /// <c>NotificationArea.OpenOverflow(</c> is among the calls this catalogue sweeps for was
-    /// reported as a case that opens the overflow. The fragment was in a string, which is the one
-    /// place in a source file where a call is a subject rather than an act.
+    /// WW197. A call whose answer is thrown away asks nothing: <c>NotificationArea.CloseOverflow();</c>
+    /// on its own line is a case tidying up after itself, and a case cannot report the desk as a
+    /// defect through a value it never looked at. The criterion says <em>asks a desk-dependent
+    /// reading for a verdict</em>, and a discarded reading is the case where that is plainly false.
     /// </para>
     /// <para>
-    /// A line whose quotes do not pair is left whole. A raw literal opens on one line and shuts on
-    /// another, and stripping from an unmatched quote to the end of the line would delete real code
-    /// — which turns a case that asks into a case that appears not to, and this list would go quiet
-    /// about it. Reading too much is a red somebody answers; reading too little is not.
+    /// A statement and not a mention: the line has to <em>start</em> with the call, so anything that
+    /// assigns it, asserts on it or reads it inside a condition still asks.
     /// </para>
     /// </summary>
-    private static string Code(string line)
+    private static IEnumerable<string> AskedOf(string code)
     {
-        var quotes = line.Count(one => one == '"');
-        if (quotes == 0 || quotes % 2 != 0)
-            return line;
+        var trimmed = code.TrimStart();
+        return Calls
+            .Where(one => code.Contains(one.Call, StringComparison.Ordinal))
+            .Where(one => !trimmed.StartsWith(one.Call, StringComparison.Ordinal))
+            .Select(one => one.Fact);
+    }
 
-        var kept = new System.Text.StringBuilder(line.Length);
-        var inside = false;
-        foreach (var letter in line)
+    /// <summary>
+    /// Every desk fact a case actually excused, which is the whole of WW197.
+    /// <para>
+    /// WW190 counted a case as excused where its body mentioned <c>BusyDesk</c> anywhere, and that is
+    /// the wrong unit by exactly the margin WW190 was about: a case that excuses its fixture and then
+    /// asserts a shell fact was credited for both. Measured — that is what
+    /// <c>TrayPlacementTests.The_fixture_leaves_the_overflow_the_way_it_found_it</c> does, and it
+    /// went red on a desk whose flyout somebody had left standing.
+    /// </para>
+    /// <para>
+    /// An excuse covers the fact of the reading it names. Where the reading is on the line — as in
+    /// <c>BusyDesk.Excused(NotificationArea.Reachable())</c> — that is read directly; where the line
+    /// names a variable, the assignment it came from is looked up in the same case, which is the
+    /// shape nearly every excuse here is written in. An excuse that names neither covers nothing,
+    /// and <c>BusyDesk.Built</c> around a fixture is exactly that: it excuses the fixture and says
+    /// nothing about a shell the case reads afterwards.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<string> Excused(IReadOnlyList<string> body)
+    {
+        var covered = new List<string>();
+        foreach (var line in Excuses(body))
         {
-            if (letter == '"')
-            {
-                inside = !inside;
-                continue;
-            }
-
-            if (!inside)
-                kept.Append(letter);
+            covered.AddRange(FactsOf(line));
+            foreach (var named in Reading(line))
+                covered.AddRange(body.Where(one => Assigns(one, named)).SelectMany(FactsOf));
         }
 
-        return kept.ToString();
+        return covered.Distinct(StringComparer.Ordinal).ToList();
+    }
+
+    /// <summary>
+    /// Each excuse as one expression, however many lines it was written across.
+    /// <para>
+    /// WW197's own check found this. An excuse whose reading did not fit on the line — the shape
+    /// <c>if (BusyDesk.Excused(</c> then the reading underneath — was read as an excuse naming
+    /// nothing, so the case looked as though it had excused a fact it plainly had.
+    /// </para>
+    /// </summary>
+    private static IEnumerable<string> Excuses(IReadOnlyList<string> body)
+    {
+        for (var at = 0; at < body.Count; at++)
+        {
+            if (!body[at].Contains("BusyDesk.", StringComparison.Ordinal))
+                continue;
+
+            var joined = body[at];
+            var depth = Depth(joined);
+            for (var next = at + 1; next < body.Count && depth > 0; next++)
+            {
+                joined = $"{joined} {body[next].Trim()}";
+                depth += Depth(body[next]);
+            }
+
+            yield return joined;
+        }
+    }
+
+    /// <summary>How far one line opens or closes the brackets around it.</summary>
+    private static int Depth(string code) => code.Count(one => one == '(') - code.Count(one => one == ')');
+
+    /// <summary>
+    /// The variables an excuse line reads a verdict off — <c>opened</c> in
+    /// <c>BusyDesk.Excused(opened.AsAssertion(...))</c>. Named by what follows them rather than by a
+    /// list of variable names, because the reading is what makes one of these a reading.
+    /// </summary>
+    private static IEnumerable<string> Reading(string line)
+    {
+        foreach (var answer in (string[])["AsAssertion", "AsPrecondition", "AsFinding"])
+        {
+            if (Before(line, $".{answer}") is { } named)
+                yield return named;
+        }
+
+        // And the shorter spelling, where a case already holds the verdict: BusyDesk.Excused(result).
+        // Found by WW197's own check, which reported a case that excuses on the line above the
+        // assertion it excuses — the reading was there and this could not see it.
+        if (Before(line, ")", after: "BusyDesk.Excused(") is { } held)
+            yield return held;
+    }
+
+    /// <summary>The identifier immediately before a marker, where one is there.</summary>
+    private static string? Before(string line, string marker, string? after = null)
+    {
+        var from = 0;
+        if (after is not null)
+        {
+            var opens = line.IndexOf(after, StringComparison.Ordinal);
+            if (opens < 0)
+                return null;
+
+            from = opens + after.Length;
+        }
+
+        var at = line.IndexOf(marker, from, StringComparison.Ordinal);
+        if (at <= 0)
+            return null;
+
+        var began = at;
+        while (began > 0 && (char.IsLetterOrDigit(line[began - 1]) || line[began - 1] == '_'))
+            began--;
+
+        return began < at && began >= from ? line[began..at] : null;
+    }
+
+    /// <summary>Whether a line is where that variable got its value.</summary>
+    private static bool Assigns(string line, string named)
+    {
+        var trimmed = line.TrimStart();
+        return trimmed.StartsWith($"var {named} =", StringComparison.Ordinal)
+            || trimmed.StartsWith($"{named} =", StringComparison.Ordinal);
     }
 
     /// <summary>The name a declaration introduces, where the line is one.</summary>

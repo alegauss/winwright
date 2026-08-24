@@ -191,7 +191,11 @@ internal static class Flattening
             }
             else if (member.Length > 0 && !isACase)
             {
-                calls |= Producers().Any(one => line.Contains(one, StringComparison.Ordinal));
+                // WW197. Code and never text. This read raw lines, and a catalogue that holds every
+                // call it knows about as a string handed it every producer at once — so three
+                // helpers that touch nothing were reported as narrowing a reading.
+                var code = Checkout.Code(line);
+                calls |= Producers().Any(one => code.Contains(one, StringComparison.Ordinal));
             }
         }
 

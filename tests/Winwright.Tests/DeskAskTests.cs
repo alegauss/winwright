@@ -19,11 +19,16 @@ public sealed class DeskAskTests
 
         var missing = DeskAsks.Bare().Where(one => !paired.Contains(one)).ToList();
 
+        // WW197: which fact, and not only which case. A case that excused one reading and asked
+        // about a second is here for the second, and a reader told only the case name would go
+        // looking at the excuse that is already there.
         Assert.True(
             missing.Count == 0,
-            $"{missing.Count} case(s) ask a desk-dependent reading for a verdict and neither excuse "
-                + $"the desk nor say why they need not:{Environment.NewLine}  "
-                + string.Join($"{Environment.NewLine}  ", missing));
+            $"{missing.Count} case(s) ask about a desk fact nothing in them excused, and say nothing "
+                + $"about why they need not:{Environment.NewLine}  "
+                + string.Join(
+                    $"{Environment.NewLine}  ",
+                    missing.Select(one => $"{one} — {string.Join("; ", DeskAsks.Unexcused(one))}")));
     }
 
     [Fact]
@@ -138,6 +143,36 @@ public sealed class DeskAskTests
             "NotificationAreaTests.The_taskbar_is_found_by_its_class_and_holds_icons",
             DeskAsks.Asking(),
             StringComparer.Ordinal);
+    }
+
+    [Fact]
+    public void An_excuse_covers_the_fact_it_names_and_not_every_fact_the_case_asks()
+    {
+        // WW197, as arithmetic. The old rule was "the body mentions BusyDesk anywhere", and under it
+        // a case that guards its fixture and then asserts on the shell counted as covered. Both of
+        // these excuse something; what makes them different is which fact.
+        var tidy = "NotificationAreaTests.The_taskbar_is_found_by_its_class_and_holds_icons";
+        var guarded = "TrayPlacementTests.The_fixture_leaves_the_overflow_the_way_it_found_it";
+
+        // One excuses the reading it goes on to assert about, so it owes nothing.
+        Assert.Empty(DeskAsks.Unexcused(tidy));
+
+        // The other excuses its fixture and asks about the flyout, which is a second fact — and it
+        // is here with a stated reason rather than credited for an excuse about something else.
+        Assert.Contains(guarded, DeskAsks.Bare(), StringComparer.Ordinal);
+        Assert.Contains(DeskAsks.Known, one => one.Case == guarded);
+    }
+
+    [Fact]
+    public void A_reading_whose_answer_is_thrown_away_is_not_asked_for_a_verdict()
+    {
+        // The other half of the finer unit. A case that shuts the flyout on its way out has not
+        // asked the shell for anything: the criterion is about a reading asked for a verdict, and a
+        // value nobody looked at cannot become one.
+        var tidying = "TrayPlacementTests.Two_icons_from_the_same_run_are_each_placed_before_their_own_add_returns";
+
+        Assert.Contains(tidying, DeskAsks.Asking(), StringComparer.Ordinal);
+        Assert.Empty(DeskAsks.Unexcused(tidying));
     }
 
     [Fact]

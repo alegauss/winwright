@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW197** (deps: —) **a case that excuses the desk once counts as excused for every assertion in it, including the ones that never were** — The pairing is per assertion, because a case excusing its fixture and then asserting a shell fact is counted covered and flaked on the desk anyway. → §WW197
 - 📋 **WW201** (deps: —) **a case starts a process from a file it then deletes, so its own cleanup throws and the run reports a broken harness** — A case waits for what it started before deleting it, because one guest run went red on the teardown and passed on a re-run. → §WW201
 
 ## Block B — Attach, launch, and leave nothing behind

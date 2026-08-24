@@ -87,6 +87,23 @@ public sealed class CheckoutTests
     }
 
     [Fact]
+    public void A_line_is_read_as_code_and_never_as_what_somebody_wrote_about_it()
+    {
+        // WW191 and WW197, in one place because two scanners kept finding the same thing: a call in
+        // a string and a call in a comment are both a call being talked about rather than made.
+        Assert.Equal("var found = ;", Checkout.Code("""var found = "NotificationArea.Tray(";""").Trim());
+        Assert.Equal("", Checkout.Code("        // NotificationArea.Tray() is the taskbar"));
+        Assert.Equal("", Checkout.Code("    /// <summary>Reads NotificationArea.Tray().</summary>"));
+        Assert.Equal("var tray = NotificationArea.Tray();", Checkout.Code("        var tray = NotificationArea.Tray(); // the shell's").Trim());
+
+        // And a line whose quotes do not pair is left whole, because deleting real code would turn
+        // a call that was made into one that appears not to be — which no sweep would report.
+        Assert.Equal(
+            """var text = "NotificationArea.Tray(""",
+            Checkout.Code("""        var text = "NotificationArea.Tray(""").Trim());
+    }
+
+    [Fact]
     public void The_root_is_walked_once_and_not_once_per_case()
     {
         // Cached, which is the third thing the copies each did for themselves. Same instance both

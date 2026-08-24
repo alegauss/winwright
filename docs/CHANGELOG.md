@@ -28,6 +28,7 @@
 - ✅ **WW190** **a case asserting a desk-dependent verdict without excusing the desk is caught by a guest run and by nothing here** — Every case asking the shell, the foreground or the focus is read out of the sources and paired with how it excuses the desk; sixteen did not, and a held desk now passes.
 - ✅ **WW191** **the third-state rule reaches only a suite reading that answers a verdict, and the defect it was written for did not** — Two earlier boundaries read off the assembly: eight readings that swallow and answer a value, and the helper that narrows a three-state one, measured against WW181's kept signature.
 - ✅ **WW192** **a summary counts holes without saying which were the desk's, though the engine now declares which conditions are** — Both headlines divide their holes into the desk's, this run's and unclassified, and every line says which it was — read off the engine's own declared conditions.
+- ✅ **WW197** **a case that excuses the desk once counts as excused for every assertion in it, including the ones that never were** — An excuse now covers the desk fact of the reading it names and nothing else; the finer unit found five cases owing a reason and one owing the repair its own comment predicted.
 
 ## Block B — Attach, launch, and leave nothing behind
 
