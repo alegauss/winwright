@@ -109,6 +109,7 @@
 - ✅ **WW165** **opening the notification overflow answers a bare bool, so a run that could not open it says only false** — Working the overflow answers a reading with the reason, a hole rather than a red, and a step; and a rule keeps the rest of the block from answering yes or no where a failure has a cause.
 - ✅ **WW168** **finding a tray icon answers null whether the icon is absent or the flyout simply would not open** — Looking for a tray icon answers a reading that says whether every place was looked at, so an absent icon fails and a flyout that would not open is a hole about the desk.
 - ✅ **WW174** **a tray menu that never came up records Failed whether the code or the desk was at fault, and answers no verdict** — A tray menu answers a verdict and a step that agree, so a shell hiding the icon or a desk refusing the focus is a hole and only a menu the icon never showed is red.
+- ✅ **WW209** **the verb catalogue says every verb the engine offers and reads two of its ten namespaces, with nothing saying why** — The catalogue reads any engine file that touches the application, not two namespaces: 18 verbs an adopter can call, never asked what they need, and the README named 22 of 31 families.
 
 ## Block E — Capture — the picture that proves what it photographed
 

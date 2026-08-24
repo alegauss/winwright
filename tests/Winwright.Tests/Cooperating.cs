@@ -62,9 +62,51 @@ internal sealed record VerbNeeds(string Named, Cooperation Needs, bool NeedsTheD
 /// </summary>
 internal static class Cooperating
 {
-    /// <summary>The namespaces a verb lives in. Reading and acting, and nothing else.</summary>
+    /// <summary>
+    /// What makes a file one a verb can live in: it reaches the application under test.
+    /// <para>
+    /// WW209. The scope was two namespaces, typed, and the case above it says <em>every verb the
+    /// engine offers</em>. The engine has ten namespaces and about a hundred and fifty public
+    /// statics outside those two — most of them plainly not verbs in this sense, since composing a
+    /// verdict or rendering a sentence needs nothing from any application. That is what the
+    /// catalogue would have recorded if asked, and it was never asked.
+    /// </para>
+    /// <para>
+    /// Derived rather than declared. A verb is something that reaches the thing under test, and a
+    /// file that reaches it says so by naming an automation element, a window handle or a process.
+    /// Four namespaces — <c>Verdicts</c>, <c>Tracing</c>, <c>Projects</c> and <c>Scenarios</c> —
+    /// name none of the three in any of their thirty-two files, which is a measurement rather than
+    /// a promise, and <c>NoCooperationTests</c> takes it again on every run.
+    /// </para>
+    /// </summary>
+    public static IReadOnlyList<string> Reaching { get; } = new ReadOnlyCollection<string>(
+        ["AutomationElement", "Win32.", "System.Diagnostics.Process", "Process.Start"]);
+
+    /// <summary>
+    /// Where a verb lives by default: reading and acting.
+    /// <para>
+    /// The floor and not the whole, which is the correction WW209 made. Scoping only by what reaches
+    /// the application would have dropped fifteen entries — <c>Locator.Parse</c>,
+    /// <c>Attempt.Until</c>, the vocabulary, the retries — and each of those is a verb an adopter
+    /// calls whose answer is that it needs nothing. Recording that is what the catalogue is for, so
+    /// the two namespaces stay and the derived half is added to them.
+    /// </para>
+    /// </summary>
     public static IReadOnlyList<string> Namespaces { get; } =
         new ReadOnlyCollection<string>(["Winwright.Acting", "Winwright.Locating"]);
+
+    /// <summary>Every engine type whose own file reaches the application under test.</summary>
+    public static IReadOnlyList<string> Driving() => driving.Value;
+
+    private static readonly Lazy<IReadOnlyList<string>> driving = new(() => new ReadOnlyCollection<string>(
+        Checkout.SourcesIn(Checkout.Engine)
+            .Where(one => File.ReadLines(one).Select(Checkout.Code)
+                .Any(line => Reaching.Any(mark => line.Contains(mark, StringComparison.Ordinal))))
+            .Select(Path.GetFileNameWithoutExtension)
+            .OfType<string>()
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(one => one, StringComparer.Ordinal)
+            .ToList()));
 
     /// <summary>Every verb, and what it needs.</summary>
     public static IReadOnlyList<VerbNeeds> Known { get; } = new ReadOnlyCollection<VerbNeeds>(
@@ -150,6 +192,36 @@ internal static class Cooperating
         new("NotificationArea.OpenOverflow", Cooperation.None, true, "open the flyout"),
         new("NotificationArea.CloseOverflow", Cooperation.None, true, "shut it again"),
         new("NotificationArea.OpenMenu", Cooperation.None, true, "an icon's context menu, by key"),
+
+        // --- WW209, and the whole of what widening the scope found -----------------------------------
+        // Eighteen verbs an adopter can call that this catalogue had never been shown. Every one of
+        // them reaches the application or the desk, which is why the derived half of the scope finds
+        // them, and not one needs the in-app half — which is the answer the criterion wanted and
+        // could not have got from a list that stopped at two namespaces.
+        new("TopLevelWindows.OfProcess", Cooperation.None, false, "every top-level window a process owns"),
+        new("TopLevelWindows.Largest", Cooperation.None, false, "the largest of them, which is the frame where there is one"),
+        new("Foreground.Now", Cooperation.None, false, "who holds the keyboard, read straight from Windows"),
+        new("Foreground.Check", Cooperation.None, false, "whether a named window holds it"),
+        new("Foreground.Between", Cooperation.None, false, "the same judgement over two sightings a caller already has"),
+        new("ForeignInput.Watch", Cooperation.None, false, "start a window in which this run owns the machine"),
+        new("ForeignInput.Read", Cooperation.None, false, "whether anybody else used it in that window"),
+        new("Desk.Read", Cooperation.None, false, "whether there is an interactive desk to drive at all"),
+        new("Desk.Blocked", Cooperation.None, false, "the reading as the one line a refusal prints"),
+        new("Desk.Caught", Cooperation.None, false, "whether a throw is the desk refusing rather than the code failing"),
+        new("Desk.WorthAnotherLook", Cooperation.None, false, "whether a refusal is one a second look could answer"),
+        new("AppTarget.AttachTo", Cooperation.None, false, "a target from a pid this run did not start"),
+        new("AppTarget.AttachToWindow", Cooperation.None, false, "the same from a window handle"),
+        new("AppTarget.FromLaunch", Cooperation.None, false, "a target from a process this run launched, arguments kept"),
+        new("ProcessRegister.For", Cooperation.None, false, "a register with the stopping budget a project declares"),
+        new("Obstruction.Reading", Cooperation.None, false, "what stands over a region, read off the z order"),
+        new("PaintedFrame.Of", Cooperation.None, false, "what a window actually paints inside the rectangle it owns"),
+        // Filed as needing the in-app half on the first attempt, and the case above put it right in
+        // one run: the engine assembly carries no reference to that half, so no verb here can be
+        // waiting on one. What this reads is the tree, against a label resolved from the project's
+        // own strings — which is a declaration and not an artefact the application wrote down.
+        new("Loading.In", Cooperation.None, false,
+            "whether a page has finished computing, read off the tree against the project's own "
+                + "loading label — and a page it could not walk answers that it did not look"),
     ]);
 
     /// <summary>The verbs a bare window is enough for, which is what the run drives.</summary>
@@ -173,7 +245,8 @@ internal static class Cooperating
     public static IReadOnlyList<string> Named() => new ReadOnlyCollection<string>(
         typeof(Resolve).Assembly
             .GetExportedTypes()
-            .Where(one => Namespaces.Contains(one.Namespace))
+            .Where(one => Namespaces.Contains(one.Namespace)
+                || Driving().Contains(one.Name, StringComparer.Ordinal))
             .SelectMany(one => one.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
                 .Where(method => !method.IsSpecialName)
                 .Select(method => $"{one.Name}.{method.Name}"))

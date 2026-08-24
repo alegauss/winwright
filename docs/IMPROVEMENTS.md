@@ -32,31 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW209 Every verb, of two namespaces
-
-`Cooperating` pairs every verb with what it needs from the application before it can
-answer, and `NoCooperationTests.Every_verb_the_engine_offers_is_in_the_catalogue` checks
-it against the assembly both ways. The sweep reads `Winwright.Acting` and
-`Winwright.Locating`.
-
-The engine has ten namespaces. Counted outside those two: seventeen public statics in
-`Windowing`, twenty-seven in `Capturing`, forty in `Verdicts`, twenty-six in
-`Asserting`, nineteen in `Projects`, twelve in `Processes`, six in `Tracing`. The two
-namespaces read hold about a third of what an adopter can call, and the case's own name
-claims all of it.
-
-Most of what is left out is plainly not a verb in this sense — composing a verdict or
-rendering a sentence needs nothing from the application, which is exactly what the
-catalogue would record if asked. That is the point rather than a reason to leave it: a
-list whose scope is a constant nobody checks is the shape WW208 just found in
-`DeskAsks.Calls`, and that one had a reading missing from it that cost two red guest
-runs.
-
-What is owed is the scope said out loud and checked. Either the sweep widens and the
-catalogue grows, or the namespaces it skips are named with why a verb there is not one
-an adopter drives — and the check asserts that the engine declares no others. The
-judgement is which, and it is the whole of the task.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

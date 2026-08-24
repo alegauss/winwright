@@ -77,6 +77,22 @@ directions — a verb added without an entry is a red.
 | `Menu` | enter a menu bar the way a keyboard user does, walk to an entry, open a submenu, dismiss |
 | `NotificationArea` | the tray, the overflow flyout, the icons on either, and an icon's context menu |
 
+Those drive controls. These are about the application itself and the desk it is running on — what a
+case reaches for before it has a control to name, and what it reads to know whether an answer it
+just took can be trusted.
+
+| Family | What it does |
+| --- | --- |
+| `AppTarget` | attach to a running application by process or by window, or launch one and keep what it was launched with |
+| `TopLevelWindows` | every top-level window a process owns, and the largest of them, which is the frame where there is one |
+| `ProcessRegister` | what this run started, and stopping it inside the budget the project declares |
+| `Desk` | whether there is an interactive desk to drive at all, and whether a throw is that desk refusing rather than the code failing |
+| `Foreground` | what holds the keyboard, read straight from Windows, and whether a named window does |
+| `ForeignInput` | whether anybody but this run touched the machine while a case was working |
+| `Obstruction` | what stands over a region, read off the z order |
+| `PaintedFrame` | what a window actually paints inside the rectangle it owns |
+| `Loading` | whether a page has finished computing, against the loading label the project declares |
+
 **A pattern act is the default and needs no foreground.** It asks the control through its own
 accessibility peer rather than asking the desktop to move a mouse. The verbs that do need the
 foreground are the ones that synthesise input, and they are marked as such in the catalogue rather

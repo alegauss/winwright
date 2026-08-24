@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Windows.Automation;
 
 using Winwright.Acting;
@@ -12,7 +12,7 @@ namespace Winwright.Tests;
 /// WW141. This block's criterion says every verb needing no cooperation runs against an application
 /// that references nothing, which is what keeps this usable on a product nobody here owns. Hundreds
 /// of cases do exactly that, so it held by accident of how the fixtures were written and no case
-/// anywhere stated it — and a rule met by whoever remembers is met by nobody.
+/// anywhere stated it â€” and a rule met by whoever remembers is met by nobody.
 /// <para>
 /// The window here is bare Win32: a frame and four controls made with CreateWindowExW, no
 /// presentation stack, no package, nothing written down for a harness to find. It is the closest
@@ -62,7 +62,7 @@ public sealed class NoCooperationTests : IDisposable
     /// An application that references nothing: bare Win32, no presentation stack, no package.
     /// <para>
     /// One caveat, stated rather than hidden. It runs inside this process, which does take the
-    /// in-app half — so the process-wide display awareness the half declares is in force here and
+    /// in-app half â€” so the process-wide display awareness the half declares is in force here and
     /// would not be in a product that never took it. That is not an API these verbs call; it is a
     /// condition the desk reading already measures and names, and it is the reason that condition
     /// exists rather than a gap in this case.
@@ -110,6 +110,42 @@ public sealed class NoCooperationTests : IDisposable
 
         Assert.Equal(listed.Count, listed.Distinct(StringComparer.Ordinal).Count());
     }
+
+    [Fact]
+    public void The_scope_is_derived_and_the_namespaces_it_leaves_out_are_measured()
+    {
+        // WW209. The scope was two namespaces typed into this file, and the case above claims every
+        // verb the engine offers â€” of ten namespaces and about a hundred and fifty public statics
+        // outside those two. It now reaches anything anywhere that touches the application, which
+        // added eighteen verbs nobody had ever been asked about.
+        var driving = Cooperating.Driving();
+
+        Assert.Contains("TopLevelWindows", driving, StringComparer.Ordinal);
+        Assert.Contains("AppTarget", driving, StringComparer.Ordinal);
+        Assert.Contains("Obstruction", driving, StringComparer.Ordinal);
+
+        // And the four that compose rather than drive contribute nothing â€” measured on every run
+        // rather than promised once. A verdict assembled from results reaches no application, and
+        // the day one does, it arrives here rather than staying outside the question.
+        var composing = Checkout.SourcesIn(Checkout.Engine)
+            .Where(one => Composing.Any(where =>
+                one.Contains($"{Path.DirectorySeparatorChar}{where}{Path.DirectorySeparatorChar}", StringComparison.Ordinal)))
+            .Select(Path.GetFileNameWithoutExtension)
+            .OfType<string>()
+            .ToList();
+
+        Assert.NotEmpty(composing);
+
+        var reaching = composing.Where(one => driving.Contains(one, StringComparer.Ordinal)).ToList();
+
+        Assert.True(
+            reaching.Count == 0,
+            $"{reaching.Count} file(s) in a namespace this catalogue does not sweep now reach the "
+                + $"application: {string.Join(", ", reaching)}");
+    }
+
+    /// <summary>The namespaces that compose values rather than drive anything.</summary>
+    private static readonly string[] Composing = ["Verdicts", "Tracing", "Projects", "Scenarios"];
 
     [Fact]
     public void No_reading_or_pattern_act_needs_the_in_app_half()
@@ -196,3 +232,4 @@ public sealed class NoCooperationTests : IDisposable
         Assert.All(rendered.Skip(1), one => Assert.StartsWith("  ", one));
     }
 }
+

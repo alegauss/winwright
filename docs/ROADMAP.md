@@ -10,8 +10,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW209** (deps: —) **the verb catalogue says every verb the engine offers and reads two of its ten namespaces, with nothing saying why** — The sweep names the namespaces it leaves out and why, because the case asserting completeness reads a fifth of the surface. → §WW209
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
