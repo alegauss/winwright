@@ -176,14 +176,14 @@ internal static class Flattening
 
         foreach (var line in File.ReadLines(file))
         {
-            if (Declares(line) is { } named)
+            if (Checkout.Owner(line) is { } named)
                 owner = named;
 
             if (line.Contains("[Fact]", StringComparison.Ordinal) || line.Contains("[Theory]", StringComparison.Ordinal))
             {
                 isACase = true;
             }
-            else if (Member(line) is { } next)
+            else if (Checkout.Member(line) is { } next)
             {
                 Close();
                 member = next;
@@ -236,35 +236,6 @@ internal static class Flattening
         return spellings.FirstOrDefault(one => Carries(one.ReturnType))?.ReturnType ?? spellings[0].ReturnType;
     }
 
-    private static string? Declares(string line)
-    {
-        if (!line.StartsWith("public ", StringComparison.Ordinal)
-            && !line.StartsWith("internal ", StringComparison.Ordinal))
-            return null;
 
-        var at = line.IndexOf("class ", StringComparison.Ordinal);
-        if (at < 0)
-            return null;
-
-        var rest = line[(at + 6)..].Trim();
-        var end = rest.IndexOfAny([' ', ':', '(', '{', '<']);
-        return end < 0 ? rest : rest[..end];
-    }
-
-    private static string? Member(string line)
-    {
-        if (!line.StartsWith("    public ", StringComparison.Ordinal)
-            && !line.StartsWith("    private ", StringComparison.Ordinal)
-            && !line.StartsWith("    internal ", StringComparison.Ordinal))
-            return null;
-
-        var bracket = line.IndexOf('(', StringComparison.Ordinal);
-        if (bracket < 0)
-            return null;
-
-        var before = line[..bracket];
-        var space = before.LastIndexOf(' ');
-        return space < 0 ? null : before[(space + 1)..];
-    }
 
 }

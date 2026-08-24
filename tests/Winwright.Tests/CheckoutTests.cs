@@ -104,6 +104,32 @@ public sealed class CheckoutTests
     }
 
     [Fact]
+    public void The_member_a_line_declares_is_found_even_where_it_returns_a_tuple()
+    {
+        // WW207, and this is the difference the four copies had split over. Two of them took the
+        // first bracket on the line, which for a member returning a tuple is the tuple — so the
+        // member had no name and was invisible to the sweep pointed straight at it.
+        Assert.Equal("Driven", Checkout.Member("    private (string Surfaces, string Geometry) Driven()"));
+        Assert.Equal("Ran", Checkout.Member("    private static string Ran(string store, string file)"));
+        Assert.Equal("Settling", Checkout.Member("    internal static Settling Settling() => new();"));
+        Assert.Equal("Dispose", Checkout.Member("    public void Dispose()"));
+
+        // And nothing that is not a member at that indentation.
+        Assert.Null(Checkout.Member("        NotificationArea.CloseOverflow();"));
+        Assert.Null(Checkout.Member("    private readonly string root = Temp();"));
+        Assert.Null(Checkout.Member("public sealed class DeskAsks"));
+    }
+
+    [Fact]
+    public void The_type_a_line_declares_is_a_declaration_and_never_a_mention()
+    {
+        Assert.Equal("DeskAsks", Checkout.Owner("public sealed class DeskAsks"));
+        Assert.Equal("Settling", Checkout.Owner("internal sealed class Settling : IDisposable"));
+        Assert.Null(Checkout.Owner("    /// The taskbar's own window class."));
+        Assert.Null(Checkout.Owner("        var named = one.ClassName;"));
+    }
+
+    [Fact]
     public void The_root_is_walked_once_and_not_once_per_case()
     {
         // Cached, which is the third thing the copies each did for themselves. Same instance both

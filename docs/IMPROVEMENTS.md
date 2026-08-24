@@ -53,30 +53,6 @@ finding where each begins — which is the same judgement `DeskAsks` makes about
 and `RefusalArms` makes about a throw site, and is the whole of the task rather than a
 step before it.
 
-### §WW207 The member walk, four times and two ways
-
-WW193 extracted the file walk because it existed twice and one copy had its exclusions
-wrong. The walk one level in — which member of a class does this line declare — now
-exists four times, in `DeskAsks`, `Flattening`, `DeskDiscards` and `WaitedForTests`, and
-two of those were written in the last two tasks.
-
-They have already diverged, and on the bug that was measured rather than imagined.
-`DeskAsks` and `Flattening` take the first bracket on the line; `DeskDiscards` and
-`WaitedForTests` take the last one an identifier opens. A member returning a tuple opens
-a bracket before its own name — `private (string Surfaces, string Geometry) Driven()` —
-so the first two find no name at all and the member is invisible to them. That was found
-twice, an hour apart, by two sweeps going quiet about a method they were pointed
-straight at.
-
-It is live rather than theoretical for one of them. `Flattening` is about helpers, and a
-helper returning a tuple is exactly the shape it cannot see — so a narrowing of a
-three-state reading inside one would be reported by nobody.
-
-What is owed is the reading, beside the walk it belongs with: the member a line
-declares, the indentation a member sits at, and the arrow that ends a signature. Each
-sweep keeps its own question, which is what WW193 said about the walk and is the same
-argument one level down.
-
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed

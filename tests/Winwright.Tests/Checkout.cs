@@ -175,6 +175,84 @@ internal static class Checkout
     }
 
     /// <summary>
+    /// The type a line declares, where the line is a top-level declaration.
+    /// <para>
+    /// A declaration and never a mention: prose about a window class is not a type, and a sweep that
+    /// took one quietly renamed every member in the file after it.
+    /// </para>
+    /// </summary>
+    /// <param name="line">The line, already read as code.</param>
+    internal static string? Owner(string line)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+
+        if (!line.StartsWith("public ", StringComparison.Ordinal)
+            && !line.StartsWith("internal ", StringComparison.Ordinal))
+            return null;
+
+        var at = line.IndexOf("class ", StringComparison.Ordinal);
+        if (at < 0)
+            return null;
+
+        var rest = line[(at + 6)..].Trim();
+        var end = rest.IndexOfAny([' ', ':', '(', '{', '<']);
+        return end < 0 ? rest : rest[..end];
+    }
+
+    /// <summary>
+    /// The member a line declares, at the one indentation a member of a class sits at.
+    /// <para>
+    /// WW207. This existed four times and had already split two against two, on a bug that was
+    /// measured rather than imagined: a member returning a tuple opens a bracket before its own name
+    /// — <c>private (string Surfaces, string Geometry) Driven()</c> — so a reader taking the first
+    /// bracket finds no name at all and the member is invisible to it. Two sweeps went quiet about a
+    /// method they were pointed straight at, an hour apart, before it was written down.
+    /// </para>
+    /// <para>
+    /// The last bracket an identifier opens, and nothing past an arrow, which is a body rather than
+    /// a signature. Each sweep keeps its own question — this answers only which member a line is in,
+    /// which is what WW193 said about the file walk and is the same argument one level down.
+    /// </para>
+    /// </summary>
+    /// <param name="line">The line, already read as code.</param>
+    internal static string? Member(string line)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+
+        if (!line.StartsWith("    public ", StringComparison.Ordinal)
+            && !line.StartsWith("    private ", StringComparison.Ordinal)
+            && !line.StartsWith("    internal ", StringComparison.Ordinal))
+            return null;
+
+        var arrow = line.IndexOf("=>", StringComparison.Ordinal);
+        var signature = arrow < 0 ? line : line[..arrow];
+
+        var named = "";
+        for (var at = 1; at < signature.Length; at++)
+        {
+            if (signature[at] != '(')
+                continue;
+
+            // An assignment before the bracket makes this a field initialised by a call rather than
+            // a member declared with parameters. All four copies read
+            // `private readonly string root = Temp();` as a member called Temp, and every line after
+            // it belonged to a member that does not exist — which is the sort of thing that stays
+            // harmless until the line after one of them is the line a sweep is looking for.
+            if (signature[..at].Contains('='))
+                break;
+
+            var began = at;
+            while (began > 0 && (char.IsLetterOrDigit(signature[began - 1]) || signature[began - 1] == '_'))
+                began--;
+
+            if (began < at)
+                named = signature[began..at];
+        }
+
+        return named.Length == 0 ? null : named;
+    }
+
+    /// <summary>
     /// Whether a path is a source somebody wrote rather than a copy a build made. Matched on the
     /// separators either side, so a directory called <c>binding</c> is not mistaken for output.
     /// </summary>

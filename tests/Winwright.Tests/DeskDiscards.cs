@@ -109,7 +109,7 @@ internal static class DeskDiscards
 
             foreach (var line in File.ReadLines(file).Select(Checkout.Code))
             {
-                if (Declares(line) is { } next)
+                if (Checkout.Member(line) is { } next)
                 {
                     member = next;
                     continue;
@@ -151,32 +151,4 @@ internal static class DeskDiscards
     }
 
     /// <summary>The member a line declares, at the one indentation a member of a class sits at.</summary>
-    private static string? Declares(string line)
-    {
-        if (!line.StartsWith("    private ", StringComparison.Ordinal)
-            && !line.StartsWith("    internal ", StringComparison.Ordinal)
-            && !line.StartsWith("    public ", StringComparison.Ordinal))
-            return null;
-
-        var arrow = line.IndexOf("=>", StringComparison.Ordinal);
-        var signature = arrow < 0 ? line : line[..arrow];
-
-        // The last bracket an identifier opens, for the reason WaitedForTests gives about its own:
-        // a member returning a tuple opens one before its own name.
-        var named = "";
-        for (var at = 1; at < signature.Length; at++)
-        {
-            if (signature[at] != '(')
-                continue;
-
-            var began = at;
-            while (began > 0 && (char.IsLetterOrDigit(signature[began - 1]) || signature[began - 1] == '_'))
-                began--;
-
-            if (began < at)
-                named = signature[began..at];
-        }
-
-        return named.Length == 0 ? null : named;
-    }
 }

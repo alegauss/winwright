@@ -369,7 +369,7 @@ internal static class DeskAsks
 
         foreach (var line in File.ReadLines(file))
         {
-            if (Declares(line, "class ") is { } named)
+            if (Checkout.Owner(line) is { } named)
                 owner = named;
 
             if (line.Contains("[Fact]", StringComparison.Ordinal)
@@ -377,7 +377,7 @@ internal static class DeskAsks
             {
                 caseNext = true;
             }
-            else if (Member(line) is { } member)
+            else if (Checkout.Member(line) is { } member)
             {
                 Close();
                 open = caseNext ? member : "";
@@ -553,41 +553,10 @@ internal static class DeskAsks
     }
 
     /// <summary>The name a declaration introduces, where the line is one.</summary>
-    private static string? Declares(string line, string what)
-    {
-        // A declaration and never a mention: prose about a window class is not a type, and this
-        // used to be the sort of thing that quietly renamed every case in a file.
-        if (!line.StartsWith("public ", StringComparison.Ordinal)
-            && !line.StartsWith("internal ", StringComparison.Ordinal))
-            return null;
-
-        var at = line.IndexOf(what, StringComparison.Ordinal);
-        if (at < 0)
-            return null;
-
-        var rest = line[(at + what.Length)..].Trim();
-        var end = rest.IndexOfAny([' ', ':', '(', '{', '<']);
-        return end < 0 ? rest : rest[..end];
-    }
 
     /// <summary>
     /// The member a line declares, at the one indentation a case sits at. Anything deeper is a
     /// local function or a lambda and belongs to the case above it.
     /// </summary>
-    private static string? Member(string line)
-    {
-        if (!line.StartsWith("    public ", StringComparison.Ordinal)
-            && !line.StartsWith("    private ", StringComparison.Ordinal)
-            && !line.StartsWith("    internal ", StringComparison.Ordinal))
-            return null;
-
-        var bracket = line.IndexOf('(', StringComparison.Ordinal);
-        if (bracket < 0)
-            return null;
-
-        var before = line[..bracket];
-        var space = before.LastIndexOf(' ');
-        return space < 0 ? null : before[(space + 1)..];
-    }
 
 }

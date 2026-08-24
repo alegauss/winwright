@@ -74,7 +74,7 @@ public sealed class WaitedForTests
             foreach (var line in File.ReadLines(file).Select(Checkout.Spoken))
             {
                 at++;
-                if (Declares(line) is { } next)
+                if (Checkout.Member(line) is { } next)
                 {
                     Close();
                     member = next;
@@ -105,36 +105,6 @@ public sealed class WaitedForTests
     }
 
     /// <summary>The member a line declares, at the one indentation a method of a class sits at.</summary>
-    private static string? Declares(string line)
-    {
-        if (!line.StartsWith("    private ", StringComparison.Ordinal)
-            && !line.StartsWith("    internal ", StringComparison.Ordinal)
-            && !line.StartsWith("    public ", StringComparison.Ordinal))
-            return null;
-
-        // The last bracket an identifier opens, and never the first bracket on the line. A method
-        // returning a tuple opens one before its own name — `private (string A, string B) Driven()`
-        // — and taking the first found no name at all, so the method holding the wait was invisible.
-        // Anything past `=>` is a body rather than a signature.
-        var arrow = line.IndexOf("=>", StringComparison.Ordinal);
-        var signature = arrow < 0 ? line : line[..arrow];
-
-        var named = "";
-        for (var at = 0; at < signature.Length; at++)
-        {
-            if (signature[at] != '(' || at == 0)
-                continue;
-
-            var began = at;
-            while (began > 0 && (char.IsLetterOrDigit(signature[began - 1]) || signature[began - 1] == '_'))
-                began--;
-
-            if (began < at)
-                named = signature[began..at];
-        }
-
-        return named.Length == 0 ? null : named;
-    }
 
     [Fact]
     public void The_cold_start_is_given_longer_than_the_write_that_follows_it()
