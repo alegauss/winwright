@@ -28,6 +28,29 @@ What is owed is the finer unit. Whether that is an assertion counted against a p
 excuse, or something a case declares once and the reading checks, is the judgement — and
 the reason this is a task rather than a line of scanner.
 
+### §WW201 Deleting a binary that is still running
+
+Measured on WW196's first guest run. `CaptureReceiptTests` failed with
+`UnauthorizedAccessException: Access to the path 'other.exe' is denied`, thrown out of
+`Directory.Delete(root, recursive: true)` in its own `Dispose`. The re-run passed, which
+is what makes it worth filing rather than fixing in passing.
+
+What it does: `Elsewhere()` copies `cmd.exe` into a temp directory as `other.exe` and
+starts it, so a receipt can be composed against a target in another process. Nothing
+waits for that process to end, and Windows will not delete a running image. The case's
+assertion had already passed.
+
+So the red is about the teardown and says nothing about the code under test, which is
+this block's own criterion pointed at the suite. Worse than a plain failure: a throw out
+of `Dispose` reads as a broken harness, which `RunVerdict` ranks above a failure
+precisely because nothing past it was observed — and it sends the reader to this
+repository over a file handle.
+
+`Attachable` already has the shape: WW126 learned that waiting for windows is the wrong
+moment and waits for the process to leave the machine instead. What is owed is that door
+here, and a look at whether other cases that copy a binary and run it have the same
+teardown. The count is unknown, which is why it is a task rather than a line.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
@@ -296,3 +319,27 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW200 The fifth type, on the other side of a boundary
+
+WW196 named five refusals thrown from many places and armed four of them: the locator
+grammar, the label reader, the declaration and the actionability check.
+`UnknownFlagException` is the fifth and it is untouched, which is worth saying plainly
+rather than leaving to a reader counting entries.
+
+It is untouched because it lives in the fixture, and `Provocation` says why the suite
+cannot reach it: the fixture is referenced without its assembly on purpose, because an
+application under test is launched from its own output rather than read from beside the
+harness. So the arm shape WW196 built — an enum a type exposes, swept by reflection —
+has nothing to reflect over.
+
+Counted: eleven throw sites across `Flags` and `Intruder`. Not a flag at all, a flag
+this fixture does not have, a flag given no value, one given a value it takes none for,
+one given a value outside what it accepts, a number that is not a number, a flag that
+needs a companion, two renders asked for at once, and two more the intruder adds. A
+person meets each of those with a different thing to fix.
+
+The judgement is how a boundary that exists for a good reason gets crossed for a
+reading. The fixture already prints its catalogue, and WW146's three shapes were
+provoked by running it and matching what it said — so the arms may be text this suite
+matches rather than an enum it reflects over. That choice is the task.
