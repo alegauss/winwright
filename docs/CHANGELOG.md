@@ -102,6 +102,7 @@
 - ✅ **WW44** **nothing checks that a capture contains the surface it was taken for** — A capture is asserted against the rectangle the application said it drew, telling clipped from elsewhere because they are two repairs, and a surface nobody reported is a hole rather than a red.
 - ✅ **WW38** **sampled points cannot answer whether a region is covered** — The z order above the window is enumerated and every frame intersected with the capture rectangle, so the answer is how many pixels are taken and by which named windows.
 - ✅ **WW40** **a copy trimmed around an intruder is a picture of something nobody asked for** — A receipt handed a reading of what stood over the region refuses rather than accepting a cropped picture, naming the intruder, its process and the pixels it takes.
+- 🗑 **WW186** **the copy route is the one a window can stand over, and it writes its file without asking what did** — superseded by WW40: Filed without reading Block E's open lines, where WW40 had asked the same question since before it: the receipt now refuses an overlap and names it.
 
 ## Block F — Assert — the expectation is derived, never typed
 
