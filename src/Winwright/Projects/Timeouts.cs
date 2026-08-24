@@ -63,6 +63,6 @@ public sealed class Timeouts
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         return byName.TryGetValue(name, out var milliseconds)
             ? milliseconds
-            : throw new DeclarationMissingException($"timeouts.{name}", declaredIn, "a step waiting on it");
+            : throw new DeclarationMissingException(MissingDeclaration.KeyNotDeclared, $"timeouts.{name}", declaredIn, "a step waiting on it");
     }
 }

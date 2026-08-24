@@ -44,6 +44,24 @@ public sealed class LabelTests : IDisposable
         ResolvedLanguage.Resolve(null, null, CultureInfo.GetCultureInfo(tag));
 
     [Fact]
+    public void A_strings_file_that_will_not_parse_is_refused_naming_it()
+    {
+        // WW196. The sixth way a label is unusable, and the one nothing drove: a file that is there
+        // and will not open. It is neither a missing key nor a missing language, and a reader handed
+        // "not in the file" for a file that never parsed would go looking for a key that is in it.
+        var project = Project(
+            """{ "languageFiles": ["strings.en.json"] }""",
+            ("strings.en.json", """{ "tray": { "quit": "Quit" """));
+
+        var refusal = Assert.Throws<UnusableLabelException>(
+            () => Labels.For("tray.quit", project, Speaking("en-GB")));
+
+        Assert.Equal(UnusableLabel.FileUnreadable, refusal.Arm);
+        Assert.Contains("could not be read", refusal.Message, StringComparison.Ordinal);
+        Assert.Contains("strings.en.json", refusal.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_portuguese_window_is_asserted_against_portuguese_words()
     {
         var label = Labels.For("tray.quit", Bilingual(), Speaking("pt-BR"));

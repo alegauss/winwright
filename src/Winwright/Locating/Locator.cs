@@ -62,7 +62,7 @@ public sealed record Locator
                 break;
 
             if (text[at] != '>')
-                throw new LocatorSyntaxException(text, at, $"expected '>' or the end, and found '{text[at]}'");
+                throw new LocatorSyntaxException(LocatorFault.StepNotSeparated, text, at, $"expected '>' or the end, and found '{text[at]}'");
 
             at++;
         }
@@ -108,6 +108,7 @@ public sealed record Locator
             var word = Word(text, ref at);
             if (!UiaVocabulary.IsControlType(word))
                 throw new LocatorSyntaxException(
+                    LocatorFault.UnknownControlType,
                     text,
                     at - word.Length,
                     $"'{word}' is no UI Automation control type; nearest are "
@@ -126,7 +127,7 @@ public sealed record Locator
             // built broke on the first line under the title bar.
             automationId = at < text.Length && text[at] == '"' ? Quoted(text, ref at) : Word(text, ref at);
             if (automationId.Length == 0)
-                throw new LocatorSyntaxException(text, at, "'#' introduces an automation id and this one is empty");
+                throw new LocatorSyntaxException(LocatorFault.EmptyAutomationId, text, at, "'#' introduces an automation id and this one is empty");
         }
 
         while (at < text.Length && text[at] == '[')
@@ -135,12 +136,12 @@ public sealed record Locator
             at++;
             var key = Word(text, ref at);
             if (at >= text.Length || text[at] != '=')
-                throw new LocatorSyntaxException(text, at, $"a predicate reads [key=value], with key one of {Keys}");
+                throw new LocatorSyntaxException(LocatorFault.PredicateMalformed, text, at, $"a predicate reads [key=value], with key one of {Keys}");
 
             at++;
             var value = Value(text, ref at);
             if (at >= text.Length || text[at] != ']')
-                throw new LocatorSyntaxException(text, at, "this predicate is not closed");
+                throw new LocatorSyntaxException(LocatorFault.PredicateNotClosed, text, at, "this predicate is not closed");
 
             at++;
 
@@ -158,6 +159,7 @@ public sealed record Locator
                     Once(text, opened, pattern, "pattern");
                     if (!UiaVocabulary.IsPattern(value))
                         throw new LocatorSyntaxException(
+                            LocatorFault.UnknownPattern,
                             text,
                             opened,
                             $"'{value}' is no UI Automation pattern; nearest are "
@@ -171,7 +173,7 @@ public sealed record Locator
                         || sorted == MatchOrder.Tree)
                     {
                         throw new LocatorSyntaxException(
-                            text, opened, $"'{value}' is no order here; they are left, right, top, bottom");
+                            LocatorFault.UnknownOrder, text, opened, $"'{value}' is no order here; they are left, right, top, bottom");
                     }
 
                     order = sorted;
@@ -179,16 +181,16 @@ public sealed record Locator
                 case "index":
                     Once(text, opened, index?.ToString(), "index");
                     if (!int.TryParse(value, out var ordinal))
-                        throw new LocatorSyntaxException(text, opened, $"'{value}' is not a whole number");
+                        throw new LocatorSyntaxException(LocatorFault.IndexNotANumber, text, opened, $"'{value}' is not a whole number");
                     if (ordinal < 1)
                         throw new LocatorSyntaxException(
-                            text, opened, $"an index counts from one, so {ordinal} addresses nothing");
+                            LocatorFault.IndexBelowOne, text, opened, $"an index counts from one, so {ordinal} addresses nothing");
 
                     index = ordinal;
                     break;
                 default:
                     throw new LocatorSyntaxException(
-                        text, opened + 1, $"'{key}' is no predicate here; the keys are {Keys}");
+                        LocatorFault.UnknownKey, text, opened + 1, $"'{key}' is no predicate here; the keys are {Keys}");
             }
         }
 
@@ -196,7 +198,7 @@ public sealed record Locator
             && pattern is null && index is null && order is null)
         {
             throw new LocatorSyntaxException(
-                text, began, "a step that constrains nothing addresses everything, so it is refused");
+                LocatorFault.StepConstrainsNothing, text, began, "a step that constrains nothing addresses everything, so it is refused");
         }
 
         return new LocatorStep(controlType, automationId, name, className, pattern, index, order);
@@ -205,7 +207,7 @@ public sealed record Locator
     private static void Once(string text, int at, string? already, string key)
     {
         if (already is not null)
-            throw new LocatorSyntaxException(text, at, $"'{key}' is claimed twice in one step, which is two claims");
+            throw new LocatorSyntaxException(LocatorFault.KeyClaimedTwice, text, at, $"'{key}' is claimed twice in one step, which is two claims");
     }
 
     private static string Word(string text, ref int at)
@@ -267,7 +269,7 @@ public sealed record Locator
             at++;
         }
 
-        throw new LocatorSyntaxException(text, opened, "this quoted value is never closed");
+        throw new LocatorSyntaxException(LocatorFault.QuoteNotClosed, text, opened, "this quoted value is never closed");
     }
 
     private static void SkipSpace(string text, ref int at)

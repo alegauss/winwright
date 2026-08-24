@@ -156,7 +156,7 @@ public sealed class ProjectDeclaration
 
         var full = System.IO.Path.GetFullPath(path);
         if (!File.Exists(full))
-            throw new DeclarationMissingException(FileName, full, "every scenario in this project");
+            throw new DeclarationMissingException(MissingDeclaration.NotAtThePathNamed, FileName, full, "every scenario in this project");
 
         var shape = JsonSerializer.Deserialize<Shape>(File.ReadAllText(full), ReadAs)
             ?? throw new JsonException($"{full} is empty, and an empty declaration declares nothing");
@@ -183,7 +183,7 @@ public sealed class ProjectDeclaration
         }
 
         throw new DeclarationMissingException(
-            FileName, $"{directory.FullName} and every directory above it", "every scenario in this project");
+            MissingDeclaration.NotUpTheTree, FileName, $"{directory.FullName} and every directory above it", "every scenario in this project");
     }
 
     private string? Resolve(string? path)
@@ -196,7 +196,7 @@ public sealed class ProjectDeclaration
     }
 
     private string Require(string? value, string key, string wanted) =>
-        value ?? throw new DeclarationMissingException(key, Path, wanted);
+        value ?? throw new DeclarationMissingException(MissingDeclaration.KeyNotDeclared, key, Path, wanted);
 
     private sealed record Shape
     {

@@ -128,6 +128,21 @@ public class ProjectDeclarationTests : IDisposable
     }
 
     [Fact]
+    public void A_path_that_names_no_declaration_says_so()
+    {
+        // WW196, and distinct from the search below. Somebody named a path and there is nothing at
+        // it, so the fix is the path; the case under this one looked everywhere and found none, so
+        // the fix is to write one. Reported identically until now.
+        var named = Path.Combine(root, "not-a-project", ProjectDeclaration.FileName);
+
+        var refusal = Assert.Throws<DeclarationMissingException>(() => ProjectDeclaration.Load(named));
+
+        Assert.Equal(MissingDeclaration.NotAtThePathNamed, refusal.Arm);
+        Assert.Equal(ProjectDeclaration.FileName, refusal.Key);
+        Assert.DoesNotContain("every directory above it", refusal.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_checkout_that_declares_nothing_refuses_and_says_where_it_looked()
     {
         var elsewhere = Directory.CreateTempSubdirectory("winwright-bare-").FullName;

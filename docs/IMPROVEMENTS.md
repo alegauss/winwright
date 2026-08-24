@@ -296,26 +296,3 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW196 One type fixed, five still counting wrong
-
-WW188 gave `WrongCaptureException` an arm it declares and paired the five one by one,
-checked against the engine both ways. It is worth saying plainly that it fixed one type.
-
-Counted after it shipped: `LocatorSyntaxException` is thrown from thirteen places,
-`UnknownFlagException` from eleven, `UnusableLabelException` from six,
-`NotActionableException` and `DeclarationMissingException` from four each. Not every
-throw site is a distinct arm — several are one reason carrying different values — but a
-type thrown thirteen times is not one refusal, and `Provocation` holds one entry for it
-naming one case.
-
-So this block's first criterion is in the same state WW188 found the capture refusal in,
-five times over. The check is honest about what it measures and measures the wrong unit:
-a reader meets an arm, a locator that will not parse for a reason nobody has provoked is
-a refusal that will quietly stop working, and the catalogue would say the type is
-covered.
-
-What is owed is the shape WW188 already built, applied where it earns its keep. Thirteen
-arms is not thirteen enum members somebody invents in an afternoon — the work is
-deciding which throws are one refusal wearing different values and which are different
-refusals, and that judgement is the whole of the task rather than a step before it.

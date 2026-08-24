@@ -6,6 +6,38 @@ using Winwright.Projects;
 
 namespace Winwright.Asserting;
 
+/// <summary>
+/// The ways a label can be unusable, each of which the author fixes somewhere different.
+/// <para>
+/// WW196. A type thrown six times was one entry in the pairing naming one case. Two of these are
+/// about a project that declares the wrong thing, two about a language it does not ship, one about
+/// a key that is not there and one about a file that would not open — six errands, one entry.
+/// </para>
+/// </summary>
+public enum UnusableLabel
+{
+    /// <summary>Thrown without saying which. Pairs with nothing, and the suite refuses it.</summary>
+    Unsaid,
+
+    /// <summary>The project declares no language files whose names carry a language tag.</summary>
+    NoLanguageFiles,
+
+    /// <summary>The key is not in the strings this project ships for the chosen language.</summary>
+    KeyNotThere,
+
+    /// <summary>The label carries a placeholder, so a filled-in tree could never match it exactly.</summary>
+    CarriesAPlaceholder,
+
+    /// <summary>The application is in a language this project ships and nothing says what to fall back to.</summary>
+    NoFallbackDeclared,
+
+    /// <summary>A fallback is declared and the project ships no strings for it.</summary>
+    FallbackNotShipped,
+
+    /// <summary>The strings file itself could not be read.</summary>
+    FileUnreadable,
+}
+
 /// <summary>Raised where a label cannot be read, or can be read and could never match.</summary>
 public sealed class UnusableLabelException : InvalidOperationException
 {
@@ -13,6 +45,15 @@ public sealed class UnusableLabelException : InvalidOperationException
     public UnusableLabelException(string message)
         : base(message)
     {
+    }
+
+    /// <summary>The same, saying which of the ways a label can be unusable this one is.</summary>
+    /// <param name="arm">Which way.</param>
+    /// <param name="message">Which label, and why nothing can be asserted with it.</param>
+    public UnusableLabelException(UnusableLabel arm, string message)
+        : base(message)
+    {
+        Arm = arm;
     }
 
     /// <summary>Unused. Present because an exception with no default shapes is awkward to catch.</summary>
@@ -26,6 +67,12 @@ public sealed class UnusableLabelException : InvalidOperationException
         : base(message, inner)
     {
     }
+
+    /// <summary>
+    /// Which way this label is unusable. <see cref="UnusableLabel.Unsaid" /> where it was thrown
+    /// without saying — a refusal nothing can pair, and the check says so.
+    /// </summary>
+    public UnusableLabel Arm { get; } = UnusableLabel.Unsaid;
 }
 
 /// <summary>One label, in the language the application is actually rendering.</summary>
@@ -101,6 +148,7 @@ public static class Labels
         var tagged = Tagged(declaration);
         if (tagged.Count == 0)
             throw new UnusableLabelException(
+                UnusableLabel.NoLanguageFiles,
                 $"'{key}' is read from the project's strings and {declaration.Path} declares no languageFiles "
                     + "whose names carry a language tag, such as strings.en.json");
 
@@ -109,6 +157,7 @@ public static class Labels
 
         var text = Read(chosen.File, key)
             ?? throw new UnusableLabelException(
+                UnusableLabel.KeyNotThere,
                 $"'{key}' is not in {chosen.File}, which is the {chosen.Culture.Name} strings this project ships");
 
         // Refused, and never skipped. A skipped label is an assertion that did not run reported
@@ -116,6 +165,7 @@ public static class Labels
         var found = Placeholder.Match(text);
         if (found.Success)
             throw new UnusableLabelException(
+                UnusableLabel.CarriesAPlaceholder,
                 $"'{key}' reads '{text}' in {System.IO.Path.GetFileName(chosen.File)}, which carries the "
                     + $"placeholder '{found.Value}': a tree holding it already filled in can never match this "
                     + "exactly, so nothing here could ever pass");
@@ -146,12 +196,14 @@ public static class Labels
         // assertion ends up matching English against a window that is not in English.
         if (declaration.LanguageFallback is null)
             throw new UnusableLabelException(
+                UnusableLabel.NoFallbackDeclared,
                 $"'{key}': the application is in {wanted.Name} and this project ships {declared}. "
                     + $"Declare language.fallback in {declaration.Path} to say which one it falls back to");
 
         var named = Culture(declaration.LanguageFallback);
         return (named is null ? null : Nearest(tagged, named))
             ?? throw new UnusableLabelException(
+                UnusableLabel.FallbackNotShipped,
                 $"'{key}': {declaration.Path} falls back to {declaration.LanguageFallback}, and the strings "
                     + $"it ships are {declared}");
     }
@@ -229,7 +281,7 @@ public static class Labels
         }
         catch (Exception unreadable) when (unreadable is JsonException or IOException)
         {
-            throw new UnusableLabelException($"{file} could not be read: {unreadable.Message}");
+            throw new UnusableLabelException(UnusableLabel.FileUnreadable, $"{file} could not be read: {unreadable.Message}");
         }
     }
 }

@@ -151,8 +151,44 @@ public class LocatorTests
     [Fact]
     public void A_predicate_that_is_not_closed_is_refused()
     {
-        Assert.Throws<LocatorSyntaxException>(() => Locator.Parse("Button[name=Save"));
-        Assert.Throws<LocatorSyntaxException>(() => Locator.Parse("""Button[name="Save]"""));
+        // WW196: the arm and not only the type. This case used to carry both spellings, and the
+        // second is a different refusal — a quote that never closes, which the case below is about.
+        Assert.Equal(
+            LocatorFault.PredicateNotClosed,
+            Assert.Throws<LocatorSyntaxException>(() => Locator.Parse("Button[name=Save")).Arm);
+    }
+
+    [Fact]
+    public void A_quoted_value_that_is_never_closed_is_refused_as_the_quote()
+    {
+        // WW196. The bracket inside a quote was never a bracket, so this is not an unclosed
+        // predicate: the reader has to add a quote and not a bracket, and that is a different fix.
+        var refusal = Assert.Throws<LocatorSyntaxException>(() => Locator.Parse("""Button[name="Save]"""));
+
+        Assert.Equal(LocatorFault.QuoteNotClosed, refusal.Arm);
+        Assert.Contains("this quoted value is never closed", refusal.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_hash_with_no_id_after_it_is_refused()
+    {
+        // WW196. A '#' introducing nothing addresses every element rather than one, which is the
+        // shape of locator that quietly matches whatever happens to be first.
+        var refusal = Assert.Throws<LocatorSyntaxException>(() => Locator.Parse("Button#"));
+
+        Assert.Equal(LocatorFault.EmptyAutomationId, refusal.Arm);
+        Assert.Contains("introduces an automation id and this one is empty", refusal.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_predicate_that_is_not_key_equals_value_is_refused()
+    {
+        // WW196. Distinct from a predicate nobody closed: this one is closed and says nothing, so
+        // the refusal answers with the keys the grammar has rather than pointing at a bracket.
+        var refusal = Assert.Throws<LocatorSyntaxException>(() => Locator.Parse("Button[name]"));
+
+        Assert.Equal(LocatorFault.PredicateMalformed, refusal.Arm);
+        Assert.Contains("a predicate reads [key=value]", refusal.Because, StringComparison.Ordinal);
     }
 
     [Fact]

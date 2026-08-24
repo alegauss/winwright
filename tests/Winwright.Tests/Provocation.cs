@@ -113,7 +113,8 @@ internal static class Provocation
         new("AnotherInstanceException", "title", null,
             "a second window of the same application under another title is what the instance check counts"),
         new("UnusableLabelException", "language", null,
-            "the fixture's own strings carry one key whose value is a placeholder no exact read can match"),
+            "the fixture's own strings carry one key whose value is a placeholder no exact read can match. "
+                + "WW196: six refusals, paired one by one in RefusalArms"),
         new("StoreTouchedException", "mutate", null,
             "a settings file rewritten to the same length, which is the accident the fingerprint exists for"),
         new("ApartmentTimeoutException", "pump", null,
@@ -126,7 +127,9 @@ internal static class Provocation
             "a render before the application exists, so neither the theme nor a window says what to draw it on"),
 
         new("LocatorSyntaxException", "", Without.NoShape,
-            "a locator that does not parse is a string, and no window has to exist for one",
+            "a locator that does not parse is a string, and no window has to exist for one. "
+                + "WW196: this type is thirteen refusals and this entry can name one, so the arms are "
+                + "paired one by one in RefusalArms",
             "LocatorTests.A_control_type_ui_automation_does_not_have_is_refused_with_the_nearest_words"),
         new("AmbiguousLocatorException", "", Without.NoShape,
             "two elements matching one step is a tree, and a hand-built window is a tree",
@@ -135,7 +138,8 @@ internal static class Provocation
             "attaching to a process that is not there needs no process, which is the whole point of it",
             "AppTargetTests.A_pid_nothing_is_running_as_is_refused_rather_than_run_against_something_else"),
         new("DeclarationMissingException", "", Without.NoShape,
-            "a project that declares nothing is a file, and the refusal is about the file",
+            "a project that declares nothing is a file, and the refusal is about the file. "
+                + "WW196: three refusals across four throw sites, paired one by one in RefusalArms",
             "ProjectDeclarationTests.What_the_project_never_declared_is_refused_by_name"),
         new("UnreadableTraceException", "", Without.NoShape,
             "a trace that is not a trace is a file, and reading one back is what this is about",
@@ -147,7 +151,8 @@ internal static class Provocation
             "a strings file declaring nothing under a key is a file, and the refusal is read off it",
             "DerivedSetTests.A_key_that_declares_nothing_is_refused_rather_than_deriving_an_empty_set"),
         new("NotActionableException", "", Without.NoShape,
-            "an element disabled, offscreen or without the pattern is a control, and a hand-built window has controls",
+            "an element disabled, offscreen or without the pattern is a control, and a hand-built window has controls. "
+                + "WW196: four properties are four refusals, paired one by one in RefusalArms",
             "ActionabilityTests.The_refusal_carries_the_locator_and_which_of_the_four_it_was"),
         new("DestructiveEntryException", "", Without.NoShape,
             "a declared entry against a control by that name, both of which a test builds",
