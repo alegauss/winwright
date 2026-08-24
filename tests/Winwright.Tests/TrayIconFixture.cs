@@ -189,9 +189,14 @@ internal sealed class TrayIconFixture : IDisposable
             // The last search's own reason, which is the half this used to drop. A shell that would
             // not open the flyout and a shell that took the icon and placed it nowhere both ended
             // this sentence the same way, and the difference is the one a reader needs.
+            //
+            // WW173: and what an earlier run left, because that is the answer measured behind four
+            // of these. A shell holding icons from a run that died is a shell that will do this
+            // again, and a reader told only about their own icon restarts nothing.
             throw new InvalidOperationException(
                 $"the shell took '{Tip}' and never put it anywhere a reading could find it within "
-                + $"{PlacedMs} ms, so nothing after this would be about the icon — {last?.Because}");
+                + $"{PlacedMs} ms, so nothing after this would be about the icon — {last?.Because} "
+                + TrayGhosts.Sentence(TrayGhosts.Showing()));
         }
     }
 

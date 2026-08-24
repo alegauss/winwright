@@ -20,6 +20,21 @@ namespace Winwright.Tests;
 public sealed class TrayPlacementTests
 {
     [Fact]
+    public void This_run_says_what_earlier_runs_left_in_the_notification_area()
+    {
+        // WW173, and the whole of it: the reading is taken whether or not anything is wrong, so a
+        // shell holding icons from a run that died says so by name. What it replaces is four cases
+        // failing at a five-second wait with nothing between them and a shell restart.
+        //
+        // Red rather than excused, and deliberately: a ghost is this suite's own leftover and not
+        // something the desk did to it. WW126 made one harmless; leaving one is still leaving one,
+        // and this block's whole theme is that a run leaves nothing behind.
+        var ghosts = TrayGhosts.Showing();
+
+        Assert.True(ghosts.Count == 0, TrayGhosts.Sentence(ghosts));
+    }
+
+    [Fact]
     public void When_the_fixture_returns_the_icon_is_already_findable()
     {
         using var icon = TrayIconFixture.Add("winwright placement");

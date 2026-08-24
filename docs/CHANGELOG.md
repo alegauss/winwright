@@ -44,6 +44,7 @@
 - ✅ **WW157** **a person at the keyboard turns a run red, since nothing tells input this run synthesised from input it did not** — Input this run synthesised is stamped where it leaves the process and compared against the machine's last, so a person at the keyboard is named as one rather than as a lost foreground.
 - ✅ **WW152** **nothing reads the survivors a run had to stop, so the summary never names what outlived the scenario** — The register answers what it had to stop as a finding for the run's own reading, and a register nobody stopped says the roll was never taken rather than that nothing outlived the run.
 - ✅ **WW158 (the reading)** **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — The condition reads whether the session is connected and whether the desktop is composed, so a session nothing is drawing is absent rather than met on a monitor count.
+- ✅ **WW173** **a run that died with the desk owned leaves the notification area unusable, and the next run reds without saying why** — Every run reads back what an earlier one left in the notification area and names it, so a shell holding icons from a run that died says so instead of four cases timing out.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

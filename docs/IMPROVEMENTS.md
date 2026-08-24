@@ -98,28 +98,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW173 What a dead run leaves in the shell
-
-Three guest runs of the same tree, in order. The first died with the Start menu holding
-the foreground: 32 failures. The menu was dismissed and nothing else touched; the second
-run came back with 4, every one of them in `TrayPlacementTests`, every one of them
-`TrayIconFixture.Placed` waiting 5000ms and reporting that the shell took the icon and
-never put it anywhere a reading could find. Explorer was restarted in the guest and
-nothing else changed; the third run passed 1087 of 1087.
-
-No process outlived any of the runs — the guest's process list was checked between the
-second and the third and held nothing of this suite's. So what survived was state inside
-the shell, and the run that created it is the run that died.
-
-This block's criterion is that a run leaves the machine as it found it, and the
-notification area is machine. What is owed is the reading: a run that added a tray icon
-says whether the shell still holds one when it finishes, the same way it says what
-processes it had to stop. That is a finding and not an assertion — nothing failed, the
-shell simply kept something — but a finding is what the next run's four reds needed and
-did not have.
-
-Where the icon cannot be withdrawn, saying so is the whole of the repair.
-
 ### §WW180 A count taken before the thing being counted exists
 
 `InstanceCheckTests.A_resident_instance_showing_nothing_is_the_ordinary_case_and_never_stops_a_run`
