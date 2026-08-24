@@ -29,9 +29,14 @@ public sealed class TrayPlacementTests
         // Red rather than excused, and deliberately: a ghost is this suite's own leftover and not
         // something the desk did to it. WW126 made one harmless; leaving one is still leaving one,
         // and this block's whole theme is that a run leaves nothing behind.
-        var ghosts = TrayGhosts.Showing();
+        var census = TrayGhosts.Showing();
 
-        Assert.True(ghosts.Count == 0, TrayGhosts.Sentence(ghosts));
+        // WW181: and a census that could not open the overflow is a hole, not a clean desk. This is
+        // the one arm the first spelling got wrong, so it is the one asserted first.
+        if (BusyDesk.Excused(census.AsAssertion("this suite left nothing in the notification area")))
+            return;
+
+        Assert.True(census.Clean, census.Sentence());
     }
 
     [Fact]

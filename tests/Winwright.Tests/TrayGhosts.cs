@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 using Winwright.Acting;
+using Winwright.Verdicts;
 
 namespace Winwright.Tests;
 
@@ -88,39 +89,93 @@ internal static class TrayGhosts
     /// off the overflow where the shell will open it.
     /// <para>
     /// The flyout is opened and shut again rather than left standing, the way the fixture's own
-    /// wait does it. Where the shell will not open it, the ghosts hiding there are simply not seen —
-    /// this reading says what it saw and never that there were none.
+    /// wait does it. Where the shell will not open it — a Start menu covering the taskbar, no
+    /// chevron in the tree — the reading says so and never that there were none.
     /// </para>
     /// </summary>
-    internal static IReadOnlyList<string> Showing()
+    internal static TrayCensus Showing()
     {
         var names = new List<string>(NotificationArea.Showing().Select(one => one.Name));
 
         var opened = NotificationArea.OpenOverflow();
-        if (opened.Held)
+        if (!opened.Held)
         {
-            names.AddRange(NotificationArea.Hidden().Select(one => one.Name));
-            if (!opened.Already)
-                NotificationArea.CloseOverflow();
+            // WW181. Half a desk read, said as half. Answering the taskbar's ghosts here as though
+            // they were all of them is a green covering what never ran, which is the one thing this
+            // project refuses — and it shipped inside the reading that was meant to stop it.
+            return new TrayCensus(Among(names, Running), everywhere: false, opened.Because ?? opened.ToString());
         }
 
-        return Among(names, Running);
+        names.AddRange(NotificationArea.Hidden().Select(one => one.Name));
+        if (!opened.Already)
+            NotificationArea.CloseOverflow();
+
+        return new TrayCensus(Among(names, Running), everywhere: true, "");
+    }
+}
+
+/// <summary>
+/// What a census of the notification area found, and whether it got to look everywhere.
+/// <para>
+/// WW181. The third state the <see cref="Winwright.Verdicts.Finding" /> shape has and the first
+/// spelling of this reading did not: seen and clean, seen and holding, and not read. A reading with
+/// two states can only report the third as one of the other two, and the one it picked was clean.
+/// </para>
+/// </summary>
+internal sealed record TrayCensus
+{
+    internal TrayCensus(IReadOnlyList<string> ghosts, bool everywhere, string because)
+    {
+        Ghosts = ghosts;
+        Everywhere = everywhere;
+        Because = because;
+    }
+
+    /// <summary>The icons an ended run left, among the places this reading got to look.</summary>
+    internal IReadOnlyList<string> Ghosts { get; }
+
+    /// <summary>
+    /// Whether the overflow was read as well as the taskbar. False makes <see cref="Ghosts" /> a
+    /// floor and never a count: what is hiding in a flyout nobody opened is not nothing.
+    /// </summary>
+    internal bool Everywhere { get; }
+
+    /// <summary>Why the overflow was not read, where it was not. Empty where it was.</summary>
+    internal string Because { get; }
+
+    /// <summary>Whether this reading is entitled to say the desk is clean.</summary>
+    internal bool Clean => Everywhere && Ghosts.Count == 0;
+
+    /// <summary>
+    /// The reading a person gets, in three states. A clean desk says so rather than saying nothing
+    /// and leaving silence to be read as either answer — which is the shape
+    /// <see cref="Winwright.Processes.ProcessSummary" /> already uses for the processes a run had to
+    /// stop, and this is the same fact one surface over.
+    /// </summary>
+    internal string Sentence()
+    {
+        var held = Ghosts.Count == 0
+            ? ""
+            : $"the notification area still holds {Ghosts.Count} icon(s) this suite added in a run that has "
+                + $"ended, which no process here can withdraw: {string.Join(", ", Ghosts)}.";
+
+        if (Everywhere)
+            return held.Length == 0 ? "nothing this suite added is still in the notification area." : held;
+
+        var unread = $"the overflow was not read, so what is hiding there was not looked at: {Because}";
+        return held.Length == 0 ? $"{unread}." : $"{held} And {unread}.";
     }
 
     /// <summary>
-    /// The sentence, said either way. A clean desk says so rather than saying nothing and leaving
-    /// silence to be read as either answer — which is the shape <see cref="Winwright.Processes.ProcessSummary" />
-    /// already uses for the processes a run had to stop, and this is the same fact one surface over.
+    /// The verdict a case counts. A shell that would not open the flyout never got asked the
+    /// question, so it is a hole under the name the search one file over already uses for it.
     /// </summary>
-    /// <param name="ghosts">What <see cref="Showing" /> found.</param>
-    internal static string Sentence(IReadOnlyList<string> ghosts)
+    /// <param name="named">What the assertion claims.</param>
+    internal AssertionResult AsAssertion(string named)
     {
-        ArgumentNullException.ThrowIfNull(ghosts);
+        if (!Everywhere)
+            return AssertionResult.Unchecked(named, Precondition.Absent(TraySearch.PreconditionName, Sentence()));
 
-        if (ghosts.Count == 0)
-            return "nothing this suite added is still in the notification area.";
-
-        return $"the notification area still holds {ghosts.Count} icon(s) this suite added in a run that has "
-            + $"ended, which no process here can withdraw: {string.Join(", ", ghosts)}.";
+        return Ghosts.Count == 0 ? AssertionResult.Pass(named, Sentence()) : AssertionResult.Fail(named, Sentence());
     }
 }

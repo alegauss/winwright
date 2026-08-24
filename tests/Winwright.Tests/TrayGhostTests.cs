@@ -53,17 +53,68 @@ public sealed class TrayGhostTests
     }
 
     [Fact]
-    public void The_sentence_says_so_either_way_rather_than_saying_nothing()
+    public void A_desk_read_all_the_way_through_and_holding_nothing_says_so()
     {
+        var census = new TrayCensus([], everywhere: true, "");
+
+        Assert.True(census.Clean);
+        Assert.Equal("nothing this suite added is still in the notification area.", census.Sentence());
         Assert.Equal(
+            Winwright.Verdicts.AssertionOutcome.Passed,
+            census.AsAssertion("nothing was left").Outcome);
+    }
+
+    [Fact]
+    public void A_desk_holding_ghosts_names_them_and_says_nothing_here_can_take_them_away()
+    {
+        var census = new TrayCensus(
+            ["winwright under test #4321", "winwright placement #4321"], everywhere: true, "");
+
+        Assert.False(census.Clean);
+        Assert.Contains("still holds 2 icon(s)", census.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("no process here can withdraw", census.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("winwright placement #4321", census.Sentence(), StringComparison.Ordinal);
+        Assert.Equal(
+            Winwright.Verdicts.AssertionOutcome.Failed,
+            census.AsAssertion("nothing was left").Outcome);
+    }
+
+    [Fact]
+    public void A_census_that_could_not_open_the_overflow_never_claims_a_clean_desk()
+    {
+        // WW181, and the whole of it. The first spelling of this reading answered the taskbar alone
+        // and said "nothing this suite added is still in the notification area", which is a green
+        // covering what never ran — shipped inside the reading meant to stop exactly that.
+        var census = new TrayCensus([], everywhere: false, "the taskbar shows no chevron");
+
+        Assert.False(census.Clean);
+        Assert.DoesNotContain(
             "nothing this suite added is still in the notification area.",
-            TrayGhosts.Sentence([]));
+            census.Sentence(),
+            StringComparison.Ordinal);
+        Assert.Contains("the overflow was not read", census.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("the taskbar shows no chevron", census.Sentence(), StringComparison.Ordinal);
 
-        var said = TrayGhosts.Sentence(["winwright under test #4321", "winwright placement #4321"]);
+        // A hole and not a failure: the shell never got asked, so nothing about this suite's
+        // leftovers was observed either way.
+        var verdict = census.AsAssertion("nothing was left");
+        Assert.Equal(Winwright.Verdicts.AssertionOutcome.Unchecked, verdict.Outcome);
+        Assert.Equal(Winwright.Acting.TraySearch.PreconditionName, verdict.Missing!.Name);
+    }
 
-        Assert.Contains("still holds 2 icon(s)", said, StringComparison.Ordinal);
-        Assert.Contains("no process here can withdraw", said, StringComparison.Ordinal);
-        Assert.Contains("winwright placement #4321", said, StringComparison.Ordinal);
+    [Fact]
+    public void What_the_taskbar_held_is_still_reported_where_the_overflow_could_not_be_read()
+    {
+        // Half an answer is worth having and is not worth rounding up. What it must not do is read
+        // as the whole one, so the count comes with the sentence saying it is a floor.
+        var census = new TrayCensus(["winwright under test #4321"], everywhere: false, "no chevron");
+
+        Assert.False(census.Clean);
+        Assert.Contains("still holds 1 icon(s)", census.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("the overflow was not read", census.Sentence(), StringComparison.Ordinal);
+        Assert.Equal(
+            Winwright.Verdicts.AssertionOutcome.Unchecked,
+            census.AsAssertion("nothing was left").Outcome);
     }
 
     [Fact]

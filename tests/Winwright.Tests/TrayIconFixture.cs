@@ -196,7 +196,7 @@ internal sealed class TrayIconFixture : IDisposable
             throw new InvalidOperationException(
                 $"the shell took '{Tip}' and never put it anywhere a reading could find it within "
                 + $"{PlacedMs} ms, so nothing after this would be about the icon — {last?.Because} "
-                + TrayGhosts.Sentence(TrayGhosts.Showing()));
+                + TrayGhosts.Showing().Sentence());
         }
     }
 
