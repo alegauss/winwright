@@ -25,6 +25,30 @@ The block's first criterion says a degraded run is legible without reading the l
 Thirty-two reds and a screenshot is the opposite of that, and it was this repository's
 own suite that produced them.
 
+### §WW176 The claim that decides a block, held up by memory
+
+WW169 is the measurement. It was filed with a full design section arguing that the
+fixture's justification field was written by the compiler, printed by `--flags`, and
+read back by nobody — "nothing asserts that a single Because is there, or that it says
+anything". WW106 had shipped both read-backs, and its own ledger line says so. Running
+the two cases before building anything was what settled it. The design was written from
+memory, and memory was wrong.
+
+That is not a one-off. This project decides a block is finished by reading its criteria,
+roadkeep asserts the list exists and not that anything satisfies it, and the reading is
+a judgement with nothing underneath it. Thirty-two criteria across eleven blocks
+currently rest on whoever last read them.
+
+The repository already answers this shape three times. `Provocation` pairs every refusal
+with what provokes it and a case; `Cooperating` pairs every verb with what it needs;
+`Rendered` pairs every rendering with the case that asserts its text, and caught an
+unpaired one on the very next task after it shipped. Each is checked against the
+assembly in both directions, so the count is arithmetic.
+
+What is owed is the fourth: a criterion, its address, and the case or catalogue that
+demonstrates it — with an honest bucket for the ones nothing demonstrates yet, counted
+rather than left off. Then "the block is finished" is a reading and not a recollection.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
