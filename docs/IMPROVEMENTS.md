@@ -77,22 +77,23 @@ could not read one machine says so rather than reporting five it read.
 every case that needed it at the time. What it did not do — because it could not — is
 make the next case use it.
 
-Three have appeared since, each found the same way. `FocusScopeTests` asserted the focus
-was inside the application. `TrayPlacementTests` asserted an icon was found.
-`NotificationAreaTests` asserted a search that reached both places had failed, and got a
-hole because the shell would not open the flyout. Every one was written after WW172, by
-somebody who had just applied the rule elsewhere, and every one was caught by a full run
-in the guest rather than by anything in the tree.
+Now measured rather than counted. Holding the guest's desk after WW179 shipped produced
+nine failures, and every one is this: `NotificationAreaTests` six times, over the
+taskbar holding no icons, the chevron being absent, the overflow refusing to open twice,
+a search that could not look everywhere, and a menu asked of an icon nothing could find;
+`ForeignTreeTests` once, over the shell's own tree; `TraversalTests` once, over what
+holds the focus. Not one was a broken harness — WW179 closed that door — and not one
+excused the desk.
 
-That is a three-minute run per occurrence, and it is the cheap outcome: the expensive
-one is the same case passing on a quiet desk for a month and then failing on somebody
-else's.
+Three of the nine were written after WW172, by somebody who had just applied the rule
+elsewhere. The rest predate it and were simply never reached. Each is a
+three-and-a-half-minute run to find, and that is the cheap outcome: the expensive one is
+the same case passing on a quiet desk for a month and then failing on somebody else's.
 
 The shape is the one this repository keeps reaching for. `Deadlines` pairs every wait
 with what its look answers as nothing, read out of the sources. The same reading finds
-every case that asks a desk-dependent reading for a verdict and asserts something other
-than a hole, and pairs it with how it excuses the desk — or with a stated reason it
-needs no excuse, which some genuinely do not.
+every case that asks a desk-dependent reading for a verdict and pairs it with how it
+excuses the desk — or with a stated reason it needs none.
 
 ## Block B — Attach, launch, and leave nothing behind
 
