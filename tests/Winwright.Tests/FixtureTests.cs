@@ -7,6 +7,8 @@ using Winwright.Asserting;
 using Winwright.Capturing;
 using Winwright.Locating;
 using Winwright.Processes;
+using Winwright.Projects;
+using Winwright.Verdicts;
 using Winwright.Windowing;
 
 using Xunit;
@@ -1009,6 +1011,43 @@ public sealed class FixtureTests : IDisposable
 
         Assert.True(change.Untouched, change.Sentence());
         Assert.Contains("left the machine as it found it", change.Sentence());
+    }
+
+    [Fact]
+    public void The_runs_own_reading_closes_the_fingerprint_it_opened_against_a_real_application()
+    {
+        // WW170, and against the fixture rather than against a temp directory: the criterion says a
+        // run leaves the machine as it found it, so what has to close the reading is a run. Untouched
+        // .Around already answered the coarse question and hands back a StoreChange the caller must
+        // render itself; this is the store reaching the run's own reading, beside the desk and the
+        // binary and the language, where every other thing this run measured is already reported.
+        var store = Path.Combine(root, "read-back");
+        Launched($"--store={store}");
+
+        var declared = Path.Combine(root, "winwright.read-back.json");
+        File.WriteAllText(
+            declared,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Executable())}},
+              "sourceRoot": {{System.Text.Json.JsonSerializer.Serialize(root)}},
+              "fingerprintStore": {{System.Text.Json.JsonSerializer.Serialize(store)}}
+            }
+            """);
+
+        var closed = Preamble.Around(
+            AppTarget.AttachTo(Environment.ProcessId),
+            () => Launched($"--store={store}", "--mutate"),
+            ProjectDeclaration.Load(declared));
+
+        var finding = Assert.Single(closed.Findings, one => one.Named == StoreChange.Named);
+
+        Assert.False(finding.Holds, finding.Sentence);
+        Assert.Contains("settings.json", finding.Sentence, StringComparison.Ordinal);
+
+        // And it is in the page a reader is handed, not only on the object.
+        Assert.Contains(
+            closed.Render(), one => one.StartsWith("  differs " + StoreChange.Named, StringComparison.Ordinal));
     }
 
     [Fact]

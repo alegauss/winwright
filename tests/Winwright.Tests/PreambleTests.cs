@@ -256,6 +256,85 @@ public sealed class PreambleTests : IDisposable
         Assert.Contains("declared reading(s) differ", read.Sentence(), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void A_run_that_ends_reads_the_store_again_without_anybody_remembering_to()
+    {
+        // WW170. LeftAsFound was bounded, thoroughly tested and called by nothing outside these
+        // cases, for the reason Preamble.Of's own comment gives about the half it does take: a
+        // reading reached by its own call is one a runner is free to forget, and this is the half
+        // that falls due when the run is already over. Around is the moment it now has.
+        var declaration = Declared();
+        var settings = Path.Combine(declaration.FingerprintStore, "settings.json");
+
+        var closed = Preamble.Around(
+            Attached(),
+            () =>
+            {
+                var was = File.ReadAllText(settings);
+                File.WriteAllText(settings, was.Replace("alpha", "gamma", StringComparison.Ordinal));
+            },
+            declaration);
+
+        // Nothing in the run asked for the closing reading, and it is there.
+        var store = Assert.Single(closed.Findings, one => one.Named == StoreChange.Named);
+
+        Assert.False(store.Holds);
+        Assert.Contains("settings.json", store.Sentence, StringComparison.Ordinal);
+        Assert.Contains(closed.Render(), one => one.StartsWith("  differs " + StoreChange.Named, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void A_run_that_left_the_store_alone_still_says_so_at_the_end_of_it()
+    {
+        // The other arm, and the one that matters most: a run with nothing to report still reports.
+        // A closing reading that only appears when something moved is one a reader cannot tell from
+        // a closing reading nobody took.
+        var closed = Preamble.Around(Attached(), () => { }, Declared());
+
+        var store = Assert.Single(closed.Findings, one => one.Named == StoreChange.Named);
+
+        Assert.True(store.Holds, store.Sentence);
+        Assert.Contains("left the machine as it found it", store.Sentence, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_run_that_threw_says_nothing_about_what_it_left_behind()
+    {
+        // Untouched.Around's reasoning, and it holds for the same reason: a closing reading taken in
+        // a disposer would replace whatever the run threw, so the report would carry a dirty machine
+        // and lose the failure that caused it. There is nothing to say about what a run left behind
+        // when the run did not finish.
+        var declaration = Declared();
+        var settings = Path.Combine(declaration.FingerprintStore, "settings.json");
+
+        var thrown = Assert.Throws<InvalidOperationException>(
+            () => Preamble.Around(
+                Attached(),
+                () =>
+                {
+                    File.WriteAllText(settings, """{ "profile": "gamma" }""");
+                    throw new InvalidOperationException("the run itself");
+                },
+                declaration));
+
+        Assert.Equal("the run itself", thrown.Message);
+    }
+
+    [Fact]
+    public void The_closing_reading_is_the_opening_one_with_the_store_joined_and_nothing_else_moved()
+    {
+        // Closing is Including(LeftAsFound()) and must stay that: a second spelling of the join
+        // would be a preamble whose measurements differ depending on which half a runner asked for.
+        var declaration = Declared();
+        var opened = Preamble.Of(Attached(), declaration);
+
+        var closed = opened.Closing();
+
+        Assert.Equal(opened.Measurements.Count, closed.Measurements.Count);
+        Assert.Equal(opened.Findings.Count + 1, closed.Findings.Count);
+        Assert.Same(opened.Store, closed.Store);
+    }
+
     /// <summary>A project declaring enough for the measurements that need one.</summary>
     private ProjectDeclaration Declared()
     {

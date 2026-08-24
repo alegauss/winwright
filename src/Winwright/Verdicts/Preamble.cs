@@ -314,6 +314,52 @@ public sealed record Preamble
         }
     }
 
+    /// <summary>
+    /// The same reading with the store read again and what moved joined into it — the reading a run
+    /// ends with rather than the one it started with.
+    /// <para>
+    /// WW170. <see cref="LeftAsFound" /> was written, bounded and thoroughly tested, and outside its
+    /// own tests nothing called it. The reason is the one this type's own comment gives for taking
+    /// the before half here: a reading reached by its own call is one a runner is free to forget,
+    /// and this is the half that gets forgotten, because it falls due when the run is already over.
+    /// </para>
+    /// <para>
+    /// Idempotent on the reading and not on the store: calling it twice reads the store twice and
+    /// joins two findings, which is a report saying the same thing twice rather than a wrong one.
+    /// <see cref="Around" /> is the spelling that cannot be called twice by accident.
+    /// </para>
+    /// </summary>
+    public Preamble Closing() => Including(LeftAsFound());
+
+    /// <summary>
+    /// Take the reading, run the case, and close the reading — so the half that falls due after the
+    /// run has a moment that exists, rather than a call somebody has to remember.
+    /// <para>
+    /// WW170. Shaped after <see cref="Asserting.Untouched.Around(IReadOnlyList{string}, Action)" />
+    /// and for the same reason it gives: the close wraps the case rather than living in a disposer,
+    /// so an exception from the case propagates untouched and no closing reading is taken. There is
+    /// nothing to say about what a run left behind when the run did not finish.
+    /// </para>
+    /// </summary>
+    /// <param name="target">What the run is driving.</param>
+    /// <param name="run">The run.</param>
+    /// <param name="declaration">The project, where one was loaded. Its store is what gets closed.</param>
+    /// <param name="window">The window the foreground is read against, where there is one.</param>
+    /// <param name="ours">The pids this run owns.</param>
+    public static Preamble Around(
+        AppTarget target,
+        Action run,
+        ProjectDeclaration? declaration = null,
+        nint window = 0,
+        IEnumerable<int>? ours = null)
+    {
+        ArgumentNullException.ThrowIfNull(run);
+
+        var opened = Of(target, declaration, window, ours);
+        run();
+        return opened.Closing();
+    }
+
     /// <summary>The preamble a summary opens with: one line per measurement, taken or not.</summary>
     public IReadOnlyList<string> Render()
     {

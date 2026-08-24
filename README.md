@@ -163,6 +163,12 @@ whether anything else is showing the application, and whether the desk is this r
 reported as measured, absent, or **not read** — an absent line and a missing line read the same to
 somebody skimming, and only one of them is a statement.
 
+That reading has an end as well as a beginning. Where the project declares a store the run must not
+change, the fingerprint is taken with the rest of the readings and read again when the run finishes,
+and what moved is reported beside them. Wrap the run in `Preamble.Around` and neither half is a call
+anyone has to remember; a run that threw takes no closing reading, because a machine left dirty by a
+run that never finished is not a fact worth reporting over the failure that caused it.
+
 ## What it refuses
 
 The value here is concentrated in the refusals, and every one of them is paired in the suite with the
@@ -188,10 +194,10 @@ Written against what has shipped, so it does not promise a line that is still a 
 
 - **There is no scenario file.** A case is C# against the verbs above. The data-file format, its
   loader and the refusals at load are designed and not built.
-- **Nothing composes a run.** A verdict now carries the step behind it, and `Expect.Of` — the one
-  assertion verb handed the subject rather than a function — attaches to a red the control view it
-  failed to read. The store fingerprint's second half is still a call nothing makes, and no runner
-  walks a case end to end.
+- **Nothing composes a run.** The pieces have callers now — a verdict carries the step behind it,
+  `Expect.Of` attaches to a red the control view it failed to read, and `Preamble.Around` closes the
+  store fingerprint the same reading opened. What is still missing is the thing above them: no
+  runner walks a case end to end, so a caller assembles these itself.
 - **There is no Claude Code plugin.** The MCP tools, the skill and the hook are designed and not
   built.
 

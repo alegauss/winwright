@@ -29,8 +29,6 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW170** (deps: —) **the store fingerprint's after half is called only by its own tests, so no run says what it left changed** — A run ends by reading the store again, so the block's third criterion is met by a run rather than by a type existing and being thoroughly tested. → §WW170
-
 ## Block G — The scenario — a case is a data file
 
 - 📋 **WW57** (deps: Block A, Block C, Block D) **a case is two hundred lines of script that mostly repeats the previous case** — A case is a data file: steps, locators, acts and expectations as fields, with the loop, the waits and the verdicts owned by the engine instead of by the author. → §WW57

@@ -211,29 +211,6 @@ which is the argument every other image comparison eventually turns into.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW170 The half WW151 could not take
-
-The fourth time this reading has come out the same way. WW163 found the trace built and
-constructed once in the whole engine. WW151 shipped the store fingerprint into the
-reading every run takes and could only take the before half. WW166 found the diagnosis
-with no caller and gave it one. This is the half WW151 left behind.
-
-`Preamble.LeftAsFound` is written, bounded, and catches the two exceptions a store read
-can throw. Its shape is right: it answers a finding and not an assertion, because the
-application did what it was driven to do and so nothing failed, and not a precondition
-either, because nothing may be excused by it. Outside `PreambleTests` nothing calls it.
-
-Block F's third criterion says the fingerprint taken before the run matches the one
-taken after, on every scenario, including the ones that drive a real setting. Read
-literally, nothing in this repository takes an after reading outside a test — so the
-criterion is met by a type existing, which is the failure the criteria were introduced
-to stop, arriving through the door they left open.
-
-What is owed is the call and a place to make it. The before half lives in the run's own
-reading; the after half has no such moment, because nothing composes a run. This is
-where that absence stops being a note in three rationale sections and becomes the work:
-a run ends, and ending it reads the store again.
-
 ## Block G — The scenario — a case is a data file
 
 ### §WW57 A case is data
