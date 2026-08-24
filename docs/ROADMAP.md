@@ -11,6 +11,8 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+- 📋 **WW206** (deps: —) **the sweep rule is checked per file, so a file holding two sweeps passes on the strength of the one that reads code** — The rule is checked at the sweep, because a file with a repaired sweep and a raw one beside it was reported as clean. → §WW206
+
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed
