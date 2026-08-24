@@ -25,8 +25,6 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW166** (deps: WW163 ✅) **a failed step's diagnosis is built by nobody, so a reader still writes a throwaway script to see what the window had** — A failure carries the view the diagnosis already builds, because a capability with no caller is a criterion met by a type existing rather than by a run. → §WW166
-
 ## Block G — The scenario — a case is a data file
 
 - 📋 **WW57** (deps: Block A, Block C ✅, Block D) **a case is two hundred lines of script that mostly repeats the previous case** — A case is a data file: steps, locators, acts and expectations as fields, with the loop, the waits and the verdicts owned by the engine instead of by the author. → §WW57

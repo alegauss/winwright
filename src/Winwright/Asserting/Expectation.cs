@@ -1,5 +1,6 @@
 using System.Diagnostics;
 
+using Winwright.Locating;
 using Winwright.Projects;
 using Winwright.Tracing;
 using Winwright.Verdicts;
@@ -66,6 +67,33 @@ public sealed record Expectation
 
     /// <summary>How many times it looked.</summary>
     public int Polls { get; }
+
+    /// <summary>
+    /// The control view that explains this, where it went red and something had a window to read.
+    /// Null on a green, and null where the expectation was built from a reading nobody could point
+    /// at a window.
+    /// <para>
+    /// WW166. The type that builds this view is bounded, budgeted and thoroughly tested, and
+    /// outside its own tests nothing in the engine called it — a capability with no caller, which
+    /// is a criterion met by a type existing rather than by a run. What was missing is a verb that
+    /// holds both halves at once: <see cref="Expect.That(string, string, Func{string}, int, int)" />
+    /// takes a function and never sees a window, so it could not have attached one.
+    /// <see cref="Expect.Of(Winwright.Locating.Subject, string, string, Func{Winwright.Locating.PatternValues, string},
+    /// int)" /> is the verb that does.
+    /// </para>
+    /// </summary>
+    public Diagnosis? Explains { get; private init; }
+
+    /// <summary>
+    /// The same expectation with the view attached. Refused on anything but a red, by the
+    /// diagnosis itself: a dump under every green is a report nobody reaches the end of.
+    /// </summary>
+    /// <param name="view">The control view as it stood when this went red.</param>
+    public Expectation Explaining(Diagnosis view)
+    {
+        ArgumentNullException.ThrowIfNull(view);
+        return this with { Explains = view };
+    }
 
     /// <summary>
     /// How many of those looks found the subject answering at all. This is the number that
@@ -183,6 +211,59 @@ public static class Expect
 
             Thread.Sleep(Math.Min(pollMs, left));
         }
+    }
+
+    /// <summary>
+    /// Watch a subject for a value, and where it never arrives, attach the control view that
+    /// explains it.
+    /// <para>
+    /// WW166. This is the verb that holds both halves at once. Every other spelling takes a
+    /// function and never sees a window, so a red came back with a sentence and the reading had to
+    /// be done twice — once by the harness, and once by a person writing a throwaway script to ask
+    /// the same question again. Here the subject is in hand, so the tree is read at the instant it
+    /// went red rather than by somebody else afterwards.
+    /// </para>
+    /// <para>
+    /// The view is attached on a red only, and it marks the subject's own element in the tree
+    /// rather than the root: a budget that drops the one line the reader came for is worse than no
+    /// dump at all.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What to watch, which is also what to diagnose against.</param>
+    /// <param name="name">What is expected, as the scenario names it.</param>
+    /// <param name="wanted">The value it is waiting for.</param>
+    /// <param name="read">Which of the subject's patterns to read.</param>
+    /// <param name="budget">How many elements the view may show.</param>
+    public static Expectation Of(
+        Subject subject,
+        string name,
+        string wanted,
+        Func<PatternValues, string?> read,
+        int budget = Diagnosis.DefaultBudget)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        ArgumentNullException.ThrowIfNull(read);
+
+        var last = default(ElementFacts);
+        var watched = That(
+            name,
+            wanted,
+            () =>
+            {
+                var look = subject.ReadOnce();
+                last = look.Facts;
+                return look.Found ? read(look.Values) : null;
+            },
+            subject.DeadlineMs,
+            subject.PollMs);
+
+        if (watched.Held)
+            return watched;
+
+        // Read now rather than kept from the poll: what a reader wants is the window as it stood
+        // when the deadline ran out, and a tree captured earlier is a page about a moment that had
+        // not failed yet.
+        return watched.Explaining(Diagnosis.OfWindow(watched.AsAssertion(), subject.Window, last, budget));
     }
 
     /// <summary>The same, with the deadline and the poll interval read from what the project declared.</summary>

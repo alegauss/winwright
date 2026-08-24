@@ -142,6 +142,33 @@ public sealed class Subject
     /// <summary>How often that wait looks again.</summary>
     public int PollMs => timeouts?.For("poll") ?? pollMs;
 
+    /// <summary>How long resolving this subject waits, which is what a read against it waits.</summary>
+    public int DeadlineMs => timeouts?.For("resolve") ?? deadlineMs;
+
+    /// <summary>
+    /// The window this subject resolves under, or zero where the root is not a window.
+    /// <para>
+    /// WW166. Needed by the one verb that attaches a control view to a red: the diagnosis reads the
+    /// tree under a window, and the subject is what already knows which window that is.
+    /// </para>
+    /// </summary>
+    public nint Window
+    {
+        get
+        {
+            try
+            {
+                var handle = (nint)root.Current.NativeWindowHandle;
+                return handle == 0 ? 0 : Winwright.Windowing.Win32.GetAncestor(handle, Winwright.Windowing.Win32.GaRoot);
+            }
+            catch (Exception gone)
+                when (gone is System.Windows.Automation.ElementNotAvailableException or InvalidOperationException)
+            {
+                return 0;
+            }
+        }
+    }
+
     /// <summary>
     /// Resolve it again, now. Every act calls this: nothing here caches an element, so there is
     /// no handle to go stale between one act and the next.

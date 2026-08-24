@@ -183,8 +183,10 @@ Written against what has shipped, so it does not promise a line that is still a 
 
 - **There is no scenario file.** A case is C# against the verbs above. The data-file format, its
   loader and the refusals at load are designed and not built.
-- **Nothing composes a run.** The trace, the diagnosis attached to a failing step, and the store
-  fingerprint's second half are each finished capabilities that no caller reaches yet.
+- **Nothing composes a run.** A verdict now carries the step behind it, and `Expect.Of` — the one
+  assertion verb handed the subject rather than a function — attaches to a red the control view it
+  failed to read. The store fingerprint's second half is still a call nothing makes, and no runner
+  walks a case end to end.
 - **There is no Claude Code plugin.** The MCP tools, the skill and the hook are designed and not
   built.
 

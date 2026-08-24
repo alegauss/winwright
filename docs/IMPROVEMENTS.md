@@ -143,29 +143,6 @@ which is the argument every other image comparison eventually turns into.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW166 The third capability waiting for a caller
-
-Read against this block's criteria the moment its last open line shipped. Two hold. The
-second says a red step carries its diagnosis - the control view it failed to read
-attached to the failure, so no throwaway script is written to find out what the window
-had. The type that builds one exists, it is bounded and budgeted, its tests are
-thorough, and outside them nothing in the engine calls it.
-
-That is the third time this reading has come out the same way in two days. WW163 found
-the trace: every field defined, the writer built, and one step constructed in the whole
-engine. WW151 shipped the store fingerprint into the reading every run takes and could
-only take the before half - the after half is a call nothing makes. Now the diagnosis.
-
-One cause under all three: nothing composes a run. Each capability is finished and a
-call away from a caller that does not exist, so every block reads as done because the
-type is there. That is the failure the criteria were introduced to stop, arriving
-through the door they left open - presence is not enforcement, and a list of finished
-parts is not a working whole.
-
-So this ships behind WW163 rather than beside it, and whoever takes it should read the
-store join in the same sitting. What is owed here is the attachment: a failing step
-carries the view, and a red without one is itself a red.
-
 ## Block G — The scenario — a case is a data file
 
 ### §WW57 A case is data
