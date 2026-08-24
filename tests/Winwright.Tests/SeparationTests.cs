@@ -30,15 +30,7 @@ public sealed class SeparationTests
     private const string Adopter = "samples/Adopter/Adopter.csproj";
 
     /// <summary>The repository root, walked up from where the suite is running.</summary>
-    private static string Repository()
-    {
-        var walking = new DirectoryInfo(AppContext.BaseDirectory);
-        while (walking is not null && !File.Exists(Path.Combine(walking.FullName, "Winwright.slnx")))
-            walking = walking.Parent;
-
-        Assert.NotNull(walking);
-        return walking.FullName;
-    }
+    private static string Repository() => Checkout.Root;
 
     /// <summary>Everything one project file references, by the name it references it under.</summary>
     private static IReadOnlyList<string> References(string project)

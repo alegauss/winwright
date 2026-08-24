@@ -26,13 +26,8 @@ internal static class Fixture
         var framework = here.Name;
         var configuration = here.Parent!.Name;
 
-        var repository = here;
-        while (repository is not null && !File.Exists(Path.Combine(repository.FullName, "Winwright.slnx")))
-            repository = repository.Parent;
-
-        Assert.NotNull(repository);
-        var path = Path.Combine(
-            repository.FullName, "src", "Winwright.Fixture", "bin", configuration, framework, "Winwright.Fixture.exe");
+        var path = Checkout.At(
+            "src", "Winwright.Fixture", "bin", configuration, framework, "Winwright.Fixture.exe");
 
         Assert.True(File.Exists(path), $"the fixture was not built: {path}");
         return path;

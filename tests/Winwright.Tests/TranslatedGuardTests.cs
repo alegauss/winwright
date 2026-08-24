@@ -72,12 +72,7 @@ public sealed class TranslatedGuardTests : IDisposable
     /// <summary>The fixture's own strings, which ship three languages of the same keys.</summary>
     private static IReadOnlyList<string> Shipped()
     {
-        var walking = new DirectoryInfo(AppContext.BaseDirectory);
-        while (walking is not null && !File.Exists(Path.Combine(walking.FullName, "Winwright.slnx")))
-            walking = walking.Parent;
-
-        Assert.NotNull(walking);
-        var strings = Path.Combine(walking.FullName, "src", "Winwright.Fixture", "strings");
+        var strings = Checkout.At("src", "Winwright.Fixture", "strings");
         var files = new[] { "strings.en.json", "strings.pt-BR.json", "strings.de.json" }
             .Select(one => Path.Combine(strings, one))
             .ToList();

@@ -19,12 +19,7 @@ public sealed class OnTheRunTests
 {
     private static XElement Project()
     {
-        var walking = new DirectoryInfo(AppContext.BaseDirectory);
-        while (walking is not null && !File.Exists(Path.Combine(walking.FullName, "Winwright.slnx")))
-            walking = walking.Parent;
-
-        Assert.NotNull(walking);
-        var path = Path.Combine(walking.FullName, "tests", "Winwright.Tests", "Winwright.Tests.csproj");
+        var path = Checkout.At("tests", "Winwright.Tests", "Winwright.Tests.csproj");
         Assert.True(File.Exists(path), path);
         return XDocument.Load(path).Root!;
     }

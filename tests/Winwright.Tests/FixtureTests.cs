@@ -964,15 +964,7 @@ public sealed class FixtureTests : IDisposable
     private readonly string root = Directory.CreateTempSubdirectory("winwright-fixed-").FullName;
 
     /// <summary>Where the fixture's own sources are, for the check that reads them.</summary>
-    private static string Sources()
-    {
-        var here = new DirectoryInfo(AppContext.BaseDirectory);
-        while (here is not null && !File.Exists(Path.Combine(here.FullName, "Winwright.slnx")))
-            here = here.Parent;
-
-        Assert.NotNull(here);
-        return Path.Combine(here.FullName, "src", "Winwright.Fixture");
-    }
+    private static string Sources() => Checkout.At("src", "Winwright.Fixture");
 
     [Fact]
     public void A_second_windowed_instance_is_what_the_refusal_exists_for()
@@ -1233,15 +1225,7 @@ public sealed class FixtureTests : IDisposable
     }
 
     /// <summary>Where the fixture's own sources are.</summary>
-    private static string FixtureSources()
-    {
-        var here = new DirectoryInfo(AppContext.BaseDirectory);
-        while (here is not null && !File.Exists(Path.Combine(here.FullName, "Winwright.slnx")))
-            here = here.Parent;
-
-        Assert.NotNull(here);
-        return Path.Combine(here.FullName, "src", "Winwright.Fixture");
-    }
+    private static string FixtureSources() => Checkout.At("src", "Winwright.Fixture");
 
     [Fact]
     public void An_application_nobody_asked_reports_nothing_and_dumps_nothing()

@@ -152,12 +152,8 @@ internal static class Flattening
     private static IReadOnlyList<string> Scan()
     {
         var flattening = new List<string>();
-        foreach (var file in Sources())
+        foreach (var file in Checkout.SourcesIn(Checkout.Suite, except: $"{nameof(Flattening)}.cs"))
         {
-            // This file names the calls it looks for, so scanning itself would find every one.
-            if (Path.GetFileName(file) == $"{nameof(Flattening)}.cs")
-                continue;
-
             foreach (var member in Reading(file))
             {
                 var answered = Answers(member);
@@ -267,16 +263,4 @@ internal static class Flattening
         return space < 0 ? null : before[(space + 1)..];
     }
 
-    private static IEnumerable<string> Sources()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Winwright.slnx")))
-            directory = directory.Parent;
-
-        Assert.NotNull(directory);
-        return Directory
-            .EnumerateFiles(Path.Combine(directory.FullName, "tests"), "*.cs", SearchOption.AllDirectories)
-            .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal));
-    }
 }

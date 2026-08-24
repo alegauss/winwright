@@ -84,12 +84,12 @@ internal static class Deadlines
     private static IReadOnlyList<Deadline> Scan()
     {
         var found = new List<Deadline>();
-        foreach (var file in Trees().SelectMany(Sources))
-        {
-            // This file names the call it is looking for, so counting itself would count the naming.
-            if (Path.GetFileName(file) == $"{nameof(Deadlines)}.cs")
-                continue;
 
+        // WW193. The walk is Checkout's, exclusions included — this is the copy that shipped
+        // recursing into bin and obj, and the guest went red twice on timing before anybody looked
+        // at the enumeration. The question below is still this catalogue's own.
+        foreach (var file in Checkout.Sources(Checkout.Everything, except: $"{nameof(Deadlines)}.cs"))
+        {
             var text = File.ReadAllText(file);
             var waits = Occurrences(text, Opening) + Occurrences(text, OpeningTyped);
             if (waits > 0)
@@ -98,19 +98,6 @@ internal static class Deadlines
 
         return found.OrderBy(one => one.File, StringComparer.Ordinal).ToList();
     }
-
-    /// <summary>
-    /// The sources under a tree, and never what a build left beside them. Two reasons, and the
-    /// second is the one that matters: bin and obj hold thousands of files on a machine that has
-    /// built, which is load a check has no business adding to a suite full of deadlines — and they
-    /// hold copies, so a wait deleted from a source still standing in obj would be a phantom entry
-    /// nobody could find.
-    /// </summary>
-    private static IEnumerable<string> Sources(string tree) =>
-        Directory
-            .EnumerateFiles(tree, "*.cs", SearchOption.AllDirectories)
-            .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal));
 
     private static int Occurrences(string text, string what)
     {
@@ -125,18 +112,4 @@ internal static class Deadlines
         return count;
     }
 
-    /// <summary>The engine's sources and the suite's, found from the solution file.</summary>
-    private static IReadOnlyList<string> Trees()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Winwright.slnx")))
-            directory = directory.Parent;
-
-        Assert.NotNull(directory);
-        return
-        [
-            Path.Combine(directory.FullName, "src"),
-            Path.Combine(directory.FullName, "tests"),
-        ];
-    }
 }

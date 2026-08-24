@@ -52,22 +52,10 @@ public sealed class FixtureNeedsTests
 
     private const string Project = "src/Winwright.Fixture/Winwright.Fixture.csproj";
 
-    private static string Repository()
-    {
-        var walking = new DirectoryInfo(AppContext.BaseDirectory);
-        while (walking is not null && !File.Exists(Path.Combine(walking.FullName, "Winwright.slnx")))
-            walking = walking.Parent;
-
-        Assert.NotNull(walking);
-        return walking.FullName;
-    }
+    private static string Repository() => Checkout.Root;
 
     private static IReadOnlyList<string> Sources() =>
-        Directory
-            .EnumerateFiles(Path.Combine(Repository(), "src", "Winwright.Fixture"), "*.cs", SearchOption.AllDirectories)
-            .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            .ToList();
+        Checkout.SourcesIn(Checkout.At("src", "Winwright.Fixture")).ToList();
 
     /// <summary>Every reference the fixture's project file declares, by the name it declares.</summary>
     private static IReadOnlyList<(string Kind, string Include)> Declared()

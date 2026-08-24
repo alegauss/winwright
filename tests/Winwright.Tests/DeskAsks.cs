@@ -289,11 +289,8 @@ internal static class DeskAsks
     /// The cases, read out of the sources. A case is where the runner's unit is: a class that asks
     /// through a field initialiser has excused nothing for the case that then asserts on it.
     /// </summary>
-    private static IReadOnlyList<Found> Scan() => Trees()
-        .SelectMany(Sources)
-
-        // This file names every call it looks for, so scanning itself would find them all.
-        .Where(one => Path.GetFileName(one) != $"{nameof(DeskAsks)}.cs")
+    private static IReadOnlyList<Found> Scan() => Checkout
+        .SourcesIn(Checkout.Suite, except: $"{nameof(DeskAsks)}.cs")
         .SelectMany(InFile)
         .OrderBy(one => one.Case, StringComparer.Ordinal)
         .ToList();
@@ -417,21 +414,4 @@ internal static class DeskAsks
         return space < 0 ? null : before[(space + 1)..];
     }
 
-    /// <summary>The sources under a tree, and never what a build left beside them.</summary>
-    private static IEnumerable<string> Sources(string tree) =>
-        Directory
-            .EnumerateFiles(tree, "*.cs", SearchOption.AllDirectories)
-            .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal));
-
-    /// <summary>The suite, which is the only tree that holds cases.</summary>
-    private static IReadOnlyList<string> Trees()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Winwright.slnx")))
-            directory = directory.Parent;
-
-        Assert.NotNull(directory);
-        return [Path.Combine(directory.FullName, "tests")];
-    }
 }

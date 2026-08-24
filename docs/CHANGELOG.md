@@ -75,6 +75,7 @@
 - ✅ **WW175** **a deadline handed a look that never answers null returns on the first look, and nothing says the wait was skipped** — Every deadline in both trees is catalogued with what its look answers as nothing, checked against the sources both ways, so a wait that cannot answer it is visible when written.
 - ✅ **WW189** **a search over a walk that ran out answers not showing, so a page too deep to reach reports as finished** — A walk says how much it did not reach and a reading that found nothing in a short one is unchecked, while finding the string stays proof a truncated walk cannot argue with.
 - ✅ **WW184** **eight files carry a sleep and nothing says which are the deadline machinery and which are a wait in disguise** — Every file that calls it is paired with why its sleeping is not a scenario waiting, checked against the sources both ways, and the one that is still a wait is counted.
+- ✅ **WW193** **two source-read catalogues carry the same tree walk and a third is asked for, and the first got its exclusions wrong** — One walk, with the trees, the exclusions and the caching: eighteen copies across sixteen files now ask Checkout, and a case reads the sources to prove none is left.
 
 ## Block D — Act — patterns before pointers
 

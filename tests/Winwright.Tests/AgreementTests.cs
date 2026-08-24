@@ -283,13 +283,5 @@ public sealed class AgreementTests : IDisposable
         Assert.Contains(rendered, one => one.Contains("(unpinnable)", StringComparison.Ordinal));
     }
 
-    private static string Repository()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Winwright.slnx")))
-            directory = directory.Parent;
-
-        Assert.NotNull(directory);
-        return directory.FullName;
-    }
+    private static string Repository() => Checkout.Root;
 }

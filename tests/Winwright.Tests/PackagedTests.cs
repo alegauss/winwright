@@ -26,15 +26,7 @@ public sealed class PackagedTests : IDisposable
     public void Dispose() => Directory.Delete(root, recursive: true);
 
     /// <summary>The repository root, walked up from where the suite is running.</summary>
-    private static string Repository()
-    {
-        var walking = new DirectoryInfo(AppContext.BaseDirectory);
-        while (walking is not null && !File.Exists(Path.Combine(walking.FullName, "Winwright.slnx")))
-            walking = walking.Parent;
-
-        Assert.NotNull(walking);
-        return walking.FullName;
-    }
+    private static string Repository() => Checkout.Root;
 
     /// <summary>A package carrying whatever nuspec is asked for, which is what a real one is.</summary>
     private string Packed(string file, string id, string version)

@@ -73,13 +73,5 @@ public sealed class SerialCollectionTests
         Assert.Equal("windows in this process", WindowFixture.Serial);
     }
 
-    private static string Sources()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Winwright.slnx")))
-            directory = directory.Parent;
-
-        Assert.NotNull(directory);
-        return Path.Combine(directory.FullName, "tests", "Winwright.Tests");
-    }
+    private static string Sources() => Checkout.At("tests", "Winwright.Tests");
 }

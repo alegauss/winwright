@@ -105,12 +105,11 @@ internal static class Sleeps
     private static IReadOnlyList<Sleep> Scan()
     {
         var found = new List<Sleep>();
-        foreach (var file in Trees().SelectMany(Sources))
-        {
-            // This file names the call it is looking for, so counting itself would count the naming.
-            if (Path.GetFileName(file) == $"{nameof(Sleeps)}.cs")
-                continue;
 
+        // WW193. Checkout's walk, so the exclusions are settled in one place — and its own note on
+        // leaving a catalogue's own file out is the same reason this one had.
+        foreach (var file in Checkout.Sources(Checkout.Everything, except: $"{nameof(Sleeps)}.cs"))
+        {
             var text = File.ReadAllText(file);
             var calls = Occurrences(text, Calling);
             if (calls > 0)
@@ -119,13 +118,6 @@ internal static class Sleeps
 
         return found.OrderBy(one => one.File, StringComparer.Ordinal).ToList();
     }
-
-    /// <summary>The sources under a tree, and never what a build left beside them.</summary>
-    private static IEnumerable<string> Sources(string tree) =>
-        Directory
-            .EnumerateFiles(tree, "*.cs", SearchOption.AllDirectories)
-            .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal));
 
     private static int Occurrences(string text, string what)
     {
@@ -140,17 +132,4 @@ internal static class Sleeps
         return count;
     }
 
-    private static IReadOnlyList<string> Trees()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Winwright.slnx")))
-            directory = directory.Parent;
-
-        Assert.NotNull(directory);
-        return
-        [
-            Path.Combine(directory.FullName, "src"),
-            Path.Combine(directory.FullName, "tests"),
-        ];
-    }
 }

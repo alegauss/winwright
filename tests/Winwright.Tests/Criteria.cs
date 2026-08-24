@@ -235,13 +235,5 @@ internal static class Criteria
     }
 
     /// <summary>The governed file, found from the solution beside it.</summary>
-    private static string Roadmap()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Winwright.slnx")))
-            directory = directory.Parent;
-
-        Assert.NotNull(directory);
-        return Path.Combine(directory.FullName, "docs", "ROADMAP.md");
-    }
+    private static string Roadmap() => Checkout.At("docs", "ROADMAP.md");
 }

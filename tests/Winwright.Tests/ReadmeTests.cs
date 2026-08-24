@@ -22,12 +22,7 @@ public sealed class ReadmeTests
     /// <summary>The file, read once. It is at the root, which is where an adopter looks.</summary>
     private static string Text()
     {
-        var walking = new DirectoryInfo(AppContext.BaseDirectory);
-        while (walking is not null && !File.Exists(Path.Combine(walking.FullName, "Winwright.slnx")))
-            walking = walking.Parent;
-
-        Assert.NotNull(walking);
-        var path = Path.Combine(walking.FullName, "README.md");
+        var path = Checkout.At("README.md");
         Assert.True(File.Exists(path), $"there is nothing at {path} for an adopter to read");
         return File.ReadAllText(path);
     }
@@ -129,12 +124,7 @@ public sealed class ReadmeTests
     /// <summary>The non-goals, out of the roadmap that governs them.</summary>
     private static IReadOnlyList<string> NonGoals()
     {
-        var walking = new DirectoryInfo(AppContext.BaseDirectory);
-        while (walking is not null && !File.Exists(Path.Combine(walking.FullName, "Winwright.slnx")))
-            walking = walking.Parent;
-
-        Assert.NotNull(walking);
-        var roadmap = File.ReadAllLines(Path.Combine(walking.FullName, "docs", "ROADMAP.md"));
+        var roadmap = File.ReadAllLines(Checkout.At("docs", "ROADMAP.md"));
 
         var reading = false;
         var found = new List<string>();
@@ -161,13 +151,5 @@ public sealed class ReadmeTests
         return found;
     }
 
-    private static string Props()
-    {
-        var walking = new DirectoryInfo(AppContext.BaseDirectory);
-        while (walking is not null && !File.Exists(Path.Combine(walking.FullName, "Winwright.slnx")))
-            walking = walking.Parent;
-
-        Assert.NotNull(walking);
-        return Path.Combine(walking.FullName, "Directory.Build.props");
-    }
+    private static string Props() => Checkout.At("Directory.Build.props");
 }
