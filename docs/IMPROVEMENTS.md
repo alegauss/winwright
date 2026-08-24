@@ -292,26 +292,3 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW203 Six milliseconds over, twice
-
-Measured on two guest runs a task apart.
-`FixtureTests.The_dump_the_fixture_writes_is_one_the_layout_check_can_read` failed at
-5009ms over 159 looks, and `The_fixture_dumps_the_geometry_it_laid_out` at 5006ms over
-158, both against the 5000ms `Waits` declares for `wrote`. Each passed on the next run.
-
-Nine milliseconds and six milliseconds past a five-second budget is not a slow machine.
-It is a budget sitting exactly where the thing it waits for lands, and the honest
-reading of a deadline met on the 158th look is that the 159th would have done.
-
-Nothing here is wrong about the fixture: it draws a window, lays out a tree and writes
-what it drew, and doing that in about five seconds under a running suite is what it has
-always done. What is wrong is that a red says the fixture never wrote its dump, which is
-a claim about the application under test, when what happened is that this suite asked
-for one millisecond less than it takes. That is the misattribution Block A's criterion
-is about, arriving through a number.
-
-What is owed is the number measured rather than chosen. `Waits` seeds three deadlines
-and this is one of them; a run already reports how long each wait actually took, so the
-material is there. Whether the answer is a wider budget, a budget read off a run, or a
-wait on something earlier than the whole dump is the judgement.

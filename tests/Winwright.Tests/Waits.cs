@@ -40,7 +40,14 @@ internal static class Waits
             // A process actually exited, which WW129 measured as well after its last window went.
             ["gone"] = 8000,
 
-            // A file the application under test writes on its way up.
+            // A file the application under test writes, once its window is up.
+            //
+            // WW203. "Once its window is up" is the whole of the repair. Both callers waited on this
+            // from a standing start, so one 5000ms budget covered a cold start, a layout and the
+            // write — while `draw` above is given 10000ms for the cold start alone. Two guest runs
+            // came in at 5006ms and 5009ms and said the fixture never wrote what it drew, which is a
+            // claim about the application arriving through a number this suite chose. Each caller
+            // now waits for the window on `draw` first, so this budget is about the write.
             ["wrote"] = 5000,
 
             // A page that finishes loading, against the fixture's own declared --loading duration.

@@ -266,6 +266,14 @@ public sealed class ProvokedByFlagTests : IDisposable
         using var running = new ProcessRegister();
         var launched = Attachable.Launch(running, Fixture.Started([store, .. flags]));
 
+        // WW203, and for the same reason as the other site: the wait below is about a file, and
+        // waiting for it from a standing start makes one budget cover a cold start as well. The
+        // window is what takes the time, and `draw` is the deadline that says so.
+        Waits.Until(
+            "draw",
+            $"the fixture never drew a window (pid {launched.Pid})",
+            () => TopLevelWindows.Largest(launched.Pid) is { Title.Length: > 0 });
+
         var written = "";
         Waits.Until(
             "wrote",

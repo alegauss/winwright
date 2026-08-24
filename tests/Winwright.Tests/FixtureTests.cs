@@ -1270,6 +1270,17 @@ public sealed class FixtureTests : IDisposable
 
         var launched = Attachable.Launch(register, start);
 
+        // WW203. The window first, on the deadline that is about drawing one. This waited only for
+        // the files, so a single 5000ms budget covered a cold start, a layout and two writes —
+        // while `draw` alone is given 10000ms and says in as many words that it covers a cold start
+        // on a runner that has never run the fixture. Two guest runs came in at 5006ms and 5009ms
+        // and reported that the fixture never wrote what it drew, which is a claim about the
+        // application under test arriving through a number this suite chose.
+        Waits.Until(
+            "draw",
+            $"the fixture never drew a window (pid {launched.Pid})",
+            () => TopLevelWindows.Largest(launched.Pid) is { Title.Length: > 0 });
+
         // WW164. Waited for what is about to be read and not for the names. Existence is the first
         // thing a write produces and the last thing that means anything: the file appears empty,
         // the wait comes back, and the reader gets a dump with nothing in it — which comes out as a
