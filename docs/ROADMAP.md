@@ -10,6 +10,8 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+- 📋 **WW198** (deps: —) **the sleep catalogue matches one spelling of waiting, and a second is already in the tree that it counts as nothing** — Every way of parking a thread is counted, because the catalogue predicted this failure in its own prose and then shipped with one spelling. → §WW198
+
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed

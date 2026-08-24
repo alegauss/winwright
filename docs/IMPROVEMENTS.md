@@ -56,6 +56,30 @@ it.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+### §WW198 The spelling it warned about
+
+`Sleeps` pairs every file that calls `Thread.Sleep(` with why its sleeping is not a
+scenario waiting, both directions, and it argues for being a catalogue rather than a ban
+in these words: a rule that admitted no exceptions "would be answered by somebody
+spelling the sleep differently, and then nothing would know about it at all".
+
+It matches one spelling. `FrameRun.cs` parks a thread twice — `Thread.Sleep` for the
+bulk of the interval and `Thread.SpinWait(200)` for the last sixteen milliseconds — and
+the catalogue records that file as sleeping once. Its own entry mentions the spin in
+prose; the count does not, and
+`SleepTests.The_count_in_the_catalogue_is_the_count_in_the_file` reads one and agrees.
+
+Nothing here is wrong about `FrameRun`: WW143 argued the pacing and the spin in writing,
+and both are right. What is wrong is that a second way was reached for and the reading
+did not notice — the failure the catalogue was written against, arriving from inside
+rather than from a future author.
+
+What is owed is the other spellings, counted the same way. `Thread.SpinWait` is the one
+measured; `Task.Delay`, `SpinWait.SpinUntil` and a blocking `WaitOne` are what a reader
+reaches for next and none is in the tree today, which makes now the cheap time. The
+judgement about which parking is machinery stays as it is — only how many the reading
+can see changes.
+
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed
