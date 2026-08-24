@@ -2,6 +2,8 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+- 📋 **WW208** (deps: —) **the list of desk-dependent calls is typed by hand, and a reading missing from it is a case nothing asks to excuse** — The list is read off the engine, because one call was absent from it until a case went red twice on a loaded guest. → §WW208
+
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
