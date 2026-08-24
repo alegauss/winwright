@@ -10,6 +10,8 @@
 
 ## Block D — Act — patterns before pointers
 
+- 📋 **WW210** (deps: —) **nothing checks a pattern act never reaches synthesised input, so a quiet fallback would go green** — The criterion claims it of every act; what stands behind it is that nobody wrote the fallback, plus one case on one label. → §WW210
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
@@ -48,6 +50,8 @@
 - 📋 **WW88** (deps: Block G, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+- 📋 **WW211** (deps: —) **a fixture write slower than the budget this suite chose is a red about the fixture** — Two guest runs in a row went red at 5s, in different cases and on the same wait; WW203 narrowed the budget and the misattribution outlived it. → §WW211
 
 ## Done when — Block A
 

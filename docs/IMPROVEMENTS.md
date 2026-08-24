@@ -32,6 +32,35 @@ it.
 
 ## Block D — Act — patterns before pointers
 
+### §WW210 Every act that can go through a pattern does
+
+Read back when Block D emptied. Its first criterion says the default act needs no
+foreground: every act that can go through a pattern does, and the ones that cannot are
+declared as pointer acts carrying the reason.
+
+The second half has teeth. `DeclaredCostTests` checks a stated reason against the tree
+rather than believing it, records one that claims nothing about this tree as unchecked,
+and says so where a scenario declares no reason at all.
+
+The first half has one case.
+`PointerTests.Nothing_in_this_project_falls_back_to_a_pointer_when_a_pattern_is_missing`
+puts a label with no invoke peer in front of `Act.Invoke`, gets `PatternMissing`, and
+reaches the pointer only by naming it. That is the door behaving on one element. The
+criterion is about the engine: that no verb anywhere quietly substitutes synthesised
+input when a peer is missing.
+
+Measured: `Act.cs` mentions the pointer twice, both in its own header prose. So the rule
+holds today because nobody wrote the fallback — which is the shape WW208 and WW209 both
+found and both replaced with a reading.
+
+What is owed is the same reading here. The pattern routes — `Act`, `Pick`, `Selecting` —
+reach no input synthesiser, transitively and not one level, and a verb added later that
+does is red at the moment it is written rather than on the run where a green covered a
+click nobody asked for.
+
+The negative control is the fallback itself: write one, and the check goes red naming
+the verb.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
@@ -221,3 +250,29 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW211 A write that ran out of time is not a fixture that never wrote
+
+`Waits.Until("wrote", ...)` fails with "pid N never wrote what it drew, or wrote it and
+it read as nothing". On a guest busy with its own antivirus that sentence is false: the
+fixture wrote, and this suite stopped looking at 5000ms.
+
+WW203 read it correctly and repaired half of it. One budget had been covering a cold
+start, a layout and the write, so each caller now waits for the window on `draw` first
+and `wrote` is about the write alone. That was a real narrowing and it did not close the
+hole: two runs since have come in at 5s, on
+`The_dump_the_fixture_writes_is_one_the_layout_check_can_read` and on
+`A_dump_that_exists_and_holds_nothing_is_not_one_this_run_may_read`, which share
+`Driven()` and nothing else.
+
+Raising the number is the move that keeps this coming back, because the number is not
+the fault. The fault is the verdict: a deadline this suite chose is reporting a claim
+about the application under test, which is the misattribution `BusyDesk` exists to stop
+everywhere else.
+
+So the same third state, at this wait. A write that has not landed inside the budget is
+a hole naming the machine — unchecked, not failed — and a run that meets it says the
+fixture was not given time rather than that it wrote nothing. A write that landed and
+read as empty stays red, because that one is about the fixture.
+
+The negative control is a budget of one millisecond: unchecked, never red.
