@@ -122,6 +122,31 @@ right only when the machine is fast is the kind of green this project withdraws.
 Whichever end takes it, what the reading owes is that a pid it was given and cannot yet
 identify is said rather than skipped.
 
+### §WW181 The census that claims a clean desk it never read
+
+Found in WW173 minutes after shipping it, which is where it belongs rather than in a
+note nobody files.
+
+`TrayGhosts.Showing` reads the taskbar, then asks the shell to open the overflow and
+reads that too. Where the flyout will not open — the case measured all through WW172, a
+Start menu covering the notification area and no chevron in the tree — it reads the
+taskbar alone and returns whatever it found there. An icon hiding in the overflow is not
+seen, and `Sentence` then answers "nothing this suite added is still in the notification
+area."
+
+That is this project's founding non-goal, committed by its own suite: a green never
+covers an assertion that did not run. The doc comment says the reading "says what it saw
+and never that there were none", and the sentence it hands back says exactly that.
+
+Everything needed is already here. `OpenOverflow` answers an `OverflowState` carrying
+whether it held and why not, and `TraySearch` already turns exactly this distinction
+into a hole rather than an absence — WW168 built it, and the census throws the same
+answer away one call later.
+
+What is owed is the third state the `Finding` shape has and this reading does not: seen
+and clean, seen and holding, and not read — with the reason. The case asserting the
+census then excuses itself on the third the way every desk-dependent case now does.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW175 A deadline that quietly stopped being one
