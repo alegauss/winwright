@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW182** (deps: —) **a suite reading invents its own shape instead of the engine's three-state Finding, and shipped able to say two things** — A suite reading answers a Finding, because the one that invented its own shape reported a desk clean where it had not looked and no check here saw it. → §WW182
 - 📋 **WW183** (deps: —) **a case reds when somebody touches the machine, though the engine already calls that a desk fact and names it** — The suite's desk facts are the ones the engine declares, because a list kept by hand already misses the reading that measured a person at the keyboard. → §WW183
 - 📋 **WW185** (deps: —) **a sweep records what each environment concluded and nothing about the machine it ran on, which is what a sweep asks** — Each environment carries the reading its own run took, because a hole in one machine and not another is a statement about the machines and neither is described. → §WW185
 - 📋 **WW190** (deps: —) **a case asserting a desk-dependent verdict without excusing the desk is caught by a guest run and by nothing here** — A case that asserts one is red until it says how it excuses the desk, because three have now been found by a full run in the guest and each cost one. → §WW190

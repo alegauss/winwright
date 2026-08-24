@@ -167,6 +167,23 @@ internal sealed record TrayCensus
     }
 
     /// <summary>
+    /// This reading as the engine's own three-state one.
+    /// <para>
+    /// WW182. The first spelling of this was a sentence and a list, and a list has no way to say
+    /// "I did not look" — so the third state had nowhere to live and the sentence rounded it down to
+    /// the second, which is how WW181 shipped a clean desk it had never read. <see cref="Finding" />
+    /// carries <c>bool? Holds</c> and was three tasks old when that happened, and its own comment
+    /// gives WW151's reason: two states could only ever report the third as one of the other two.
+    /// </para>
+    /// <para>
+    /// Answered rather than replaced-with. The census keeps the fields a case reads — which ghosts,
+    /// and whether the overflow was reached — and this is the shape a report joins, so a run could
+    /// carry what it left in the shell beside what it left in the store.
+    /// </para>
+    /// </summary>
+    internal Finding AsFinding() => new(TrayGhosts.Named, Everywhere ? Ghosts.Count == 0 : null, Sentence());
+
+    /// <summary>
     /// The verdict a case counts. A shell that would not open the flyout never got asked the
     /// question, so it is a hole under the name the search one file over already uses for it.
     /// </summary>

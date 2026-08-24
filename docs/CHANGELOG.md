@@ -22,6 +22,7 @@
 - ✅ **WW176** **32 criteria decide when a block is finished and no case names evidence for any of them, so the reading is a recollection** — Every criterion the roadmap declares is paired with the case that shows it, checked both ways, so what nothing shows is a counted bucket and finishing a block is a reading.
 - ✅ **WW177** **the summary a run exits on never shows what the run read, so the readings and the verdict are two pages that never meet** — The summary prints what the run read above the verdict it makes legible, and refuses a reading that opened a store fingerprint and never closed it.
 - ✅ **WW179** **a desk fact met while building a fixture is thrown, so the case reads as a broken harness rather than a hole** — A fixture the desk refused answers the reading an act answers and the case excuses itself, so a held desk produced nine ordinary failures and no broken harness at all.
+- ✅ **WW182** **a suite reading invents its own shape instead of the engine's three-state Finding, and shipped able to say two things** — The tray census answers the engine's Finding, and a suite reading that answers a verdict without one is red here, so the third state is a property of the type.
 
 ## Block B — Attach, launch, and leave nothing behind
 
