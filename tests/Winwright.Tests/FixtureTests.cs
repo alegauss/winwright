@@ -1610,6 +1610,10 @@ public sealed class FixtureTests : IDisposable
 
         // Actionable and not mysterious: "something else was in the way" sends a reader nowhere,
         // and a title with a pid and a rectangle sends them to the window to move.
+        // WW188: the arm, and then the words. Three of the five open with the same six words, so a
+        // case matching only a phrase is one that starts matching a different arm the day somebody
+        // rewords a message.
+        Assert.Equal(WrongCapture.RegionCovered, refused.Arm);
         Assert.Contains($"pid {placed.Intruder.Pid}", refused.Message, StringComparison.Ordinal);
         Assert.Contains("stand over", refused.Message, StringComparison.Ordinal);
         Assert.Contains("pixel(s)", refused.Message, StringComparison.Ordinal);
@@ -1690,6 +1694,7 @@ public sealed class FixtureTests : IDisposable
                 AppTarget.AttachTo(window.Pid),
                 glass: glass));
 
+        Assert.Equal(WrongCapture.GlassTransmits, refused.Arm);
         Assert.Contains("acrylic", refused.Message, StringComparison.Ordinal);
         Assert.Contains("through the glass", refused.Message, StringComparison.Ordinal);
     }
@@ -1782,6 +1787,7 @@ public sealed class FixtureTests : IDisposable
         var refused = Assert.Throws<WrongCaptureException>(
             () => CaptureReceipt.Of(flat, window, AppTarget.AttachTo(window.Pid), colours: counted));
 
+        Assert.Equal(WrongCapture.OneFlatColour, refused.Arm);
         Assert.Contains("one colour across all", refused.Message, StringComparison.Ordinal);
         Assert.Contains("not a picture of a window", refused.Message, StringComparison.Ordinal);
     }

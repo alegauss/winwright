@@ -78,7 +78,7 @@ public sealed class CaptureDoorTests : IDisposable
             // and the refusal is itself the proof the door asked, because nothing here passed a
             // region reading in. Both arms assert something real, which is the point.
             Assert.True(taken, "the door refused without ever writing the file");
-            Assert.Contains("stand over", refused.Message, StringComparison.Ordinal);
+            Assert.Equal(WrongCapture.RegionCovered, refused.Arm);
             return;
         }
 
@@ -129,6 +129,7 @@ public sealed class CaptureDoorTests : IDisposable
             () => CaptureReceipt.Taking(
                 path, window, Target(), Flat, route: CaptureRoute.For(window, window)));
 
+        Assert.Equal(WrongCapture.OneFlatColour, refused.Arm);
         Assert.Contains("one colour across all", refused.Message, StringComparison.Ordinal);
 
         // And the file is there. A picture nobody may trust is still evidence about what went

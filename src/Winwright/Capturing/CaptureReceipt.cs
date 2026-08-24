@@ -14,6 +14,24 @@ public sealed class WrongCaptureException : InvalidOperationException
     {
     }
 
+    /// <summary>
+    /// The same, saying which of the ways a capture can be wrong this one is.
+    /// <para>
+    /// WW188. A refusal is what a reader meets, and a reader meets an arm rather than a type. This
+    /// one is five: another process's window, a window nothing is drawing, a region another window
+    /// stood over, a window whose glass transmits, and a picture of exactly one colour. The
+    /// catalogue that pairs every refusal with something that provokes it counted them as one, so
+    /// four were invisible to it and a sixth would have been too.
+    /// </para>
+    /// </summary>
+    /// <param name="arm">Which way this capture is wrong.</param>
+    /// <param name="message">What was photographed and why it is not what the run was driving.</param>
+    public WrongCaptureException(WrongCapture arm, string message)
+        : base(message)
+    {
+        Arm = arm;
+    }
+
     /// <summary>Unused. Present because an exception with no default shapes is awkward to catch.</summary>
     public WrongCaptureException()
         : base("the capture does not describe what this run was driving")
@@ -25,6 +43,41 @@ public sealed class WrongCaptureException : InvalidOperationException
         : base(message, inner)
     {
     }
+
+    /// <summary>
+    /// Which way this capture is wrong. <see cref="WrongCapture.Unsaid" /> where it was thrown
+    /// without saying — which is a refusal nothing can pair, and the check says so.
+    /// </summary>
+    public WrongCapture Arm { get; } = WrongCapture.Unsaid;
+}
+
+/// <summary>
+/// The ways a capture can be wrong, each of which a file on disk looks exactly the same as.
+/// <para>
+/// WW188. Named here rather than told apart by the sentence they carry: a case matching a phrase is
+/// one that starts matching a different arm the day somebody rewords a message, and a catalogue
+/// keyed on the type could only ever count five refusals as one.
+/// </para>
+/// </summary>
+public enum WrongCapture
+{
+    /// <summary>Thrown without saying which. Pairs with nothing, and the suite refuses it.</summary>
+    Unsaid,
+
+    /// <summary>The window belongs to a process this run is not driving.</summary>
+    AnotherProcess,
+
+    /// <summary>Nothing was drawing the window, so the picture is of something cloaked.</summary>
+    NothingDrawing,
+
+    /// <summary>Another window stood over the region while it was copied.</summary>
+    RegionCovered,
+
+    /// <summary>The window's own glass carries what is behind it into the copy.</summary>
+    GlassTransmits,
+
+    /// <summary>The picture is one flat colour, which is not a picture of a window.</summary>
+    OneFlatColour,
 }
 
 /// <summary>
@@ -234,17 +287,20 @@ public sealed record CaptureReceipt
         // perfectly good file, and the only thing that ever caught one was a person looking.
         if (window.Pid != target.Pid)
             throw new WrongCaptureException(
+                WrongCapture.AnotherProcess,
                 $"the capture is of {window} in pid {window.Pid}, and this run is driving pid {target.Pid}.");
 
         if (window.Cloak != Cloak.NotCloaked)
             throw new WrongCaptureException(
+                WrongCapture.NothingDrawing,
                 $"the capture is of {window}, which nothing is drawing: {Cloaking.Because(window.Cloak)}.");
 
         // WW40, and named rather than merely refused: "something else was in the way" is not
         // actionable and a title with a pid is. The reading already carries both, so the refusal
         // hands over its sentence rather than composing a second, thinner one.
         if (over is { Was: true, Clear: false })
-            throw new WrongCaptureException($"the capture is of {window}, and {over.Sentence()}");
+            throw new WrongCaptureException(
+                WrongCapture.RegionCovered, $"the capture is of {window}, and {over.Sentence()}");
 
         // WW41, and refused rather than warned about: a warning is not a refusal and the file gets
         // written either way. Not for a popup, which is the one thing the screen copy exists for —
@@ -258,14 +314,16 @@ public sealed record CaptureReceipt
         // A forced copy of a renderable window is what the condition was reaching for, and that is
         // a copy: Renders is the field that separates the two.
         if (glass is { Transmits: true } && route?.Renders is not true && route?.Reach is null or OutOfReach.Renderable)
-            throw new WrongCaptureException($"the capture is of {window}, and {glass.Sentence()}");
+            throw new WrongCaptureException(
+                WrongCapture.GlassTransmits, $"the capture is of {window}, and {glass.Sentence()}");
 
         // WW42. A flat rectangle is not a picture of a window, and the session that produced one
         // had everything present and nothing rendering — so the file was written and the run exited
         // zero. Counted rather than scanned for ink: a screen copy has no alpha channel, and the
         // reading that answers "did anything draw" cannot answer for it at all.
         if (colours is { Counted: true, IsFlat: true })
-            throw new WrongCaptureException($"the capture is of {window}, and {colours.Sentence()}");
+            throw new WrongCaptureException(
+                WrongCapture.OneFlatColour, $"the capture is of {window}, and {colours.Sentence()}");
 
         return new CaptureReceipt(path, window, target, frame, route, over, glass, colours);
     }

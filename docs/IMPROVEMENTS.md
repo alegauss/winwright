@@ -127,28 +127,6 @@ is for.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW188 Five refusals wearing one name
-
-`Provocation` pairs every refusal the framework names with a fixture flag or a stated
-reason, checked against the assemblies in both directions. It reads exception *types*,
-and that was right when a type was a refusal.
-
-`WrongCaptureException` is now five. It fires on a window belonging to another process,
-on a window nothing is drawing, on a region another window stood over, on a window whose
-glass transmits, and on a picture of exactly one colour. The catalogue carries one
-entry, naming one case, and its shape cannot carry more: an entry holds a flag or a
-reason and never both, which WW40 already had to write into its prose because there was
-nowhere else to put it.
-
-So Block K's first criterion — every refusal has something that provokes it, checked
-both ways — is now true of one arm in five here. The other four are provoked, and by
-real fixture shapes: `--intrude` for the region, `--backdrop` for the glass. Nothing
-reads that back, and a sixth arm added next week is a refusal nobody has to provoke.
-
-What is owed is the finer unit. A refusal is what a reader meets, and a reader meets an
-arm rather than a type — so the pairing is by the sentence a refusal is thrown with, and
-the count stops being one per class of thing that can go wrong.
-
 ### §WW195 The instant before is not the instant of
 
 WW187 put the readings where a caller cannot forget them, and reads the region and the
