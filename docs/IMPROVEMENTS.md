@@ -26,6 +26,32 @@ and legible means a reader can act. What is owed is the division, in both headli
 with an honest third bucket for a hole whose condition this engine has not classified at
 all.
 
+### §WW197 One BusyDesk covers the whole case
+
+WW190 reads the suite for cases that ask a desk-dependent reading and pairs the ones
+that do not excuse the desk. A case counts as excusing where its body mentions
+`BusyDesk` anywhere, which is one line of scanner and is the wrong unit by exactly the
+margin WW190 was about.
+
+Found rather than argued, on WW191's first guest run.
+`TrayPlacementTests.The_fixture_leaves_the_overflow_the_way_it_found_it` builds its icon
+through `BusyDesk.Built` and returns where the desk refused — properly, and that is what
+makes it invisible here. Its actual assertion is
+`Assert.Null(NotificationArea.Overflow())`, which says the shell is not showing the
+flyout, and nothing excuses that at all. It went red on a desk whose flyout somebody
+else had left standing, then passed on a re-run. The case's own comment already names
+this as one of the two flakes it was written for.
+
+So the guard has the shape of WW182's: it keys on a mention rather than on the
+assertion, and a case that mentions `BusyDesk` for one reading is credited for a second
+the desk can refuse just as easily. Both the cases that fixture-guard and then assert on
+the shell are exactly this pattern, and there is no reason to think they are the only
+two.
+
+What is owed is the finer unit. Whether that is an assertion counted against a preceding
+excuse, or something a case declares once and the reading checks, is the judgement — and
+the reason this is a task rather than a line of scanner.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
