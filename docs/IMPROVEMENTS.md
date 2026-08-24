@@ -2,31 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW208 The call the list had never heard of
-
-`DeskAsks.Calls` is the judgement WW190 said it was: which calls can turn on a fact
-about the desk, each filed under a condition `DeskFacts` declares. The filing is
-checked; the list itself is typed.
-
-Found on WW206's guest run.
-`TraversalTests.What_holds_the_focus_can_be_asked_without_pressing_anything` asserts on
-`Traversal.WhoHasFocus`, which reads what holds the focus anywhere on the desk — and the
-list had never heard of it, so nothing ever asked that case to excuse anything. It went
-red twice running on a guest slowed by its own antivirus, saying the focus was not on
-the control this suite had just put it on. That is the misattribution WW190 exists to
-stop, arriving through the one door WW190 left open.
-
-Repaired where it was found: the call is in the list and the case excuses. What is not
-repaired is that the next reading added to `Acting` or `Windowing` starts the same way —
-invisible, and invisible in the direction that produces a false red rather than a false
-green.
-
-The engine already declares what a desk fact is. What is owed is the other end of the
-same door: a reading of the engine's surface that finds a verb answering a desk
-condition and is red until the list names it or says why it is not one. `Cooperating`
-already sweeps two namespaces for verbs and could be asked this question, which is where
-the judgement lies.
-
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached

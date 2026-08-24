@@ -54,6 +54,12 @@ internal static class DeskDiscards
                 + "that watching again reports nothing synthesised, and a type the desk refused "
                 + "leaves nothing to forget — so the claim holds either way and proves less on the "
                 + "run where it was refused, which is honest rather than wrong"),
+        new("TraversalTests.A_failure_says_where_the_focus_actually_went_and_not_only_that_it_did_not_move",
+            "Traversal.Press(",
+            "the first of two tabs, thrown away because it is the setup: what the case is about is "
+                + "where the second one lands, and that press is excused. A desk that refused the "
+                + "first leaves the focus where it was, so the second lands somewhere the excused "
+                + "assertion below reports honestly"),
         new("NotificationAreaTests.Dispose", "NotificationArea.CloseOverflow(",
             "the class tidies up on the way out and asserts nothing after it. A shell that will not "
                 + "shut the flyout leaves it standing for the next class, and the one case that "

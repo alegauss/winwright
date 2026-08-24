@@ -113,6 +113,9 @@ internal static class DeskAsks
         new("Traversal.WhoHasFocus(", Winwright.Acting.FocusReading.Named,
             "what holds the focus anywhere on the desk, which this list did not know about until a "
                 + "case asserting on it went red twice on a loaded guest"),
+        new("Traversal.Press(", Winwright.Acting.Keyboard.FocusPreconditionName,
+            "a traversal key is a real keystroke, so where it lands is the focus's business — and "
+                + "WW208's reading of the engine found this missing here too, on the same day"),
         new("ForeignInput.Read(", Winwright.Windowing.ForeignInput.PreconditionName,
             "whether somebody was using the machine, which is the machine's business"),
         new("Obstruction.Reading(", Winwright.Capturing.Obstruction.PreconditionName,
@@ -260,6 +263,10 @@ internal static class DeskAsks
             Unaffected.Provoked,
             "the decoy again, and what is asserted is that the hole carries the condition rather "
                 + "than a sentence about it"),
+        new("RefusedForegroundTests.A_traversal_that_could_not_be_sent_is_a_hole",
+            Unaffected.Provoked,
+            "the decoy once more, for a traversal key rather than a click or a type — and what is "
+                + "asserted is the hole it produces, naming the foreground as the reason"),
         new("RefusedForegroundTests.Typing_that_could_not_be_sent_is_a_hole_too",
             Unaffected.Provoked,
             "the decoy for the keyboard rather than the pointer, asserting the same hole"),
