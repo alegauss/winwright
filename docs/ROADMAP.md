@@ -65,7 +65,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW169** (deps: —) **every shape claims the defect it reproduces and nothing checks that any row makes the claim** — The catalogue is read for a defect on every row, because a shape that can name none is one this block says is removed rather than maintained forever. → §WW169
 - 📋 **WW171** (deps: —) **the cycle case declares a 200ms animation this harness cannot read that fast, so a guest run goes red about the desk** — The case declares a length the reader can keep up with, because a guard that fires on a working fixture teaches whoever sees it to ignore the guard. → §WW171
 
 ## Done when — Block A
