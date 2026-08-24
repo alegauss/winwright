@@ -19,6 +19,7 @@
 ## Block E — Capture — the picture that proves what it photographed
 
 - 📋 **WW188** (deps: —) **one refusal type has five arms now and the pairing records one, so an arm added later is provoked by nobody** — The pairing is per arm, because a block is called finished on every refusal having something that provokes it and four of these five are invisible to the check. → §WW188
+- 📋 **WW195** (deps: —) **the region is read before a capture and never after, so a window that arrived while it was taken is not seen** — The region is read on both sides of the take, because a window arriving during it is in the picture and the reading that would say so was taken before it existed. → §WW195
 
 ## Block F — Assert — the expectation is derived, never typed
 
