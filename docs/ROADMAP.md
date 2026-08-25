@@ -49,8 +49,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW212** (deps: —) **no check reads a fixture surface's reason for existing, so one that can name no defect is kept forever** — The criterion says such a surface is removed rather than maintained; eleven explain themselves in prose, three name a task, and nothing reads either. → §WW212
-
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine

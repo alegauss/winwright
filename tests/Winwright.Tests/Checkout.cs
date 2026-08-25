@@ -272,17 +272,28 @@ internal static class Checkout
     /// </para>
     /// </summary>
     /// <param name="file">The source to read.</param>
-    internal static IReadOnlyList<SourceMember> Members(string file)
+    /// <param name="reading">
+    /// How to read each line: <see cref="Code" /> by default, and <see cref="Spoken" /> for a sweep
+    /// whose subject is inside a string.
+    /// <para>
+    /// WW212 needed the second and got the first, which is the same trap WW202 named one level up.
+    /// A sweep for the flag a member tests is looking for <c>Has("names")</c>, and the reading that
+    /// drops strings leaves <c>Has()</c> — so every surface in the fixture read as gated by nothing,
+    /// which was a claim about this walk arriving as a claim about the fixture.
+    /// </para>
+    /// </param>
+    internal static IReadOnlyList<SourceMember> Members(string file, Func<string, string>? reading = null)
     {
         ArgumentNullException.ThrowIfNull(file);
 
+        var read = reading ?? Code;
         var owner = Path.GetFileNameWithoutExtension(file);
         var found = new List<SourceMember>();
         var named = "";
         var visible = false;
         var body = new List<string>();
 
-        foreach (var line in File.ReadLines(file).Select(Code))
+        foreach (var line in File.ReadLines(file).Select(read))
         {
             if (Member(line) is { } next)
             {

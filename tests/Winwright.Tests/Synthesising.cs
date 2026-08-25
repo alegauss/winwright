@@ -154,7 +154,7 @@ internal static class Synthesising
     private static (List<string> Public, List<string> Reaching) Sweep()
     {
         var members = Checkout.SourcesIn(Checkout.Engine)
-            .SelectMany(Checkout.Members)
+            .SelectMany(one => Checkout.Members(one))
             .GroupBy(one => one.Named, StringComparer.Ordinal)
             .ToDictionary(
                 one => one.Key,
