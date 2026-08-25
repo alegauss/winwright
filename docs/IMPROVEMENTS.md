@@ -221,3 +221,29 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW212 A shape exists because a defect existed
+
+Read back when Block K emptied. Two of its three criteria have teeth. `Provocation`
+pairs every named refusal with the flag or the case that provokes it, and WW160 already
+caught the quiet half of that — twelve entries claiming a case existed with nothing
+asserting one did. `FixtureNeedsTests` reads the project's own references and would
+notice the day the fixture started asking the machine for something.
+
+The third has none. Every surface does argue for itself: `AbsencesPane` says three kinds
+of absence each cost a real defect to learn, `Toast` says a launcher asking the process
+for its window finds none. That is prose a person wrote, and prose is what WW160 found
+was not enough.
+
+Measured across the eleven surfaces the fixture carries: three name a task
+(`SizelessPane` and `BlankPane` name WW146, `Cloak` names WW199) and eight name none.
+Nothing anywhere enumerates them, so a surface added tomorrow with no reason at all
+reads exactly like one that has held since WW146.
+
+And the criterion's second half — that a surface which can name none is removed rather
+than maintained forever — has no mechanism whatsoever. There is no moment at which
+anybody is asked.
+
+What is owed is the reading: the surfaces swept rather than listed, each paired with the
+defect it reproduces, and a surface without one red where it is written. The negative
+control is a pane that reproduces nothing.
