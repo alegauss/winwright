@@ -14,6 +14,10 @@ internal enum Touching
 
     /// <summary>It reads a window a caller already has, rather than looking for one on the desk.</summary>
     AWindowInHand,
+
+    /// <summary>It sweeps the desk and then keeps only what the caller named, so what else happens
+    /// to be open cannot change the answer.</summary>
+    FilteredToWhatTheCallerNamed,
 }
 
 /// <summary>One engine verb that reaches the desk and is not in <see cref="DeskAsks.Calls" />.</summary>
@@ -76,6 +80,19 @@ internal static class DeskVerbs
                 + "desktop, a compositor — which is a fact about the session this run is in and not "
                 + "about what happens to be on it. A case cannot excuse the absence of a desk on the "
                 + "grounds of the desk, and DeskGateTests asserts it either way"),
+
+        // WW210 found both of these, and found them by repairing the walk rather than by asking a
+        // better question. OfProcess is two overloads: the one that enumerates, and the convenience
+        // one beside it. The reading kept whichever came last and threw the other away — so the
+        // overload that calls EnumWindows was invisible, and Largest, which calls it, with it.
+        new("TopLevelWindows.OfProcess", Touching.FilteredToWhatTheCallerNamed,
+            "it walks every top-level window there is and keeps the ones belonging to a pid the "
+                + "caller named. A desk crowded with somebody else's windows returns the same list, "
+                + "and a window this run's application has not drawn yet is what a deadline is for "
+                + "rather than what an excuse is for"),
+        new("TopLevelWindows.Largest", Touching.FilteredToWhatTheCallerNamed,
+            "the same walk, answering the largest of them. It reaches the desk only through "
+                + "OfProcess and inherits the whole of its argument"),
     ]);
 
     /// <summary>Every public verb of the engine that reaches a desk primitive.</summary>
@@ -106,7 +123,15 @@ internal static class DeskVerbs
     private static IEnumerable<string> InFile(string file)
     {
         var owner = Path.GetFileNameWithoutExtension(file);
-        var bodies = Bodies(File.ReadLines(file).Select(Checkout.Code));
+        // Grouped and not indexed, because a name in a file can be two overloads. The old copy of
+        // this kept the last one and threw the rest away, so an overload that touched the desk was
+        // invisible whenever a quieter one was declared below it.
+        var bodies = Checkout.Members(file)
+            .GroupBy(one => one.Name, StringComparer.Ordinal)
+            .ToDictionary(
+                one => one.Key,
+                one => (Body: string.Join('\n', one.Select(each => each.Body)), IsPublic: one.Any(each => each.IsPublic)),
+                StringComparer.Ordinal);
 
         // All the way down and not one level. A verb rarely calls the primitive itself, and rarely
         // calls something that does: NotificationArea.Find asks OpenOverflow, which asks Chevron,
@@ -135,47 +160,9 @@ internal static class DeskVerbs
     private static bool Touches(string text) =>
         Primitives.Any(one => text.Contains(one, StringComparison.Ordinal));
 
-    /// <summary>
-    /// Each member of one file, with the lines under it and whether an adopter can call it.
-    /// <para>
-    /// Per file, which the first draft was not: the public names were kept in one set across the
-    /// whole engine, so a private helper sharing a name with somebody else's public verb was read as
-    /// public. A sweep whose answer depends on which file it read first is not a reading.
-    /// </para>
-    /// </summary>
-    private static Dictionary<string, (string Body, bool IsPublic)> Bodies(IEnumerable<string> lines)
-    {
-        var found = new Dictionary<string, (string Body, bool IsPublic)>(StringComparer.Ordinal);
-        var member = "";
-        var visible = false;
-        var body = new List<string>();
-
-        foreach (var line in lines)
-        {
-            if (Checkout.Member(line) is { } next)
-            {
-                Close();
-                member = next;
-                visible = line.StartsWith("    public ", StringComparison.Ordinal);
-                body.Add(line);
-            }
-            else if (member.Length > 0)
-            {
-                body.Add(line);
-            }
-        }
-
-        Close();
-        return found;
-
-        void Close()
-        {
-            if (member.Length > 0)
-                found[member] = (string.Join('\n', body), visible);
-
-            member = "";
-            visible = false;
-            body = [];
-        }
-    }
+    // The walk that reads a file member by member moved to Checkout under WW210, where a second
+    // sweep needed the same one. The reading here stays per file on purpose: the public names were
+    // once kept in one set across the whole engine, so a private helper sharing a name with
+    // somebody else's public verb was read as public, and a sweep whose answer depends on which
+    // file it read first is not a reading.
 }

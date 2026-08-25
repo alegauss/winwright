@@ -1,4 +1,4 @@
-using System.Windows.Automation;
+﻿using System.Windows.Automation;
 
 using Winwright.Locating;
 
@@ -9,7 +9,7 @@ namespace Winwright.Acting;
 /// <para>
 /// pportal's harness states the rule and the reason in its own header: a synthesised mouse click
 /// lands on whatever is drawn at a point, so it needs the window in the foreground, and Windows
-/// refuses the foreground to a process that does not already own it — which means a run started
+/// refuses the foreground to a process that does not already own it â€” which means a run started
 /// from an editor or an agent drives somebody else's window. A pattern asks the control: no
 /// pointer, no foreground, nothing on top to be confused with. That is what lets these run
 /// unattended, which is the whole point of them.
@@ -27,7 +27,7 @@ public static class Act
         subject, "invoke", "Invoke",
         element => ((InvokePattern)element.GetCurrentPattern(InvokePattern.Pattern)).Invoke());
 
-    /// <summary>Flip it — on to off, off to on, and whatever a third state does next.</summary>
+    /// <summary>Flip it â€” on to off, off to on, and whatever a third state does next.</summary>
     public static ActResult Toggle(Subject subject) => Through(
         subject, "toggle", "Toggle",
         element => ((TogglePattern)element.GetCurrentPattern(TogglePattern.Pattern)).Toggle());
@@ -90,3 +90,4 @@ public static class Act
             before.Resolution.Polls);
     }
 }
+

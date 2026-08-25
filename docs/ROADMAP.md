@@ -10,8 +10,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW210** (deps: —) **nothing checks a pattern act never reaches synthesised input, so a quiet fallback would go green** — The criterion claims it of every act; what stands behind it is that nobody wrote the fallback, plus one case on one label. → §WW210
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

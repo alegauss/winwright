@@ -110,6 +110,7 @@
 - ✅ **WW168** **finding a tray icon answers null whether the icon is absent or the flyout simply would not open** — Looking for a tray icon answers a reading that says whether every place was looked at, so an absent icon fails and a flyout that would not open is a hole about the desk.
 - ✅ **WW174** **a tray menu that never came up records Failed whether the code or the desk was at fault, and answers no verdict** — A tray menu answers a verdict and a step that agree, so a shell hiding the icon or a desk refusing the focus is a hole and only a menu the icon never showed is red.
 - ✅ **WW209** **the verb catalogue says every verb the engine offers and reads two of its ten namespaces, with nothing saying why** — The catalogue reads any engine file that touches the application, not two namespaces: 18 verbs an adopter can call, never asked what they need, and the README named 22 of 31 families.
+- ✅ **WW210** **nothing checks a pattern act never reaches synthesised input, so a quiet fallback would go green** — Filed expecting Act, Pick and Selecting to reach nothing; two of the three do, deliberately — so it is 14 verbs paired with how a caller learns, and Act alone asserted to reach none.
 
 ## Block E — Capture — the picture that proves what it photographed
 

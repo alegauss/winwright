@@ -4,6 +4,17 @@ using Xunit;
 
 namespace Winwright.Tests;
 
+/// <summary>One member of one source file, as a sweep over the checkout reads it.</summary>
+/// <param name="Owner">The file it is in, without its extension, which is its type in this tree.</param>
+/// <param name="Name">The member's own name.</param>
+/// <param name="Body">Its declaration and every line under it, as code, joined by newlines.</param>
+/// <param name="IsPublic">Whether an adopter can call it.</param>
+internal sealed record SourceMember(string Owner, string Name, string Body, bool IsPublic)
+{
+    /// <summary>How anything outside its file spells a call to it.</summary>
+    public string Named => $"{Owner}.{Name}";
+}
+
 /// <summary>
 /// The checkout this suite is running out of: where it is, and what source files are in it.
 /// <para>
@@ -112,20 +123,17 @@ internal static class Checkout
     }
 
     /// <summary>
-    /// The line with what a person wrote about it taken off.
+    /// The line with what a person wrote about it taken off and its strings kept.
     /// <para>
-    /// Found by WW197 on the doc comment of this very method, which names a call in a <c>see</c> tag
-    /// to explain what it does — and a sweep reading comments reported three helpers that touch
+    /// Found by WW197 on the doc comment of <see cref="Code" />, which names a call in a <c>see</c>
+    /// tag to explain what it does — and a sweep reading comments reported three helpers that touch
     /// nothing as reaching for it. Prose about a call is the other place a call is a subject rather
     /// than an act, and every catalogue here explains itself in prose.
     /// </para>
     /// <para>
-    /// After the quotes and never before, so a <c>//</c> inside a string has already gone and cannot
-    /// take the rest of a real line with it.
+    /// Stripped after the quotes and never before, so a <c>//</c> inside a string has already gone
+    /// and cannot take the rest of a real line with it.
     /// </para>
-    /// </summary>
-    /// <summary>
-    /// The line with what a person wrote about it taken off and its strings kept.
     /// <para>
     /// WW202. <see cref="Code" /> is what a sweep for a call wants, and it is the wrong reading for
     /// a sweep looking for a file pattern: <c>"*.cs"</c> is a string, and stripping strings deletes
@@ -250,6 +258,57 @@ internal static class Checkout
         }
 
         return named.Length == 0 ? null : named;
+    }
+
+    /// <summary>
+    /// Every member of one file, with the lines under it and whether an adopter can call it.
+    /// <para>
+    /// WW210, and the same argument WW207 made about <see cref="Member" /> one level up. Walking a
+    /// file member by member — open on a declaration, collect until the next — was written twice,
+    /// and the second copy is the one that has to hold: a sweep whose answer depends on which
+    /// file it read first is not a reading, and that is a bug about the walk rather than about
+    /// either question. The questions stay apart. This answers only where each member begins and
+    /// ends.
+    /// </para>
+    /// </summary>
+    /// <param name="file">The source to read.</param>
+    internal static IReadOnlyList<SourceMember> Members(string file)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        var owner = Path.GetFileNameWithoutExtension(file);
+        var found = new List<SourceMember>();
+        var named = "";
+        var visible = false;
+        var body = new List<string>();
+
+        foreach (var line in File.ReadLines(file).Select(Code))
+        {
+            if (Member(line) is { } next)
+            {
+                Close();
+                named = next;
+                visible = line.StartsWith("    public ", StringComparison.Ordinal);
+                body.Add(line);
+            }
+            else if (named.Length > 0)
+            {
+                body.Add(line);
+            }
+        }
+
+        Close();
+        return new ReadOnlyCollection<SourceMember>(found);
+
+        void Close()
+        {
+            if (named.Length > 0)
+                found.Add(new SourceMember(owner, named, string.Join('\n', body), visible));
+
+            named = "";
+            visible = false;
+            body = [];
+        }
     }
 
     /// <summary>

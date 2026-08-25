@@ -32,35 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW210 Every act that can go through a pattern does
-
-Read back when Block D emptied. Its first criterion says the default act needs no
-foreground: every act that can go through a pattern does, and the ones that cannot are
-declared as pointer acts carrying the reason.
-
-The second half has teeth. `DeclaredCostTests` checks a stated reason against the tree
-rather than believing it, records one that claims nothing about this tree as unchecked,
-and says so where a scenario declares no reason at all.
-
-The first half has one case.
-`PointerTests.Nothing_in_this_project_falls_back_to_a_pointer_when_a_pattern_is_missing`
-puts a label with no invoke peer in front of `Act.Invoke`, gets `PatternMissing`, and
-reaches the pointer only by naming it. That is the door behaving on one element. The
-criterion is about the engine: that no verb anywhere quietly substitutes synthesised
-input when a peer is missing.
-
-Measured: `Act.cs` mentions the pointer twice, both in its own header prose. So the rule
-holds today because nobody wrote the fallback — which is the shape WW208 and WW209 both
-found and both replaced with a reading.
-
-What is owed is the same reading here. The pattern routes — `Act`, `Pick`, `Selecting` —
-reach no input synthesiser, transitively and not one level, and a verb added later that
-does is red at the moment it is written rather than on the run where a green covered a
-click nobody asked for.
-
-The negative control is the fallback itself: write one, and the check goes red naming
-the verb.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
