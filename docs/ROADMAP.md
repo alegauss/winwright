@@ -49,8 +49,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW211** (deps: —) **a fixture write slower than the budget this suite chose is a red about the fixture** — Two guest runs in a row went red at 5s, in different cases and on the same wait; WW203 narrowed the budget and the misattribution outlived it. → §WW211
-
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine

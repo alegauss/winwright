@@ -1,3 +1,5 @@
+﻿using System.Text.RegularExpressions;
+
 using Xunit;
 
 namespace Winwright.Tests;
@@ -19,11 +21,30 @@ namespace Winwright.Tests;
 /// </summary>
 public sealed class WaitedForTests
 {
-    /// <summary>How the deadlines are named where a wait is taken, which is in a string.</summary>
-    private const string ForTheWrite = "\"wrote\"";
+    /// <summary>
+    /// A wait actually taken on a named deadline, and not the deadline's name appearing somewhere.
+    /// <para>
+    /// WW211 walked into this. The first reading looked for <c>"wrote"</c> anywhere inside a member,
+    /// which is the mistake WW191 and WW197 each found one level up: a name is a subject as often as
+    /// it is an act. A case asserting that <c>DeskFacts</c> does not call <c>wrote</c> the desk's,
+    /// and listing the deadlines this suite declares to prove each is reachable, was reported as a
+    /// caller waiting on the write without waiting for a window — while waiting for nothing at all.
+    /// </para>
+    /// <para>
+    /// So the verb is matched with the name, across the newline that a wrapped call puts between
+    /// them. Only the two that wait: <c>Missed</c> builds a sentence and <c>Declared.For</c> reads a
+    /// number, and neither is a wait that a budget could be too small for.
+    /// </para>
+    /// </summary>
+    private static readonly Regex TakenOnTheWrite = TakenOn("wrote");
 
     /// <summary>And the one that has to come first.</summary>
-    private const string ForTheWindow = "\"draw\"";
+    private static readonly Regex TakenOnTheWindow = TakenOn("draw");
+
+    private static Regex TakenOn(string named) => new(
+        $"""Waits\.(Until|Trying)\s*(<[^>\n]*>)?\s*\(\s*"{named}"\s*,""",
+        RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(5));
 
     [Fact]
     public void A_wait_for_a_file_the_fixture_writes_waits_for_its_window_first()
@@ -54,6 +75,28 @@ public sealed class WaitedForTests
         Assert.Contains("ProvokedByFlagTests.Ran", named, StringComparer.Ordinal);
     }
 
+    [Fact]
+    public void Naming_a_deadline_is_not_waiting_on_one()
+    {
+        // WW211. The reading this replaced looked for the name anywhere in a member, and reported a
+        // case that names every deadline this suite declares — to assert each is reachable, waiting
+        // for nothing — as a caller waiting on the write with no window waited for first. A rule
+        // that fires on a member which takes no wait at all is a rule nobody can act on.
+        var named = Waiting().Select(one => one.Named).ToList();
+
+        Assert.DoesNotContain(
+            "SlowMachineTests.This_gate_is_not_the_desks_and_says_so_by_taking_a_name_the_desk_would_refuse",
+            named,
+            StringComparer.Ordinal);
+
+        // Not by having narrowed the sweep until it finds nothing: the member it was measured on is
+        // still found, and it is found because it takes a wait rather than because it says a word.
+        // Driven names 'wrote' three more times after its wait comes back — building the sentence a
+        // red prints, and excusing the hole — and none of those is a wait a budget could be too
+        // small for.
+        Assert.Contains("FixtureTests.Driven", named, StringComparer.Ordinal);
+    }
+
     /// <summary>
     /// Every member of this suite that waits on the write, and where each deadline is named in it.
     /// </summary>
@@ -64,16 +107,13 @@ public sealed class WaitedForTests
         {
             var owner = Path.GetFileNameWithoutExtension(file);
             var member = "";
-            var draws = -1;
-            var writes = -1;
-            var at = 0;
+            var body = new List<string>();
 
             // Spoken and not Code: a deadline is named by a string, and the reading that drops
             // strings deletes both names. What has to go is the prose, since the comment above each
             // wait names the other deadline.
             foreach (var line in File.ReadLines(file).Select(Checkout.Spoken))
             {
-                at++;
                 if (Checkout.Member(line) is { } next)
                 {
                     Close();
@@ -81,10 +121,7 @@ public sealed class WaitedForTests
                 }
                 else if (member.Length > 0)
                 {
-                    if (draws < 0 && line.Contains(ForTheWindow, StringComparison.Ordinal))
-                        draws = at;
-                    if (writes < 0 && line.Contains(ForTheWrite, StringComparison.Ordinal))
-                        writes = at;
+                    body.Add(line);
                 }
             }
 
@@ -92,19 +129,25 @@ public sealed class WaitedForTests
 
             void Close()
             {
-                if (member.Length > 0 && writes >= 0)
-                    found.Add(($"{owner}.{member}", draws, writes));
+                // Joined, because a wrapped call puts the verb and the deadline it waits on either
+                // side of a newline — which is exactly how the caller this rule was measured on
+                // spells it. Ordered by where each match begins, which is the same ordering line
+                // numbers gave and needs no second count.
+                var text = string.Join('\n', body);
+                var writes = member.Length > 0 ? TakenOnTheWrite.Match(text) : Match.Empty;
+                if (writes.Success)
+                {
+                    var draws = TakenOnTheWindow.Match(text);
+                    found.Add(($"{owner}.{member}", draws.Success ? draws.Index : -1, writes.Index));
+                }
 
                 member = "";
-                draws = -1;
-                writes = -1;
+                body = [];
             }
         }
 
         return found;
     }
-
-    /// <summary>The member a line declares, at the one indentation a method of a class sits at.</summary>
 
     [Fact]
     public void The_cold_start_is_given_longer_than_the_write_that_follows_it()
