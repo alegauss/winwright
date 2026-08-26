@@ -280,8 +280,9 @@ once the act has landed, and `reads` says which reading that is — one of `anyt
 in the order a reader looks at them. `with` is required exactly where the act takes something and
 refused where it does not. `named` renames a step in the report; `meansIt` is the sentence a step
 needs before it may touch an entry the project declared destructive. `moves` is the other kind of
-expectation: that the reading ended up different, for the claim a case cannot name a value for. And
-`covers` is the third, which is one claim over many elements — see below.
+expectation: that the reading ended up different, for the claim a case cannot name a value for. `answers`
+is the third — that the reading said something rather than nothing, for the value a case cannot
+know. And `covers` is the fourth, which is one claim over many elements — see below.
 
 A step with no `expect` is an act and not a check: it moves the window into the state a later step
 reads. An act that survives being repeated is attempted again where its read-back does not arrive; one

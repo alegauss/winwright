@@ -161,6 +161,7 @@
 - ✅ **WW219** **a case needing four polls inside eighty milliseconds claims the guest is the application** — The claim is made about the readings that happened, so a guest that fitted three polls proves it, and the stronger claim still holds on every run that saw the move.
 - ✅ **WW229** **a case can expect a value and never that one moved** — A step claims the reading moved without naming what it moved to, and an act nothing attempted is a hole in the verdict rather than a red.
 - ✅ **WW236** **a case cannot check a derived set, so the criterion about them cannot be tried** — A step covers a key and the set comes out of the project's own strings, so a string added to the file fails the case until the window carries it.
+- ✅ **WW237** **a case cannot say a reading answered at all, only what it answered** — A step claims the reading it names says something rather than nothing, so a value the case cannot know is still a claim it can make.
 
 ## Block G — The scenario — a case is a data file
 

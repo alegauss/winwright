@@ -33,7 +33,13 @@ public sealed class CoversTests : IDisposable
         "winwright covers",
         new PumpedDialog.ChildWindow("Static", "Overview", WsChild | WsVisible, 20, 20, 160, 20),
         new PumpedDialog.ChildWindow("Static", "Sessions", WsChild | WsVisible, 20, 50, 160, 20),
-        new PumpedDialog.ChildWindow("Static", "Profiles", WsChild | WsVisible, 20, 80, 160, 20));
+        new PumpedDialog.ChildWindow("Static", "Profiles", WsChild | WsVisible, 20, 80, 160, 20),
+
+        // An Edit for the reading, and that is a measurement rather than a preference: a Win32 Static
+        // resolves as a Text control whose content is its *name*, and it offers no TextPattern — so
+        // `reads: text` answered nothing against one, which the sweep above does not care about
+        // because it compares names, and a claim about a reading does.
+        new PumpedDialog.ChildWindow("Edit", "a computed number", WsChild | WsVisible, 20, 110, 160, 24));
 
     public void Dispose()
     {
@@ -96,6 +102,101 @@ public sealed class CoversTests : IDisposable
 
         Assert.Equal("read", step.Verb.Name);
         Assert.True(step.Checkable);
+    }
+
+    [Fact]
+    public void A_reading_can_be_claimed_to_answer_without_the_case_naming_what()
+    {
+        // WW237. Three of the panes case's four assertions are this: a percentage the application
+        // computed, a caption and a headline, each claimed readable rather than equal to something.
+        var step = StepDeclaration.Of("Text#Used", "read", reads: "text", answers: true);
+
+        Assert.True(step.Answers);
+        Assert.True(step.Checkable);
+        Assert.Null(step.Expected);
+    }
+
+    [Fact]
+    public void Claiming_it_answers_and_saying_what_it_answers_are_two_claims()
+    {
+        foreach (var refused in new[]
+        {
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of("Text", "read", expected: "42", answers: true)),
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of("Edit", "type", argument: "x", answers: true, moves: true)),
+        })
+        {
+            Assert.Contains("cannot name a value", refused.Because, StringComparison.Ordinal);
+        }
+
+        // And beside a sweep it is refused too: the set is already the claim that every string read.
+        Assert.Contains(
+            "every string under the key was read",
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of("Text", "read", covers: "stats.tab", answers: true)).Because,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_label_that_reads_answers_and_one_that_says_nothing_does_not()
+    {
+        if (!Winwright.Windowing.Desk.Read().CanObserve)
+            return;
+
+        // Two labels, and the empty one is the point: a control answering nothing is what this claim
+        // exists to catch, so an empty string is not an answer.
+        var project = ProjectDeclaration.Load(Declaring());
+
+        var held = Suite.Run(
+            ScenarioFile.Read("answers.cases.json", Answering("Edit")),
+            Selection.All,
+            dialog.Root,
+            project);
+
+        Assert.True(held.Outcome == RunOutcome.Passed, Said(held));
+
+        var missing = Suite.Run(
+            ScenarioFile.Read("answers.cases.json", Answering("Edit#nothingIsCalledThis")),
+            Selection.All,
+            dialog.Root,
+            project);
+
+        Assert.NotEqual(RunOutcome.Passed, missing.Outcome);
+        Assert.Contains("something rather than nothing", Said(missing), StringComparison.Ordinal);
+    }
+
+    private static string Answering(string locator) => $$"""
+        {
+          "cases": [
+            {
+              "name": "the label reads something",
+              "catches": "a pane whose body left the tree and took its number with it",
+              "steps": [ { "locator": {{System.Text.Json.JsonSerializer.Serialize(locator)}}, "act": "read", "reads": "value", "answers": true } ]
+            }
+          ]
+        }
+        """;
+
+    /// <summary>A declaration with a strings file, for the runs that need one.</summary>
+    private string Declaring()
+    {
+        var languages = Path.Combine(root, "en.json");
+        if (!File.Exists(languages))
+            File.WriteAllText(languages, """{ "stats.tab.overview": "Overview" }""");
+
+        var declaration = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            declaration,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "languageFiles": ["en.json"],
+              "timeouts": { "resolve": 2000, "act": 2000, "poll": 25 }
+            }
+            """);
+
+        return declaration;
     }
 
     [Fact]

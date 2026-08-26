@@ -417,6 +417,9 @@ public static class CaseRun
         if (step.Moves)
             return Moved(step, subject, acted, was);
 
+        if (step.Answers)
+            return Answered(step, subject, acted);
+
         if (step.Expected is not { } wanted)
             return new Landed(acted, null, acted?.Element);
 
@@ -431,6 +434,34 @@ public static class CaseRun
                 var look = subject.ReadOnce();
                 saw = look.Facts ?? saw;
                 return look.Found ? step.Reads.Of(look) : null;
+            },
+            subject.ActMs,
+            subject.PollMs);
+
+        return new Landed(acted, expectation, saw);
+    }
+
+    /// <summary>
+    /// A step that claims the reading says something, waited for the way every other expectation is.
+    /// <para>
+    /// WW237. The wanted value is the sentence, so a failure reads as what it is — <em>wanted
+    /// something rather than nothing, last read nothing</em> — and an empty answer is nothing: a
+    /// control saying <c>""</c> is what this claim exists to catch.
+    /// </para>
+    /// </summary>
+    private static Landed Answered(StepDeclaration step, Subject subject, ActResult? acted)
+    {
+        const string wanted = "something rather than nothing";
+        var saw = acted?.Element;
+        var expectation = Expect.That(
+            step.Name,
+            wanted,
+            () =>
+            {
+                var look = subject.ReadOnce();
+                saw = look.Facts ?? saw;
+                var now = look.Found ? step.Reads.Of(look) : null;
+                return string.IsNullOrWhiteSpace(now) ? now : wanted;
             },
             subject.ActMs,
             subject.PollMs);

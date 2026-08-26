@@ -335,12 +335,13 @@ public sealed class ScenarioFile
         var expect = Text(at, step, ScenarioSchema.Step, "expect");
         var reads = Text(at, step, ScenarioSchema.Step, "reads");
         var moves = Truth(at, step, ScenarioSchema.Step, "moves");
+        var answers = Truth(at, step, ScenarioSchema.Step, "answers");
         var covers = Text(at, step, ScenarioSchema.Step, "covers");
         var meansIt = Truth(at, step, ScenarioSchema.Step, "meansIt");
         var named = Text(at, step, ScenarioSchema.Step, "named");
 
         return Addressed(
-            at, () => StepDeclaration.Of(locator!, act!, with, expect, reads, meansIt, named, moves, covers));
+            at, () => StepDeclaration.Of(locator!, act!, with, expect, reads, meansIt, named, moves, covers, answers));
     }
 
     /// <summary>
