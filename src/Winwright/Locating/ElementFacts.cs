@@ -42,6 +42,23 @@ public sealed record ElementFacts(
     public bool HasKeyboardFocus { get; init; }
 
     /// <summary>
+    /// What this element says, which is its <see cref="Name"/> where it has one and nothing where it
+    /// does not.
+    /// <para>
+    /// WW238. One definition of that, because there are two readers of it and they have to agree: the
+    /// <c>name</c> reading a step names, and the sweep <c>covers</c> makes over every element a locator
+    /// matched. A sweep that counted the unnamed as having read the empty string would hold against a
+    /// pane of blank controls, so both want the name only where there is one — and deriving that twice
+    /// is the second spelling that goes on saying the old thing after the first moves.
+    /// </para>
+    /// <para>
+    /// Blank and not merely empty: UI Automation reports a name of spaces for some frameworks, and a
+    /// label that shows a person nothing has said nothing.
+    /// </para>
+    /// </summary>
+    public string? Says => string.IsNullOrWhiteSpace(Name) ? null : Name;
+
+    /// <summary>
     /// The locator step that would address this element, spelled the way the grammar spells one.
     /// It is the whole point of inspecting: the line a reader copies is already a locator, so it
     /// is written from the tree rather than from the markup the check is about to assert on.

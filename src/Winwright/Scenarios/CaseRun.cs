@@ -377,9 +377,8 @@ public static class CaseRun
         // `TabItem` under `Window#main > TabItem` is about the tab items, and the frame above them is
         // how they were reached.
         var read = Resolve.Matching(root, subject.Locator.Steps[^1])
-            .Select(one => ElementFacts.Of(one)?.Name)
+            .Select(one => ElementFacts.Of(one)?.Says)
             .OfType<string>()
-            .Where(one => one.Trim().Length > 0)
             .ToList();
 
         var compared = derived.Against(read);

@@ -243,6 +243,22 @@ public sealed record StepDeclaration
                     + "resolved at all; the claim could never be false, so it says nothing");
         }
 
+        // WW238. The other half of the same rule: a reading the locator already selected by is fixed
+        // before the act runs, so a step reading it asserts what chose the element. Refused whatever
+        // the claim is — 'expect' repeats the locator, 'answers' holds because the locator matched,
+        // and both are the step passing on its own selection.
+        //
+        // Naming the element some other way and reading its name is the useful shape, so the sentence
+        // says which locator field to move rather than that the reading is wrong.
+        if (reading.PinnedBy(parsed!.Steps[^1]) is { } already && (wanted is not null || moves || answers))
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it reads '{reading.Name}' and its locator already matched on that — '{already}' — so the "
+                    + "reading is fixed before the act runs; select the element another way to claim "
+                    + "anything about it");
+        }
+
         // WW237. One claim per step, for the reason the other two are: a trace line standing for two
         // things is one a reader has to take apart, and naming the value already says it answered.
         if (answers && (wanted is not null || moves))
@@ -293,8 +309,8 @@ public sealed record StepDeclaration
         }
 
         return new StepDeclaration(
-            called ?? Describing(act.Name, parsed!.Text),
-            parsed!,
+            called ?? Describing(act.Name, parsed.Text),
+            parsed,
             act,
             string.IsNullOrWhiteSpace(argument) ? null : argument.Trim(),
             wanted,

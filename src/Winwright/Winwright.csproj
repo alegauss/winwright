@@ -22,11 +22,19 @@
     <Description>Drives a Windows desktop application through UI Automation and answers in three
       verdicts rather than two, so a check that could not run is never reported as one that passed.
       No external dependency, and nothing here belongs in the application under test.</Description>
-    <Authors>winwright</Authors>
     <PackageTags>ui-automation;wpf;testing;windows</PackageTags>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- WW230. The one page an adopter reads before deciding, and the tree's own README rather than a
+         second one written for the package: a description kept twice is the one that goes on saying
+         the old thing after the first moves. -->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <!-- Turning UseWPF on swaps the SDK's implicit global usings for WPF's set, and System.IO is
        not in that set: the tracing and project files stopped compiling the moment the property

@@ -5,8 +5,12 @@
        Setting it once here is what keeps a later project from quietly targeting something else. -->
   <PropertyGroup>
     <!-- WW70: the version every copy of the engine is read against. Declared once here, because a
-         tree that declares none builds as 1.0.0 and an invented version agrees with nothing. -->
-    <Version>0.1.0</Version>
+         tree that declares none builds as 1.0.0 and an invented version agrees with nothing.
+
+         WW230 made it a prerelease rather than a bump: the first published version is the one an
+         adopter's restore reaches, and 0.1.0 plain would say this is settled. The publish workflow
+         compares a tag against this line, so the two cannot drift. -->
+    <Version>0.1.0-alpha.1</Version>
     <TargetFramework>net10.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -19,6 +23,28 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- WW230: what the two packable projects say about themselves on nuget.org. Here rather than in
+       each of them because they are one thing published twice - the in-app half and the driving half
+       of the same engine - and an adopter reading two different licences off a matched pair has been
+       told something untrue about the pair.
+
+       Inert on the projects that are not packable, which is why it can be a property group and not a
+       condition: IsPackable is set in a csproj, which is evaluated after this file. -->
+  <PropertyGroup>
+    <Authors>alegauss</Authors>
+    <Copyright>Copyright 2026 Alexandre Oliveira</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/alegauss/winwright</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/alegauss/winwright.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- What puts the commit into the package. It is the same claim the agreement check makes about a
+         version: a copy that cannot say which build it came from is one nobody can put beside its
+         source. ContinuousIntegrationBuild is set by the workflow rather than here, because a local
+         build has no commit worth pinning. -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
 
 </Project>

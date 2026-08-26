@@ -1,0 +1,182 @@
+# WW230. Where the engine's package comes to exist.
+#
+# Until this, the only copy of it was `Winwright.0.1.0.nupkg` in a gitignored folder inside this
+# repository, so every adoption bootstrapped on a filesystem path across two clones — and a guest
+# that had the tree still could not restore, because the folder never travels. The measurement block
+# J's first criterion is about is a deletion: the day this runs, the adopting project's nuget.config
+# goes away and a bare PackageReference is all that is left.
+#
+# Trusted publishing rather than an API key, and not only because nuget.org steers a new account
+# there: there is no secret in this file, in this repository or in its settings. The workflow asks
+# GitHub for a short-lived OIDC token, nuget.org exchanges it for a key valid for an hour, and the
+# name of this file is half of what nuget.org trusts. Which is why renaming it breaks the publish:
+# the policy names `publish.yml`, and that is deliberate rather than fragile.
+name: publish
+
+# Manual and only manual. Publishing on every push to main would spend a version number on every
+# commit, and a version number is the one thing here that cannot be taken back — nuget.org unlists a
+# version and never deletes it. So the decision to publish is a person's; everything after it is not.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The version to publish. Leave empty to raise the last number of what the tree declares.'
+        required: false
+        type: string
+
+# Never two at once, and never cancelled halfway: a run that has pushed to nuget.org and not yet
+# tagged has left the repository behind a published version, and that is the one state worth not
+# racing into.
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    permissions:
+      # Writes, because this job is what raises the version, tags it and cuts the release. The two
+      # are granted to the job rather than to the workflow so a job added beside it inherits neither.
+      contents: write
+      # What lets the job ask GitHub for the token nuget.org validates. Nothing publishes without it.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # global.json pins the SDK; reading it here is what keeps this runner and the developer's from
+      # being two different answers, exactly as CI does.
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Decide the version
+        id: version
+        shell: pwsh
+        run: |
+          # One rule for both shapes, because there is only one thing being asked: the last number
+          # goes up. 0.1.0-alpha.1 becomes 0.1.0-alpha.2 and 0.1.2 becomes 0.1.3 — for a prerelease
+          # the counter is the last number, and for a settled version it is the patch. Spelling those
+          # as two rules would be two rules to keep true of one line.
+          $props = [xml](Get-Content Directory.Build.props)
+          $node = $props.SelectSingleNode('//PropertyGroup/Version')
+          if (-not $node) { throw "Directory.Build.props declares no <Version>" }
+          $was = $node.InnerText.Trim()
+
+          $asked = '${{ inputs.version }}'.Trim()
+          if ($asked) {
+            $now = $asked
+          }
+          elseif ($was -match '^(.*?)(\d+)$') {
+            $now = $Matches[1] + ([int]$Matches[2] + 1)
+          }
+          else {
+            throw "'$was' ends in no number to raise; name a version in the workflow input instead"
+          }
+
+          Write-Host "$was -> $now"
+          "was=$was"          >> $env:GITHUB_OUTPUT
+          "now=$now"          >> $env:GITHUB_OUTPUT
+          "tag=v$now"         >> $env:GITHUB_OUTPUT
+          # A version with a hyphen is a prerelease by SemVer's own rule, so the release is marked one
+          # off the version rather than off a second flag somebody has to remember to set.
+          "prerelease=$(if ($now -like '*-*') { 'true' } else { 'false' })" >> $env:GITHUB_OUTPUT
+
+      - name: Raise it in every copy
+        shell: pwsh
+        run: |
+          # Five files hold the version, and WW70's whole point is that they hold the same one. This
+          # rewrites the exact old string in each, and the list is not trusted: the concordance check
+          # below compares four of these copies and ReadmeTests compares the fifth, so a file this
+          # forgot is a red rather than a surprise in somebody's restore.
+          #
+          # The fifth is here because it was measured. This list was four paths long and the suite
+          # went red on the README — which is the net working, and is why the net runs after the
+          # rewrite rather than the rewrite being believed.
+          #
+          # A sweep over every file mentioning the old version would need no list at all, and is
+          # refused: docs/CHANGELOG.md names versions that have shipped, and a release that rewrote
+          # its own history would be the one thing worse than a stale pin.
+          $was = '${{ steps.version.outputs.was }}'
+          $now = '${{ steps.version.outputs.now }}'
+
+          $copies = @(
+            'Directory.Build.props',
+            '.claude-plugin/plugin.json',
+            'samples/Adopter/Adopter.csproj',
+            'samples/Adopter/driving/Driving.csproj',
+            'README.md'
+          )
+
+          foreach ($copy in $copies) {
+            $text = Get-Content $copy -Raw
+            if ($text -notmatch [regex]::Escape($was)) { throw "$copy does not mention $was" }
+            ($text -replace [regex]::Escape($was), $now) | Set-Content $copy -NoNewline -Encoding utf8
+            Write-Host "  $copy"
+          }
+
+      - name: Pack
+        run: dotnet pack Winwright.slnx --configuration Release --output artifacts -p:ContinuousIntegrationBuild=true
+
+      # WW142, and here it is load-bearing rather than a gate: it reads the copies the step above
+      # rewrote against each other and against what was just built. A version raised in three files
+      # out of four is a package that disagrees with the tree that produced it, which is the exact
+      # thing this tool exists to refuse — so it runs before anything is published and not after.
+      - name: Check every copy agrees
+        run: >
+          dotnet exec tools/Winwright.Concordance/bin/Release/net10.0-windows/Winwright.Concordance.dll
+          --declared Directory.Build.props
+          --packed artifacts
+          --package Winwright.InApp
+          --packed artifacts
+          --pinned samples/Adopter/Adopter.csproj
+          --manifest .
+
+      # Asked here and not at the top of the job: a key nuget.org issues is good for an hour, and a
+      # pack that took longer than that would push with a credential that had already expired.
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: alegauss
+
+      # Before the tag and the release, and that order is the decision: a tag says a version exists
+      # and a release says where to get it, so publishing first means neither can point at nothing. A
+      # nuget push that fails leaves a red run and an untagged tree, which is a state one re-run fixes.
+      #
+      # Both halves in one go, symbols included — a stack from an adopter's failing run is the thing
+      # this tool exists to hand over. --skip-duplicate so re-running after a failure in a later step
+      # is not a red about work that is already done.
+      - name: Push to nuget.org
+        run: >
+          dotnet nuget push "artifacts/*.nupkg"
+          --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
+      - name: Commit and tag what was published
+        shell: pwsh
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Directory.Build.props .claude-plugin/plugin.json samples/Adopter/Adopter.csproj samples/Adopter/driving/Driving.csproj README.md
+          git commit -m 'chore(release): ${{ steps.version.outputs.tag }}'
+          git tag ${{ steps.version.outputs.tag }}
+          # The tag and the commit together, so a tag never exists for a commit nobody can fetch.
+          git push origin HEAD --follow-tags
+
+      - name: Cut the release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The packages themselves are attached rather than only described: a release whose assets
+          # are the artifacts is one somebody can read the nuspec out of without trusting this log.
+          $prerelease = if ('${{ steps.version.outputs.prerelease }}' -eq 'true') { '--prerelease' } else { '' }
+          gh release create '${{ steps.version.outputs.tag }}' `
+            --title '${{ steps.version.outputs.tag }}' `
+            --generate-notes `
+            --verify-tag `
+            $prerelease `
+            (Get-ChildItem artifacts/*.nupkg, artifacts/*.snupkg | ForEach-Object { $_.FullName })

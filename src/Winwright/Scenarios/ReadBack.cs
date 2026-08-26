@@ -39,6 +39,16 @@ public sealed record ReadBack
         new("expanded", read => read.Values.ExpandCollapse),
         new("text", read => read.Values.Text),
 
+        // WW238, and it is here because it was measured to be missing. A WPF label was read through
+        // the seven above and answered nothing to all of them: its words are in its name, exactly as
+        // with a Win32 Static, and a tool whose subject is what a window shows could not check what a
+        // label said.
+        //
+        // Not a pattern reading, like 'focused' below, and null where nothing resolved for the same
+        // reason. Not Always either: an element whose name is blank answers nothing, so 'this label
+        // says something' stays a claim that can be false.
+        new("name", read => read.Facts?.Says, pinned: step => step.Name),
+
         // WW225. The one reading that is not about a pattern. It is here because "Tab moved the focus
         // off this box" is a claim a case has to be able to make, and it was the one assertion of the
         // keyboard case that could not be written at all — the other two could be written and would
@@ -59,12 +69,18 @@ public sealed record ReadBack
     ];
 
     private readonly Func<Reading, string?> reading;
+    private readonly Func<LocatorStep, string?>? pinned;
 
-    private ReadBack(string name, Func<Reading, string?> reading, bool always = false)
+    private ReadBack(
+        string name,
+        Func<Reading, string?> reading,
+        bool always = false,
+        Func<LocatorStep, string?>? pinned = null)
     {
         Always = always;
         Name = name;
         this.reading = reading;
+        this.pinned = pinned;
     }
 
     /// <summary>Every reading a case may name, in the order a reader is shown them.</summary>
@@ -91,6 +107,28 @@ public sealed record ReadBack
     /// </para>
     /// </summary>
     public bool Always { get; }
+
+    /// <summary>
+    /// What <paramref name="step"/> has already fixed this reading to, or null where it has fixed
+    /// nothing.
+    /// <para>
+    /// WW238. Some of what UI Automation says about an element is also what a locator selects by, and
+    /// a step reading one of those is at risk of asserting what chose the element: <c>name</c> read off
+    /// <c>Text[name="Profile"]</c> can only ever answer <em>Profile</em>, because <see cref="Resolve"/>
+    /// matches a name by equality. That is the same unearned green <see cref="Always"/> is about, one
+    /// step removed — it depends on the locator rather than on the reading alone.
+    /// </para>
+    /// <para>
+    /// A function rather than a flag because the refusal has to name the value the locator pinned, and
+    /// beside the reading rather than in the rule so that a reading added for a property the grammar
+    /// also matches on says so where it is written.
+    /// </para>
+    /// </summary>
+    public string? PinnedBy(LocatorStep step)
+    {
+        ArgumentNullException.ThrowIfNull(step);
+        return pinned?.Invoke(step);
+    }
 
     /// <summary>
     /// The reading of that name, or a refusal listing the ones there are. Nothing named is

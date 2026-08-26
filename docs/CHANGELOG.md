@@ -162,6 +162,7 @@
 - ✅ **WW229** **a case can expect a value and never that one moved** — A step claims the reading moved without naming what it moved to, and an act nothing attempted is a hole in the verdict rather than a red.
 - ✅ **WW236** **a case cannot check a derived set, so the criterion about them cannot be tried** — A step covers a key and the set comes out of the project's own strings, so a string added to the file fails the case until the window carries it.
 - ✅ **WW237** **a case cannot say a reading answered at all, only what it answered** — A step claims the reading it names says something rather than nothing, so a value the case cannot know is still a claim it can make.
+- ✅ **WW238** **no reading answers a label's words, so a case cannot check what a label says** — A label's words are in its name, so `name` reads them — refused where the locator matched on the name, because then the reading is fixed before the act runs.
 
 ## Block G — The scenario — a case is a data file
 
@@ -212,6 +213,7 @@
 - ✅ **WW78 (the adoption is wired and the case loads)** **the keyboard case is the only observable of a live input path and it lives in a script** — claude-tray drives the engine by one package reference, and its keyboard case loads with four checks and four synthesised acts.
 - ✅ **WW227** **an adopting project can only run its cases on the desk somebody is using** — The runner takes a tree, a name, a command and what to bring back, so an adopting repository runs its cases in the guest instead of on somebody's desk.
 - ✅ **WW228** **an app project at the repository root compiles the driving project into itself** — The adoption section names the one line an app at a repository root needs, and samples/Adopter carries a driving project underneath it so deleting the line goes red.
+- ✅ **WW230 (the workflow and the metadata)** **the only place the engine's package exists is a folder inside this repository** — Both halves publish to nuget.org from `publish.yml`, keylessly, on one manual dispatch.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

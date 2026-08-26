@@ -36,28 +36,6 @@ it.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW238 The words are in the name and nothing reads it
-
-Measured, and it was not what was expected. A WPF `TextBlock` was read through all eight
-readings the vocabulary offers: `value`, `range`, `toggle`, `selected`, `expanded`,
-`text` and `anything` each answered nothing, and the only one that said anything was
-`focused`, with *not focused*. The words — `Profile` — are in the element's name,
-exactly as with a Win32 `Static`, and no reading reads a name.
-
-So a case cannot check what a label says. That is a large hole for a tool whose subject
-is what a window shows: claude-tray's panes case reads a reset caption and a live
-headline, and both are labels. `WW237`'s `answers` cannot help — there is nothing for it
-to be true of.
-
-Two things it must be careful about. `ElementFacts.Name` is what a locator already
-matches on, so a reading for it makes a step able to assert what its own locator
-selected by — which is a claim that cannot fail where the locator named the name. Naming
-the element by id and reading its name is the useful shape, and the useless one has to
-be refused rather than left to an author to notice.
-
-And `covers` already compares names, which is the same reading one level up. Whatever
-this is called, the two should agree about what a name is rather than deriving it twice.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
@@ -155,30 +133,31 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW230 The feed is a folder in the tool's own tree
+### §WW230 The feed was a folder in the tool's own tree
 
-`Winwright.0.1.0.nupkg` exists in `packages/`, which is gitignored, and nowhere else. So
-claude-tray's driving project carries a `nuget.config` naming
-`..\..\..\winwright\packages` — a path that assumes the two repositories are cloned side
-by side, and a path into the tool from the project adopting it.
+`Winwright.0.1.0.nupkg` existed in gitignored `packages/` and nowhere else, so
+claude-tray's driving project carried a `nuget.config` naming
+`..\..\..\winwright\packages` — a path that assumes two clones side by side, and a path
+into the tool from the project adopting it. Measured in the guest the moment WW227 could
+carry claude-tray there: `NU1301: the local source 'C:\src\winwright\packages' does not
+exist`. The tree was there; the folder never travels.
 
-That is precisely what block I's criterion forbids for the in-app half, and
-`samples/Adopter` exists to prove it: one package reference, no path into this
-repository, no second package. The driving side has no such proof and now has a
-counter-example.
+Answered by publishing to nuget.org from `.github/workflows/publish.yml`, keylessly.
+Trusted publishing means no API key exists in this repository or its settings: the run
+asks GitHub for an OIDC token, nuget.org exchanges it for a key good for an hour, and
+the file's own name is half of what nuget.org trusts. Renaming it breaks the publish,
+deliberately.
 
-It is written down as a bootstrap in the file itself rather than left to be found, and
-the comment says the day the engine is published that file is deleted and nothing else
-about the adoption changes. That deletion is the measurement — the same shape as this
-block's first criterion, where the proof is what goes away.
+A release is one manual dispatch. It raises the last number of the declared version —
+one rule that reads as the prerelease counter or as the patch — writes it into every
+copy, packs, and only then publishes, tags and cuts the release. Publishing first is the
+decision: a tag says a version exists, so nothing can point at nothing.
 
-Two things it also costs today. The package has to be repacked by hand after any engine
-change, and WW78's own migration would have loaded a case naming verbs the packaged
-engine did not have if that had been forgotten. And an adopter cannot restore at all on
-a machine that has one clone. Measured in the guest the moment WW227 could carry
-claude-tray there: `NU1301: the local source 'C:\src\winwright\packages' does not exist`
-— the tree was there, from this project's own runs, and the folder never travels because
-it is gitignored.
+The copy list was four files long and the suite went red on the fifth, the README. That
+is the net working, and is why the concordance check runs after the rewrite rather than
+the list being believed.
+
+What is left is the deletion the criterion measures.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

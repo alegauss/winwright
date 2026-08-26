@@ -13,8 +13,11 @@
   <!-- WW122: this is the half an application under test takes, so it has to be takeable. A project
        reference into this repository is unpinnable by construction - which the agreement check
        already says out loud - and an application shipping to its users cannot take one at all.
-       Packing is declared here; publishing anywhere is a decision nobody has made, and a package an
-       adopter references from a local folder is still a package. -->
+
+       WW230 answered where it goes: nuget.org, published from .github/workflows/publish.yml on a
+       tag. Until then a folder in this tree was the only place either half existed, which meant an
+       adopter's restore needed a path into this repository - the shape block I's criterion forbids
+       and samples/Adopter exists to disprove. -->
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Winwright.InApp</PackageId>
@@ -23,11 +26,15 @@
       work, shareable brushes, per-monitor coordinates, a background nobody can leave transparent,
       and a geometry dump. No reference to the engine, so nothing here ships a test harness to an
       application's users.</Description>
-    <Authors>winwright</Authors>
     <PackageTags>ui-automation;wpf;testing;windows</PackageTags>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <!-- Same repair as the engine: UseWPF swaps the SDK's implicit global usings for WPF's set, and
        System.IO is not in that set. -->

@@ -155,7 +155,16 @@ public sealed class PackagedTests : IDisposable
     {
         // The loop this closes: before the halves were packable, one side of this comparison was a
         // path, and a path makes the whole reading unpinnable however well the other side agrees.
-        Packed("Winwright.InApp.0.1.0.nupkg", "Winwright.InApp", "0.1.0");
+        //
+        // The packed side is built at whatever the tree declares rather than at a version written
+        // here, and that is WW230's own lesson taken one layer up: this test failed the moment the
+        // tree became a prerelease, which is a red about the test having gone stale rather than about
+        // the two copies disagreeing. A version spelled twice is the second spelling that goes on
+        // saying the old thing after the first moves — and the check under test is the one that exists
+        // to say so.
+        var declared = Engine.Declared("the source tree", Path.Combine(Repository(), "Directory.Build.props")).Version;
+        Assert.NotNull(declared);
+        Packed($"Winwright.InApp.{declared}.nupkg", "Winwright.InApp", declared);
 
         var agreed = Agreement.Between(
             Engine.Packed("the package that was built", root, "Winwright.InApp"),

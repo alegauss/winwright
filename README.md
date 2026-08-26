@@ -17,10 +17,10 @@ the output rather than left out of it.
 
 ```xml
 <!-- In the test project that drives the application. -->
-<PackageReference Include="Winwright" Version="0.1.0" />
+<PackageReference Include="Winwright" Version="0.1.0-alpha.1" />
 
 <!-- In the application under test, only if you want the readings it can only take from inside. -->
-<PackageReference Include="Winwright.InApp" Version="0.1.0" />
+<PackageReference Include="Winwright.InApp" Version="0.1.0-alpha.1" />
 ```
 
 `Winwright.InApp` is optional, and deliberately so: every reading and every pattern act runs against
@@ -276,8 +276,10 @@ A case has a `name` and its `steps`, and may carry `tags`, `needs`, `catches` an
 `locator` and `act` are the two fields every step has. `act` is one of `read`, `invoke`, `toggle`,
 `set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`. `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
-`toggle`, `selected`, `expanded`, `text`, `focused`, defaulting to `anything`, the one value the element reports,
-in the order a reader looks at them. `with` is required exactly where the act takes something and
+`toggle`, `selected`, `expanded`, `text`, `name`, `focused`, defaulting to `anything`, the one value the element
+reports, in the order a reader looks at them. `name` is what a label says: a caption's words are in its
+name and in no pattern, so it is the only reading that answers for one — and a step may not read it
+where its own locator matched on the name, because then the reading is fixed before the act runs. `with` is required exactly where the act takes something and
 refused where it does not. `named` renames a step in the report; `meansIt` is the sentence a step
 needs before it may touch an entry the project declared destructive. `moves` is the other kind of
 expectation: that the reading ended up different, for the claim a case cannot name a value for. `answers`

@@ -49,7 +49,8 @@ jobs:
 
       # WW122: the two halves are packages or they are a path into this repository, and a path is
       # unpinnable by construction. Packing here is what makes the claim checkable rather than
-      # intended; publishing anywhere is a decision nobody has made.
+      # intended. WW230 decided where they go — nuget.org, from publish.yml — and this still packs on
+      # every push, because a pack that only happens at release time is one that first fails there.
       - name: Pack
         run: dotnet pack Winwright.slnx --configuration Release --no-build --output packages
 
