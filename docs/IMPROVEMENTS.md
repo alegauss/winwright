@@ -66,25 +66,75 @@ keep.
 ### §WW249 The proof that WPF takes input is itself intermittent
 
 `WpfInputTests.Typing_reaches_a_wpf_text_box` is the negative control `WW246` was
-missing, and it does not hold every time. Measured across four runs with no change
-between them: host green, guest green, guest red, guest green. The red was `Failed`
-rather than a hole, so the keys were sent and the read-back did not match.
+missing, and it does not hold every time. Measured with nothing changed between runs:
+host green, guest green, guest red, guest green. The red was `Failed` rather than a
+hole, so the keys were sent and the read-back did not match.
 
 What the red said was `Expected: Passed / Actual: Failed` and nothing else, because the
 assertion threw its own evidence away — the fourth time in one session that a red here
-has been written without its diagnosis. That is fixed: the assertion now carries the
-result, so the next occurrence names what the box read.
+was written without its diagnosis. Fixed: it now carries the result, so the next
+occurrence names what the box read.
 
-The obvious hypothesis is the box's own starting text. It ships reading `default`, and
-whether a WPF `TextBox` replaces or appends depends on whether the content was selected
-when the focus arrived — which differs between a click and a programmatic focus. If that
-is it, then it is not a flake in the test at all: it is `Keyboard.Type`'s read-back
-contract being sometimes false against WPF, which is the same class of finding as
-`WW246` and a worse one.
+Then eight consecutive host runs of that one case, and none of them red. So it is the
+guest that reproduces it, which is a fact about timing rather than about logic — a
+slower machine, fewer cores, and a WPF window that has to be focused before a key means
+anything.
 
-It is deliberately not guessed at here. Two runs were spent today refuting hypotheses
-that reasoning made look certain, and the sentence needed to settle this arrives on the
-next red.
+The hypothesis that fits, and it is written down as a hypothesis: the focus arrives
+while the keys are already going, so the box reads a part of what was typed. If that is
+it then it is not a flake in the test — it is `Keyboard.Type` sending before the window
+is ready, which is the engine's own contract being sometimes false.
+
+Deliberately not settled by reasoning. Two runs were spent today refuting hypotheses
+that looked certain, and the sentence that settles this arrives on the next guest red.
+
+### §WW250 Between naming a value and naming nothing
+
+`expect` names the value exactly. `answers` says there is one. There is no third, and a
+real claim sits between them.
+
+Measured while migrating `WW80`. claude-tray's list-price note interpolates the date its
+rate card was read, so no case can name what it says — and the script it replaces
+asserted exactly the right thing: that the note carries `\d{4}-\d{2}-\d{2}`. A figure
+whose provenance has gone is the defect, and a note that lost its date still *answers*.
+
+So the migration has to drop that assertion or weaken it to `answers`, and weakening it
+is worse than dropping: it reads as covered.
+
+The shape that fits is a `matches` field beside `expect`, taking a regular expression,
+mutually exclusive with it as the other three claims already are. What it must not
+become is a way to write a loose `expect`: `.*` is a claim that cannot fail, which is
+the same unearned green `WW237` and `WW238` closed twice, and a pattern that matches
+everything has to be refused the way an always-answering reading is.
+
+There is a second reason to be careful. `T361` is written into that script: an assertion
+matched the English words *list prices*, found nothing in the other four languages, and
+reported a readable note as unreadable. A pattern is exactly where that mistake is
+easiest, so whatever this becomes should be as hard to write against a translated string
+as `expect` already is.
+
+### §WW251 A disclosure is not one reading moving
+
+`moves` claims one reading of one element ended up different. `covers` claims a derived
+set was read across many. Neither says *there is more here than there was*, and that is
+what a disclosure is.
+
+Measured while migrating `WW80`. Clicking a conversation row unfolds the call tree that
+produced it, and the script asserted two things about that: the row went from N readable
+fields to more than N, and at least one of the new ones is a task line. Both are claims
+about a subtree before and after an act, and a step can hold neither.
+
+The claim is worth having beyond this case. A tree view, an expander, a details pane, a
+search that fills a list — every one of them is *an act put something in the tree that
+was not there*, and each is currently written as an expectation about one element
+somebody picked out of the result, which is the hardcoded-list defect `WW236` closed one
+level down.
+
+What it must not be is a count somebody types. `at least 4 fields` is the same stale
+literal as a listed set: the row grows a field and the case goes on asserting four. The
+honest shape compares the subtree against itself a moment earlier, which is what `moves`
+already does for one reading — the same idea over a locator's descendants rather than
+over a single value.
 
 ## Block G — The scenario — a case is a data file
 
@@ -109,6 +159,22 @@ it and no published screenshot ever will. Whether that note is readable at all i
 question only the accessibility tree can answer. The case also waits out an asynchronous
 scan, expands a row into a tree and puts the surface back afterwards, which makes it the
 widest single test of locate, act, wait and restore in one place.
+
+Half of it is written and runs. The tab selects through the pattern in 52 polls, which
+is the engine's retry replacing the script's hand-written three-attempt
+Select-then-confirm loop; the info dot resolves and reads `Off`. The click that opens
+the note is a hole on this desk — `explorer` holds the foreground — so the question this
+case exists for is **not yet measured**: whether a popup in its own top-level window
+resolves from the main window's root.
+
+Three of the script's assertions cannot be written at all. A count of readable fields on
+a row and a subtree that grew after a click are `WW251`; a value carrying a date rather
+than equalling a string is `WW250`. The third is the one that matters most here: a note
+that lost the rate-card date still *answers*, so weakening that assertion would read as
+covered while checking nothing.
+
+None of the three is dropped quietly. The file says in its own comment which are missing
+and why.
 
 ### §WW81 The profiles case is the only thing that drives the picker
 
