@@ -176,7 +176,7 @@ public class FixtureDeclarationTests
     }
 
     [Fact]
-    public void A_case_naming_a_fixture_in_a_file_that_declares_none_says_that_rather_than_listing_nothing()
+    public void A_case_naming_a_fixture_nothing_in_the_suite_declares_says_that_rather_than_listing_nothing()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(() => ScenarioFile.Read("one.cases.json", """
             {
@@ -190,7 +190,7 @@ public class FixtureDeclarationTests
             }
             """));
 
-        Assert.Contains("this file declares no 'fixtures'", refusal.Because);
+        Assert.Contains("the suite declares no fixtures", refusal.Because);
     }
 
     [Fact]

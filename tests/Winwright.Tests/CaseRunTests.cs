@@ -202,6 +202,94 @@ public sealed class CaseRunTests : IDisposable
     }
 
     [Fact]
+    public void A_step_that_reads_touches_nothing_and_records_one_line_rather_than_two()
+    {
+        // WW213. An act and its expectation are two lines because they can be true separately. A
+        // read has no act for it to be separately true of, and the empty pattern is what says so.
+        var frame = Dialog();
+        var declared = CaseDeclaration.Of(
+            "the field says what it was made with",
+            StepDeclaration.Of("Edit", "read", expected: "alpha", reads: "value"));
+
+        var run = Run(declared, frame);
+
+        Assert.Equal(RunOutcome.Passed, run.Verdict.Outcome);
+
+        var only = Assert.Single(run.Trace);
+        Assert.Equal("read", only.Verb);
+        Assert.Equal("Edit", only.Locator);
+        Assert.Null(only.Pattern);
+        Assert.Equal("alpha", only.ReadBack);
+        Assert.Equal("read Edit", only.Asserted);
+        Assert.Equal(1, Assert.Single(run.Verdict.Results).Step);
+    }
+
+    [Fact]
+    public void A_read_leaves_the_control_exactly_as_it_found_it()
+    {
+        var frame = Dialog();
+        var declared = CaseDeclaration.Of(
+            "the box is read twice and never flipped",
+            StepDeclaration.Of("""CheckBox[name="Wrap lines"]""", "read", expected: "Off", reads: "toggle"),
+            StepDeclaration.Of("""CheckBox[name="Wrap lines"]""", "read", expected: "Off", reads: "toggle"));
+
+        var run = Run(declared, frame);
+
+        // A toggle read twice would have been On by the second look. Two Offs is the claim.
+        Assert.Equal(RunOutcome.Passed, run.Verdict.Outcome);
+        Assert.Equal(2, run.Verdict.Ran);
+        Assert.Equal(["read", "read"], run.Trace.Select(step => step.Verb));
+    }
+
+    [Fact]
+    public void A_read_of_something_nothing_draws_is_a_failure_about_the_locator_and_not_a_throw()
+    {
+        // The reason a read does not go through Act: an act must have found something to press and
+        // a read need not, so what was not there is an expectation nothing answered.
+        var frame = Dialog();
+        var declared = CaseDeclaration.Of(
+            "the status label says Saved",
+            StepDeclaration.Of("""Text[name="Saved"]""", "read", expected: "Saved", reads: "text"));
+
+        var run = Run(declared, frame);
+
+        Assert.Equal(RunOutcome.Failed, run.Verdict.Outcome);
+        Assert.Empty(run.Verdict.Broke);
+        Assert.Contains("nothing answered to it", Assert.Single(run.Verdict.Failures).Detail);
+    }
+
+    [Fact]
+    public void A_read_is_attempted_once_however_long_it_waits()
+    {
+        var frame = Dialog();
+        var declared = CaseDeclaration.Of(
+            "the field says gamma",
+            StepDeclaration.Of("Edit", "read", expected: "gamma", reads: "value"));
+
+        var run = Run(declared, frame);
+
+        Assert.Equal(RunOutcome.Failed, run.Verdict.Outcome);
+        Assert.Equal(1, Assert.Single(run.Trace).Attempts);
+    }
+
+    [Fact]
+    public void A_case_of_reads_alone_is_a_case_and_never_the_green_a_case_of_acts_alone_would_be()
+    {
+        // The pair that makes the refusal legible: reads are checks, so a case of nothing but reads
+        // loads, and a case of nothing but acts does not.
+        var reading = CaseDeclaration.Of(
+            "the field says what it was made with",
+            StepDeclaration.Of("Edit", "read", expected: "alpha", reads: "value"));
+
+        Assert.Equal(1, reading.Checks);
+
+        Assert.Contains(
+            "can only ever read green",
+            Assert.Throws<ScenarioRefusedException>(
+                () => CaseDeclaration.Of("the tree opens", StepDeclaration.Of("ComboBox", "expand"))).Because);
+    }
+
+    [Fact]
     public void A_case_run_carries_the_case_it_was_a_run_of_and_says_so_in_one_line()
     {
         var frame = Dialog();

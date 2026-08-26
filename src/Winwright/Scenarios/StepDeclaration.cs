@@ -70,11 +70,15 @@ public sealed record StepDeclaration
     public bool Checkable => Expected is not null;
 
     /// <summary>
-    /// Whether the engine may attempt this step again where its read-back did not arrive. Both
-    /// halves are needed: there is nothing to retry towards without an expectation, and a verb that
-    /// does not survive being repeated gets one attempt whatever the expectation said.
+    /// Whether the engine may attempt this step again where its read-back did not arrive.
+    /// <para>
+    /// All three clauses earn their place. There is nothing to retry towards without an expectation;
+    /// a verb that does not survive being repeated gets one attempt whatever the expectation said;
+    /// and a read is never retried at all, because the wait already polled to the deadline and a
+    /// second go is the same look taken again for the same answer at three times the cost.
+    /// </para>
     /// </summary>
-    public bool Retryable => Checkable && Verb.Repeatable;
+    public bool Retryable => Checkable && Verb.Repeatable && !Verb.Reads;
 
     /// <summary>
     /// Declare one, refusing every field that is wrong about the file rather than about the desk.
@@ -118,6 +122,12 @@ public sealed record StepDeclaration
             throw new ScenarioRefusedException(
                 subject, $"it reads '{reading.Name}' and expects nothing of it, so the reading changes nothing");
         }
+
+        // WW213. An act with no expectation is a navigation a later step is the check for. A read
+        // with no expectation is nothing at all: it touches nothing and claims nothing, so a case
+        // carrying one is a case with a step in it that could not fail.
+        if (wanted is null && act.Reads)
+            throw new ScenarioRefusedException(subject, $"'{act.Name}' expects nothing, so the step does nothing at all");
 
         return new StepDeclaration(
             called ?? Describing(act.Name, parsed!.Text),

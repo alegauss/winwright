@@ -255,10 +255,17 @@ public static class CaseRun
     }
 
     /// <summary>
-    /// One step: act, wait for what it said, record both, and count the check. The act's record and
-    /// the expectation's are two lines rather than one, because they are two things that can be
-    /// true separately — an act that landed on an element whose value then never moved is the case
-    /// this project was built to report, and one merged line loses it.
+    /// One step: act, wait for what it said, record both, and count the check.
+    /// <para>
+    /// An act's record and its expectation's are two lines rather than one, because they are two
+    /// things that can be true separately — an act that landed on an element whose value then never
+    /// moved is the case this project was built to report, and one merged line loses it.
+    /// </para>
+    /// <para>
+    /// A read is one line, for the same reason read the other way: there is no act for it to be
+    /// separately true of. What tells the two apart in a trace is the pattern, which an act names
+    /// and a read leaves empty.
+    /// </para>
     /// </summary>
     private static void Perform(
         StepDeclaration step,
@@ -270,11 +277,12 @@ public static class CaseRun
     {
         var cap = step.Retryable ? project.Attempts : 1;
         var attempted = Retry.Bounded(() => Attempting(step, subject), one => one.Held, cap);
-        var acted = attempted.Last.Acted;
+        var landed = attempted.Last;
 
-        trace.Add(Retry.Recorded(acted.AsTraceStep() with { Step = trace.Count + 1 }, attempted));
+        if (landed.Acted is { } acted)
+            trace.Add(Retry.Recorded(acted.AsTraceStep() with { Step = trace.Count + 1 }, attempted));
 
-        if (attempted.Last.Expected is not { } expectation)
+        if (landed.Expected is not { } expectation)
             return;
 
         // Read now rather than kept from the poll that missed: what a reader wants is the window as
@@ -283,40 +291,63 @@ public static class CaseRun
         if (!expectation.Held)
         {
             expectation = expectation.Explaining(
-                Diagnosis.OfWindow(expectation.AsAssertion(), subject.Window, acted.Element, budget));
+                Diagnosis.OfWindow(expectation.AsAssertion(), subject.Window, landed.Saw, budget));
         }
 
-        trace.Add(expectation.AsTraceStep() with { Step = trace.Count + 1 });
+        var recorded = expectation.AsTraceStep() with { Step = trace.Count + 1 };
+        if (landed.Acted is null)
+        {
+            // The read's own line: the verb it was, the locator it read, and what it claimed. Not
+            // the expectation's default shape, which names the assertion where the locator goes and
+            // would leave a read with no line saying what it looked at.
+            recorded = Retry.Recorded(
+                recorded with
+                {
+                    Verb = step.Verb.Name,
+                    Locator = step.Locator.Text,
+                    Resolved = landed.Saw?.ToString(),
+                    Asserted = step.Name,
+                },
+                attempted);
+        }
+
+        trace.Add(recorded);
         results.Add(expectation.AsAssertion().At(trace.Count));
     }
 
     private static Landed Attempting(StepDeclaration step, Subject subject)
     {
-        var acted = step.Verb.Perform(subject, step.Argument);
+        // A read never goes through Act: an act must have found something to press and a read need
+        // not, so the element that was not there comes out as an expectation nothing answered rather
+        // than a throw about a pattern the reader has to trace back to a locator.
+        var acted = step.Verb.Reads ? null : step.Verb.Perform(subject, step.Argument);
         if (step.Expected is not { } wanted)
-            return new Landed(acted, null);
+            return new Landed(acted, null, acted?.Element);
 
         // Expect.That rather than Expect.Of: the diagnosis is a window dump, and taking one per
         // missed attempt pays for three of them to report the last.
-        return new Landed(
-            acted,
-            Expect.That(
-                step.Name,
-                wanted,
-                () =>
-                {
-                    var look = subject.ReadOnce();
-                    return look.Found ? step.Reads.Of(look.Values) : null;
-                },
-                subject.ActMs,
-                subject.PollMs));
+        var saw = acted?.Element;
+        var expectation = Expect.That(
+            step.Name,
+            wanted,
+            () =>
+            {
+                var look = subject.ReadOnce();
+                saw = look.Facts ?? saw;
+                return look.Found ? step.Reads.Of(look.Values) : null;
+            },
+            subject.ActMs,
+            subject.PollMs);
+
+        return new Landed(acted, expectation, saw);
     }
 
     /// <summary>
-    /// One go at a step: what the act reported, and what the wait afterwards saw. A step with
-    /// nothing to wait for holds by having acted, which is what makes one attempt of it the cap.
+    /// One go at a step: what the act reported where there was one, what the wait saw, and the
+    /// element the last look found. A step with nothing to wait for holds by having acted, which is
+    /// what makes one attempt of it the cap.
     /// </summary>
-    private sealed record Landed(ActResult Acted, Expectation? Expected)
+    private sealed record Landed(ActResult? Acted, Expectation? Expected, ElementFacts? Saw)
     {
         internal bool Held => Expected?.Held ?? true;
     }

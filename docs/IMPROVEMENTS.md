@@ -99,46 +99,6 @@ unchecked and names that; where it is, a red is a red.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW213 A step that reads and does not act
-
-The vocabulary WW57 shipped is seven acts and nothing else, so a case that wants to
-check a label after a save has to name an act to get there. Selecting a Text element to
-read its contents is the shape that gets written, and it is wrong twice over: it says
-the case moved something, and a control that does not offer the pattern turns a check
-into a harness error about the wrong repository. The README's own first example had to
-be rewritten around it.
-
-The step is data, so the reading has to be one of the fields rather than a side effect
-of an act. What is needed is a verb that resolves, judges nothing and reads - the
-subject's own read door, which is already public and already the thing every expectation
-polls through. It takes nothing, it survives being repeated, and an element it could not
-find is a red about the locator rather than a throw about a pattern.
-
-The one open question is what the trace records for it, since an act result carries a
-pattern and a pair of readings either side of something that happened. Both readings are
-the same look, which is honest, and the pattern is empty - which is the field a reader
-uses to tell an act from a read without being told which is which.
-
-### §WW214 A fixture is the suite's and not one file's
-
-WW60 declares fixtures at the file, and a case names one its own file holds. That is the
-right scope for the refusal - a name nothing declares is refused with the ones there are
-- and the wrong scope for the declaration. A suite loaded with the directory reader is
-several files, and the pt-BR launch that three of them need is written three times.
-
-Two copies of a launch is the shape WW57 was filed about, one level up. The second copy
-is where the flag gains a value the first does not have, and nothing anywhere compares
-them: two files each declare a fixture called pt-BR, one passes the sampled language and
-one has stopped, and both load. Every expectation in the second file then describes an
-environment nothing put the window into, which is precisely the failure WW60's own
-refusal exists to prevent inside a single file.
-
-What it wants is the same resolution the case names already get across the suite: a
-fixture declared in one place, named from anywhere, and two declarations of one name
-refused whichever files they are in. The directory reader already refuses a case name
-declared twice across two files for the same reason, so the rule exists and the fixtures
-are simply outside it.
-
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ### §WW65 The plugin is the installation
@@ -266,3 +226,24 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW218 The wait ends on the write finishing, not on a clock
+
+Two guest runs an hour apart, two different cases in the same file, and the same
+arithmetic: 5002ms against the 5000ms this suite declares, and 5029ms against the same
+5000ms. A hundred and fifty looks each. Both reported that the fixture wrote what it
+drew and it read as nothing, which is a sentence about the application under test
+arriving through a number this file chose.
+
+WW211 already refused the obvious move and was right to: the budget is not the fault,
+and raising it is what keeps this coming back. WW145 and WW164 made the repair one layer
+down - read through the write rather than around it, because a file that exists is the
+half of a write that finished first. What is left is that the completeness test is
+parsing: the wait asks whether the content reads yet, which races however long the
+writer takes to fill a file it has already created.
+
+A writer that finishes with a marker - a rename into place, a trailing line, a sibling
+the reader waits on - turns that race into a fact. Then the wait ends because the write
+ended, the deadline is a real deadline rather than a coin toss at the boundary, and a
+run that genuinely timed out says the write did not finish instead of blaming what it
+managed to read. Both halves are here: the fixture writes it and this suite reads it.

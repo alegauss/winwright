@@ -101,6 +101,38 @@ public class StepDeclarationTests
     }
 
     [Fact]
+    public void A_read_is_never_retried_because_the_wait_already_polled_to_the_deadline()
+    {
+        // WW213. A second go is the same look taken again for the same answer at three times the
+        // cost, and the poll inside the wait is what a read is made of.
+        var reading = StepDeclaration.Of("Text#status", "read", expected: "Saved", reads: "text");
+
+        Assert.True(reading.Verb.Repeatable);
+        Assert.True(reading.Checkable);
+        Assert.False(reading.Retryable);
+    }
+
+    [Fact]
+    public void A_read_that_expects_nothing_is_refused_because_the_step_would_do_nothing_at_all()
+    {
+        // An act with no expectation is a navigation a later step is the check for. A read with none
+        // touches nothing and claims nothing.
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => StepDeclaration.Of("Text#status", "read"));
+
+        Assert.Contains("'read' expects nothing", refusal.Because);
+        Assert.Contains("the step does nothing at all", refusal.Because);
+    }
+
+    [Fact]
+    public void A_read_takes_no_argument_the_way_the_other_wordless_verbs_do_not()
+    {
+        Assert.Contains(
+            "takes nothing",
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of("Text#status", "read", "Saved", expected: "Saved")).Because);
+    }
+
+    [Fact]
     public void A_step_that_means_a_destructive_entry_says_so_in_a_field_a_reviewer_finds()
     {
         var quitting = StepDeclaration.Of(

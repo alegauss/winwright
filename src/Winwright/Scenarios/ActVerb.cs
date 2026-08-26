@@ -41,6 +41,7 @@ public sealed record ActVerb
 {
     private static readonly ActVerb[] Vocabulary =
     [
+        new("read", Takes.Nothing, repeatable: true, null),
         new("invoke", Takes.Nothing, repeatable: false, (subject, _) => Act.Invoke(subject)),
         new("toggle", Takes.Nothing, repeatable: false, (subject, _) => Act.Toggle(subject)),
         new("set value", Takes.Text, repeatable: true, (subject, argument) => Act.SetValue(subject, argument!)),
@@ -50,9 +51,9 @@ public sealed record ActVerb
         new("collapse", Takes.Nothing, repeatable: true, (subject, _) => Act.Collapse(subject)),
     ];
 
-    private readonly Func<Subject, string?, ActResult> doing;
+    private readonly Func<Subject, string?, ActResult>? doing;
 
-    private ActVerb(string name, Takes takes, bool repeatable, Func<Subject, string?, ActResult> doing)
+    private ActVerb(string name, Takes takes, bool repeatable, Func<Subject, string?, ActResult>? doing)
     {
         Name = name;
         Wants = takes;
@@ -77,6 +78,24 @@ public sealed record ActVerb
     /// go undoes or repeats the first, and the engine attempts one of those exactly once.
     /// </summary>
     public bool Repeatable { get; }
+
+    /// <summary>
+    /// Whether this verb reads and never acts.
+    /// <para>
+    /// WW213. The vocabulary was seven acts, so a case checking a label after a save had to name an
+    /// act to get there — and selecting a Text element to read it says the case moved something and
+    /// turns a check into a harness error on a control that does not offer the pattern. Reading is a
+    /// step, so it is in the vocabulary rather than borrowed from an act that means nothing.
+    /// </para>
+    /// <para>
+    /// The engine takes the look itself for one of these rather than going through
+    /// <see cref="Act"/>: an act must have found something to press and a read need not, so the
+    /// element that was not there comes out as an expectation nothing answered rather than a throw.
+    /// That also means a read never passes the destructive guard, which is right — reading the name
+    /// of the entry that ends the run does not press it.
+    /// </para>
+    /// </summary>
+    public bool Reads => doing is null;
 
     /// <summary>
     /// The verb of that name, or a refusal listing the ones there are.
@@ -112,7 +131,12 @@ public sealed record ActVerb
     }
 
     /// <summary>Do it. The subject is resolved, judged and read either side by <see cref="Act"/>.</summary>
-    internal ActResult Perform(Subject subject, string? argument) => doing(subject, argument);
+    /// <exception cref="InvalidOperationException">Where this verb reads and there is no act to run.</exception>
+    internal ActResult Perform(Subject subject, string? argument) =>
+        doing is null
+            ? throw new InvalidOperationException(
+                $"'{Name}' reads and never acts, so the engine takes the look rather than calling this")
+            : doing(subject, argument);
 
     private static bool Numeric(string argument) =>
         double.TryParse(argument, NumberStyles.Float, CultureInfo.InvariantCulture, out _);

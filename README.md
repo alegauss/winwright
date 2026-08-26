@@ -175,7 +175,8 @@ their expectations are fields, and the loop, the waits, the attempts and the ver
         { "locator": "TabItem[name=\"Profiles\"]", "act": "select" },
         { "locator": "Edit#profileName", "act": "set value", "with": "Beta", "expect": "Beta", "reads": "value" },
         { "locator": "CheckBox#autosave", "act": "toggle", "expect": "On", "reads": "toggle" },
-        { "locator": "Button#save", "act": "invoke", "named": "save the profile" }
+        { "locator": "Button#save", "act": "invoke", "named": "save the profile" },
+        { "locator": "Text#status", "act": "read", "expect": "Saved", "reads": "text" }
       ]
     }
   ]
@@ -183,7 +184,7 @@ their expectations are fields, and the loop, the waits, the attempts and the ver
 ```
 
 A case has a `name` and its `steps`, and may carry `tags`, `needs`, `catches` and `filed`.
-`locator` and `act` are the two fields every step has. `act` is one of `invoke`, `toggle`,
+`locator` and `act` are the two fields every step has. `act` is one of `read`, `invoke`, `toggle`,
 `set value`, `set range`, `select`, `expand`, `collapse`. `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
 `toggle`, `selected`, `expanded`, `text`, defaulting to `anything`, the one value the element reports,
@@ -195,6 +196,15 @@ A step with no `expect` is an act and not a check: it moves the window into the 
 reads. An act that survives being repeated is attempted again where its read-back does not arrive; one
 that does not — `toggle`, `invoke` — gets a single go, because a retried toggle fails about the
 opposite state.
+
+`read` is the one verb that touches nothing. It resolves, reads, and claims what it read, which is
+what a case checking a label after a save actually wants — and what it stops the case from doing is
+naming `select` on a text label to get there, which says the case moved something and turns a check
+into a harness error on a control that offers no such pattern. A `read` of something nothing drew is
+a **failure naming the locator**, not a break, because a read need not have found anything the way an
+act must. It expects something or it is refused, it is never retried (the wait already polled to the
+deadline), and it never passes the destructive guard — reading the name of the entry that ends the
+run does not press it.
 
 **Every field is judged where it is written, and the refusal names the field.** A locator that does
 not parse, an act that is not an act, a number a range could never take, a key nobody recognises —
@@ -224,8 +234,9 @@ nobody dares delete and nobody dares change.
 
 ### What a case is launched against
 
-A file declares `fixtures`, and a case names one with `fixture`. A fixture is what the application is
-started with — `arguments`, `variables`, and the `environment` it samples reached through a `flag`:
+A file declares `fixtures`, and a case names one with `fixture` — from any file in the suite, not
+only its own. A fixture is what the application is started with: `arguments`, `variables`, and the
+`environment` it samples reached through a `flag`:
 
 ```json
 {
@@ -242,6 +253,12 @@ assertions are only ever unchecked. A fixture that names an environment nothing 
 is refused, and so is one that names it twice: an argument spelling `--language=en` beside
 `"environment": "pt-BR"` is two places deciding one thing, and whichever the application reads last
 wins while the expectations still describe the other.
+
+Names resolve across the whole suite, so the launch three files need is declared once and a name two
+files declare is **refused, naming both** — before any case has resolved against either. Without that,
+the second copy is where the flag gains a value the first does not have, nothing compares them, and
+every expectation in that file describes an environment nothing set up. Same rule as case names, one
+level up.
 
 `shareable` says the application leaves a window the next case would accept. `Suite.Launch` lends one
 window to several cases only when three separate things agree: the fixture says it may be lent, every

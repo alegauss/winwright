@@ -163,6 +163,8 @@
 - ✅ **WW61** **a case with an absent precondition goes red for a reason about the desk it ran on** — A case declares what the machine must have, an absent precondition makes every check in it unchecked and named, and a requirement nothing measured is refused.
 - ✅ **WW62** **three cases driving the same window each pay their own launch** — A shareable fixture two read-only cases want costs one launch where the invocation asks to share, and the first case through owns the window, so one run alone still owns its process.
 - ✅ **WW63** **a scenario says what to do and never why it is worth doing** — Each case carries the defect it exists to catch and the task it was filed under, and a run counts and names the cases that say nothing rather than leaving that to whoever last looked.
+- ✅ **WW213** **a step that only reads has to borrow an act that means nothing** — Reading is a verb: a read touches nothing, is never retried, expects something or is refused, and an element nothing drew is a failure naming the locator instead of a throw.
+- ✅ **WW214** **a fixture two files both need is written twice and the second copy drifts** — A fixture name resolves across the whole suite, so one launch is declared once, and a name two files declare is refused naming both before any case resolves against either.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

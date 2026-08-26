@@ -15,10 +15,20 @@ public class ActVerbTests
     public void Every_act_the_engine_offers_is_nameable_and_lists_itself()
     {
         Assert.Equal(
-            ["invoke", "toggle", "set value", "set range", "select", "expand", "collapse"],
+            ["read", "invoke", "toggle", "set value", "set range", "select", "expand", "collapse"],
             ActVerb.All.Select(verb => verb.Name));
 
         Assert.All(ActVerb.All, verb => Assert.Same(verb, ActVerb.Named(verb.Name)));
+    }
+
+    [Fact]
+    public void Exactly_one_of_them_reads_and_never_acts()
+    {
+        // WW213. The vocabulary was seven acts, so a case checking a label had to name an act to
+        // get there — and selecting a Text element to read it says the case moved something.
+        Assert.True(ActVerb.Named("read").Reads);
+        Assert.Equal(["read"], ActVerb.All.Where(verb => verb.Reads).Select(verb => verb.Name));
+        Assert.Equal(Takes.Nothing, ActVerb.Named("read").Wants);
     }
 
     [Fact]
@@ -83,6 +93,7 @@ public class ActVerbTests
         Assert.True(ActVerb.Named("expand").Repeatable);
         Assert.True(ActVerb.Named("collapse").Repeatable);
         Assert.True(ActVerb.Named("select").Repeatable);
+        Assert.True(ActVerb.Named("read").Repeatable);
     }
 
     [Fact]

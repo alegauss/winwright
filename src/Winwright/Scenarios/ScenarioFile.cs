@@ -55,36 +55,49 @@ public sealed class ScenarioFile
 
     /// <summary>Read one, refusing at the first field that is wrong.</summary>
     /// <param name="path">The file.</param>
+    /// <param name="suite">
+    /// What the rest of the suite declares, where a caller has it. A case may then name a fixture
+    /// another file declared — which is WW214, and the reason a launch three files need is written
+    /// once. Null resolves against this file alone.
+    /// </param>
     /// <exception cref="ScenarioRefusedException">Where it is absent, is not JSON, or has a wrong field.</exception>
-    public static ScenarioFile Load(string path)
+    public static ScenarioFile Load(string path, FixtureSet? suite = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
         var full = System.IO.Path.GetFullPath(path.Trim());
-        string text;
+        return new ScenarioFile(full, Read(full, Text(full), suite));
+    }
+
+    private static string Text(string full)
+    {
         try
         {
-            text = File.ReadAllText(full);
+            return File.ReadAllText(full);
         }
         catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
         {
             throw new ScenarioRefusedException(full, $"it could not be read — {unreadable.Message}");
         }
-
-        return new ScenarioFile(full, Read(full, text));
     }
 
     /// <summary>
     /// Every scenario file under a directory, in path order, and the cases they hold.
     /// <para>
-    /// A case name declared in two files is refused, naming both. WW59 runs a case by name, and a
-    /// name that selects two cases across a suite is the same ambiguity a name declared twice in one
-    /// file is — it just costs a second file to see.
+    /// Two passes, because the fixtures are the suite's and the cases are each file's. The first
+    /// collects every fixture every file declares, so the second can resolve a case against a launch
+    /// declared next door — and a name two files declare is refused in the first pass, naming both,
+    /// before any case has resolved against either of them.
+    /// </para>
+    /// <para>
+    /// A case name declared in two files is refused too. WW59 runs a case by name, and a name that
+    /// selects two cases across a suite is the same ambiguity a name declared twice in one file is —
+    /// it just costs a second file to see.
     /// </para>
     /// </summary>
     /// <param name="directory">Where to look, walked recursively.</param>
     /// <exception cref="ScenarioRefusedException">
-    /// Where the directory is absent, a file will not load, or two files declare one case name.
+    /// Where the directory is absent, a file will not load, or two files declare one case or fixture name.
     /// </exception>
     public static IReadOnlyList<ScenarioFile> LoadAll(string directory)
     {
@@ -97,11 +110,12 @@ public sealed class ScenarioFile
         var found = Directory.GetFiles(root, $"*{Extension}", SearchOption.AllDirectories);
         Array.Sort(found, StringComparer.OrdinalIgnoreCase);
 
+        var suite = FixtureSet.Across(found.Select(path => new ScenarioSource(path, Text(path))));
         var loaded = new List<ScenarioFile>();
         var whose = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var path in found)
         {
-            var file = Load(path);
+            var file = Load(path, suite);
             foreach (var one in file.Cases)
             {
                 if (whose.TryGetValue(one.Name, out var already))
@@ -131,8 +145,12 @@ public sealed class ScenarioFile
     /// <summary>Read cases out of JSON that is already in hand, under a name for the refusals.</summary>
     /// <param name="named">What the refusals should call it.</param>
     /// <param name="json">The text.</param>
+    /// <param name="suite">
+    /// What the rest of the suite declares. This file's own fixtures are folded in on top, and a
+    /// name another file already declared is the drift WW214 refuses.
+    /// </param>
     /// <exception cref="ScenarioRefusedException">Where it is not JSON, or has a wrong field.</exception>
-    public static IReadOnlyList<CaseDeclaration> Read(string named, string json)
+    public static IReadOnlyList<CaseDeclaration> Read(string named, string json, FixtureSet? suite = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(named);
         ArgumentNullException.ThrowIfNull(json);
@@ -150,7 +168,7 @@ public sealed class ScenarioFile
         if (cases.ValueKind != JsonValueKind.Array)
             throw new ScenarioRefusedException($"{named} {ScenarioSchema.Cases}", "it is not an array of cases");
 
-        var fixtures = Fixtured(named, root);
+        var fixtures = (suite ?? FixtureSet.Empty).With(named, Fixtured(named, root));
         var read = new List<CaseDeclaration>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var index = 0;
@@ -189,13 +207,33 @@ public sealed class ScenarioFile
     }
 
     /// <summary>
-    /// The fixtures this file declares, by name. Declared at the file rather than on each case so
-    /// that several cases can name one — which is what makes WW62's lending expressible at all, and
-    /// what stops the same launch being written out three times and drifting on the second.
+    /// The fixtures one file declares, without reading its cases.
+    /// <para>
+    /// The first of WW214's two passes. A suite's fixtures have to be collected before any case
+    /// resolves against them, or a case naming a launch declared next door is refused for naming
+    /// something that exists.
+    /// </para>
     /// </summary>
-    private static IReadOnlyDictionary<string, FixtureDeclaration> Fixtured(string named, JsonElement root)
+    /// <param name="named">What refusals should call the file.</param>
+    /// <param name="json">Its text.</param>
+    /// <exception cref="ScenarioRefusedException">Where it is not JSON, or a fixture in it is wrong.</exception>
+    internal static IReadOnlyList<FixtureDeclaration> FixturesIn(string named, string json)
     {
-        var read = new Dictionary<string, FixtureDeclaration>(StringComparer.OrdinalIgnoreCase);
+        using var document = Parsed(named, json);
+        return document.RootElement.ValueKind == JsonValueKind.Object
+            ? Fixtured(named, document.RootElement)
+            : [];
+    }
+
+    /// <summary>
+    /// The fixtures this file declares, in declared order. Declared at the file rather than on each
+    /// case so that several cases can name one — which is what makes WW62's lending expressible at
+    /// all, and what stops the same launch being written out three times and drifting on the second.
+    /// </summary>
+    private static IReadOnlyList<FixtureDeclaration> Fixtured(string named, JsonElement root)
+    {
+        var read = new List<FixtureDeclaration>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         if (!root.TryGetProperty(ScenarioSchema.Fixtures, out var fixtures) || fixtures.ValueKind == JsonValueKind.Null)
             return read;
 
@@ -220,17 +258,17 @@ public sealed class ScenarioFile
                 Pairs(at, one, "variables"),
                 Truth(at, one, "shareable")));
 
-            if (!read.TryAdd(declared.Name, declared))
+            if (!seen.Add(declared.Name))
                 throw new ScenarioRefusedException(at, $"'{declared.Name}' is declared twice, so a case naming it names two");
 
+            read.Add(declared);
             index++;
         }
 
         return read;
     }
 
-    private static CaseDeclaration OneCase(
-        string at, JsonElement one, IReadOnlyDictionary<string, FixtureDeclaration> fixtures)
+    private static CaseDeclaration OneCase(string at, JsonElement one, FixtureSet fixtures)
     {
         if (one.ValueKind != JsonValueKind.Object)
             throw new ScenarioRefusedException(at, "a case is an object");
@@ -264,25 +302,19 @@ public sealed class ScenarioFile
     }
 
     /// <summary>
-    /// The fixture this case names, resolved against the ones its file declares. A name nothing
+    /// The fixture this case names, resolved against everything the suite declares. A name nothing
     /// declares is refused with the ones there are: a case launched against a fixture that does not
     /// exist would otherwise silently get the application as it comes, and its expectations describe
     /// an environment nothing put the window into.
     /// </summary>
-    private static FixtureDeclaration? Against(
-        string at, JsonElement one, IReadOnlyDictionary<string, FixtureDeclaration> fixtures)
+    private static FixtureDeclaration? Against(string at, JsonElement one, FixtureSet fixtures)
     {
         if (Text(at, one, "fixture", required: false) is not { } named)
             return null;
 
-        if (fixtures.TryGetValue(named, out var found))
-            return found;
-
-        var there = fixtures.Count == 0
-            ? $"this file declares no '{ScenarioSchema.Fixtures}'"
-            : $"there is {string.Join(", ", fixtures.Values.Select(fixture => $"'{fixture.Name}'"))}";
-
-        throw new ScenarioRefusedException($"{at}.fixture", $"no fixture is called '{named}'; {there}");
+        return fixtures.Named(named)
+            ?? throw new ScenarioRefusedException(
+                $"{at}.fixture", $"no fixture is called '{named}'; {fixtures.Spelled()}");
     }
 
     private static StepDeclaration OneStep(string at, JsonElement step)
