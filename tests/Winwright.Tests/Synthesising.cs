@@ -92,6 +92,7 @@ internal static class Synthesising
         new("Synthesised.Type", Asking.ItIsTheAct, "typing, as a step's own result"),
         new("Synthesised.Click", Asking.ItIsTheAct,
             "a click, carrying the PointerReason a case had to write to reach it"),
+        new("Synthesised.Nudge", Asking.ItIsTheAct, "an arrow key at a range control, as a step"),
 
         // A menu is entered the way a keyboard user enters one, and that is Block D's third
         // criterion rather than an escalation: reaching a destructive entry by invoke is refused

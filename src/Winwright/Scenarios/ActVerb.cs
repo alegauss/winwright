@@ -50,14 +50,15 @@ public sealed record ActVerb
         new("expand", Takes.Nothing, repeatable: true, (subject, _) => Act.Expand(subject)),
         new("collapse", Takes.Nothing, repeatable: true, (subject, _) => Act.Collapse(subject)),
 
-        // WW225. The two that synthesise input, which is the half of the engine a case could not
+        // WW225. The three that synthesise input, which is the half of the engine a case could not
         // name. Each has a pattern act beside it that reads almost the same and proves something
         // else: 'set value' writes through ValuePattern and 'type' presses keys, and the difference
         // is the whole of what an interaction loop is for.
         //
-        // 'nudge' is not here, and that is deliberate rather than forgotten: the proving ground draws
-        // no range control, so a verb for one would have nothing driving it — and a verb nothing
-        // drives is the shape this project refuses everywhere else.
+        // 'nudge' arrived one task later than the other two. It was left out until WW226 drew a range
+        // control for it, because a verb with nothing driving it is the shape this project refuses
+        // everywhere else — and its own branch that flips direction at the end of a range needs a
+        // control already sitting there to provoke it.
         new(
             "type",
             Takes.Text,
@@ -71,6 +72,7 @@ public sealed record ActVerb
             (subject, argument) => Synthesised.Click(subject, Because(argument!)),
             synthesises: true,
             accepts: Enum.GetValues<PointerReason>().Select(one => one.ToString()).ToList()),
+        new("nudge", Takes.Nothing, repeatable: false, (subject, _) => Synthesised.Nudge(subject), synthesises: true),
     ];
 
     private readonly Func<Subject, string?, ActResult>? doing;

@@ -76,6 +76,28 @@ public static class Synthesised
     }
 
     /// <summary>
+    /// Move a range control one step with an arrow key, in whichever direction can actually move it.
+    /// <para>
+    /// At the end of its range the other direction is used, so the assertion stays about whether the
+    /// control responds rather than about where it happened to start. WW226 is what made that branch
+    /// reachable: it drew a control already sitting at its maximum, which is the only thing that
+    /// provokes the flip.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">The range control.</param>
+    /// <param name="vertical">That it is driven by Up and Down rather than by Left and Right.</param>
+    /// <exception cref="NotActionableException">Where it offers no range, or none with room to move.</exception>
+    public static ActResult Nudge(Subject subject, bool vertical = false)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+
+        var before = subject.Read();
+        var nudged = Traversal.Nudge(subject, vertical);
+
+        return Landed(subject, "nudge", "synthesised keyboard", nudged.Element, before, nudged.Foreground);
+    }
+
+    /// <summary>
     /// What a synthesised act answers: the readings either side, and what it needed of the machine —
     /// which is the field the pattern acts leave null and none of these can.
     /// </summary>

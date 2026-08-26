@@ -156,7 +156,7 @@ public sealed class SynthesisedActTests : IDisposable
     {
         // Data rather than a note, so a report can name the acts in a case that needed the machine.
         Assert.Equal(
-            ["type", "click"],
+            ["type", "click", "nudge"],
             ActVerb.All.Where(one => one.Synthesises).Select(one => one.Name));
 
         Assert.All(

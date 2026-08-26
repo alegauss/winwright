@@ -35,6 +35,9 @@ public partial class MainWindow : Window
         if (Shapes.Has("absences"))
             AbsencesPane.AddTo(panes);
 
+        if (Shapes.Has("ranges"))
+            RangesPane.AddTo(panes);
+
         if (Shapes.Has("peerless"))
             Peerless.AddTo(panes);
 

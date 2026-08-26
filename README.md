@@ -132,7 +132,7 @@ directions — a verb added without an entry is a red.
 | `Attempt` / `Retry` | a deadline on a sighting or a condition; an act attempted to a cap and counted |
 | `Preflight` | what each declared act needs, checked against the tree before anything is pressed |
 | `Act` | invoke, toggle, set a value or a range, select, expand, collapse — through the control's own patterns |
-| `Synthesised` | the acts a case can name that put real input on the desk — type, click — each carrying what it needed of the machine |
+| `Synthesised` | the acts a case can name that put real input on the desk — type, click, nudge — each carrying what it needed of the machine |
 | `Selecting` / `Pick` | select and confirm; every value a picker holds, and reaching one |
 | `Surface` | record controls as a case found them and put them back |
 | `Pointer` | synthesised mouse input, and the declared readings about why an act needs it |
@@ -249,7 +249,7 @@ their expectations are fields, and the loop, the waits, the attempts and the ver
 
 A case has a `name` and its `steps`, and may carry `tags`, `needs`, `catches` and `filed`.
 `locator` and `act` are the two fields every step has. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`. `expect` is what the element should read
+`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`. `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
 `toggle`, `selected`, `expanded`, `text`, defaulting to `anything`, the one value the element reports,
 in the order a reader looks at them. `with` is required exactly where the act takes something and
@@ -261,13 +261,17 @@ reads. An act that survives being repeated is attempted again where its read-bac
 that does not — `toggle`, `invoke` — gets a single go, because a retried toggle fails about the
 opposite state.
 
-### The two that synthesise input
+### The three that synthesise input
 
-`type` and `click` put real input on the desk instead of asking the control. Each has a pattern act
-beside it that reads almost the same and proves something else, and **which one a case names is the
-whole of what an interaction loop is for**: `set value` writes through ValuePattern and passed on the
-day a WPF window under a WinForms pump took no keyboard input at all; `type` presses keys and did
-not. Likewise `invoke` against `click`.
+`type`, `click` and `nudge` put real input on the desk instead of asking the control. Each has a
+pattern act beside it that reads almost the same and proves something else, and **which one a case
+names is the whole of what an interaction loop is for**: `set value` writes through ValuePattern and
+passed on the day a WPF window under a WinForms pump took no keyboard input at all; `type` presses
+keys and did not. Likewise `set range` against `nudge`, and `invoke` against `click`.
+
+`nudge` presses an arrow key at a range control, in whichever direction can actually move it — at the
+maximum a press upward is a legitimate no-op, so it goes the other way and the check stays about
+whether the control responds rather than about where it started.
 
 They cost something the other eight do not. A synthesised act needs the window in the foreground,
 which Windows does not always grant — so its result carries **what it needed**, and a step that was

@@ -235,6 +235,11 @@ public sealed record Flags
             "a pane carrying the three kinds of absence at once - a collapsed pane, a closed popup and an unopened submenu",
             "a control on a page that is not showing cannot be found by any id, which reads exactly like one that was renamed or removed"),
         new Flag(
+            "ranges",
+            "",
+            "a pane carrying the three answers a key pressed at a range has - room either way, already at the maximum, and no room at all",
+            "Traversal.Nudge chose its direction from where the control already sat and nothing here drove it, so the branch that presses the other way at the end of a range had never run against a real control"),
+        new Flag(
             "backdrop",
             "kind",
             "a window that opted into a system backdrop, which transmits what is behind it through the glass",
