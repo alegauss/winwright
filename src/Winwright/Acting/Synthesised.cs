@@ -1,3 +1,5 @@
+using System.Windows.Automation;
+
 using Winwright.Locating;
 using Winwright.Verdicts;
 
@@ -30,6 +32,14 @@ namespace Winwright.Acting;
 public static class Synthesised
 {
     /// <summary>
+    /// The route the keyboard acts went through, in the field <see cref="ActResult.Pattern"/> carries.
+    /// Named rather than repeated, and a route and not a pattern: <c>Pick</c> has written
+    /// <c>"synthesized keyboard"</c> there since block D, so the field already says which door an act
+    /// took rather than which pattern it asked.
+    /// </summary>
+    public const string ByKeyboard = "synthesised keyboard";
+
+    /// <summary>
     /// Type into a control with real keys, and read back what it says afterwards.
     /// </summary>
     /// <param name="subject">What to type into.</param>
@@ -48,7 +58,7 @@ public static class Synthesised
         return Landed(
             subject,
             "type",
-            "synthesised keyboard",
+            ByKeyboard,
             typed.Element,
             before,
             typed.Foreground.Satisfied ? typed.Focus : typed.Foreground);
@@ -94,7 +104,43 @@ public static class Synthesised
         var before = subject.Read();
         var nudged = Traversal.Nudge(subject, vertical);
 
-        return Landed(subject, "nudge", "synthesised keyboard", nudged.Element, before, nudged.Foreground);
+        return Landed(subject, "nudge", ByKeyboard, nudged.Element, before, nudged.Foreground);
+    }
+
+    /// <summary>
+    /// Send a traversal key at the window this element is in, and read the element again after.
+    /// <para>
+    /// WW225. The act the keyboard case's second assertion needs, and the one that could not be
+    /// written at all: <em>Tab moves the focus off this box</em>. The locator is the element the step
+    /// is about rather than the window the key goes to, because that is what the expectation is
+    /// then about — pair it with the <c>focused</c> reading and the claim is exactly the one
+    /// claude-tray's harness made in eight lines of focus bookkeeping.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">The element the step is about. The key is sent at its window.</param>
+    /// <param name="key">Which traversal key.</param>
+    public static ActResult Press(Subject subject, TraversalKey key)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+
+        var before = subject.Read();
+
+        // The window rather than the element: a traversal key is a keystroke at whatever holds the
+        // focus, and sending it at an element would say this act is about that element's own input.
+        var window = subject.Window == 0 ? null : AutomationElement.FromHandle(subject.Window);
+        if (window is null)
+        {
+            return Landed(
+                subject,
+                $"press {key}",
+                ByKeyboard,
+                before.Facts,
+                before,
+                Precondition.Absent(Windowing.Desk.ForegroundToTake, "this element is in no window a key could be sent to"));
+        }
+
+        var pressed = Traversal.Press(window, key, subject.ActMs, subject.PollMs);
+        return Landed(subject, $"press {key}", ByKeyboard, before.Facts, before, pressed.Foreground);
     }
 
     /// <summary>

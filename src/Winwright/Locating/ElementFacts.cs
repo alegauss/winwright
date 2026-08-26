@@ -29,6 +29,19 @@ public sealed record ElementFacts(
     IReadOnlySet<string> Patterns)
 {
     /// <summary>
+    /// Whether it held the keyboard focus at the instant the rest of this was read.
+    /// <para>
+    /// WW225. Read in the same pass as the other seven and for the reason this type exists at all: a
+    /// case asserting that Tab moved the focus off a box is comparing where the focus was against
+    /// where it is, and two answers taken at two instants would be a judgement about no moment that
+    /// happened. An init property with a default rather than a ninth positional field, so the places
+    /// that construct facts by hand for a refusal are not made to answer a question they have no
+    /// element to ask.
+    /// </para>
+    /// </summary>
+    public bool HasKeyboardFocus { get; init; }
+
+    /// <summary>
     /// The locator step that would address this element, spelled the way the grammar spells one.
     /// It is the whole point of inspecting: the line a reader copies is already a locator, so it
     /// is written from the tree rather than from the markup the check is about to assert on.
@@ -80,7 +93,10 @@ public sealed record ElementFacts(
                 Rectangle(current.BoundingRectangle),
                 element.GetSupportedPatterns()
                     .Select(pattern => Short(pattern.ProgrammaticName, suffix: "PatternIdentifiers.Pattern"))
-                    .ToHashSet(StringComparer.Ordinal));
+                    .ToHashSet(StringComparer.Ordinal))
+            {
+                HasKeyboardFocus = current.HasKeyboardFocus,
+            };
         }
         catch (ElementNotAvailableException)
         {

@@ -170,7 +170,7 @@
 - ✅ **WW63** **a scenario says what to do and never why it is worth doing** — Each case carries the defect it exists to catch and the task it was filed under, and a run counts and names the cases that say nothing rather than leaving that to whoever last looked.
 - ✅ **WW213** **a step that only reads has to borrow an act that means nothing** — Reading is a verb: a read touches nothing, is never retried, expects something or is refused, and an element nothing drew is a failure naming the locator instead of a throw.
 - ✅ **WW214** **a fixture two files both need is written twice and the second copy drifts** — A fixture name resolves across the whole suite, so one launch is declared once, and a name two files declare is refused naming both before any case resolves against either.
-- ✅ **WW225 (type and click)** **a case can name no synthesised input, so migrating one that proves input stops proving it** — A step result carries what its act needed of the machine, and two synthesised acts have names a data file can write.
+- ✅ **WW225** **a case can name no synthesised input, so migrating one that proves input stops proving it** — A case names four synthesised acts and reads what holds the focus, so the keyboard case's three assertions are all writable.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

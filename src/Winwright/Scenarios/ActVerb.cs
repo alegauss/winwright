@@ -73,6 +73,13 @@ public sealed record ActVerb
             synthesises: true,
             accepts: Enum.GetValues<PointerReason>().Select(one => one.ToString()).ToList()),
         new("nudge", Takes.Nothing, repeatable: false, (subject, _) => Synthesised.Nudge(subject), synthesises: true),
+        new(
+            "press",
+            Takes.Text,
+            repeatable: false,
+            (subject, argument) => Synthesised.Press(subject, Traversing(argument!)),
+            synthesises: true,
+            accepts: Enum.GetValues<TraversalKey>().Select(one => one.ToString()).ToList()),
     ];
 
     private readonly Func<Subject, string?, ActResult>? doing;
@@ -182,10 +189,11 @@ public sealed record ActVerb
             (_, null) => $"'{Name}' acts on {(Wants == Takes.Text ? "text" : "a number")}, and this one carries none",
 
             // WW225. The closed list is checked here and not inside the act, because here is where
-            // the author is: a reason nobody recognises has to cost a corrected field and never a
-            // run that gets halfway and stops.
+            // the author is: a word nobody recognises has to cost a corrected field and never a run
+            // that gets halfway and stops. Worded off the verb rather than per verb, so a third one
+            // with a closed list gets the sentence without anybody writing it.
             (Takes.Text, _) when Accepts.Count > 0 && !Accepts.Contains(written, StringComparer.OrdinalIgnoreCase) =>
-                $"there is no such reason for a pointer act; there is {string.Join(", ", Accepts)}",
+                $"'{Name}' does not take '{written}'; it takes {string.Join(", ", Accepts)}",
 
             (Takes.Text, _) => null,
             (Takes.Number, _) => Numeric(written) ? null : $"'{Name}' acts on a number, and '{written}' is not one",
@@ -225,6 +233,22 @@ public sealed record ActVerb
 
         throw new InvalidOperationException(
             $"'{wanted}' reached the act and is not a reason, so the load accepted what the act cannot run");
+    }
+
+    /// <summary>
+    /// The traversal key a step named. Refused at the point of insertion by <see cref="Accepts"/>, so
+    /// reaching here with anything else means the two lists disagree.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Where the name is not a traversal key.</exception>
+    private static TraversalKey Traversing(string argument)
+    {
+        var wanted = argument.Trim();
+        foreach (var key in Enum.GetValues<TraversalKey>())
+            if (string.Equals(key.ToString(), wanted, StringComparison.OrdinalIgnoreCase))
+                return key;
+
+        throw new InvalidOperationException(
+            $"'{wanted}' reached the act and is not a traversal key, so the load accepted what the act cannot run");
     }
 
     private static bool Numeric(string argument) =>

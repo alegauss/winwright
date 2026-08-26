@@ -129,7 +129,7 @@ public sealed class SynthesisedActTests : IDisposable
             }
             """));
 
-        Assert.Contains("no such reason for a pointer act", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("'click' does not take 'because I felt like it'", refused.Because, StringComparison.Ordinal);
         foreach (var reason in Enum.GetValues<PointerReason>())
             Assert.Contains(reason.ToString(), refused.Because, StringComparison.Ordinal);
     }
@@ -152,11 +152,68 @@ public sealed class SynthesisedActTests : IDisposable
     }
 
     [Fact]
+    public void Tab_moves_the_focus_off_the_box_and_a_case_can_say_so()
+    {
+        // WW78's second assertion, and the one that could not be written at all: the seven readings
+        // were about patterns, and what holds the focus is not one. Written the way a case would —
+        // the locator is the element the step is about, the key goes to its window, and the reading
+        // asks whether that element still has the focus.
+        var typed = Synthesised.Type(On("Edit#profileBox"), "epsilon");
+        if (BusyDesk.Excused(typed.Needed!))
+            return;
+
+        // Typing focuses it, so the reading before the key is 'focused' and after it is not.
+        Assert.Equal("focused", ReadBack.Named("focused").Of(On("Edit#profileBox").Read()));
+
+        var pressed = Synthesised.Press(On("Edit#profileBox"), TraversalKey.Tab);
+        if (BusyDesk.Excused(pressed.Needed!))
+            return;
+
+        Assert.Equal("not focused", ReadBack.Named("focused").Of(On("Edit#profileBox").Read()));
+    }
+
+    [Fact]
+    public void The_focus_reading_answers_nothing_where_nothing_resolved()
+    {
+        // Null and not "not focused", exactly as the seven pattern readings answer: an element that
+        // is not there holds no focus and does not fail to hold it either, and answering the second
+        // would be an expectation met by an absence.
+        Assert.Null(ReadBack.Named("focused").Of(On("Edit#thereIsNoSuchBox").Read()));
+    }
+
+    [Fact]
+    public void A_key_no_traversal_has_is_refused_where_the_author_wrote_it()
+    {
+        var refused = Assert.Throws<ScenarioRefusedException>(() => ScenarioFile.Read("one.cases.json", """
+            {
+              "cases": [
+                {
+                  "name": "a",
+                  "steps": [
+                    {
+                      "locator": "Edit#profileBox",
+                      "act": "press",
+                      "with": "Enter",
+                      "expect": "not focused",
+                      "reads": "focused"
+                    }
+                  ]
+                }
+              ]
+            }
+            """));
+
+        Assert.Contains("'press' does not take 'Enter'", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("Tab", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("ShiftTab", refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void The_vocabulary_says_which_acts_a_busy_desk_can_take_away()
     {
         // Data rather than a note, so a report can name the acts in a case that needed the machine.
         Assert.Equal(
-            ["type", "click", "nudge"],
+            ["type", "click", "nudge", "press"],
             ActVerb.All.Where(one => one.Synthesises).Select(one => one.Name));
 
         Assert.All(

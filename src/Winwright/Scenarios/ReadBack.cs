@@ -26,23 +26,38 @@ public sealed record ReadBack
 {
     private static readonly ReadBack[] Vocabulary =
     [
-        new("anything", values => values.Reading()),
-        new("value", values => values.Value),
-        new("range", values => values.Range is { } range ? range.ToString(CultureInfo.InvariantCulture) : null),
-        new("toggle", values => values.Toggle),
-        new("selected", values => values.IsSelected switch
+        new("anything", read => read.Values.Reading()),
+        new("value", read => read.Values.Value),
+        new("range", read => read.Values.Range is { } range ? range.ToString(CultureInfo.InvariantCulture) : null),
+        new("toggle", read => read.Values.Toggle),
+        new("selected", read => read.Values.IsSelected switch
         {
             true => "selected",
             false => "not selected",
             null => null,
         }),
-        new("expanded", values => values.ExpandCollapse),
-        new("text", values => values.Text),
+        new("expanded", read => read.Values.ExpandCollapse),
+        new("text", read => read.Values.Text),
+
+        // WW225. The one reading that is not about a pattern. It is here because "Tab moved the focus
+        // off this box" is a claim a case has to be able to make, and it was the one assertion of the
+        // keyboard case that could not be written at all — the other two could be written and would
+        // have gone through the patterns that passed on the day of the bug.
+        //
+        // Null where nothing resolved, exactly as the seven above: an element that was not there
+        // holds no focus and does not hold it either, and answering "not focused" would be an
+        // expectation met by an absence.
+        new("focused", read => read.Facts?.HasKeyboardFocus switch
+        {
+            true => "focused",
+            false => "not focused",
+            null => null,
+        }),
     ];
 
-    private readonly Func<PatternValues, string?> reading;
+    private readonly Func<Reading, string?> reading;
 
-    private ReadBack(string name, Func<PatternValues, string?> reading)
+    private ReadBack(string name, Func<Reading, string?> reading)
     {
         Name = name;
         this.reading = reading;
@@ -77,10 +92,17 @@ public sealed record ReadBack
             $"there is no such reading; there is {string.Join(", ", Vocabulary.Select(one => one.Name))}");
     }
 
-    /// <summary>Take this reading off what the element's patterns said at one instant.</summary>
-    public string? Of(PatternValues values)
+    /// <summary>
+    /// Take this reading off what one look answered.
+    /// <para>
+    /// The whole look and not its pattern values alone: <c>focused</c> is a property of the element
+    /// rather than of a pattern, and the two have to come out of the same look or a case comparing
+    /// them is comparing two moments.
+    /// </para>
+    /// </summary>
+    public string? Of(Reading read)
     {
-        ArgumentNullException.ThrowIfNull(values);
-        return reading(values);
+        ArgumentNullException.ThrowIfNull(read);
+        return reading(read);
     }
 }

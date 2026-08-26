@@ -188,6 +188,7 @@ internal static class Cooperating
         new("Synthesised.Type", Cooperation.None, true, "typing, as a step's own result"),
         new("Synthesised.Click", Cooperation.None, true, "a click a case had to say the reason for"),
         new("Synthesised.Nudge", Cooperation.None, true, "an arrow key at a range control, as a step"),
+        new("Synthesised.Press", Cooperation.None, true, "a traversal key at the window, as a step"),
         new("Pick.Value", Cooperation.None, true, "reach a value, by keyboard where the pattern will not"),
         new("Menu.Enter", Cooperation.None, true, "enter a menu bar the way a keyboard user does"),
         new("Menu.To", Cooperation.None, true, "walk to an entry"),

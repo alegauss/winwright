@@ -38,31 +38,6 @@ it.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW225 Half the engine has no name in the format
-
-The vocabulary is `read`, `invoke`, `toggle`, `set value`, `set range`, `select`,
-`expand`, `collapse` — every one through the control's own pattern. The engine also has
-`Pointer`, `Keyboard`, `Traversal` and `Focus`, and none of them has a name a data file
-can write.
-
-WW78 is what that costs. Its keyboard case asserts three things: typing reaches a WPF
-TextBox, Tab moves focus off it, an arrow key moves a Slider. The first and third become
-`set value` and `set range`, which go through the patterns that passed on the day those
-windows took no keyboard input at all. The second cannot be written: no reading answers
-what holds the focus. And the sidebar it clicks is a `Text` element with no peer, which
-`invoke` cannot reach.
-
-**The gap is the shape of `ActResult`, not a forgotten list.** `Keyboard.Type` returns
-two preconditions — foreground and focus; `Traversal.Nudge` returns one; `Pointer.Click`
-carries a stated reason. `ActResult` has no field for any of them. Collapsing one into
-it discards the reading that separates *the control did not change* from *this run never
-had the foreground*, so a synthesised step would report a red where the truth is a hole.
-`Pick` and `Selecting` have the same shape and are unreachable from a case for the same
-reason: the eight verbs a case can name are exactly the eight that fit.
-
-So a step result that can carry a precondition comes first, and the five verbs follow
-it.
-
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness

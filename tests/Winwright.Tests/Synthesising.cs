@@ -41,7 +41,7 @@ internal sealed record Synthesiser(string Named, Asking How, string Because)
 /// demanding the engine be worse.
 /// </para>
 /// <para>
-/// So the reading is the honest one: fourteen verbs reach synthesised input, and each is paired with
+/// So the reading is the honest one: every verb that reaches synthesised input is paired with
 /// how a caller learns it did. What the criterion forbids is not the escalation — it is an
 /// escalation nobody is told about, and that is what a missing entry now is.
 /// </para>
@@ -85,7 +85,8 @@ internal static class Synthesising
         new("Traversal.Press", Asking.ItIsTheAct, "a traversal key at a window, which is a keystroke"),
         new("Traversal.Nudge", Asking.ItIsTheAct, "an arrow at whatever holds the focus"),
 
-        // WW225. The same three acts in the shape a step of a case is answered in, so a data file can
+        // WW225 and WW226. The same four acts in the shape a step of a case is answered in, so a data
+        // file can
         // name them. Its own type and never on Act, because the criterion above is that the default
         // act reaches no send — and an adapter living there would have made that false. The name says
         // what it does, which is what makes ItIsTheAct the honest answer here too.
@@ -93,6 +94,7 @@ internal static class Synthesising
         new("Synthesised.Click", Asking.ItIsTheAct,
             "a click, carrying the PointerReason a case had to write to reach it"),
         new("Synthesised.Nudge", Asking.ItIsTheAct, "an arrow key at a range control, as a step"),
+        new("Synthesised.Press", Asking.ItIsTheAct, "a traversal key at the window, as a step"),
 
         // A menu is entered the way a keyboard user enters one, and that is Block D's third
         // criterion rather than an escalation: reaching a destructive entry by invoke is refused

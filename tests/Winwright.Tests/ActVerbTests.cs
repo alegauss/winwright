@@ -14,12 +14,12 @@ public class ActVerbTests
     [Fact]
     public void Every_act_the_engine_offers_is_nameable_and_lists_itself()
     {
-        // WW225 and WW226 added the three that synthesise input, at the end: the order is the order a
+        // WW225 and WW226 added the four that synthesise input, at the end: the order is the order a
         // reader is shown them, and the pattern acts come first because a pattern act is the default.
         Assert.Equal(
             [
                 "read", "invoke", "toggle", "set value", "set range", "select", "expand", "collapse",
-                "type", "click", "nudge",
+                "type", "click", "nudge", "press",
             ],
             ActVerb.All.Select(verb => verb.Name));
 

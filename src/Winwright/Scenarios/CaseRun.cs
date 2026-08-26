@@ -334,7 +334,7 @@ public static class CaseRun
             {
                 var look = subject.ReadOnce();
                 saw = look.Facts ?? saw;
-                return look.Found ? step.Reads.Of(look.Values) : null;
+                return look.Found ? step.Reads.Of(look) : null;
             },
             subject.ActMs,
             subject.PollMs);
