@@ -61,6 +61,7 @@
 - ✅ **WW181** **the ghost census says none where the flyout would not open, so it reports a clean desk it never looked at** — The census answers seen and clean, seen and holding, or not read, so a shell that would not open the flyout is a hole and never a desk this suite calls clean.
 - ✅ **WW180** **a case counts two processes it launched a moment earlier and sees one, twice in eight guest runs** — A candidate that will not say which binary it runs is still passed over and is now named, so a count of none is never a claim about a process nobody could read.
 - ✅ **WW205** **the register stops what it started and cannot say when it is gone, so every caller needing that writes the wait** — The register answers a three-state reading of stopped and gone, and the suite's copy of the wait is deleted rather than kept beside it.
+- ✅ **WW215** **an unshared run keeps every window it launched open until the last case ends** — A case that owns its process gives it back when it finishes, so the criterion holds during the run and not only at the end of it.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

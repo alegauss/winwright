@@ -28,26 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW215 A case gives its process back when it finishes
-
-WW62 gave a case its own launch and never gave it a way to end one. The register stops
-everything or nothing, so a suite of nine unshared cases holds nine windows, nine
-processes and nine first paints on the desk until the last case is done - and the desk
-is the one thing this project keeps saying it does not own.
-
-It is worse than untidy. Every window after the first is another top-level window a
-locator could match, another candidate for the largest window a process owns, and
-another thing the foreground reading has to be right about. The other-instance refusal
-exists because a second window of the same application is a real hazard, and this
-creates eight of them on purpose.
-
-What is missing is stopping one process inside the same budget the register already
-declares for stopping all of them, with the same survivor reading. Then a case that owns
-its process gives it back, a lent window is held exactly as long as the fixture is being
-lent, and the verdict says which of the two it was - which it already does. The register
-is the right place for it, because nothing outside the register may start a process and
-nothing outside it should be able to end one either.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

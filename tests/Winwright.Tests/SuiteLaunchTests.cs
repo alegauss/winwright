@@ -142,6 +142,55 @@ public sealed class SuiteLaunchTests : IDisposable
     }
 
     [Fact]
+    public void Two_unshared_cases_cost_one_window_at_a_time_rather_than_two_at_the_end()
+    {
+        // WW215. Read after the run and before the roll, which is the only moment the two readings
+        // differ: StopAll has always left nothing behind, and what was wrong was that it was the
+        // first thing to. Every window after the first is another top-level window a locator could
+        // match and another candidate for the largest window a process owns.
+        var owned = Names();
+        var verdict = Suite.Launch(
+            [Borrowing("the pane is selected", owned), Borrowing("the pane is still selected", owned)],
+            Selection.All,
+            register,
+            Project());
+
+        Assert.Equal(RunOutcome.Passed, verdict.Outcome);
+        Assert.Equal(2, register.Launched.Count);
+
+        Assert.All(register.Launched, one =>
+        {
+            one.Refresh();
+            Assert.True(one.HasExited, $"pid {one.Pid} was still running after the run that owned it");
+        });
+
+        // And nothing is reported as having outlived a case, because nothing did.
+        Assert.Empty(register.StopAll());
+    }
+
+    [Fact]
+    public void A_lent_window_is_held_as_long_as_it_is_being_lent_and_not_given_back_early()
+    {
+        // The exception to the rule above, and the reason it has to be one: the second case reads the
+        // window the first one owns, so giving it back after the first case would leave the second
+        // borrowing something that has gone.
+        var shared = Names(shareable: true);
+        var verdict = Suite.Launch(
+            [Borrowing("the pane is selected", shared), Borrowing("the pane is still selected", shared)],
+            Selection.All,
+            register,
+            Project(),
+            sharing: true);
+
+        Assert.Equal(RunOutcome.Passed, verdict.Outcome);
+
+        var lent = Assert.Single(register.Launched);
+        lent.Refresh();
+        Assert.False(lent.HasExited, "the lent window was given back while a case was still borrowing it");
+        Assert.Single(register.StopAll());
+    }
+
+    [Fact]
     public void A_fixture_that_was_never_declared_shareable_is_not_lent_either()
     {
         var owned = Names();

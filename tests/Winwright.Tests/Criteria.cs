@@ -87,7 +87,9 @@ internal static class Criteria
         // --- B, attach and leave nothing behind -------------------------------------------------
         new("B", "No process outlives the run that started it",
             "ProcessRegisterTests.What_outlived_the_case_is_named_rather_than_cleaned_up_in_silence",
-            null, "the register stops what it launched and the summary names whatever would not stop"),
+            null, "the register stops what it launched and the summary names whatever would not stop; "
+                + "since WW215 a case that owns its process gives it back when it finishes, so the "
+                + "criterion holds during the run and not only at the end of it"),
         new("B", "A run says which binary it drove",
             "RunningBinaryTests.Both_keys_agreeing_is_the_binary_the_run_named",
             null, "the version and the write time are both read, and a difference in either is reported"),

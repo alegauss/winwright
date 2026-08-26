@@ -195,14 +195,30 @@ public static class Suite
                 continue;
             }
 
-            var window = Opened(register, project, fixture, one.Name);
+            var (window, process) = Opened(register, project, fixture, one.Name);
             if (borrowing)
                 lent[fixture.Name] = window;
 
             // The first case through a lent fixture pays the launch and does not borrow it: it is
             // the one that owns the window until the run ends, so the reading it takes is the same
             // reading it would take alone.
-            ran.Add(CaseRun.Of(one, window, project, Diagnosis.DefaultBudget, measured, lent: false));
+            try
+            {
+                ran.Add(CaseRun.Of(one, window, project, Diagnosis.DefaultBudget, measured, lent: false));
+            }
+            finally
+            {
+                // WW215. Given back here and not at the end of the run: a case that owns its process
+                // owns it for as long as it is running and no longer. A lent window is the exception
+                // and not the rule — it is held precisely as long as it is being lent, which is
+                // until the run ends, so that is the one launch not stopped where it was made.
+                //
+                // In a finally for the reason the register is total by construction rather than by
+                // discipline: a case that throws on the way out still finished, and the promise is
+                // about the window being gone, not about how the case ended.
+                if (!borrowing)
+                    register.Stop(process);
+            }
         }
 
         return new SuiteVerdict(asked, new ReadOnlyCollection<CaseResult>(ran), new ReadOnlyCollection<NotRun>(skipped));
@@ -233,12 +249,17 @@ public static class Suite
 
     /// <summary>
     /// Launch that fixture and wait for the window it draws.
+    /// <para>
+    /// Hands back the process as well as the window. WW215: a caller that only gets the window has
+    /// no way to give the launch back, and the register is the only thing allowed to end one — so
+    /// discarding it here was what made a run hold every window it had ever opened.
+    /// </para>
     /// </summary>
     /// <exception cref="ScenarioRefusedException">
     /// Where the launch draws no window inside the project's own launch budget. A refusal rather
     /// than a red: nothing about the case was observed, so nothing about the application was.
     /// </exception>
-    private static AutomationElement Opened(
+    private static (AutomationElement Window, LaunchedProcess Process) Opened(
         ProcessRegister register, ProjectDeclaration project, FixtureDeclaration fixture, string named)
     {
         var launched = register.Launch(fixture.Starting(project.Executable));
@@ -255,7 +276,7 @@ public static class Suite
                 $"'{fixture.Name}' drew no window in {deadline}ms, so nothing about this case was observed");
         }
 
-        return AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle);
+        return (AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle), launched);
     }
 
     private static void Something(IReadOnlyList<CaseDeclaration> declared)

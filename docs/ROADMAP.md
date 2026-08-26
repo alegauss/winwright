@@ -5,7 +5,6 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-- 📋 **WW215** (deps: —) **an unshared run keeps every window it launched open until the last case ends** — A case that owns its process gives it back when it finishes, so a suite of nine costs one window at a time instead of nine. → §WW215
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

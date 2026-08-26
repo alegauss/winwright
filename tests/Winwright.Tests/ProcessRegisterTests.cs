@@ -87,6 +87,75 @@ public class ProcessRegisterTests
     }
 
     [Fact]
+    public void A_case_that_gives_its_process_back_gives_it_back_before_the_run_ends()
+    {
+        // WW215. The claim is about when, not whether: StopAll already stopped everything, and a
+        // suite of nine held nine windows until the last case was done.
+        using var register = new ProcessRegister();
+        var first = register.Launch(LongRunning());
+        var second = register.Launch(LongRunning());
+
+        Assert.Null(register.Stop(first));
+
+        Assert.False(StillRunning(first.Pid));
+        Assert.True(StillRunning(second.Pid), "the other case's process was stopped along with it");
+        Assert.Equal(2, register.Launched.Count);
+    }
+
+    [Fact]
+    public void A_process_given_back_did_not_outlive_its_case_and_is_not_reported_as_having()
+    {
+        // The whole vocabulary of Survivor is about outliving a case. Nine cases each cleanly
+        // ending their own process must not read as nine leftovers, which is what a stop that
+        // recorded itself would say.
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning());
+
+        register.Stop(launched);
+
+        Assert.Empty(register.StopAll());
+        Assert.Equal("no process outlived the run that started it.", ProcessSummary.Sentence(register.Survivors));
+        Assert.True(register.AsFinding().Holds);
+    }
+
+    [Fact]
+    public void Stopping_one_twice_is_the_second_call_finding_it_already_gone()
+    {
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning());
+
+        Assert.Null(register.Stop(launched));
+        Assert.Null(register.Stop(launched));
+    }
+
+    [Fact]
+    public void A_process_this_register_never_launched_is_refused_rather_than_stopped()
+    {
+        // Otherwise the one list there is stops being the one list there is.
+        using var mine = new ProcessRegister();
+        using var theirs = new ProcessRegister();
+        var elsewhere = theirs.Launch(LongRunning());
+
+        var refused = Assert.Throws<ArgumentException>(() => mine.Stop(elsewhere));
+
+        Assert.Contains($"pid {elsewhere.Pid} was not launched by this register", refused.Message);
+        Assert.True(StillRunning(elsewhere.Pid), "refusing to stop it stopped it");
+    }
+
+    [Fact]
+    public void Giving_a_process_back_after_the_roll_is_taken_is_refused()
+    {
+        // The same rule Launch keeps: after the roll, the reading is what it is, and a register that
+        // let one more process through would answer a question it had already answered.
+        var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning());
+        register.StopAll();
+
+        Assert.Throws<ObjectDisposedException>(() => register.Stop(launched));
+        register.Dispose();
+    }
+
+    [Fact]
     public void A_process_that_went_on_its_own_is_not_a_survivor()
     {
         using var register = new ProcessRegister();

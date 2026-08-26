@@ -21,6 +21,20 @@ namespace Winwright.Processes;
 public sealed class ProcessRegister : IDisposable
 {
     private readonly List<LaunchedProcess> launched = [];
+
+    /// <summary>
+    /// What a per-case <see cref="Stop(LaunchedProcess)"/> found still running after it asked.
+    /// <para>
+    /// WW215. A case that gives its process back is not a leftover, so a stop that worked adds
+    /// nothing here — the whole vocabulary of <see cref="Survivor"/> is about outliving a case, and
+    /// nine cases reporting nine survivors they each cleanly ended would say the opposite of what
+    /// happened. One that would not stop <em>has</em> outlived its case: the case ended and the
+    /// process did not, which is the leftover that locks the next build. Kept, because
+    /// <see cref="StopAll"/> would otherwise be the only reading and it runs after the run.
+    /// </para>
+    /// </summary>
+    private readonly List<Survivor> outlived = [];
+
     private readonly int stopTimeoutMs;
     private IReadOnlyList<Survivor>? survivors;
 
@@ -108,17 +122,76 @@ public sealed class ProcessRegister : IDisposable
     }
 
     /// <summary>
+    /// Stop one process this register started, which is how a case gives back a window it owns.
+    /// <para>
+    /// WW215. The register stopped everything or nothing, so a suite of nine unshared cases held
+    /// nine windows, nine processes and nine first paints on the desk until the last case was done —
+    /// and every window after the first is another top-level window a locator could match, another
+    /// candidate for the largest window a process owns, and another thing the foreground reading has
+    /// to be right about. The other-instance refusal exists because a second window of the same
+    /// application is a real hazard; holding eight of them on purpose was making them.
+    /// </para>
+    /// <para>
+    /// Here rather than on the caller for the reason nothing outside the register may start a
+    /// process: nothing outside it should be able to end one either. Same budget as
+    /// <see cref="StopAll"/>, because it is the one the project declared for stopping a process, and
+    /// a second number would be a second rule about the same thing.
+    /// </para>
+    /// </summary>
+    /// <param name="registered">What to stop. Must be something this register launched.</param>
+    /// <returns>
+    /// Null where the process is gone — whether this call stopped it or it had already exited, since
+    /// neither outlived its case. A <see cref="Survivor"/> where it is still running after being
+    /// asked, which the register then carries into <see cref="Survivors"/> and its own finding.
+    /// </returns>
+    /// <exception cref="ArgumentException">Where this register did not launch it.</exception>
+    /// <exception cref="ObjectDisposedException">Where the roll has already been taken.</exception>
+    public Survivor? Stop(LaunchedProcess registered)
+    {
+        ArgumentNullException.ThrowIfNull(registered);
+        ObjectDisposedException.ThrowIf(survivors is not null, this);
+
+        if (!launched.Contains(registered))
+        {
+            throw new ArgumentException(
+                $"pid {registered.Pid} was not launched by this register, so this is not the list it is on",
+                nameof(registered));
+        }
+
+        registered.Refresh();
+        if (registered.HasExited)
+            return null;
+
+        // The pid is read before the stop: afterwards the process object may no longer answer for
+        // one, and a leftover reported without the number a file lock names is a leftover a reader
+        // cannot act on.
+        var pid = registered.Pid;
+        if (Ending(registered) == SurvivorFate.Stopped)
+            return null;
+
+        var refused = new Survivor(pid, registered.Executable, SurvivorFate.WouldNotStop);
+        outlived.Add(refused);
+        return refused;
+    }
+
+    /// <summary>
     /// Stop everything still running and say what was. A window is asked to close first, because
     /// an application under test is entitled to shut down the way a person would close it; what
     /// does not take the hint is killed with its tree, since the child it spawned holds the same
     /// file lock the parent did. Idempotent: the second call answers what the first found.
+    /// <para>
+    /// The reading starts from what a per-case <see cref="Stop(LaunchedProcess)"/> already found
+    /// refusing to go. Rebuilding it from what is still alive would drop those: the case that could
+    /// not give its window back is exactly the one a reader needs named, and by the time the run
+    /// ends the process may have gone on its own and left no trace of having outlived anything.
+    /// </para>
     /// </summary>
     public IReadOnlyList<Survivor> StopAll()
     {
         if (survivors is not null)
             return survivors;
 
-        var outlived = new List<Survivor>();
+        var left = new List<Survivor>(outlived);
         foreach (var registered in launched)
         {
             registered.Refresh();
@@ -126,10 +199,10 @@ public sealed class ProcessRegister : IDisposable
                 continue;
 
             var pid = registered.Pid;
-            outlived.Add(new Survivor(pid, registered.Executable, Stop(registered)));
+            left.Add(new Survivor(pid, registered.Executable, Ending(registered)));
         }
 
-        survivors = new ReadOnlyCollection<Survivor>(outlived);
+        survivors = new ReadOnlyCollection<Survivor>(left);
         return survivors;
     }
 
@@ -141,7 +214,8 @@ public sealed class ProcessRegister : IDisposable
             registered.Underlying.Dispose();
     }
 
-    private SurvivorFate Stop(LaunchedProcess registered)
+    /// <summary>Ask it to go, then make it. The one place the two-stage stop is written.</summary>
+    private SurvivorFate Ending(LaunchedProcess registered)
     {
         var half = Math.Max(1, stopTimeoutMs / 2);
 
