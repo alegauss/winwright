@@ -19,6 +19,10 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
+- 📋 **WW221** (deps: —) **a fresh clone has the plugin's wiring and none of its tools** — The server and the hook are dll paths under bin/Release, so the two commands wire an adopter to two files nothing built yet. → §WW221
+- 📋 **WW222** (deps: —) **nothing in a session runs a case, so the tools stop at would-load** — A verb that launches the fixture, runs a selection and hands back the verdict is what makes a case a thing a session can finish. → §WW222
+- 📋 **WW224** (deps: —) **a block criterion names a surface the plugin never got** — Block H's first criterion says the two commands wire the commands, and there are none, so a criterion read as met is covering something that was never built. → §WW224
+
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
@@ -36,6 +40,8 @@
 - 📋 **WW88** (deps: Block G ✅, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+- 📋 **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — The case written to prove the race is gone went red on one guest run and green on the next against the same tree, so the race is not gone. → §WW223
 
 ## Done when — Block A
 

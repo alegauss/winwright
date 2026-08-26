@@ -60,6 +60,56 @@ nothing outside it should be able to end one either.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
+### §WW221 The wiring is not the tool
+
+WW65 shipped a claim: two commands, nothing added to any path, and committing one file
+wires every clone. WW66 and WW67 then made both surfaces .NET processes, and the wiring
+points at `bin/Release/net10.0-windows/*.dll` — paths a clone does not have until
+somebody runs `dotnet build -c Release`. So the claim is now true about the wiring and
+false about the tools. An adopter who runs the two commands gets a session whose server
+fails to start and whose hook exits silently, which is the worse of the two: a guard
+that is not there refuses nothing, and nothing goes red. The README names the build step
+rather than hiding it, and naming a gap is not closing one. What closes it is the plugin
+carrying something that runs without a prior build, or the install failing loudly when
+the build is missing instead of degrading to a session with no tools and no guard. The
+second is cheaper and is probably the right first move: a hook that cannot find its
+assembly is the one case where silence is wrong, because the whole point of it is to be
+in the way.
+
+### §WW222 The tools stop one step short of the answer
+
+`winwright_check` answers whether a file would load. That is the saving WW66 was about —
+the analysis, before the prose exists — and it is not the question a session actually
+has, which is *did it pass*. Today the answer to that comes from a shell: build, then
+`dotnet test`, then read a trx. So the tool chain gets an agent to a correct case file
+and then hands the run back to the same script-shaped path WW67 exists to deny, which is
+the shape of a guard that closes one door and leaves the next one open.
+
+What is missing is a verb that takes a selection, launches what the fixtures declare,
+runs it and hands back the verdict — the sentence, the exit code, and the holes named
+rather than counted. The reason it is not WW66's scope is that running one needs a desk,
+and a desk is the one thing an MCP server cannot assume: the six conditions WW68 reads
+have to be read before anything launches, and a tool that cannot observe has to answer
+*hole* rather than a red or a green. That makes this a verdict-shaped task and not a
+schema-shaped one, which is why it is filed apart rather than folded in.
+
+### §WW224 Either the commands or the sentence
+
+"The plugin is the whole installation" says in full that two commands wire the hook, the
+tools, the commands and the skill. Three of the four landed. The commands did not, and
+nothing in the block was ever filed for them — so the criterion closed over a surface no
+task claimed, which is the failure mode WW176 exists to stop, arriving through the
+criterion's own wording rather than through a missing pairing. `Criteria.cs` now says so
+out loud rather than letting the entry read as satisfied.
+
+Two ways out and they are not equivalent. Build them: a slash command per tool, which is
+cheap and mostly redundant, because a verb reachable from a tool does not also need a
+name typed with a slash. Or restate the criterion to name the three surfaces there are,
+and record why commands were dropped. The second is more likely right, and it is the one
+that needs a decision rather than an afternoon — which is why this is filed as a task
+and not done in passing. What must not happen is the entry quietly keeping a word for a
+thing nobody intends to build: that is how a list stops being read.
+
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
@@ -154,3 +204,24 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW223 The repetition caught what a single green hides
+
+`TrayPlacementTests.Adding_one_and_finding_it_holds_every_time_rather_than_most_times`
+repeats five rounds precisely because a single green is what the old fixture produced
+about half the time. On the guest run of WW67 it failed on round 1 — "it is on neither
+the taskbar nor the overflow" — and passed on an immediate re-run of the same tree. So
+the claim in the case's own name is false, and the evidence is the case doing exactly
+what it was written to do.
+
+Two things make round 1 the suspicious one. Round 0 ends with
+`NotificationArea.CloseOverflow()`, and the next round's `TrayIconFixture.Add` runs
+while the shell may still be tearing the flyout down; and the search was not excused, so
+the desk was observable and the icon genuinely was in neither place. That points at
+`Add` returning before the shell has placed the icon when the notification area is
+mid-transition — the fixture's promise being read a moment too early rather than the
+search looking in the wrong place.
+
+Worth naming: the repair is not a retry around the assertion. A retry there would
+restore the green and delete the measurement, which is the same trade the twenty-two
+missing tests came out of.
