@@ -60,14 +60,6 @@ nothing outside it should be able to end one either.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW69 The skill loads when a window is in play
-
-The whole content of an instruction file is loaded on every turn against a budget, which
-is why claude-tray keeps its flag catalogue in a skill and only the rules in the file
-the harness reads. The skill says which loop answers which question - a picture proves
-layout, an interaction proves input, a render proves determinism - and what it costs a
-session is measured rather than assumed to be small.
-
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion

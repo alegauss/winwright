@@ -465,11 +465,10 @@ Written against what has shipped, so it does not promise a line that is still a 
   waits, the attempts and the verdict. What is still missing is above it: nothing selects a case by
   name or a file by path, nothing declares the fixture a case needs, and nothing lends one window
   to the several cases that only read it.
-- **The plugin carries the tools and the guard, and no commands or skill yet.** The three MCP tools
-  above answer the format, the vocabulary and whether a case loads, and the hook denies a harness
-  script. The slash commands and the skill are designed and not built — and no tool runs a case:
-  `winwright_check` says a file would load and stops there, because running one needs a desk and that
-  is a different claim.
+- **No tool runs a case.** The plugin carries the three MCP tools, the guard and the skill.
+  `winwright_check` says a file would load and stops there: running one needs a desk, a launch and a
+  verdict, and that is a different claim from *this would parse*. There are no slash commands either,
+  and none are planned — a verb reachable from a tool does not also need a name typed with a slash.
 
 ## Building it here
 

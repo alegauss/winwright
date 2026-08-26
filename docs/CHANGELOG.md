@@ -178,6 +178,7 @@
 - ✅ **WW65** **adopting the tool is a per-machine install somebody has to remember** — Two commands wire it and committing .claude/settings.json wires every clone, with the version its manifest carries read against the tree by the gate that compares the packages.
 - ✅ **WW66** **the schema of a case arrives as flag names typed from memory** — The tools carry the loader's own schema as their input schema, so a misspelled key is unsendable and a case is read back before its file exists.
 - ✅ **WW67** **a hand-written harness script is the path of least resistance** — A write naming the engine's acting, locating or asserting surface is denied and the refusal names the case file and winwright_check that replace it.
+- ✅ **WW69** **the skill is loaded on every turn against a budget it does not need** — It loads on a window rather than every turn and says which loop answers which question, and both its costs are measured apart rather than assumed small.
 
 ## Block I — The in-app half — the app cooperates with the harness
 

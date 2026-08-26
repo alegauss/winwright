@@ -19,8 +19,6 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-- 📋 **WW69** (deps: Block G ✅) **the skill is loaded on every turn against a budget it does not need** — It loads when a window is in play and says which loop answers which question, which is the whole of what an agent needs to reach the right verb. → §WW69
-
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion

@@ -157,17 +157,21 @@ internal static class Criteria
                 + "half the criterion is actually about — an unqualified pass over a filtered run"),
 
         // --- H, the Claude Code surface -----------------------------------------------------------------
-        new("H", "The plugin is the whole installation", "", Unshown.NotBuilt,
-            "the plugin exists, its two commands are the whole of wiring it, and it now carries the MCP "
-                + "tools and the guard — ConcordanceTests reads its manifest against the tree, McpTests "
-                + "and GuardTests read both wirings against what this tree builds — but the slash "
-                + "commands and the skill are still open"),
+        new("H", "The plugin is the whole installation",
+            "PluginTests.Everything_the_plugin_carries_is_declared_by_it_and_points_at_this_tree",
+            null, "every surface the plugin carries — the server, the hook, the skill, the version it "
+                + "declares — is declared by the manifest and points at something this tree produces, "
+                + "each paired with the case reading its wiring back; the criterion's own sentence also "
+                + "names commands, and there are none"),
         new("H", "An answer costs no context",
             "McpTests.The_format_and_the_vocabulary_are_answers_rather_than_prose_somebody_loads",
             null, "the format and the vocabulary are tool answers rather than prose a turn loads, and the "
                 + "one tool that takes a case carries the loader's own schema, so the key a caller cannot "
                 + "spell is one they cannot send"),
-        new("H", "The skill fits its budget", "", Unshown.NotBuilt, "there is no skill to measure"),
+        new("H", "The skill fits its budget",
+            "SkillTests.The_skill_fits_its_budget_on_both_of_the_costs_it_has",
+            null, "both costs are measured apart — the description, which is in context on every turn "
+                + "whether a window is in play or not, and the body, which is paid only when one is"),
 
         // --- I, the in-app half -------------------------------------------------------------------------
         new("I", "The in-app half is one package reference", "", Unshown.NotBuilt,
