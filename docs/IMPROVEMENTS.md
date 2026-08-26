@@ -28,9 +28,70 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
+### §WW215 A case gives its process back when it finishes
+
+WW62 gave a case its own launch and never gave it a way to end one. The register stops
+everything or nothing, so a suite of nine unshared cases holds nine windows, nine
+processes and nine first paints on the desk until the last case is done - and the desk
+is the one thing this project keeps saying it does not own.
+
+It is worse than untidy. Every window after the first is another top-level window a
+locator could match, another candidate for the largest window a process owns, and
+another thing the foreground reading has to be right about. The other-instance refusal
+exists because a second window of the same application is a real hazard, and this
+creates eight of them on purpose.
+
+What is missing is stopping one process inside the same budget the register already
+declares for stopping all of them, with the same survivor reading. Then a case that owns
+its process gives it back, a lent window is held exactly as long as the fixture is being
+lent, and the verdict says which of the two it was - which it already does. The register
+is the right place for it, because nothing outside the register may start a process and
+nothing outside it should be able to end one either.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
+
+### §WW216 The cap is checked where the number is declared
+
+Retry publishes a most-attempts of five and says why: past a handful it stops being a
+cap and becomes the loop the type exists to refuse. Its own door enforces that and
+throws an argument exception on anything larger. The project declaration, which is where
+the number actually comes from, checks only that it is positive.
+
+So a project writing nine attempts loads. Nothing says anything. Then the case engine
+passes the declared cap to the bounded retry, which throws - once per step, caught as a
+harness error, so a run of a six-step case reports six breakages about an argument out
+of range and none of them mentions the file the nine was typed into. A reader gets six
+copies of a sentence about this repository for one number in theirs.
+
+Two rules about one value, in two places, and only the weaker one runs at the point
+where a person can act on it. The fix is the shape this tree has used since the first
+block: the limit lives where the value is read, so the number that could never be
+honoured is refused with the file and the key named, and the throw further in becomes
+unreachable rather than merely unlikely. Same for a run that declares zero, which the
+declaration already refuses - this is the other end of the same interval.
+
+### §WW217 A shell that will not cooperate is a hole and not a red
+
+Three guest runs in a row, three different tray cases red, none of them about the code:
+one where the second reading found the flyout shut between two calls and reported a
+toggle nobody made, and one where the fixture's own constructor threw because the shell
+took an icon and put it on neither the taskbar nor the overflow inside five seconds. The
+third run had neither and the second had none.
+
+These cases already know how to answer this. The busy-desk excuse and the hole-naming
+verdict exist for exactly the shell that will not work its flyout, and one of the two
+cases that failed is the case about that. What is missing is that the reasons are
+enumerated at the wrong depth: the excuse covers opening the flyout and does not cover
+the icon never being placed, and it covers the first reading of a pair and not the
+second.
+
+So the interval where a desk becomes a defect is whatever the case happened to wrap.
+Widening it is not the answer either - an excuse that covers everything withdraws the
+check. What is wanted is the reading taken once for the whole case: is this a desk that
+places icons and keeps a flyout open at all. Where it is not, every tray case is
+unchecked and names that; where it is, a red is a red.
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -38,61 +99,45 @@ it.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW57 A case is data
+### §WW213 A step that reads and does not act
 
-The interaction harness in claude-tray is 2,732 lines for eight cases, and most of what
-is in it is the same loop written eight times. The steps, their locators, their acts and
-their expectations are fields; the loop, the waits, the retries, the process register
-and the verdicts belong to the engine. This is the whole reason for a framework here
-rather than the library it would otherwise have been.
+The vocabulary WW57 shipped is seven acts and nothing else, so a case that wants to
+check a label after a save has to name an act to get there. Selecting a Text element to
+read its contents is the shape that gets written, and it is wrong twice over: it says
+the case moved something, and a control that does not offer the pattern turns a check
+into a harness error about the wrong repository. The README's own first example had to
+be rewritten around it.
 
-### §WW58 Refused at insertion, not linted afterwards
+The step is data, so the reading has to be one of the fields rather than a side effect
+of an act. What is needed is a verb that resolves, judges nothing and reads - the
+subject's own read door, which is already public and already the thing every expectation
+polls through. It takes nothing, it survives being repeated, and an element it could not
+find is a red about the locator rather than a throw about a pattern.
 
-roadkeep's first law, transferred. A linter reports after the text exists, and by then
-the work is done and the author is being asked to delete what they just wrote. A field
-validated at the point of insertion refuses before the case is composed, which converts
-an analytical act into a procedural one - and the saving is the analysis rather than the
-characters.
+The one open question is what the trace records for it, since an act result carries a
+pattern and a pair of readings either side of something that happened. Both readings are
+the same look, which is honest, and the pattern is empty - which is the field a reader
+uses to tell an act from a read without being told which is which.
 
-### §WW59 One case runs alone
+### §WW214 A fixture is the suite's and not one file's
 
-The value of a small case is partly that it costs ten seconds when a name is what
-changed. Run takes a file, a case or a tag, and says what it did not run - because a
-filtered run reporting success without qualification is the same silent pass the third
-verdict exists to prevent, one level up.
+WW60 declares fixtures at the file, and a case names one its own file holds. That is the
+right scope for the refusal - a name nothing declares is refused with the ones there are
+- and the wrong scope for the declaration. A suite loaded with the directory reader is
+several files, and the pt-BR launch that three of them need is written three times.
 
-### §WW60 A fixture reaches every launch a case makes
+Two copies of a launch is the shape WW57 was filed about, one level up. The second copy
+is where the flag gains a value the first does not have, and nothing anywhere compares
+them: two files each declare a fixture called pt-BR, one passes the sampled language and
+one has stopped, and both load. Every expectation in the second file then describes an
+environment nothing put the window into, which is precisely the failure WW60's own
+refusal exists to prevent inside a single file.
 
-The states a menu exists to report are the ones where the environment disagrees with the
-application, and on a developer's machine it never does - so without a sampled
-environment those assertions are only ever unchecked. One declaration decides both what
-the app is launched with and what the expectations are read from, so the two cannot be
-given different modes and a sampled menu is never compared against a real environment.
-
-### §WW61 A precondition is declared
-
-pportal's interaction tests fail rather than skip when no controller is plugged in, and
-say so, because xUnit gives them no third outcome to use. With one, the precondition
-belongs in the case: this needs two profiles, this needs a pad, this needs a display
-that renders. Its absence is then named and counted rather than argued about, and the
-case stays honest on a machine that cannot run it.
-
-### §WW62 One launch, lent to the cases that only read
-
-Three cases in claude-tray drive the same window and each used to own its process, so a
-full run paid the launch, the first layout pass and the wait for the first poll three
-times over - seconds each, for a window none of them leaves in a state the next would
-reject. Sharing is opted into per invocation rather than being a merge of the cases, so
-a case run alone still owns its process, which is the property that keeps it worth
-running alone.
-
-### §WW63 A case names the defect it exists to catch
-
-Every case in these harnesses carries a task id and a sentence about what went wrong
-without it, and that is why they survive: a check nobody can justify is a check nobody
-dares delete and nobody dares change. The field is part of the schema, so the
-justification is written when the case is, rather than reconstructed a year later out of
-a commit message.
+What it wants is the same resolution the case names already get across the suite: a
+fixture declared in one place, named from anywhere, and two declarations of one name
+refused whichever files they are in. The directory reader already refuses a case name
+declared twice across two files for the same reason, so the rule exists and the fixtures
+are simply outside it.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

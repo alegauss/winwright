@@ -144,8 +144,17 @@ public sealed class NoCooperationTests : IDisposable
                 + $"application: {string.Join(", ", reaching)}");
     }
 
-    /// <summary>The namespaces that compose values rather than drive anything.</summary>
-    private static readonly string[] Composing = ["Verdicts", "Tracing", "Projects", "Scenarios"];
+    /// <summary>
+    /// The namespaces that compose values rather than drive anything.
+    /// <para>
+    /// WW57 took <c>Scenarios</c> off this list, and the measurement above is what noticed. The
+    /// declarations in it still compose — a step, a case, a vocabulary, a format — but the engine
+    /// that runs one resolves locators under a root element, which is reaching the application by
+    /// any reading. So it is swept as a driving namespace and <c>CaseRun.Of</c> is classified in the
+    /// catalogue like every other verb, which is what this measurement exists to force.
+    /// </para>
+    /// </summary>
+    private static readonly string[] Composing = ["Verdicts", "Tracing", "Projects"];
 
     [Fact]
     public void No_reading_or_pattern_act_needs_the_in_app_half()

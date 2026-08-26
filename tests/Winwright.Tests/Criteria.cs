@@ -75,9 +75,11 @@ internal static class Criteria
             "VerdictSummaryTests.Each_assertion_that_did_not_run_is_named_with_the_precondition_that_was_absent",
             null, "the summary names every hole and the precondition behind it, rather than counting them, "
                 + "and since WW177 the reading that measured those preconditions is on the same page"),
-        new("A", "Nothing about this machine is typed into a scenario", "", Unshown.NotBuilt,
-            "there are no scenarios to move to another checkout; the declaration half is checked by "
-                + "ProvenanceTests and the claim itself waits on Block G"),
+        new("A", "Nothing about this machine is typed into a scenario",
+            "FixtureDeclarationTests.An_environment_that_reaches_the_launch_nowhere_is_refused",
+            null, "a scenario file names an environment and never a desk: what a case is launched with is "
+                + "declared, refused where it would reach the launch nowhere, and the same field is what "
+                + "the expectations are read against"),
         new("A", "A failure is diagnosed from the record and not from a re-run",
             "TraceTests.A_step_carries_the_locator_what_it_resolved_to_and_what_was_read_back",
             null, "a step carries the locator, what it resolved to, what was read back and its verdict"),
@@ -141,10 +143,18 @@ internal static class Criteria
             null, "the run's own reading closes the fingerprint it opened, against a launched application"),
 
         // --- G, the scenario ---------------------------------------------------------------------------
-        new("G", "A case is data", "", Unshown.NotBuilt, "there is no scenario file; the whole block is open"),
-        new("G", "The format refuses before the prose exists", "", Unshown.NotBuilt,
-            "there is no format to refuse against; the loader and its refusals are designed and not built"),
-        new("G", "One case runs alone", "", Unshown.NotBuilt, "there is nothing to run by name"),
+        new("G", "A case is data", "", Unshown.NotBuilt,
+            "the format exists, a case declared in it runs end to end, and a launch is declared rather "
+                + "than written — but the criterion is about the adopting project's line count, and "
+                + "nothing is migrated yet"),
+        new("G", "The format refuses before the prose exists",
+            "ScenarioFileTests.A_key_the_format_does_not_have_is_refused_with_the_keys_it_does",
+            null, "a key the format does not have is refused at its own address in the file, with the keys "
+                + "there are, before the rest of it is read"),
+        new("G", "One case runs alone",
+            "SuiteRunTests.A_filtered_run_qualifies_its_pass_before_it_states_it",
+            null, "a case runs by name and the run's own sentence names what it did not run, which is the "
+                + "half the criterion is actually about — an unqualified pass over a filtered run"),
 
         // --- H, the Claude Code surface -----------------------------------------------------------------
         new("H", "The plugin is the whole installation", "", Unshown.NotBuilt, "there is no plugin"),

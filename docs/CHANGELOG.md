@@ -156,6 +156,14 @@
 
 ## Block G — The scenario — a case is a data file
 
+- ✅ **WW57** **a case is two hundred lines of script that mostly repeats the previous case** — A case is a data file — steps, locators, acts and expectations as fields — and CaseRun owns the loop, the waits, the attempts and which acts survive being repeated.
+- ✅ **WW58** **the format is a convention the author is asked to remember** — Every field is judged where it is written: a key the format does not have is refused at its own address in the file, before the rest of it is read.
+- ✅ **WW59** **there is no way to run one case, or one file, without running the rest** — Run takes a file, a case or a tag, names every case it did not run in the sentence it opens with, and refuses a selector that matches nothing rather than passing over none.
+- ✅ **WW60** **a case that needs a fixture reaches for this machine instead** — One declaration decides the launch and what the expectations are read from, and an environment reaching the launch nowhere — or twice — is refused before anything starts.
+- ✅ **WW61** **a case with an absent precondition goes red for a reason about the desk it ran on** — A case declares what the machine must have, an absent precondition makes every check in it unchecked and named, and a requirement nothing measured is refused.
+- ✅ **WW62** **three cases driving the same window each pay their own launch** — A shareable fixture two read-only cases want costs one launch where the invocation asks to share, and the first case through owns the window, so one run alone still owns its process.
+- ✅ **WW63** **a scenario says what to do and never why it is worth doing** — Each case carries the defect it exists to catch and the task it was filed under, and a run counts and names the cases that say nothing rather than leaving that to whoever last looked.
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 - ✅ **WW64** **an answer has to be verified by reading the file the command already read** — Every answer carries where it came from as fields - file, line, key, element, pattern - so a missing header reads as strings.en.json:6 and the trace keeps it, rather than a reader opening the file.

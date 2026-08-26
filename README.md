@@ -92,6 +92,8 @@ just took can be trusted.
 | `Obstruction` | what stands over a region, read off the z order |
 | `PaintedFrame` | what a window actually paints inside the rectangle it owns |
 | `Loading` | whether a page has finished computing, against the loading label the project declares |
+| `CaseRun` | one declared case, run: the loop, the waits, the attempts and the verdict, none of which the case carries |
+| `Suite` | the cases a selection asked for, run, with every case it left alone named rather than counted |
 
 **A pattern act is the default and needs no foreground.** It asks the control through its own
 accessibility peer rather than asking the desktop to move a mouse. The verbs that do need the
@@ -152,6 +154,116 @@ bare name is refused where the project ships more than one language, because a n
 translation rewrites. Write `{"id": …}` or `{"key": …}` instead — a safety check compared against
 text a person sees has an expiry date, and the expiry is whenever somebody translates the
 application.
+
+## Writing a case
+
+A scenario file is an object with `cases` in it, and optionally the `fixtures` those cases are
+launched against. A case is a data file, not a script: the steps, their locators, their acts and
+their expectations are fields, and the loop, the waits, the attempts and the verdict belong to
+`CaseRun` — so two cases that drive the same window do not carry two copies of the same loop.
+
+```json
+{
+  "cases": [
+    {
+      "name": "renaming a profile writes it back",
+      "catches": "a rename that updates the list and never the file",
+      "filed": "WW63",
+      "tags": ["smoke", "profiles"],
+      "needs": ["a second profile"],
+      "steps": [
+        { "locator": "TabItem[name=\"Profiles\"]", "act": "select" },
+        { "locator": "Edit#profileName", "act": "set value", "with": "Beta", "expect": "Beta", "reads": "value" },
+        { "locator": "CheckBox#autosave", "act": "toggle", "expect": "On", "reads": "toggle" },
+        { "locator": "Button#save", "act": "invoke", "named": "save the profile" }
+      ]
+    }
+  ]
+}
+```
+
+A case has a `name` and its `steps`, and may carry `tags`, `needs`, `catches` and `filed`.
+`locator` and `act` are the two fields every step has. `act` is one of `invoke`, `toggle`,
+`set value`, `set range`, `select`, `expand`, `collapse`. `expect` is what the element should read
+once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
+`toggle`, `selected`, `expanded`, `text`, defaulting to `anything`, the one value the element reports,
+in the order a reader looks at them. `with` is required exactly where the act takes something and
+refused where it does not. `named` renames a step in the report; `meansIt` is the sentence a step
+needs before it may touch an entry the project declared destructive.
+
+A step with no `expect` is an act and not a check: it moves the window into the state a later step
+reads. An act that survives being repeated is attempted again where its read-back does not arrive; one
+that does not — `toggle`, `invoke` — gets a single go, because a retried toggle fails about the
+opposite state.
+
+**Every field is judged where it is written, and the refusal names the field.** A locator that does
+not parse, an act that is not an act, a number a range could never take, a key nobody recognises —
+each is refused at `cases[2].steps[1].act`, before the rest of the file is read. A key is refused
+rather than ignored on purpose: `"expects"` beside `"expect"` would load, run, check nothing and read
+green, which is a check the author wrote and the run never made.
+
+Two refusals are about a case that cannot fail. One with no steps drives nothing. One whose steps all
+expect nothing acts and never looks, so it passes on a build with the defect still in it — the same
+unearned green the third verdict exists to prevent, arriving as a file instead.
+
+### What a case needs, and why it exists
+
+`needs` names what this machine has to have before there is anything to observe — a second profile,
+a pad plugged in, a display that renders. A case whose requirement the run measured as **absent does
+not act at all**: every check in it comes back *unchecked*, carrying the absence, and the run is
+degraded rather than red. That is the third verdict applied to a whole case, and it is the answer
+xUnit has nowhere to put: a case that fails because the machine could not run it sends the reader
+looking for a defect in the application. A case that declares a requirement nothing measured is
+refused — a run answering "it needs two profiles" with silence does not know whether it looked.
+
+`catches` is the defect the case exists to catch, and `filed` the task it was filed under. Neither is
+required, deliberately: asked for a sentence they do not have, an author writes one, and the field
+stops meaning anything for every case that has a real one. What happens instead is that the run
+**counts the cases that say nothing** and names them, because a check nobody can justify is a check
+nobody dares delete and nobody dares change.
+
+### What a case is launched against
+
+A file declares `fixtures`, and a case names one with `fixture`. A fixture is what the application is
+started with — `arguments`, `variables`, and the `environment` it samples reached through a `flag`:
+
+```json
+{
+  "fixtures": [
+    { "name": "pt-BR", "environment": "pt-BR", "flag": "--language", "shareable": true }
+  ]
+}
+```
+
+**One declaration decides both what the application is launched with and what the expectations are
+read from.** The states a menu exists to report are the ones where the environment disagrees with the
+application, and on a developer's machine it never does — so without a sampled environment those
+assertions are only ever unchecked. A fixture that names an environment nothing carries to the launch
+is refused, and so is one that names it twice: an argument spelling `--language=en` beside
+`"environment": "pt-BR"` is two places deciding one thing, and whichever the application reads last
+wins while the expectations still describe the other.
+
+`shareable` says the application leaves a window the next case would accept. `Suite.Launch` lends one
+window to several cases only when three separate things agree: the fixture says it may be lent, every
+case using it declares `onlyReads`, and the invocation asked for sharing. Sharing is opted into per
+invocation rather than merged into the cases, because **a case run alone still owning its process is
+what keeps it worth running alone** — and the first case through a lent fixture pays the launch and
+owns the window, so its reading is the reading it would take alone.
+
+### Running one of them
+
+A case declares `tags` as well as a name, and `Selection` takes either: `Selection.Case("renaming a
+profile writes it back")`, `Selection.Tag("smoke")`, or `Selection.All`. `Suite.Run` runs what the
+selection asked for and **names every case it did not run**, in the sentence it opens with:
+
+```
+Passed: 1 of 9 cases, 8 not run, 3 assertions over case 'renaming a profile writes it back'.
+```
+
+A selector that matches nothing is **refused** with the names or tags there are, rather than
+producing a run of no cases — a run of no cases has no failure and no hole in it, so it reads as a
+pass, and the pass is about nothing. A case name declared twice, in one file or across two, is
+refused for the same reason: a name has to select one case.
 
 ## The verdict, and the exit code
 
@@ -282,12 +394,10 @@ machine of whoever ran it, a verdict assembled wrongly, and a trace that is not 
 
 Written against what has shipped, so it does not promise a line that is still a line:
 
-- **There is no scenario file.** A case is C# against the verbs above. The data-file format, its
-  loader and the refusals at load are designed and not built.
-- **Nothing composes a run.** The pieces have callers now — a verdict carries the step behind it,
-  `Expect.Of` attaches to a red the control view it failed to read, and `Preamble.Around` closes the
-  store fingerprint the same reading opened. What is still missing is the thing above them: no
-  runner walks a case end to end, so a caller assembles these itself.
+- **A case runs; a suite does not.** `CaseRun.Of` walks one case end to end and owns the loop, the
+  waits, the attempts and the verdict. What is still missing is above it: nothing selects a case by
+  name or a file by path, nothing declares the fixture a case needs, and nothing lends one window
+  to the several cases that only read it.
 - **There is no Claude Code plugin.** The MCP tools, the skill and the hook are designed and not
   built.
 

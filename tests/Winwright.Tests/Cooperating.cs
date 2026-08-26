@@ -74,9 +74,15 @@ internal static class Cooperating
     /// <para>
     /// Derived rather than declared. A verb is something that reaches the thing under test, and a
     /// file that reaches it says so by naming an automation element, a window handle or a process.
-    /// Four namespaces — <c>Verdicts</c>, <c>Tracing</c>, <c>Projects</c> and <c>Scenarios</c> —
-    /// name none of the three in any of their thirty-two files, which is a measurement rather than
-    /// a promise, and <c>NoCooperationTests</c> takes it again on every run.
+    /// Three namespaces — <c>Verdicts</c>, <c>Tracing</c> and <c>Projects</c> — name none of the
+    /// three in any of their files, which is a measurement rather than a promise, and
+    /// <c>NoCooperationTests</c> takes it again on every run.
+    /// </para>
+    /// <para>
+    /// It was four until WW57. <c>Scenarios</c> held only declarations, and then it gained the
+    /// engine that runs one — which resolves locators under a root element and is a verb by every
+    /// reading here. The measurement is what found it, on the run after the file was written, which
+    /// is the whole reason it is taken rather than promised.
     /// </para>
     /// </summary>
     public static IReadOnlyList<string> Reaching { get; } = new ReadOnlyCollection<string>(
@@ -222,6 +228,22 @@ internal static class Cooperating
         new("Loading.In", Cooperation.None, false,
             "whether a page has finished computing, read off the tree against the project's own "
                 + "loading label — and a page it could not walk answers that it did not look"),
+
+        // --- WW57, the one verb a whole case is run by -----------------------------------------------
+        // It needs nothing the acts it dispatches do not need, which is the answer that matters: a
+        // case declared as data drives a product nobody here owns, exactly as far as the pattern
+        // acts underneath it do.
+        new("CaseRun.Of", Cooperation.None, false,
+            "one case, run: the loop, the waits, the attempts and the verdict, none of which the "
+                + "case itself carries"),
+
+        // --- WW59, WW60 and WW62 ---------------------------------------------------------------------
+        new("Suite.Run", Cooperation.None, false,
+            "the cases a selection asked for, run against a window the caller already has, with what "
+                + "it left alone named rather than counted"),
+        new("Suite.Launch", Cooperation.None, false,
+            "the same, launching the application under test per fixture — and lending one window to "
+                + "the cases that only read it where the invocation asked for that"),
     ]);
 
     /// <summary>The verbs a bare window is enough for, which is what the run drives.</summary>

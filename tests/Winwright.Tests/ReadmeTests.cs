@@ -113,13 +113,76 @@ public sealed class ReadmeTests
     [Fact]
     public void What_is_not_built_yet_is_said_where_an_adopter_will_look()
     {
-        // Written against what shipped rather than against what is planned. A README naming a
-        // scenario file would be this project promising a line that is still a line.
+        // Written against what shipped rather than against what is planned. This used to assert
+        // that the README said there was no scenario file, which was the honest sentence until
+        // WW58 wrote one — and the sentence a section is checked by has to move when the section
+        // does, or the check outlives what it was about.
         var said = Text();
 
         Assert.Contains("Not built yet", said, StringComparison.Ordinal);
-        Assert.Contains("There is no scenario file", said, StringComparison.Ordinal);
+        Assert.Contains("A case runs; a suite does not", said, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void The_scenario_format_an_adopter_copies_is_the_format_the_loader_reads()
+    {
+        // WW58. An adopter writes their first case by copying the block. A field or a vocabulary
+        // that is not in it is one nobody uses, and one that is in it and wrong is a refusal on
+        // their first run — so both lists are read off the schema rather than retyped here.
+        var said = Text();
+
+        var every = Winwright.Scenarios.ScenarioSchema.File
+            .Concat(Winwright.Scenarios.ScenarioSchema.Case)
+            .Concat(Winwright.Scenarios.ScenarioSchema.Step)
+            .Concat(Winwright.Scenarios.ScenarioSchema.Fixture);
+
+        foreach (var field in every)
+            Assert.Contains($"`{field.Name}`", said, StringComparison.Ordinal);
+
+        foreach (var verb in Winwright.Scenarios.ActVerb.All)
+            Assert.Contains($"`{verb.Name}`", said, StringComparison.Ordinal);
+
+        foreach (var reading in Winwright.Scenarios.ReadBack.All)
+            Assert.Contains($"`{reading.Name}`", said, StringComparison.Ordinal);
+
+        // And the example really is one the loader accepts, taken out of the file rather than
+        // written twice: a block that does not load is worse than no block.
+        var example = Fenced(said, """{"cases":""");
+        Assert.Single(Winwright.Scenarios.ScenarioFile.Read("README.md", example));
+    }
+
+    /// <summary>The first fenced block whose text, with the spaces out, starts with <paramref name="opening"/>.</summary>
+    private static string Fenced(string said, string opening)
+    {
+        var lines = said.Split('\n');
+        var block = new List<string>();
+        var inside = false;
+        foreach (var line in lines)
+        {
+            if (line.TrimEnd('\r').StartsWith("```", StringComparison.Ordinal))
+            {
+                if (inside)
+                {
+                    var text = string.Join('\n', block);
+                    if (Bare(text).StartsWith(Bare(opening), StringComparison.Ordinal))
+                        return text;
+
+                    block.Clear();
+                }
+
+                inside = !inside;
+                continue;
+            }
+
+            if (inside)
+                block.Add(line.TrimEnd('\r'));
+        }
+
+        Assert.Fail($"the README shows no fenced block starting {opening}");
+        return "";
+    }
+
+    private static string Bare(string text) => text.Replace(" ", "").Replace("\n", "").Replace("\r", "");
 
     /// <summary>The non-goals, out of the roadmap that governs them.</summary>
     private static IReadOnlyList<string> NonGoals()
