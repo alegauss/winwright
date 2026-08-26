@@ -52,47 +52,6 @@ nothing outside it should be able to end one either.
 
 ## Block D — Act — patterns before pointers
 
-### §WW216 The cap is checked where the number is declared
-
-Retry publishes a most-attempts of five and says why: past a handful it stops being a
-cap and becomes the loop the type exists to refuse. Its own door enforces that and
-throws an argument exception on anything larger. The project declaration, which is where
-the number actually comes from, checks only that it is positive.
-
-So a project writing nine attempts loads. Nothing says anything. Then the case engine
-passes the declared cap to the bounded retry, which throws - once per step, caught as a
-harness error, so a run of a six-step case reports six breakages about an argument out
-of range and none of them mentions the file the nine was typed into. A reader gets six
-copies of a sentence about this repository for one number in theirs.
-
-Two rules about one value, in two places, and only the weaker one runs at the point
-where a person can act on it. The fix is the shape this tree has used since the first
-block: the limit lives where the value is read, so the number that could never be
-honoured is refused with the file and the key named, and the throw further in becomes
-unreachable rather than merely unlikely. Same for a run that declares zero, which the
-declaration already refuses - this is the other end of the same interval.
-
-### §WW217 A shell that will not cooperate is a hole and not a red
-
-Three guest runs in a row, three different tray cases red, none of them about the code:
-one where the second reading found the flyout shut between two calls and reported a
-toggle nobody made, and one where the fixture's own constructor threw because the shell
-took an icon and put it on neither the taskbar nor the overflow inside five seconds. The
-third run had neither and the second had none.
-
-These cases already know how to answer this. The busy-desk excuse and the hole-naming
-verdict exist for exactly the shell that will not work its flyout, and one of the two
-cases that failed is the case about that. What is missing is that the reasons are
-enumerated at the wrong depth: the excuse covers opening the flyout and does not cover
-the icon never being placed, and it covers the first reading of a pair and not the
-second.
-
-So the interval where a desk becomes a defect is whatever the case happened to wrap.
-Widening it is not the answer either - an excuse that covers everything withdraws the
-check. What is wanted is the reading taken once for the whole case: is this a desk that
-places icons and keeps a flyout open at all. Where it is not, every tray case is
-unchecked and names that; where it is, a red is a red.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

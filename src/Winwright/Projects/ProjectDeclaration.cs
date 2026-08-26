@@ -55,12 +55,7 @@ public sealed class ProjectDeclaration
         LanguageFallback = string.IsNullOrWhiteSpace(shape.Language?.Fallback)
             ? null
             : shape.Language.Fallback.Trim();
-        Attempts = shape.Attempts is { } declared
-            ? declared > 0
-                ? declared
-                : throw new ArgumentException(
-                    $"{path} allows {declared} attempts, and an act nobody may attempt is not an act", nameof(shape))
-            : Acting.Retry.DefaultCap;
+        Attempts = shape.Attempts is { } declared ? Capped(declared, path) : Acting.Retry.DefaultCap;
         Timeouts = Timeouts.Declared(shape.Timeouts, path);
         Destructive = Destructive.Of(shape.Destructive, LanguageFiles, path);
     }
@@ -120,6 +115,14 @@ public sealed class ProjectDeclaration
     /// <summary>
     /// How many times a flaky act may be attempted. A number about this project rather than about
     /// a case, so it is declared once here and never typed into the scenario that needed it.
+    /// <para>
+    /// Bounded at both ends by <see cref="Acting.Retry"/>'s own limits, and both ends checked here.
+    /// WW216: only the lower one was. A project writing nine loaded, said nothing, and then threw
+    /// once per step when the engine handed the number to the bounded retry — so a six-step case
+    /// reported six breakages about an argument out of range, none of which named the file the nine
+    /// was typed into. Two rules about one value in two places, and the weaker one ran where a
+    /// person could act on it.
+    /// </para>
     /// </summary>
     public int Attempts { get; }
 
@@ -184,6 +187,34 @@ public sealed class ProjectDeclaration
 
         throw new DeclarationMissingException(
             MissingDeclaration.NotUpTheTree, FileName, $"{directory.FullName} and every directory above it", "every scenario in this project");
+    }
+
+    /// <summary>
+    /// The declared cap, or a refusal naming this file and the limit it broke.
+    /// <para>
+    /// WW216. Both ends, and both of <see cref="Acting.Retry"/>'s own numbers rather than a second
+    /// pair written here: a limit transcribed is a limit that drifts, and the reason for the upper
+    /// one lives on the type that enforces it — past a handful a cap stops being a cap and becomes
+    /// the loop that type exists to refuse.
+    /// </para>
+    /// </summary>
+    private static int Capped(int declared, string path)
+    {
+        if (declared <= 0)
+        {
+            throw new ArgumentException(
+                $"{path} allows {declared} attempts, and an act nobody may attempt is not an act", nameof(declared));
+        }
+
+        if (declared > Acting.Retry.MostAttempts)
+        {
+            throw new ArgumentException(
+                $"{path} allows {declared} attempts, which is not a cap: past {Acting.Retry.MostAttempts} an act is "
+                    + "one nobody will ever see fail",
+                nameof(declared));
+        }
+
+        return declared;
     }
 
     private string? Resolve(string? path)

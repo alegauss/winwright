@@ -11,9 +11,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW216** (deps: —) **a project declaring nine attempts breaks every step instead of being refused once** — The cap Retry publishes is checked where the number is read, so a declaration nothing could honour is refused at load instead of thrown per step. → §WW216
-- 📋 **WW217** (deps: —) **the tray cases go red about the shell on a guest that placed no icon and shut its own flyout** — A shell that will not place an icon or keep a flyout open is a hole naming the desk, which is the answer these cases already have for every other reason. → §WW217
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

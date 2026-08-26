@@ -70,6 +70,11 @@ internal static class DeskDiscards
             "shutting what this case opened, on the arm where opening worked. The case has already "
                 + "asserted everything it is about by then, and the class's own Dispose shuts it "
                 + "again — so a refused close here is answered one line later"),
+        new("NotificationAreaTests.A_search_that_opened_the_flyout_waits_for_its_own_icon_and_not_for_a_stranger",
+            "NotificationArea.CloseOverflow(",
+            "shutting what the search opened, after the case has asserted everything it is about. The "
+                + "shut it does care about is the one before the search, and that one is excused "
+                + "rather than discarded — a flyout left standing here is the class's Dispose's problem"),
         new("TrayGhosts.Showing", "NotificationArea.CloseOverflow(",
             "the census opens the flyout to read what is hiding in it and shuts it again. The "
                 + "reading it answers is about ghosts and carries its own third state for a flyout "

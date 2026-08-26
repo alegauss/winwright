@@ -111,6 +111,9 @@
 - ✅ **WW174** **a tray menu that never came up records Failed whether the code or the desk was at fault, and answers no verdict** — A tray menu answers a verdict and a step that agree, so a shell hiding the icon or a desk refusing the focus is a hole and only a menu the icon never showed is red.
 - ✅ **WW209** **the verb catalogue says every verb the engine offers and reads two of its ten namespaces, with nothing saying why** — The catalogue reads any engine file that touches the application, not two namespaces: 18 verbs an adopter can call, never asked what they need, and the README named 22 of 31 families.
 - ✅ **WW210** **nothing checks a pattern act never reaches synthesised input, so a quiet fallback would go green** — Filed expecting Act, Pick and Selecting to reach nothing; two of the three do, deliberately — so it is 14 verbs paired with how a caller learns, and Act alone asserted to reach none.
+- ✅ **WW216** **a project declaring nine attempts breaks every step instead of being refused once** — Both ends of the cap Retry publishes are checked where the number is declared, so nine is refused once with the file named instead of thrown once per step.
+- ✅ **WW217** **the tray cases go red about the shell on a guest that placed no icon and shut its own flyout** — A desk placing no icon anywhere is a hole naming it, asked by a new reading after the search fails, and the second call of a pair is excused like the first.
+- ✅ **WW220** **a search misses an icon in a flyout that opened and had laid out somebody else's** — A search that opened the flyout polls for the name it was given, so a stranger laid out first is no longer answered as this icon being absent from everywhere.
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -153,6 +156,7 @@
 - ✅ **WW151** **nothing a run calls takes the store fingerprint, so leaving the machine as it was is met by whoever remembers** — The run's own reading takes the fingerprint and reports what moved as a finding, so a scenario that changed a setting says so and one that declared no store says that instead of nothing.
 - ✅ **WW166** **a failed step's diagnosis is built by nobody, so a reader still writes a throwaway script to see what the window had** — A red expectation carries the control view it failed to read, because Expect.Of is handed the subject rather than a function and reads the window the instant the deadline ran out.
 - ✅ **WW170** **the store fingerprint's after half is called only by its own tests, so no run says what it left changed** — Preamble.Around closes the fingerprint the same reading opened, so what a run left changed is reported beside the desk and the binary rather than by whoever remembered the second call.
+- ✅ **WW219** **a case needing four polls inside eighty milliseconds claims the guest is the application** — The claim is made about the readings that happened, so a guest that fitted three polls proves it, and the stronger claim still holds on every run that saw the move.
 
 ## Block G — The scenario — a case is a data file
 

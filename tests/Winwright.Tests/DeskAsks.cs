@@ -150,6 +150,10 @@ internal static class DeskAsks
         new("NotificationArea.Reachable(", Winwright.Acting.TraySearch.PreconditionName,
             "whether there is a notification area on this desk at all, which WW190 added and which "
                 + "is the reading most of the tray cases excuse on"),
+        new("NotificationArea.Placing(", Winwright.Acting.TraySearch.PreconditionName,
+            "whether this shell is placing icons at all, which WW217 added for the case that has "
+                + "just failed to find its own — and a shell that places none is the same absence "
+                + "Reachable names, asked one question wider"),
         new("NotificationArea.ElementFor(", Winwright.Acting.TraySearch.PreconditionName,
             "the element behind an icon, which the shell may have moved between the two calls"),
         new("NotificationArea.OpenMenu(", Winwright.Acting.TrayMenu.PreconditionName,
@@ -276,6 +280,16 @@ internal static class DeskAsks
             Unaffected.Shape,
             "the window is created hidden and never activated, so it cannot be the foreground on any "
                 + "desk — what is asserted is a negative that holds whoever does hold it"),
+        new("NotificationAreaTests.Whether_this_desk_places_icons_at_all_is_a_different_question_from_whether_one_is_there",
+            Unaffected.Shape,
+            "WW217. The reading itself is what this case is about, and both arms are written out: a "
+                + "desk called placing must hold an icon somewhere, and one that is not says which "
+                + "part refused. Excusing on the fact it exists to read would leave nothing asserted"),
+        new("NotificationAreaTests.Asking_whether_the_desk_places_icons_leaves_the_taskbar_as_it_found_it",
+            Unaffected.Shape,
+            "the flyout is read either side and the two are compared, so whatever the shell was "
+                + "showing is what the reading has to leave it showing — which holds on a desk that "
+                + "would not open it at all, and is the same claim WW197 made literal one case down"),
         new("TrayPlacementTests.The_fixture_leaves_the_overflow_the_way_it_found_it",
             Unaffected.Shape,
             "WW197 made the claim literal: the flyout is read either side and the two are compared, "

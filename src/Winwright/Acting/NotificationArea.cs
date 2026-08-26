@@ -396,6 +396,72 @@ public static class NotificationArea
     }
 
     /// <summary>
+    /// Whether this desk is placing tray icons at all, wherever they land.
+    /// <para>
+    /// WW217. <see cref="Reachable"/> answers whether the area can be searched and stops at the bar,
+    /// which is the wrong question for the case that has just failed to find its own icon: a search
+    /// that opened the flyout, read it, and did not see one genuinely looked everywhere — so the
+    /// verdict was a red about the code, and the sentence beside it said the shell had taken the
+    /// icon and put it nowhere. On a guest under a full suite that is the shell being slow, and a
+    /// red about it sends the reader to this repository.
+    /// </para>
+    /// <para>
+    /// So the question is asked once, after the fact, about the desk rather than about the icon: is
+    /// anything placed anywhere. A bar or a flyout holding icons is a shell that places them, and
+    /// ours being absent from it is a finding. A bar with nothing on it and a flyout this run cannot
+    /// read has placed nobody's icon, and that is not a finding about anything.
+    /// </para>
+    /// <para>
+    /// It leaves the taskbar as it found it. Looking may have to open the flyout, and a flyout left
+    /// standing is the thing the next case trips on.
+    /// </para>
+    /// </summary>
+    /// <param name="settleMs">How long working the flyout may take.</param>
+    /// <param name="pollMs">How often that wait looks again.</param>
+    public static Precondition Placing(int settleMs = 2000, int pollMs = 25)
+    {
+        if (Tray() is null)
+            return Precondition.Absent(TraySearch.PreconditionName, $"no window of class {TrayClassName} is on this desk");
+
+        // The cheap half first, and it is also the common answer: a bar with anything on it is a
+        // shell that places icons, and nothing has to be opened to find that out.
+        if (Showing().Count > 0)
+            return Precondition.Met(TraySearch.PreconditionName);
+
+        if (Chevron() is null)
+        {
+            return Precondition.Absent(
+                TraySearch.PreconditionName,
+                "the taskbar shows no icon and carries no chevron, so nothing placed anywhere could be reached");
+        }
+
+        var already = Overflow() is not null;
+        var flyout = OpenOverflow(settleMs, pollMs);
+        try
+        {
+            if (!flyout.Held)
+            {
+                return Precondition.Absent(
+                    TraySearch.PreconditionName,
+                    $"the taskbar shows no icon and the overflow could not be looked in — {flyout}");
+            }
+
+            return Hidden().Count > 0
+                ? Precondition.Met(TraySearch.PreconditionName)
+                : Precondition.Absent(
+                    TraySearch.PreconditionName,
+                    "neither the taskbar nor the overflow holds a single icon, so this shell is placing none");
+        }
+        finally
+        {
+            // Only what this reading opened. A flyout that was already standing belongs to whoever
+            // opened it, and shutting it here would answer their next look with a closed one.
+            if (!already && flyout.Held)
+                CloseOverflow(settleMs, pollMs);
+        }
+    }
+
+    /// <summary>
     /// Open the overflow through the chevron's invoke pattern, which needs no pointer and no
     /// foreground.
     /// <para>
@@ -492,8 +558,12 @@ public static class NotificationArea
     /// Whether to open the flyout when the taskbar does not hold it. False looks at the bar alone,
     /// which is a smaller question and is reported as one rather than as an absent icon.
     /// </param>
-    /// <param name="settleMs">How long working the flyout may take.</param>
-    /// <param name="pollMs">How often that wait looks again.</param>
+    /// <param name="settleMs">
+    /// How long each stage of working the flyout may take: opening it, and then WW220's wait for the
+    /// icon this search was named for. Two stages and not one, because a flyout that has laid out
+    /// somebody else's icon is open and is not yet an answer to this question.
+    /// </param>
+    /// <param name="pollMs">How often those waits look again.</param>
     public static TraySearch Find(string named, bool openingTheOverflow = true, int settleMs = 2000, int pollMs = 25)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(named);
@@ -522,7 +592,20 @@ public static class NotificationArea
                 $"it is not on the taskbar, and the overflow could not be looked in — {flyout}");
         }
 
-        var hidden = Hidden().FirstOrDefault(icon => Matches(icon, named));
+        // WW220. Polled for the name this search was given, and not read once. The gate the flyout
+        // was settled against is any icon with a width — which a flyout holding four of the shell's
+        // own satisfies on the first poll, while the one this run added is still arriving. Measured:
+        // a case added an icon, watched a reading find it, shut the flyout, asked again through here,
+        // and got told it was on neither the taskbar nor the overflow.
+        //
+        // The cost is on the negative, and that is the right way round: an icon genuinely absent now
+        // pays the settle before saying so, and a fast wrong no is exactly what this was.
+        TrayIcon? hidden = null;
+        Attempt.UntilTrue(
+            () => (hidden = Hidden().FirstOrDefault(icon => Matches(icon, named))) is not null,
+            settleMs,
+            pollMs);
+
         return hidden is not null
             ? new TraySearch(named, hidden, everywhere: true, flyout, "")
             : new TraySearch(named, null, everywhere: true, flyout, "it is on neither the taskbar nor the overflow");

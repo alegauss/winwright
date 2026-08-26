@@ -209,6 +209,18 @@ internal sealed class TrayIconFixture : IDisposable
 
         if (!found.Found)
         {
+            // WW217. Asked once, after the fact, and about the desk rather than about this icon: a
+            // search that opened the flyout and read it did look everywhere, so the old verdict here
+            // was a red — and on a guest under a full suite what it was really reporting was a shell
+            // that had not placed anybody's icon yet. A bar or a flyout with icons in it is a shell
+            // that places them, and ours being absent from that is a finding.
+            if (NotificationArea.Placing() is { Satisfied: false } desk)
+            {
+                throw new DeskRefusedException(
+                    desk,
+                    $"'{Tip}' could not be looked for on a desk that is placing no icons: {desk.Absence}");
+            }
+
             // The last search's own reason, which is the half this used to drop. A shell that would
             // not open the flyout and a shell that took the icon and placed it nowhere both ended
             // this sentence the same way, and the difference is the one a reader needs.

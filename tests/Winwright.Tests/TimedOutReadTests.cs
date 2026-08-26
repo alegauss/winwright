@@ -81,8 +81,19 @@ public sealed class TimedOutReadTests
         var read = Reads.Diagnose(
             Waited(() => ++polls <= 3 ? Computing : Rendering), Computing, Rendering);
 
+        // WW219. This asserted the sentence quoted Rendering, which needs the deadline to fit a
+        // fourth poll — and on a loaded guest it fits three. Nothing about the code differs between
+        // those two runs: what differs is how many times this suite got to look, and asserting on
+        // that turned the machine into a claim about the application, in the file that exists to
+        // diagnose exactly that confusion.
         Assert.Equal(ReadEnded.Working, read.Ended);
-        Assert.Contains($"last reading '{Rendering}'", read.Sentence());
+        Assert.Contains(read.LastSeen, (string?[])[Computing, Rendering]);
+        Assert.Contains($"last reading '{read.LastSeen}'", read.Sentence());
+
+        // And the stronger claim, still made on every run that did observe the move: a reading that
+        // changed from one declared working state to another ends on the second one.
+        if (read.Watched.Readings.Any(one => one.Read == Rendering))
+            Assert.Equal(Rendering, read.LastSeen);
     }
 
     [Fact]

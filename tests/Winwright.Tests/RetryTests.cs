@@ -179,4 +179,57 @@ public class RetryTests
             Directory.Delete(root, recursive: true);
         }
     }
+
+    [Fact]
+    public void A_cap_this_type_would_refuse_is_refused_where_the_number_is_declared()
+    {
+        // WW216. Both ends of the same interval, checked in the same place. This used to load, say
+        // nothing, and then throw once per step when the engine handed the number here — so a
+        // six-step case reported six breakages about an argument out of range, and not one of them
+        // named the file the number was typed into.
+        var root = Directory.CreateTempSubdirectory("winwright-capped-").FullName;
+        try
+        {
+            var path = Path.Combine(root, ProjectDeclaration.FileName);
+
+            File.WriteAllText(path, $$"""{ "attempts": {{Retry.MostAttempts}} }""");
+            Assert.Equal(Retry.MostAttempts, ProjectDeclaration.Find(root).Attempts);
+
+            File.WriteAllText(path, $$"""{ "attempts": {{Retry.MostAttempts + 1}} }""");
+            var refused = Assert.Throws<ArgumentException>(() => ProjectDeclaration.Find(root));
+
+            // The file and the limit, because the reader is going to their own repository to change
+            // a number and not to this one to read a stack trace.
+            Assert.Contains(path, refused.Message, StringComparison.Ordinal);
+            Assert.Contains($"past {Retry.MostAttempts}", refused.Message, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Nothing_a_project_may_declare_can_reach_the_cap_this_type_refuses()
+    {
+        // The point of putting the limit where the value is read: the throw further in is now
+        // unreachable from a declaration rather than merely unlikely.
+        var root = Directory.CreateTempSubdirectory("winwright-reachable-").FullName;
+        try
+        {
+            var path = Path.Combine(root, ProjectDeclaration.FileName);
+            foreach (var declared in Enumerable.Range(1, Retry.MostAttempts))
+            {
+                File.WriteAllText(path, $$"""{ "attempts": {{declared}} }""");
+                var attempts = ProjectDeclaration.Find(root).Attempts;
+
+                Assert.Equal(declared, attempts);
+                Assert.Equal(1, Retry.Bounded(FlakyFor(0), Worked, attempts).Attempts);
+            }
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
 }

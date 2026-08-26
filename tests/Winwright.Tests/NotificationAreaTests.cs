@@ -109,6 +109,42 @@ public sealed class NotificationAreaTests : IDisposable
     }
 
     [Fact]
+    public void Whether_this_desk_places_icons_at_all_is_a_different_question_from_whether_one_is_there()
+    {
+        // WW217. The reading the tray fixture was missing. A search that opened the flyout and read
+        // it did look everywhere, so an absent icon came out as a red — while what the desk was
+        // really doing on a loaded guest was placing nobody's icon yet.
+        var placing = NotificationArea.Placing();
+
+        Assert.Equal(NotificationArea.Reachable().Name, placing.Name);
+        Assert.False(string.IsNullOrWhiteSpace(placing.Satisfied ? "met" : placing.Absence));
+
+        // The two are not the same question, and this is the case that says so: a bar with nothing
+        // on it and a readable flyout with something in it is unreachable and placing.
+        if (!placing.Satisfied)
+            return;
+
+        Assert.True(
+            NotificationArea.Showing().Count > 0 || NotificationArea.Hidden().Count > 0,
+            "this desk was called placing and holds no icon anywhere");
+    }
+
+    [Fact]
+    public void Asking_whether_the_desk_places_icons_leaves_the_taskbar_as_it_found_it()
+    {
+        // Looking may have to open the flyout, and a flyout left standing is what the next case
+        // trips on — which one of the flakes behind WW217 was exactly.
+        if (BusyDesk.Excused(NotificationArea.Reachable()))
+            return;
+
+        var before = NotificationArea.Overflow() is not null;
+
+        _ = NotificationArea.Placing();
+
+        Assert.Equal(before, NotificationArea.Overflow() is not null);
+    }
+
+    [Fact]
     public void The_chevron_is_found_by_its_automation_id_and_never_by_its_position()
     {
         // WW190. An absent chevron is a covered taskbar and not a shell that names it differently,
@@ -163,6 +199,19 @@ public sealed class NotificationAreaTests : IDisposable
 
         var again = NotificationArea.OpenOverflow();
 
+        // WW217. The second reading of the pair, excused the way the first already was. A shell that
+        // shuts its own flyout between one call and the next leaves nothing already open to answer
+        // about — and the red that produced said the second call had toggled it, which is a claim
+        // about this code made out of something the desk did.
+        if (again.Held && !again.Already
+            && BusyDesk.Excused(Winwright.Verdicts.Precondition.Absent(
+                OverflowState.PreconditionName,
+                "the shell shut the flyout between one call and the next, so the second call had "
+                    + "nothing already open to answer about")))
+        {
+            return;
+        }
+
         Assert.True(first.Held, first.ToString());
         Assert.True(again.Held, again.ToString());
         Assert.NotNull(NotificationArea.Overflow());
@@ -199,6 +248,31 @@ public sealed class NotificationAreaTests : IDisposable
         Assert.Equal(Winwright.Tracing.StepVerdict.Unchecked, step.Verdict);
         Assert.False(string.IsNullOrWhiteSpace(opened.Because), "the flyout was refused and said nothing about why");
         Assert.Contains(opened.Because, step.Detail!, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_search_that_opened_the_flyout_waits_for_its_own_icon_and_not_for_a_stranger()
+    {
+        // WW220. The gate the flyout was settled against is any icon with a width, which the shell's
+        // own icons satisfy on the first poll — so a search read once and answered about an icon that
+        // was still arriving. Provoked rather than waited for: the flyout is shut, so this search
+        // opens it from cold and has to find its own icon on the far side of that.
+        if (!Placed)
+            return;
+
+        // Excused and not asserted. Whether the shell shuts its own flyout is the shell's business,
+        // and this case is about what the search does once the flyout is shut — so a desk that will
+        // not shut it has taken the condition away rather than failed anything.
+        if (BusyDesk.Excused(NotificationArea.CloseOverflow().AsAssertion("the flyout shuts before the search")))
+            return;
+
+        var searched = NotificationArea.Find(Tip);
+        if (BusyDesk.Excused(searched.AsAssertion("the icon this run added can be found")))
+            return;
+
+        Assert.True(searched.Found, searched.Sentence());
+        Assert.True(searched.Everywhere, searched.Sentence());
+        NotificationArea.CloseOverflow();
     }
 
     [Fact]

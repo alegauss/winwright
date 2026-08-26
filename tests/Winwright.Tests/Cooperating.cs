@@ -194,6 +194,9 @@ internal static class Cooperating
         new("NotificationArea.Hidden", Cooperation.None, false, "the icons in the flyout"),
         new("NotificationArea.ElementFor", Cooperation.None, false, "one icon as an element"),
         new("NotificationArea.Reachable", Cooperation.None, false, "whether there is a notification area to look at"),
+        new("NotificationArea.Placing", Cooperation.None, false,
+            "whether this desk is placing icons at all, wherever they land — the question a case asks "
+                + "after failing to find its own, and the one that tells a slow shell from an absent icon"),
         new("NotificationArea.Find", Cooperation.None, true, "an icon by name, opening the flyout to look"),
         new("NotificationArea.OpenOverflow", Cooperation.None, true, "open the flyout"),
         new("NotificationArea.CloseOverflow", Cooperation.None, true, "shut it again"),
