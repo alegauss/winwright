@@ -606,9 +606,40 @@ public static class NotificationArea
             settleMs,
             pollMs);
 
-        return hidden is not null
-            ? new TraySearch(named, hidden, everywhere: true, flyout, "")
-            : new TraySearch(named, null, everywhere: true, flyout, "it is on neither the taskbar nor the overflow");
+        if (hidden is not null)
+            return new TraySearch(named, hidden, everywhere: true, flyout, "");
+
+        // WW223. The poll gave up, and until now that came out as one sentence whichever of two
+        // things had happened. WW220 made the look a poll rather than a single read; what a poll
+        // cannot fix is a flyout that shuts while it is running — Hidden() then answers empty for
+        // the rest of the deadline, and "on neither" becomes a claim about the icon assembled out of
+        // a desk that had stopped being lookable. That is the shape WW168, WW174 and WW179 each
+        // caught once already: not found because nothing was there, against not found because
+        // nothing could look.
+        //
+        // Read once, after the fact, for the reason the diagnosis is taken after the last attempt:
+        // what a reader wants is the desk as it stood when the run gave up.
+        var open = Overflow() is not null;
+        var inside = open ? Hidden().Count : 0;
+        var showing = Showing().Count;
+
+        if (!open)
+        {
+            // Not everywhere, so it is a hole under this search's own condition rather than an
+            // absence. A caller told the icon is missing restarts nothing; a caller told the flyout
+            // shut mid-look knows to ask again.
+            return new TraySearch(
+                named, null, everywhere: false, flyout,
+                $"the overflow shut while this search was looking in it, so the flyout was not read to "
+                    + $"the end — the taskbar's own {showing} icon(s) are all this saw");
+        }
+
+        // The counts are the half that used to be missing. An empty flyout and a flyout holding four
+        // of the shell's own end this sentence the same way, and the difference is the one that says
+        // whether the shell is placing anything at all.
+        return new TraySearch(
+            named, null, everywhere: true, flyout,
+            $"it is on neither the taskbar nor the overflow ({showing} on the bar, {inside} in the flyout)");
     }
 
     /// <summary>

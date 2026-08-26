@@ -375,6 +375,26 @@ public sealed class NotificationAreaTests : IDisposable
     }
 
     [Fact]
+    public void An_absence_says_how_much_was_there_to_look_through()
+    {
+        // WW223. An empty flyout and a flyout holding four of the shell's own ended this sentence
+        // the same way, and the difference is the one that says whether the shell is placing
+        // anything at all — which is what an investigation of the intermittent red had to go and
+        // measure by hand because the red did not carry it.
+        var searched = NotificationArea.Find("winwright is not here", settleMs: 800, pollMs: 40);
+
+        Assert.False(searched.Found);
+        if (BusyDesk.Excused(searched.AsAssertion("the notification area could be looked through")))
+            return;
+
+        // Everywhere, so this is an answer about the icon and the counts are what it was measured
+        // against. A search that could not look says something else entirely and is excused above.
+        Assert.True(searched.Everywhere, searched.Sentence());
+        Assert.Contains("on the bar", searched.Because, StringComparison.Ordinal);
+        Assert.Contains("in the flyout", searched.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void The_route_to_a_menu_is_focus_and_the_application_key_and_it_reports_the_truth()
     {
         if (!Placed)

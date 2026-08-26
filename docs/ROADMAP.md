@@ -38,7 +38,7 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — The case written to prove the race is gone went red on one guest run and green on the next against the same tree, so the race is not gone. → §WW223
+- ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
 
 ## Done when — Block A
 
