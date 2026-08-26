@@ -76,7 +76,9 @@ public sealed record Roll
         IReadOnlyList<Attendance> missing,
         IReadOnlyList<Attendance> skipping,
         IReadOnlyList<Attendance> unexpected,
-        string? lastAnswered)
+        string? lastAnswered,
+        IReadOnlyList<string>? excused,
+        bool asked)
     {
         Discovered = discovered;
         Recorded = recorded;
@@ -84,7 +86,30 @@ public sealed record Roll
         Skipping = skipping;
         Unexpected = unexpected;
         LastAnswered = lastAnswered;
+        Excused = excused;
+        Asked = asked;
     }
+
+    /// <summary>
+    /// Whether anybody asked what the run excused. Three states and not two: a caller that never
+    /// asked is silent, a caller that asked and found no ledger is told it is unknown, and a caller
+    /// that read one gets the count. Collapsing the first two would put "not read" on the end of
+    /// every sentence in this tool's own tests, which is how a clause stops being read.
+    /// </summary>
+    public bool Asked { get; }
+
+    /// <summary>
+    /// Every desk fact a check was excused for, or null where nobody wrote them down.
+    /// <para>
+    /// WW231. Null is not zero. A suite that excused nothing wrote an empty ledger; a run whose
+    /// ledger never appeared has excuses nobody counted, and calling that zero is the same reading
+    /// this whole tool exists to withdraw.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string>? Excused { get; }
+
+    /// <summary>How many checks the desk was excused for, or null where that was not read.</summary>
+    public int? Holes => Excused?.Count;
 
     /// <summary>Every case discovery found, in the order it found them.</summary>
     public IReadOnlyList<string> Discovered { get; }
@@ -137,7 +162,28 @@ public sealed record Roll
     /// </summary>
     /// <param name="discovered">The cases discovery reported.</param>
     /// <param name="recorded">The cases the run wrote down, each saying whether it ran.</param>
-    public static Roll Of(IEnumerable<string> discovered, IEnumerable<Recorded> recorded)
+    /// <remarks>
+    /// This overload asks nothing about what the run excused, and says nothing about it. WW231: the
+    /// excuses are the third number in this arithmetic and the only one nobody was told, and the
+    /// overload below is how a caller asks. Neither ever makes a run red — a hole is not a failure —
+    /// but a green covering 1,551 of 1,563 checks has to say so.
+    /// </remarks>
+    public static Roll Of(IEnumerable<string> discovered, IEnumerable<Recorded> recorded) =>
+        Taken(discovered, recorded, null, asked: false);
+
+    /// <inheritdoc cref="Of(IEnumerable{string}, IEnumerable{Recorded})" />
+    /// <param name="discovered">The cases discovery reported.</param>
+    /// <param name="recorded">The cases the run wrote down.</param>
+    /// <param name="excused">
+    /// What the run excused, or null where the ledger was not there. Calling this overload is the
+    /// asking, so null here is <em>unknown</em> and never <em>none</em>.
+    /// </param>
+    public static Roll Of(
+        IEnumerable<string> discovered, IEnumerable<Recorded> recorded, IEnumerable<string>? excused) =>
+        Taken(discovered, recorded, excused, asked: true);
+
+    private static Roll Taken(
+        IEnumerable<string> discovered, IEnumerable<Recorded> recorded, IEnumerable<string>? excused, bool asked)
     {
         ArgumentNullException.ThrowIfNull(discovered);
         ArgumentNullException.ThrowIfNull(recorded);
@@ -184,7 +230,9 @@ public sealed record Roll
             new ReadOnlyCollection<Attendance>(missing),
             new ReadOnlyCollection<Attendance>(skipping),
             new ReadOnlyCollection<Attendance>(unexpected),
-            answered.Count == 0 ? null : answered[^1].Name);
+            answered.Count == 0 ? null : answered[^1].Name,
+            excused is null ? null : new ReadOnlyCollection<string>(excused.Where(one => !string.IsNullOrWhiteSpace(one)).ToList()),
+            asked);
     }
 
     /// <summary>What the roll found, in the one sentence a reader skims.</summary>
@@ -193,8 +241,12 @@ public sealed record Roll
         if (Discovered.Count == 0)
             return "discovery found no test at all, which is not a suite that passed.";
 
+        // WW231. The excuses ride on the sentence and never on the verdict: a hole is not a failure,
+        // and a roll that went red over one would have every desk-dependent case turned off inside a
+        // week. What it changes is the claim — "all 1,563 ran" is false of a run where twelve of them
+        // looked at the desk and left, and that sentence was the only thing anybody read.
         if (Whole)
-            return $"all {Discovered.Count} discovered cases ran.";
+            return $"all {Discovered.Count} discovered cases ran{Excusing()}.";
 
         var parts = new List<string>();
         if (Missing.Count > 0)
@@ -212,7 +264,37 @@ public sealed record Roll
         if (Unexpected.Count > 0)
             parts.Add($"{Unexpected.Count} method(s) answered with cases discovery never found");
 
-        return string.Join("; ", parts) + ".";
+        return string.Join("; ", parts) + Excusing() + ".";
+    }
+
+    /// <summary>
+    /// What the excuses add to either sentence, or nothing at all where none were made.
+    /// <para>
+    /// Silent on a run that excused nothing, because a clause saying "and none were excused" on every
+    /// green is a clause nobody reads by the third run — and then the one that says twelve reads the
+    /// same. Never silent about not knowing: a ledger nobody wrote is the reading this tool is for.
+    /// </para>
+    /// </summary>
+    private string Excusing()
+    {
+        if (!Asked)
+            return "";
+
+        if (Excused is null)
+            return ", and how many checks the desk excused was not read";
+
+        if (Excused.Count == 0)
+            return "";
+
+        // The conditions and not only the count. Twelve excuses for one absent foreground is a desk
+        // somebody was using; twelve for six different facts is a machine that cannot observe at all,
+        // and the reader's next move differs for each.
+        var facts = Excused
+            .GroupBy(one => one, StringComparer.Ordinal)
+            .OrderByDescending(one => one.Count())
+            .Select(one => $"{one.Count()} for {one.Key}");
+
+        return $", and {Excused.Count} check(s) were excused — {string.Join(", ", facts)}";
     }
 
     /// <summary>The whole reading: the sentence, then the methods, bounded so a wipeout is readable.</summary>

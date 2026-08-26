@@ -39,7 +39,6 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
-- 📋 **WW231** (deps: —) **a case that excused itself is reported as a pass and counted as one** — So a run where every desk-dependent case holed reads exactly like one that proved everything, and the roll call cannot tell them apart. → §WW231
 
 ## Done when — Block A
 

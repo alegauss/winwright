@@ -49,6 +49,7 @@ public static class Program
 
         string? listing = null;
         string? results = null;
+        string? excused = null;
         var most = 25;
 
         for (var index = 0; index + 1 < args.Length; index += 2)
@@ -61,6 +62,12 @@ public static class Program
                 case "--results":
                     results = args[index + 1];
                     break;
+
+                // WW231. Optional, and its absence is not zero: a caller that does not pass it is a
+                // caller who never asked, and the roll says so rather than reporting a clean run.
+                case "--excused":
+                    excused = args[index + 1];
+                    break;
                 case "--most" when int.TryParse(args[index + 1], out var many) && many > 0:
                     most = many;
                     break;
@@ -72,14 +79,21 @@ public static class Program
         if (listing is null || results is null)
         {
             wrong.WriteLine(
-                "usage: Winwright.RollCall --discovered <dotnet test --list-tests output> --results <trx> [--most n]");
+                "usage: Winwright.RollCall --discovered <dotnet test --list-tests output> "
+                    + "--results <trx> [--excused <ledger>] [--most n]");
             return Unreadable;
         }
 
         Roll roll;
         try
         {
-            roll = Roll.Of(Readers.DiscoveredIn(listing), Readers.RecordedIn(results));
+            // The overload is the asking. A caller that did not pass the flag takes the two-argument
+            // one and hears nothing about excuses; a caller that did takes the three-argument one, and
+            // a ledger that is not there then reads as unknown rather than as none. Calling the second
+            // either way is what made every run of this tool claim its excuses were unread.
+            roll = excused is null
+                ? Roll.Of(Readers.DiscoveredIn(listing), Readers.RecordedIn(results))
+                : Roll.Of(Readers.DiscoveredIn(listing), Readers.RecordedIn(results), Readers.ExcusedIn(excused));
         }
         catch (Exception unreadable) when (unreadable is IOException or InvalidDataException or UnauthorizedAccessException)
         {

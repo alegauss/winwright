@@ -45,6 +45,43 @@ internal sealed class DeskRefusedException : Exception
 internal static class BusyDesk
 {
     /// <summary>
+    /// Where an excuse is written down, beside the assembly that made it.
+    /// <para>
+    /// WW231. This was called at eighty-one sites and counted nowhere. An excused case returns and
+    /// xunit records a pass, so a run on a locked desk reported every case passing and the roll call's
+    /// arithmetic — discovery against results — balanced perfectly. That is the founding defect
+    /// wearing the other hat: the suite that reported 352 where the run before had 374 at least moved
+    /// a number, and this moved none.
+    /// </para>
+    /// <para>
+    /// A file rather than a counter, because the process that excuses is not the process that reports:
+    /// the roll call runs after the test host, including after one that died, which is the whole
+    /// reason it is its own program. A counter in memory would go with the host it was counting.
+    /// </para>
+    /// </summary>
+    internal static string Ledger { get; } = Path.Combine(AppContext.BaseDirectory, "excused.txt");
+
+    private static readonly object Writing = new();
+
+    /// <summary>
+    /// Truncated once, which is once per run: this type is touched by every desk-dependent class, and
+    /// a file left from an earlier run would be read as this one's excuses. Absent afterwards means
+    /// nothing was excused; absent because nobody wrote it is what the roll call reports as unknown.
+    /// </summary>
+    static BusyDesk()
+    {
+        try
+        {
+            File.WriteAllText(Ledger, "");
+        }
+        catch (Exception unwritable) when (unwritable is IOException or UnauthorizedAccessException)
+        {
+            // Deliberately swallowed. A suite that cannot write its own ledger still has a suite to
+            // run, and the roll call reports the absence rather than this failing every case.
+        }
+    }
+
+    /// <summary>
     /// Build a fixture, answering null where the desk refused rather than letting the throw stand.
     /// <para>
     /// WW179. Setup meets the same desk facts an act does, and there is no act there to answer them
@@ -128,5 +165,21 @@ internal static class BusyDesk
             DeskFacts.Names(missing.Name),
             $"'{missing.Name}' is not a fact this engine calls the desk's: "
                 + string.Join("; ", DeskFacts.Named));
+
+        // WW231. Written down after the validation and never before it: an excuse this method is
+        // about to refuse is not an excuse, and recording it would put a hole in the count that the
+        // run does not have.
+        lock (Writing)
+        {
+            try
+            {
+                File.AppendAllText(Ledger, missing.Name + Environment.NewLine);
+            }
+            catch (Exception unwritable) when (unwritable is IOException or UnauthorizedAccessException)
+            {
+                // As above: the case it excused is still excused, and a ledger that could not be
+                // written is a number the roll call says it does not have.
+            }
+        }
     }
 }

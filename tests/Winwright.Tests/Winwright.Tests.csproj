@@ -94,7 +94,14 @@
     <!-- Captured rather than left to fail on its own: MSBuild's own words for a command that
          exited non-zero are "the command exited with code 1", and this block's criterion is that a
          degraded run is legible without reading the log. What the roll said is the legible part. -->
-    <Exec Command="dotnet exec &quot;$(RollCallTool)&quot; --discovered &quot;$(RollCallResults)\discovered.txt&quot; --results &quot;$(RollCallResults)\winwright.trx&quot; 2&gt;&amp;1"
+    <!-- WW231: the excused flag names the ledger BusyDesk writes beside this assembly. Passing it is
+         the asking, so a run that wrote no ledger is reported as unknown rather than as a clean run.
+         $(TargetDir) and not the results directory: the suite writes it from inside its own process,
+         which knows where its assembly is and nothing about the name this run was given.
+
+         The flag is described rather than spelled, because an XML comment cannot carry two hyphens in
+         a row and this file refused to load with MSB4025 over exactly that. -->
+    <Exec Command="dotnet exec &quot;$(RollCallTool)&quot; --discovered &quot;$(RollCallResults)\discovered.txt&quot; --results &quot;$(RollCallResults)\winwright.trx&quot; --excused &quot;$(TargetDir)excused.txt&quot; 2&gt;&amp;1"
           IgnoreExitCode="true"
           ConsoleToMSBuild="true"
           StandardOutputImportance="low">

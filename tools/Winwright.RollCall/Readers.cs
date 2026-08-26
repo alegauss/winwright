@@ -69,6 +69,36 @@ public static class Readers
     }
 
     /// <summary>
+    /// The desk facts a run excused a check for, one per line, or null where nobody wrote them down.
+    /// <para>
+    /// WW231. Null and empty are different answers and this is the one place that matters: a suite
+    /// that excused nothing wrote an empty file, and a suite whose ledger never appeared is a run
+    /// whose excuses are unknown. Reporting the second as zero is the reading the whole roll call
+    /// exists to refuse, one level up.
+    /// </para>
+    /// </summary>
+    /// <param name="path">The ledger the suite wrote beside its own assembly.</param>
+    public static IReadOnlyList<string>? ExcusedIn(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        if (!File.Exists(path))
+            return null;
+
+        try
+        {
+            return File.ReadAllLines(path)
+                .Select(one => one.Trim())
+                .Where(one => one.Length > 0)
+                .ToList();
+        }
+        catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// The outcomes that mean a case was written down and never executed.
     /// <para>
     /// WW137. A deliberate skip, or a case the runner listed and then abandoned. Both are recorded
