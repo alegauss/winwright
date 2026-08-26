@@ -518,6 +518,24 @@ The suite creates real windows, takes the foreground and synthesises input, whic
 one exists. A bare `dotnet test` takes the roll call too: a run short of what discovery found is not
 reported as a pass.
 
+### Running an adopting project's cases off the desk
+
+The guest runner carries a tree, not this tree. An adopting repository points it at itself:
+
+```
+tools\run-tests-vm.ps1 -Tree D:\path\to\yours -Run "run-cases.cmd" -Bring @('yours.trx')
+```
+
+`-Name` defaults to the tree's own folder, so it lands in `C:\src\<name>` and two projects cannot
+collide in one guest; `-ResultsIn` says where the command left what it wrote. **That the runner can
+carry two trees is why it prints which one it took** — otherwise a green is a green about whichever
+tree the caller believed they named.
+
+This matters more for an adopter than it does here. Every reason this exists — a host run that
+reported eight failures of which two were only the desk, and a negative control that passed because
+the host wrote a file faster than the guest could — applies to anybody driving a window from a test,
+and until this took a tree they had nowhere to run but the machine they were working at.
+
 `docs/` holds the roadmap, the ledger and the rationale behind each decision. They are written for
 whoever is building winwright, and they are governed — the files are written through `roadkeep`
 rather than by hand.

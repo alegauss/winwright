@@ -63,15 +63,47 @@ param(
 
     [switch] $CommittedOnly,
 
-    [string] $Vmx
+    [string] $Vmx,
+
+    # WW227. The five that make this an adopter's runner rather than this repository's.
+    #
+    # An adopting project had exactly one place to run its migrated cases: the desk somebody is
+    # working at. That is the thing this project already knows better than — a host run of this suite
+    # produced eight failures of which two were only the desk, and reported a negative control
+    # passing because the host wrote a file faster than the guest could. Every one of those lessons
+    # applied to every adopter and none of them had the runner that taught it.
+    #
+    # Defaults reproduce this repository's own run exactly, which is what makes the change testable:
+    # the gate that validates it is the gate it is.
+
+    # The tree to carry. Its git listing is what goes into the guest, and its TestResults is where
+    # what comes back lands.
+    [string] $Tree,
+
+    # What the guest calls it: the sync folder, the tree's folder, and the stage on the host. Derived
+    # from the tree's own leaf name, so two projects cannot collide in one guest.
+    [string] $Name,
+
+    # The command the guest runs from the tree's root. Not a project or a filter: an adopting
+    # repository already has a way to run its own tests, and this types what a developer there types.
+    [string] $Run,
+
+    # Where that command leaves its results, relative to the tree in the guest.
+    [string] $ResultsIn,
+
+    # What to bring back out of it. The first is fetched always; the rest only on a green run, for
+    # the reason the roll call is: a check that was never due is not a check that is missing.
+    [string[]] $Bring
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $script:RepoRoot = Split-Path -Parent $PSScriptRoot
-$script:GuestSync = 'C:\winwright-sync'
-$script:GuestRepo = 'C:\src\winwright'
+$script:Tree = if ($Tree) { (Resolve-Path -LiteralPath $Tree).Path } else { $script:RepoRoot }
+$script:Name = if ($Name) { $Name } else { Split-Path -Leaf $script:Tree }
+$script:GuestSync = "C:\$($script:Name)-sync"
+$script:GuestRepo = "C:\src\$($script:Name)"
 
 # WW150. The suite writes its listing and its results into a directory named for the run, so two
 # runs on one machine cannot read each other's files. The default is a stamp the run picks for
@@ -80,10 +112,19 @@ $script:GuestRepo = 'C:\src\winwright'
 # chose, which is also what stops two guest runs from colliding.
 $script:RunName = 'vm-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')
 
+# What the guest runs, and where it leaves what it wrote. WW227: defaulted rather than required, so
+# this repository's own invocation is unchanged and an adopter names the two things that differ.
+$script:Run = if ($Run) { $Run } else { "run-tests.cmd $Configuration" }
+$script:ResultsIn = if ($ResultsIn) { $ResultsIn } else { "TestResults\$script:RunName" }
+$script:Bring = if ($Bring) { $Bring } else { @('winwright.trx', 'discovered.txt') }
+
+# The VM's credentials and not the project's, so the search is not multiplied per tree: one guest,
+# one file. The tree's own copy is second because a project may pin a different machine.
 $script:EnvFileCandidates = @(
     'd:\tmp\winwright-vm.env',
+    (Join-Path $script:Tree 'winwright-vm.env'),
     (Join-Path $script:RepoRoot 'winwright-vm.env')
-)
+) | Select-Object -Unique
 
 function Refuse {
     param([Parameter(Mandatory)] [string] $What, [string] $Remedy)
@@ -201,6 +242,11 @@ $vmxPath = $env:WINWRIGHT_VMX
 Write-Host "run-tests-vm  $vmxPath" -ForegroundColor Cyan
 if ($envFile) { Write-Host "  settings    $envFile" }
 
+# Named on every run and not only an adopter's. A runner that can carry two trees has to say which
+# one it took, or a green is a green about whichever tree the caller believed they named.
+Write-Host "  tree        $script:Tree  ->  $script:GuestRepo"
+Write-Host "  running     $script:Run"
+
 # listSnapshots is the cheapest call that needs the VM actually opened, so it is what tells an
 # absent encryption password from a wrong one. The two messages differ, and matching only the first
 # sends a wrong password to the branch whose remedy says the problem is not a password.
@@ -242,11 +288,11 @@ Write-Host '  guest       running, tools answering'
 
 # --- the tree the guest will test ---------------------------------------------------------------
 
-$stage = Join-Path ([IO.Path]::GetTempPath()) 'winwright-vm'
+$stage = Join-Path ([IO.Path]::GetTempPath()) "$($script:Name)-vm"
 if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
 $null = New-Item -ItemType Directory -Path $stage
 
-Push-Location $script:RepoRoot
+Push-Location $script:Tree
 try {
     # -c and -o together, minus what .gitignore covers: tracked files plus the untracked ones that
     # are really part of the tree. A sync built from `git diff` alone carries neither an untracked
@@ -261,7 +307,7 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem | Out-Null
 $archive = [IO.Compression.ZipFile]::Open($zip, 'Create')
 try {
     foreach ($relative in $files) {
-        $full = Join-Path $script:RepoRoot $relative
+        $full = Join-Path $script:Tree $relative
         if (Test-Path -LiteralPath $full -PathType Leaf) {
             $null = [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $full, $relative)
         }
@@ -317,7 +363,7 @@ set "RollCallRun=$script:RunName"
 dotnet build-server shutdown >nul 2>&1
 
 cd /d "$script:GuestRepo"
-call "$script:GuestRepo\run-tests.cmd" $Configuration > "$script:GuestSync\vm-run.log" 2>&1
+call $script:Run > "$script:GuestSync\vm-run.log" 2>&1
 
 rem Captured before the shutdown and not after. Anything run between the suite and the write takes
 rem %ERRORLEVEL% with it, so the tidying up would have reported its own success as the suite's.
@@ -393,7 +439,7 @@ if (-not $ran.Ok) {
 # host's, and the only thing in it saying which desk had produced the run was a computerName buried
 # in the XML. Two machines writing one path is a result that cannot say where it came from, which is
 # the same defect as a green that cannot say what it covered.
-$results = Join-Path $script:RepoRoot 'TestResults\vm'
+$results = Join-Path $script:Tree 'TestResults\vm'
 if (-not (Test-Path -LiteralPath $results)) { $null = New-Item -ItemType Directory -Path $results -Force }
 
 $exitFile = Join-Path $stage 'vm-exit.txt'
@@ -413,18 +459,21 @@ $code = [int]$said
 $logFile = Join-Path $results 'vm-run.log'
 $null = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\vm-run.log", $logFile)
 
-$guestResults = "$script:GuestRepo\TestResults\$script:RunName"
+$guestResults = "$script:GuestRepo\$script:ResultsIn"
 
-$got = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\winwright.trx", (Join-Path $results 'winwright.trx'))
-if (-not $got.Ok) { Write-Host '  no winwright.trx came back from the guest' -ForegroundColor Yellow }
+$first = $script:Bring[0]
+$got = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\$first", (Join-Path $results $first))
+if (-not $got.Ok) { Write-Host "  no $first came back from the guest" -ForegroundColor Yellow }
 
-# Only chased on a green run, and that is a fact about this repository rather than about the guest.
-# The roll call hangs off AfterTargets="VSTest", so a failed VSTest never reaches it and writes no
-# discovered.txt - warning about its absence on a red run reports a missing check that was never
-# due, which is noise on exactly the runs already carrying a real answer.
+# Everything after the first is only chased on a green run, and that is a fact about this repository
+# rather than about the guest. The roll call hangs off AfterTargets="VSTest", so a failed VSTest never
+# reaches it and writes no discovered.txt - warning about its absence on a red run reports a missing
+# check that was never due, which is noise on exactly the runs already carrying a real answer.
 if ($code -eq 0) {
-    $roll = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\discovered.txt", (Join-Path $results 'discovered.txt'))
-    if (-not $roll.Ok) { Write-Host '  the run passed and no discovered.txt came back: the roll call did not take' -ForegroundColor Yellow }
+    foreach ($also in ($script:Bring | Select-Object -Skip 1)) {
+        $roll = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\$also", (Join-Path $results $also))
+        if (-not $roll.Ok) { Write-Host "  the run passed and no $also came back" -ForegroundColor Yellow }
+    }
 }
 
 if (Test-Path -LiteralPath $logFile) {

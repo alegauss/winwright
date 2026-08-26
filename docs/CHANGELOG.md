@@ -206,6 +206,7 @@
 
 - ✅ **WW154** **nothing at the root tells an adopter what this is, what it refuses, or how to take it** — A README at the root says what winwright is, what it needs, how an adopter takes it and what each exit code means, and a case holds it to the engine's own codes, verb families and non-goals.
 - ✅ **WW78 (the adoption is wired and the case loads)** **the keyboard case is the only observable of a live input path and it lives in a script** — claude-tray drives the engine by one package reference, and its keyboard case loads with four checks and four synthesised acts.
+- ✅ **WW227** **an adopting project can only run its cases on the desk somebody is using** — The runner takes a tree, a name, a command and what to bring back, so an adopting repository runs its cases in the guest instead of on somebody's desk.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
