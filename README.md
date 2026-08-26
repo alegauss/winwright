@@ -280,12 +280,32 @@ once the act has landed, and `reads` says which reading that is — one of `anyt
 in the order a reader looks at them. `with` is required exactly where the act takes something and
 refused where it does not. `named` renames a step in the report; `meansIt` is the sentence a step
 needs before it may touch an entry the project declared destructive. `moves` is the other kind of
-expectation: that the reading ended up different, for the claim a case cannot name a value for.
+expectation: that the reading ended up different, for the claim a case cannot name a value for. And
+`covers` is the third, which is one claim over many elements — see below.
 
 A step with no `expect` is an act and not a check: it moves the window into the state a later step
 reads. An act that survives being repeated is attempted again where its read-back does not arrive; one
 that does not — `toggle`, `invoke` — gets a single go, because a retried toggle fails about the
 opposite state.
+
+### An expectation nobody types
+
+`covers` names a key in the project's strings, and the claim is that **every string declared under it
+reads somewhere this step's locator matches**:
+
+```json
+{ "locator": "Text", "act": "read", "covers": "stats.tab" }
+```
+
+The set is derived and never listed, and that is the whole point. claude-tray's harness named three
+tab keys by hand; the window grew a fourth, and the case went on reporting *all three tab headers
+read* against a four-tab window. A list stops covering what it was written for and says nothing when
+it does. Add a string to the file and this step fails until the window carries it — with no edit here.
+
+One claim over many elements, so it takes no `expect`, no `reads` and no `moves`: those are about one
+element, and a step answers one thing. The act must be `read`, because one act over many of them is
+not a claim. A key that declares no strings is **broken and not failed** — an empty expected set is
+met by an empty window, which is the hole the derivation exists to close.
 
 ### The four that synthesise input
 

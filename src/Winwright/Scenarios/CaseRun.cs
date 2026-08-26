@@ -161,7 +161,7 @@ public static class CaseRun
 
             try
             {
-                Perform(step, subject, project, budget, trace, results);
+                Perform(step, subject, project, budget, trace, results, root);
             }
             catch (Exception thrown) when (thrown is not (OutOfMemoryException or StackOverflowException))
             {
@@ -273,8 +273,18 @@ public static class CaseRun
         ProjectDeclaration project,
         int budget,
         List<TraceStep> trace,
-        List<AssertionResult> results)
+        List<AssertionResult> results,
+        AutomationElement root)
     {
+        // WW236. A sweep is one claim over many elements, so it goes nowhere near the attempt loop:
+        // there is no single reading to poll towards, and retrying it would re-read a whole tree for
+        // the same answer at three times the cost.
+        if (step.Covers is { } key)
+        {
+            Swept(step, key, subject, project, root, trace, results);
+            return;
+        }
+
         var cap = step.Retryable ? project.Attempts : 1;
         var attempted = Retry.Bounded(() => Attempting(step, subject), one => one.Held, cap);
         var landed = attempted.Last;
@@ -329,6 +339,67 @@ public static class CaseRun
 
         trace.Add(recorded);
         results.Add(expectation.AsAssertion().At(trace.Count));
+    }
+
+    /// <summary>
+    /// A step that covers a key: derive the set from the project's own strings, read the name of every
+    /// element the locator matched, and compare.
+    /// <para>
+    /// The derivation is the point. A case listing the strings is a case that stops covering what it
+    /// was written for the day the application grows one — which is the defect this exists for, and it
+    /// reported <em>all three tab headers read</em> against a four-tab window.
+    /// </para>
+    /// <para>
+    /// A set that cannot be derived is a refusal and never a failure: nothing about the application
+    /// was observed, so nothing about it is being reported.
+    /// </para>
+    /// </summary>
+    private static void Swept(
+        StepDeclaration step,
+        string key,
+        Subject subject,
+        ProjectDeclaration project,
+        AutomationElement root,
+        List<TraceStep> trace,
+        List<AssertionResult> results)
+    {
+        DerivedSet derived;
+        try
+        {
+            derived = DerivedSet.From(step.Name, project, key);
+        }
+        catch (UnderivableSetException underivable)
+        {
+            throw new ScenarioRefusedException(step.Name, underivable.Message);
+        }
+
+        // The last step of the locator, because that is the one the matches are of: a sweep over
+        // `TabItem` under `Window#main > TabItem` is about the tab items, and the frame above them is
+        // how they were reached.
+        var read = Resolve.Matching(root, subject.Locator.Steps[^1])
+            .Select(one => ElementFacts.Of(one)?.Name)
+            .OfType<string>()
+            .Where(one => one.Trim().Length > 0)
+            .ToList();
+
+        var compared = derived.Against(read);
+
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = step.Verb.Name,
+            Locator = step.Locator.Text,
+            Asserted = step.Name,
+            ReadBack = string.Join(", ", compared.Matched),
+            Detail = compared.Held ? null : compared.Sentence(),
+            Verdict = compared.Held ? StepVerdict.Ok : StepVerdict.Failed,
+        });
+
+        var result = compared.Held
+            ? AssertionResult.Pass(step.Name, compared.Sentence())
+            : AssertionResult.Fail(step.Name, compared.Sentence());
+
+        results.Add(result.At(trace.Count));
     }
 
     private static Landed Attempting(StepDeclaration step, Subject subject)

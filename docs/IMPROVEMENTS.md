@@ -36,28 +36,6 @@ it.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW236 A criterion nothing can try
-
-Block F's first criterion reads: every set a scenario checks against is derived from the
-project's own strings or read-outs, and adding a tab, a panel or a profile needs no
-scenario edit. `DerivedSet` does exactly that — a set out of the strings, with
-provenance, and a `SetComparison` naming what was read and never declared and the other
-way round. Nothing in `Winwright.Scenarios` references any of it.
-
-So a scenario cannot check a set at all. The criterion is true of engine callers and
-unfalsifiable of scenarios: no case can try it, which is not the same as no case failing
-it. That block was closed this session on WW229's strength, and this is the half closing
-it did not notice.
-
-Measured on WW79. claude-tray's panes case derives its tab headers from `en.json` —
-every `stats.tab.*` key — and asserts each is in the tree. Its own comment says why: it
-named three keys by hand, the window grew a fourth, and the case reported "all three tab
-headers read" against a four-tab window.
-
-That case is unmigratable today, and so are WW82's expectations derived from the app's
-read-out and WW84's derived panel sweep. What is missing is a name a data file can
-write, and a step is the wrong shape: a sweep is one claim over many elements.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

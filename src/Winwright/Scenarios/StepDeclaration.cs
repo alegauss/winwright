@@ -30,7 +30,8 @@ public sealed record StepDeclaration
         string? expected,
         ReadBack reads,
         bool meansIt,
-        bool moves)
+        bool moves,
+        string? covers)
     {
         Name = name;
         Locator = locator;
@@ -40,6 +41,7 @@ public sealed record StepDeclaration
         Reads = reads;
         MeansIt = meansIt;
         Moves = moves;
+        Covers = covers;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -89,11 +91,34 @@ public sealed record StepDeclaration
     public bool Moves { get; }
 
     /// <summary>
-    /// Whether this step says anything a run could find false. A step that expects nothing and claims
-    /// no movement produces no assertion result, which is why a case made only of these is refused by
-    /// <see cref="CaseDeclaration"/> rather than run to a green it did not earn.
+    /// The key whose every declared string must be read somewhere this step's locator matches, or
+    /// null where this step is about one element.
+    /// <para>
+    /// WW236. The engine has derived a set from a project's own strings since block F, with provenance
+    /// and a comparison naming what was read and never declared and the other way round — and nothing
+    /// in a data file could name one. So block F's first criterion, that every set a scenario checks
+    /// against is derived rather than typed, was unfalsifiable of scenarios: no case could try it.
+    /// </para>
+    /// <para>
+    /// Measured on claude-tray's panes case. It derives its tab headers from the strings and says why
+    /// in its own comment: it listed three by hand, the window grew a fourth, and it reported <em>all
+    /// three tab headers read</em> against a four-tab window. A list stops covering what it was
+    /// written for and says nothing when it does.
+    /// </para>
+    /// <para>
+    /// One claim over many elements, which is why it is not an <see cref="Expected"/>. The key is all
+    /// a case says: which strings file it comes out of is the project's business, and a case naming
+    /// one would be a case that runs on one checkout.
+    /// </para>
     /// </summary>
-    public bool Checkable => Expected is not null || Moves;
+    public string? Covers { get; }
+
+    /// <summary>
+    /// Whether this step says anything a run could find false. A step that expects nothing, claims no
+    /// movement and covers no set produces no assertion result, which is why a case made only of these
+    /// is refused by <see cref="CaseDeclaration"/> rather than run to a green it did not earn.
+    /// </summary>
+    public bool Checkable => Expected is not null || Moves || Covers is not null;
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -117,6 +142,7 @@ public sealed record StepDeclaration
     /// <param name="meansIt">That this step means a destructive entry it names.</param>
     /// <param name="named">What a report should call it, where the verb and locator will not do.</param>
     /// <param name="moves">That the reading should end up different from what it was.</param>
+    /// <param name="covers">The key whose every declared string this step's locator must read.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static StepDeclaration Of(
         string locator,
@@ -126,7 +152,8 @@ public sealed record StepDeclaration
         string? reads = null,
         bool meansIt = false,
         string? named = null,
-        bool moves = false)
+        bool moves = false,
+        string? covers = null)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var subject = called ?? Describing(verb, locator);
@@ -146,6 +173,12 @@ public sealed record StepDeclaration
         var wanted = expected;
         var reading = ReadBack.Named(reads);
 
+        // WW236, and it is computed here rather than below because the two rules under this one would
+        // otherwise fire first and say the wrong thing: a sweep expects nothing of one reading on
+        // purpose, so "the reading changes nothing" and "the step does nothing at all" are both false
+        // of it — and a refusal that names the wrong field is a refusal somebody fixes the wrong way.
+        var sweeping = string.IsNullOrWhiteSpace(covers) ? null : covers.Trim();
+
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
         // says it moved where it was something else. A step asserting both would owe two assertion
         // results, and a trace line that stands for two things is one a reader has to take apart.
@@ -157,7 +190,7 @@ public sealed record StepDeclaration
                     + "so 'moves' is for the claim that cannot name one");
         }
 
-        if (wanted is null && !moves && !string.IsNullOrWhiteSpace(reads))
+        if (wanted is null && !moves && sweeping is null && !string.IsNullOrWhiteSpace(reads))
         {
             throw new ScenarioRefusedException(
                 subject, $"it reads '{reading.Name}' and expects nothing of it, so the reading changes nothing");
@@ -166,7 +199,7 @@ public sealed record StepDeclaration
         // WW213. An act with no expectation is a navigation a later step is the check for. A read
         // with no expectation is nothing at all: it touches nothing and claims nothing, so a case
         // carrying one is a case with a step in it that could not fail.
-        if (wanted is null && !moves && act.Reads)
+        if (wanted is null && !moves && sweeping is null && act.Reads)
             throw new ScenarioRefusedException(subject, $"'{act.Name}' expects nothing, so the step does nothing at all");
 
         // A read moves nothing by construction, so a read claiming movement is a claim about whatever
@@ -177,6 +210,37 @@ public sealed record StepDeclaration
                 subject, $"'{act.Name}' reads and never acts, so it cannot be what moved a reading");
         }
 
+        // One claim over many elements, and every other field on a step is about one.
+        if (sweeping is not null)
+        {
+            if (!act.Reads)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it covers '{sweeping}' and acts with '{act.Name}'; a sweep reads every element its "
+                        + "locator matches, and one act over many of them is not a claim");
+            }
+
+            // 'moves' is not tested for here and that is not an omission: a sweep needs a verb that
+            // reads, and a read claiming movement is already refused above. Naming it twice would be
+            // a branch no file can reach.
+            if (wanted is not null)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it covers '{sweeping}' and also expects '{wanted}' of one reading; a set and a "
+                        + "value are two claims, and a step answers one");
+            }
+
+            if (!string.IsNullOrWhiteSpace(reads))
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it covers '{sweeping}' and reads '{reading.Name}'; a sweep compares the names the "
+                        + "locator matched against the strings, and a pattern reading is not one of them");
+            }
+        }
+
         return new StepDeclaration(
             called ?? Describing(act.Name, parsed!.Text),
             parsed!,
@@ -185,7 +249,8 @@ public sealed record StepDeclaration
             wanted,
             reading,
             meansIt,
-            moves);
+            moves,
+            sweeping);
     }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>

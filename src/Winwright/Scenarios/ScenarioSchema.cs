@@ -149,6 +149,7 @@ public static class ScenarioSchema
         new("expect", false, Taking.Text, "what the reading should be once the act has landed", []),
         new("reads", false, Taking.Text, "which reading the expectation is about", ReadBack.All.Select(one => one.Name).ToList()),
         new("moves", false, Taking.Truth, "that the reading should end up different, where the case cannot know what it will be", []),
+        new("covers", false, Taking.Text, "the key whose every string must be read somewhere the locator matches, without its trailing dot — derived from the project's own strings and never listed here", []),
         new("meansIt", false, Taking.Truth, "that this step means a destructive entry it names", []),
         new("named", false, Taking.Text, "what a report should call it, where the act and the locator will not do", []),
     ]);

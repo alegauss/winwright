@@ -160,6 +160,7 @@
 - ✅ **WW170** **the store fingerprint's after half is called only by its own tests, so no run says what it left changed** — Preamble.Around closes the fingerprint the same reading opened, so what a run left changed is reported beside the desk and the binary rather than by whoever remembered the second call.
 - ✅ **WW219** **a case needing four polls inside eighty milliseconds claims the guest is the application** — The claim is made about the readings that happened, so a guest that fitted three polls proves it, and the stronger claim still holds on every run that saw the move.
 - ✅ **WW229** **a case can expect a value and never that one moved** — A step claims the reading moved without naming what it moved to, and an act nothing attempted is a hole in the verdict rather than a red.
+- ✅ **WW236** **a case cannot check a derived set, so the criterion about them cannot be tried** — A step covers a key and the set comes out of the project's own strings, so a string added to the file fails the case until the window carries it.
 
 ## Block G — The scenario — a case is a data file
 
