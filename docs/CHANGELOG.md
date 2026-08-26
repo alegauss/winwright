@@ -166,6 +166,7 @@
 - ✅ **WW241** **a sweep reads once and concludes, so it fails against a window that had not finished drawing** — A sweep polls the resolve budget like any read, and one that gave up says so and whether the page was still showing the project's loading text.
 - ✅ **WW242** **a language file named by its tag alone is invisible, so a project declares strings nothing ever reads** — The tag walk reaches the first part of a file name, so `en.json` is read; `strings.json` still answers nothing, because that is `Culture`'s job and never the index's.
 - ✅ **WW244** **an act that was never sent is invisible in the verdict where its step carries no expectation** — An act that was never sent is a hole in the verdict whatever its step claimed, and the case stops there rather than reading a window nothing moved.
+- ✅ **WW245** **the hole about a refused foreground names who holds it and never what was wanted, so two faults read alike** — Every absence about the foreground names both sides, so a hole says what it compared against and not only who answered.
 
 ## Block G — The scenario — a case is a data file
 

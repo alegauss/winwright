@@ -116,13 +116,25 @@ public sealed record Foreground
     /// failure: the keystroke was never delivered to the application under test, so nothing about
     /// that application was observed, and calling it a failure blames the wrong repository.
     /// </summary>
+    /// <remarks>
+    /// WW245: every absence names both sides. It used to name the holder alone, and a hole reading
+    /// <em>the foreground belongs to ClaudeTray (pid 49276) 'Settings'</em> — where ClaudeTray is the
+    /// application under test and 49276 is the process the run launched — fits two faults and
+    /// distinguishes neither: a second window the run did not attach to, or the window under test
+    /// described from a handle that answered no pid, which falls through to <see cref="Wanted"/>
+    /// matching nothing while the holder named is the right one. Ruling those apart cost two runs that
+    /// refuted two hypotheses and still did not answer. A refusal naming one side of a comparison is
+    /// one a reader has to reconstruct.
+    /// </remarks>
     public Precondition AsPrecondition() => State switch
     {
         ForegroundState.Ours => Precondition.Met(PreconditionName),
-        ForegroundState.Nobody => Precondition.Absent(PreconditionName, "nothing owns the foreground"),
+        ForegroundState.Nobody => Precondition.Absent(
+            PreconditionName, $"nothing owns the foreground, and the window under test is {Wanted}"),
         ForegroundState.SameProcess => Precondition.Absent(
-            PreconditionName, $"another window of the same process owns it: {Holder}"),
-        _ => Precondition.Absent(PreconditionName, $"the foreground belongs to {Holder}"),
+            PreconditionName, $"another window of the same process owns it: {Holder}, and the window under test is {Wanted}"),
+        _ => Precondition.Absent(
+            PreconditionName, $"the foreground belongs to {Holder}, and the window under test is {Wanted}"),
     };
 
     /// <summary>Who had the keyboard when this was asked, said either way.</summary>

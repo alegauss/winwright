@@ -78,7 +78,18 @@ public sealed class RefusedForegroundTests : IDisposable
         // another window of this process, to whatever the person was reading, or to nothing at all,
         // and each of those is a different honest sentence about why nothing was sent.
         Assert.True(BusyDesk.Excused(result));
-        Assert.DoesNotContain("winwright statistics", result.Missing.Absence);
+
+        // WW245. Both sides, always. This used to assert the absence never mentioned 'winwright
+        // statistics' — the dialog under test — as a way of saying the holder is not misreported as
+        // the window that wanted it. That was the right worry and the wrong assertion: naming only the
+        // holder is what made the two indistinguishable in the first place, so the sentence now says
+        // what it compared against and this says where the title has to appear.
+        Assert.Contains("the window under test is", result.Missing.Absence, StringComparison.Ordinal);
+        Assert.Contains("winwright statistics", result.Missing.Absence, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "the foreground belongs to winwright statistics",
+            result.Missing.Absence,
+            StringComparison.Ordinal);
     }
 
     [Fact]

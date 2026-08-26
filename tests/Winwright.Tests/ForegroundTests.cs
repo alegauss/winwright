@@ -68,8 +68,11 @@ public sealed class ForegroundTests : IDisposable
         var foreground = Foreground.Between(Editor, UnderTest);
 
         Assert.Equal(ForegroundState.Elsewhere, foreground.State);
+        // WW245: both sides. Naming only the holder is what made a hole about the application under
+        // test indistinguishable from a hole about a window nobody attached to.
         Assert.Equal(
-            "the foreground belongs to Code (pid 4242) 'ROADMAP.md - winwright - Visual Studio Code'",
+            "the foreground belongs to Code (pid 4242) 'ROADMAP.md - winwright - Visual Studio Code', "
+                + $"and the window under test is {UnderTest}",
             foreground.AsPrecondition().Absence);
     }
 
@@ -89,7 +92,9 @@ public sealed class ForegroundTests : IDisposable
         var foreground = Foreground.Between(WindowOwner.None, UnderTest);
 
         Assert.Equal(ForegroundState.Nobody, foreground.State);
-        Assert.Equal("nothing owns the foreground", foreground.AsPrecondition().Absence);
+        Assert.Equal(
+            $"nothing owns the foreground, and the window under test is {UnderTest}",
+            foreground.AsPrecondition().Absence);
     }
 
     [Fact]
