@@ -183,7 +183,14 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add Directory.Build.props .claude-plugin/plugin.json samples/Adopter/Adopter.csproj samples/Adopter/driving/Driving.csproj README.md
           git commit -m 'chore(release): ${{ steps.version.outputs.tag }}'
-          git tag ${{ steps.version.outputs.tag }}
+
+          # Annotated, and measured: `git tag` makes a lightweight tag, and `--follow-tags` pushes
+          # only annotated ones. So the commit went up, the tag stayed on the runner, and the release
+          # step refused with "tag doesn't exist in the repo" about a version that was by then already
+          # on nuget.org. An annotated tag is also the right thing for a release on its own terms — it
+          # records who cut it and when, and a lightweight tag records neither.
+          git tag -a ${{ steps.version.outputs.tag }} -m 'published to nuget.org by publish.yml'
+
           # The tag and the commit together, so a tag never exists for a commit nobody can fetch.
           git push origin HEAD --follow-tags
 
