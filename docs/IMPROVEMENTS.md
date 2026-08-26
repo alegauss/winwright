@@ -39,26 +39,29 @@ it.
 ### §WW248 A dialog beside a fixture takes the desk from it
 
 `PumpedDialog` shows a window on this thread, and a window this process shows takes the
-foreground. So every launched fixture in the same class is left without it, and every
+foreground. So a launched fixture in the same class is left without it, and every
 synthesised act against that fixture is a hole — correctly reported, and for a reason
 nobody wrote down.
 
 Measured in one guest run. `NudgeTests` — a dialog and a launched fixture together —
 excused a nudge on the launched slider. `WpfInputTests` — a launched WPF fixture and no
-dialog — typed into a text box and clicked a checkbox in the same run, neither excused.
-Two classes, one difference.
+dialog — typed and clicked in the same run, neither excused. Two classes, one
+difference.
 
-It is not a defect in the engine. The hole is honest and the excuse is real: the desk
-genuinely belonged to something else. What is missing is that nothing stops a case being
-written where it can only ever be excused, and an excuse that arrives every run is a
-check nobody is running.
+The roll now carries the engine's own absence beside each excuse, so the difference is
+readable rather than inferred. This run's five all say `another window of the same
+process owns it: testhost 'winwright decoy'` — the decoy those cases open on purpose —
+which a reader can see at a glance instead of trusting.
 
-`WW231` and `WW233` made excuses countable and named, which is how this was seen at all.
-What they do not do is tell an excuse about the machine somebody happened to be using
-from one that is structural — and a structural excuse is the one worth a red.
+What is left is making a structural excuse a red, and asking the question turned up why
+it is hard. Both obvious checks misfire on honest cases here. At run time, *the holder
+is this process* marks `RefusedForegroundTests`, which takes the desk deliberately. Over
+the sources, *a dialog and a launch and a synthesised act* marks `NudgeTests`, whose act
+is against the dialog.
 
-The cheap half is a rule: a class that opens a dialog does not drive a launched window.
-Whether the suite can check that about itself is the question worth asking.
+What separates them is not visible in one run: an excuse that arrives every time is
+structural, and one run cannot say *every time*. That needs a history the suite does not
+keep.
 
 ### §WW249 The proof that WPF takes input is itself intermittent
 

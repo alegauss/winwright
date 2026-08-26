@@ -325,7 +325,8 @@ public sealed record Roll
         var read = Excused.Select(Readers.Excuse).ToList();
         var lines = read
             .Take(most)
-            .Select(one => $"  excused   {one.Case ?? "<unnamed>"}: {one.Fact}")
+            .Select(one => $"  excused   {one.Case ?? "<unnamed>"}: {one.Fact}"
+                + (one.Absence is null ? "" : $" — {one.Absence}"))
             .ToList();
 
         if (read.Count > most)

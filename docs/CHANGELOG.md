@@ -168,6 +168,7 @@
 - ✅ **WW244** **an act that was never sent is invisible in the verdict where its step carries no expectation** — An act that was never sent is a hole in the verdict whatever its step claimed, and the case stops there rather than reading a window nothing moved.
 - ✅ **WW245** **the hole about a refused foreground names who holds it and never what was wanted, so two faults read alike** — Every absence about the foreground names both sides, so a hole says what it compared against and not only who answered.
 - ✅ **WW246** **the window under test reads as nothing against a real window, so no act on it can ever own the foreground** — An element with no handle of its own belongs to the window the run attached to, so synthesised input reaches a WPF application at all.
+- ✅ **WW248 (the reading)** **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — The roll carries the engine's own absence beside each excuse, so who held the desk is read rather than inferred.
 
 ## Block G — The scenario — a case is a data file
 

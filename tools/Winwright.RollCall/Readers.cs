@@ -107,14 +107,21 @@ public static class Readers
     /// </para>
     /// </summary>
     /// <param name="line">A line as the ledger wrote it.</param>
-    public static (string Fact, string? Case) Excuse(string line)
+    public static (string Fact, string? Case, string? Absence) Excuse(string line)
     {
         ArgumentNullException.ThrowIfNull(line);
 
-        var apart = line.Split('\t', 2);
-        return apart.Length == 2 && apart[1].Trim().Length > 0
-            ? (apart[0].Trim(), apart[1].Trim())
-            : (apart[0].Trim(), null);
+        // WW248: three fields, and the third optional for the same reason the second was — a ledger
+        // written by an older build still says how many, and still says which case. What the third
+        // adds is what the engine said was missing, which after WW245 names both sides of the
+        // comparison. A reader of the roll can then tell a desk somebody else was using from this
+        // suite's own window standing in front of the one under test, and that difference is what
+        // decides whether an excuse is circumstance or structure.
+        var apart = line.Split('\t', 3);
+        return (
+            apart[0].Trim(),
+            apart.Length > 1 && apart[1].Trim().Length > 0 ? apart[1].Trim() : null,
+            apart.Length > 2 && apart[2].Trim().Length > 0 ? apart[2].Trim() : null);
     }
 
 

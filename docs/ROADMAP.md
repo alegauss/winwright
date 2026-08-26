@@ -14,7 +14,7 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — Measured in the guest: a nudge on a launched fixture excused itself beside a dialog, while the same acts against a launched fixture with no dialog ran and passed. → §WW248
+- ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
 - 📋 **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Four runs measured: host green, guest green, guest red, guest green, with nothing changed between them — so what it proves is that typing reaches a WPF box sometimes. → §WW249
 
 ## Block G — The scenario — a case is a data file

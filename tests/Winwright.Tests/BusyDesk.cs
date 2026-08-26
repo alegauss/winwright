@@ -179,6 +179,13 @@ internal static class BusyDesk
     /// That the hole is an honest one, and about the desk rather than about anything the machine
     /// could have arranged.
     /// </summary>
+    /// <summary>
+    /// One line of it, because the ledger is tab-separated and a newline in a field is a second row
+    /// that parses as a fact nobody measured.
+    /// </summary>
+    private static string OneLine(string absence) =>
+        absence.Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ').Trim();
+
     private static void Excusing(Precondition missing)
     {
         Assert.False(missing.Satisfied);
@@ -200,7 +207,12 @@ internal static class BusyDesk
         {
             try
             {
-                File.AppendAllText(Ledger, $"{missing.Name}\t{Whose()}{Environment.NewLine}");
+                // WW248: the absence as well, because the name alone cannot say whether the desk
+                // belonged to a person or to this suite's own dialog — and an excuse that arrives on
+                // every run because of the second is a check nobody is running.
+                File.AppendAllText(
+                    Ledger,
+                    $"{missing.Name}\t{Whose()}\t{OneLine(missing.Absence)}{Environment.NewLine}");
             }
             catch (Exception unwritable) when (unwritable is IOException or UnauthorizedAccessException)
             {

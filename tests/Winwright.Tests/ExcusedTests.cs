@@ -126,11 +126,20 @@ public sealed class ExcusedTests : IDisposable
         // WW233. A ledger from an older build, or a frame the stack could not answer for, still says
         // how many — so a line with no name is read as unnamed rather than refused.
         Assert.Equal(
-            ("a foreground to take", "NudgeTests.A_range_with_room"),
+            ("a foreground to take", "NudgeTests.A_range_with_room", null),
             Readers.Excuse("a foreground to take\tNudgeTests.A_range_with_room"));
 
-        Assert.Equal(("a display that renders", null), Readers.Excuse("a display that renders"));
-        Assert.Equal(("a display that renders", null), Readers.Excuse("a display that renders\t   "));
+        Assert.Equal(("a display that renders", null, null), Readers.Excuse("a display that renders"));
+        Assert.Equal(("a display that renders", null, null), Readers.Excuse("a display that renders\t   "));
+
+        // WW248. The third field is what the engine said was missing, and it is what tells a desk
+        // somebody else was using from this suite's own dialog standing in front of the window under
+        // test. A ledger written before it still reads, which is the promise the second field made.
+        Assert.Equal(
+            ("a foreground to take", "NudgeTests.A_range_with_room", "the foreground belongs to Code, and the window under test is the fixture"),
+            Readers.Excuse(
+                "a foreground to take\tNudgeTests.A_range_with_room\t"
+                    + "the foreground belongs to Code, and the window under test is the fixture"));
     }
 
     [Fact]
