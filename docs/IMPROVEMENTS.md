@@ -183,3 +183,26 @@ once. A genuine absence now carries how many icons the bar and the flyout held.
 
 What is left waits on the next occurrence rather than on any work: it will say which of
 the two it was.
+
+### §WW226 A range nothing here can move
+
+WW225 added `type` and `click` and stopped short of `nudge`, which presses an arrow key
+at a range control and reads what it did. `Traversal.Nudge` has existed since block D
+and is driven by nothing: no pane in the fixture draws a Slider, a ScrollBar or anything
+else offering RangeValue.
+
+That makes `nudge` a verb with no observable, and this project refuses those everywhere
+else — block K's own criterion is that a shape exists because a defect existed. So it
+was left out of the vocabulary rather than shipped against a control nobody could point
+at, and the reason is written into the vocabulary itself so it does not read as an
+oversight.
+
+What the pane needs is small and it is not only a Slider. The one worth having is a
+range with room to move in both directions and a read-back through RangeValue, because
+`Nudge` chooses its direction from where the control already sits — at the maximum it
+presses the other way, and a control pinned at one end would let that branch pass
+untested. A second one already at its maximum is what provokes the reversal, and a third
+offering no range at all is what provokes the refusal `Nudge` throws.
+
+Then `nudge` has three things driving it rather than one, which is the difference
+between a verb that works here and a verb that works.

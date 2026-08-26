@@ -16,7 +16,7 @@
 
 ## Block G — The scenario — a case is a data file
 
-- ⏳ **WW225** (deps: —) **a case can name no synthesised input, so migrating one that proves input stops proving it** — A range control the proving ground does not draw blocks nudge, and press with a focus reading needs a source that is not PatternValues. → §WW225
+- ⏳ **WW225** (deps: WW226) **a case can name no synthesised input, so migrating one that proves input stops proving it** — A range control the proving ground does not draw blocks nudge, and press with a focus reading needs a source that is not PatternValues. → §WW225
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
@@ -39,6 +39,7 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
+- 📋 **WW226** (deps: —) **the proving ground draws no range control, so an arrow key has nothing to move** — A pane draws one, and the verb that presses a key at it stops being a verb with nothing to drive it. → §WW226
 
 ## Done when — Block A
 
