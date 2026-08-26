@@ -216,6 +216,7 @@
 - ✅ **WW227** **an adopting project can only run its cases on the desk somebody is using** — The runner takes a tree, a name, a command and what to bring back, so an adopting repository runs its cases in the guest instead of on somebody's desk.
 - ✅ **WW228** **an app project at the repository root compiles the driving project into itself** — The adoption section names the one line an app at a repository root needs, and samples/Adopter carries a driving project underneath it so deleting the line goes red.
 - ✅ **WW230 (the workflow and the metadata)** **the only place the engine's package exists is a folder inside this repository** — Both halves publish to nuget.org from `publish.yml`, keylessly, on one manual dispatch.
+- ✅ **WW79** **the panes case proves a report is readable and needs no second profile** — Two cases: the headers cover a derived set and run everywhere, and the body claims three readings behind a precondition this repository measures.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

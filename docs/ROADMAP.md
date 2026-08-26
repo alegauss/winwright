@@ -23,19 +23,19 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW78** (deps: WW230 ⏳) **the keyboard case is the only observable of a live input path and it lives in a script** — The runner now carries claude-tray to the guest, and the restore there fails: the engine's package exists only in a folder this repository does not ship. → §WW78
-- 📋 **WW79** (deps: WW236 ✅) **the panes case proves a report is readable and needs no second profile** — Migrated as the case that runs on every machine, which is what makes it the one that would notice a template part going missing again. → §WW79
 - 📋 **WW80** (deps: Block G ✅) **the sessions case drives the one surface a capture provably cannot finish checking** — Migrated with its waits, its expansion and the popup it opens, since that popup is the argument for the whole interaction loop existing. → §WW80
 - 📋 **WW81** (deps: Block G ✅) **the profiles case is the only thing in that repository that drives the picker** — Migrated with the round trip and the timing observation, both of which need the hop count the walk reports to mean anything. → §WW81
 - 📋 **WW82** (deps: WW225 ✅) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
 - 📋 **WW83** (deps: Block G ✅) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
 - 📋 **WW84** (deps: WW236 ✅) **the names case observes what no screenshot can** — Migrated with the derived panel sweep and the exact-label reads, including the rule that must fire and the one that must not. → §WW84
 - 📋 **WW85** (deps: Block G ✅) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
-- 📋 **WW86** (deps: WW78 ⏳, WW79, WW80, WW81, WW82, WW83, WW84, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
+- 📋 **WW86** (deps: WW78 ⏳, WW79 ✅, WW80, WW81, WW82, WW83, WW84, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - 📋 **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G ✅, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 - ⏳ **WW230** (deps: —) **the only place the engine's package exists is a folder inside this repository** — Nothing is published yet, so the adopter's `nuget.config` is still a path across two clones. → §WW230
 - 📋 **WW239** (deps: —) **the release workflow keeps its own list of where the version lives, and the list was already wrong once** — Four paths in YAML, and the suite went red on a fifth; the tool that reads the copies is told which they are, so nothing owns the enumeration. → §WW239
 - 📋 **WW240** (deps: —) **a project that ships several languages cannot derive a set at all, and the language it runs in is knowable** — A derived set refuses more than one declared language file rather than guessing, and the fixture that launched the window already names which language it is showing. → §WW240
+- 📋 **WW243** (deps: —) **the keyboard case has never run green: its first step navigates nowhere and every step after it breaks** — Measured against the real window: the click on the sidebar lands, and the box the next step names is not in the tree, so the case reports broken over 0 of 3. → §WW243
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

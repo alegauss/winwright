@@ -52,15 +52,6 @@ through a pattern, traverse, and drive a range - and it is the case whose absenc
 window ship with no keyboard input at all. Migrating it first means the engine is
 exercised end to end before anything else about it is claimed.
 
-### §WW79 The panes case runs on every machine
-
-This assertion used to live inside the profiles case, which opens by counting profiles
-and skipping below two. That is right for a round trip and wrong for the property that
-made the round trip readable: a tab body being in the tree has nothing to do with
-profiles, and behind that skip it did not run on a single-profile machine - which is
-most machines and every hosted runner. Migrating it separately is what keeps the two
-apart.
-
 ### §WW80 The sessions case is the argument for the whole loop
 
 A popup is its own top-level window, so no render over a page's content can photograph
@@ -210,6 +201,28 @@ that is not in English.
 
 Until then the single declaration is the honest thing, and the comment beside it says
 why it is not the general answer.
+
+### §WW243 The first migrated case was written and never run
+
+`WW78` wrote claude-tray's keyboard case, its runner and its project declaration, and
+the whole of it was checked by loading rather than by running. Running it says:
+
+> `[step 2] typing reaches the WPF text box — NotActionableException: Edit#DirectoryBox cannot take this act: nothing matched, or what matched has gone since.`
+
+So the case stops two steps short and reports `Broken over 0 of 3`. `DirectoryBox` is
+real — `src/Ui/SettingsPage.xaml` declares it — which leaves the step before it: a click
+on `Text[name="Claude Code"][order=left]`, whose whole job is to put that page on
+screen. Either the click did not land, or it landed somewhere that is not the sidebar
+item, and the case cannot tell those apart because a navigation is not a check.
+
+That is the shape `WW79` ran into from the other side and is worth saying once: a step
+with no expectation is a navigation, and the step after it is what proves it worked.
+When the proof is a *resolve* failure, the report names the box and not the click — so
+the reader is sent to the wrong half of the case.
+
+What this needs is a run against the window, reading what the sidebar actually offers,
+in the same way the panes case was settled. It is not a guess about the locator; it is
+the measurement nobody took.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
