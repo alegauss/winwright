@@ -36,6 +36,28 @@ it.
 
 ## Block F — Assert — the expectation is derived, never typed
 
+### §WW229 An expectation about a value, where the claim is about movement
+
+Measured migrating WW78. The script's fourth assertion read the slider, pressed a key,
+read it again and compared — a claim about movement, which is the only honest one when
+the starting value belongs to the application's own settings. `expect` compares a
+reading to a string, so the case cannot say it.
+
+The migration worked around it: `set range` to the floor first, then nudge, then expect
+the one value that can follow. That only worked because claude-tray's bounds are `const
+int` in its own source and could be read while writing the case. An adopter whose
+control is bound to data has nothing to put in the field, and the assertion is
+unmigratable rather than awkward.
+
+Worth naming what the workaround costs even where it is available. Two steps instead of
+one, a `set range` through the pattern before the key press that is the point, and an
+expectation that goes stale the day the tick frequency changes — the case would then
+read 6 where the control says 10 and the red would be about the expectation.
+
+`ActResult.Changed` already answers this inside the engine: it is the readings either
+side compared, and it exists because "it changed" has to be a claim that can be false.
+What is missing is a name a data file can write for it.
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
@@ -132,6 +154,73 @@ single-threaded runner become one package reference, which is the largest single
 deletion the whole adoption produces. It is also the hardest, because a thousand other
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
+
+### §WW227 The runner is the tool's and not an adopter's
+
+Measured on WW78's own adoption. `run-tests-vm.cmd` carries this working tree into a
+guest and runs this suite in it; its parameters are a configuration, a screenshot
+switch, a committed-only switch and a vmx path. There is no tree to point it at. So
+claude-tray's migrated case has exactly one place to run: the host desk, taking the
+foreground and synthesising input on the machine somebody is working at.
+
+That is the thing this project already knows better than. A host run of this suite
+produced eight failures of which two were only the desk, cost a second guest run to tell
+the real six from the noise, and reported a negative control passing because the host
+wrote a file faster than the guest could. Every one of those lessons now applies to
+every adopter, and none of them has the runner that taught it.
+
+Block J's third criterion is unmeasurable without this. "The migrated suite is not
+slower than what it replaced" is a timing claim, and a timing claim taken on a desk
+somebody is using is the one this project refuses by name.
+
+What is missing is a runner an adopting repository can call: their tree, their
+configuration, their results copied back. The engine already has no opinion about which
+tree it is in, and neither does the case format — the runner is the one piece that does.
+
+### §WW228 One package reference, and one line nobody mentions
+
+claude-tray's csproj sits at the repository root, so every default glob the SDK applies
+reaches everything beneath it. Adding `tests/ClaudeTray.Cases` there made the
+application compile the driving project's sources — and its `obj` — into itself. The
+build failed with eight `CS0579` duplicate-attribute errors, every one of them naming a
+`_wpftmp` project, which reads like a WPF build problem and says nothing about tests. It
+took moving the folder out of the tree and building again to know what it was.
+
+The fix is one line — `DefaultItemExcludes` rather than a `Compile Remove`, because it
+is every glob and not only that one. The cost is that nothing told anybody, and the
+failure names the wrong thing.
+
+This is the adoption story's own gap. The README says an application under test takes
+the in-app half by one package reference and by nothing else, and `samples/Adopter`
+proves it. Neither says where the project that *drives* the application goes, and the
+obvious placement is the one that breaks. An adopter whose app is not at the root never
+sees this; one whose app is at the root loses an afternoon to a WPF error message.
+
+What closes it is the adoption section naming the requirement, and `samples/Adopter`
+growing the shape that proves it — an app at a root with a driving project under it,
+building.
+
+### §WW230 The feed is a folder in the tool's own tree
+
+`Winwright.0.1.0.nupkg` exists in `packages/`, which is gitignored, and nowhere else. So
+claude-tray's driving project carries a `nuget.config` naming
+`..\..\..\winwright\packages` — a path that assumes the two repositories are cloned side
+by side, and a path into the tool from the project adopting it.
+
+That is precisely what block I's criterion forbids for the in-app half, and
+`samples/Adopter` exists to prove it: one package reference, no path into this
+repository, no second package. The driving side has no such proof and now has a
+counter-example.
+
+It is written down as a bootstrap in the file itself rather than left to be found, and
+the comment says the day the engine is published that file is deleted and nothing else
+about the adoption changes. That deletion is the measurement — the same shape as this
+block's first criterion, where the proof is what goes away.
+
+Two things it also costs today. The package has to be repacked by hand after any engine
+change, and WW78's own migration would have loaded a case naming verbs the packaged
+engine did not have if that had been forgotten. And an adopter cannot restore at all on
+a machine that has one clone, which is every machine that is not this one.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

@@ -14,6 +14,8 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
+- 📋 **WW229** (deps: —) **a case can expect a value and never that one moved** — The assertion an arrow key drives a control is about change, so migrating it needs a starting value the case has no way to know. → §WW229
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
@@ -22,7 +24,7 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- 📋 **WW78** (deps: WW225 ✅) **the keyboard case is the only observable of a live input path and it lives in a script** — Migrated first: navigate, type, read back, traverse and drive a slider, which is the shortest path through locate, act and assert. → §WW78
+- ⏳ **WW78** (deps: WW227) **the keyboard case is the only observable of a live input path and it lives in a script** — Nothing has run it against the application: WW227 is the runner an adopter needs, and the host desk is the only one there is until then. → §WW78
 - 📋 **WW79** (deps: Block G ✅) **the panes case proves a report is readable and needs no second profile** — Migrated as the case that runs on every machine, which is what makes it the one that would notice a template part going missing again. → §WW79
 - 📋 **WW80** (deps: Block G ✅) **the sessions case drives the one surface a capture provably cannot finish checking** — Migrated with its waits, its expansion and the popup it opens, since that popup is the argument for the whole interaction loop existing. → §WW80
 - 📋 **WW81** (deps: Block G ✅) **the profiles case is the only thing in that repository that drives the picker** — Migrated with the round trip and the timing observation, both of which need the hop count the walk reports to mean anything. → §WW81
@@ -30,9 +32,12 @@
 - 📋 **WW83** (deps: Block G ✅) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
 - 📋 **WW84** (deps: Block G ✅) **the names case observes what no screenshot can** — Migrated with the derived panel sweep and the exact-label reads, including the rule that must fire and the one that must not. → §WW84
 - 📋 **WW85** (deps: Block G ✅) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
-- 📋 **WW86** (deps: WW78, WW79, WW80, WW81, WW82, WW83, WW84, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
+- 📋 **WW86** (deps: WW78 ⏳, WW79, WW80, WW81, WW82, WW83, WW84, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - 📋 **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G ✅, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
+- 📋 **WW227** (deps: —) **an adopting project can only run its cases on the desk somebody is using** — The guest runner is fixed to this repository, so a migrated suite has nowhere to run that is not the author's own machine. → §WW227
+- 📋 **WW228** (deps: —) **an app project at the repository root compiles the driving project into itself** — The adoption story says one package reference and never says the app has to exclude the folder the cases are driven from. → §WW228
+- 📋 **WW230** (deps: —) **the only place the engine's package exists is a folder inside this repository** — So every adoption bootstraps on a filesystem path across two clones, which is the shape the block's own criterion says an adopter must not need. → §WW230
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
