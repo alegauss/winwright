@@ -168,14 +168,17 @@ the taskbar nor the overflow" — and passed on an immediate re-run of the same 
 the claim in the case's own name is false, and the evidence is the case doing exactly
 what it was written to do.
 
-Two things make round 1 the suspicious one. Round 0 ends with
-`NotificationArea.CloseOverflow()`, and the next round's `TrayIconFixture.Add` runs
-while the shell may still be tearing the flyout down; and the search was not excused, so
-the desk was observable and the icon genuinely was in neither place. That points at
-`Add` returning before the shell has placed the icon when the notification area is
-mid-transition — the fixture's promise being read a moment too early rather than the
-search looking in the wrong place.
+**Ruled out.** This was first filed suspecting `TrayIconFixture.Add` of returning before
+the shell had placed the icon, round 0 having just shut the flyout. WW220 had already
+closed that: `Find` polls `Hidden()` for the name rather than reading once, and its
+comment describes this exact sequence. Do not go back there.
 
-Worth naming: the repair is not a retry around the assertion. A retry there would
-restore the green and delete the measurement, which is the same trade the twenty-two
-missing tests came out of.
+What landed instead is the distinction the sentence was missing. "On neither" covered
+two different things — an icon that is absent, and a flyout that shut while the poll was
+running, after which `Hidden()` answers empty for the rest of the deadline and the
+absence is assembled out of a desk that stopped being lookable. The second is now a hole
+under the search's own condition, which is the shape WW168, WW174 and WW179 each caught
+once. A genuine absence now carries how many icons the bar and the flyout held.
+
+What is left waits on the next occurrence rather than on any work: it will say which of
+the two it was.
