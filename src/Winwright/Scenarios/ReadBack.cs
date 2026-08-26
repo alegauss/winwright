@@ -47,18 +47,22 @@ public sealed record ReadBack
         // Null where nothing resolved, exactly as the seven above: an element that was not there
         // holds no focus and does not hold it either, and answering "not focused" would be an
         // expectation met by an absence.
-        new("focused", read => read.Facts?.HasKeyboardFocus switch
-        {
-            true => "focused",
-            false => "not focused",
-            null => null,
-        }),
+        new(
+            "focused",
+            read => read.Facts?.HasKeyboardFocus switch
+            {
+                true => "focused",
+                false => "not focused",
+                null => null,
+            },
+            always: true),
     ];
 
     private readonly Func<Reading, string?> reading;
 
-    private ReadBack(string name, Func<Reading, string?> reading)
+    private ReadBack(string name, Func<Reading, string?> reading, bool always = false)
     {
+        Always = always;
         Name = name;
         this.reading = reading;
     }
@@ -71,6 +75,22 @@ public sealed record ReadBack
 
     /// <summary>The name a case writes.</summary>
     public string Name { get; }
+
+    /// <summary>
+    /// Whether this reading answers something for every element that resolved at all.
+    /// <para>
+    /// True of <c>focused</c> alone, and measured rather than assumed: a label was read through every
+    /// reading in this vocabulary and the only one that said anything was that one, with <em>not
+    /// focused</em>. Which means a step claiming that reading answers is a step that cannot fail while
+    /// the element is there — an unearned green by construction, and it arrived with WW225 and WW237
+    /// two tasks apart without either noticing.
+    /// </para>
+    /// <para>
+    /// Data rather than a list somewhere else, so a reading added tomorrow declares this where it is
+    /// written and the refusal follows it.
+    /// </para>
+    /// </summary>
+    public bool Always { get; }
 
     /// <summary>
     /// The reading of that name, or a refusal listing the ones there are. Nothing named is

@@ -232,6 +232,17 @@ public sealed record StepDeclaration
                 subject, $"'{act.Name}' reads and never acts, so it cannot be what moved a reading");
         }
 
+        // The reading has to be able to answer nothing, or the claim cannot be false. 'focused' says
+        // 'not focused' for every element that resolved, so a step claiming it answers is a step that
+        // holds whenever the locator matched — which is existence wearing the words of a reading.
+        if (answers && reading.Always)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims '{reading.Name}' answers, and that reading answers for every element that "
+                    + "resolved at all; the claim could never be false, so it says nothing");
+        }
+
         // WW237. One claim per step, for the reason the other two are: a trace line standing for two
         // things is one a reader has to take apart, and naming the value already says it answered.
         if (answers && (wanted is not null || moves))

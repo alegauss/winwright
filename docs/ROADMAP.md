@@ -14,6 +14,8 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
+- 📋 **WW238** (deps: —) **no reading answers a label's words, so a case cannot check what a label says** — Measured against a real WPF label: every reading in the vocabulary answered nothing, because the words are in the element's name and no reading reads that. → §WW238
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

@@ -36,6 +36,28 @@ it.
 
 ## Block F — Assert — the expectation is derived, never typed
 
+### §WW238 The words are in the name and nothing reads it
+
+Measured, and it was not what was expected. A WPF `TextBlock` was read through all eight
+readings the vocabulary offers: `value`, `range`, `toggle`, `selected`, `expanded`,
+`text` and `anything` each answered nothing, and the only one that said anything was
+`focused`, with *not focused*. The words — `Profile` — are in the element's name,
+exactly as with a Win32 `Static`, and no reading reads a name.
+
+So a case cannot check what a label says. That is a large hole for a tool whose subject
+is what a window shows: claude-tray's panes case reads a reset caption and a live
+headline, and both are labels. `WW237`'s `answers` cannot help — there is nothing for it
+to be true of.
+
+Two things it must be careful about. `ElementFacts.Name` is what a locator already
+matches on, so a reading for it makes a step able to assert what its own locator
+selected by — which is a claim that cannot fail where the locator named the name. Naming
+the element by id and reading its name is the useful shape, and the useless one has to
+be refused rather than left to an author to notice.
+
+And `covers` already compares names, which is the same reading one level up. Whatever
+this is called, the two should agree about what a name is rather than deriving it twice.
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
