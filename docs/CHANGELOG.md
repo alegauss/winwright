@@ -176,6 +176,7 @@
 - ✅ **WW68** **a machine that can observe nothing reports a build failure** — Six conditions are read before anything launches - session, desktop, display, coordinates, automation, foreground - and a desk lacking one excuses a check as a named hole instead of a red.
 - ✅ **WW70** **three copies of the engine can be in play and quietly disagree** — The copies in play are read together and answer agreed, behind or unpinnable, exiting non-zero on the two that are not agreement - and one copy nobody can pin makes the whole reading unpinnable.
 - ✅ **WW65** **adopting the tool is a per-machine install somebody has to remember** — Two commands wire it and committing .claude/settings.json wires every clone, with the version its manifest carries read against the tree by the gate that compares the packages.
+- ✅ **WW66** **the schema of a case arrives as flag names typed from memory** — The tools carry the loader's own schema as their input schema, so a misspelled key is unsendable and a case is read back before its file exists.
 
 ## Block I — The in-app half — the app cooperates with the harness
 

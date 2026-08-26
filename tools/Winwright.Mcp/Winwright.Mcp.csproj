@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WW66: the tools the plugin carries. Its own process because that is what a stdio MCP server
+       is - the harness launches it and talks JSON-RPC over the two pipes - and it answers off the
+       engine's own schema rather than off a second copy of the format written here. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Winwright.Mcp</RootNamespace>
+    <AssemblyName>Winwright.Mcp</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Winwright\Winwright.csproj" />
+  </ItemGroup>
+
+</Project>

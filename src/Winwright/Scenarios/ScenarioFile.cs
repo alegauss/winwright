@@ -162,6 +162,7 @@ public sealed class ScenarioFile
 
         Unknown(named, root, ScenarioSchema.File);
 
+        ScenarioSchema.Of(ScenarioSchema.File, ScenarioSchema.Cases, Taking.Cases);
         if (!root.TryGetProperty(ScenarioSchema.Cases, out var cases))
             throw new ScenarioRefusedException(named, $"it declares no '{ScenarioSchema.Cases}', so it holds no case");
 
@@ -234,6 +235,7 @@ public sealed class ScenarioFile
     {
         var read = new List<FixtureDeclaration>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        ScenarioSchema.Of(ScenarioSchema.File, ScenarioSchema.Fixtures, Taking.Fixtures);
         if (!root.TryGetProperty(ScenarioSchema.Fixtures, out var fixtures) || fixtures.ValueKind == JsonValueKind.Null)
             return read;
 
@@ -249,14 +251,14 @@ public sealed class ScenarioFile
 
             Unknown(at, one, ScenarioSchema.Fixture);
 
-            var name = Text(at, one, "name", required: true);
+            var name = Text(at, one, ScenarioSchema.Fixture, "name");
             var declared = Addressed(at, () => FixtureDeclaration.Of(
                 name!,
-                Text(at, one, "environment", required: false),
-                Text(at, one, "flag", required: false),
-                Words(at, one, "arguments"),
-                Pairs(at, one, "variables"),
-                Truth(at, one, "shareable")));
+                Text(at, one, ScenarioSchema.Fixture, "environment"),
+                Text(at, one, ScenarioSchema.Fixture, "flag"),
+                Words(at, one, ScenarioSchema.Fixture, "arguments"),
+                Pairs(at, one, ScenarioSchema.Fixture, "variables"),
+                Truth(at, one, ScenarioSchema.Fixture, "shareable")));
 
             if (!seen.Add(declared.Name))
                 throw new ScenarioRefusedException(at, $"'{declared.Name}' is declared twice, so a case naming it names two");
@@ -275,7 +277,8 @@ public sealed class ScenarioFile
 
         Unknown(at, one, ScenarioSchema.Case);
 
-        var name = Text(at, one, "name", required: true);
+        var name = Text(at, one, ScenarioSchema.Case, "name");
+        ScenarioSchema.Of(ScenarioSchema.Case, ScenarioSchema.Steps, Taking.Steps);
         if (!one.TryGetProperty(ScenarioSchema.Steps, out var steps))
             throw new ScenarioRefusedException($"{at}.{ScenarioSchema.Steps}", "a case declares its steps, and this one declares none");
 
@@ -290,12 +293,12 @@ public sealed class ScenarioFile
             index++;
         }
 
-        var tags = Words(at, one, ScenarioSchema.Tags);
-        var needs = Words(at, one, ScenarioSchema.Needs);
-        var catches = Text(at, one, ScenarioSchema.Catches, required: false);
-        var filed = Text(at, one, "filed", required: false);
+        var tags = Words(at, one, ScenarioSchema.Case, ScenarioSchema.Tags);
+        var needs = Words(at, one, ScenarioSchema.Case, ScenarioSchema.Needs);
+        var catches = Text(at, one, ScenarioSchema.Case, ScenarioSchema.Catches);
+        var filed = Text(at, one, ScenarioSchema.Case, "filed");
         var against = Against(at, one, fixtures);
-        var onlyReads = Truth(at, one, "onlyReads");
+        var onlyReads = Truth(at, one, ScenarioSchema.Case, "onlyReads");
 
         return Addressed(at, () => CaseDeclaration.Declared(
             name!, declared, tags, needs, catches, filed, against, onlyReads));
@@ -309,7 +312,7 @@ public sealed class ScenarioFile
     /// </summary>
     private static FixtureDeclaration? Against(string at, JsonElement one, FixtureSet fixtures)
     {
-        if (Text(at, one, "fixture", required: false) is not { } named)
+        if (Text(at, one, ScenarioSchema.Case, "fixture") is not { } named)
             return null;
 
         return fixtures.Named(named)
@@ -326,13 +329,13 @@ public sealed class ScenarioFile
 
         // Every field is read before anything is declared, so a refusal about a field's kind wears
         // that field's own address and never the step's with the field's in brackets after it.
-        var locator = Text(at, step, "locator", required: true);
-        var act = Text(at, step, "act", required: true);
-        var with = Text(at, step, "with", required: false);
-        var expect = Text(at, step, "expect", required: false);
-        var reads = Text(at, step, "reads", required: false);
-        var meansIt = Truth(at, step, "meansIt");
-        var named = Text(at, step, "named", required: false);
+        var locator = Text(at, step, ScenarioSchema.Step, "locator");
+        var act = Text(at, step, ScenarioSchema.Step, "act");
+        var with = Text(at, step, ScenarioSchema.Step, "with");
+        var expect = Text(at, step, ScenarioSchema.Step, "expect");
+        var reads = Text(at, step, ScenarioSchema.Step, "reads");
+        var meansIt = Truth(at, step, ScenarioSchema.Step, "meansIt");
+        var named = Text(at, step, ScenarioSchema.Step, "named");
 
         return Addressed(at, () => StepDeclaration.Of(locator!, act!, with, expect, reads, meansIt, named));
     }
@@ -355,11 +358,21 @@ public sealed class ScenarioFile
         }
     }
 
-    private static string? Text(string at, JsonElement element, string key, bool required)
+    /// <summary>
+    /// Read a text field, asking the schema what it holds and whether it has to be there.
+    /// <para>
+    /// WW66. Whether a field is text and whether it is required used to be said twice — once in the
+    /// schema a tool publishes and once at the call site that reads it — and the copy that drifts is
+    /// the published one, because only the call site is exercised. Asking makes a mismatch a harness
+    /// error on the first load rather than a tool that accepts what the run refuses.
+    /// </para>
+    /// </summary>
+    private static string? Text(string at, JsonElement element, IReadOnlyList<Field> fields, string key)
     {
+        var field = ScenarioSchema.Of(fields, key, Taking.Text);
         if (!element.TryGetProperty(key, out var value) || value.ValueKind == JsonValueKind.Null)
         {
-            return required
+            return field.Required
                 ? throw new ScenarioRefusedException($"{at}.{key}", "it is not there, and it has to be")
                 : null;
         }
@@ -370,8 +383,9 @@ public sealed class ScenarioFile
         return value.GetString();
     }
 
-    private static IReadOnlyList<string> Words(string at, JsonElement element, string key)
+    private static IReadOnlyList<string> Words(string at, JsonElement element, IReadOnlyList<Field> fields, string key)
     {
+        ScenarioSchema.Of(fields, key, Taking.Words);
         if (!element.TryGetProperty(key, out var value) || value.ValueKind == JsonValueKind.Null)
             return [];
 
@@ -392,8 +406,10 @@ public sealed class ScenarioFile
         return read;
     }
 
-    private static IReadOnlyDictionary<string, string> Pairs(string at, JsonElement element, string key)
+    private static IReadOnlyDictionary<string, string> Pairs(
+        string at, JsonElement element, IReadOnlyList<Field> fields, string key)
     {
+        ScenarioSchema.Of(fields, key, Taking.Pairs);
         var read = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         if (!element.TryGetProperty(key, out var value) || value.ValueKind == JsonValueKind.Null)
             return read;
@@ -415,8 +431,9 @@ public sealed class ScenarioFile
         return read;
     }
 
-    private static bool Truth(string at, JsonElement element, string key)
+    private static bool Truth(string at, JsonElement element, IReadOnlyList<Field> fields, string key)
     {
+        ScenarioSchema.Of(fields, key, Taking.Truth);
         if (!element.TryGetProperty(key, out var value) || value.ValueKind == JsonValueKind.Null)
             return false;
 

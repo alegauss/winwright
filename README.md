@@ -44,6 +44,23 @@ other by the same gate that compares the packages — `Winwright.Concordance --d
 A plugin an adopter installed that is a version behind is the hazard worth naming: nothing goes red,
 and the run answers a question somebody stopped asking.
 
+### What the tools answer
+
+The plugin wires an MCP server, so the format arrives as a schema rather than as prose somebody
+loaded and then typed a key out of:
+
+- **`winwright_format`** — every field of a file, a case, a step and a fixture, whether it is
+  required, and the closed list of what it accepts.
+- **`winwright_vocabulary`** — every act, what each one needs said beside it, and whether the engine
+  may repeat it.
+- **`winwright_check`** — a case read back *before* the file exists. Its input schema **is** the
+  loader's schema, so a misspelled key is not a thing the caller can send; what comes back is either
+  the loader's own refusal, addressed as `cases[0].steps[1].act`, or what a run of it would do.
+
+The server is a .NET process the plugin launches, so it needs building once — `dotnet build -c
+Release` in the plugin's own clone. That is the one step the two commands above do not cover, and it
+is named here rather than left to a session that finds the tools missing.
+
 ## Addressing an element
 
 One grammar, written once, read the same way by every verb.
@@ -433,10 +450,10 @@ Written against what has shipped, so it does not promise a line that is still a 
   waits, the attempts and the verdict. What is still missing is above it: nothing selects a case by
   name or a file by path, nothing declares the fixture a case needs, and nothing lends one window
   to the several cases that only read it.
-- **The plugin carries nothing yet.** The two commands above wire it, and the version it declares is
-  read against the tree — but the MCP tools, the slash commands, the skill and the hook that refuses
-  a hand-written harness are designed and not built. Installing it today changes nothing about a
-  session except that the wiring is already done when they land.
+- **The plugin carries the tools and nothing else yet.** The three MCP tools above answer the format,
+  the vocabulary and whether a case loads. The slash commands, the skill and the hook that refuses a
+  hand-written harness are designed and not built — and no tool runs a case: `winwright_check` says a
+  file would load and stops there, because running one needs a desk and that is a different claim.
 
 ## Building it here
 

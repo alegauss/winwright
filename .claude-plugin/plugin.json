@@ -16,5 +16,6 @@
     "testing",
     "screenshots",
     "mcp"
-  ]
+  ],
+  "mcpServers": "./.claude-plugin/mcp.json"
 }

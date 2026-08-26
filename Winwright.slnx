@@ -7,6 +7,7 @@
   <Folder Name="/tools/">
     <Project Path="tools/Winwright.RollCall/Winwright.RollCall.csproj" />
     <Project Path="tools/Winwright.Concordance/Winwright.Concordance.csproj" />
+    <Project Path="tools/Winwright.Mcp/Winwright.Mcp.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Winwright.Tests/Winwright.Tests.csproj" />

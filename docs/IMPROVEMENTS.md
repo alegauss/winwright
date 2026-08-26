@@ -60,13 +60,6 @@ nothing outside it should be able to end one either.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW66 The schema arrives as the tool's input schema
-
-Flag names typed from memory are guesses, and a guess costs a refusal and a retry at
-best. A tool whose input schema is this project's scenario schema makes the fields
-arrive already named, already typed and already constrained, which is the difference
-between being told what is wrong and being unable to express it in the first place.
-
 ### §WW67 The hook is what makes the verb the easy path
 
 A hand-written harness script is always available and always faster in the moment, and
