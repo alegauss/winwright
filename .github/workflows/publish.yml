@@ -116,8 +116,15 @@ jobs:
             Write-Host "  $copy"
           }
 
+      # Built before packing, and that is not ceremony: measured on this workflow's first run, `dotnet
+      # pack` on the solution builds only what it can pack. Winwright.Concordance sets IsPackable
+      # false, so it was never compiled and the check below failed with the assembly missing rather
+      # than with anything about the versions. ci.yml already had this shape.
+      - name: Build
+        run: dotnet build Winwright.slnx --configuration Release -p:ContinuousIntegrationBuild=true
+
       - name: Pack
-        run: dotnet pack Winwright.slnx --configuration Release --output artifacts -p:ContinuousIntegrationBuild=true
+        run: dotnet pack Winwright.slnx --configuration Release --no-build --output artifacts -p:ContinuousIntegrationBuild=true
 
       # WW142, and here it is load-bearing rather than a gate: it reads the copies the step above
       # rewrote against each other and against what was just built. A version raised in three files
@@ -173,10 +180,18 @@ jobs:
         run: |
           # The packages themselves are attached rather than only described: a release whose assets
           # are the artifacts is one somebody can read the nuspec out of without trusting this log.
-          $prerelease = if ('${{ steps.version.outputs.prerelease }}' -eq 'true') { '--prerelease' } else { '' }
-          gh release create '${{ steps.version.outputs.tag }}' `
-            --title '${{ steps.version.outputs.tag }}' `
-            --generate-notes `
-            --verify-tag `
-            $prerelease `
-            (Get-ChildItem artifacts/*.nupkg, artifacts/*.snupkg | ForEach-Object { $_.FullName })
+          #
+          # Built as an array rather than interpolated. A `--prerelease` flag spliced in as '' when the
+          # version is settled reaches gh as an empty positional argument, which is a release created
+          # under a name nobody asked for or a refusal about an argument this file never meant to pass.
+          $arguments = @(
+            'release', 'create', '${{ steps.version.outputs.tag }}',
+            '--title', '${{ steps.version.outputs.tag }}',
+            '--generate-notes',
+            '--verify-tag'
+          )
+
+          if ('${{ steps.version.outputs.prerelease }}' -eq 'true') { $arguments += '--prerelease' }
+          $arguments += (Get-ChildItem artifacts/*.nupkg, artifacts/*.snupkg | ForEach-Object { $_.FullName })
+
+          gh @arguments
