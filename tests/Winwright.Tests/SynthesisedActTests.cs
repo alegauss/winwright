@@ -40,10 +40,17 @@ public sealed class SynthesisedActTests : IDisposable
     /// An in-process window, and that is the whole reason this class does not launch the fixture.
     /// <para>
     /// WW232. It did launch it, and every positive case here excused itself on every guest run —
-    /// silently, while being reported as proof. Windows refuses the foreground to a process that does
-    /// not already own it, which <see cref="Act"/>'s own header says; a fixture started by a test host
-    /// with no foreground cannot take one, and `--show` was measured to change nothing. Only a thread
-    /// that owns a window gets the desk, so the window has to be this thread's.
+    /// silently, while being reported as proof. What that was blamed on is corrected by WW247: the
+    /// sentence written here said a fixture started by a test host can never take the foreground,
+    /// inferred from <see cref="Act"/>'s header, which is about Windows refusing to *grant* it. A
+    /// launched window that opens focused already has it. The real cause was WW246 — the engine read
+    /// the window under test as nothing, because a WPF control carries no handle of its own.
+    /// </para>
+    /// <para>
+    /// The dialog stays for now and its reason is WW248: a window this thread shows takes the desk, so
+    /// a class that opens one cannot drive a launched fixture beside it. Whether these cases are
+    /// better off back on the fixture is a question about this class rather than about the engine, and
+    /// is open.
     /// </para>
     /// <para>
     /// Two edits and a label: something to type into, something for Tab to move the focus to, and

@@ -34,10 +34,16 @@ public sealed class MovesTests : IDisposable
     private readonly string root = Directory.CreateTempSubdirectory("winwright-moves-").FullName;
 
     /// <summary>
-    /// WW234. This ran through <c>Suite.Launch</c>, which starts a process — and a process started by
-    /// a test host with no foreground never gets one, so the driving case excused itself on every
-    /// guest run while being read as proof. <c>Suite.Run</c> takes a root that is already open, which
-    /// is the door: the window is this thread's, and the case is otherwise the same data file.
+    /// WW234. This ran through <c>Suite.Launch</c>, which starts a process, and the driving case
+    /// excused itself on every guest run while being read as proof. <c>Suite.Run</c> takes a root that
+    /// is already open, which is the door: the window is this thread's, and the case is otherwise the
+    /// same data file.
+    /// <para>
+    /// WW247 corrects the reason. It said a process started by a test host never gets the foreground;
+    /// a launched window that opens focused already has it, and WW246 — the window under test reading
+    /// as nothing — is what was really stopping this. The dialog stays for WW248's reason rather than
+    /// this one, and whether it should is open.
+    /// </para>
     /// </summary>
     private readonly PumpedDialog dialog = PumpedDialog.Open(
         "winwright moves",

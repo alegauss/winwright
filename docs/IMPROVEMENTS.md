@@ -36,6 +36,53 @@ it.
 
 ## Block F — Assert — the expectation is derived, never typed
 
+### §WW248 A dialog beside a fixture takes the desk from it
+
+`PumpedDialog` shows a window on this thread, and a window this process shows takes the
+foreground. So every launched fixture in the same class is left without it, and every
+synthesised act against that fixture is a hole — correctly reported, and for a reason
+nobody wrote down.
+
+Measured in one guest run. `NudgeTests` — a dialog and a launched fixture together —
+excused a nudge on the launched slider. `WpfInputTests` — a launched WPF fixture and no
+dialog — typed into a text box and clicked a checkbox in the same run, neither excused.
+Two classes, one difference.
+
+It is not a defect in the engine. The hole is honest and the excuse is real: the desk
+genuinely belonged to something else. What is missing is that nothing stops a case being
+written where it can only ever be excused, and an excuse that arrives every run is a
+check nobody is running.
+
+`WW231` and `WW233` made excuses countable and named, which is how this was seen at all.
+What they do not do is tell an excuse about the machine somebody happened to be using
+from one that is structural — and a structural excuse is the one worth a red.
+
+The cheap half is a rule: a class that opens a dialog does not drive a launched window.
+Whether the suite can check that about itself is the question worth asking.
+
+### §WW249 The proof that WPF takes input is itself intermittent
+
+`WpfInputTests.Typing_reaches_a_wpf_text_box` is the negative control `WW246` was
+missing, and it does not hold every time. Measured across four runs with no change
+between them: host green, guest green, guest red, guest green. The red was `Failed`
+rather than a hole, so the keys were sent and the read-back did not match.
+
+What the red said was `Expected: Passed / Actual: Failed` and nothing else, because the
+assertion threw its own evidence away — the fourth time in one session that a red here
+has been written without its diagnosis. That is fixed: the assertion now carries the
+result, so the next occurrence names what the box read.
+
+The obvious hypothesis is the box's own starting text. It ships reading `default`, and
+whether a WPF `TextBox` replaces or appends depends on whether the content was selected
+when the focus arrived — which differs between a click and a programmatic focus. If that
+is it, then it is not a flake in the test at all: it is `Keyboard.Type`'s read-back
+contract being sometimes false against WPF, which is the same class of finding as
+`WW246` and a worse one.
+
+It is deliberately not guessed at here. Two runs were spent today refuting hypotheses
+that reasoning made look certain, and the sentence needed to settle this arrives on the
+next red.
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
@@ -201,31 +248,6 @@ that is not in English.
 
 Until then the single declaration is the honest thing, and the comment beside it says
 why it is not the general answer.
-
-### §WW247 Three cases moved for a reason that was not real
-
-Earlier in the same session that found `WW246`, three cases were failing against a
-launched fixture and were moved to `PumpedDialog` — an in-process Win32 dialog — on the
-reading that a launched process cannot be sent synthesised input.
-
-`Act.cs`'s header is what that reading came from, and the header is correct: Windows
-refuses the *foreground* to a process that does not already own it, so a run cannot
-bring somebody's window forward. What was inferred from it is not: that a launched
-window can therefore never be typed into. A launched window that opens focused already
-has the foreground, and nothing needs to be granted.
-
-What actually stopped those cases was `WW246` — the window under test reading as
-nothing, so the check could not recognise a foreground the fixture already held.
-`WpfInputTests` now types into and clicks a launched WPF fixture with nothing excused,
-which is the measurement that settles it.
-
-So the moves may have been unnecessary, and one of them cost more than a move: a case
-that was rewritten around an in-process dialog is a case that no longer drives the thing
-it was written about. Which of the three still earn their dialog and which should go
-back to the fixture is worth asking one at a time.
-
-The rule underneath is the one this session keeps re-learning: correct documentation
-plus a plausible inference is still a guess.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

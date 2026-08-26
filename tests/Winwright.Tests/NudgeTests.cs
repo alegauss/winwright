@@ -30,11 +30,24 @@ public sealed class NudgeTests : IDisposable
     /// <summary>
     /// The window the driven case uses, and it is this thread's.
     /// <para>
-    /// WW234. This class launched the fixture, and both of its driving cases excused themselves on
-    /// every guest run — Windows refuses the foreground to a process that does not already own it, so
-    /// a launched fixture cannot be sent a key whatever flag it carries. A trackbar takes the range
-    /// 0..100 at position 0 with no message sent to it, which is an end: the direction has to be
-    /// chosen, so one case here proves both that the act lands and that it reverses.
+    /// WW234. This class launched the fixture and both of its driving cases excused themselves on
+    /// every guest run. A trackbar takes the range 0..100 at position 0 with no message sent to it,
+    /// which is an end: the direction has to be chosen, so one case here proves both that the act
+    /// lands and that it reverses.
+    /// </para>
+    /// <para>
+    /// WW247 corrects why they were excusing, because the reason written here was wrong. It said a
+    /// launched fixture cannot be sent a key whatever flag it carries, inferred from `Act.cs`'s header
+    /// — which is about Windows refusing to *grant* the foreground, not about a window that already
+    /// has it. What was actually stopping them was WW246: the engine read the window under test as
+    /// nothing, because a WPF slider carries no handle of its own.
+    /// </para>
+    /// <para>
+    /// And this dialog is now the second reason. Measured in the guest: a launched-fixture nudge added
+    /// here excused itself while `WpfInputTests` — a launched WPF fixture with no dialog beside it —
+    /// typed and clicked in the same run without excusing. An in-process window shown by this thread
+    /// takes the desk, so a class holding one cannot also drive a launched window. The claim that a
+    /// launched window takes a key lives there rather than here.
     /// </para>
     /// </summary>
     private readonly PumpedDialog dialog = PumpedDialog.Open(

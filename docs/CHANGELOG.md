@@ -221,6 +221,7 @@
 - ✅ **WW230 (the workflow and the metadata)** **the only place the engine's package exists is a folder inside this repository** — Both halves publish to nuget.org from `publish.yml`, keylessly, on one manual dispatch.
 - ✅ **WW79** **the panes case proves a report is readable and needs no second profile** — Two cases: the headers cover a derived set and run everywhere, and the body claims three readings behind a precondition this repository measures.
 - ✅ **WW243** **the keyboard case has never run green: the click it opens with is never sent, and the red names the step after it** — The case runs green once WW244 and WW246 land: three checks, nothing excused, against real keys on a real WPF window.
+- ✅ **WW247** **three cases were moved to an in-process dialog on an inference that turned out to be false** — The three false sentences are corrected to what was measured, and each says the dialog's reason is now WW248 rather than a rule about Windows.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

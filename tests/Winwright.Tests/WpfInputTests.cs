@@ -108,7 +108,7 @@ public sealed class WpfInputTests : IDisposable
             return;
         }
 
-        Assert.Equal(AssertionOutcome.Passed, result.Outcome);
+        Assert.True(result.Outcome == AssertionOutcome.Passed, result.ToString());
         Assert.Equal("WW246", box.Read().Values.Value);
     }
 
@@ -129,7 +129,7 @@ public sealed class WpfInputTests : IDisposable
             return;
         }
 
-        Assert.Equal(AssertionOutcome.Passed, result.Outcome);
+        Assert.True(result.Outcome == AssertionOutcome.Passed, result.ToString());
 
         // The pointer is the act here rather than an escalation, so what proves it landed is the
         // toggle moving — the pattern route would have moved it whether or not a click was sent.
