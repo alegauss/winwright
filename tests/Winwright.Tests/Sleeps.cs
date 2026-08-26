@@ -110,6 +110,11 @@ internal static class Sleeps
             "the fixture parks a thread without pumping, which is the whole of what --pump=none "
                 + "reproduces: a single-threaded apartment that blocks any other way keeps answering "
                 + "messages and is not dead at all"),
+        new("Finished.cs", 1, Sleeping.Machinery,
+            "WW218's move into place needs delete access to the destination, and a harness polling "
+                + "that file has it open — so this is the interval between one attempt and the next, "
+                + "the same machinery a deadline is made of, against a collision that clears in "
+                + "milliseconds because the thing holding the file is a poll"),
 
         // --- the suite ----------------------------------------------------------------------------
         new("FixtureTests.cs", 1, Sleeping.Resolution,
@@ -127,6 +132,11 @@ internal static class Sleeps
             "the thread that owns the window sets this once the window exists, so the constructor "
                 + "hands back a dialog that is really there rather than one that will be shortly — "
                 + "with a ten-second deadline, so a thread that never starts is a refusal and not a hang"),
+        new("FinishedTests.cs", 3, Sleeping.OnASignal,
+            "two signals and one delay, and the shape is the point: a reader takes the destination "
+                + "and parks until it is told to let go, so the case knows the file really is open "
+                + "rather than about to be — and the letting go is delayed rather than triggered by "
+                + "the move, because a collision that had already cleared would not be one"),
         new("TrayIconFixture.cs", 1, Sleeping.OnASignal,
             "the same shape for the icon: the shell is asked and the add is signalled, which is what "
                 + "lets every case look straight after Add rather than waiting a guessed interval"),

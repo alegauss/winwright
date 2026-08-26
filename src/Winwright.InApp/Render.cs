@@ -151,17 +151,20 @@ public static class Render
 
     private static void Write(string full, BitmapSource image)
     {
-        var directory = Path.GetDirectoryName(full);
-        if (!string.IsNullOrEmpty(directory))
-            Directory.CreateDirectory(directory);
-
         var encoder = new PngBitmapEncoder();
         encoder.Frames.Add(BitmapFrame.Create(image));
 
         // Written through a stream that is closed before the receipt is returned: a caller told a
         // file exists and then finding it half-written is the same lie as an empty one.
-        using var file = File.Create(full);
-        encoder.Save(file);
+        //
+        // WW218. And filled beside the name rather than into it, which is the other half of the
+        // same sentence for a reader in another process: File.Create truncates first, so a harness
+        // polling in the gap sees a picture that is there and is not a picture yet.
+        Finished.Writing(full, beside =>
+        {
+            using var file = File.Create(beside);
+            encoder.Save(file);
+        });
     }
 
     private static (BitmapSource Image, RenderedPicture Facts) Rendered(

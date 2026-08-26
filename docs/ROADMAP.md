@@ -45,8 +45,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW218** (deps: —) **the dump the fixture writes reads as empty at five seconds and one millisecond** — The wait ends on something the fixture writes last, so a run reads a finished file or says the write did not finish rather than parsing a half of one. → §WW218
-
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine

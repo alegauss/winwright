@@ -1309,17 +1309,29 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         // Which of the two ways it ended, proved rather than assumed. Something that is there and
         // reads as nothing is the fixture's doing and stays red — that is exactly the confusion
         // WW164 was filed about, and excusing it would withdraw the check WW164 added.
-        var absent = !File.Exists(surfaces) && !File.Exists(geometry);
+        //
+        // WW218. Per file, and that is the repair. This asked whether *both* were absent, so a run
+        // where the surfaces arrived promptly and the fixture had not reached the dump at all went
+        // red saying it wrote what it drew and it read as nothing — a sentence about a file it had
+        // not written, on the strength of one it had. Since WW218 an existing dump is a finished
+        // dump, so the two answers are now genuinely different: absent is a machine that ran out of
+        // time, and present-and-unreadable is the fixture's doing.
+        var unfinished = Unwritten(surfaces, geometry);
         Assert.True(
-            absent,
+            unfinished.Count > 0,
             Waits.Missed(
                 "wrote", $"pid {launched.Pid} wrote what it drew and it read as nothing", waited));
 
-        SlowMachine.Excusing("wrote", waited, absent);
+        SlowMachine.Excusing("wrote", waited, true);
 
         // Said out loud, because a case that returns quietly is a green covering a check that never
-        // ran. The caller returns on this; the run reports it.
-        output.WriteLine(SlowMachine.Sentence("wrote", $"pid {launched.Pid} writing what it drew", waited));
+        // ran. The caller returns on this; the run reports it. Naming the file is what tells the
+        // reader whether the fixture was slow to draw or slow to report.
+        output.WriteLine(SlowMachine.Sentence(
+            "wrote",
+            $"pid {launched.Pid} writing what it drew ({string.Join(" and ", unfinished)} never arrived)",
+            waited));
+
         return null;
     }
 
@@ -1355,6 +1367,27 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
     }
 
     /// <summary>Whether the surface report holds a surface, rather than merely being there.</summary>
+    /// <summary>
+    /// Which of the two the fixture never got round to writing, by the name a reader would look for.
+    /// <para>
+    /// WW218. The distinction this file used to collapse: a dump that is not there is a machine that
+    /// ran out of time, and one that is there and will not read is the fixture's doing. Since WW218
+    /// the in-app half fills a sibling and moves it over the name, so an existing file is a finished
+    /// file and the two answers cannot be confused by a truncate nobody saw.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<string> Unwritten(string surfaces, string geometry)
+    {
+        var missing = new List<string>();
+        if (!File.Exists(surfaces))
+            missing.Add("the surface report");
+
+        if (!File.Exists(geometry))
+            missing.Add("the geometry dump");
+
+        return missing;
+    }
+
     private static bool Readable(string surfaces) => Written(surfaces, () => SurfaceReport.Read(surfaces).Count > 0);
 
     /// <summary>Whether the geometry dump holds a tree, rather than merely being there.</summary>

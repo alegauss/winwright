@@ -226,24 +226,3 @@ tests sit around it and the migration must not disturb the parallelism setting t
 runner config exists to hold in place.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW218 The wait ends on the write finishing, not on a clock
-
-Two guest runs an hour apart, two different cases in the same file, and the same
-arithmetic: 5002ms against the 5000ms this suite declares, and 5029ms against the same
-5000ms. A hundred and fifty looks each. Both reported that the fixture wrote what it
-drew and it read as nothing, which is a sentence about the application under test
-arriving through a number this file chose.
-
-WW211 already refused the obvious move and was right to: the budget is not the fault,
-and raising it is what keeps this coming back. WW145 and WW164 made the repair one layer
-down - read through the write rather than around it, because a file that exists is the
-half of a write that finished first. What is left is that the completeness test is
-parsing: the wait asks whether the content reads yet, which races however long the
-writer takes to fill a file it has already created.
-
-A writer that finishes with a marker - a rename into place, a trailing line, a sibling
-the reader waits on - turns that race into a fact. Then the wait ends because the write
-ended, the deadline is a real deadline rather than a coin toss at the boundary, and a
-run that genuinely timed out says the write did not finish instead of blaming what it
-managed to read. Both halves are here: the fixture writes it and this suite reads it.

@@ -172,11 +172,6 @@ public static class Geometry
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
         var dumped = Of(root, depth, width);
-        var full = Path.GetFullPath(path.Trim());
-        var directory = Path.GetDirectoryName(full);
-        if (!string.IsNullOrEmpty(directory))
-            Directory.CreateDirectory(directory);
-
         var text = new StringBuilder();
         foreach (var element in dumped.Elements)
             text.Append(element.Line()).Append('\n');
@@ -184,7 +179,13 @@ public static class Geometry
         if (dumped.Elided > 0)
             text.Append(ElidedMarker).Append('\t').Append(dumped.Elided.ToString(CultureInfo.InvariantCulture)).Append('\n');
 
-        File.WriteAllText(full, text.ToString(), new UTF8Encoding(false));
+        // WW218. Filled beside the name the harness watches and moved over it, because writing to
+        // that name truncates it first: a reader looking in the gap gets a dump that is there and
+        // holds nothing, which is a fault reported against an application that was fine.
+        Finished.Writing(
+            Path.GetFullPath(path.Trim()),
+            beside => File.WriteAllText(beside, text.ToString(), new UTF8Encoding(false)));
+
         return dumped;
     }
 
