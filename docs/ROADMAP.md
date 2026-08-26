@@ -20,7 +20,6 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-- 📋 **WW222** (deps: —) **nothing in a session runs a case, so the tools stop at would-load** — A verb that launches the fixture, runs a selection and hands back the verdict is what makes a case a thing a session can finish. → §WW222
 - 📋 **WW224** (deps: —) **a block criterion names a surface the plugin never got** — Block H's first criterion says the two commands wire the commands, and there are none, so a criterion read as met is covering something that was never built. → §WW224
 
 ## Block I — The in-app half — the app cooperates with the harness

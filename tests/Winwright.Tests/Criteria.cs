@@ -167,9 +167,9 @@ internal static class Criteria
                 + "names commands, and there are none"),
         new("H", "An answer costs no context",
             "McpTests.The_format_and_the_vocabulary_are_answers_rather_than_prose_somebody_loads",
-            null, "the format and the vocabulary are tool answers rather than prose a turn loads, and the "
-                + "one tool that takes a case carries the loader's own schema, so the key a caller cannot "
-                + "spell is one they cannot send"),
+            null, "the format and the vocabulary are tool answers rather than prose a turn loads, the one "
+                + "tool that takes a case carries the loader's own schema, and since WW222 the verdict is "
+                + "an answer too rather than a shell round trip — RunningTests holds that half"),
         new("H", "The skill fits its budget",
             "SkillTests.The_skill_fits_its_budget_on_both_of_the_costs_it_has",
             null, "both costs are measured apart — the description, which is in context on every turn "

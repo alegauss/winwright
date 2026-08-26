@@ -56,6 +56,11 @@ loaded and then typed a key out of:
 - **`winwright_check`** — a case read back *before* the file exists. Its input schema **is** the
   loader's schema, so a misspelled key is not a thing the caller can send; what comes back is either
   the loader's own refusal, addressed as `cases[0].steps[1].act`, or what a run of it would do.
+- **`winwright_run`** — the cases a selection asks for, run. It answers the verdict, a line per case
+  that ran and per case it left alone, the exit code, and what outlived the run. **A desk that cannot
+  observe answers a hole**, naming which of the six conditions is missing — not a red, and not a
+  green either. That is the whole reason it is a separate verb from `winwright_check`: whether a file
+  parses is a claim nothing about the machine can change, and whether it passed is not.
 
 The server and the guard are .NET processes the plugin launches, so they need building once —
 `dotnet build -c Release` in the plugin's own clone. That is the one step the two commands above do
@@ -473,10 +478,10 @@ Written against what has shipped, so it does not promise a line that is still a 
   waits, the attempts and the verdict. What is still missing is above it: nothing selects a case by
   name or a file by path, nothing declares the fixture a case needs, and nothing lends one window
   to the several cases that only read it.
-- **No tool runs a case.** The plugin carries the three MCP tools, the guard and the skill.
-  `winwright_check` says a file would load and stops there: running one needs a desk, a launch and a
-  verdict, and that is a different claim from *this would parse*. There are no slash commands either,
-  and none are planned — a verb reachable from a tool does not also need a name typed with a slash.
+- **A suite runs; a suite does not report to anywhere but the caller.** `winwright_run` launches,
+  runs and answers, and what it answers is the verdict — there is no file it writes, no watch mode and
+  no history. A second run tells you nothing about the first. There are no slash commands either, and
+  none are planned: a verb reachable from a tool does not also need a name typed with a slash.
 
 ## Building it here
 

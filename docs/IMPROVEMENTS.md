@@ -64,23 +64,6 @@ J waits on.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW222 The tools stop one step short of the answer
-
-`winwright_check` answers whether a file would load. That is the saving WW66 was about —
-the analysis, before the prose exists — and it is not the question a session actually
-has, which is *did it pass*. Today the answer to that comes from a shell: build, then
-`dotnet test`, then read a trx. So the tool chain gets an agent to a correct case file
-and then hands the run back to the same script-shaped path WW67 exists to deny, which is
-the shape of a guard that closes one door and leaves the next one open.
-
-What is missing is a verb that takes a selection, launches what the fixtures declare,
-runs it and hands back the verdict — the sentence, the exit code, and the holes named
-rather than counted. The reason it is not WW66's scope is that running one needs a desk,
-and a desk is the one thing an MCP server cannot assume: the six conditions WW68 reads
-have to be read before anything launches, and a tool that cannot observe has to answer
-*hole* rather than a red or a green. That makes this a verdict-shaped task and not a
-schema-shaped one, which is why it is filed apart rather than folded in.
-
 ### §WW224 Either the commands or the sentence
 
 "The plugin is the whole installation" says in full that two commands wire the hook, the

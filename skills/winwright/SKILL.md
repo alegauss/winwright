@@ -34,6 +34,9 @@ Instead:
    whether the engine may repeat it.
 3. Write the `.cases.json`, then ask **`winwright_check`** whether it loads. The refusal is addressed
    into the file (`cases[0].steps[1].act`), so you fix a field and not a file.
+4. Ask **`winwright_run`** to run it. It answers the verdict, a line per case that ran and per case
+   it left alone, the exit code, and what outlived the run — so *did it pass* does not go back to a
+   shell. A desk that cannot observe answers a hole, which is neither a red nor a green.
 
 Do not type a field name from memory. The tools carry the loader's own schema, so a key you cannot
 spell is a key you cannot send — take the constraint rather than guessing at it.

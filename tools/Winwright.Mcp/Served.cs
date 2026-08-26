@@ -83,6 +83,14 @@ public static class Served
                 + "the file, or what the loader read — which is what a run of it would do.",
             ScenarioSchema.AsJsonSchema(),
             Checking),
+
+        new(
+            "winwright_run",
+            "Run the cases a selection asks for and answer the verdict: the sentence, a line per case "
+                + "that ran and per case it left alone, the exit code, and what outlived the run. A "
+                + "desk that cannot observe answers a hole rather than a red.",
+            Running.Schema(),
+            arguments => Running.Over(arguments, Winwright.Windowing.Desk.Read())),
     ]);
 
     /// <summary>The version of the engine this server is calling.</summary>
