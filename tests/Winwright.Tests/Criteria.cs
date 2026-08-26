@@ -159,9 +159,9 @@ internal static class Criteria
         // --- H, the Claude Code surface -----------------------------------------------------------------
         new("H", "The plugin is the whole installation", "", Unshown.NotBuilt,
             "the plugin exists, its two commands are the whole of wiring it, and it now carries the MCP "
-                + "tools — ConcordanceTests reads its manifest against the tree and McpTests reads the "
-                + "wiring against what this tree builds — but the commands, the skill and the hook that "
-                + "refuses a hand-written harness are still open"),
+                + "tools and the guard — ConcordanceTests reads its manifest against the tree, McpTests "
+                + "and GuardTests read both wirings against what this tree builds — but the slash "
+                + "commands and the skill are still open"),
         new("H", "An answer costs no context",
             "McpTests.The_format_and_the_vocabulary_are_answers_rather_than_prose_somebody_loads",
             null, "the format and the vocabulary are tool answers rather than prose a turn loads, and the "

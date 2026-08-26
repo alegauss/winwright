@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "dotnet exec \"${CLAUDE_PLUGIN_ROOT}/tools/Winwright.Guard/bin/Release/net10.0-windows/Winwright.Guard.dll\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -61,6 +61,21 @@ The server is a .NET process the plugin launches, so it needs building once — 
 Release` in the plugin's own clone. That is the one step the two commands above do not cover, and it
 is named here rather than left to a session that finds the tools missing.
 
+### What the guard refuses
+
+A hand-written harness script is always available and always faster in the moment, and that is
+exactly how a 2,732-line one happens. So the plugin registers a `PreToolUse` hook: a write whose
+content names `Winwright.Acting`, `Winwright.Locating` or `Winwright.Asserting` is **denied**, and the
+refusal names the case file and `winwright_check` that replace it. The refusal arrives before the
+work rather than after it, which is the difference between being asked to write the other thing and
+being asked to delete what you just wrote.
+
+It stays out of its own way in three places. A `.cases.json` write is never denied — that is the verb.
+A project referencing the engine's *source* is never denied — the suite here drives windows on
+purpose, and a guard you turn off to work on the tool is a guard whose false denies nobody hears
+about. And anything it cannot read it allows: a hook that denies what it did not understand is one
+that gets removed, after which nothing is guarded at all.
+
 ## Addressing an element
 
 One grammar, written once, read the same way by every verb.
@@ -450,10 +465,11 @@ Written against what has shipped, so it does not promise a line that is still a 
   waits, the attempts and the verdict. What is still missing is above it: nothing selects a case by
   name or a file by path, nothing declares the fixture a case needs, and nothing lends one window
   to the several cases that only read it.
-- **The plugin carries the tools and nothing else yet.** The three MCP tools above answer the format,
-  the vocabulary and whether a case loads. The slash commands, the skill and the hook that refuses a
-  hand-written harness are designed and not built — and no tool runs a case: `winwright_check` says a
-  file would load and stops there, because running one needs a desk and that is a different claim.
+- **The plugin carries the tools and the guard, and no commands or skill yet.** The three MCP tools
+  above answer the format, the vocabulary and whether a case loads, and the hook denies a harness
+  script. The slash commands and the skill are designed and not built — and no tool runs a case:
+  `winwright_check` says a file would load and stops there, because running one needs a desk and that
+  is a different claim.
 
 ## Building it here
 

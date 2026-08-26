@@ -33,6 +33,10 @@
          checked as often as somebody opens a session. -->
     <ProjectReference Include="../../tools/Winwright.Mcp/Winwright.Mcp.csproj" />
 
+    <!-- WW67: the guard denies a write, so every one of its judgements is a false deny waiting to
+         happen. What it allows is checked here as carefully as what it refuses. -->
+    <ProjectReference Include="../../tools/Winwright.Guard/Winwright.Guard.csproj" />
+
     <!-- Referenced so the suite builds the fixture, and copied nowhere: an application under
          test is launched from its own output, not from a half-copy beside the suite. Copying it
          brought the apphost without its assembly and every launch died at CLR startup. -->

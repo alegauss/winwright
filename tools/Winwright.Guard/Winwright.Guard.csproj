@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WW67: the guard the plugin registers. Its own process because that is what a hook is, and it
+       references the engine so the namespaces it recognises are read off the assembly rather than
+       retyped here - a list of spellings nobody checks is the second copy that goes on naming a
+       namespace after it moves. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Winwright.Guarding</RootNamespace>
+    <AssemblyName>Winwright.Guard</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Winwright\Winwright.csproj" />
+  </ItemGroup>
+
+</Project>

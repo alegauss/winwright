@@ -60,14 +60,6 @@ nothing outside it should be able to end one either.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW67 The hook is what makes the verb the easy path
-
-A hand-written harness script is always available and always faster in the moment, and
-that is exactly how 2,732 lines happen. The guard denies the write and names the verb
-that replaces it, which is the same shape roadkeep puts in front of a governed file -
-and the reason it works is that the refusal arrives before the work rather than after
-it.
-
 ### §WW69 The skill loads when a window is in play
 
 The whole content of an instruction file is loaded on every turn against a budget, which

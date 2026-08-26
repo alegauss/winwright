@@ -177,6 +177,7 @@
 - ✅ **WW70** **three copies of the engine can be in play and quietly disagree** — The copies in play are read together and answer agreed, behind or unpinnable, exiting non-zero on the two that are not agreement - and one copy nobody can pin makes the whole reading unpinnable.
 - ✅ **WW65** **adopting the tool is a per-machine install somebody has to remember** — Two commands wire it and committing .claude/settings.json wires every clone, with the version its manifest carries read against the tree by the gate that compares the packages.
 - ✅ **WW66** **the schema of a case arrives as flag names typed from memory** — The tools carry the loader's own schema as their input schema, so a misspelled key is unsendable and a case is read back before its file exists.
+- ✅ **WW67** **a hand-written harness script is the path of least resistance** — A write naming the engine's acting, locating or asserting surface is denied and the refusal names the case file and winwright_check that replace it.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
