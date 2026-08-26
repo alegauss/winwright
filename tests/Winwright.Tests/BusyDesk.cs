@@ -149,6 +149,33 @@ internal static class BusyDesk
     }
 
     /// <summary>
+    /// Which case is being excused, read off the stack.
+    /// <para>
+    /// WW233. The count landed without the names, and the trade was written up as eighty-one call
+    /// sites each taking an argument — which is a price nobody should pay and was the wrong list of
+    /// options. The stack already knows: the first frame outside this type is the case, or the
+    /// initialiser that built its fixture, and neither xunit nor any call site has to be asked.
+    /// </para>
+    /// <para>
+    /// It catches nothing, and that is a correction rather than an omission. The first version wrapped
+    /// the walk in a catch answering <c>&lt;unnamed&gt;</c> — a defensive catch with no failure mode
+    /// anybody could name, which is exactly what <see cref="Swallowing"/> exists to refuse: a value
+    /// answered out of a catch block is "I could not tell" spelled like an answer. A frame whose
+    /// method is unreadable is skipped, and a walk that finds nothing outside this type says so.
+    /// </para>
+    /// </summary>
+    private static string Whose()
+    {
+        foreach (var frame in new System.Diagnostics.StackTrace(fNeedFileInfo: false).GetFrames())
+        {
+            if (frame.GetMethod() is { DeclaringType: { } owner } method && owner != typeof(BusyDesk))
+                return $"{owner.Name}.{method.Name}";
+        }
+
+        return "<unnamed>";
+    }
+
+    /// <summary>
     /// That the hole is an honest one, and about the desk rather than about anything the machine
     /// could have arranged.
     /// </summary>
@@ -173,7 +200,7 @@ internal static class BusyDesk
         {
             try
             {
-                File.AppendAllText(Ledger, missing.Name + Environment.NewLine);
+                File.AppendAllText(Ledger, $"{missing.Name}\t{Whose()}{Environment.NewLine}");
             }
             catch (Exception unwritable) when (unwritable is IOException or UnauthorizedAccessException)
             {

@@ -121,6 +121,49 @@ public sealed class ExcusedTests : IDisposable
     }
 
     [Fact]
+    public void A_line_carries_the_case_beside_the_fact_and_reads_without_one()
+    {
+        // WW233. A ledger from an older build, or a frame the stack could not answer for, still says
+        // how many — so a line with no name is read as unnamed rather than refused.
+        Assert.Equal(
+            ("a foreground to take", "NudgeTests.A_range_with_room"),
+            Readers.Excuse("a foreground to take\tNudgeTests.A_range_with_room"));
+
+        Assert.Equal(("a display that renders", null), Readers.Excuse("a display that renders"));
+        Assert.Equal(("a display that renders", null), Readers.Excuse("a display that renders\t   "));
+    }
+
+    [Fact]
+    public void The_reading_says_which_cases_were_excused_and_not_only_how_many()
+    {
+        // The sentence groups by fact, because that is what says cause against contention. The lines
+        // name the cases, because that is what makes eleven holes something a reader can chase.
+        var roll = Roll.Of(
+            ["A.B", "A.C"],
+            [new("A.B", "Passed", true), new("A.C", "Passed", true)],
+            ["a foreground to take\tNudgeTests.A_range", "a foreground to take\tMovesTests.A_control"]);
+
+        var said = roll.Render();
+
+        Assert.Contains("2 for a foreground to take", said[0], StringComparison.Ordinal);
+        Assert.Contains(said, one => one.Contains("NudgeTests.A_range", StringComparison.Ordinal));
+        Assert.Contains(said, one => one.Contains("MovesTests.A_control", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void A_wipeout_of_excuses_stays_readable()
+    {
+        // A machine that can observe nothing excuses every one of them, and a listing of eighty-one
+        // is a listing nobody reads. Bounded like every other list here, and it says what it cut.
+        var many = Enumerable.Range(0, 40).Select(one => $"a display that renders\tA.Case{one}").ToList();
+        var roll = Roll.Of(["A.B"], [new("A.B", "Passed", true)], many);
+
+        var said = roll.Render(most: 5);
+
+        Assert.Contains(said, one => one.Contains("and 35 more", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void This_suite_writes_its_own_ledger_where_the_roll_call_is_told_to_look()
     {
         // The two halves are wired by a path in the csproj, so a rename here and a rename there are

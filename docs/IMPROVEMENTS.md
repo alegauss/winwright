@@ -2,6 +2,30 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+### §WW235 A collision timed against a thread pool
+
+`FinishedTests.A_replacement_lands_through_a_reader_that_briefly_holds_the_destination_open`
+failed twice in one session, both times `UnauthorizedAccessException` out of `File.Move`
+— the last go, the one outside the retry loop, which throws what the collision actually
+was rather than swallowing it. Earlier runs in the same session passed.
+
+The arithmetic is the whole finding. `Finished` retries 8 times with 25ms between them,
+so it has about 175ms to get through a collision. The case holds the destination open
+and releases it with `Task.Delay(BetweenMs * 2).ContinueWith(...)` — fifty milliseconds,
+scheduled on the thread pool. A suite of 1,574 cases saturating that pool is what
+decides whether fifty becomes two hundred, and the runs that failed took 4m45s and 5m18s
+where the ones that passed took 3m20s.
+
+So the case is timed against the machine's load rather than against the code, and it
+gets less true as the suite grows. That is the shape this project refuses by name: a
+control is a timing claim, and one measured on a machine that changed measures the
+change.
+
+Raising `Attempts` is the wrong repair — it edits the product to suit its test. What the
+case needs is a release that does not queue behind the suite: its own thread, and a hold
+measured against the budget rather than expressed as a multiple of one constant that
+happens to be the same one the retry sleeps for.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
@@ -209,44 +233,52 @@ the two it was.
 
 ### §WW232 Eleven holes the guest has every time
 
-The first run after WW231 said it: `all 1571 discovered cases ran, and 11 check(s) were
-excused - 11 for the foreground belongs to the window under test.` Eleven, on a green
-run, on the machine built so these cases could run at all — and all eleven for the same
-fact, which is what makes it one cause rather than a busy desk.
+The first run after WW231 said it: `all 1574 discovered cases ran, and 11 check(s) were
+excused - 11 for the foreground belongs to the window under test.` WW233 then named
+them, and the eleven are two different things.
 
-That is worth more than the number. A single condition means it is not contention:
-nobody is typing on the guest. It is the window under test not owning the foreground at
-the moment those cases ask, which points at the launch rather than at the desk. `--show`
-exists in the fixture precisely because a suite raising a window thirty times a run must
-not take the desk, and these are the cases that need the opposite.
+Five are correct.
+`RefusedForegroundTests.A_click_that_could_not_be_sent_is_a_hole_naming_the_desk`,
+`KeyboardTests.Typing_with_the_desktop_elsewhere_sends_nothing_and_names_the_intruder`
+and three like them have the absent foreground as their subject. They should excuse, and
+they should stay.
 
-Also measured, and it is why this was invisible: WW229's positive case was almost
-certainly among the eleven. It came back green, its duration looked like a real launch,
-and nothing in the results said whether it proved the claim or excused itself. The
-reasoning was sound and the evidence was absent.
+Six are losses, all added in one session, all the positive cases for `type`, `click`,
+`press`, `nudge` and `moves`. None of them has ever run. They were reported as proven on
+the strength of a green.
 
-Nothing here should become a red. What should happen is that eleven becomes zero, by
-giving those cases a window that owns the foreground when they ask — and the number is
-now the thing that says whether it worked.
+**Measured, and the first repair was wrong.** Launching the fixture with `--show`
+changed nothing: the same eleven, the same list. The reason is in `Act`'s own header —
+Windows refuses the foreground to a process that does not already own it — so a fixture
+started by a test host that has no foreground cannot take one, whatever flag it carries.
+`KeyboardTests` proves the same verbs today because `PumpedDialog` is an in-process
+window, and its comment says exactly that: only a thread that owns one gets the
+foreground.
 
-### §WW233 The count without the names
+So the six belong on a pumped dialog, not on a launched fixture — and WW226's slider
+pane, added to prove `nudge`, is in the wrong process to do it. The count is what says
+whether the move worked.
 
-WW231 records one line per excuse, and the line is the desk fact. That is enough for the
-sentence — eleven, all for one condition, which is a cause rather than a busy desk — and
-it is not enough to act on. WW232 needs the eleven cases, and the ledger cannot name
-them.
+### §WW234 The pane that was not needed
 
-Half of it is already in hand. `BusyDesk.Excused(AssertionResult)` holds a verdict that
-carries the assertion's name, so those sites could write it beside the condition at no
-cost. The other overload takes a bare precondition and knows nothing, which is honest
-and is most of the call sites: the reading it excuses is not an assertion yet.
+WW226 shipped saying `Traversal.Nudge` had nothing driving it, so the branch that
+reverses direction at the end of a range had never run against a real control.
+`TraversalTests` drives it four times — including the refusal — against an
+`msctls_trackbar32` child of a `PumpedDialog`, and its own class comment says the slider
+starts at its minimum precisely so the direction has to be chosen.
 
-What that asymmetry means is worth naming rather than papering over. A ledger where some
-lines carry a name and some do not is a ledger a reader has to hold two rules for, and a
-count that says "eleven, four of them named" is worse than the count alone. What closes
-it is the excuse knowing the case regardless — which xunit will hand over through a
-test's own context, at the cost of every one of the eighty-one sites taking an argument.
+The premise came from grepping the fixture application for `Slider` and finding none.
+That is true and it is the wrong question: a verb needing the foreground is proven
+against an in-process window, because Windows refuses the foreground to a process that
+does not already own it. The pane was added in the one process that cannot serve it,
+which WW232 then measured — six positive cases excusing themselves on every guest run,
+`nudge` among them.
 
-That is the trade. It is not obviously worth paying, and this exists so the next person
-deciding has the measurement rather than the impression: eleven holes, one condition, no
-names.
+This is WW169's shape, and `Criteria`'s note on that says what would have caught it: run
+the cases before building anything. A grep is not that.
+
+What is left is a decision rather than a deletion. Three ranges in the fixture are still
+the right shape for a `.cases.json` driving a real application — which is what block J
+is for — and they are reachable by every verb that needs no foreground. What has to go
+is the claim that they exist because nothing drove the verb, and `nudge`'s own proof
+belongs on the trackbar that already existed.

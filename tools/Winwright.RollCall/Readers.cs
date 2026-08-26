@@ -99,6 +99,26 @@ public static class Readers
     }
 
     /// <summary>
+    /// One ledger line split into the desk fact and the case it excused.
+    /// <para>
+    /// WW233. The name is what makes eleven holes actionable rather than merely counted, and a line
+    /// that carries none is read as unnamed rather than refused: a ledger written by an older build,
+    /// or by a frame the stack could not answer for, still says how many.
+    /// </para>
+    /// </summary>
+    /// <param name="line">A line as the ledger wrote it.</param>
+    public static (string Fact, string? Case) Excuse(string line)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+
+        var apart = line.Split('\t', 2);
+        return apart.Length == 2 && apart[1].Trim().Length > 0
+            ? (apart[0].Trim(), apart[1].Trim())
+            : (apart[0].Trim(), null);
+    }
+
+
+    /// <summary>
     /// The outcomes that mean a case was written down and never executed.
     /// <para>
     /// WW137. A deliberate skip, or a case the runner listed and then abandoned. Both are recorded

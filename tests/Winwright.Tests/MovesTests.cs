@@ -86,7 +86,7 @@ public sealed class MovesTests : IDisposable
         // starting value this case never names.
         var verdict = Run("""
             {
-              "fixtures": [ { "name": "the ranges pane", "arguments": ["--ranges"] } ],
+              "fixtures": [ { "name": "the ranges pane", "arguments": ["--ranges", "--show"] } ],
               "cases": [
                 {
                   "name": "an arrow key moves a range that has room",
@@ -121,7 +121,7 @@ public sealed class MovesTests : IDisposable
         // it, so nothing could move it and the claim is false. What the reader gets is the number.
         var verdict = Run("""
             {
-              "fixtures": [ { "name": "the ranges pane", "arguments": ["--ranges"] } ],
+              "fixtures": [ { "name": "the ranges pane", "arguments": ["--ranges", "--show"] } ],
               "cases": [
                 {
                   "name": "a range with no room does not move",

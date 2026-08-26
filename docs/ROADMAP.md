@@ -2,6 +2,8 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+- 📋 **WW235** (deps: —) **a timing case fails more often as the suite it runs in grows** — Its release is a thread-pool delay racing a 175ms retry budget, so a busier run is what decides it rather than the code under test. → §WW235
+
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
@@ -39,8 +41,8 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
-- 📋 **WW232** (deps: —) **eleven checks are excused on every green guest run, all for one condition** — The window under test does not hold the foreground when those cases ask, so the guest that exists to run them is where they do not run. → §WW232
-- 📋 **WW233** (deps: —) **the roll says how many checks were excused and never which ones** — So chasing eleven holes down to the cases that own them still means reading twenty classes and guessing, which is the reading the count replaced. → §WW233
+- ⏳ **WW232** (deps: WW234) **eleven checks are excused on every green guest run, all for one condition** — Nudge and moves still launch the fixture, so they still excuse; where their proof belongs waits on WW234. → §WW232
+- 📋 **WW234** (deps: —) **WW226 drew a ranges pane for a verb four cases already drove** — Its premise was a grep of the fixture app, and the trackbar that proves the verb is a pumped window in the suite's own process. → §WW234
 
 ## Done when — Block A
 

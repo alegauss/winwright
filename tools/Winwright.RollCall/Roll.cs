@@ -290,6 +290,7 @@ public sealed record Roll
         // somebody was using; twelve for six different facts is a machine that cannot observe at all,
         // and the reader's next move differs for each.
         var facts = Excused
+            .Select(one => Readers.Excuse(one).Fact)
             .GroupBy(one => one, StringComparer.Ordinal)
             .OrderByDescending(one => one.Count())
             .Select(one => $"{one.Count()} for {one.Key}");
@@ -307,7 +308,30 @@ public sealed record Roll
         lines.AddRange(Listed(Missing, most));
         lines.AddRange(Listed(Skipping, most));
         lines.AddRange(Listed(Unexpected, most));
+        lines.AddRange(Excusing(most));
         return new ReadOnlyCollection<string>(lines);
+    }
+
+    /// <summary>
+    /// A line per case the desk excused, which is what WW233 is for: the sentence says eleven and one
+    /// condition, and this says which eleven. Bounded like every other list here, because a machine
+    /// that can observe nothing excuses all of them and a wipeout has to stay readable.
+    /// </summary>
+    private IReadOnlyList<string> Excusing(int most)
+    {
+        if (Excused is null || Excused.Count == 0)
+            return [];
+
+        var read = Excused.Select(Readers.Excuse).ToList();
+        var lines = read
+            .Take(most)
+            .Select(one => $"  excused   {one.Case ?? "<unnamed>"}: {one.Fact}")
+            .ToList();
+
+        if (read.Count > most)
+            lines.Add($"  excused   and {read.Count - most} more");
+
+        return lines;
     }
 
     /// <summary>The reading as a block of text.</summary>

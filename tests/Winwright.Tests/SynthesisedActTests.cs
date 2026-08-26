@@ -25,32 +25,49 @@ namespace Winwright.Tests;
 [Collection(WindowFixture.Serial)]
 public sealed class SynthesisedActTests : IDisposable
 {
-    private readonly Settling settling = Attachable.Settling();
-    private readonly AutomationElement root;
+    private const uint WsVisible = 0x10000000;
+    private const uint WsChild = 0x40000000;
 
-    public SynthesisedActTests()
-    {
-        // The names pane, because it draws the one editable control and a label beside it — which is
-        // exactly the pair these two verbs need: something to type into, and something that resolves
-        // and offers no Invoke.
-        var launched = settling.Register.Launch(Fixture.Started("--names"));
-        var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(launched.Pid) is not null, 20000, 25);
+    /// <summary>
+    /// Without this, Tab moves nothing. A plain child window is not in a tab order — that is what a
+    /// dialog's own message loop arranges — and the first version of this class left it off and
+    /// asserted the focus had moved. It had not, and the case said so rather than excusing itself,
+    /// which is the difference WW232 bought.
+    /// </summary>
+    private const uint WsTabStop = 0x00010000;
 
-        Assert.True(drawn.Happened, $"the fixture drew no window in {drawn.WaitedMs}ms");
-        root = AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle);
-    }
+    /// <summary>
+    /// An in-process window, and that is the whole reason this class does not launch the fixture.
+    /// <para>
+    /// WW232. It did launch it, and every positive case here excused itself on every guest run —
+    /// silently, while being reported as proof. Windows refuses the foreground to a process that does
+    /// not already own it, which <see cref="Act"/>'s own header says; a fixture started by a test host
+    /// with no foreground cannot take one, and `--show` was measured to change nothing. Only a thread
+    /// that owns a window gets the desk, so the window has to be this thread's.
+    /// </para>
+    /// <para>
+    /// Two edits and a label: something to type into, something for Tab to move the focus to, and
+    /// something that resolves while offering no Invoke, which is what a click has to be about.
+    /// </para>
+    /// </summary>
+    private readonly PumpedDialog dialog = PumpedDialog.Open(
+        "winwright synthesised",
+        new PumpedDialog.ChildWindow("Edit", "alpha", WsChild | WsVisible | WsTabStop, 20, 20, 220, 24),
+        new PumpedDialog.ChildWindow("Edit", "beta", WsChild | WsVisible | WsTabStop, 20, 60, 220, 24),
+        new PumpedDialog.ChildWindow("Static", "a label", WsChild | WsVisible, 20, 100, 120, 20),
+        new PumpedDialog.ChildWindow("msctls_trackbar32", null, WsChild | WsVisible | WsTabStop, 20, 130, 200, 32));
 
-    public void Dispose() => settling.Dispose();
+    public void Dispose() => dialog.Dispose();
 
     private Subject On(string locator) =>
-        Subject.Unguarded(root, Locator.Parse(locator), 4000, pollMs: 25);
+        Subject.Unguarded(dialog.Root, Locator.Parse(locator), deadlineMs: 4000, pollMs: 25);
 
     [Fact]
     public void Typing_reaches_the_control_with_real_keys_and_reads_back()
     {
         // The observable WW78's first assertion is. `set value` beside this one writes through
         // ValuePattern and cannot fail the way this one can.
-        var typed = Synthesised.Type(On("Edit#profileBox"), "beta");
+        var typed = Synthesised.Type(On("Edit[order=top]"), "beta");
 
         if (BusyDesk.Excused(typed.Needed!))
             return;
@@ -67,7 +84,7 @@ public sealed class SynthesisedActTests : IDisposable
         // The other half of the shape, and the reason the field is nullable rather than always
         // present: nothing about the desk stops a pattern act, which is why those eight were the
         // whole vocabulary a case could name.
-        var written = Act.SetValue(On("Edit#profileBox"), "gamma");
+        var written = Act.SetValue(On("Edit[order=top]"), "gamma");
 
         Assert.Null(written.Needed);
         Assert.True(written.Attempted);
@@ -79,7 +96,7 @@ public sealed class SynthesisedActTests : IDisposable
     {
         // Present either way, so a reader never has to know which verbs are which to know whether
         // the answer is about the application.
-        var typed = Synthesised.Type(On("Edit#profileBox"), "delta");
+        var typed = Synthesised.Type(On("Edit[order=top]"), "delta");
 
         Assert.NotNull(typed.Needed);
         Assert.Equal(typed.Needed!.Satisfied, typed.Attempted);
@@ -97,7 +114,7 @@ public sealed class SynthesisedActTests : IDisposable
     {
         // A label resolves and offers no Invoke, which is why claude-tray's navigation clicked one.
         // The reason is in the route, so a report says why this act was not a pattern act.
-        var clicked = Synthesised.Click(On("Text#profileLabel"), PointerReason.PointerIsTheAct);
+        var clicked = Synthesised.Click(On("Text[name=\"a label\"]"), PointerReason.PointerIsTheAct);
 
         if (BusyDesk.Excused(clicked.Needed!))
             return;
@@ -158,18 +175,18 @@ public sealed class SynthesisedActTests : IDisposable
         // were about patterns, and what holds the focus is not one. Written the way a case would —
         // the locator is the element the step is about, the key goes to its window, and the reading
         // asks whether that element still has the focus.
-        var typed = Synthesised.Type(On("Edit#profileBox"), "epsilon");
+        var typed = Synthesised.Type(On("Edit[order=top]"), "epsilon");
         if (BusyDesk.Excused(typed.Needed!))
             return;
 
         // Typing focuses it, so the reading before the key is 'focused' and after it is not.
-        Assert.Equal("focused", ReadBack.Named("focused").Of(On("Edit#profileBox").Read()));
+        Assert.Equal("focused", ReadBack.Named("focused").Of(On("Edit[order=top]").Read()));
 
-        var pressed = Synthesised.Press(On("Edit#profileBox"), TraversalKey.Tab);
+        var pressed = Synthesised.Press(On("Edit[order=top]"), TraversalKey.Tab);
         if (BusyDesk.Excused(pressed.Needed!))
             return;
 
-        Assert.Equal("not focused", ReadBack.Named("focused").Of(On("Edit#profileBox").Read()));
+        Assert.Equal("not focused", ReadBack.Named("focused").Of(On("Edit[order=top]").Read()));
     }
 
     [Fact]
