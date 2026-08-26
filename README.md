@@ -26,6 +26,31 @@ the output rather than left out of it.
 `Winwright.InApp` is optional, and deliberately so: every reading and every pattern act runs against
 an application that references nothing. See [what needs cooperation](#what-needs-the-application-to-cooperate).
 
+### One line if your application's project is at the repository root
+
+The project that drives the application is a project of its own, and it usually goes in a folder
+underneath. If the application's `.csproj` sits at the repository root, that folder is inside its
+reach: every default glob the SDK applies — `Compile`, and with `UseWPF` also `Page`, `Resource` and
+`EmbeddedResource` — walks the whole tree below the project file, so the driving project's sources and
+its `obj\` are compiled **into the application**.
+
+```xml
+<!-- In the application's own project, if it lives at the repository root. -->
+<DefaultItemExcludes>$(DefaultItemExcludes);tests\**</DefaultItemExcludes>
+```
+
+**It is named here because the failure names something else.** Without it the build stops with a
+row of `CS0579` duplicate-attribute errors — and every one of them points at your *own* generated
+`obj\…\AssemblyInfo.cs`, because the duplicate it found is the nested project's copy of the same
+attributes. Nothing in the message mentions the folder that caused it. Under `UseWPF` it is worse
+again: the errors arrive attributed to a `<YourApp>_<random>_wpftmp` project, which reads like a XAML
+problem.
+
+Measured twice. In claude-tray it took moving the folder out of the tree and building again to find
+out what it was; here it is a negative control — delete the line from `samples/Adopter` and the build
+fails that way on purpose, which is what keeps this a rule rather than a note somebody wrote after
+losing an afternoon.
+
 ## Adopting it in Claude Code
 
 Two commands, run once in the repository that drives the application:

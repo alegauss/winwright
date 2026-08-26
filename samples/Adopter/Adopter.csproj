@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- WW122: this is the proof of the block's first criterion, and it is a project rather than a
        paragraph. An application under test takes the in-app half by one package reference and by
@@ -10,6 +10,15 @@
     <IsPackable>false</IsPackable>
     <UseWPF>true</UseWPF>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+
+    <!-- WW228: the one line the adoption story never mentioned, and the reason this sample now has a
+         project underneath it. Every default glob the SDK applies reaches the whole tree below this
+         file, so driving\ would be compiled INTO the application under test - which fails as eight
+         CS0579 duplicate-attribute errors naming a _wpftmp project, saying nothing about the folder
+         that caused them. Measured in claude-tray, where it cost an afternoon.
+         DefaultItemExcludes and not a Compile Remove, because it is every glob and not only that one:
+         Page, Resource and EmbeddedResource reach down there too, and this project has UseWPF on. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);driving\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <!-- The version is the tree's own, which is what makes the agreement check able to say the

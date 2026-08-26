@@ -60,6 +60,14 @@ jobs:
       - name: Build the adopter against the package
         run: dotnet build samples/Adopter/Adopter.csproj --configuration Release
 
+      # WW228: the driving half, and it is a separate step because it proves a separate thing. The
+      # application above proves one package reference reaches the in-app half; this proves a project
+      # can live underneath it without being compiled into it. Delete the DefaultItemExcludes line in
+      # Adopter.csproj and the step above fails, which is what makes the line a rule rather than a
+      # note somebody wrote after losing an afternoon to it.
+      - name: Build the adopter's driving half against the package
+        run: dotnet build samples/Adopter/driving/Driving.csproj --configuration Release
+
       # WW142: the copies of the engine in play, read against each other, with the exit code the
       # agreement reading has carried since WW70 and nothing ever left behind. It runs after Pack
       # because one of the copies is what the build actually produced, and before the packages are

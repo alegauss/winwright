@@ -133,29 +133,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW228 One package reference, and one line nobody mentions
-
-claude-tray's csproj sits at the repository root, so every default glob the SDK applies
-reaches everything beneath it. Adding `tests/ClaudeTray.Cases` there made the
-application compile the driving project's sources — and its `obj` — into itself. The
-build failed with eight `CS0579` duplicate-attribute errors, every one of them naming a
-`_wpftmp` project, which reads like a WPF build problem and says nothing about tests. It
-took moving the folder out of the tree and building again to know what it was.
-
-The fix is one line — `DefaultItemExcludes` rather than a `Compile Remove`, because it
-is every glob and not only that one. The cost is that nothing told anybody, and the
-failure names the wrong thing.
-
-This is the adoption story's own gap. The README says an application under test takes
-the in-app half by one package reference and by nothing else, and `samples/Adopter`
-proves it. Neither says where the project that *drives* the application goes, and the
-obvious placement is the one that breaks. An adopter whose app is not at the root never
-sees this; one whose app is at the root loses an afternoon to a WPF error message.
-
-What closes it is the adoption section naming the requirement, and `samples/Adopter`
-growing the shape that proves it — an app at a root with a driving project under it,
-building.
-
 ### §WW230 The feed is a folder in the tool's own tree
 
 `Winwright.0.1.0.nupkg` exists in `packages/`, which is gitignored, and nowhere else. So

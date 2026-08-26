@@ -33,7 +33,6 @@
 - 📋 **WW86** (deps: WW78 ⏳, WW79, WW80, WW81, WW82, WW83, WW84, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - 📋 **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G ✅, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
-- 📋 **WW228** (deps: —) **an app project at the repository root compiles the driving project into itself** — The adoption story says one package reference and never says the app has to exclude the folder the cases are driven from. → §WW228
 - 📋 **WW230** (deps: —) **the only place the engine's package exists is a folder inside this repository** — So every adoption bootstraps on a filesystem path across two clones, which is the shape the block's own criterion says an adopter must not need. → §WW230
 
 ## Block K — The proving ground — a fixture app built to be hard to test

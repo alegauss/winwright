@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WW228: the driving half of an adoption, as a project rather than a paragraph — and it is
+       deliberately underneath Adopter.csproj, because that is the shape that breaks.
+
+       An application whose project sits at a repository root reaches every default glob the SDK
+       applies down the whole tree, so a project added beneath it is compiled INTO it. Measured in
+       claude-tray: eight CS0579 "duplicate attribute" errors, every one naming a _wpftmp project,
+       which reads like a WPF problem and says nothing about the folder that caused it. Adopter.csproj
+       carries the one line that stops it, and this project existing under it is what keeps that line
+       honest — remove it there and this build is what fails.
+
+       One package reference and no path into the engine's source, which is the same claim the
+       application above makes about the in-app half. The restore comes from what this repository just
+       packed, through the nuget.config beside Adopter.csproj. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>Adopter.Driving</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Winwright" Version="0.1.0" />
+  </ItemGroup>
+
+</Project>
