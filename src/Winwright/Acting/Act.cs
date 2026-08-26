@@ -1,6 +1,7 @@
 ﻿using System.Windows.Automation;
 
 using Winwright.Locating;
+using Winwright.Verdicts;
 
 namespace Winwright.Acting;
 

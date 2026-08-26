@@ -49,15 +49,45 @@ public sealed record ActVerb
         new("select", Takes.Nothing, repeatable: true, (subject, _) => Act.Select(subject)),
         new("expand", Takes.Nothing, repeatable: true, (subject, _) => Act.Expand(subject)),
         new("collapse", Takes.Nothing, repeatable: true, (subject, _) => Act.Collapse(subject)),
+
+        // WW225. The two that synthesise input, which is the half of the engine a case could not
+        // name. Each has a pattern act beside it that reads almost the same and proves something
+        // else: 'set value' writes through ValuePattern and 'type' presses keys, and the difference
+        // is the whole of what an interaction loop is for.
+        //
+        // 'nudge' is not here, and that is deliberate rather than forgotten: the proving ground draws
+        // no range control, so a verb for one would have nothing driving it — and a verb nothing
+        // drives is the shape this project refuses everywhere else.
+        new(
+            "type",
+            Takes.Text,
+            repeatable: false,
+            (subject, argument) => Synthesised.Type(subject, argument!),
+            synthesises: true),
+        new(
+            "click",
+            Takes.Text,
+            repeatable: false,
+            (subject, argument) => Synthesised.Click(subject, Because(argument!)),
+            synthesises: true,
+            accepts: Enum.GetValues<PointerReason>().Select(one => one.ToString()).ToList()),
     ];
 
     private readonly Func<Subject, string?, ActResult>? doing;
 
-    private ActVerb(string name, Takes takes, bool repeatable, Func<Subject, string?, ActResult>? doing)
+    private ActVerb(
+        string name,
+        Takes takes,
+        bool repeatable,
+        Func<Subject, string?, ActResult>? doing,
+        bool synthesises = false,
+        IReadOnlyList<string>? accepts = null)
     {
         Name = name;
         Wants = takes;
         Repeatable = repeatable;
+        Synthesises = synthesises;
+        Accepts = accepts ?? [];
         this.doing = doing;
     }
 
@@ -72,6 +102,30 @@ public sealed record ActVerb
 
     /// <summary>What has to be written next to it.</summary>
     public Takes Wants { get; }
+
+    /// <summary>
+    /// Whether it synthesises input rather than asking the control.
+    /// <para>
+    /// WW225. A pattern act asks a control through its own accessibility peer and nothing about the
+    /// desk stops it. One of these goes through the keyboard or the pointer, so it needs the window
+    /// in the foreground — which means it can come back not attempted, and the reader has to be told
+    /// that rather than shown a reading that did not move. Data, so a report can say which acts in a
+    /// case were the ones a busy desk could take away.
+    /// </para>
+    /// </summary>
+    public bool Synthesises { get; }
+
+    /// <summary>
+    /// Everything the argument may be, where it is a closed list. Empty where it takes free text.
+    /// <para>
+    /// WW225. <c>click</c> carries the reason no pattern would express it, and the reasons are a
+    /// closed set — so a name outside it has to be refused where the author wrote it, not on the run
+    /// that reaches the step. Measured: the first version validated the reason inside the act, and a
+    /// case with a reason nobody recognises loaded, passed <c>winwright_check</c>, and refused
+    /// halfway through a run — which is exactly the linter-shaped failure WW58 exists to replace.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Accepts { get; }
 
     /// <summary>
     /// Whether doing it twice means the same as doing it once. False for the acts whose second
@@ -124,6 +178,13 @@ public sealed record ActVerb
             (Takes.Nothing, not null) => $"'{Name}' takes nothing, and this one carries '{written}'",
             (Takes.Nothing, null) => null,
             (_, null) => $"'{Name}' acts on {(Wants == Takes.Text ? "text" : "a number")}, and this one carries none",
+
+            // WW225. The closed list is checked here and not inside the act, because here is where
+            // the author is: a reason nobody recognises has to cost a corrected field and never a
+            // run that gets halfway and stops.
+            (Takes.Text, _) when Accepts.Count > 0 && !Accepts.Contains(written, StringComparer.OrdinalIgnoreCase) =>
+                $"there is no such reason for a pointer act; there is {string.Join(", ", Accepts)}",
+
             (Takes.Text, _) => null,
             (Takes.Number, _) => Numeric(written) ? null : $"'{Name}' acts on a number, and '{written}' is not one",
             _ => null,
@@ -137,6 +198,32 @@ public sealed record ActVerb
             ? throw new InvalidOperationException(
                 $"'{Name}' reads and never acts, so the engine takes the look rather than calling this")
             : doing(subject, argument);
+
+    /// <summary>
+    /// The reason a click carries, out of the name a case wrote.
+    /// <para>
+    /// Refused with the list rather than defaulted, for the reason <see cref="Pointer"/> makes the
+    /// reason a required field: a click whose justification defaults is a click nobody had to
+    /// justify, and then every act quietly escalates to the pointer and the suite is driving the
+    /// desktop instead of asking controls.
+    /// </para>
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Where the name is not one of the reasons there are. A harness error and never a scenario
+    /// refusal: <see cref="Refuses"/> already turned that away at the point of insertion, so reaching
+    /// this with a name outside the list means the two lists disagree and nothing about the author's
+    /// file is wrong.
+    /// </exception>
+    private static PointerReason Because(string argument)
+    {
+        var wanted = argument.Trim();
+        foreach (var reason in Enum.GetValues<PointerReason>())
+            if (string.Equals(reason.ToString(), wanted, StringComparison.OrdinalIgnoreCase))
+                return reason;
+
+        throw new InvalidOperationException(
+            $"'{wanted}' reached the act and is not a reason, so the load accepted what the act cannot run");
+    }
 
     private static bool Numeric(string argument) =>
         double.TryParse(argument, NumberStyles.Float, CultureInfo.InvariantCulture, out _);

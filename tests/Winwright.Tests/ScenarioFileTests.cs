@@ -72,7 +72,7 @@ public class ScenarioFileTests
                   "name": "b",
                   "steps": [
                     { "locator": "Edit", "act": "set value", "with": "b", "expect": "b" },
-                    { "locator": "Button", "act": "click" }
+                    { "locator": "Button", "act": "smash" }
                   ]
                 }
               ]
@@ -81,6 +81,10 @@ public class ScenarioFileTests
 
         Assert.StartsWith("two.cases.json cases[1].steps[1]", refusal.Subject);
         Assert.Contains("no such act", refusal.Because);
+
+        // 'smash' and not 'click': WW225 made click a verb, and this case is about the address a
+        // refusal carries rather than about which word happens to be outside the vocabulary today.
+        Assert.Contains("smash", refusal.Subject);
     }
 
     [Fact]

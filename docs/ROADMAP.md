@@ -16,7 +16,7 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 📋 **WW225** (deps: —) **a case can name no synthesised input, so migrating one that proves input stops proving it** — All eight acts go through a pattern, so typing, Tab and an arrow key become value writes that pass with the bug the case exists to catch. → §WW225
+- ⏳ **WW225** (deps: —) **a case can name no synthesised input, so migrating one that proves input stops proving it** — A range control the proving ground does not draw blocks nudge, and press with a focus reading needs a source that is not PatternValues. → §WW225
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
@@ -24,11 +24,11 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- 📋 **WW78** (deps: WW225) **the keyboard case is the only observable of a live input path and it lives in a script** — Migrated first: navigate, type, read back, traverse and drive a slider, which is the shortest path through locate, act and assert. → §WW78
+- 📋 **WW78** (deps: WW225 ⏳) **the keyboard case is the only observable of a live input path and it lives in a script** — Migrated first: navigate, type, read back, traverse and drive a slider, which is the shortest path through locate, act and assert. → §WW78
 - 📋 **WW79** (deps: Block G) **the panes case proves a report is readable and needs no second profile** — Migrated as the case that runs on every machine, which is what makes it the one that would notice a template part going missing again. → §WW79
 - 📋 **WW80** (deps: Block G) **the sessions case drives the one surface a capture provably cannot finish checking** — Migrated with its waits, its expansion and the popup it opens, since that popup is the argument for the whole interaction loop existing. → §WW80
 - 📋 **WW81** (deps: Block G) **the profiles case is the only thing in that repository that drives the picker** — Migrated with the round trip and the timing observation, both of which need the hop count the walk reports to mean anything. → §WW81
-- 📋 **WW82** (deps: WW225) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
+- 📋 **WW82** (deps: WW225 ⏳) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
 - 📋 **WW83** (deps: Block G) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
 - 📋 **WW84** (deps: Block G) **the names case observes what no screenshot can** — Migrated with the derived panel sweep and the exact-label reads, including the rule that must fire and the one that must not. → §WW84
 - 📋 **WW85** (deps: Block G) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85

@@ -101,7 +101,10 @@ public sealed class SynthesisingTests
             Synthesising.Known.Where(one => one.How == Asking.ItIsTheAct),
             one => Assert.Contains(
                 one.Named.Split('.')[0],
-                new[] { "Keyboard", "Pointer", "Traversal", "Menu", "NotificationArea" },
+                // WW225 added a sixth, and it belongs by the same test the other five pass: the
+                // family is called Synthesised, so a caller reaching for it has said what it wants
+                // by choosing the name.
+                new[] { "Keyboard", "Pointer", "Traversal", "Menu", "NotificationArea", "Synthesised" },
                 StringComparer.Ordinal));
     }
 

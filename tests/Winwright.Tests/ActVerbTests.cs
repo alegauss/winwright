@@ -14,8 +14,10 @@ public class ActVerbTests
     [Fact]
     public void Every_act_the_engine_offers_is_nameable_and_lists_itself()
     {
+        // WW225 added the two that synthesise input, at the end: the order is the order a reader is
+        // shown them, and the pattern acts come first because a pattern act is the default.
         Assert.Equal(
-            ["read", "invoke", "toggle", "set value", "set range", "select", "expand", "collapse"],
+            ["read", "invoke", "toggle", "set value", "set range", "select", "expand", "collapse", "type", "click"],
             ActVerb.All.Select(verb => verb.Name));
 
         Assert.All(ActVerb.All, verb => Assert.Same(verb, ActVerb.Named(verb.Name)));
@@ -34,11 +36,14 @@ public class ActVerbTests
     [Fact]
     public void A_verb_that_does_not_exist_is_refused_with_the_ones_that_do()
     {
-        var refusal = Assert.Throws<ScenarioRefusedException>(() => ActVerb.Named("click"));
+        // 'smash' and not 'click': WW225 made click a verb, and this case is about a name outside the
+        // vocabulary being refused with the vocabulary, not about which word is outside it today.
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => ActVerb.Named("smash"));
 
-        Assert.Equal("click", refusal.Subject);
+        Assert.Equal("smash", refusal.Subject);
         Assert.Contains("invoke", refusal.Because);
         Assert.Contains("set range", refusal.Because);
+        Assert.Contains("click", refusal.Because);
     }
 
     [Fact]

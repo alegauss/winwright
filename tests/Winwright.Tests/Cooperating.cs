@@ -181,6 +181,12 @@ internal static class Cooperating
         new("Traversal.Press", Cooperation.None, true, "a traversal key at a window"),
         new("Traversal.Nudge", Cooperation.None, true, "a range moved by a key"),
         new("Traversal.WhoHasFocus", Cooperation.None, false, "what holds the focus, asked and not pressed"),
+
+        // WW225. The same three as a step answers them, so the axis is the same: nothing from the
+        // application, and a foreground Windows does not always grant — which is why each one carries
+        // what it needed rather than leaving a reader to read it off a value that did not move.
+        new("Synthesised.Type", Cooperation.None, true, "typing, as a step's own result"),
+        new("Synthesised.Click", Cooperation.None, true, "a click a case had to say the reason for"),
         new("Pick.Value", Cooperation.None, true, "reach a value, by keyboard where the pattern will not"),
         new("Menu.Enter", Cooperation.None, true, "enter a menu bar the way a keyboard user does"),
         new("Menu.To", Cooperation.None, true, "walk to an entry"),

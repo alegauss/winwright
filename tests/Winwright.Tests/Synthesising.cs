@@ -85,6 +85,14 @@ internal static class Synthesising
         new("Traversal.Press", Asking.ItIsTheAct, "a traversal key at a window, which is a keystroke"),
         new("Traversal.Nudge", Asking.ItIsTheAct, "an arrow at whatever holds the focus"),
 
+        // WW225. The same three acts in the shape a step of a case is answered in, so a data file can
+        // name them. Its own type and never on Act, because the criterion above is that the default
+        // act reaches no send — and an adapter living there would have made that false. The name says
+        // what it does, which is what makes ItIsTheAct the honest answer here too.
+        new("Synthesised.Type", Asking.ItIsTheAct, "typing, as a step's own result"),
+        new("Synthesised.Click", Asking.ItIsTheAct,
+            "a click, carrying the PointerReason a case had to write to reach it"),
+
         // A menu is entered the way a keyboard user enters one, and that is Block D's third
         // criterion rather than an escalation: reaching a destructive entry by invoke is refused
         // at the door, so walking is the only route there is.

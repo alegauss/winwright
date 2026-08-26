@@ -234,7 +234,13 @@ public static class Served
         var lines = new List<string> { "An act:" };
         lines.AddRange(ActVerb.All.Select(verb =>
             $"  {verb.Name} — {Needs(verb)}, and {(verb.Repeatable ? "the engine may repeat it" : "the engine attempts it once")}"
-                + (verb.Reads ? ", and it reads without acting" : "")));
+                + (verb.Reads ? ", and it reads without acting" : "")
+
+                // WW225. Both read off the verb rather than described here. The closed list is what
+                // makes a wrong reason a refusal at the point of insertion, and whether an act
+                // synthesises input is what decides it can come back not attempted at all.
+                + (verb.Synthesises ? ", and it synthesises input so it needs the foreground" : "")
+                + (verb.Accepts.Count > 0 ? $" — one of: {string.Join(", ", verb.Accepts)}" : "")));
 
         lines.Add("A reading:");
         lines.AddRange(ReadBack.All.Select(one => $"  {one.Name}"));

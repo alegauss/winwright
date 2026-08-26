@@ -41,26 +41,27 @@ it.
 ### §WW225 Half the engine has no name in the format
 
 The vocabulary is `read`, `invoke`, `toggle`, `set value`, `set range`, `select`,
-`expand`, `collapse`. Every one reaches its element through the control's own pattern,
-which is the right default and is the whole of what a case can say. The engine also has
-`Pointer`, `Keyboard`, `Traversal` and `Focus` — synthesised input, and the readings
-about why an act needs it — and none of them has a name a data file can write.
+`expand`, `collapse` — every one through the control's own pattern. The engine also has
+`Pointer`, `Keyboard`, `Traversal` and `Focus`, and none of them has a name a data file
+can write.
 
-Not in the abstract. WW78's keyboard case asserts three things: typing reaches a WPF
+WW78 is what that costs. Its keyboard case asserts three things: typing reaches a WPF
 TextBox, Tab moves focus off it, an arrow key moves a Slider. The first and third become
 `set value` and `set range`, which go through the patterns that passed on the day those
-windows took no keyboard input at all — checks that cannot fail for the reason they were
-written. The second cannot be written: no reading answers what holds the focus.
+windows took no keyboard input at all. The second cannot be written: no reading answers
+what holds the focus. And the sidebar it clicks is a `Text` element with no peer, which
+`invoke` cannot reach.
 
-Two more things need names. A pointer act, because the sidebar item the case clicks has
-no automation peer and `invoke` needs an Invoke pattern. And a step's own foreground
-precondition, since synthesised input goes wherever the foreground is and the script
-asks before it drives.
+**The gap is the shape of `ActResult`, not a forgotten list.** `Keyboard.Type` returns
+two preconditions — foreground and focus; `Traversal.Nudge` returns one; `Pointer.Click`
+carries a stated reason. `ActResult` has no field for any of them. Collapsing one into
+it discards the reading that separates *the control did not change* from *this run never
+had the foreground*, so a synthesised step would report a red where the truth is a hole.
+`Pick` and `Selecting` have the same shape and are unreachable from a case for the same
+reason: the eight verbs a case can name are exactly the eight that fit.
 
-WW82's sentence names a keyboard expansion, so it waits on this too. Past those two the
-script drives the same way throughout — a pointer click to navigate, a keyboard walk
-through a picker, Escape to close a menu — so this is not WW78's alone. It is what block
-J waits on.
+So a step result that can carry a precondition comes first, and the five verbs follow
+it.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
