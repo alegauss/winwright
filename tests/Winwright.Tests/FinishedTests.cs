@@ -115,11 +115,34 @@ public sealed class FinishedTests : IDisposable
         });
 
         Assert.True(holding.Wait(5000), "the reader never opened the file");
+
+        // WW235. Its own thread, never the thread pool. This was a Task.Delay continuation, and a
+        // suite of 1,574 cases saturating that pool is what decided whether the hold stayed inside
+        // the retry budget: the case failed twice in one session, both times on runs that took 4m45s
+        // where the ones that passed took 3m20s. A timing claim queued behind the suite measures the
+        // suite, which is the reading this project refuses by name.
+        //
+        // And the hold is a fraction of the budget rather than a multiple of the constant the retry
+        // happens to sleep for. `BetweenMs * 2` sat well inside `Attempts * BetweenMs` and nothing
+        // said so, so neither number could move without silently deciding this case.
+        var budget = Finished.Attempts * Finished.BetweenMs;
+        var hold = budget / 4;
+        Assert.True(hold * 2 < budget, $"a hold of {hold}ms leaves no room in a budget of {budget}ms");
+
+        var releasing = new Thread(() =>
+        {
+            Thread.Sleep(hold);
+            release.Set();
+        })
+        {
+            IsBackground = true,
+        };
+
         try
         {
             // Released on a timer rather than on the move landing, because the move is what is being
             // measured: it has to get through a collision that is still in progress when it starts.
-            _ = Task.Delay(Finished.BetweenMs * 2).ContinueWith(_ => release.Set(), TaskScheduler.Default);
+            releasing.Start();
             Finished.Writing(destination, beside => File.WriteAllText(beside, "newer\n"));
         }
         finally

@@ -2,30 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW235 A collision timed against a thread pool
-
-`FinishedTests.A_replacement_lands_through_a_reader_that_briefly_holds_the_destination_open`
-failed twice in one session, both times `UnauthorizedAccessException` out of `File.Move`
-— the last go, the one outside the retry loop, which throws what the collision actually
-was rather than swallowing it. Earlier runs in the same session passed.
-
-The arithmetic is the whole finding. `Finished` retries 8 times with 25ms between them,
-so it has about 175ms to get through a collision. The case holds the destination open
-and releases it with `Task.Delay(BetweenMs * 2).ContinueWith(...)` — fifty milliseconds,
-scheduled on the thread pool. A suite of 1,574 cases saturating that pool is what
-decides whether fifty becomes two hundred, and the runs that failed took 4m45s and 5m18s
-where the ones that passed took 3m20s.
-
-So the case is timed against the machine's load rather than against the code, and it
-gets less true as the suite grows. That is the shape this project refuses by name: a
-control is a timing claim, and one measured on a machine that changed measures the
-change.
-
-Raising `Attempts` is the wrong repair — it edits the product to suit its test. What the
-case needs is a release that does not queue behind the suite: its own thread, and a hold
-measured against the budget rather than expressed as a multiple of one constant that
-happens to be the same one the retry sleeps for.
-
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached

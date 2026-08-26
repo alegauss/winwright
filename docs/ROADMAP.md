@@ -2,8 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW235** (deps: —) **a timing case fails more often as the suite it runs in grows** — Its release is a thread-pool delay racing a 175ms retry budget, so a busier run is what decides it rather than the code under test. → §WW235
-
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158

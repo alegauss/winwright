@@ -32,6 +32,7 @@
 - ✅ **WW201** **a case starts a process from a file it then deletes, so its own cleanup throws and the run reports a broken harness** — Four classes deleted a binary they had started, not one; each now settles through a door, and a source-read check names the fifth rather than waiting for a guest run to.
 - ✅ **WW204** **a suite fixture threw away a desk reading and the case downstream reported the shell's refusal as the fixture failing** — Seven discarded desk readings are paired with what downstream could be wronged by them, swept over every member rather than every case — which is where the one that cost a red lived.
 - ✅ **WW208** **the list of desk-dependent calls is typed by hand, and a reading missing from it is a case nothing asks to excuse** — The engine's surface is read for verbs that reach the desk and the list must name each: thirteen do, and the reading found a second call missing on the day it was written.
+- ✅ **WW235** **a timing case fails more often as the suite it runs in grows** — The release runs on its own thread instead of the thread pool, and the hold is a checked fraction of the retry budget rather than a multiple of its sleep.
 
 ## Block B — Attach, launch, and leave nothing behind
 
