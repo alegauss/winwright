@@ -206,3 +206,47 @@ once. A genuine absence now carries how many icons the bar and the flyout held.
 
 What is left waits on the next occurrence rather than on any work: it will say which of
 the two it was.
+
+### §WW232 Eleven holes the guest has every time
+
+The first run after WW231 said it: `all 1571 discovered cases ran, and 11 check(s) were
+excused - 11 for the foreground belongs to the window under test.` Eleven, on a green
+run, on the machine built so these cases could run at all — and all eleven for the same
+fact, which is what makes it one cause rather than a busy desk.
+
+That is worth more than the number. A single condition means it is not contention:
+nobody is typing on the guest. It is the window under test not owning the foreground at
+the moment those cases ask, which points at the launch rather than at the desk. `--show`
+exists in the fixture precisely because a suite raising a window thirty times a run must
+not take the desk, and these are the cases that need the opposite.
+
+Also measured, and it is why this was invisible: WW229's positive case was almost
+certainly among the eleven. It came back green, its duration looked like a real launch,
+and nothing in the results said whether it proved the claim or excused itself. The
+reasoning was sound and the evidence was absent.
+
+Nothing here should become a red. What should happen is that eleven becomes zero, by
+giving those cases a window that owns the foreground when they ask — and the number is
+now the thing that says whether it worked.
+
+### §WW233 The count without the names
+
+WW231 records one line per excuse, and the line is the desk fact. That is enough for the
+sentence — eleven, all for one condition, which is a cause rather than a busy desk — and
+it is not enough to act on. WW232 needs the eleven cases, and the ledger cannot name
+them.
+
+Half of it is already in hand. `BusyDesk.Excused(AssertionResult)` holds a verdict that
+carries the assertion's name, so those sites could write it beside the condition at no
+cost. The other overload takes a bare precondition and knows nothing, which is honest
+and is most of the call sites: the reading it excuses is not an assertion yet.
+
+What that asymmetry means is worth naming rather than papering over. A ledger where some
+lines carry a name and some do not is a ledger a reader has to hold two rules for, and a
+count that says "eleven, four of them named" is worse than the count alone. What closes
+it is the excuse knowing the case regardless — which xunit will hand over through a
+test's own context, at the cost of every one of the eighty-one sites taking an argument.
+
+That is the trade. It is not obviously worth paying, and this exists so the next person
+deciding has the measurement rather than the impression: eleven holes, one condition, no
+names.

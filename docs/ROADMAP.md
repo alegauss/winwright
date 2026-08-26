@@ -39,6 +39,8 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
+- 📋 **WW232** (deps: —) **eleven checks are excused on every green guest run, all for one condition** — The window under test does not hold the foreground when those cases ask, so the guest that exists to run them is where they do not run. → §WW232
+- 📋 **WW233** (deps: —) **the roll says how many checks were excused and never which ones** — So chasing eleven holes down to the cases that own them still means reading twenty classes and guessing, which is the reading the count replaced. → §WW233
 
 ## Done when — Block A
 
