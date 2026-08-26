@@ -60,14 +60,6 @@ nothing outside it should be able to end one either.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW65 The plugin is the installation
-
-Two commands in the adopting repository write both declarations into its settings, and
-committing that file wires every clone - no per-machine step, no path entry, no
-instruction that differs by operating system. What arrives with it is the hook, the
-tools, the commands and the skill. This is roadkeep's adoption story, and it is the
-reason that tool gets used rather than admired.
-
 ### §WW66 The schema arrives as the tool's input schema
 
 Flag names typed from memory are guesses, and a guess costs a refusal and a retry at

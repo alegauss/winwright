@@ -26,6 +26,24 @@ the output rather than left out of it.
 `Winwright.InApp` is optional, and deliberately so: every reading and every pattern act runs against
 an application that references nothing. See [what needs cooperation](#what-needs-the-application-to-cooperate).
 
+## Adopting it in Claude Code
+
+Two commands, run once in the repository that drives the application:
+
+```
+claude plugin marketplace add alegauss/winwright --scope project
+claude plugin install winwright@alegauss --scope project
+```
+
+Both write into that repository's `.claude/settings.json`, so **committing that file wires every
+clone**. There is no per-machine install, nothing added to any path, and no instruction that differs
+by whose desk it is. A clone that has the file has the plugin.
+
+The version the plugin carries is the version this tree declares, and the two are read against each
+other by the same gate that compares the packages — `Winwright.Concordance --declared … --manifest …`.
+A plugin an adopter installed that is a version behind is the hazard worth naming: nothing goes red,
+and the run answers a question somebody stopped asking.
+
 ## Addressing an element
 
 One grammar, written once, read the same way by every verb.
@@ -415,8 +433,10 @@ Written against what has shipped, so it does not promise a line that is still a 
   waits, the attempts and the verdict. What is still missing is above it: nothing selects a case by
   name or a file by path, nothing declares the fixture a case needs, and nothing lends one window
   to the several cases that only read it.
-- **There is no Claude Code plugin.** The MCP tools, the skill and the hook are designed and not
-  built.
+- **The plugin carries nothing yet.** The two commands above wire it, and the version it declares is
+  read against the tree — but the MCP tools, the slash commands, the skill and the hook that refuses
+  a hand-written harness are designed and not built. Installing it today changes nothing about a
+  session except that the wiring is already done when they land.
 
 ## Building it here
 

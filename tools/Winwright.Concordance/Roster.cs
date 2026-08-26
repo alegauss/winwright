@@ -27,11 +27,13 @@ public sealed record Roster(IReadOnlyList<EngineCopy> Copies, string Complaint =
     public static string Usage =>
         """
         usage: Winwright.Concordance [--package <id>] --declared <csproj|props> --packed <nupkg|dir>
-                                     --pinned <consuming csproj> --running
+                                     --pinned <consuming csproj> --manifest <plugin dir|plugin.json>
+                                     --running
 
           --declared  the version a source tree declares, out of its first <Version>
           --packed    the version a build actually produced, out of the nuspec inside the package
           --pinned    the version a consuming project asks for, out of its PackageReference
+          --manifest  the version the Claude Code plugin carries, which is what an adopter installed
           --running   the version of the engine assembly this process loaded
           --package   the package id the --packed and --pinned flags after it are about
                       (default: Winwright; it is read left to right, so it can change mid-line)
@@ -65,7 +67,7 @@ public sealed record Roster(IReadOnlyList<EngineCopy> Copies, string Complaint =
                 continue;
             }
 
-            if (flag is not ("--declared" or "--packed" or "--pinned" or "--package"))
+            if (flag is not ("--declared" or "--packed" or "--pinned" or "--package" or "--manifest"))
                 return Refusing($"'{args[index]}' is not one of the flags this reads");
 
             if (index + 1 >= args.Count || string.IsNullOrWhiteSpace(args[index + 1]))
@@ -79,6 +81,11 @@ public sealed record Roster(IReadOnlyList<EngineCopy> Copies, string Complaint =
                     break;
                 case "--declared":
                     copies.Add(Engine.Declared($"the tree ({Path.GetFileName(value)})", value));
+                    break;
+                case "--manifest":
+                    // WW65. The copy this reading was written about first and could not take until
+                    // the plugin existed: what an adopter actually installed.
+                    copies.Add(Engine.Manifested("the plugin an adopter installs", value));
                     break;
                 case "--packed":
                     copies.Add(Engine.Packed($"the {package} package in {value}", value, package));

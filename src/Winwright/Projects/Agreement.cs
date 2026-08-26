@@ -383,6 +383,61 @@ public static class Engine
             : Reading(where, declared, Path.GetFileName(path));
     }
 
+    /// <summary>What a plugin manifest is called, which is where the plugin's own version lives.</summary>
+    public const string ManifestName = "plugin.json";
+
+    /// <summary>
+    /// The version the Claude Code plugin manifest declares.
+    /// <para>
+    /// WW65. This type's own opening says which copies it exists to compare, and the first of them is
+    /// the version a plugin carries — which nothing here could read until the plugin existed. A stale
+    /// manifest is the hazard named there in full: nothing goes red, and the run is answering a
+    /// question somebody stopped asking, because the plugin an adopter installed is a version behind
+    /// the tree that published it.
+    /// </para>
+    /// </summary>
+    /// <param name="where">What this copy is, as a report names it.</param>
+    /// <param name="manifestOrDirectory">
+    /// The manifest, or a directory holding one — the plugin root or its <c>.claude-plugin</c>, since
+    /// a caller pointing at the plugin should not have to know which of the two the file sits in.
+    /// </param>
+    public static EngineCopy Manifested(string where, string manifestOrDirectory)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(where);
+        ArgumentException.ThrowIfNullOrWhiteSpace(manifestOrDirectory);
+
+        var path = Path.GetFullPath(manifestOrDirectory.Trim());
+        if (Directory.Exists(path))
+        {
+            var beside = Path.Combine(path, ManifestName);
+            var under = Path.Combine(path, ".claude-plugin", ManifestName);
+            path = File.Exists(beside) ? beside : under;
+        }
+
+        if (!File.Exists(path))
+            return new EngineCopy(where, null, Pinning.Absent, $"there is no {ManifestName} at {path}");
+
+        string? declared;
+        try
+        {
+            using var document = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
+            declared = document.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object
+                && document.RootElement.TryGetProperty("version", out var version)
+                && version.ValueKind == System.Text.Json.JsonValueKind.String
+                    ? version.GetString()
+                    : null;
+        }
+        catch (Exception unreadable)
+            when (unreadable is System.Text.Json.JsonException or IOException or UnauthorizedAccessException)
+        {
+            return new EngineCopy(where, null, Pinning.Absent, $"{ManifestName} could not be read — {unreadable.Message}");
+        }
+
+        return string.IsNullOrWhiteSpace(declared)
+            ? new EngineCopy(where, null, Pinning.Absent, $"{ManifestName} declares no version")
+            : Reading(where, declared.Trim(), ManifestName);
+    }
+
     /// <summary>The version the nuspec inside a package declares, or null where it cannot be read.</summary>
     private static string? InNuspec(string nupkg, string package)
     {

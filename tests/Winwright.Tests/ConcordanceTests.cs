@@ -135,12 +135,119 @@ public sealed class ConcordanceTests : IDisposable
         [
             "--declared", Path.Combine(repository, "Directory.Build.props"),
             "--running",
+            "--manifest", repository,
             "--package", "Winwright.InApp",
             "--pinned", Path.Combine(repository, "samples", "Adopter", "Adopter.csproj"),
         ]);
 
         Assert.True(roster.Readable, roster.Complaint);
         Assert.Equal(0, roster.Read().ExitCode);
+    }
+
+    [Fact]
+    public void The_plugin_an_adopter_installs_is_a_copy_of_the_engine_and_is_read_as_one()
+    {
+        // WW65. Agreement's own opening names the version a plugin carries as the first of the
+        // copies it exists to compare, and nothing could read it until the plugin existed. A stale
+        // manifest is the hazard stated there in full: nothing goes red, and an adopter is running
+        // a version behind the tree that published it.
+        var repository = Repository();
+
+        var manifest = Winwright.Projects.Engine.Manifested("the plugin", repository);
+        var tree = Winwright.Projects.Engine.Declared("the tree", Path.Combine(repository, "Directory.Build.props"));
+
+        Assert.True(manifest.Pins, manifest.ToString());
+        Assert.Equal(tree.Version, manifest.Version);
+    }
+
+    [Fact]
+    public void The_manifest_is_found_beside_the_plugin_or_under_its_plugin_directory()
+    {
+        // A caller pointing at a plugin should not have to know which of the two the file sits in.
+        var repository = Repository();
+        var under = Path.Combine(repository, ".claude-plugin");
+
+        Assert.Equal(
+            Winwright.Projects.Engine.Manifested("under", under).Version,
+            Winwright.Projects.Engine.Manifested("the root", repository).Version);
+
+        Assert.Equal(
+            Winwright.Projects.Engine.Manifested("the file itself", Path.Combine(under, Winwright.Projects.Engine.ManifestName)).Version,
+            Winwright.Projects.Engine.Manifested("the root", repository).Version);
+    }
+
+    [Fact]
+    public void A_manifest_that_is_not_there_or_says_no_version_is_unpinned_and_never_zero()
+    {
+        Assert.Contains("there is no plugin.json", Winwright.Projects.Engine.Manifested("absent", root).Because);
+
+        File.WriteAllText(Path.Combine(root, Winwright.Projects.Engine.ManifestName), """{ "name": "winwright" }""");
+        Assert.Contains("declares no version", Winwright.Projects.Engine.Manifested("versionless", root).Because);
+
+        File.WriteAllText(Path.Combine(root, Winwright.Projects.Engine.ManifestName), "{ not json");
+        Assert.Contains("could not be read", Winwright.Projects.Engine.Manifested("unreadable", root).Because);
+    }
+
+    [Fact]
+    public void A_manifest_a_version_behind_the_tree_is_what_the_gate_stops_on()
+    {
+        // The failure this copy exists to catch, provoked rather than waited for.
+        File.WriteAllText(
+            Path.Combine(root, Winwright.Projects.Engine.ManifestName),
+            """{ "name": "winwright", "version": "0.0.9" }""");
+
+        var roster = Roster.From(["--declared", Declaring("Directory.Build.props", "0.1.0"), "--manifest", root]);
+
+        Assert.True(roster.Readable, roster.Complaint);
+        Assert.Equal(Winwright.Projects.Concord.Behind, roster.Read().Verdict);
+        Assert.Equal(1, roster.Read().ExitCode);
+    }
+
+    [Fact]
+    public void The_marketplace_offers_the_plugin_this_repository_declares()
+    {
+        // The two files are what the two adoption commands read, and a marketplace naming a plugin
+        // this tree does not carry is a name an adopter's install would fail on.
+        var plugin = Manifest("plugin.json");
+        var marketplace = Manifest("marketplace.json");
+
+        var named = plugin.RootElement.GetProperty("name").GetString();
+        var offered = marketplace.RootElement.GetProperty("plugins").EnumerateArray()
+            .Select(one => one.GetProperty("name").GetString())
+            .ToList();
+
+        Assert.Equal("winwright", named);
+        Assert.Contains(named, offered);
+        Assert.Equal("alegauss", marketplace.RootElement.GetProperty("name").GetString());
+
+        // Where the plugin lives inside the marketplace's own repository, which is this one.
+        Assert.Equal(
+            "./",
+            marketplace.RootElement.GetProperty("plugins").EnumerateArray().First().GetProperty("source").GetString());
+    }
+
+    [Fact]
+    public void The_plugin_says_where_it_came_from_so_an_adopter_can_go_and_look()
+    {
+        var plugin = Manifest("plugin.json");
+
+        foreach (var key in new[] { "description", "homepage", "repository", "license" })
+        {
+            Assert.True(
+                plugin.RootElement.TryGetProperty(key, out var value)
+                    && !string.IsNullOrWhiteSpace(value.GetString()),
+                $"the plugin manifest says nothing under '{key}'");
+        }
+
+        Assert.Contains("alegauss/winwright", plugin.RootElement.GetProperty("repository").GetString()!);
+    }
+
+    /// <summary>One of the two plugin manifests, parsed.</summary>
+    private static System.Text.Json.JsonDocument Manifest(string name)
+    {
+        var path = Path.Combine(Repository(), ".claude-plugin", name);
+        Assert.True(File.Exists(path), $"there is no {path} for the adoption commands to read");
+        return System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
     }
 
     /// <summary>The repository root, found by walking up to the file that declares the version.</summary>

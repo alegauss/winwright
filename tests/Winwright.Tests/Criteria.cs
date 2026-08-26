@@ -157,7 +157,10 @@ internal static class Criteria
                 + "half the criterion is actually about — an unqualified pass over a filtered run"),
 
         // --- H, the Claude Code surface -----------------------------------------------------------------
-        new("H", "The plugin is the whole installation", "", Unshown.NotBuilt, "there is no plugin"),
+        new("H", "The plugin is the whole installation", "", Unshown.NotBuilt,
+            "the plugin exists and its two commands are the whole of wiring it — ConcordanceTests reads "
+                + "its manifest against the tree — but the criterion is about what arrives with it, and "
+                + "the tools, the commands, the skill and the hook are still open"),
         new("H", "An answer costs no context", "", Unshown.NotBuilt, "there are no MCP tools to answer"),
         new("H", "The skill fits its budget", "", Unshown.NotBuilt, "there is no skill to measure"),
 

@@ -1,0 +1,20 @@
+{
+  "name": "winwright",
+  "description": "Drives a Windows desktop application through UI Automation and reports what it observed: a case is a data file, an act asks the control rather than the desktop, and a check that could not run is a third verdict instead of a green.",
+  "version": "0.1.0",
+
+  "author": {
+    "name": "Alexandre Oliveira"
+  },
+  "homepage": "https://github.com/alegauss/winwright",
+  "repository": "https://github.com/alegauss/winwright",
+  "license": "Apache-2.0",
+  "keywords": [
+    "windows",
+    "ui-automation",
+    "wpf",
+    "testing",
+    "screenshots",
+    "mcp"
+  ]
+}
