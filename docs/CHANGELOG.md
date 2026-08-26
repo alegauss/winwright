@@ -165,6 +165,7 @@
 - ✅ **WW238** **no reading answers a label's words, so a case cannot check what a label says** — A label's words are in its name, so `name` reads them — refused where the locator matched on the name, because then the reading is fixed before the act runs.
 - ✅ **WW241** **a sweep reads once and concludes, so it fails against a window that had not finished drawing** — A sweep polls the resolve budget like any read, and one that gave up says so and whether the page was still showing the project's loading text.
 - ✅ **WW242** **a language file named by its tag alone is invisible, so a project declares strings nothing ever reads** — The tag walk reaches the first part of a file name, so `en.json` is read; `strings.json` still answers nothing, because that is `Culture`'s job and never the index's.
+- ✅ **WW244** **an act that was never sent is invisible in the verdict where its step carries no expectation** — An act that was never sent is a hole in the verdict whatever its step claimed, and the case stops there rather than reading a window nothing moved.
 
 ## Block G — The scenario — a case is a data file
 

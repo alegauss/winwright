@@ -205,24 +205,28 @@ why it is not the general answer.
 ### §WW243 The first migrated case was written and never run
 
 `WW78` wrote claude-tray's keyboard case, its runner and its project declaration, and
-the whole of it was checked by loading rather than by running. Running it says:
+the whole of it was checked by loading rather than by running. Running it reports
+`Broken over 0 of 3`, two steps short, with:
 
-> `[step 2] typing reaches the WPF text box — NotActionableException: Edit#DirectoryBox cannot take this act: nothing matched, or what matched has gone since.`
+> `[step 2] typing reaches the WPF text box — NotActionableException: Edit#DirectoryBox cannot take this act: nothing matched.`
 
-So the case stops two steps short and reports `Broken over 0 of 3`. `DirectoryBox` is
-real — `src/Ui/SettingsPage.xaml` declares it — which leaves the step before it: a click
-on `Text[name="Claude Code"][order=left]`, whose whole job is to put that page on
-screen. Either the click did not land, or it landed somewhere that is not the sidebar
-item, and the case cannot tell those apart because a navigation is not a check.
+That sentence sends the reader to the wrong step. The trace says what happened:
 
-That is the shape `WW79` ran into from the other side and is worth saying once: a step
-with no expectation is a navigation, and the step after it is what proves it worked.
-When the proof is a *resolve* failure, the report names the box and not the click — so
-the reader is sent to the wrong half of the case.
+> `[step 1] click Text[name="Claude Code"] — Unchecked — the foreground belongs to ClaudeTray (pid 65068) 'Settings'`
 
-What this needs is a run against the window, reading what the sidebar actually offers,
-in the same way the panes case was settled. It is not a guess about the locator; it is
-the measurement nobody took.
+So the click was never sent. `DirectoryBox` is missing because the page it lives on was
+never opened, and the case is red about a locator that was right to find nothing.
+
+Two separate things, and only the second is claude-tray's. The step-1 hole is invisible
+in the verdict because a navigation carries no check — filed as its own line, since a
+run that could not act and reports nothing about it is the inversion this whole project
+exists to refuse.
+
+What is left here is the foreground itself: the holder is a ClaudeTray window titled
+*Settings* whose pid is not the window under test's, which is two processes where the
+case assumes one. Whether that is the tray re-launching itself, a leftover from an
+earlier run, or the window under test being read off the wrong handle is the measurement
+still to take.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

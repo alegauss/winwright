@@ -161,7 +161,16 @@ public static class CaseRun
 
             try
             {
-                Perform(step, subject, project, budget, trace, results, root);
+                // WW244. A step whose act was never sent stops the case, for the reason a step that
+                // throws does: everything after it was written assuming it landed, and running those
+                // produces reds about a window nobody put into the state they describe. Measured in
+                // claude-tray, where a click that was never delivered left the case red about a text
+                // box on a page that had never been opened.
+                if (!Perform(step, subject, project, budget, trace, results, root))
+                {
+                    stopped = index;
+                    break;
+                }
             }
             catch (Exception thrown) when (thrown is not (OutOfMemoryException or StackOverflowException))
             {
@@ -267,7 +276,11 @@ public static class CaseRun
     /// and a read leaves empty.
     /// </para>
     /// </summary>
-    private static void Perform(
+    /// <returns>
+    /// Whether the case may go on. False where the act was never sent: WW244, and the whole of it is
+    /// that the next step would then be read against a window nothing had moved.
+    /// </returns>
+    private static bool Perform(
         StepDeclaration step,
         Subject subject,
         ProjectDeclaration project,
@@ -276,13 +289,12 @@ public static class CaseRun
         List<AssertionResult> results,
         AutomationElement root)
     {
-        // WW236. A sweep is one claim over many elements, so it goes nowhere near the attempt loop:
-        // there is no single reading to poll towards, and retrying it would re-read a whole tree for
-        // the same answer at three times the cost.
+        // WW236. A sweep is one claim over many elements, so it does not go through the attempt loop —
+        // it has its own wait, over the resolve budget, which WW241 gave it.
         if (step.Covers is { } key)
         {
             Swept(step, key, subject, project, root, trace, results);
-            return;
+            return true;
         }
 
         var cap = step.Retryable ? project.Attempts : 1;
@@ -301,15 +313,22 @@ public static class CaseRun
             //
             // Before the expectation and not after it: what the step claimed was never put to the
             // application, so there is nothing for a diagnosis to be a page about.
-            if (!acted.Attempted && step.Checkable)
+            //
+            // WW244: whether or not the step is checkable, which it used to require. A step with no
+            // expectation is a navigation, and a navigation is exactly the one whose job is to put the
+            // window into the state the next step reads — so a hole there was recorded in the trace
+            // and in nothing the verdict counts. Measured in claude-tray: a click that was never
+            // delivered left the case red about a text box on a page that had never been opened, and
+            // the reader was sent to the application's own XAML to look for it.
+            if (!acted.Attempted)
             {
                 results.Add(AssertionResult.Unchecked(step.Name, acted.Needed!).At(trace.Count));
-                return;
+                return false;
             }
         }
 
         if (landed.Expected is not { } expectation)
-            return;
+            return true;
 
         // Read now rather than kept from the poll that missed: what a reader wants is the window as
         // it stood when the run gave up, and the tree as it was one attempt ago is a page about a
@@ -339,6 +358,7 @@ public static class CaseRun
 
         trace.Add(recorded);
         results.Add(expectation.AsAssertion().At(trace.Count));
+        return true;
     }
 
     /// <summary>

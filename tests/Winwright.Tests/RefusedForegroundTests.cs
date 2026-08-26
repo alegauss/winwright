@@ -94,6 +94,70 @@ public sealed class RefusedForegroundTests : IDisposable
     }
 
     [Fact]
+    public void A_navigation_that_could_not_be_sent_is_a_hole_and_stops_the_case()
+    {
+        // WW244. The step this used to miss. WW225 wrote the hole into the verdict only for a step
+        // carrying an expectation, and a step with none is a navigation — the one whose whole job is
+        // to put the window into the state the next step reads.
+        //
+        // Measured in claude-tray: a click that was never delivered left the case red about a text box
+        // on a page that had never been opened, so the reader was sent to the application's own XAML
+        // to look for something that was exactly where it should be.
+        Decoy();
+
+        var folder = Directory.CreateTempSubdirectory("winwright-navigating-").FullName;
+        var declaration = Path.Combine(folder, Projects.ProjectDeclaration.FileName);
+        File.WriteAllText(
+            declaration,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "timeouts": { "resolve": 2000, "act": 2000, "poll": 20 }
+            }
+            """);
+
+        var declared = Scenarios.ScenarioFile.Read("navigating.cases.json", Navigating);
+        var verdict = Scenarios.Suite.Run(
+            declared,
+            Scenarios.Selection.All,
+            dialog.Root,
+            Projects.ProjectDeclaration.Load(declaration));
+
+        Directory.Delete(folder, recursive: true);
+
+        var ran = Assert.Single(verdict.Ran);
+
+        // The hole is named after the navigation, and the step that would have been red about the
+        // wrong locator was never reached.
+        var hole = Assert.Single(ran.Verdict.Unchecked);
+        Assert.Equal("click the box", hole.Name);
+        Assert.Equal(Foreground.PreconditionName, hole.Missing!.Name);
+
+        Assert.Equal(1, ran.Reached);
+        Assert.False(ran.Finished);
+        Assert.Equal("type into it", Assert.Single(ran.NotReached).Name);
+
+        // And nothing in the run failed. A red here would be the inversion the whole block is about:
+        // a machine that could not act reporting a defect in the application.
+        Assert.Empty(ran.Verdict.Failures);
+    }
+
+    private const string Navigating = """
+        {
+          "cases": [
+            {
+              "name": "a navigation that never landed",
+              "catches": "a click nothing delivered, reported as a missing control on the page it would have opened",
+              "steps": [
+                { "locator": "CheckBox[name=\"Wrap lines\"]", "act": "click", "with": "PointerIsTheAct", "named": "click the box" },
+                { "locator": "Edit", "act": "type", "with": "beta", "expect": "beta", "reads": "value", "named": "type into it" }
+              ]
+            }
+          ]
+        }
+        """;
+
+    [Fact]
     public void A_traversal_that_could_not_be_sent_is_a_hole()
     {
         Decoy();
