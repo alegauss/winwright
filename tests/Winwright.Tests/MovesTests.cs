@@ -27,12 +27,25 @@ namespace Winwright.Tests;
 [Collection(WindowFixture.Serial)]
 public sealed class MovesTests : IDisposable
 {
+    private const uint WsVisible = 0x10000000;
+    private const uint WsChild = 0x40000000;
+    private const uint WsTabStop = 0x00010000;
+
     private readonly string root = Directory.CreateTempSubdirectory("winwright-moves-").FullName;
-    private readonly Settling settling = Attachable.Settling();
+
+    /// <summary>
+    /// WW234. This ran through <c>Suite.Launch</c>, which starts a process — and a process started by
+    /// a test host with no foreground never gets one, so the driving case excused itself on every
+    /// guest run while being read as proof. <c>Suite.Run</c> takes a root that is already open, which
+    /// is the door: the window is this thread's, and the case is otherwise the same data file.
+    /// </summary>
+    private readonly PumpedDialog dialog = PumpedDialog.Open(
+        "winwright moves",
+        new PumpedDialog.ChildWindow("msctls_trackbar32", null, WsChild | WsVisible | WsTabStop, 20, 20, 200, 32));
 
     public void Dispose()
     {
-        settling.Dispose();
+        dialog.Dispose();
         Directory.Delete(root, recursive: true);
     }
 
@@ -86,14 +99,12 @@ public sealed class MovesTests : IDisposable
         // starting value this case never names.
         var verdict = Run("""
             {
-              "fixtures": [ { "name": "the ranges pane", "arguments": ["--ranges", "--show"] } ],
               "cases": [
                 {
-                  "name": "an arrow key moves a range that has room",
+                  "name": "an arrow key moves a range",
                   "catches": "a range control that reports a value and does not respond to a key",
-                  "fixture": "the ranges pane",
                   "steps": [
-                    { "locator": "Slider#roomEitherWay", "act": "nudge", "reads": "range", "moves": true }
+                    { "locator": "Slider", "act": "nudge", "reads": "range", "moves": true }
                   ]
                 }
               ]
@@ -119,16 +130,17 @@ public sealed class MovesTests : IDisposable
     {
         // The other end, provoked rather than waited for: the pane draws a range with one value in
         // it, so nothing could move it and the claim is false. What the reader gets is the number.
+        // Written against the trackbar and not a range with no room: `set range` to the value it
+        // already holds is a write that cannot move anything, which is the same false claim reached
+        // without needing a control the fixture had to draw.
         var verdict = Run("""
             {
-              "fixtures": [ { "name": "the ranges pane", "arguments": ["--ranges", "--show"] } ],
               "cases": [
                 {
-                  "name": "a range with no room does not move",
-                  "catches": "a movement claim that passes on a control nothing could move",
-                  "fixture": "the ranges pane",
+                  "name": "a value written where it already sits does not move",
+                  "catches": "a movement claim that passes on a reading that never changed",
                   "steps": [
-                    { "locator": "Slider#noRoomAtAll", "act": "set range", "with": "3", "reads": "range", "moves": true }
+                    { "locator": "Slider", "act": "set range", "with": "0", "reads": "range", "moves": true }
                   ]
                 }
               ]
@@ -146,7 +158,7 @@ public sealed class MovesTests : IDisposable
 
         // The value that stayed, in the sentence. A boolean would have thrown it away, and the number
         // is what tells a reader whether the control is stuck or the key never arrived.
-        Assert.Contains("something other than '3'", Said(verdict), StringComparison.Ordinal);
+        Assert.Contains("something other than '0'", Said(verdict), StringComparison.Ordinal);
     }
 
     /// <summary>Everything the run said, so a red here carries its own explanation.</summary>
@@ -174,6 +186,7 @@ public sealed class MovesTests : IDisposable
         var project = ProjectDeclaration.Load(declaration);
         var declared = ScenarioFile.Read("moves.cases.json", cases);
 
-        return Suite.Launch(declared, Selection.All, settling.Register, project);
+        dialog.BringToFront();
+        return Suite.Run(declared, Selection.All, dialog.Root, project);
     }
 }

@@ -23,22 +23,50 @@ namespace Winwright.Tests;
 [Collection(WindowFixture.Serial)]
 public sealed class NudgeTests : IDisposable
 {
+    private const uint WsVisible = 0x10000000;
+    private const uint WsChild = 0x40000000;
+    private const uint WsTabStop = 0x00010000;
+
+    /// <summary>
+    /// The window the driven case uses, and it is this thread's.
+    /// <para>
+    /// WW234. This class launched the fixture, and both of its driving cases excused themselves on
+    /// every guest run — Windows refuses the foreground to a process that does not already own it, so
+    /// a launched fixture cannot be sent a key whatever flag it carries. A trackbar takes the range
+    /// 0..100 at position 0 with no message sent to it, which is an end: the direction has to be
+    /// chosen, so one case here proves both that the act lands and that it reverses.
+    /// </para>
+    /// </summary>
+    private readonly PumpedDialog dialog = PumpedDialog.Open(
+        "winwright ranges",
+        new PumpedDialog.ChildWindow("msctls_trackbar32", null, WsChild | WsVisible | WsTabStop, 20, 20, 200, 32));
+
     private readonly Settling settling = Attachable.Settling();
-    private readonly AutomationElement root;
+    private readonly AutomationElement fixtureRoot;
 
     public NudgeTests()
     {
-        var launched = settling.Register.Launch(Fixture.Started("--ranges", "--show"));
+        // The fixture as well, for the two claims a trackbar cannot make without a message sent to
+        // it: a range with no room in either direction, and the pane drawing what it says it draws.
+        // Neither needs the desktop — the refusal throws before anything is pressed.
+        var launched = settling.Register.Launch(Fixture.Started("--ranges"));
         var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(launched.Pid) is not null, 20000, 25);
 
         Assert.True(drawn.Happened, $"the fixture drew no window in {drawn.WaitedMs}ms");
-        root = AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle);
+        fixtureRoot = AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle);
     }
 
-    public void Dispose() => settling.Dispose();
+    public void Dispose()
+    {
+        dialog.Dispose();
+        settling.Dispose();
+    }
 
     private Subject On(string named) =>
-        Subject.Unguarded(root, Locator.Parse($"Slider#{named}"), 4000, pollMs: 25);
+        Subject.Unguarded(fixtureRoot, Locator.Parse($"Slider#{named}"), 4000, pollMs: 25);
+
+    private Subject Pumped() =>
+        Subject.Unguarded(dialog.Root, Locator.Parse("Slider"), deadlineMs: 4000, pollMs: 25);
 
     [Fact]
     public void The_pane_draws_every_range_the_verb_has_an_answer_for()
@@ -60,33 +88,26 @@ public sealed class NudgeTests : IDisposable
     }
 
     [Fact]
-    public void A_range_with_room_either_way_moves_the_way_the_verb_prefers()
+    public void A_range_sitting_at_an_end_is_pressed_the_way_that_can_move_it()
     {
-        var nudged = Synthesised.Nudge(On("roomEitherWay"));
+        // The branch this verb exists to get right, against a window this thread owns. A trackbar
+        // starts at its minimum, so the direction the verb prefers is the no-op: one that never
+        // reversed would read the starting value back and report a control that does not respond.
+        dialog.BringToFront();
+
+        var nudged = Synthesised.Nudge(Pumped());
 
         if (BusyDesk.Excused(nudged.Needed!))
             return;
 
         Assert.True(nudged.Changed, nudged.ToString());
-        Assert.Equal("synthesised keyboard", nudged.Pattern);
+        Assert.Equal(Synthesised.ByKeyboard, nudged.Pattern);
 
-        // Up from the middle, because that is the direction it prefers when it has the room.
-        Assert.Equal(6d, double.Parse(nudged.After.Range!.ToString()!, System.Globalization.CultureInfo.InvariantCulture));
-    }
-
-    [Fact]
-    public void A_range_already_at_its_maximum_is_pressed_the_other_way_instead()
-    {
-        // The branch WW226 exists for. Without a control sitting at the end, a verb that never
-        // flipped would have passed every run: the value would come back unchanged and read as a
-        // control that does not respond.
-        var nudged = Synthesised.Nudge(On("atTheMaximum"));
-
-        if (BusyDesk.Excused(nudged.Needed!))
-            return;
-
-        Assert.True(nudged.Changed, nudged.ToString());
-        Assert.Equal(9d, double.Parse(nudged.After.Range!.ToString()!, System.Globalization.CultureInfo.InvariantCulture));
+        // Upward, because down from the minimum moves nothing. The number is the control's own and
+        // is not named here: what is asserted is that it left the end it was sitting at.
+        var after = nudged.After.Range!.Value;
+        var before = nudged.Before.Range!.Value;
+        Assert.True(after > before, $"{before} -> {after} is not a press away from the minimum");
     }
 
     [Fact]

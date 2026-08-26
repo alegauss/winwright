@@ -39,8 +39,6 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
-- ⏳ **WW232** (deps: WW234) **eleven checks are excused on every green guest run, all for one condition** — Nudge and moves still launch the fixture, so they still excuse; where their proof belongs waits on WW234. → §WW232
-- 📋 **WW234** (deps: —) **WW226 drew a ranges pane for a verb four cases already drove** — Its premise was a grep of the fixture app, and the trackbar that proves the verb is a pumped window in the suite's own process. → §WW234
 
 ## Done when — Block A
 
