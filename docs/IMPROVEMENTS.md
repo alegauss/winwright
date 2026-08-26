@@ -58,6 +58,30 @@ nothing outside it should be able to end one either.
 
 ## Block G — The scenario — a case is a data file
 
+### §WW225 Half the engine has no name in the format
+
+The vocabulary is `read`, `invoke`, `toggle`, `set value`, `set range`, `select`,
+`expand`, `collapse`. Every one reaches its element through the control's own pattern,
+which is the right default and is the whole of what a case can say. The engine also has
+`Pointer`, `Keyboard`, `Traversal` and `Focus` — synthesised input, and the readings
+about why an act needs it — and none of them has a name a data file can write.
+
+Not in the abstract. WW78's keyboard case asserts three things: typing reaches a WPF
+TextBox, Tab moves focus off it, an arrow key moves a Slider. The first and third become
+`set value` and `set range`, which go through the patterns that passed on the day those
+windows took no keyboard input at all — checks that cannot fail for the reason they were
+written. The second cannot be written: no reading answers what holds the focus.
+
+Two more things need names. A pointer act, because the sidebar item the case clicks has
+no automation peer and `invoke` needs an Invoke pattern. And a step's own foreground
+precondition, since synthesised input goes wherever the foreground is and the script
+asks before it drives.
+
+WW82's sentence names a keyboard expansion, so it waits on this too. Past those two the
+script drives the same way throughout — a pointer click to navigate, a keyboard walk
+through a picker, Escape to close a menu — so this is not WW78's alone. It is what block
+J waits on.
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ### §WW221 The wiring is not the tool
