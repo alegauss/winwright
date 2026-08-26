@@ -182,6 +182,7 @@
 - ✅ **WW69** **the skill is loaded on every turn against a budget it does not need** — It loads on a window rather than every turn and says which loop answers which question, and both its costs are measured apart rather than assumed small.
 - ✅ **WW221** **a fresh clone has the plugin's wiring and none of its tools** — A launcher looks for the assembly and, finding none, names the missing surface and the build command on stderr instead of failing as a .NET error.
 - ✅ **WW222** **nothing in a session runs a case, so the tools stop at would-load** — A verb runs the cases a selection asks for and answers the verdict, and a desk that cannot observe answers a hole rather than a red.
+- ✅ **WW224** **a block criterion names a surface the plugin never got** — The criterion now names the three surfaces the plugin carries and says why there are no slash commands, so it covers nothing nobody intends to build.
 
 ## Block I — The in-app half — the app cooperates with the harness
 

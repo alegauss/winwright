@@ -64,23 +64,6 @@ J waits on.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW224 Either the commands or the sentence
-
-"The plugin is the whole installation" says in full that two commands wire the hook, the
-tools, the commands and the skill. Three of the four landed. The commands did not, and
-nothing in the block was ever filed for them — so the criterion closed over a surface no
-task claimed, which is the failure mode WW176 exists to stop, arriving through the
-criterion's own wording rather than through a missing pairing. `Criteria.cs` now says so
-out loud rather than letting the entry read as satisfied.
-
-Two ways out and they are not equivalent. Build them: a slash command per tool, which is
-cheap and mostly redundant, because a verb reachable from a tool does not also need a
-name typed with a slash. Or restate the criterion to name the three surfaces there are,
-and record why commands were dropped. The second is more likely right, and it is the one
-that needs a decision rather than an afternoon — which is why this is filed as a task
-and not done in passing. What must not happen is the entry quietly keeping a word for a
-thing nobody intends to build: that is how a list stops being read.
-
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion

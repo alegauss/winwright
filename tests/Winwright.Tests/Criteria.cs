@@ -161,10 +161,10 @@ internal static class Criteria
         // --- H, the Claude Code surface -----------------------------------------------------------------
         new("H", "The plugin is the whole installation",
             "PluginTests.Everything_the_plugin_carries_is_declared_by_it_and_points_at_this_tree",
-            null, "every surface the plugin carries — the server, the hook, the skill, the version it "
-                + "declares — is declared by the manifest and points at something this tree produces, "
-                + "each paired with the case reading its wiring back; the criterion's own sentence also "
-                + "names commands, and there are none"),
+            null, "every surface the plugin carries — the server, the hook, the skill, the launchers, "
+                + "the version it declares — is declared by the manifest and points at something this "
+                + "tree produces, each paired with the case reading its wiring back; since WW224 the "
+                + "criterion names those and no longer names slash commands nobody intends to build"),
         new("H", "An answer costs no context",
             "McpTests.The_format_and_the_vocabulary_are_answers_rather_than_prose_somebody_loads",
             null, "the format and the vocabulary are tool answers rather than prose a turn loads, the one "

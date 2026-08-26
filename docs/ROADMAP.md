@@ -20,8 +20,6 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-- 📋 **WW224** (deps: —) **a block criterion names a surface the plugin never got** — Block H's first criterion says the two commands wire the commands, and there are none, so a criterion read as met is covering something that was never built. → §WW224
-
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
@@ -128,7 +126,8 @@
 ## Done when — Block H
 
 - **The plugin is the whole installation** Two commands in an adopting repository wire
-  the hook, the tools, the commands and the skill, and nothing is added to any path.
+  the hook, the tools and the skill, and nothing is added to any path. No slash
+  commands: a verb reachable from a tool does not also need a name typed with a slash.
 - **An answer costs no context** Every verb answers as machine-readable output carrying
   the file and line it came from, so nothing is verified by reading what the command
   already read.
