@@ -254,7 +254,8 @@ once the act has landed, and `reads` says which reading that is — one of `anyt
 `toggle`, `selected`, `expanded`, `text`, `focused`, defaulting to `anything`, the one value the element reports,
 in the order a reader looks at them. `with` is required exactly where the act takes something and
 refused where it does not. `named` renames a step in the report; `meansIt` is the sentence a step
-needs before it may touch an entry the project declared destructive.
+needs before it may touch an entry the project declared destructive. `moves` is the other kind of
+expectation: that the reading ended up different, for the claim a case cannot name a value for.
 
 A step with no `expect` is an act and not a check: it moves the window into the state a later step
 reads. An act that survives being repeated is attempted again where its read-back does not arrive; one

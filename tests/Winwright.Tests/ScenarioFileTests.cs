@@ -243,7 +243,7 @@ public class ScenarioFileTests
             ["name", "environment", "flag", "arguments", "variables", "shareable"],
             ScenarioSchema.Fixture.Select(field => field.Name));
         Assert.Equal(
-            ["locator", "act", "with", "expect", "reads", "meansIt", "named"],
+            ["locator", "act", "with", "expect", "reads", "moves", "meansIt", "named"],
             ScenarioSchema.Step.Select(field => field.Name));
 
         Assert.Equal(

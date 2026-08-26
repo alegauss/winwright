@@ -334,10 +334,11 @@ public sealed class ScenarioFile
         var with = Text(at, step, ScenarioSchema.Step, "with");
         var expect = Text(at, step, ScenarioSchema.Step, "expect");
         var reads = Text(at, step, ScenarioSchema.Step, "reads");
+        var moves = Truth(at, step, ScenarioSchema.Step, "moves");
         var meansIt = Truth(at, step, ScenarioSchema.Step, "meansIt");
         var named = Text(at, step, ScenarioSchema.Step, "named");
 
-        return Addressed(at, () => StepDeclaration.Of(locator!, act!, with, expect, reads, meansIt, named));
+        return Addressed(at, () => StepDeclaration.Of(locator!, act!, with, expect, reads, meansIt, named, moves));
     }
 
     /// <summary>

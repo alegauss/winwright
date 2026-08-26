@@ -14,8 +14,6 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW229** (deps: —) **a case can expect a value and never that one moved** — The assertion an arrow key drives a control is about change, so migrating it needs a starting value the case has no way to know. → §WW229
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
@@ -41,6 +39,7 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
+- 📋 **WW231** (deps: —) **a case that excused itself is reported as a pass and counted as one** — So a run where every desk-dependent case holed reads exactly like one that proved everything, and the roll call cannot tell them apart. → §WW231
 
 ## Done when — Block A
 

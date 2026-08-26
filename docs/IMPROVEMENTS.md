@@ -36,28 +36,6 @@ it.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW229 An expectation about a value, where the claim is about movement
-
-Measured migrating WW78. The script's fourth assertion read the slider, pressed a key,
-read it again and compared — a claim about movement, which is the only honest one when
-the starting value belongs to the application's own settings. `expect` compares a
-reading to a string, so the case cannot say it.
-
-The migration worked around it: `set range` to the floor first, then nudge, then expect
-the one value that can follow. That only worked because claude-tray's bounds are `const
-int` in its own source and could be read while writing the case. An adopter whose
-control is bound to data has nothing to put in the field, and the assertion is
-unmigratable rather than awkward.
-
-Worth naming what the workaround costs even where it is available. Two steps instead of
-one, a `set range` through the pattern before the key press that is the point, and an
-expectation that goes stale the day the tick frequency changes — the case would then
-read 6 where the control says 10 and the red would be about the expectation.
-
-`ActResult.Changed` already answers this inside the engine: it is the readings either
-side compared, and it exists because "it changed" has to be a claim that can be false.
-What is missing is a name a data file can write for it.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
@@ -228,3 +206,25 @@ once. A genuine absence now carries how many icons the bar and the flyout held.
 
 What is left waits on the next occurrence rather than on any work: it will say which of
 the two it was.
+
+### §WW231 The excuses are invisible in the results
+
+`BusyDesk.Excused` is called at 81 sites across 20 classes. It validates that the
+precondition is a fact the engine calls the desk's — which is WW183's correction and is
+right — and then the case returns. xunit records a pass. Nothing counts it, nothing
+prints it, and the trx says the same word for a case that drove a window and one that
+looked at the desk and left.
+
+This is the founding defect wearing the other hat. That suite reported 352 where the run
+before had 374, and the only sign was a number nobody read; here the number does not
+even move. A run on a locked desk would report 1,563 passed.
+
+Measured, and it cost an answer: after WW229 landed, its two window-driving cases came
+back green and there was no way to tell from the results whether the positive one proved
+the claim or excused itself. Durations were the only evidence, and durations cannot
+separate a launch that ran from a launch that was abandoned.
+
+What is missing is the count, said out loud where the roll call already speaks. The roll
+call exists because discovery and results have to agree; excuses are the third number in
+that arithmetic, and it is the only one nobody is told. A run that excused twelve cases
+is not a red — it is a run whose green covers 1,551 things.

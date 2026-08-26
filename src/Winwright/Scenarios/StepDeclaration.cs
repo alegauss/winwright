@@ -23,7 +23,14 @@ namespace Winwright.Scenarios;
 public sealed record StepDeclaration
 {
     private StepDeclaration(
-        string name, Locator locator, ActVerb verb, string? argument, string? expected, ReadBack reads, bool meansIt)
+        string name,
+        Locator locator,
+        ActVerb verb,
+        string? argument,
+        string? expected,
+        ReadBack reads,
+        bool meansIt,
+        bool moves)
     {
         Name = name;
         Locator = locator;
@@ -32,6 +39,7 @@ public sealed record StepDeclaration
         Expected = expected;
         Reads = reads;
         MeansIt = meansIt;
+        Moves = moves;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -63,11 +71,29 @@ public sealed record StepDeclaration
     public bool MeansIt { get; }
 
     /// <summary>
-    /// Whether this step says anything a run could find false. A step that expects nothing produces
-    /// no assertion result, which is why a case made only of these is refused by
+    /// Whether this step claims the reading moved, rather than what it moved to.
+    /// <para>
+    /// WW229. Measured migrating claude-tray's keyboard case. Its fourth assertion was an arrow key
+    /// driving a slider, which is a claim about movement: the script read the value, pressed the key,
+    /// read it again and compared, because the starting value belongs to the application's own
+    /// settings and no case can know it. <see cref="Expected"/> compares a reading to a string, so the
+    /// migration had to put the control at a known floor first and expect the one value that could
+    /// follow — which worked only because that application's bounds are constants in its own source.
+    /// </para>
+    /// <para>
+    /// The workaround also costs something where it is available: two steps instead of one, a write
+    /// through the pattern before the key press that is the point, and an expectation that goes stale
+    /// the day the tick frequency changes. This is the claim the script was actually making.
+    /// </para>
+    /// </summary>
+    public bool Moves { get; }
+
+    /// <summary>
+    /// Whether this step says anything a run could find false. A step that expects nothing and claims
+    /// no movement produces no assertion result, which is why a case made only of these is refused by
     /// <see cref="CaseDeclaration"/> rather than run to a green it did not earn.
     /// </summary>
-    public bool Checkable => Expected is not null;
+    public bool Checkable => Expected is not null || Moves;
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -90,6 +116,7 @@ public sealed record StepDeclaration
     /// <param name="reads">Which reading, by the name <see cref="ReadBack.All"/> lists.</param>
     /// <param name="meansIt">That this step means a destructive entry it names.</param>
     /// <param name="named">What a report should call it, where the verb and locator will not do.</param>
+    /// <param name="moves">That the reading should end up different from what it was.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static StepDeclaration Of(
         string locator,
@@ -98,7 +125,8 @@ public sealed record StepDeclaration
         string? expected = null,
         string? reads = null,
         bool meansIt = false,
-        string? named = null)
+        string? named = null,
+        bool moves = false)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var subject = called ?? Describing(verb, locator);
@@ -117,7 +145,19 @@ public sealed record StepDeclaration
 
         var wanted = expected;
         var reading = ReadBack.Named(reads);
-        if (wanted is null && !string.IsNullOrWhiteSpace(reads))
+
+        // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
+        // says it moved where it was something else. A step asserting both would owe two assertion
+        // results, and a trace line that stands for two things is one a reader has to take apart.
+        if (wanted is not null && moves)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it expects '{wanted}' and also that the reading moved; naming the value says both, "
+                    + "so 'moves' is for the claim that cannot name one");
+        }
+
+        if (wanted is null && !moves && !string.IsNullOrWhiteSpace(reads))
         {
             throw new ScenarioRefusedException(
                 subject, $"it reads '{reading.Name}' and expects nothing of it, so the reading changes nothing");
@@ -126,8 +166,16 @@ public sealed record StepDeclaration
         // WW213. An act with no expectation is a navigation a later step is the check for. A read
         // with no expectation is nothing at all: it touches nothing and claims nothing, so a case
         // carrying one is a case with a step in it that could not fail.
-        if (wanted is null && act.Reads)
+        if (wanted is null && !moves && act.Reads)
             throw new ScenarioRefusedException(subject, $"'{act.Name}' expects nothing, so the step does nothing at all");
+
+        // A read moves nothing by construction, so a read claiming movement is a claim about whatever
+        // else is happening on the desk rather than about this step.
+        if (moves && act.Reads)
+        {
+            throw new ScenarioRefusedException(
+                subject, $"'{act.Name}' reads and never acts, so it cannot be what moved a reading");
+        }
 
         return new StepDeclaration(
             called ?? Describing(act.Name, parsed!.Text),
@@ -136,13 +184,17 @@ public sealed record StepDeclaration
             string.IsNullOrWhiteSpace(argument) ? null : argument.Trim(),
             wanted,
             reading,
-            meansIt);
+            meansIt,
+            moves);
     }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>
-    public override string ToString() => Expected is null
-        ? Name
-        : $"{Name} → {Reads.Name} '{Expected}'";
+    public override string ToString() => (Expected, Moves) switch
+    {
+        (not null, _) => $"{Name} → {Reads.Name} '{Expected}'",
+        (_, true) => $"{Name} → {Reads.Name} moves",
+        _ => Name,
+    };
 
     private static string Describing(string? verb, string locator) =>
         $"{(string.IsNullOrWhiteSpace(verb) ? "<no verb>" : verb.Trim())} {locator.Trim()}";

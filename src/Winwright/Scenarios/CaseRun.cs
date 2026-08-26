@@ -280,7 +280,23 @@ public static class CaseRun
         var landed = attempted.Last;
 
         if (landed.Acted is { } acted)
+        {
             trace.Add(Retry.Recorded(acted.AsTraceStep() with { Step = trace.Count + 1 }, attempted));
+
+            // WW225 and WW229. An act that was never attempted is a hole and never a red, and this is
+            // where that becomes true of the verdict rather than only of the trace line. Measured: a
+            // case naming 'nudge' under a run that did not own the foreground failed on the
+            // expectation, which reports a control that would not move about a machine that never
+            // pressed the key — the exact inversion this whole project exists to refuse.
+            //
+            // Before the expectation and not after it: what the step claimed was never put to the
+            // application, so there is nothing for a diagnosis to be a page about.
+            if (!acted.Attempted && step.Checkable)
+            {
+                results.Add(AssertionResult.Unchecked(step.Name, acted.Needed!).At(trace.Count));
+                return;
+            }
+        }
 
         if (landed.Expected is not { } expectation)
             return;
@@ -317,10 +333,19 @@ public static class CaseRun
 
     private static Landed Attempting(StepDeclaration step, Subject subject)
     {
+        // WW229. Read before the act and only where a step claims movement, because that is the one
+        // claim whose other half is a moment that has already gone. Everything else compares a
+        // reading to a string the case wrote down, and needs no before.
+        var was = step.Moves ? step.Reads.Of(subject.Read()) : null;
+
         // A read never goes through Act: an act must have found something to press and a read need
         // not, so the element that was not there comes out as an expectation nothing answered rather
         // than a throw about a pattern the reader has to trace back to a locator.
         var acted = step.Verb.Reads ? null : step.Verb.Perform(subject, step.Argument);
+
+        if (step.Moves)
+            return Moved(step, subject, acted, was);
+
         if (step.Expected is not { } wanted)
             return new Landed(acted, null, acted?.Element);
 
@@ -335,6 +360,39 @@ public static class CaseRun
                 var look = subject.ReadOnce();
                 saw = look.Facts ?? saw;
                 return look.Found ? step.Reads.Of(look) : null;
+            },
+            subject.ActMs,
+            subject.PollMs);
+
+        return new Landed(acted, expectation, saw);
+    }
+
+    /// <summary>
+    /// A step that claims the reading moved, waited for the way every other expectation is.
+    /// <para>
+    /// The wanted value is the sentence rather than a sentinel, so a failure reads as what it is:
+    /// <em>wanted something other than '5', last read '5'</em>. A reader is then told the value that
+    /// would not budge, which is the half of the answer a boolean would have thrown away.
+    /// </para>
+    /// <para>
+    /// A reading that went to nothing counts as moved, and that is deliberate: it did change, and the
+    /// sentence records every reading on the way, so a case whose element vanished says so rather
+    /// than passing quietly on a comparison that happened to differ.
+    /// </para>
+    /// </summary>
+    private static Landed Moved(StepDeclaration step, Subject subject, ActResult? acted, string? was)
+    {
+        var wanted = $"something other than '{was ?? "nothing"}'";
+        var saw = acted?.Element;
+        var expectation = Expect.That(
+            step.Name,
+            wanted,
+            () =>
+            {
+                var look = subject.ReadOnce();
+                saw = look.Facts ?? saw;
+                var now = look.Found ? step.Reads.Of(look) : null;
+                return string.Equals(now, was, StringComparison.Ordinal) ? now : wanted;
             },
             subject.ActMs,
             subject.PollMs);
