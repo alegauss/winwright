@@ -156,11 +156,25 @@ jobs:
       # this tool exists to hand over. --skip-duplicate so re-running after a failure in a later step
       # is not a red about work that is already done.
       - name: Push to nuget.org
-        run: >
-          dotnet nuget push "artifacts/*.nupkg"
-          --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
-          --source https://api.nuget.org/v3/index.json
-          --skip-duplicate
+        shell: pwsh
+        run: |
+          # Enumerated rather than globbed, measured on this workflow's second run: `dotnet nuget push
+          # "artifacts/*.nupkg"` answered `File does not exist (artifacts/*.nupkg)` with four packages
+          # sitting in that folder. The pattern is not expanded, so the tool was handed a literal name.
+          #
+          # Only the .nupkg files are named. Pushing one carries its matching .snupkg with it, and
+          # naming the symbols package separately is how a push of it on its own gets refused.
+          $packages = Get-ChildItem artifacts/*.nupkg
+          if (-not $packages) { throw "nothing was packed into artifacts" }
+
+          foreach ($package in $packages) {
+            Write-Host "pushing $($package.Name)"
+            dotnet nuget push $package.FullName `
+              --api-key '${{ steps.login.outputs.NUGET_API_KEY }}' `
+              --source https://api.nuget.org/v3/index.json `
+              --skip-duplicate
+            if ($LASTEXITCODE -ne 0) { throw "pushing $($package.Name) failed" }
+          }
 
       - name: Commit and tag what was published
         shell: pwsh
