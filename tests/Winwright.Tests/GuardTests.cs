@@ -202,8 +202,14 @@ public sealed class GuardTests
         var command = Assert.Single(registered[0].GetProperty("hooks").EnumerateArray())
             .GetProperty("command").GetString()!;
 
+        // WW221: through a launcher, so a clone that has not been built gets a sentence naming the
+        // build rather than a .NET assembly error on every write.
         Assert.Contains("${CLAUDE_PLUGIN_ROOT}", command, StringComparison.Ordinal);
-        Assert.Contains("Winwright.Guard.dll", command, StringComparison.Ordinal);
+        Assert.Contains("hooks/winwright-guard.cmd", command, StringComparison.Ordinal);
+
+        var launcher = Path.Combine(repository, "hooks", "winwright-guard.cmd");
+        Assert.True(File.Exists(launcher), $"the hook names {command} and there is no {launcher}");
+        Assert.Contains("Winwright.Guard.dll", File.ReadAllText(launcher), StringComparison.Ordinal);
     }
 
     private static JsonObject Writing(string path, string content) => new()

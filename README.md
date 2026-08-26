@@ -57,9 +57,17 @@ loaded and then typed a key out of:
   loader's schema, so a misspelled key is not a thing the caller can send; what comes back is either
   the loader's own refusal, addressed as `cases[0].steps[1].act`, or what a run of it would do.
 
-The server is a .NET process the plugin launches, so it needs building once — `dotnet build -c
-Release` in the plugin's own clone. That is the one step the two commands above do not cover, and it
-is named here rather than left to a session that finds the tools missing.
+The server and the guard are .NET processes the plugin launches, so they need building once —
+`dotnet build -c Release` in the plugin's own clone. That is the one step the two commands above do
+not cover.
+
+**Skip it and you are told, not left guessing.** Both are wired through a launcher that looks for its
+assembly — Release first, then Debug — and where there is none it writes the missing surface and the
+build command to stderr and exits. What that replaces is the failure mode worth naming: a `dotnet
+exec` on a path a fresh clone does not have produced a .NET assembly error on every write, and a
+guard that is not there refuses nothing. The one surface whose whole job is to be in the way was the
+one that went quiet. The launcher exits 1 and never 2: denying every write because a build is missing
+would put the guard in front of everything instead of in front of a harness script.
 
 ### What the guard refuses
 

@@ -64,22 +64,6 @@ J waits on.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW221 The wiring is not the tool
-
-WW65 shipped a claim: two commands, nothing added to any path, and committing one file
-wires every clone. WW66 and WW67 then made both surfaces .NET processes, and the wiring
-points at `bin/Release/net10.0-windows/*.dll` — paths a clone does not have until
-somebody runs `dotnet build -c Release`. So the claim is now true about the wiring and
-false about the tools. An adopter who runs the two commands gets a session whose server
-fails to start and whose hook exits silently, which is the worse of the two: a guard
-that is not there refuses nothing, and nothing goes red. The README names the build step
-rather than hiding it, and naming a gap is not closing one. What closes it is the plugin
-carrying something that runs without a prior build, or the install failing loudly when
-the build is missing instead of degrading to a session with no tools and no guard. The
-second is cheaper and is probably the right first move: a hook that cannot find its
-assembly is the one case where silence is wrong, because the whole point of it is to be
-in the way.
-
 ### §WW222 The tools stop one step short of the answer
 
 `winwright_check` answers whether a file would load. That is the saving WW66 was about —

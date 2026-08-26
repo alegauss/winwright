@@ -1,11 +1,7 @@
 {
   "mcpServers": {
     "winwright": {
-      "command": "dotnet",
-      "args": [
-        "exec",
-        "${CLAUDE_PLUGIN_ROOT}/tools/Winwright.Mcp/bin/Release/net10.0-windows/Winwright.Mcp.dll"
-      ]
+      "command": "${CLAUDE_PLUGIN_ROOT}/tools/winwright-mcp.cmd"
     }
   }
 }

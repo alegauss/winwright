@@ -209,25 +209,31 @@ public sealed class McpTests
     }
 
     [Fact]
-    public void The_plugin_wires_the_server_at_the_path_this_tree_builds_it_to()
+    public void The_plugin_wires_the_server_through_the_launcher_that_can_say_it_is_not_built()
     {
-        // The wiring and the build cannot drift on a renamed assembly or a moved framework: both
-        // halves of the path are read rather than retyped here.
+        // WW221. The wiring used to be `dotnet exec` on a path under bin\Release, so a fresh clone
+        // showed the server as failed with a .NET assembly error for its whole explanation. The
+        // launcher is what turns that into a sentence naming the build.
         var repository = Repository();
         using var wiring = JsonDocument.Parse(
             File.ReadAllText(Path.Combine(repository, ".claude-plugin", "mcp.json")));
 
         var server = wiring.RootElement.GetProperty("mcpServers").GetProperty("winwright");
-        var arguments = server.GetProperty("args").EnumerateArray().Select(one => one.GetString()!).ToList();
+        var command = server.GetProperty("command").GetString()!;
 
-        Assert.Equal("dotnet", server.GetProperty("command").GetString());
-        Assert.Contains("exec", arguments);
+        Assert.StartsWith("${CLAUDE_PLUGIN_ROOT}/", command, StringComparison.Ordinal);
+        Assert.EndsWith("/tools/winwright-mcp.cmd", command, StringComparison.Ordinal);
 
-        var pointed = Assert.Single(arguments, one => one.EndsWith(".dll", StringComparison.Ordinal));
-        Assert.StartsWith("${CLAUDE_PLUGIN_ROOT}/", pointed, StringComparison.Ordinal);
-        Assert.EndsWith($"/{Framework(repository)}/Winwright.Mcp.dll", pointed, StringComparison.Ordinal);
+        var launcher = Path.Combine(repository, "tools", "winwright-mcp.cmd");
+        Assert.True(File.Exists(launcher), $"the wiring names {command} and there is no {launcher}");
 
-        // And the manifest points at this file, or the wiring is a file nothing reads.
+        // The launcher and the build cannot drift on a renamed assembly or a moved framework: both
+        // halves are read off this tree rather than retyped here.
+        var said = File.ReadAllText(launcher);
+        Assert.Contains("Winwright.Mcp.dll", said, StringComparison.Ordinal);
+        Assert.Contains(Framework(repository), said, StringComparison.Ordinal);
+
+        // And the manifest points at the wiring, or it is a file nothing reads.
         using var manifest = JsonDocument.Parse(
             File.ReadAllText(Path.Combine(repository, ".claude-plugin", "plugin.json")));
         Assert.Equal("./.claude-plugin/mcp.json", manifest.RootElement.GetProperty("mcpServers").GetString());
