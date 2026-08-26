@@ -167,6 +167,7 @@
 - ✅ **WW242** **a language file named by its tag alone is invisible, so a project declares strings nothing ever reads** — The tag walk reaches the first part of a file name, so `en.json` is read; `strings.json` still answers nothing, because that is `Culture`'s job and never the index's.
 - ✅ **WW244** **an act that was never sent is invisible in the verdict where its step carries no expectation** — An act that was never sent is a hole in the verdict whatever its step claimed, and the case stops there rather than reading a window nothing moved.
 - ✅ **WW245** **the hole about a refused foreground names who holds it and never what was wanted, so two faults read alike** — Every absence about the foreground names both sides, so a hole says what it compared against and not only who answered.
+- ✅ **WW246** **the window under test reads as nothing against a real window, so no act on it can ever own the foreground** — An element with no handle of its own belongs to the window the run attached to, so synthesised input reaches a WPF application at all.
 
 ## Block G — The scenario — a case is a data file
 
@@ -219,6 +220,7 @@
 - ✅ **WW228** **an app project at the repository root compiles the driving project into itself** — The adoption section names the one line an app at a repository root needs, and samples/Adopter carries a driving project underneath it so deleting the line goes red.
 - ✅ **WW230 (the workflow and the metadata)** **the only place the engine's package exists is a folder inside this repository** — Both halves publish to nuget.org from `publish.yml`, keylessly, on one manual dispatch.
 - ✅ **WW79** **the panes case proves a report is readable and needs no second profile** — Two cases: the headers cover a derived set and run everywhere, and the body claims three readings behind a precondition this repository measures.
+- ✅ **WW243** **the keyboard case has never run green: the click it opens with is never sent, and the red names the step after it** — The case runs green once WW244 and WW246 land: three checks, nothing excused, against real keys on a real WPF window.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

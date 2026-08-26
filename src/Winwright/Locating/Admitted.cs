@@ -57,9 +57,28 @@ public sealed class Admitted
     public PatternValues Values => Reading.Values;
 
     /// <summary>
-    /// The top-level window the element belongs to, or 0 where it has none of its own. Read here
-    /// rather than in each verb: four of them wanted it, and a door invented per verb is four
-    /// doors that differ.
+    /// The top-level window the element belongs to. Read here rather than in each verb: four of them
+    /// wanted it, and a door invented per verb is four doors that differ.
+    /// <para>
+    /// WW246, and the fall-back is the whole of it. This used to answer the element's own
+    /// <c>NativeWindowHandle</c> and zero where it had none — which is right for Win32, where every
+    /// control is a window, and wrong for every framework that draws its own. A WPF <c>TextBlock</c>
+    /// has no handle, so this answered zero, so <see cref="Foreground"/> compared the desk against
+    /// <em>nothing</em>, matched neither handle nor root nor pid, and every synthesised act on a WPF
+    /// application was a hole for a condition that was never absent.
+    /// </para>
+    /// <para>
+    /// Measured against claude-tray: <c>the foreground belongs to ClaudeTray (pid 42048) 'Settings',
+    /// and the window under test is nothing</c> — where ClaudeTray is the application the run had just
+    /// launched. This repository's own suite never caught it because every case that synthesises input
+    /// drives a Win32 dialog, where the old reading happens to be correct.
+    /// </para>
+    /// <para>
+    /// The subject's root is what the run attached to, so it is the window the element belongs to
+    /// whether or not the element carries a handle of its own. The element is still asked first: a
+    /// control that <em>is</em> a window is the more precise answer, and hosted content is exactly
+    /// where the two differ.
+    /// </para>
     /// </summary>
     public nint Window
     {
@@ -68,7 +87,7 @@ public sealed class Admitted
             if (window == -1)
             {
                 var handle = (nint)element.Current.NativeWindowHandle;
-                window = handle == 0 ? 0 : Win32.GetAncestor(handle, Win32.GaRoot);
+                window = handle == 0 ? Subject.Window : Win32.GetAncestor(handle, Win32.GaRoot);
             }
 
             return window;

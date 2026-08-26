@@ -202,31 +202,30 @@ that is not in English.
 Until then the single declaration is the honest thing, and the comment beside it says
 why it is not the general answer.
 
-### §WW243 The first migrated case was written and never run
+### §WW247 Three cases moved for a reason that was not real
 
-`WW78` wrote claude-tray's keyboard case, its runner and its project declaration, and
-the whole of it was checked by loading rather than by running. Running it reports
-`Broken over 0 of 3`, two steps short, with:
+Earlier in the same session that found `WW246`, three cases were failing against a
+launched fixture and were moved to `PumpedDialog` — an in-process Win32 dialog — on the
+reading that a launched process cannot be sent synthesised input.
 
-> `[step 2] typing reaches the WPF text box — NotActionableException: Edit#DirectoryBox cannot take this act: nothing matched.`
+`Act.cs`'s header is what that reading came from, and the header is correct: Windows
+refuses the *foreground* to a process that does not already own it, so a run cannot
+bring somebody's window forward. What was inferred from it is not: that a launched
+window can therefore never be typed into. A launched window that opens focused already
+has the foreground, and nothing needs to be granted.
 
-That sentence sends the reader to the wrong step. The trace says what happened:
+What actually stopped those cases was `WW246` — the window under test reading as
+nothing, so the check could not recognise a foreground the fixture already held.
+`WpfInputTests` now types into and clicks a launched WPF fixture with nothing excused,
+which is the measurement that settles it.
 
-> `[step 1] click Text[name="Claude Code"] — Unchecked — the foreground belongs to ClaudeTray (pid 65068) 'Settings'`
+So the moves may have been unnecessary, and one of them cost more than a move: a case
+that was rewritten around an in-process dialog is a case that no longer drives the thing
+it was written about. Which of the three still earn their dialog and which should go
+back to the fixture is worth asking one at a time.
 
-So the click was never sent. `DirectoryBox` is missing because the page it lives on was
-never opened, and the case is red about a locator that was right to find nothing.
-
-Two separate things, and only the second is claude-tray's. The step-1 hole is invisible
-in the verdict because a navigation carries no check — filed as its own line, since a
-run that could not act and reports nothing about it is the inversion this whole project
-exists to refuse.
-
-What is left here is the foreground itself: the holder is a ClaudeTray window titled
-*Settings* whose pid is not the window under test's, which is two processes where the
-case assumes one. Whether that is the tray re-launching itself, a leftover from an
-earlier run, or the window under test being read off the wrong handle is the measurement
-still to take.
+The rule underneath is the one this session keeps re-learning: correct documentation
+plus a plausible inference is still a guess.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

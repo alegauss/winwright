@@ -35,7 +35,7 @@
 - ⏳ **WW230** (deps: —) **the only place the engine's package exists is a folder inside this repository** — Nothing is published yet, so the adopter's `nuget.config` is still a path across two clones. → §WW230
 - 📋 **WW239** (deps: —) **the release workflow keeps its own list of where the version lives, and the list was already wrong once** — Four paths in YAML, and the suite went red on a fifth; the tool that reads the copies is told which they are, so nothing owns the enumeration. → §WW239
 - 📋 **WW240** (deps: —) **a project that ships several languages cannot derive a set at all, and the language it runs in is knowable** — A derived set refuses more than one declared language file rather than guessing, and the fixture that launched the window already names which language it is showing. → §WW240
-- 📋 **WW243** (deps: —) **the keyboard case has never run green: the click it opens with is never sent, and the red names the step after it** — Measured: the foreground belongs to a second ClaudeTray process titled Settings, so the act is a hole and the page it would have opened is never there. → §WW243
+- 📋 **WW247** (deps: —) **three cases were moved to an in-process dialog on an inference that turned out to be false** — They were moved because a launched fixture seemed unable to receive synthesised input, and WW246 shows that was a defect in identifying the window rather than a rule about Windows. → §WW247
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
