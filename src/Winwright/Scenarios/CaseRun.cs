@@ -373,15 +373,38 @@ public static class CaseRun
             throw new ScenarioRefusedException(step.Name, underivable.Message);
         }
 
-        // The last step of the locator, because that is the one the matches are of: a sweep over
-        // `TabItem` under `Window#main > TabItem` is about the tab items, and the frame above them is
-        // how they were reached.
-        var read = Resolve.Matching(root, subject.Locator.Steps[^1])
-            .Select(one => ElementFacts.Of(one)?.Says)
-            .OfType<string>()
-            .ToList();
+        // WW241. Polled, and this used to read once. The reasoning for reading once was that retrying
+        // would re-read a whole tree for the same answer — and it is not the same answer: a window
+        // still drawing has a different tree a moment later, so reading once made a sweep a race.
+        //
+        // Measured against claude-tray, where the tab control the sweep is about is Collapsed, and
+        // therefore absent from the tree, until the report renders. The sweep read `0 of 4` and the
+        // case beside it read three labels out of that same pane seconds later and passed.
+        //
+        // The resolve budget and not the attempt cap: a sweep is a read, and what a read waits for is
+        // the element to be there. `Attempts` is about a flaky act, which this is not.
+        SetComparison compared = default!;
+        var waited = Attempt.UntilTrue(
+            () =>
+            {
+                // The last step of the locator, because that is the one the matches are of: a sweep
+                // over `TabItem` under `Window#main > TabItem` is about the tab items, and the frame
+                // above them is how they were reached.
+                var read = Resolve.Matching(root, subject.Locator.Steps[^1])
+                    .Select(one => ElementFacts.Of(one)?.Says)
+                    .OfType<string>()
+                    .ToList();
 
-        var compared = derived.Against(read);
+                compared = derived.Against(read);
+                return compared.Held;
+            },
+            project.Timeouts.For("resolve"),
+            project.Timeouts.For("poll"));
+
+        // What the window was doing when the wait gave up, and only then: a sweep that held says
+        // nothing about loading text, and reading the whole tree again to find that out would be the
+        // cost the old comment was worried about, paid on every green.
+        var detail = waited.Happened ? compared.Sentence() : Explaining(compared, project, root, waited.WaitedMs);
 
         trace.Add(new TraceStep
         {
@@ -390,15 +413,36 @@ public static class CaseRun
             Locator = step.Locator.Text,
             Asserted = step.Name,
             ReadBack = string.Join(", ", compared.Matched),
-            Detail = compared.Held ? null : compared.Sentence(),
-            Verdict = compared.Held ? StepVerdict.Ok : StepVerdict.Failed,
+            Detail = waited.Happened ? null : detail,
+            Verdict = waited.Happened ? StepVerdict.Ok : StepVerdict.Failed,
         });
 
-        var result = compared.Held
-            ? AssertionResult.Pass(step.Name, compared.Sentence())
-            : AssertionResult.Fail(step.Name, compared.Sentence());
+        var result = waited.Happened
+            ? AssertionResult.Pass(step.Name, detail)
+            : AssertionResult.Fail(step.Name, detail);
 
         results.Add(result.At(trace.Count));
+    }
+
+    /// <summary>
+    /// Why a sweep that waited still did not hold: the comparison, how long it waited, and — where the
+    /// project declared what <em>not yet</em> looks like — whether the page was saying so the whole
+    /// time.
+    /// <para>
+    /// WW241. The project already declares its loading strings and nothing in a run read them, so a
+    /// page that never finished counting failed as a set that was missing. The two are not the same
+    /// finding and a reader acts on them differently: one is a defect in the window, the other is a
+    /// window that was never asked at a moment it could answer.
+    /// </para>
+    /// </summary>
+    private static string Explaining(SetComparison compared, ProjectDeclaration project, AutomationElement root, int waitedMs)
+    {
+        var said = $"{compared.Sentence()} Waited {waitedMs}ms.";
+        if (project.Loading.Count == 0)
+            return said;
+
+        var loading = Loading.In(root, project);
+        return loading.Computing ? $"{said} {loading.Sentence()}" : said;
     }
 
     private static Landed Attempting(StepDeclaration step, Subject subject)

@@ -240,8 +240,17 @@ public static class Labels
         {
             // Read right to left out of the file name — strings.pt-BR.json is pt-BR, and
             // strings.json is nothing, which is not an error and simply never answers.
+            //
+            // WW242: down to and including the first part, which it used to stop before. That bound
+            // read like it was protecting the case named above and was not needed for it —
+            // Culture("strings") already answers null, as it does for any part that is not a
+            // predefined tag, and predefinedOnly is what carries that weight at every index. What it
+            // did instead was make `en.json` invisible: the walk started at 0 and the condition was
+            // false before the first turn. Measured against claude-tray, which ships lang/en.json and
+            // four more beside it — the layout an application reaches for when the folder already
+            // says what the files are.
             var parts = System.IO.Path.GetFileName(file).Split('.');
-            for (var index = parts.Length - 2; index > 0; index--)
+            for (var index = parts.Length - 2; index >= 0; index--)
             {
                 if (Culture(parts[index]) is { } culture)
                 {

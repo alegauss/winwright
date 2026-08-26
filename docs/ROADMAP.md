@@ -34,6 +34,8 @@
 - 📋 **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G ✅, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 - ⏳ **WW230** (deps: —) **the only place the engine's package exists is a folder inside this repository** — Nothing is published yet, so the adopter's `nuget.config` is still a path across two clones. → §WW230
+- 📋 **WW239** (deps: —) **the release workflow keeps its own list of where the version lives, and the list was already wrong once** — Four paths in YAML, and the suite went red on a fifth; the tool that reads the copies is told which they are, so nothing owns the enumeration. → §WW239
+- 📋 **WW240** (deps: —) **a project that ships several languages cannot derive a set at all, and the language it runs in is knowable** — A derived set refuses more than one declared language file rather than guessing, and the fixture that launched the window already names which language it is showing. → §WW240
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
