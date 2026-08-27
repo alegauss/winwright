@@ -63,6 +63,7 @@
 - ✅ **WW180** **a case counts two processes it launched a moment earlier and sees one, twice in eight guest runs** — A candidate that will not say which binary it runs is still passed over and is now named, so a count of none is never a claim about a process nobody could read.
 - ✅ **WW205** **the register stops what it started and cannot say when it is gone, so every caller needing that writes the wait** — The register answers a three-state reading of stopped and gone, and the suite's copy of the wait is deleted rather than kept beside it.
 - ✅ **WW215** **an unshared run keeps every window it launched open until the last case ends** — A case that owns its process gives it back when it finishes, so the criterion holds during the run and not only at the end of it.
+- ✅ **WW257** **a launch that draws no window is refused, and a tray is a process that draws none** — A fixture says `resident` and the run holds the launch as a process against the desktop, keeping the drew-no-window refusal for every fixture that did not say so.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

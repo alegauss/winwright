@@ -5,7 +5,7 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-- 📋 **WW257** (deps: —) **a launch that draws no window is refused, and a tray is a process that draws none** — The menu case drives a resident tray — an icon, a context menu and no window at all — so its fixture is refused before the first step of it runs. → §WW257
+- 📋 **WW279** (deps: —) **a resident launch that died on startup is reported as an application whose controls are all missing** — A tray that draws no window has nothing to wait for, so a process that exited before the first step reaches the case as reds about locators, not as a launch that observed nothing. → §WW279
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -16,7 +16,7 @@
 ## Block F — Assert — the expectation is derived, never typed
 
 - ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
-- ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Three reds now and one rule fits all — the second character became the last — with the third in claude-tray on the host, so it is neither the fixture nor the guest. → §WW249
+- ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Five reds now and it is not one guest run in four — what holds across all of them is that one character is overwritten by the last one sent, length for length. → §WW249
 - 📋 **WW260** (deps: —) **an expected set is derived from the project's strings and never from what the application reports** — The menu case counts profile entries against the app's own read-out, and `covers` derives only from the language files, so the number would be typed here. → §WW260
 - 📋 **WW269** (deps: —) **a caption counting down in real time cannot survive an exact comparison across a round trip** — `sameAs` compares two readings exactly, and a run that straddles a minute boundary would then be a red build about a clock rather than about the application. → §WW269
 - 📋 **WW275** (deps: —) **covers is two-way and reads as one-way, so a completeness claim against a shared container cannot be written** — The README says every declared string reads somewhere the locator matched; the engine also refuses every stranger, and its sentence misagrees with itself. → §WW275
@@ -33,7 +33,7 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW78** (deps: WW230 ⏳) **the keyboard case is the only observable of a live input path and it lives in a script** — The runner now carries claude-tray to the guest, and the restore there fails: the engine's package exists only in a folder this repository does not ship. → §WW78
-- 📋 **WW82** (deps: WW257, WW258, WW259, WW260) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
+- 📋 **WW82** (deps: WW257 ✅, WW258, WW259, WW260) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
 - 📋 **WW83** (deps: Block G) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
 - 📋 **WW85** (deps: Block G) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
 - 📋 **WW86** (deps: WW78 ⏳, WW79 ✅, WW80 ✅, WW81 ✅, WW82, WW83, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86

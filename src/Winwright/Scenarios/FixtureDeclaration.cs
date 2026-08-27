@@ -37,7 +37,8 @@ public sealed record FixtureDeclaration
         IReadOnlyList<string> arguments,
         IReadOnlyDictionary<string, string> variables,
         bool shareable,
-        string language)
+        string language,
+        bool resident)
     {
         Name = name;
         Environment = environment;
@@ -46,6 +47,7 @@ public sealed record FixtureDeclaration
         Variables = variables;
         Shareable = shareable;
         Language = language;
+        Resident = resident;
     }
 
     /// <summary>What the fixture is called, and what a report names the launch by.</summary>
@@ -96,12 +98,31 @@ public sealed record FixtureDeclaration
     public System.Globalization.CultureInfo? Speaking =>
         Language.Length == 0 ? null : Culture(Name, Language);
 
+    /// <summary>
+    /// Whether this launch draws no window of its own, and is held as a process instead.
+    /// <para>
+    /// WW257. The wait after a launch refuses where no window arrives, which is the right answer for
+    /// every fixture that meant to draw one: nothing about the case was observed, so nothing about the
+    /// application is being reported. A tray is the counter-example. claude-tray's `--second-tray`
+    /// puts an icon in the notification area and draws nothing, and the window there is what a click
+    /// on the icon is supposed to <em>produce</em> — so refusing the fixture makes the one thing being
+    /// asserted a reason not to run.
+    /// </para>
+    /// <para>
+    /// Said by the fixture and never inferred from the wait timing out, because that is the same
+    /// refusal read backwards: a launch that was supposed to draw a window and did not is a failure,
+    /// and a run that quietly carried on would report it as a case about the desktop. What a resident
+    /// fixture's locators resolve against is the desktop, because that is where a tray icon lives.
+    /// </para>
+    /// </summary>
+    public bool Resident { get; }
+
     /// <summary>Whether this fixture samples an environment at all.</summary>
     public bool Samples => Environment.Length > 0;
 
     /// <summary>The application as it comes: no arguments, no variables, nothing sampled.</summary>
     public static FixtureDeclaration Plain { get; } =
-        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "");
+        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false);
 
     /// <summary>
     /// Declare one.
@@ -113,6 +134,7 @@ public sealed record FixtureDeclaration
     /// <param name="variables">The environment variables it sets. A value carrying the environment counts as carrying it.</param>
     /// <param name="shareable">That this window may be lent to a case that only reads it.</param>
     /// <param name="language">The language tag the window it launches is in.</param>
+    /// <param name="resident">That this launch draws no window, so the run holds it as a process.</param>
     /// <exception cref="ScenarioRefusedException">
     /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not one.
     /// </exception>
@@ -123,7 +145,8 @@ public sealed record FixtureDeclaration
         IEnumerable<string>? arguments = null,
         IReadOnlyDictionary<string, string>? variables = null,
         bool shareable = false,
-        string? language = null)
+        string? language = null,
+        bool resident = false)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
         if (string.IsNullOrWhiteSpace(name))
@@ -191,7 +214,8 @@ public sealed record FixtureDeclaration
             new ReadOnlyCollection<string>(rest),
             new ReadOnlyDictionary<string, string>(set),
             shareable,
-            speaking);
+            speaking,
+            resident);
     }
 
     /// <summary>
@@ -252,7 +276,8 @@ public sealed record FixtureDeclaration
     {
         var sampled = Samples ? $"sampling {Environment}" : "the application as it comes";
         var lent = Shareable ? ", shareable" : "";
-        return $"{Name}: {sampled}{lent}.";
+        var held = Resident ? ", resident" : "";
+        return $"{Name}: {sampled}{lent}{held}.";
     }
 
     /// <summary>The one line a listing shows.</summary>

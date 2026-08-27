@@ -28,28 +28,27 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW257 A tray is a launch with nothing to attach to
+### §WW279 a resident launch that died on startup reads as an application full of missing controls
 
-`Suite.Opened` waits for the launch to draw a window and refuses where none arrives,
-which is the right answer for every fixture written so far: nothing about the case was
-observed, so nothing about the application was.
+`WW257` let a fixture say its launch draws no window, because a tray is a process that
+draws none and the window there is what a click on the icon is supposed to produce. What
+went with the window was the wait, and with the wait went the one thing that noticed a
+launch which never arrived.
 
-A tray is the counter-example, and `WW82` is blocked on it. claude-tray's
-`--second-tray` puts an icon in the notification area and draws no window at all; the
-window in that case is what a left-click on the icon is supposed to *produce*, which is
-the claim rather than the precondition. Refusing the fixture makes the one thing being
-asserted a reason not to run.
+A tray that crashes on startup now reaches the case as a run against the desktop, and
+every step in it reds about a locator that matched nothing. Those reds are about the
+application, which is half right — it did fail to start — and they name the wrong thing:
+a reader is sent looking for a missing icon on a desk where nothing was ever drawn.
 
-The launch itself is already right. `ProcessRegister` starts it, keeps what it was
-launched with and stops it inside the project's budget, and none of that assumed a
-window. What assumes one is the wait after it and the root every locator resolves
-against.
+Two shapes were tried and neither is it. Asking `HasExited` once at the launch is a
+race, because a process that exits still takes a moment to do it; asking with a wait is
+the window deadline paid by every tray that behaves, which is the cost `WW257` removed.
 
-So a fixture needs to be able to say that this launch draws nothing, and the run needs
-to hold it as a process rather than as a window — with the refusal kept for every
-fixture that did not say so, because a launch that was *supposed* to draw a window and
-did not is still the failure this refusal was written for. A flag that turned that off
-everywhere would buy one case and cost the answer on all the others.
+What is probably right is asking at the other end. The run already stops the process
+where the case finishes, and a resident process that had gone before it got there is a
+fact the result can carry — so the sentence becomes *the tray exited with 1 partway
+through* rather than a list of locators. That also covers the case this one does not: a
+tray that starts, is driven, and dies in the middle.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -94,17 +93,19 @@ runs — and eight consecutive host runs of that one case, none of them red. So 
 guest that reproduces it, which is a fact about timing rather than about logic.
 
 The first hypothesis was a focus arriving while the keys were already going, so the box
-reads part of what was typed. Refuted. **Three reds now, and one rule fits all of
-them:**
+reads part of what was typed. Refuted. **Five reds, and the last two refuted the rule
+the first three fitted:**
 
-    typed WW246    read W6246       the second character became the last
-    typed WW246-4  read W4246-4     the second character became the last
-    typed T142check read Tk42check   the second character became the last
+        typed WW246     read W6246       index 1 became the last character
+        typed WW246-4   read W4246-4     index 1 became the last character
+        typed T142check read Tk42check   index 1 became the last character
+        typed WW246-2   read WW242-2     index 4 became the last character
+    typed WW246-1   the dash at index 5 became the last character
 
-Length for length every time — one **substituted**, never lost. The second was round
-four of five, so it is not the first send after a focus. And the third is claude-tray on
-the host, in an application this repository does not build: not the fixture, not the
-guest.
+So it is not *the second* character. What holds across all four is that **one character
+is overwritten by the last one sent** — length for length, never lost, a far narrower
+shape than a dropped key. Round four of five once, so not the first send after a focus;
+claude-tray once, so neither fixture nor guest.
 
 The typing path was read for a defect that would produce it and has none: one input pair
 per code unit, each a fresh struct, one `SendInput`, and an `INPUT` union written

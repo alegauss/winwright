@@ -550,6 +550,15 @@ five files and picking the first would expect a language nobody is looking at. W
 declares everything it ships and two fixtures in one file may be in two languages. A tag that is not
 a language is refused where it was written.
 
+`resident` says this launch draws **no window**, and it exists because a tray is a process that draws
+none. A launch that draws nothing is otherwise refused, which is the right answer for every fixture
+that meant to draw one — nothing about the case was observed, so nothing about the application is
+being reported. claude-tray's tray is the counter-example: it puts an icon in the notification area,
+and the window there is what a click on the icon is supposed to *produce*. Refusing the fixture makes
+the one thing being asserted a reason not to run. A resident fixture's locators resolve against the
+**desktop**, because that is where a tray icon lives; the refusal is kept for every fixture that did
+not say so, and a resident launch that has already exited is refused too.
+
 Names resolve across the whole suite, so the launch three files need is declared once and a name two
 files declare is **refused, naming both** — before any case has resolved against either. Without that,
 the second copy is where the flag gains a value the first does not have, nothing compares them, and

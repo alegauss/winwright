@@ -264,6 +264,19 @@ public static class Suite
     {
         var launched = register.Launch(fixture.Starting(project.Executable));
         var deadline = project.Timeouts.For(WindowTimeout);
+
+        // WW257. A tray draws no window, and the window in that case is what a click on the icon is
+        // supposed to produce — so waiting for one makes the thing being asserted a reason not to run.
+        // The desktop is what its locators resolve against, because that is where a tray icon lives.
+        //
+        // What this does not do is judge whether the process is still there. Asking once at the launch
+        // is a race — a process that exits takes a moment to do it — and asking with a wait is the
+        // window deadline paid by every tray that behaves. A resident launch that died is reported by
+        // the case's own reds, which name locators that found nothing, and telling that apart from a
+        // tray that is running and wrong is its own task.
+        if (fixture.Resident)
+            return (AutomationElement.RootElement, launched);
+
         var drawn = Attempt.UntilTrue(
             () => TopLevelWindows.Largest(launched.Pid) is not null,
             deadline,
