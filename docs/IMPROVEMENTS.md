@@ -184,6 +184,28 @@ Two things are owed. The documentation should say both directions, in the paragr
 teaches the field. And a case that means the one-way claim should have a way to say so,
 rather than reaching for a locator that cannot exist.
 
+### §WW276 a repeated case makes its claim once per member
+
+`WW272` made a sweep that matched nothing a hole rather than a red, which is right: a
+page with no rows is a fact about the application. It leaves the other half unanswered.
+A case repeating over six panels asserts the row rule six times, About draws prose and
+no rows, and the run is degraded on every machine forever — so the suite around it goes
+red, or it goes green over a hole, and neither is a reading anybody acts on.
+
+The script this replaces had the answer and wrote it by hand. It counted: *`$opened` of
+N settings panels opened, `$asserted` carried a row control*, narrated the panels with
+nothing for the rule to name, and failed only where **not one** name had been read. The
+claim was over the walk and never over a panel.
+
+That is derivable and needs no new field. A repeated case makes one claim per member,
+and those are one claim: it is red where any member that carried it failed, a hole only
+where **no** member carried it — the vacuous walk, which is `WW263`'s empty-derivation
+guard one level in — and otherwise a pass saying how many of the members carried it.
+
+The count is the half `WW263`'s design asked for and did not get: what was visited,
+reported apart from what was asserted. A member that was reached and had nothing to
+check is not one that got away, and today the verdict cannot tell them apart.
+
 ## Block G — The scenario — a case is a data file
 
 ### §WW258 The notification area is a surface no locator addresses
@@ -271,10 +293,11 @@ name, which is worse for a screen reader than one unnamed.
 
 Both branches landed, on the two panels that carry them, with every label a key rather
 than a word. What did not is the derivation the headline promises. The sidebar items are
-bare `Border`s with no automation peer, so their words are the only thing that addresses
-one and a locator cannot be built out of a declared string — `WW273`. And the flat sweep
-governs a family of control types that no single locator names — `WW274`. The script
-stays until both land, because the proof of this migration is its deletion.
+bare `Border`s with no automation peer, and the flat sweep governs a family of control
+types — both of which the grammar can now say, in `WW273` and `WW274`. What is left is
+the About panel: it draws no settings rows, so a claim made once per panel holes there
+on every run and a suite around it is degraded forever. `WW276` is that. The script
+stays until it lands, because the proof of this migration is its deletion.
 
 ### §WW85 The environment sweep, last
 
