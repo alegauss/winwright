@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
 namespace Winwright.Fixture;
 
@@ -239,6 +239,12 @@ public sealed record Flags
             "",
             "a pane carrying the three answers a key pressed at a range has - room either way, already at the maximum, and no room at all",
             "Traversal.Nudge chose its direction from where the control already sat and nothing here drove it, so the branch that presses the other way at the end of a range had never run against a real control"),
+        new Flag(
+            "rows",
+            "how",
+            "a pane of settings rows, either paired correctly or with one control wearing the row next door's label",
+            "a rule that pairs a row's control with the wrong row's header gives several controls one name, and every check that asks whether a name exists passes it",
+            Choices: RowsPane.Names),
         new Flag(
             "pickers",
             "",

@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 
 namespace Winwright.Fixture;
 
@@ -40,6 +40,9 @@ public partial class MainWindow : Window
 
         if (Shapes.Has("pickers"))
             PickersPane.AddTo(panes);
+
+        if (Shapes.Value("rows") is string rows)
+            RowsPane.AddTo(panes, rows);
 
         if (Shapes.Has("peerless"))
             Peerless.AddTo(panes);

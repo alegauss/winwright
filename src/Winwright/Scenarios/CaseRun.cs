@@ -372,6 +372,14 @@ public static class CaseRun
             return true;
         }
 
+        // WW264. The pairing, which is a sweep over rows and everything inside them — so it goes the
+        // way the other sweeps go and not through the attempt loop.
+        if (step.OwnHeader)
+        {
+            Paired(step, subject, root, trace, results);
+            return true;
+        }
+
         // WW261 and WW270. Resolved once, before the attempts, and out of the language the fixture
         // said its window is in. A key that cannot be read is a scenario that is wrong rather than an
         // application that is: the refusal names the key and the file, and it arrives before anything
@@ -539,6 +547,109 @@ public static class CaseRun
             Locator = step.Locator.Text,
             Asserted = step.Name,
             ReadBack = string.Join(", ", compared.Matched),
+            Detail = waited.Happened ? null : detail,
+            Verdict = waited.Happened ? StepVerdict.Ok : StepVerdict.Failed,
+        });
+
+        var result = waited.Happened
+            ? AssertionResult.Pass(step.Name, detail)
+            : AssertionResult.Fail(step.Name, detail);
+
+        results.Add(result.At(trace.Count));
+    }
+
+    /// <summary>
+    /// A step claiming no control inside a row its locator matches announces another row's header.
+    /// <para>
+    /// WW264. The headers are derived and never listed: they are the names of the rows the locator
+    /// matched, so a row added to the page joins the set with no edit to the case. A control that
+    /// announces its own row's header is right, and one that keeps its own text is right — that is
+    /// the branch of the rule that must not fire, and the only one that can produce the duplicate.
+    /// </para>
+    /// <para>
+    /// A row that announces nothing is passed over rather than failed: this claim is about pairing,
+    /// and whether a row has a header at all is what `eachSpoken` is for. Two claims in one check is
+    /// how a red stops saying which of them went wrong.
+    /// </para>
+    /// </summary>
+    private static void Paired(
+        StepDeclaration step,
+        Subject subject,
+        AutomationElement root,
+        List<TraceStep> trace,
+        List<AssertionResult> results)
+    {
+        var wrong = new List<string>();
+        var paired = 0;
+        var rows = 0;
+
+        var waited = Attempt.UntilTrue(
+            () =>
+            {
+                wrong.Clear();
+                paired = 0;
+
+                var found = Resolve.Matching(root, subject.Locator.Steps[^1]);
+                rows = found.Count;
+
+                var headers = found
+                    .Select(one => ElementFacts.Of(one)?.Says)
+                    .OfType<string>()
+                    .ToHashSet(StringComparer.Ordinal);
+
+                foreach (var row in found)
+                {
+                    if (ElementFacts.Of(row)?.Says is not { } header)
+                        continue;
+
+                    var inside = row.FindAll(TreeScope.Descendants, Condition.TrueCondition)
+                        .Cast<AutomationElement>()
+                        .Select(one => ElementFacts.Of(one))
+                        .OfType<ElementFacts>()
+                        .Where(one => one.Says is not null)
+                        .ToList();
+
+                    if (inside.Count > 0)
+                        paired++;
+
+                    foreach (var one in inside)
+                    {
+                        // Its own row's header is right and its own text is right. What is left is a
+                        // name that is some other row's header, which is the rule pairing the wrong
+                        // two things — and it is a real label somebody wrote, on the wrong control.
+                        if (!string.Equals(one.Says, header, StringComparison.Ordinal)
+                            && headers.Contains(one.Says!))
+                        {
+                            wrong.Add($"{one} sits in the '{header}' row and announces \"{one.Says}\"");
+                        }
+                    }
+                }
+
+                return rows > 0 && paired > 0 && wrong.Count == 0;
+            },
+            subject.DeadlineMs,
+            subject.PollMs);
+
+        var detail = (rows, paired, wrong.Count) switch
+        {
+            (0, _, _) => $"{step.Locator.Text} matched no row in {waited.WaitedMs}ms, so nothing was "
+                + "paired — an empty set is met by an empty window",
+            (_, 0, _) => $"{step.Locator.Text} matched {rows} row(s) and not one of them holds a control "
+                + $"that announces anything, so no pairing was checked. Waited {waited.WaitedMs}ms.",
+            (_, _, > 0) => $"{wrong.Count} control(s) announce another row's header: "
+                + $"{string.Join("; ", wrong)}. Waited {waited.WaitedMs}ms.",
+            _ => $"across {rows} row(s), {paired} of them pair a control with their own header and none "
+                + "announces another row's",
+        };
+
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = step.Verb.Name,
+            Locator = step.Locator.Text,
+            Asserted = step.Name,
+            WaitedMs = waited.WaitedMs,
+            Polls = rows,
             Detail = waited.Happened ? null : detail,
             Verdict = waited.Happened ? StepVerdict.Ok : StepVerdict.Failed,
         });

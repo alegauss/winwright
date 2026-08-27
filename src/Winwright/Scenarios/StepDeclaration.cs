@@ -41,7 +41,8 @@ public sealed record StepDeclaration
         string? label,
         string? notLabel,
         string? unlike,
-        bool eachSpoken)
+        bool eachSpoken,
+        bool ownHeader)
     {
         Name = name;
         Locator = locator;
@@ -62,6 +63,7 @@ public sealed record StepDeclaration
         NotLabel = notLabel;
         Unlike = unlike;
         EachSpoken = eachSpoken;
+        OwnHeader = ownHeader;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -203,6 +205,25 @@ public sealed record StepDeclaration
     public bool EachSpoken { get; }
 
     /// <summary>
+    /// Whether this step claims no control inside a row its locator matches announces a different
+    /// row's header.
+    /// <para>
+    /// WW264. <see cref="EachSpoken"/> proves a control announces something. It cannot prove the
+    /// something is its own row's header, because it has no idea which row the control is in — and the
+    /// failure hiding there is worse than the one it catches. A rule that pairs the wrong two things
+    /// gives several controls one name, and a screen reader reads the same label over each of them.
+    /// </para>
+    /// <para>
+    /// Structural rather than textual, and it takes no list. The headers are the names of the rows the
+    /// locator matched, so the set is derived from the page: a control announcing its own row's header
+    /// is right, one keeping its own text is right — that is the branch of the rule that must
+    /// <em>not</em> fire, and the only one that can produce a duplicate — and one announcing a header
+    /// belonging to another row is the defect.
+    /// </para>
+    /// </summary>
+    public bool OwnHeader { get; }
+
+    /// <summary>
     /// The key whose declared string this step's reading should be, or null where it makes another
     /// claim.
     /// <para>
@@ -335,7 +356,7 @@ public sealed record StepDeclaration
     public bool Checkable =>
         Expected is not null || Moves || Answers || Covers is not null || Matches is not null || Discloses
         || SameAs is not null || Never is not null || Spoken
-        || Label is not null || NotLabel is not null || Unlike is not null || EachSpoken;
+        || Label is not null || NotLabel is not null || Unlike is not null || EachSpoken || OwnHeader;
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -370,6 +391,7 @@ public sealed record StepDeclaration
     /// <param name="notLabel">The key whose declared string the reading should not be.</param>
     /// <param name="unlike">The earlier step this one claims its reading differs from.</param>
     /// <param name="eachSpoken">That every element the locator matches announces a name.</param>
+    /// <param name="ownHeader">That no control in a row announces another row's header.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static StepDeclaration Of(
         string locator,
@@ -390,7 +412,8 @@ public sealed record StepDeclaration
         string? label = null,
         string? notLabel = null,
         string? unlike = null,
-        bool eachSpoken = false)
+        bool eachSpoken = false,
+        bool ownHeader = false)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var subject = called ?? Describing(verb, locator);
@@ -441,7 +464,7 @@ public sealed record StepDeclaration
 
         var claims = wanted is not null || moves || answers || sweeping is not null || pattern is not null
             || discloses || back is not null || apart is not null || forbidden is not null || spoken
-            || declared is not null || undeclared is not null || apart is not null || eachSpoken;
+            || declared is not null || undeclared is not null || apart is not null || eachSpoken || ownHeader;
 
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
         // says it moved where it was something else. A step asserting both would owe two assertion
@@ -634,6 +657,39 @@ public sealed record StepDeclaration
                     + "key is where the value comes from rather than a second thing to check");
         }
 
+        if (ownHeader)
+        {
+            // One claim per step, as everywhere else.
+            if (wanted is not null || moves || answers || sweeping is not null || pattern is not null
+                || discloses || back is not null || apart is not null || forbidden is not null || spoken
+                || declared is not null || undeclared is not null || eachSpoken)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    "it claims each row's controls announce that row and also makes another claim; the "
+                        + "pairing is one claim over the rows the locator matched");
+            }
+
+            // The same rule a sweep is under: this reads every row the locator matches and everything
+            // inside them, and one act over all of that is not a claim about any of it.
+            if (!act.Reads)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims each row's controls announce that row and acts with '{act.Name}'; the "
+                        + "pairing reads every row its locator matches, and one act over many of them "
+                        + "is not a claim");
+            }
+
+            if (!string.IsNullOrWhiteSpace(reads))
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims each row's controls announce that row and names the '{reads.Trim()}' "
+                        + "reading; the claim is about what those controls announce, which is their name");
+            }
+        }
+
         if (eachSpoken)
         {
             // One claim per step, as everywhere else.
@@ -807,7 +863,8 @@ public sealed record StepDeclaration
             declared,
             undeclared,
             apart,
-            eachSpoken);
+            eachSpoken,
+            ownHeader);
     }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>

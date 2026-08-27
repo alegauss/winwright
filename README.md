@@ -307,11 +307,12 @@ states an application has a word for and must not be showing.
 everything under it which announces anything announces a **name** — never a font glyph, a template
 nobody filled in, or an automation id handed back — and that something does. `eachSpoken` is the
 eleventh and is the same predicate over a different set: every element the locator **matches**
-announces a name.
+announces a name. `ownHeader` is the twelfth and is the half neither of those can see: of the rows
+the locator matches, no control inside one announces a **different** row's header.
 
-`never` is the twelfth and is the only claim about the **wait** rather
+`never` is the thirteenth and is the only claim about the **wait** rather
 than about what it ended on: it names a key whose string must not be showing anywhere in the window
-at any moment while this step waits for its locator. And `covers` is the thirteenth, which is one claim
+at any moment while this step waits for its locator. And `covers` is the fourteenth, which is one claim
 over many elements — see below.
 
 `sameAs` and `unlike` are judged where the case knows all its steps, so a pointer at a name nobody
@@ -334,6 +335,14 @@ each reads somewhere the locator matched; this asks whether every **element** th
 announces a label. It is what a settings page needs: thirty-odd rows under one naming rule, where an
 assertion written against three named controls covers the rule exactly where it was already known to
 work. A locator matching nothing fails rather than holding — an empty set is met by an empty window.
+
+`ownHeader` catches what a name-existence check is blind to by construction. A rule that pairs a
+row's control with the wrong row's header gives several controls one name — every one of them a real
+label somebody wrote, every one non-empty, and a screen reader reading the same words over each. The
+headers are derived and never listed: they are the names of the rows the locator matched, so a row
+added to the page joins the set with no edit here. A control announcing its own row's header is
+right, and one keeping its own text is right — that second branch is the only one that can produce
+the duplicate, which is why a case checking the first alone is checking the easy half.
 
 `spoken` is what a screen reader gets, and no capture can tell it from a picture. It is never a
 count: claude-tray's script asserted *four or more* named fields on a conversation row, which is the

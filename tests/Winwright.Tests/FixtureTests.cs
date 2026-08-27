@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 using System.Windows.Automation;
@@ -2358,6 +2358,32 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         "language" => "=en",
         "store" => $"={Path.Combine(root, "by-hand")}",
         "intrude" => "=900,700,200,150",
-        _ => "",
+
+        // A flag with a fixed set of choices answers for itself: the catalogue prints them, so the
+        // first is read off the article rather than remembered here. The names above are the ones
+        // taking free text, which no listing could supply — and a shape added later with choices is
+        // driven without an edit, which is the half of this switch that was wrong the first time
+        // nobody remembered to extend it.
+        _ => Choice(name) ?? "",
     };
+
+    /// <summary>The first value a flag accepts, out of the catalogue, or null where it lists none.</summary>
+    /// <param name="name">The flag, without its dashes.</param>
+    private static string? Choice(string name)
+    {
+        foreach (var row in Fixture.Catalogue().Split('\n'))
+        {
+            var listed = System.Text.RegularExpressions.Regex.Match(
+                row.Trim(), @"^--([A-Za-z]+)=([^\s]+)");
+
+            if (listed.Success
+                && string.Equals(listed.Groups[1].Value, name, StringComparison.Ordinal)
+                && listed.Groups[2].Value.Contains('|', StringComparison.Ordinal))
+            {
+                return "=" + listed.Groups[2].Value.Split('|')[0];
+            }
+        }
+
+        return null;
+    }
 }

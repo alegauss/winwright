@@ -135,27 +135,6 @@ rather than a condition the case runs under. What is missing is a set the applic
 itself reports, declared once where the project declares its strings, and derived per
 run like the other one.
 
-### §WW264 A name that belongs to the row next door
-
-A sweep proves a control announces something. It cannot prove the something is its own
-row's header, because it has no idea which row the control is in — and the failure that
-hides there is worse than the one it does catch. A rule that pairs the wrong two things
-gives three controls in a row one name, and a screen reader then reads the same label
-three times over three different controls.
-
-The claude-tray rule has two branches and the case has to cover both. The one that must
-fire: a picker, a slider, a text box or a switch with no content of its own takes its
-row's header. The one that must **not**: a field with a labelled button beside it keeps
-the header on the field, and each button keeps its own text. Only the second branch can
-produce the duplicate, which is why the case that only checked the first was checking
-the easy half.
-
-What makes it askable is that the row has an automation peer of its own, so its header
-is readable and the controls under it are reachable from it. The claim is then
-structural rather than textual: of the controls in this row, each announces this row's
-header or its own text, and none announces a header belonging to another row on the page
-— with the set of headers derived from the page rather than listed.
-
 ### §WW269 A minute of tolerance, and only a minute
 
 The reset caption names when a quota window turns over, and it counts down while the
