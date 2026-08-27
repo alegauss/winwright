@@ -172,6 +172,7 @@
 - ✅ **WW250** **a case can say what a reading is and that it says something, and nothing in between** — A step may name the shape of a reading it cannot name the value of, and a pattern matching the empty string is refused as `answers` wearing a check.
 - ✅ **WW252** **the routine that explains why a locator found nothing throws when the element arrives while it is explaining** — A chain that matches by the time the diagnosis walks it is a reading — a wait that was too short — rather than an index one past the end.
 - ✅ **WW251** **a case cannot claim that an act unfolded a subtree, only that one reading moved** — A step may claim the act put something under its locator that was not in the tree before it, compared against the engine's own reading rather than a count the case typed.
+- ✅ **WW255** **a case cannot claim a reading came back to what an earlier step read, only that it moved** — A step names an earlier one in `sameAs` and claims its reading is back to what that one read, judged where the case knows all its steps and never against a value the file typed.
 
 ## Block G — The scenario — a case is a data file
 

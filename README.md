@@ -289,8 +289,15 @@ but whose shape it can — a note carrying the date its figure came from, say. A
 the empty string is refused, because that is `answers` in a field that reads as though it checked
 more. `discloses` is the fifth: that the act put something under the locator that was not in the tree
 before it — an expander, a tree view, a details pane, a search that fills a list. Never a count the
-case types; the engine compares the subtree against what it read a moment earlier. And `covers` is
-the sixth, which is one claim over many elements — see below.
+case types; the engine compares the subtree against what it read a moment earlier. `sameAs` is the
+sixth and is `moves` with a memory: it names the `named` of an earlier step in the same case and
+claims this step's reading is **back to what that one read** — the round trip, for the value a case
+cannot know at either end. And `covers` is the seventh, which is one claim over many elements — see
+below.
+
+`sameAs` is judged where the case knows all its steps, so a pointer at a name nobody wrote, at a
+step further down, at a name two steps share, or at a step reading something else is refused before
+the run. It has to say which reading it is about: comparing a value to a name says nothing.
 
 A step with no `expect` is an act and not a check: it moves the window into the state a later step
 reads. An act that survives being repeated is attempted again where its read-back does not arrive; one

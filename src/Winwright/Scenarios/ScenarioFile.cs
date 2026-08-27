@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text.Json;
 
 namespace Winwright.Scenarios;
@@ -338,6 +338,7 @@ public sealed class ScenarioFile
         var answers = Truth(at, step, ScenarioSchema.Step, "answers");
         var matches = Text(at, step, ScenarioSchema.Step, "matches");
         var discloses = Truth(at, step, ScenarioSchema.Step, "discloses");
+        var sameAs = Text(at, step, ScenarioSchema.Step, "sameAs");
         var covers = Text(at, step, ScenarioSchema.Step, "covers");
         var meansIt = Truth(at, step, ScenarioSchema.Step, "meansIt");
         var named = Text(at, step, ScenarioSchema.Step, "named");
@@ -345,7 +346,8 @@ public sealed class ScenarioFile
         return Addressed(
             at,
             () => StepDeclaration.Of(
-                locator!, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches, discloses));
+                locator!, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches, discloses,
+                sameAs));
     }
 
     /// <summary>

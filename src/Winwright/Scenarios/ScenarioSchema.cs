@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 
 namespace Winwright.Scenarios;
@@ -152,6 +152,7 @@ public static class ScenarioSchema
         new("answers", false, Taking.Truth, "that the reading it names should say something rather than nothing, where the case cannot know what", []),
         new("matches", false, Taking.Text, "the regular expression the reading should match, where the case cannot name the value but can name its shape", []),
         new("discloses", false, Taking.Truth, "that the act put something under the locator that was not in the tree before it", []),
+        new("sameAs", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to be back to, for the round trip whose value no case can name", []),
         new("covers", false, Taking.Text, "the key whose every string must be read somewhere the locator matches, without its trailing dot — derived from the project's own strings and never listed here", []),
         new("meansIt", false, Taking.Truth, "that this step means a destructive entry it names", []),
         new("named", false, Taking.Text, "what a report should call it, where the act and the locator will not do", []),

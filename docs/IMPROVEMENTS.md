@@ -28,6 +28,29 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
+### §WW257 A tray is a launch with nothing to attach to
+
+`Suite.Opened` waits for the launch to draw a window and refuses where none arrives,
+which is the right answer for every fixture written so far: nothing about the case was
+observed, so nothing about the application was.
+
+A tray is the counter-example, and `WW82` is blocked on it. claude-tray's
+`--second-tray` puts an icon in the notification area and draws no window at all; the
+window in that case is what a left-click on the icon is supposed to *produce*, which is
+the claim rather than the precondition. Refusing the fixture makes the one thing being
+asserted a reason not to run.
+
+The launch itself is already right. `ProcessRegister` starts it, keeps what it was
+launched with and stops it inside the project's budget, and none of that assumed a
+window. What assumes one is the wait after it and the root every locator resolves
+against.
+
+So a fixture needs to be able to say that this launch draws nothing, and the run needs
+to hold it as a process rather than as a window — with the refusal kept for every
+fixture that did not say so, because a launch that was *supposed* to draw a window and
+did not is still the failure this refusal was written for. A flag that turned that off
+everywhere would buy one case and cost the answer on all the others.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -110,30 +133,6 @@ locator, the ones that could carry a name do. It is `covers` one level down — 
 nobody lists, read out of what the window drew rather than out of the project's strings
 — and it is the claim every list, grid and row in every adopting project wants.
 
-### §WW255 A round trip is a comparison with a step, not with a moment ago
-
-`moves` compares a reading against the same reading a moment earlier, in the same step,
-across the same act. That is one shape of *changed*, and the profiles case needs the
-other: a value that changed and then came back.
-
-The script walked the picker 0 → 1 → 0 and held three stops in a variable. Two of its
-assertions are comparisons between the third stop and the first — the used percentage is
-the same, and the reset caption is the same to within a minute, for the same profile.
-Neither is a claim about the act that preceded it. Both are claims about a step several
-steps back.
-
-It is the field report and not a nicety. The defect it was written for repainted the
-panes with the profile being left behind, so coming back showed another account's
-numbers while every reading, taken on its own, looked perfectly healthy.
-
-The honest shape is a step naming an earlier step and claiming its reading is back.
-Never a value typed here: the whole point is that the case cannot know what the number
-is, only that it is the one from before. That is `moves` with a memory, and the memory
-is what a data file has no way to spell.
-
-The minute of tolerance the caption needs is the second question and a real one — a run
-that straddles a minute boundary must not be a red build.
-
 ### §WW256 Some claims are about the wait and not about what it ended on
 
 An expectation is read after the wait. The profiles case carries one that is about the
@@ -156,7 +155,74 @@ The project already declares `loading` keys, and the engine refuses a reading ta
 while the page still says *not yet*. This is the same key turned around — a state that
 must not be seen at all, rather than one that must be over before anybody reads.
 
+### §WW260 Some expected sets are the application's data, not its strings
+
+`covers` is the answer to the hardcoded list and it derives from one place: the language
+files the project declares. That is right for the set it was built for — every tab
+header the strings declare has to read somewhere — and it is the wrong well for the menu
+case.
+
+What that case counts is profiles. The script asked the application, running it with a
+flag that prints them, and compared the submenu against what came back: one entry per
+profile plus the two toggles the submenu carries. Neither half of that is in a strings
+file. The profiles are this machine's data, and the number is whatever this machine has.
+
+Typing it is the defect `covers` exists to refuse, one well over. A case asserting two
+profile entries goes on asserting two after a third is added, and it says nothing when
+it stops covering what it was written for — which is the shape a run reported as *all
+three tab headers read* against a four-tab window.
+
+`needs` is the near miss and does not answer it. A requirement is measured as present or
+absent by the adopting project's runner, and this is a count the expectation is about
+rather than a condition the case runs under. What is missing is a set the application
+itself reports, declared once where the project declares its strings, and derived per
+run like the other one.
+
 ## Block G — The scenario — a case is a data file
+
+### §WW258 The notification area is a surface no locator addresses
+
+Every locator in a case resolves against the window the fixture launched. The
+notification area is in the shell's tree and not in that window's, so there is no
+locator that reaches it — and the icon has no clickable point either, which is why
+`NotificationArea` addresses it by rectangle and finds it by the name the shell gives it
+rather than through the grammar at all.
+
+The engine does the hard parts already. It opens the overflow flyout, because an icon in
+it is not in the tree until it is open; it puts the flyout back; it names the icon by
+tooltip, which is the only name the shell exposes; and `OpenMenu` answers whether a menu
+came up with the desk fact that stopped it where one did — the collapse `WW174` closed,
+so that a shell which would not open the flyout is not read as an application that would
+not show a menu.
+
+None of it is nameable from a data file, and `WW82` is the only case in any of these
+repositories that drives it. The icon is named rather than located, so what a step
+writes is a name in `with` and not a locator — which means the shape here is not another
+verb over the existing grammar but a second kind of subject, and that is the question
+worth settling before anything is added.
+
+### §WW259 A submenu that only opens to a key needs the verb that presses one
+
+`expand` asks ExpandCollapsePattern, and every other synthesised verb has a pattern act
+beside it for exactly this reason: which of the two a case names is the whole of what an
+interaction loop is for. The menu walk has no such pair. `Menu.Enter`, `Menu.To` and
+`Menu.Expand` go in the way a keyboard user goes in, and nothing a step may write
+reaches them.
+
+The defect that shape exists to catch is already on record. A WinForms submenu that is
+empty when the menu opens exposes no ExpandCollapse at all, draws no arrow, and the
+shell handles Right as *activate a plain command* — which dismisses the whole menu. A
+mouse hover always worked, which is precisely why it went unnoticed until something
+drove it from the keyboard. A case naming `expand` against that menu would ask the
+pattern, get nothing to ask, and report a control rather than the gesture.
+
+So this is the fifth pair: `expand` through the pattern and a menu walk that presses
+Right, with the same rule as the other four — the walk needs the foreground, so a desk
+that refused it is a hole naming the absence and never a red about the application.
+
+It is separable from `WW258`. That one is about reaching a menu at all; this is about a
+menu that is already open, and it is the same question for a menu bar as for a tray
+icon's.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

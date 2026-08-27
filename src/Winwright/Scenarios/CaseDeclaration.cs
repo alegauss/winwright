@@ -192,6 +192,8 @@ public sealed record CaseDeclaration
                 + "so it acts and never looks and can only ever read green");
         }
 
+        Pointing(called, collected);
+
         // A present-but-blank justification is worse than an absent one: it reads as answered.
         if (catches is not null && catches.Trim().Length == 0)
             throw new ScenarioRefusedException(called, "it says what it catches and then says nothing, which reads as answered");
@@ -225,6 +227,75 @@ public sealed record CaseDeclaration
         var needed = Needs.Count == 0 ? "" : $" (needs {string.Join(", ", Needs)})";
         return $"{Name}: {Steps.Count} step{(Steps.Count == 1 ? "" : "s")}, {Checks} checked{tagged}{needed}";
     }
+
+    /// <summary>
+    /// Judge every <see cref="StepDeclaration.SameAs"/> against the steps it could be pointing at.
+    /// <para>
+    /// WW255. A step is declared on its own and this claim is not about the step: it names another one,
+    /// so the only place it can be judged is where the case knows all of them. Here rather than at run
+    /// time for the reason every other field is judged at insertion — a pointer that resolves to
+    /// nothing is wrong on every machine, and discovering it on the run that was going to use it costs
+    /// a launch to learn what the file already said.
+    /// </para>
+    /// </summary>
+    /// <param name="called">The case, for the refusal.</param>
+    /// <param name="steps">Its steps, in declared order.</param>
+    /// <exception cref="ScenarioRefusedException">
+    /// Where a step points at nothing, at something later, at a name two steps share, or at a step
+    /// reading something else.
+    /// </exception>
+    private static void Pointing(string called, IReadOnlyList<StepDeclaration> steps)
+    {
+        for (var index = 0; index < steps.Count; index++)
+        {
+            if (steps[index].SameAs is not { } back)
+                continue;
+
+            var earlier = new List<StepDeclaration>();
+            for (var before = 0; before < index; before++)
+                if (string.Equals(steps[before].Name, back, StringComparison.Ordinal))
+                    earlier.Add(steps[before]);
+
+            // Later or absent are one refusal on purpose. A step further down the case is a reading
+            // that does not exist yet when this one runs, so pointing at it is the same nothing as
+            // pointing at a name nobody wrote — and the sentence a reader needs is which names it
+            // could have meant.
+            if (earlier.Count == 0)
+            {
+                throw new ScenarioRefusedException(
+                    called,
+                    $"'{steps[index].Name}' claims its reading is back to '{back}', and no step before "
+                        + $"it is called that; the steps before it are {Named(steps, index)}");
+            }
+
+            // Two steps by one name is the shape this claim is most likely to meet: a round trip reads
+            // the same element with the same verb at every stop, so the default name is the same at
+            // all of them. Which one it meant is the whole question, and a pointer that picks the
+            // first is a case that reads correctly and means something else.
+            if (earlier.Count > 1)
+            {
+                throw new ScenarioRefusedException(
+                    called,
+                    $"'{steps[index].Name}' claims its reading is back to '{back}' and {earlier.Count} "
+                        + "steps before it are called that; give the one it means its own 'named'");
+            }
+
+            if (earlier[0].Reads != steps[index].Reads)
+            {
+                throw new ScenarioRefusedException(
+                    called,
+                    $"'{steps[index].Name}' reads '{steps[index].Reads.Name}' and claims it is back to "
+                        + $"'{back}', which reads '{earlier[0].Reads.Name}'; two readings of a control "
+                        + "are two different values and comparing them says nothing");
+            }
+        }
+    }
+
+    /// <summary>The names of the steps before <paramref name="index"/>, for a refusal that has to list them.</summary>
+    private static string Named(IReadOnlyList<StepDeclaration> steps, int index) =>
+        index == 0
+            ? "none — it is the first step"
+            : string.Join(", ", steps.Take(index).Select(step => $"'{step.Name}'").Distinct(StringComparer.Ordinal));
 
     private static IReadOnlyList<string> Words(string called, IEnumerable<string>? given, string what, string blankly)
     {

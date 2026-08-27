@@ -1,4 +1,4 @@
-using Winwright.Locating;
+﻿using Winwright.Locating;
 
 namespace Winwright.Scenarios;
 
@@ -34,7 +34,8 @@ public sealed record StepDeclaration
         string? covers,
         bool answers,
         System.Text.RegularExpressions.Regex? matches,
-        bool discloses)
+        bool discloses,
+        string? sameAs)
     {
         Name = name;
         Locator = locator;
@@ -48,6 +49,7 @@ public sealed record StepDeclaration
         Answers = answers;
         Matches = matches;
         Discloses = discloses;
+        SameAs = sameAs;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -101,6 +103,24 @@ public sealed record StepDeclaration
     /// </para>
     /// </summary>
     public bool Discloses { get; }
+
+    /// <summary>
+    /// The earlier step this one claims its reading is back to, or null where it makes another claim.
+    /// <para>
+    /// WW255. <see cref="Moves"/> compares a reading against the same reading a moment earlier, in the
+    /// same step, across the same act. That is one shape of <em>changed</em>, and a round trip is the
+    /// other: a value that changed and then came back. Measured migrating claude-tray's profiles case,
+    /// which walks a picker 0 → 1 → 0 and asserts that the third stop reads what the first one did —
+    /// a claim about a step several steps back and about no act at all.
+    /// </para>
+    /// <para>
+    /// Never a value typed here, for the reason <see cref="Moves"/> takes none: the case cannot know
+    /// what the number is, only that it is the one from before. The defect it was written for
+    /// repainted the panes with the profile being left behind, so coming back showed another account's
+    /// figures while every reading, taken on its own, looked perfectly healthy.
+    /// </para>
+    /// </summary>
+    public string? SameAs { get; }
 
     /// <summary>Which reading the expectation is about. <see cref="ReadBack.Anything"/> by default.</summary>
     public ReadBack Reads { get; }
@@ -205,6 +225,7 @@ public sealed record StepDeclaration
     /// <param name="answers">That the reading should say something rather than nothing.</param>
     /// <param name="matches">The pattern the reading should match, where no case can name its value.</param>
     /// <param name="discloses">That the act put something under the locator that was not there before.</param>
+    /// <param name="sameAs">The earlier step this one claims its reading is back to.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static StepDeclaration Of(
         string locator,
@@ -218,7 +239,8 @@ public sealed record StepDeclaration
         string? covers = null,
         bool answers = false,
         string? matches = null,
-        bool discloses = false)
+        bool discloses = false,
+        string? sameAs = null)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var subject = called ?? Describing(verb, locator);
@@ -249,6 +271,13 @@ public sealed record StepDeclaration
         // that claims nothing — a refusal naming the wrong field, which somebody then fixes wrongly.
         var pattern = string.IsNullOrWhiteSpace(matches) ? null : Compiled(subject, matches.Trim());
 
+        // WW255, computed here with the two above it and for the same reason — and then made the one
+        // local the rules below ask, because the clause they each carried had grown to six negations
+        // and a claim any of them had not heard of is a refusal naming the wrong field.
+        var back = string.IsNullOrWhiteSpace(sameAs) ? null : sameAs.Trim();
+        var claims = wanted is not null || moves || answers || sweeping is not null || pattern is not null
+            || discloses || back is not null;
+
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
         // says it moved where it was something else. A step asserting both would owe two assertion
         // results, and a trace line that stands for two things is one a reader has to take apart.
@@ -260,7 +289,7 @@ public sealed record StepDeclaration
                     + "so 'moves' is for the claim that cannot name one");
         }
 
-        if (wanted is null && !moves && !answers && sweeping is null && pattern is null && !discloses && !string.IsNullOrWhiteSpace(reads))
+        if (!claims && !string.IsNullOrWhiteSpace(reads))
         {
             throw new ScenarioRefusedException(
                 subject, $"it reads '{reading.Name}' and expects nothing of it, so the reading changes nothing");
@@ -269,7 +298,7 @@ public sealed record StepDeclaration
         // WW213. An act with no expectation is a navigation a later step is the check for. A read
         // with no expectation is nothing at all: it touches nothing and claims nothing, so a case
         // carrying one is a case with a step in it that could not fail.
-        if (wanted is null && !moves && !answers && sweeping is null && pattern is null && !discloses && act.Reads)
+        if (!claims && act.Reads)
             throw new ScenarioRefusedException(subject, $"'{act.Name}' expects nothing, so the step does nothing at all");
 
         // WW254. The one act whose landing the engine can see. It was handed a value by name and can
@@ -278,7 +307,7 @@ public sealed record StepDeclaration
         // happened to stop at. That is WW244's failure with the act delivered rather than dropped, and
         // the migration this verb exists for made exactly this claim in the script: the picker walked
         // one label to another and back, checked at each stop.
-        if (act.Reaches && wanted is null && !moves && !answers && sweeping is null && pattern is null && !discloses)
+        if (act.Reaches && !claims)
         {
             throw new ScenarioRefusedException(
                 subject,
@@ -369,6 +398,42 @@ public sealed record StepDeclaration
             }
         }
 
+        if (back is not null)
+        {
+            // One claim per step, as everywhere else. 'expect' names the value and this is the claim
+            // for a value the case cannot name — it only knows which earlier step read the same one.
+            if (wanted is not null || moves || answers || sweeping is not null || pattern is not null || discloses)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims its reading is back to '{back}' and also makes another claim; 'sameAs' "
+                        + "is for the value a case cannot name and can only point at");
+            }
+
+            // A step comparing itself to itself holds by construction. It is the one spelling of this
+            // field that could never be false, and it is also the easy typo: the round trip's third
+            // stop and its first read the same element under the same verb, so a case that left both
+            // unnamed would have written this by accident.
+            if (string.Equals(back, subject, StringComparison.Ordinal))
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    "it claims its reading is back to itself, which holds whatever the window did; "
+                        + "name the earlier step in 'named' and point at that");
+            }
+
+            // Which reading, said out loud. The comparison is between two readings and the default is
+            // whichever one the element happens to answer first, so a step that left it out would
+            // compare a value to a name on the day the control gained a pattern.
+            if (string.IsNullOrWhiteSpace(reads))
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims its reading is back to '{back}' and does not say which reading; 'sameAs' "
+                        + "compares two of them, so the default would compare whichever answered first");
+            }
+        }
+
         // WW238. The other half of the same rule: a reading the locator already selected by is fixed
         // before the act runs, so a step reading it asserts what chose the element. Refused whatever
         // the claim is — 'expect' repeats the locator, 'answers' holds because the locator matched,
@@ -446,7 +511,8 @@ public sealed record StepDeclaration
             sweeping,
             answers,
             pattern,
-            discloses);
+            discloses,
+            back);
     }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>

@@ -146,6 +146,15 @@ public static class CaseRun
         var broke = new List<HarnessError>();
         var stopped = -1;
 
+        // WW255. Which steps a later one claims its reading is back to, worked out once. Only these
+        // are read again after they run: remembering every step's reading would pay for a resolve per
+        // step on every case in the suite to serve the two or three that ever point backwards.
+        var pointedAt = declared.Steps
+            .Select(one => one.SameAs)
+            .OfType<string>()
+            .ToHashSet(StringComparer.Ordinal);
+        var recalled = new Dictionary<string, string?>(StringComparer.Ordinal);
+
         // WW61. Before the first act, not after the first red: a case whose precondition is absent
         // would otherwise fail on the step that could not find what the absence explains, and the
         // reader of that red goes looking for a defect in the application.
@@ -166,7 +175,7 @@ public static class CaseRun
                 // produces reds about a window nobody put into the state they describe. Measured in
                 // claude-tray, where a click that was never delivered left the case red about a text
                 // box on a page that had never been opened.
-                if (!Perform(step, subject, project, budget, trace, results, root))
+                if (!Perform(step, subject, project, budget, trace, results, root, pointedAt, recalled))
                 {
                     stopped = index;
                     break;
@@ -287,7 +296,32 @@ public static class CaseRun
         int budget,
         List<TraceStep> trace,
         List<AssertionResult> results,
-        AutomationElement root)
+        AutomationElement root,
+        HashSet<string> pointedAt,
+        Dictionary<string, string?> recalled)
+    {
+        var went = Performing(step, subject, project, budget, trace, results, root, recalled);
+
+        // WW255. Read after the step rather than kept from inside it, and only for a step something
+        // points back at. What a later step compares against is what this one left the window reading,
+        // which is not the same as what it claimed: the claim can be `answers`, and then the value is
+        // one nothing in the file ever named.
+        if (went && pointedAt.Contains(step.Name))
+            recalled[step.Name] = step.Reads.Of(subject.Read());
+
+        return went;
+    }
+
+    /// <summary>The step itself, with the recall around it in <see cref="Perform"/>.</summary>
+    private static bool Performing(
+        StepDeclaration step,
+        Subject subject,
+        ProjectDeclaration project,
+        int budget,
+        List<TraceStep> trace,
+        List<AssertionResult> results,
+        AutomationElement root,
+        Dictionary<string, string?> recalled)
     {
         // WW236. A sweep is one claim over many elements, so it does not go through the attempt loop —
         // it has its own wait, over the resolve budget, which WW241 gave it.
@@ -297,8 +331,13 @@ public static class CaseRun
             return true;
         }
 
+        // WW255. Looked up once, before the attempts: the value a round trip is about was read when
+        // the earlier step ran, and a lookup inside the retry would be the same answer fetched three
+        // times. Absent only where that step stopped the case, which is a state this never reaches.
+        var backTo = step.SameAs is { } back && recalled.TryGetValue(back, out var read) ? read : null;
+
         var cap = step.Retryable ? project.Attempts : 1;
-        var attempted = Retry.Bounded(() => Attempting(step, subject), one => one.Held, cap);
+        var attempted = Retry.Bounded(() => Attempting(step, subject, backTo), one => one.Held, cap);
         var landed = attempted.Last;
 
         if (landed.Acted is { } acted)
@@ -465,7 +504,7 @@ public static class CaseRun
         return loading.Computing ? $"{said} {loading.Sentence()}" : said;
     }
 
-    private static Landed Attempting(StepDeclaration step, Subject subject)
+    private static Landed Attempting(StepDeclaration step, Subject subject, string? backTo = null)
     {
         // WW229. Read before the act and only where a step claims movement, because that is the one
         // claim whose other half is a moment that has already gone. Everything else compares a
@@ -493,6 +532,9 @@ public static class CaseRun
 
         if (step.Discloses)
             return Disclosed(step, subject, acted, under);
+
+        if (step.SameAs is not null)
+            return Returned(step, subject, acted, backTo);
 
         if (step.Expected is not { } wanted)
             return new Landed(acted, null, acted?.Element);
@@ -536,6 +578,54 @@ public static class CaseRun
                 saw = look.Facts ?? saw;
                 var now = look.Found ? step.Reads.Of(look) : null;
                 return string.IsNullOrWhiteSpace(now) ? now : wanted;
+            },
+            subject.ActMs,
+            subject.PollMs);
+
+        return new Landed(acted, expectation, saw);
+    }
+
+    /// <summary>
+    /// A step that claims its reading is back to what an earlier one read, waited for the way every
+    /// other expectation is.
+    /// <para>
+    /// WW255. The wanted value is the earlier reading itself, so a failure reads as what it is —
+    /// <em>wanted the 41% that 'the first stop' read, last read 63%</em> — and nothing in the file
+    /// typed either number. A round trip is the case this exists for and the value is exactly the one
+    /// no case can know.
+    /// </para>
+    /// <para>
+    /// An earlier step that read nothing is a failure and never a match. Two nothings are equal, and a
+    /// green resting on that would say the round trip held on a window that never answered at either
+    /// end — which is the same unearned green a pattern matching the empty string would be.
+    /// </para>
+    /// </summary>
+    private static Landed Returned(StepDeclaration step, Subject subject, ActResult? acted, string? backTo)
+    {
+        var saw = acted?.Element;
+        if (string.IsNullOrEmpty(backTo))
+        {
+            var never = Expect.That(
+                step.Name,
+                $"the '{step.Reads.Name}' that '{step.SameAs}' read",
+                () => "nothing: that step read nothing, so there is no value to be back to",
+                subject.ActMs,
+                subject.PollMs);
+
+            return new Landed(acted, never, saw);
+        }
+
+        var expectation = Expect.That(
+            step.Name,
+            $"the '{step.Reads.Name}' that '{step.SameAs}' read — {backTo}",
+            () =>
+            {
+                var look = subject.ReadOnce();
+                saw = look.Facts ?? saw;
+                var now = look.Found ? step.Reads.Of(look) : null;
+                return string.Equals(now, backTo, StringComparison.Ordinal)
+                    ? $"the '{step.Reads.Name}' that '{step.SameAs}' read — {backTo}"
+                    : now;
             },
             subject.ActMs,
             subject.PollMs);

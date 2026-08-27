@@ -5,6 +5,7 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
+- 📋 **WW257** (deps: —) **a launch that draws no window is refused, and a tray is a process that draws none** — The menu case drives a resident tray — an icon, a context menu and no window at all — so its fixture is refused before the first step of it runs. → §WW257
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -17,10 +18,13 @@
 - ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
 - 📋 **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Four runs measured: host green, guest green, guest red, guest green, with nothing changed between them — so what it proves is that typing reaches a WPF box sometimes. → §WW249
 - 📋 **WW253** (deps: —) **a case cannot claim a row reads as text rather than as a picture, only that its subtree grew** — The script counted four readable fields on a row, and a typed count is the stale literal a derived set exists to refuse — so nothing writes the claim at all. → §WW253
-- 📋 **WW255** (deps: —) **a case cannot claim a reading came back to what an earlier step read, only that it moved** — The round trip is the whole of the profiles case — switch away, switch back, same number — and `moves` compares against the act before it and nothing else. → §WW255
 - 📋 **WW256** (deps: —) **a case cannot claim a state was never observed while it waited, only what it read at the end** — The claim is that coming back never shows the not-yet line at all, and a read taken after the wait passes just the same on a switch that flashed one. → §WW256
+- 📋 **WW260** (deps: —) **an expected set is derived from the project's strings and never from what the application reports** — The menu case counts profile entries against the app's own read-out, and `covers` derives only from the language files, so the number would be typed here. → §WW260
 
 ## Block G — The scenario — a case is a data file
+
+- 📋 **WW258** (deps: —) **a case cannot name a tray icon or open its menu, and the engine has done both since block D** — `NotificationArea` finds an icon by the name the shell gives it, opens the overflow to reach a hidden one and asks for the menu; no step may write any of it. → §WW258
+- 📋 **WW259** (deps: —) **`expand` goes through the pattern, and the submenu the menu case is about only opens to a key** — An empty WinForms submenu exposes no ExpandCollapse, so the pattern route cannot ask the question that was broken; `Menu.Expand` walks it and no case can name it. → §WW259
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
@@ -29,14 +33,14 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW78** (deps: WW230 ⏳) **the keyboard case is the only observable of a live input path and it lives in a script** — The runner now carries claude-tray to the guest, and the restore there fails: the engine's package exists only in a folder this repository does not ship. → §WW78
-- 📋 **WW81** (deps: WW254 ✅, WW255, WW256) **the profiles case is the only thing in that repository that drives the picker** — Migrated with the round trip and the timing observation, both of which need the hop count the walk reports to mean anything. → §WW81
-- 📋 **WW82** (deps: WW225 ✅) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
-- 📋 **WW83** (deps: Block G ✅) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
+- 📋 **WW81** (deps: WW254 ✅, WW255 ✅, WW256) **the profiles case is the only thing in that repository that drives the picker** — Migrated with the round trip and the timing observation, both of which need the hop count the walk reports to mean anything. → §WW81
+- 📋 **WW82** (deps: WW257, WW258, WW259, WW260) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
+- 📋 **WW83** (deps: Block G) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
 - 📋 **WW84** (deps: WW236 ✅) **the names case observes what no screenshot can** — Migrated with the derived panel sweep and the exact-label reads, including the rule that must fire and the one that must not. → §WW84
-- 📋 **WW85** (deps: Block G ✅) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
+- 📋 **WW85** (deps: Block G) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
 - 📋 **WW86** (deps: WW78 ⏳, WW79 ✅, WW80 ✅, WW81, WW82, WW83, WW84, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
-- 📋 **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
-- 📋 **WW88** (deps: Block G ✅, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
+- 📋 **WW87** (deps: Block G, Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
+- 📋 **WW88** (deps: Block G, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 - ⏳ **WW230** (deps: —) **the only place the engine's package exists is a folder inside this repository** — Nothing is published yet, so the adopter's `nuget.config` is still a path across two clones. → §WW230
 - 📋 **WW239** (deps: —) **the release workflow keeps its own list of where the version lives, and the list was already wrong once** — Four paths in YAML, and the suite went red on a fifth; the tool that reads the copies is told which they are, so nothing owns the enumeration. → §WW239
 - 📋 **WW240** (deps: —) **a project that ships several languages cannot derive a set at all, and the language it runs in is knowable** — A derived set refuses more than one declared language file rather than guessing, and the fixture that launched the window already names which language it is showing. → §WW240
