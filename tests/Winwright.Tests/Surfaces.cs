@@ -103,6 +103,10 @@ internal static class Surfaces
         new("Flags", Carrying.ThePlumbing,
             Because: "the flags, which is where the reasons are kept — a shape justified by a flag "
                 + "cannot be justified by the type declaring the flag"),
+        new("Arrivals", Carrying.ThePlumbing,
+            Because: "what Windows delivers to the window, recorded on every run and behind no flag "
+                + "— WW249's flake cannot be provoked on purpose, so the reading has to be running "
+                + "already, and what it reads is a property of the window rather than of any shape"),
         new("Protocol", Carrying.ThePlumbing,
             Because: "what the fixture and a harness agree on: the channels a run is asked to write "
                 + "to and the background a capture is drawn against, read on every run"),

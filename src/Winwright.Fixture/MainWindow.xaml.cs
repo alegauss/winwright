@@ -66,6 +66,9 @@ public partial class MainWindow : Window
     /// <summary>Held so it is not collected while it is still meant to be running.</summary>
     private Animation? animation;
 
+    /// <summary>The same, for the recorder: a hook whose owner has gone is a reading that stops.</summary>
+    private Arrivals? arrivals;
+
     /// <summary>What language this window is in, where a run asked for one.</summary>
     public Strings? Speaking { get; private set; }
 
@@ -164,6 +167,11 @@ public partial class MainWindow : Window
 
         if (Shapes.Value("backdrop") is string kind)
             Backdrop.Set(window, kind);
+
+        // WW249. On every surface and behind no flag, because what it reads is a property of the
+        // window rather than of anything a run asked to be drawn — and a flake nobody can provoke on
+        // purpose is one the recording has to be running for already.
+        arrivals = Arrivals.On(this, arrived);
     }
 
     /// <summary>What this run was asked to be.</summary>

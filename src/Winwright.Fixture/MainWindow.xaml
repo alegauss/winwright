@@ -63,6 +63,11 @@
           <TextBlock x:Name="configTitle" Text="Config" FontSize="16" Margin="0,0,0,8" />
           <TextBox x:Name="profile" Width="220" HorizontalAlignment="Left" Text="default" />
           <CheckBox x:Name="verbose" Margin="0,12,0,0" Content="Verbose" />
+
+          <!-- WW249. Every WM_CHAR this window is delivered, in order, below WPF entirely. It is
+               what separates a send that arrived already wrong from a text box that dropped one
+               under load, and those are opposite repairs in opposite repositories. -->
+          <TextBlock x:Name="arrived" Margin="0,12,0,0" TextWrapping="Wrap" Text="nothing yet" />
         </StackPanel>
       </TabItem>
     </TabControl>

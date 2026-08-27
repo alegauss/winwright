@@ -116,6 +116,12 @@ public sealed class WpfInputTests : IDisposable
             // rather than a pass on somebody else's text.
             var typing = $"WW246-{round}";
 
+            // WW249. What Windows delivered to the window before this round, so a red can say what
+            // arrived during it. The recorder reads WM_CHAR below WPF entirely, which is the one
+            // reading that separates a send that arrived already substituted from a text box that
+            // dropped a character under load — opposite repairs, in opposite repositories.
+            var before = Arrived();
+
             // Assigned in one step on purpose: DeskAsks traces an excused reading back to the line
             // that assigned it, so an act and its assertion split across two names is an excuse the
             // catalogue cannot see. Measured — this is what it went red about.
@@ -130,14 +136,36 @@ public sealed class WpfInputTests : IDisposable
                 return;
             }
 
-            // The round is in both, because WW249's whole difficulty was a red that said which value
-            // was wrong and never which attempt: `W6246` for `WW246` is one character substituted
-            // rather than lost, and knowing whether that was the first send or the fifth is the
-            // difference between a race at the window and a race inside the send.
-            Assert.True(result.Outcome == AssertionOutcome.Passed, $"round {round} of {Rounds}: {result}");
-            Assert.Equal(typing, box.Read().Values.Value);
+            // The round is in all of it, because WW249's whole difficulty was a red that said which
+            // value was wrong and never which attempt: `W6246` for `WW246` is one character
+            // substituted rather than lost, and knowing whether that was the first send or the fifth
+            // is the difference between a race at the window and a race inside the send.
+            var said = $"round {round} of {Rounds}: {result}."
+                + $" Windows had delivered '{before}' and has now delivered '{Arrived()}'";
+
+            Assert.True(result.Outcome == AssertionOutcome.Passed, said);
+            Assert.True(typing == box.Read().Values.Value, said);
+
+            // And the recorder itself, asserted rather than trusted. An instrument that is only ever
+            // read on a red is one nobody finds out is broken until the red arrives — which is what
+            // happened on its first guest run, where it answered nothing at all and the measurement
+            // it existed to take was lost.
+            Assert.True(Arrived().EndsWith(typing, StringComparison.Ordinal), said);
         }
     }
+
+    /// <summary>
+    /// Every character Windows has delivered to the fixture's window so far, escaped where a console
+    /// cannot draw it.
+    /// <para>
+    /// WW249. The erase before each send is Backspaces and they arrive as characters too, so they are
+    /// left in rather than filtered out: a reading that quietly dropped them could not have been used
+    /// to rule them out. A recorder that could not be read says so rather than answering the empty
+    /// string, which would read in a red exactly like a window that was sent nothing.
+    /// </para>
+    /// </summary>
+    private string Arrived() =>
+        On("Text#arrived").Read().Facts?.Name ?? "<the recorder could not be read>";
 
     [Fact]
     public void A_click_reaches_a_wpf_checkbox()

@@ -88,32 +88,30 @@ keep.
 ### §WW249 The proof that WPF takes input is itself intermittent
 
 `WpfInputTests` is the negative control `WW246` was missing, and it does not hold every
-time. Host green, guest green, guest red, guest green, with nothing changed between the
-runs — and eight consecutive host runs of that one case, none of them red. So it is the
-guest that reproduces it, which is a fact about timing rather than about logic.
+time. Host green, guest green, guest red, guest green, nothing changed between the runs
+— and eight consecutive host runs of that case, none of them red. So the guest
+reproduces it, which is a fact about timing rather than about logic.
 
-The first hypothesis was a focus arriving while the keys were already going, so the box
-reads part of what was typed. Refuted. **Five reds, and the last two refuted the rule
-the first three fitted:**
+The first hypothesis, a focus arriving while the keys were already going, is refuted.
+**Five reds, and the last two refuted the rule the first three fitted:**
 
-        typed WW246     read W6246       index 1 became the last character
-        typed WW246-4   read W4246-4     index 1 became the last character
-        typed T142check read Tk42check   index 1 became the last character
-        typed WW246-2   read WW242-2     index 4 became the last character
-    typed WW246-1   the dash at index 5 became the last character
+        WW246     -> W6246       index 1 became the last character
+        WW246-4   -> W4246-4     index 1 became the last character
+        T142check -> Tk42check   index 1 became the last character
+        WW246-2   -> WW242-2     index 4 became the last character
+        WW246-1   -> the dash at index 5 became the last character
 
-So it is not *the second* character. What holds across all four is that **one character
-is overwritten by the last one sent** — length for length, never lost, a far narrower
-shape than a dropped key. Round four of five once, so not the first send after a focus;
-claude-tray once, so neither fixture nor guest.
+So it is not *the second* character. What holds across all five is that **one character
+is overwritten by the last one sent** — length for length, never lost. Round four of
+five once, so not the first send after a focus; claude-tray once, so neither fixture nor
+guest. The typing path has no defect that would produce it.
 
-The typing path was read for a defect that would produce it and has none: one input pair
-per code unit, each a fresh struct, one `SendInput`, and an `INPUT` union written
-explicitly so its size is right on x64.
-
-So the next thing owed is still not a hypothesis. It is a reading of what actually
-reaches the box — the same keys sent to a control that records every `WM_CHAR` it gets,
-which separates a send that went wrong from a WPF text box that dropped one under load.
+What was owed was a reading, and it exists: `Arrivals` records every `WM_CHAR` the
+window is delivered, **off the message pump, which was measured**. Hooked through
+`HwndSource.AddHook` instead, a run typing `WW246-1` recorded seven VK_PACKET pairs and
+seven keyups and not one `WM_CHAR`, while the box read the text correctly — WPF answers
+the character messages first and the hook chain stops there. What is left waits on the
+next red.
 
 ### §WW260 Some expected sets are the application's data, not its strings
 
