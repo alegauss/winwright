@@ -87,29 +87,56 @@ public sealed class WpfInputTests : IDisposable
         Assert.Equal(box.Window, admitted.Window);
     }
 
+    /// <summary>
+    /// How many times the typing is driven in one case.
+    /// <para>
+    /// WW249. One go is what this had, and it failed about one guest run in four — so what it proved
+    /// was that typing reaches a WPF box <em>sometimes</em>, and finding out which run was which cost
+    /// a re-run every time. Five rounds is the same answer <c>TrayPlacementTests</c> gives to the same
+    /// shape: a claim in a case's own name that holds most times is a claim the case is not making.
+    /// </para>
+    /// <para>
+    /// Five and not fifty. Each round is a real send at a real window, so the number is what turns a
+    /// one-in-four into a near-certainty rather than what makes the suite slow — and the round it
+    /// failed on is in the message, which a single go could never say.
+    /// </para>
+    /// </summary>
+    private const int Rounds = 5;
+
     [Fact]
-    public void Typing_reaches_a_wpf_text_box()
+    public void Typing_reaches_a_wpf_text_box_every_time_rather_than_most_times()
     {
         if (root is null)
             return;
 
         var box = OnConfig("Edit#profile");
-        // Assigned in one step on purpose: DeskAsks traces an excused reading back to the line that
-        // assigned it, so an act and its assertion split across two names is an excuse the catalogue
-        // cannot see. Measured — this is what it went red about.
-        var result = Keyboard.Type(box, "WW246").AsAssertion("the box reads WW246");
-
-        // The desk may still be somebody else's — a person typing, another window on top — and that
-        // stays a hole rather than becoming a red. What must not happen is a hole naming a window
-        // under test of 'nothing', which is the defect wearing the desk's clothes.
-        if (BusyDesk.Excused(result))
+        for (var round = 1; round <= Rounds; round++)
         {
-            Assert.DoesNotContain("the window under test is nothing", result.Missing!.Absence, StringComparison.Ordinal);
-            return;
-        }
+            // A different string per round, so a box that kept what the last round left is a red
+            // rather than a pass on somebody else's text.
+            var typing = $"WW246-{round}";
 
-        Assert.True(result.Outcome == AssertionOutcome.Passed, result.ToString());
-        Assert.Equal("WW246", box.Read().Values.Value);
+            // Assigned in one step on purpose: DeskAsks traces an excused reading back to the line
+            // that assigned it, so an act and its assertion split across two names is an excuse the
+            // catalogue cannot see. Measured — this is what it went red about.
+            var result = Keyboard.Type(box, typing).AsAssertion($"the box reads {typing} (round {round})");
+
+            // The desk may still be somebody else's — a person typing, another window on top — and
+            // that stays a hole rather than becoming a red. What must not happen is a hole naming a
+            // window under test of 'nothing', which is the defect wearing the desk's clothes.
+            if (BusyDesk.Excused(result))
+            {
+                Assert.DoesNotContain("the window under test is nothing", result.Missing!.Absence, StringComparison.Ordinal);
+                return;
+            }
+
+            // The round is in both, because WW249's whole difficulty was a red that said which value
+            // was wrong and never which attempt: `W6246` for `WW246` is one character substituted
+            // rather than lost, and knowing whether that was the first send or the fifth is the
+            // difference between a race at the window and a race inside the send.
+            Assert.True(result.Outcome == AssertionOutcome.Passed, $"round {round} of {Rounds}: {result}");
+            Assert.Equal(typing, box.Read().Values.Value);
+        }
     }
 
     [Fact]

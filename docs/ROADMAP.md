@@ -16,7 +16,7 @@
 ## Block F — Assert — the expectation is derived, never typed
 
 - ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
-- 📋 **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Four runs measured: host green, guest green, guest red, guest green, with nothing changed between them — so what it proves is that typing reaches a WPF box sometimes. → §WW249
+- ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Four runs measured: host green, guest green, guest red, guest green, with nothing changed between them — so what it proves is that typing reaches a WPF box sometimes. → §WW249
 - 📋 **WW253** (deps: —) **a case cannot claim a row reads as text rather than as a picture, only that its subtree grew** — The script counted four readable fields on a row, and a typed count is the stale literal a derived set exists to refuse — so nothing writes the claim at all. → §WW253
 - 📋 **WW260** (deps: —) **an expected set is derived from the project's strings and never from what the application reports** — The menu case counts profile entries against the app's own read-out, and `covers` derives only from the language files, so the number would be typed here. → §WW260
 - 📋 **WW261** (deps: —) **a case expecting a label has to type it, which is the hardcoded set one control down** — `expect` takes a literal, `covers` takes a whole key's children, and nothing says a control announces the one string a named key declares. → §WW261

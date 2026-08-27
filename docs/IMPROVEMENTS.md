@@ -88,27 +88,29 @@ keep.
 
 ### §WW249 The proof that WPF takes input is itself intermittent
 
-`WpfInputTests.Typing_reaches_a_wpf_text_box` is the negative control `WW246` was
-missing, and it does not hold every time. Measured with nothing changed between runs:
-host green, guest green, guest red, guest green. The red was `Failed` rather than a
-hole, so the keys were sent and the read-back did not match.
+`WpfInputTests` is the negative control `WW246` was missing, and it does not hold every
+time. Measured with nothing changed between runs: host green, guest green, guest red,
+guest green. The red was `Failed` rather than a hole, so the keys were sent and the
+read-back did not match.
 
 What the red said was `Expected: Passed / Actual: Failed` and nothing else, because the
-assertion threw its own evidence away — the fourth time in one session that a red here
-was written without its diagnosis. Fixed: it now carries the result, so the next
-occurrence names what the box read.
+assertion threw its own evidence away. Fixed then, and it paid: the next guest red named
+what the box read.
 
 Then eight consecutive host runs of that one case, and none of them red. So it is the
 guest that reproduces it, which is a fact about timing rather than about logic.
 
 The hypothesis was a focus arriving while the keys were already going, so the box reads
-part of what was typed. The next guest red refutes it. `WW246` was typed and the box
-read `W6246`: five characters for five, one **substituted** rather than lost — and the
-character it was replaced by is the one two positions later in the same string.
+part of what was typed. That is refuted. `WW246` was typed and the box read `W6246`:
+five characters for five, one **substituted** rather than lost, and the replacement is
+the character two later in the same string. Not a truncated read — the order the keys
+arrived in, which points at the send.
 
-That is not a truncated read, it is the order the keys arrived in. Which points at the
-send rather than at the focus, and is a different defect from the one this was filed
-against.
+The typing path was then read for a defect that would produce it and has none: one input
+pair per code unit, each a fresh struct, one `SendInput`. So what is owed is a
+reproduction rather than another hypothesis. The case now drives five rounds with a
+different string each and names the round it failed on, which is `TrayPlacementTests`'
+answer to the same shape.
 
 ### §WW253 A row that reads as text is not a subtree that grew
 
