@@ -87,6 +87,67 @@ public sealed class SlowMachineTests
         Assert.Contains("was not given time", said, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// WW280. A watch that kept pace, one that could not, and one that never measured a cadence —
+    /// the same three states the wait gate above is held to, on the other number this suite chooses.
+    /// </summary>
+    /// <param name="taken">How many looks the run got.</param>
+    /// <param name="apartMs">How far apart to space them.</param>
+    private static Looks Watching(int taken, double apartMs) =>
+        Looks.Over(
+            Enumerable.Range(0, taken).Select(one => one * apartMs).ToList(),
+            wanted: 3,
+            lastingMs: 600);
+
+    [Fact]
+    public void A_run_that_could_not_look_often_enough_measured_nothing_about_what_it_watched()
+    {
+        // The guest run this task was filed from: 241ms a look at a 600ms state, which is fewer
+        // than three looks each and so cannot have seen the sequence it was about to judge.
+        var looks = Watching(taken: 20, apartMs: 241);
+
+        Assert.False(looks.Enough);
+        SlowMachine.Excusing(looks);
+
+        var said = SlowMachine.Sentence("a cycle of 600ms a state", looks);
+
+        Assert.StartsWith("unchecked: ", said, StringComparison.Ordinal);
+        Assert.Contains("a cycle of 600ms a state", said, StringComparison.Ordinal);
+        Assert.Contains("was not given time", said, StringComparison.Ordinal);
+        Assert.Contains("nothing here is a claim about the fixture", said, StringComparison.Ordinal);
+
+        // The cadence it actually met, so a reader can tell how far short it fell rather than only
+        // that it did.
+        Assert.Contains("241ms", said, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_run_that_kept_pace_has_nothing_to_excuse()
+    {
+        // Three looks a state exactly is not enough — the guard is strict, because a sampler at the
+        // edge loses a member to any jitter and a count that lost members is a confident number
+        // about the application.
+        var looks = Watching(taken: 60, apartMs: 100);
+
+        Assert.True(looks.Enough);
+
+        var refused = Assert.ThrowsAny<Xunit.Sdk.XunitException>(() => SlowMachine.Excusing(looks));
+
+        Assert.Contains("there is nothing to excuse", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_run_that_got_one_look_has_not_shown_the_machine_was_slow()
+    {
+        // The half that keeps the check. One look is a gap between nothing: it is as likely to be a
+        // window that answered once as a desk that could not keep up, and excusing it would
+        // withdraw whichever of the two it actually was.
+        var refused = Assert.ThrowsAny<Xunit.Sdk.XunitException>(
+            () => SlowMachine.Excusing(Watching(taken: 1, apartMs: 241)));
+
+        Assert.Contains("no cadence at all", refused.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void This_gate_is_not_the_desks_and_says_so_by_taking_a_name_the_desk_would_refuse()
     {

@@ -44,7 +44,8 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
-- 📋 **WW280** (deps: —) **a run too slow to observe the animation says so and goes red about it anyway** — The guard names the reading as the cause in its own message and is still an assertion, so a busy guest reports a fixture that cycled exactly as asked as a defect. → §WW280
+- 📋 **WW281** (deps: —) **a slow-machine excuse is written to the test's own output and counted nowhere** — The roll call reads the desk ledger alone, so a run that excused a wait or a cadence balances its arithmetic exactly like one where every check ran. → §WW281
+- 📋 **WW282** (deps: —) **the sequence case reads a skipped state as a broken order and has no guard at all** — Its comment says a sampler that cannot keep up makes the order read as broken, and it then asserts the order against a cadence it never measures. → §WW282
 
 ## Done when — Block A
 

@@ -726,14 +726,24 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         var window = Launched($"--animate={every}");
 
         var watched = Watched(window, TimeSpan.FromSeconds(5));
-        var perLook = PerLook(watched);
+        var looks = Looks.Over(watched.Select(one => one.AtMs).ToList(), LooksPerState, every);
 
         // WW162, and read before anything is concluded about the animation.
-        Assert.True(
-            perLook * LooksPerState < every,
-            $"this run looked every {perLook:0}ms at a state that lasts {every}ms, which is fewer than "
-                + $"{LooksPerState} looks each, so it could not have observed the sequence — that is the "
-                + "reading being too slow and not the animation");
+        //
+        // WW280. A hole and not a red, which is the half WW162 left. The guard's own message said
+        // "that is the reading being too slow and not the animation" and it was an assertion, so a
+        // guest that looked every 241ms at a 600ms state failed a fixture that was cycling exactly
+        // as asked. Raising ReadableMs again is the move WW171 already made once and the one that
+        // keeps this coming back; the number is not the fault, the verdict is.
+        if (!looks.Enough)
+        {
+            SlowMachine.Excusing(looks);
+
+            // Said out loud, because a case that returns quietly is a green covering a check that
+            // never ran.
+            output.WriteLine(SlowMachine.Sentence($"a cycle of {every}ms a state", looks));
+            return;
+        }
 
         var seen = ChangesIn(watched);
         Assert.True(seen.Count > 1, $"only {seen.Count} change(s) over {watched[^1].AtMs:0}ms of watching");
@@ -747,7 +757,7 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         Assert.True(
             perState > every * 0.4 && perState < every * 3,
             $"{seen.Count} change(s) over {over:0}ms is {perState:0}ms each, against {every}, "
-                + $"and this run looked every {perLook:0}ms");
+                + $"and this run looked every {looks.ApartMs:0}ms");
 
         var declared = int.Parse(seen[0].Said.Split(" of ")[1], System.Globalization.CultureInfo.InvariantCulture);
         Assert.True(declared > 1);
@@ -820,13 +830,6 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
 
     private static IReadOnlyList<string> Sampled(TopLevelWindow window, TimeSpan howLong) =>
         Watched(window, howLong).Select(one => one.Said).ToList();
-
-    /// <summary>
-    /// How often this run actually got a look, which is what decides whether it could have observed
-    /// the sequence at all. A reader slower than a state has not measured the animation.
-    /// </summary>
-    private static double PerLook(IReadOnlyList<Shown> watched) =>
-        watched.Count < 2 ? double.MaxValue : (watched[^1].AtMs - watched[0].AtMs) / (watched.Count - 1);
 
     /// <summary>The watch with the repeats removed, which is the sequence rather than the poll.</summary>
     private static IReadOnlyList<Shown> ChangesIn(IReadOnlyList<Shown> watched)

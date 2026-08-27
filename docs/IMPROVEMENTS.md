@@ -346,26 +346,49 @@ once. A genuine absence now carries how many icons the bar and the flyout held.
 What is left waits on the next occurrence rather than on any work: it will say which of
 the two it was.
 
-### §WW280 The guard that diagnoses the reading and blames the fixture
+### §WW281 The other excuse the roll call cannot see
 
-`FixtureTests.A_full_cycle_takes_about_as_long_as_the_length_the_run_declared` opens
-with a guard WW162 put there, and the guard is right: it compares how often the run
-managed to look against how long a state lasts, and refuses to conclude anything about
-the animation where the reading could not have seen the sequence. Its own message says
-so — "that is the reading being too slow and not the animation".
+WW231 withdrew a green that covered checks nobody ran: `BusyDesk` writes every excuse to
+a ledger, and the roll call reports how many the desk excused and for which facts.
+`SlowMachine` does neither. It validates the excuse as strictly — more strictly, since
+the caller must prove it met the machine and not the fixture — and then the case writes
+a sentence to `ITestOutputHelper` and returns.
 
-Then it asserts it. On a guest run of 1,716 cases it was the only red: 241ms a look at a
-600ms state, fewer than three looks each. The fixture was cycling exactly as asked, and
-the suite reported a defect in it.
+xunit records a pass. `Readers.ExcusedIn` reads `BusyDesk.Ledger` and nothing else, so a
+run where two waits ran out and a watch could not keep pace has the same
+discovery-against-results arithmetic as a run where all of it was checked. That is
+WW231's founding defect surviving in the excuse WW211 added afterwards, and it is worse
+in one way: a desk excuse at least names a condition the engine declares, while this one
+is prose in a log nobody parses.
 
-This is the misattribution `BusyDesk` exists to refuse, arriving through a door
-`BusyDesk` does not have. Every fact `DeskFacts` names is about somebody else owning
-something — the foreground, the focus, the shell's flyout, a window left standing over
-the region — and each is answered by a `Precondition` the engine hands back. A machine
-too busy to read a window three times a state is none of those: nothing owns anything,
-the reading was simply not fast enough, and no engine reading answers it.
+What it is not is the same fix. The desk ledger's rows are `fact`, `whose`, `absence`,
+and a slow-machine excuse has no fact — that is why WW211 refused to borrow the gate. So
+either the ledger grows a column saying which kind of excuse a row is, or the second
+kind gets its own file and the roll call reads two. The first keeps one arithmetic and
+mixes two things a reader must not confuse; the second keeps them apart and says
+"unknown" twice.
 
-So what this asks first is whether that is a desk fact at all. If it is, the engine
-names it and the case excuses itself the way every other one does; if it is not, the
-case still must not go red about the fixture, and what it does instead is a decision
-rather than an assumption.
+Whichever it is, the run has to stop reporting a clean sweep it did not take.
+
+### §WW282 The neighbour that never got the guard
+
+WW280 fixed the verdict on the case that measures a cadence. The case beside it,
+`The_states_arrive_in_the_order_they_were_declared_in_and_come_round_again`, measures
+none — and its own comment says exactly what that costs: "the sampler skipped one and
+the order read as broken when it was the reading that could not keep up".
+
+It reads a sequence of states off a live window and asserts each is the declared
+successor of the one before. A skipped state does not read as a gap; it reads as a jump,
+which is indistinguishable from a fixture cycling in the wrong order. The protection it
+has is `ReadableMs`, the constant WW171 derived so a sampler would get three looks a
+state — and the guest run that filed WW280 was slower than that constant assumes. So
+this case is exposed to the run that already happened, and the reason it did not go red
+on it is that a skip has to land in the wrong place, not that anything stopped it.
+
+`The_animation_says_how_many_states_it_has_so_nothing_has_to_be_told` sits in the same
+file and counts distinct states, which is the same exposure a third way: a skipped state
+is a state the count never saw.
+
+The reading `Looks` already exists and the excuse is one call, so this is not a design
+question. What has to be decided is whether the cadence is read once per case or once
+for the class, since three cases watch the same window under the same flag.
