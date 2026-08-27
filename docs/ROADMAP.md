@@ -16,7 +16,7 @@
 ## Block F — Assert — the expectation is derived, never typed
 
 - ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
-- ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Four runs measured: host green, guest green, guest red, guest green, with nothing changed between them — so what it proves is that typing reaches a WPF box sometimes. → §WW249
+- ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Three reds now and one rule fits all — the second character became the last — with the third in claude-tray on the host, so it is neither the fixture nor the guest. → §WW249
 - 📋 **WW260** (deps: —) **an expected set is derived from the project's strings and never from what the application reports** — The menu case counts profile entries against the app's own read-out, and `covers` derives only from the language files, so the number would be typed here. → §WW260
 - 📋 **WW269** (deps: —) **a caption counting down in real time cannot survive an exact comparison across a round trip** — `sameAs` compares two readings exactly, and a run that straddles a minute boundary would then be a red build about a clock rather than about the application. → §WW269
 - 📋 **WW275** (deps: —) **covers is two-way and reads as one-way, so a completeness claim against a shared container cannot be written** — The README says every declared string reads somewhere the locator matched; the engine also refuses every stranger, and its sentence misagrees with itself. → §WW275
@@ -40,7 +40,6 @@
 - 📋 **WW87** (deps: Block G, Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 - ⏳ **WW230** (deps: —) **the only place the engine's package exists is a folder inside this repository** — Nothing is published yet, so the adopter's `nuget.config` is still a path across two clones. → §WW230
-- 📋 **WW278** (deps: —) **the sessions note stays open after the click that should close it, so the case leaves the window changed** — Measured three times on a real desk: the second click on the info dot reads 'On' for every poll of six seconds, and the case's last step exists to put the surface back. → §WW278
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

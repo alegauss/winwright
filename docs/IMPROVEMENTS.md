@@ -94,13 +94,17 @@ runs — and eight consecutive host runs of that one case, none of them red. So 
 guest that reproduces it, which is a fact about timing rather than about logic.
 
 The first hypothesis was a focus arriving while the keys were already going, so the box
-reads part of what was typed. Refuted. **Two reds now, and the same rule fits both:**
+reads part of what was typed. Refuted. **Three reds now, and one rule fits all of
+them:**
 
     typed WW246    read W6246       the second character became the last
     typed WW246-4  read W4246-4     the second character became the last
+    typed T142check read Tk42check   the second character became the last
 
-Five characters for five and seven for seven — one **substituted**, never lost. The
-second was round four of five, so it is not the first send after a focus either.
+Length for length every time — one **substituted**, never lost. The second was round
+four of five, so it is not the first send after a focus. And the third is claude-tray on
+the host, in an application this repository does not build: not the fixture, not the
+guest.
 
 The typing path was read for a defect that would produce it and has none: one input pair
 per code unit, each a fresh struct, one `SendInput`, and an `INPUT` union written
@@ -316,29 +320,6 @@ is the net working, and is why the concordance check runs after the rewrite rath
 the list being believed.
 
 What is left is the deletion the criterion measures.
-
-### §WW278 the sessions note stays open after the click that should close it
-
-`WW80`'s note case opens the popup behind claude-tray's info dot, reads the date its
-figure came from, and clicks the dot again to leave the window as it found it. That last
-step is the one this project cares most about — a run leaves the machine as it found it
-— and it is red.
-
-Measured three times while `WW84` was being finished, on the same desk, in three
-separate suite runs. The dot reads `Off`, the first click reads `On`, the note is
-readable, the second click reads `On` again, and the expectation polls `On` seven to
-nine times over six seconds and never anything else. The trace says the click landed:
-the act is recorded `Ok` with a synthesised pointer and a read-back.
-
-Two readings fit and they are opposite repairs. Either the application does not close
-the note on a second click of the dot — a popup that only dismisses on a click outside
-it, which is a real and common shape — or the click is being swallowed because the popup
-has the mouse capture, and the act that reports `Ok` never reached the dot at all.
-
-What separates them is a reading nobody has taken: what the dot's own toggle says
-immediately after the second click, and whether a click somewhere outside the popup
-closes it. Until then the case is right to be red and the sentence beside it does not
-say which repository to open.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

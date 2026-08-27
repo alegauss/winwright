@@ -250,6 +250,7 @@
 - ✅ **WW239** **the release workflow keeps its own list of where the version lives, and the list was already wrong once** — One line names every copy, and the same flags raise them and read them back — so a copy nobody added is in neither half, and the README joined both.
 - ✅ **WW240** **a project that ships several languages cannot derive a set at all, and the language it runs in is knowable** — A fixture says which language its window is in and a set derives from the file for it, so claude-tray declares all five it ships instead of one.
 - ✅ **WW84** **the names case observes what no screenshot can** — The walk visits all six panels the strings declare and asserts both branches of the naming rule on each, with every label a key — passing with no hole and no word typed anywhere in the file.
+- ✅ **WW278** **the sessions note stays open after the click that should close it, so the case leaves the window changed** — The case restores the window by clicking away, which is how the application says the note closes — measured green, so the dot's second click reopens what it dismissed and the clicks were landing.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
