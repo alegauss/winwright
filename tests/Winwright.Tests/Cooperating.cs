@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Reflection;
 using Winwright.Locating;
 
@@ -191,10 +191,14 @@ internal static class Cooperating
         new("Synthesised.Press", Cooperation.None, true, "a traversal key at the window, as a step"),
         new("Pick.Value", Cooperation.None, true, "reach a value, by keyboard where the pattern will not"),
 
+        // WW267. Told a position rather than a value, for a picker holding the machine's own data.
+        new("Pick.At", Cooperation.None, true, "reach whatever sits at a position, by the same two routes"),
+
         // WW254. The same walk as a step answers it. On the desk axis with the four above rather than
         // beside the pattern acts: the pattern route needs nothing, but the fallback is keys, and a
         // verb filed as needing nothing would promise that for the runs where it does.
         new("Synthesised.Pick", Cooperation.None, true, "reaching a value in a picker, as a step"),
+        new("Synthesised.PickAt", Cooperation.None, true, "reaching a position in a picker, as a step"),
         new("Menu.Enter", Cooperation.None, true, "enter a menu bar the way a keyboard user does"),
         new("Menu.To", Cooperation.None, true, "walk to an entry"),
         new("Menu.Expand", Cooperation.None, true, "open a submenu"),

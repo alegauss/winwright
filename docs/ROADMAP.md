@@ -22,14 +22,12 @@
 - 📋 **WW261** (deps: —) **a case expecting a label has to type it, which is the hardcoded set one control down** — `expect` takes a literal, `covers` takes a whole key's children, and nothing says a control announces the one string a named key declares. → §WW261
 - 📋 **WW262** (deps: —) **a case can claim one element is named and a set of strings was read, and nothing about every element** — `NameCheck` tells a label from a glyph, a template and an id echoed back, and no step reaches it — least of all over the thirty-odd controls one rule names. → §WW262
 - 📋 **WW264** (deps: —) **a control wearing its neighbour's label reads as named, and nothing can tell the two apart** — The naming rule pairs a row's control with that row's header, and getting it wrong gives three controls one name — which every check that asks whether a name exists passes. → §WW264
-- 📋 **WW266** (deps: —) **no reading answers what a picker has selected, and a ComboBox offers no value to read** — `Pick` reads the selection through SelectionPattern, and the vocabulary a step names has no word for it — so nothing can claim a picker moved or came back. → §WW266
 
 ## Block G — The scenario — a case is a data file
 
 - 📋 **WW258** (deps: —) **a case cannot name a tray icon or open its menu, and the engine has done both since block D** — `NotificationArea` finds an icon by the name the shell gives it, opens the overflow to reach a hidden one and asks for the menu; no step may write any of it. → §WW258
 - 📋 **WW259** (deps: —) **`expand` goes through the pattern, and the submenu the menu case is about only opens to a key** — An empty WinForms submenu exposes no ExpandCollapse, so the pattern route cannot ask the question that was broken; `Menu.Expand` walks it and no case can name it. → §WW259
 - 📋 **WW263** (deps: —) **a case has a fixed list of steps, and the panels it must visit are derived from the strings** — The names case opens every settings panel the page declares and makes the same claims on each, and a data file cannot say "once per member" of a set it does not list. → §WW263
-- 📋 **WW267** (deps: —) **a picker is reached by naming a value, and the values are the machine's own data** — The profiles case walks one profile to another and back over whatever this desk happens to have, so naming one is the single thing a case must never do. → §WW267
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
@@ -38,7 +36,7 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW78** (deps: WW230 ⏳) **the keyboard case is the only observable of a live input path and it lives in a script** — The runner now carries claude-tray to the guest, and the restore there fails: the engine's package exists only in a folder this repository does not ship. → §WW78
-- 📋 **WW81** (deps: WW265 ✅, WW266, WW267) **the profiles case is the only thing in that repository that drives the picker** — Migrated with the round trip and the timing observation, both of which need the hop count the walk reports to mean anything. → §WW81
+- 📋 **WW81** (deps: WW265 ✅, WW266 ✅, WW267 ✅) **the profiles case is the only thing in that repository that drives the picker** — Migrated with the round trip and the timing observation, both of which need the hop count the walk reports to mean anything. → §WW81
 - 📋 **WW82** (deps: WW257, WW258, WW259, WW260) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
 - 📋 **WW83** (deps: Block G) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
 - 📋 **WW84** (deps: WW261, WW262, WW263, WW264) **the names case observes what no screenshot can** — Migrated with the derived panel sweep and the exact-label reads, including the rule that must fire and the one that must not. → §WW84

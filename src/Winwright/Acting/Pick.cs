@@ -195,20 +195,7 @@ public static class Pick
                     + (items.Count == 0 ? "nothing" : string.Join(", ", items.Select(item => $"\"{item.Name}\""))));
             }
 
-            var met = Precondition.Met(Windowing.Foreground.PreconditionName);
-            string? refused = null;
-            if (!byKeyboard && TryThePattern(items[index].Element, out refused))
-            {
-                return new PickResult(
-                    wanted, facts, PickRoute.Pattern, [wanted], Selected(element), null, met);
-            }
-
-            // The keyboard route needs the desktop; the pattern one never did.
-            var foreground = Windowing.Foreground.Check(admitted.Window).AsPrecondition();
-            if (!foreground.Satisfied)
-                return new PickResult(wanted, facts, PickRoute.Keyboard, [], Selected(element), refused, foreground);
-
-            return Walked(container, element, facts, items, index, wanted, refused, foreground);
+            return Reaching(container, admitted, element, facts, items, index, wanted, byKeyboard);
         }
         finally
         {
@@ -289,6 +276,58 @@ public static class Pick
     }
 
     /// <summary>
+    /// Reach whatever sits at <paramref name="index"/> in a picker, by pattern where that works and
+    /// by keyboard where it does not.
+    /// <para>
+    /// WW267. `Value` is right wherever the values are the application's own vocabulary. A profile
+    /// picker's are not: measured on one desk it held two, and the selected one was the name of a
+    /// Claude Code profile that exists there and nowhere else — so a case naming it passes on one
+    /// machine and fails on every other. A position is what the picker's own order supplies and no
+    /// machine's data changes.
+    /// </para>
+    /// <para>
+    /// What it reached is still reported by name, because the engine can read it even where the case
+    /// could not have written it — and <see cref="PickResult.Landed"/> is then the same claim it is
+    /// for `Value`, checked against the value the position turned out to hold.
+    /// </para>
+    /// </summary>
+    /// <param name="container">The picker.</param>
+    /// <param name="index">Which position, counted from the top and from zero.</param>
+    /// <param name="byKeyboard">Take the keyboard route deliberately, which is its own claim.</param>
+    /// <exception cref="NotActionableException">
+    /// Where the picker cannot take the act, or holds no such position — and then the refusal says
+    /// how many it does hold, which is what a reader needs next.
+    /// </exception>
+    public static PickResult At(Subject container, int index, bool byKeyboard = false)
+    {
+        ArgumentNullException.ThrowIfNull(container);
+        ArgumentOutOfRangeException.ThrowIfNegative(index);
+
+        var admitted = Admitted.To(container, "Selection");
+        var facts = admitted.Facts;
+        var element = admitted.Do(picker => picker);
+
+        var opened = Opening(container, element);
+        try
+        {
+            var items = Items(element);
+            if (index >= items.Count)
+            {
+                throw new NotActionableException(
+                    container.Locator.Text,
+                    Actionable.NotInTree,
+                    $"{facts} has no position {index}; it holds {items.Count} value(s)");
+            }
+
+            return Reaching(container, admitted, element, facts, items, index, items[index].Name, byKeyboard);
+        }
+        finally
+        {
+            Shutting(container, element, opened);
+        }
+    }
+
+    /// <summary>
     /// Every value a picker holds, in the order it holds them.
     /// <para>
     /// WW265. Opens one that holds nothing and shuts it again, for the reason <see cref="Value"/>
@@ -314,6 +353,38 @@ public static class Pick
         {
             Shutting(container, element, opened);
         }
+    }
+
+    /// <summary>
+    /// The pattern route, then the keyboard one, once something has decided which item is wanted.
+    /// <para>
+    /// WW267. Both doors are the same door: `Value` finds the index by name and `At` is handed one,
+    /// and everything after that — the pattern attempt, the foreground the fallback needs, the walk
+    /// anchored at the nearer end — is one route with two ways in. Two copies of it would be two
+    /// places for the hole this walk already had to be fixed in.
+    /// </para>
+    /// </summary>
+    private static PickResult Reaching(
+        Subject container,
+        Admitted admitted,
+        AutomationElement element,
+        ElementFacts facts,
+        List<(string Name, AutomationElement Element)> items,
+        int index,
+        string wanted,
+        bool byKeyboard)
+    {
+        var met = Precondition.Met(Windowing.Foreground.PreconditionName);
+        string? refused = null;
+        if (!byKeyboard && TryThePattern(items[index].Element, out refused))
+            return new PickResult(wanted, facts, PickRoute.Pattern, [wanted], Selected(element), null, met);
+
+        // The keyboard route needs the desktop; the pattern one never did.
+        var foreground = Windowing.Foreground.Check(admitted.Window).AsPrecondition();
+        if (!foreground.Satisfied)
+            return new PickResult(wanted, facts, PickRoute.Keyboard, [], Selected(element), refused, foreground);
+
+        return Walked(container, element, facts, items, index, wanted, refused, foreground);
     }
 
     private static PickResult Walked(

@@ -178,6 +178,30 @@ public static class Synthesised
     }
 
     /// <summary>
+    /// Reach whatever sits at a position in a picker, the same two routes as <see cref="Pick"/>.
+    /// <para>
+    /// WW267. The verb for a picker whose values are the machine's data rather than the application's
+    /// vocabulary — a profile list, an account, a device — where naming one is the hardcoded
+    /// expectation with the worst possible scope. What it reached is still reported by name, because
+    /// the engine can read what the case could not have written.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">The picker.</param>
+    /// <param name="index">Which position, counted from the top and from zero.</param>
+    /// <exception cref="NotActionableException">
+    /// Where the picker cannot take the act, or holds no such position.
+    /// </exception>
+    public static ActResult PickAt(Subject subject, int index)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+
+        var before = subject.Read();
+        var picked = Acting.Pick.At(subject, index);
+
+        return Landed(subject, "pick at", picked.Door, picked.Container, before, picked.Foreground);
+    }
+
+    /// <summary>
     /// What a synthesised act answers: the readings either side, and what it needed of the machine —
     /// which is the field the pattern acts leave null and none of these can.
     /// </summary>

@@ -227,7 +227,7 @@ public class ScenarioFileTests
         Assert.Contains("'cases': an array of cases", rendered);
         Assert.Contains("locator: what to act on", rendered);
         Assert.Contains("one of: read, invoke, toggle, set value, set range, select, expand, collapse", rendered);
-        Assert.Contains("one of: anything, value, range, toggle, selected, expanded, text", rendered);
+        Assert.Contains("one of: anything, value, range, toggle, selected, picked, expanded, text", rendered);
         Assert.Contains("(optional)", rendered);
     }
 

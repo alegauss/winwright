@@ -251,6 +251,7 @@ public static class Served
     {
         Takes.Text => "needs text in 'with'",
         Takes.Number => "needs a number in 'with'",
+        Takes.Position => "needs a position in 'with', counted from 0",
         _ => "needs nothing said beside it",
     };
 

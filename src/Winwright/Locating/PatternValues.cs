@@ -44,6 +44,22 @@ public sealed record PatternValues
     /// <summary>Whether a selection item reads as selected.</summary>
     public bool? IsSelected { get; private init; }
 
+    /// <summary>
+    /// What a container has selected, by name, where the element is one that holds a selection.
+    /// <para>
+    /// WW266. The other half of <see cref="IsSelected"/>, and the one every claim about a picker is
+    /// about. Measured on claude-tray's profile picker: a ComboBox carrying Selection, ExpandCollapse
+    /// and ItemContainer and <em>no ValuePattern at all</em> — so what it has chosen was readable by
+    /// nothing, while <c>Pick</c> had read it through this same pattern since block D.
+    /// </para>
+    /// <para>
+    /// Empty rather than null where a container holds a selection and has selected nothing: an empty
+    /// picker has answered, and it has answered <em>nothing is picked</em>, which is a different fact
+    /// from an element that holds no selection to be asked about.
+    /// </para>
+    /// </summary>
+    public string? Picked { get; private init; }
+
     /// <summary>Expanded, Collapsed, PartiallyExpanded or LeafNode, where the element expands.</summary>
     public string? ExpandCollapse { get; private init; }
 
@@ -57,8 +73,14 @@ public sealed record PatternValues
     /// The one value worth showing in a line, or null where the element reports none. The order is
     /// what a reader looks at first: what it says, then where it sits, then what state it is in.
     /// </summary>
+    /// <remarks>
+    /// WW266 put <see cref="Picked"/> after <see cref="Value"/> and before the states. A picker that
+    /// carries a value reads it, as before; one that carries none used to fall through to
+    /// <em>Collapsed</em>, which is the shape it is in rather than what it says.
+    /// </remarks>
     public string? Reading() =>
         Value
+        ?? Picked
         ?? Range?.ToString(System.Globalization.CultureInfo.InvariantCulture)
         ?? Toggle
         ?? (IsSelected is { } selected ? selected ? "selected" : "not selected" : null)
@@ -102,6 +124,15 @@ public sealed record PatternValues
                     ? values with { IsSelected = pattern.Current.IsSelected }
                     : values);
 
+        // WW266. The container's own pattern, and the first of its selection rather than all of it:
+        // every picker this drives is single-select, and a claim about a multi-select list is a
+        // different claim that should be named rather than folded into this one.
+        if (facts.Supports("Selection"))
+            values = Read(values, () =>
+                element.GetCurrentPattern(SelectionPattern.Pattern) is SelectionPattern pattern
+                    ? values with { Picked = Chosen(pattern) }
+                    : values);
+
         if (facts.Supports("ExpandCollapse"))
             values = Read(values, () =>
                 element.GetCurrentPattern(ExpandCollapsePattern.Pattern) is ExpandCollapsePattern pattern
@@ -114,6 +145,17 @@ public sealed record PatternValues
                 : values);
 
         return values;
+    }
+
+    /// <summary>
+    /// What a selection holds, by name. Empty where it holds nothing, which is an answer and not an
+    /// absence: a picker with nothing chosen has said so.
+    /// </summary>
+    /// <param name="selection">The container's pattern.</param>
+    private static string Chosen(SelectionPattern selection)
+    {
+        var chosen = selection.Current.GetSelection();
+        return chosen.Length == 0 ? "" : chosen[0].Current.Name ?? "";
     }
 
     private static PatternValues Read(PatternValues so_far, Func<PatternValues> reading)

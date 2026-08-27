@@ -99,17 +99,16 @@ was written without its diagnosis. Fixed: it now carries the result, so the next
 occurrence names what the box read.
 
 Then eight consecutive host runs of that one case, and none of them red. So it is the
-guest that reproduces it, which is a fact about timing rather than about logic — a
-slower machine, fewer cores, and a WPF window that has to be focused before a key means
-anything.
+guest that reproduces it, which is a fact about timing rather than about logic.
 
-The hypothesis that fits, and it is written down as a hypothesis: the focus arrives
-while the keys are already going, so the box reads a part of what was typed. If that is
-it then it is not a flake in the test — it is `Keyboard.Type` sending before the window
-is ready, which is the engine's own contract being sometimes false.
+The hypothesis was a focus arriving while the keys were already going, so the box reads
+part of what was typed. The next guest red refutes it. `WW246` was typed and the box
+read `W6246`: five characters for five, one **substituted** rather than lost — and the
+character it was replaced by is the one two positions later in the same string.
 
-Deliberately not settled by reasoning. Two runs were spent today refuting hypotheses
-that looked certain, and the sentence that settles this arrives on the next guest red.
+That is not a truncated read, it is the order the keys arrived in. Which points at the
+send rather than at the focus, and is a different defect from the one this was filed
+against.
 
 ### §WW253 A row that reads as text is not a subtree that grew
 
@@ -221,27 +220,6 @@ structural rather than textual: of the controls in this row, each announces this
 header or its own text, and none announces a header belonging to another row on the page
 — with the set of headers derived from the page rather than listed.
 
-### §WW266 What a picker has selected is a reading nobody can name
-
-Measured on claude-tray's profile picker: a `ComboBox` carrying Selection,
-ExpandCollapse and ItemContainer, and **no ValuePattern at all**. So `reads: value`
-answers nothing there, `reads: name` answers the picker's own label — *Profile* — and
-`reads: selected` is about whether an element is selected rather than about which one a
-container has.
-
-`Pick.Selected` has read it since block D: the container's `SelectionPattern`, its first
-selected item, that item's name. It is the value every claim about a picker is about,
-and the word a step would name it by does not exist.
-
-That is what stops `WW81` twice over. The round trip claims the picker moved away and
-came back, and `moves` and `sameAs` both compare a reading — so without this they
-compare the label *Profile* to itself and hold on every machine whatever the picker did.
-That is not a missing check; it is a check that passes by construction, which is the one
-failure this project exists to refuse.
-
-It is a reading and not a verb, which is what makes it small: the same word every claim
-already takes, answering the one thing a picker has to say.
-
 ## Block G — The scenario — a case is a data file
 
 ### §WW258 The notification area is a surface no locator addresses
@@ -308,28 +286,6 @@ step, or a group of them, that says *once for each member of this derived set*, 
 member reaching the locator — and the two guards owned by the engine: an empty
 derivation is broken and never passed, and what was visited is counted apart from what
 was asserted.
-
-### §WW267 Where to go, when a case may not know what is there
-
-`pick` reaches a value by name, which is right wherever the values are the application's
-own vocabulary. The profile picker's are not: measured on this desk it holds two, and
-the selected one is the name of a Claude Code profile that exists here and nowhere else.
-A case naming it passes on one machine and fails on every other, which is the hardcoded
-expectation with the worst possible scope.
-
-The script never named one. It walked to index 1, read what was there, and walked back
-to index 0 — and every claim it made was about the reading changing and coming back
-rather than about what the reading said. That is the shape the format now has the claims
-for and no way to reach.
-
-So the walk needs somewhere to go that is not a value: a position, which the picker's
-own order supplies and no machine's data changes. It is a second verb rather than a
-second meaning for `with`, because a picker may hold a value spelled `1` and a step
-whose argument means two different things depending on what the application happens to
-contain is one nobody can read.
-
-The count `pick` reports matters here for the same reason it does there, and more: a
-position is exactly what the anchoring at the nearer end is computed from.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

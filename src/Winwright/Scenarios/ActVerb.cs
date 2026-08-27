@@ -17,6 +17,16 @@ public enum Takes
 
     /// <summary>A number the control says it accepts.</summary>
     Number,
+
+    /// <summary>
+    /// A position in something, counted from zero.
+    /// <para>
+    /// WW267. Its own kind rather than <see cref="Number"/>, because the two are refused for
+    /// different things: a range takes a fraction and a negative quite happily, and a position that
+    /// is either is a step nobody can perform. Refused where it is written, like every other field.
+    /// </para>
+    /// </summary>
+    Position,
 }
 
 /// <summary>
@@ -96,6 +106,18 @@ public sealed record ActVerb
             Takes.Text,
             repeatable: false,
             (subject, argument) => Synthesised.Pick(subject, argument!),
+            synthesises: true,
+            reaches: true),
+
+        // WW267. The same walk, told where to go rather than what to reach. It is a second verb and
+        // not a second meaning for 'with' because a picker may hold a value spelled '1', and a step
+        // whose argument means two different things depending on what the application happens to
+        // contain is one nobody can read.
+        new(
+            "pick at",
+            Takes.Position,
+            repeatable: false,
+            (subject, argument) => Synthesised.PickAt(subject, Position(argument!)),
             synthesises: true,
             reaches: true),
     ];
@@ -218,7 +240,7 @@ public sealed record ActVerb
         {
             (Takes.Nothing, not null) => $"'{Name}' takes nothing, and this one carries '{written}'",
             (Takes.Nothing, null) => null,
-            (_, null) => $"'{Name}' acts on {(Wants == Takes.Text ? "text" : "a number")}, and this one carries none",
+            (_, null) => $"'{Name}' acts on {Wanting()}, and this one carries none",
 
             // WW225. The closed list is checked here and not inside the act, because here is where
             // the author is: a word nobody recognises has to cost a corrected field and never a run
@@ -229,6 +251,14 @@ public sealed record ActVerb
 
             (Takes.Text, _) => null,
             (Takes.Number, _) => Numeric(written) ? null : $"'{Name}' acts on a number, and '{written}' is not one",
+
+            // WW267. Refused here for the reason every other field is: a position that is a fraction
+            // or below zero is wrong on every machine, and discovering it on the run that was going
+            // to walk with it costs a launch to learn what the file already said.
+            (Takes.Position, _) => Whole(written)
+                ? null
+                : $"'{Name}' acts on a position, and '{written}' is not a whole number from 0",
+
             _ => null,
         };
     }
@@ -282,6 +312,32 @@ public sealed record ActVerb
         throw new InvalidOperationException(
             $"'{wanted}' reached the act and is not a traversal key, so the load accepted what the act cannot run");
     }
+
+    /// <summary>What this verb wants said, as the refusal words it.</summary>
+    private string Wanting() => Wants switch
+    {
+        Takes.Text => "text",
+        Takes.Number => "a number",
+        Takes.Position => "a position",
+        _ => "nothing",
+    };
+
+    /// <summary>Whether the argument is a position: a whole number, counted from zero.</summary>
+    /// <param name="argument">What the step wrote.</param>
+    private static bool Whole(string argument) =>
+        int.TryParse(argument, NumberStyles.None, CultureInfo.InvariantCulture, out var at) && at >= 0;
+
+    /// <summary>
+    /// The position a step named. Refused at the point of insertion by <see cref="Refuses"/>, so
+    /// reaching here with anything else means the two disagree.
+    /// </summary>
+    /// <param name="argument">What the step wrote.</param>
+    /// <exception cref="InvalidOperationException">Where it is not a position after all.</exception>
+    private static int Position(string argument) =>
+        int.TryParse(argument.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var at) && at >= 0
+            ? at
+            : throw new InvalidOperationException(
+                $"'{argument}' reached the act and is not a position, so the load accepted what the act cannot run");
 
     private static bool Numeric(string argument) =>
         double.TryParse(argument, NumberStyles.Float, CultureInfo.InvariantCulture, out _);

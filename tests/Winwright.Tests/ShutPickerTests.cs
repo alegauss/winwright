@@ -2,6 +2,7 @@
 
 using Winwright.Acting;
 using Winwright.Locating;
+using Winwright.Scenarios;
 using Winwright.Windowing;
 
 using Xunit;
@@ -107,6 +108,46 @@ public sealed class ShutPickerTests : IDisposable
         Assert.Contains("holds no \"Foxtrot\"", refusal.Because, StringComparison.Ordinal);
         Assert.Contains("\"Alpha\"", refusal.Because, StringComparison.Ordinal);
         Assert.Equal("Collapsed", State("shutPicker"));
+    }
+
+    [Fact]
+    public void What_the_picker_has_chosen_is_a_reading_a_case_can_name()
+    {
+        // WW266. Measured on claude-tray's profile picker and true of this one: a ComboBox carrying
+        // Selection, ExpandCollapse and ItemContainer and no ValuePattern at all. So 'value' answers
+        // nothing, 'name' answers the picker's own label, and without 'picked' a round trip comparing
+        // either would have held on every machine whatever the picker did.
+        var reading = Picker("shutPicker").Read();
+
+        Assert.True(reading.Found);
+        Assert.Null(reading.Values.Value);
+        Assert.Equal("Alpha", ReadBack.Named("picked").Of(reading));
+
+        // And it is what 'anything' answers too, rather than the shape the picker happens to be in.
+        Assert.Equal("Alpha", reading.Values.Reading());
+    }
+
+    [Fact]
+    public void A_position_is_reached_without_the_case_naming_what_is_there()
+    {
+        // WW267. The whole point: nothing here writes a value, because on the picker this is for the
+        // values are the machine's own data. What it reached is still reported by name, since the
+        // engine can read what the case could not have written.
+        var picked = Pick.At(Picker("shutPicker"), 3);
+
+        Assert.True(picked.Landed, picked.ToString());
+        Assert.Equal("Delta", picked.Selected);
+        Assert.Equal(PickRoute.Pattern, picked.Route);
+        Assert.Equal("Collapsed", State("shutPicker"));
+    }
+
+    [Fact]
+    public void A_position_the_picker_does_not_have_is_refused_with_how_many_it_holds()
+    {
+        var refusal = Assert.Throws<NotActionableException>(() => Pick.At(Picker("shutPicker"), 5));
+
+        Assert.Contains("has no position 5", refusal.Because, StringComparison.Ordinal);
+        Assert.Contains("5 value(s)", refusal.Because, StringComparison.Ordinal);
     }
 
     /// <summary>

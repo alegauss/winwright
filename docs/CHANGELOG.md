@@ -175,6 +175,7 @@
 - ✅ **WW251** **a case cannot claim that an act unfolded a subtree, only that one reading moved** — A step may claim the act put something under its locator that was not in the tree before it, compared against the engine's own reading rather than a count the case typed.
 - ✅ **WW255** **a case cannot claim a reading came back to what an earlier step read, only that it moved** — A step names an earlier one in `sameAs` and claims its reading is back to what that one read, judged where the case knows all its steps and never against a value the file typed.
 - ✅ **WW256** **a case cannot claim a state was never observed while it waited, only what it read at the end** — A step names a key in `never` and claims it was showing at no moment while its locator was waited for, reporting how many times it looked and holing an absence a short walk found.
+- ✅ **WW266** **no reading answers what a picker has selected, and a ComboBox offers no value to read** — A step reads `picked` and gets what a container has chosen, which is also what `anything` now answers for a picker carrying no value of its own.
 
 ## Block G — The scenario — a case is a data file
 
@@ -189,6 +190,7 @@
 - ✅ **WW214** **a fixture two files both need is written twice and the second copy drifts** — A fixture name resolves across the whole suite, so one launch is declared once, and a name two files declare is refused naming both before any case resolves against either.
 - ✅ **WW225** **a case can name no synthesised input, so migrating one that proves input stops proving it** — A case names four synthesised acts and reads what holds the focus, so the keyboard case's three assertions are all writable.
 - ✅ **WW254** **the engine walks a picker and reports the hops, and no case can name that act** — A case names `pick`, hands it the value in `with`, and reads the route and the switch count in the step's own line; one claiming nothing of what it reached is refused.
+- ✅ **WW267** **a picker is reached by naming a value, and the values are the machine's own data** — A step names `pick at` with a position, and the walk reaches whatever sits there — reporting by name what the case could not have written.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

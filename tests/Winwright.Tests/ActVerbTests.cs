@@ -1,4 +1,4 @@
-using Winwright.Scenarios;
+﻿using Winwright.Scenarios;
 
 using Xunit;
 
@@ -21,7 +21,7 @@ public class ActVerbTests
         Assert.Equal(
             [
                 "read", "invoke", "toggle", "set value", "set range", "select", "expand", "collapse",
-                "type", "click", "nudge", "press", "pick",
+                "type", "click", "nudge", "press", "pick", "pick at",
             ],
             ActVerb.All.Select(verb => verb.Name));
 

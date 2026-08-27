@@ -36,6 +36,13 @@ public sealed record ReadBack
             false => "not selected",
             null => null,
         }),
+        // WW266. The other half of 'selected', and the one a claim about a picker is actually about:
+        // that one asks whether this element is chosen, and this asks which one the container chose.
+        // Measured missing on claude-tray's profile picker, which offers no ValuePattern — so 'value'
+        // answered nothing, 'name' answered the picker's own label, and a round trip comparing either
+        // would have held on every machine whatever the picker did.
+        new("picked", read => read.Values.Picked),
+
         new("expanded", read => read.Values.ExpandCollapse),
         new("text", read => read.Values.Text),
 

@@ -1,4 +1,4 @@
-using System.Windows.Automation;
+﻿using System.Windows.Automation;
 
 using Winwright.Acting;
 using Winwright.Locating;
@@ -240,7 +240,7 @@ public sealed class SynthesisedActTests : IDisposable
         // answers whether a busy desk can take the act away and for that one it can — the keyboard
         // fallback exists precisely because the pattern route sometimes refuses.
         Assert.Equal(
-            ["type", "click", "nudge", "press", "pick"],
+            ["type", "click", "nudge", "press", "pick", "pick at"],
             ActVerb.All.Where(one => one.Synthesises).Select(one => one.Name));
 
         Assert.All(

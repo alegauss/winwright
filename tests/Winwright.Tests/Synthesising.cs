@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
 namespace Winwright.Tests;
 
@@ -103,6 +103,11 @@ internal static class Synthesising
         new("Synthesised.Pick", Asking.ItIsTheAct,
             "reaching a value in a picker, by the pattern where that works and by the keyboard where it does not"),
 
+        // WW267. The same walk told where to go rather than what to reach, for a picker whose values
+        // are the machine's data. Same routes, same fallback, same reason it is catalogued as the act.
+        new("Synthesised.PickAt", Asking.ItIsTheAct,
+            "reaching whatever sits at a position in a picker, by the same two routes"),
+
         // A menu is entered the way a keyboard user enters one, and that is Block D's third
         // criterion rather than an escalation: reaching a destructive entry by invoke is refused
         // at the door, so walking is the only route there is.
@@ -125,6 +130,9 @@ internal static class Synthesising
                 + "PickRoute.Keyboard, the reason the pattern was refused, and the foreground as a "
                 + "precondition — so a desk that would not give it up reads as unchecked and never "
                 + "as a value that was picked"),
+        new("Pick.At", Asking.TheResultSaysWhichRouteRan,
+            "the same walk told a position rather than a value, and it learns the same way: one "
+                + "route, one result, and the route it took written into it"),
     ]);
 
     /// <summary>Every public verb of the engine that reaches one of the primitives, at any depth.</summary>

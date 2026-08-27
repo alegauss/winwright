@@ -1,4 +1,4 @@
-# winwright
+﻿# winwright
 
 Driving a Windows desktop application from a test, and reporting what was actually observed.
 
@@ -274,10 +274,12 @@ their expectations are fields, and the loop, the waits, the attempts and the ver
 
 A case has a `name` and its `steps`, and may carry `tags`, `needs`, `catches` and `filed`.
 `locator` and `act` are the two fields every step has. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`. `expect` is what the element should read
+`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`. `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
-`toggle`, `selected`, `expanded`, `text`, `name`, `focused`, defaulting to `anything`, the one value the element
-reports, in the order a reader looks at them. `name` is what a label says: a caption's words are in its
+`toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `focused`, defaulting to `anything`, the one value the element
+reports, in the order a reader looks at them. `selected` asks whether *this* element is chosen and
+`picked` asks which one a container chose — the reading every claim about a picker is about, and the
+only one that answers on a ComboBox offering no value. `name` is what a label says: a caption's words are in its
 name and in no pattern, so it is the only reading that answers for one — and a step may not read it
 where its own locator matched on the name, because then the reading is fixed before the act runs. `with` is required exactly where the act takes something and
 refused where it does not. `named` renames a step in the report; `meansIt` is the sentence a step
@@ -353,6 +355,13 @@ many selection changes it cost**, because a claim about one switch is void when 
 several: each intermediate stop is a switch of its own. It is also the one act whose landing the
 engine can see, so a `pick` that claims nothing of what it reached is refused where it was written —
 every step after it would be read against whichever value the walk happened to stop at.
+
+`pick at` is the same walk told **where to go rather than what to reach**, for the picker whose
+values are the machine's data rather than the application's vocabulary — a profile list, an account,
+a device. Naming one of those is the hardcoded expectation with the worst possible scope: it passes
+on the desk it was written on and fails on every other. A position is what the picker's own order
+supplies and no machine's data changes. Its own verb and not a second meaning for `with`, because a
+picker may hold a value spelled `1`.
 
 They cost something the other eight do not. A synthesised act needs the window in the foreground,
 which Windows does not always grant — so its result carries **what it needed**, and a step that was

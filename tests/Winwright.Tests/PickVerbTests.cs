@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 using Winwright.Acting;
 using Winwright.Locating;
@@ -89,7 +89,62 @@ public sealed class PickVerbTests : IDisposable
     {
         // Data rather than a name compared in a refusal: every other flag on a verb is a field, and
         // a rule keyed on the string "pick" would be the vocabulary written twice.
-        Assert.Equal(["pick"], ActVerb.All.Where(one => one.Reaches).Select(one => one.Name));
+        Assert.Equal(["pick", "pick at"], ActVerb.All.Where(one => one.Reaches).Select(one => one.Name));
+    }
+
+    [Fact]
+    public void The_position_verb_takes_a_position_and_refuses_anything_else_where_it_was_written()
+    {
+        // WW267. Its own argument kind rather than 'a number': a range takes a fraction and a
+        // negative quite happily, and a position that is either is a step nobody can perform.
+        var verb = ActVerb.Named("pick at");
+
+        Assert.Equal(Takes.Position, verb.Wants);
+        Assert.True(verb.Reaches);
+        Assert.True(verb.Synthesises);
+        Assert.False(verb.Repeatable);
+
+        Assert.Null(verb.Refuses("0"));
+        Assert.Null(verb.Refuses("12"));
+        Assert.Contains("is not a whole number from 0", verb.Refuses("1.5"), StringComparison.Ordinal);
+        Assert.Contains("is not a whole number from 0", verb.Refuses("-1"), StringComparison.Ordinal);
+        Assert.Contains("is not a whole number from 0", verb.Refuses("second"), StringComparison.Ordinal);
+        Assert.Contains("acts on a position", verb.Refuses(null), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_case_naming_a_position_claims_the_reading_moved_rather_than_what_it_is()
+    {
+        // The shape the profiles case needs, and the reason both halves had to exist: a position to
+        // go to, because the values are the machine's data, and a claim about the reading changing,
+        // because the case cannot name what it changed to.
+        var loaded = ScenarioFile.Read(
+            "picker.cases.json",
+            """
+            {
+              "cases": [
+                {
+                  "name": "the picker walks off the one it opened on",
+                  "steps": [
+                    {
+                      "locator": "ComboBox#profiles",
+                      "act": "pick at",
+                      "with": "1",
+                      "reads": "picked",
+                      "moves": true
+                    }
+                  ]
+                }
+              ]
+            }
+            """);
+
+        var step = Assert.Single(Assert.Single(loaded).Steps);
+
+        Assert.Equal("pick at", step.Verb.Name);
+        Assert.Equal("1", step.Argument);
+        Assert.Equal("picked", step.Reads.Name);
+        Assert.True(step.Moves);
     }
 
     [Fact]
