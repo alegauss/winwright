@@ -260,23 +260,6 @@ resident process, because a pick there would repoint the real icon for real. Mig
 it inside the store comparison asserts the promise that a run touches nothing at the one
 place most likely to break it.
 
-### §WW84 The names case observes what no screenshot can
-
-A picture cannot see an accessible name, and an unnamed control is invisible to every
-other check. The case sweeps every panel the page declares - derived from the navigation
-labels, so a panel added later is covered with no edit here - and reads every control
-the naming rule is responsible for, covering both the branch that must fire and the
-branch that must not. Getting the second wrong gives three controls in one row the same
-name, which is worse for a screen reader than one unnamed.
-
-Both branches landed, on the two panels that carry them, with every label a key rather
-than a word. What did not is the derivation the headline promises. The sidebar items are
-bare `Border`s with no automation peer, and the flat sweep governs a family of control
-types — both of which the grammar can now say, in `WW273` and `WW274`. What is left is
-the About panel: it draws no settings rows, so a claim made once per panel holes there
-on every run and a suite around it is degraded forever. `WW276` is that. The script
-stays until it lands, because the proof of this migration is its deletion.
-
 ### §WW85 The environment sweep, last
 
 It walks one submenu per sampled mode, and it is the case that proves a fixture reaches
@@ -333,6 +316,29 @@ is the net working, and is why the concordance check runs after the rewrite rath
 the list being believed.
 
 What is left is the deletion the criterion measures.
+
+### §WW278 the sessions note stays open after the click that should close it
+
+`WW80`'s note case opens the popup behind claude-tray's info dot, reads the date its
+figure came from, and clicks the dot again to leave the window as it found it. That last
+step is the one this project cares most about — a run leaves the machine as it found it
+— and it is red.
+
+Measured three times while `WW84` was being finished, on the same desk, in three
+separate suite runs. The dot reads `Off`, the first click reads `On`, the note is
+readable, the second click reads `On` again, and the expectation polls `On` seven to
+nine times over six seconds and never anything else. The trace says the click landed:
+the act is recorded `Ok` with a synthesised pointer and a read-back.
+
+Two readings fit and they are opposite repairs. Either the application does not close
+the note on a second click of the dot — a popup that only dismisses on a click outside
+it, which is a real and common shape — or the click is being swallowed because the popup
+has the mouse capture, and the act that reports `Ok` never reached the dot at all.
+
+What separates them is a reading nobody has taken: what the dot's own toggle says
+immediately after the second click, and whether a click somewhere outside the popup
+closes it. Until then the case is right to be red and the sentence beside it does not
+say which repository to open.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
