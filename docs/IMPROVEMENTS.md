@@ -88,6 +88,28 @@ is ready, which is the engine's own contract being sometimes false.
 Deliberately not settled by reasoning. Two runs were spent today refuting hypotheses
 that looked certain, and the sentence that settles this arrives on the next guest red.
 
+### §WW253 A row that reads as text is not a subtree that grew
+
+`discloses` says there is more under the locator than there was. It does not say that
+what is under it *reads*, and that is the claim the script made about a conversation row
+before it ever clicked one: what a screen reader gets from a row is text or it is a
+picture, and no capture can tell the two apart.
+
+Measured migrating `WW80`. The script asserted four or more named descendants on the
+row. That count is the stale literal a derived set exists to refuse — the row grows a
+column and the case goes on asserting four.
+
+`answers` on the row is worse than nothing here. Probed on this desk, every row in that
+list announces `ClaudeTray.SessionListRow`, which is the CLR type name: a step reading
+the row's name and claiming it says something passes on a row whose every field is
+unreadable. That is an unearned green in the one place the accessibility tree was the
+whole point.
+
+The honest shape is derived from the tree rather than typed: of the elements under this
+locator, the ones that could carry a name do. It is `covers` one level down — a set
+nobody lists, read out of what the window drew rather than out of the project's strings
+— and it is the claim every list, grid and row in every adopting project wants.
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
@@ -103,30 +125,6 @@ navigate by clicking a control with no automation peer, resolve by id, type, rea
 through a pattern, traverse, and drive a range - and it is the case whose absence let a
 window ship with no keyboard input at all. Migrating it first means the engine is
 exercised end to end before anything else about it is claimed.
-
-### §WW80 The sessions case is the argument for the whole loop
-
-A popup is its own top-level window, so no render over a page's content can photograph
-it and no published screenshot ever will. Whether that note is readable at all is a
-question only the accessibility tree can answer. The case also waits out an asynchronous
-scan, expands a row into a tree and puts the surface back afterwards, which makes it the
-widest single test of locate, act, wait and restore in one place.
-
-Half of it is written and runs. The tab selects through the pattern in 52 polls, which
-is the engine's retry replacing the script's hand-written three-attempt
-Select-then-confirm loop; the info dot resolves and reads `Off`. The click that opens
-the note is a hole on this desk — `explorer` holds the foreground — so the question this
-case exists for is **not yet measured**: whether a popup in its own top-level window
-resolves from the main window's root.
-
-Three of the script's assertions cannot be written at all. A count of readable fields on
-a row and a subtree that grew after a click are `WW251`; a value carrying a date rather
-than equalling a string is `WW250`. The third is the one that matters most here: a note
-that lost the rate-card date still *answers*, so weakening that assertion would read as
-covered while checking nothing.
-
-None of the three is dropped quietly. The file says in its own comment which are missing
-and why.
 
 ### §WW81 The profiles case is the only thing that drives the picker
 
