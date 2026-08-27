@@ -126,6 +126,35 @@ public sealed class TypeUnionTests : IDisposable
         Assert.Contains("of the 4 element(s)", Said(verdict), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void A_sweep_looks_only_under_what_the_steps_before_its_last_one_name()
+    {
+        // WW277. The last step is the one the matches are of, and it was being matched against the
+        // whole window — so every step before it was decoration, and a case scoping a sweep to one row
+        // got a sweep of the page with the row's name written beside it.
+        //
+        // The language row holds one control. The window holds four, one of which announces nothing.
+        var verdict = Run("Group[name=\"Language\"] > ComboBox|Slider|Edit|CheckBox");
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+        Assert.Contains("all 1 element(s)", Said(verdict), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_route_that_resolves_to_nothing_sweeps_nothing_rather_than_the_window()
+    {
+        // The other half, and it is what a bug here would look like from a green: a scope naming a row
+        // this page does not draw must not quietly widen to the page.
+        var verdict = Run("Group[name=\"Nothing drew this\"] > ComboBox|Slider|Edit");
+        if (verdict is null)
+            return;
+
+        Assert.Equal(RunOutcome.Degraded, verdict.Outcome);
+        Assert.Contains("swept nothing at all", Said(verdict), StringComparison.Ordinal);
+    }
+
     /// <summary>Everything the run said, so a red here carries its own explanation.</summary>
     private static string Said(SuiteVerdict verdict) => string.Join(
         Environment.NewLine,

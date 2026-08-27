@@ -178,6 +178,7 @@ public sealed class NoCooperationTests : IDisposable
         Assert.True(Resolve.Once(root, Locator.Parse("Edit")).Found);
         Assert.True(Resolve.Until(root, Locator.Parse("""Button[name="Save"]"""), 2000, 20).Found);
         Assert.NotEmpty(Resolve.Matching(root, Locator.Parse("Button").Steps[0]));
+        Assert.NotNull(Resolve.Beneath(root, Locator.Parse("Button")));
         Assert.NotEmpty(Preflight.Offers(root, Locator.Parse("""Button[name="Save"]"""))!);
     }
 

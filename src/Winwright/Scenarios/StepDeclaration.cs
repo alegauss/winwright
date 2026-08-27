@@ -45,6 +45,7 @@ public sealed record StepDeclaration
         bool ownHeader)
     {
         Name = name;
+        Claimed = name;
         Locator = locator;
         Verb = verb;
         Argument = argument;
@@ -913,9 +914,24 @@ public sealed record StepDeclaration
         {
             Locator = parsed!,
             Name = $"{Name} [{member}]",
-            Carries = NamesTheMember ? member : null,
+            // The last step and not the whole locator: that is the one a sweep's matches are of, so
+            // `Group[name="{}"]` finding nothing is the strings and the window disagreeing, and
+            // `Group[name="{}"] > ComboBox` finding nothing is a row that holds no picker (WW276).
+            Carries = Locator.Steps[^1].Mentions(Member) ? member : null,
         };
     }
+
+    /// <summary>
+    /// The name this step is reported under before a repeated case adds the member, which is the same
+    /// thing for a case that runs once.
+    /// <para>
+    /// WW276. It is what says two results are the same claim. A case walking six panels asserts one
+    /// rule six times and those are one claim — red where any panel that carried it failed, a hole
+    /// only where none of them did — and the run needs a key to gather them by that a member's name
+    /// cannot be.
+    /// </para>
+    /// </summary>
+    public string Claimed { get; private init; }
 
     /// <summary>Whether this step's locator names the member of a repeated case.</summary>
     public bool NamesTheMember => Locator.Text.Contains(Member, StringComparison.Ordinal);

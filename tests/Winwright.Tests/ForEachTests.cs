@@ -58,13 +58,71 @@ public sealed class ForEachTests : IDisposable
             return;
 
         Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
-        Assert.Equal(4, verdict.Assertions);
+
+        // WW276. One claim and not four: the case asserts one rule over four rows, and a summary
+        // naming four results for one rule says the rule was checked four times.
+        Assert.Equal(1, verdict.Assertions);
+
+        var said = Said(verdict);
 
         // The member reaches the report as well as the locator: twelve steps across four panels
         // reported under four identical names is a trace a reader has to count lines in to use.
-        var said = Said(verdict);
         Assert.True(said.Contains("[Working directory]", StringComparison.Ordinal), said);
         Assert.True(said.Contains("across 4 member(s)", StringComparison.Ordinal), said);
+
+        // And what was visited, apart from what was asserted, which is the count the script kept by
+        // hand and the half WW263's design asked for and did not get.
+        Assert.True(said.Contains("4 of 4 member(s) carried this claim", StringComparison.Ordinal), said);
+    }
+
+    [Fact]
+    public void A_member_with_nothing_to_check_is_counted_and_named_and_does_not_degrade_the_walk()
+    {
+        // WW276, and the reason it exists. claude-tray's About panel holds prose and links and not one
+        // settings row, so a claim made once per panel holes there on every machine forever — and the
+        // suite around it goes red on a page behaving exactly as designed.
+        //
+        // The same shape here: the four rows are all on the page, and the naming rule governs a
+        // picker, a slider and a field — so the row holding a check box has nothing for it to name.
+        var verdict = Run("rows.headers", "Group[name=\"{}\"] > ComboBox|Slider|Edit");
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+
+        // Counted and named, never silent: a row that was reached and had nothing to check is not
+        // one that got away, and a reader has to be able to tell which it was.
+        var said = Said(verdict);
+        Assert.True(said.Contains("3 of 4 member(s) carried this claim", StringComparison.Ordinal), said);
+        Assert.True(said.Contains("1 had nothing to check", StringComparison.Ordinal), said);
+        Assert.True(said.Contains("[Startup]", StringComparison.Ordinal), said);
+    }
+
+    [Fact]
+    public void A_walk_where_no_member_carried_the_claim_is_a_hole_and_never_a_pass()
+    {
+        // The other end, and it is WW263's empty-derivation guard one level in: a walk that visited
+        // every member and found nothing to check anywhere ran zero times and reported nothing at all.
+        var verdict = Run("rows.headers", "Group[name=\"{}\"] > ProgressBar");
+        if (verdict is null)
+            return;
+
+        Assert.Equal(RunOutcome.Degraded, verdict.Outcome);
+        Assert.Contains("not one of the 4 member(s) had anything to check", Said(verdict), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_member_the_window_does_not_draw_is_still_a_red_and_never_one_of_those_holes()
+    {
+        // WW272's carve-out, kept: the locator's last step is the member itself, so nothing matching
+        // is the strings and the window disagreeing rather than a row with nothing in it. The two read
+        // alike from a count and are opposite repairs, so this is measured beside the two above.
+        var verdict = Run("rows.withAnExtra", "Group[name=\"{}\"]");
+        if (verdict is null)
+            return;
+
+        Assert.Equal(RunOutcome.Failed, verdict.Outcome);
+        Assert.Contains("this window does not draw", Said(verdict), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -162,7 +220,8 @@ public sealed class ForEachTests : IDisposable
 
     /// <summary>Repeat one claim over the strings a key declares, or null where the desk cannot observe.</summary>
     /// <param name="key">What to run once for each of.</param>
-    private SuiteVerdict? Run(string key)
+    /// <param name="locator">What each run sweeps, with the member reaching it through the placeholder.</param>
+    private SuiteVerdict? Run(string key, string locator = "Group[name=\"{}\"]")
     {
         if (!Desk.Read().CanObserve)
             return null;
@@ -204,7 +263,7 @@ public sealed class ForEachTests : IDisposable
                   "forEach": {{System.Text.Json.JsonSerializer.Serialize(key)}},
                   "steps": [
                     {
-                      "locator": "Group[name=\"{}\"]",
+                      "locator": {{System.Text.Json.JsonSerializer.Serialize(locator)}},
                       "act": "read",
                       "eachSpoken": true,
                       "named": "the row is on the page and everything in it is named"

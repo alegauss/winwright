@@ -41,10 +41,14 @@ public sealed class CaseResult
     /// <summary>
     /// How many members of a derived set this case ran over. One where it repeats over nothing.
     /// <para>
-    /// WW263. A repeated case makes its declared checks once per member, so the count a summary shows
-    /// is the product — and a line reading <em>over 12 of 3 check(s)</em> is one a reader stops
-    /// trusting. What was visited is also what the script counted apart from what was asserted, and
-    /// this is where that number comes from rather than from the case.
+    /// WW263. A repeated case drives the window once per member, and what was visited is what the
+    /// script counted apart from what was asserted — so this is where that number comes from, rather
+    /// than from the case.
+    /// </para>
+    /// <para>
+    /// WW276. It is no longer a multiplier on the checks. A case walking six panels asserts one rule
+    /// six times and those are one claim, gathered into one result over the whole walk — so the line
+    /// reads <em>3 of 3 check(s) across 6 member(s)</em>, and the count of checks is the case's own.
     /// </para>
     /// </summary>
     public int Across { get; }
@@ -95,7 +99,7 @@ public sealed class CaseResult
 
         var over = Across == 1
             ? $"{Declared.Checks} check(s)"
-            : $"{Declared.Checks * Across} check(s) across {Across} member(s)";
+            : $"{Declared.Checks} check(s) across {Across} member(s)";
 
         return $"{Declared.Name}: {Verdict.Outcome} over {Verdict.Ran} of {over}"
             + $"{short_fall}{where}{window}";
@@ -203,6 +207,11 @@ public static class CaseRun
         if (Absent(declared, measured) is { } missing)
             return NotOn(declared, missing, lent);
 
+        // WW276. Which claim each result belongs to, recorded as the run goes: a step adds none, one
+        // or two results depending on what it claimed and how far it got, so nothing after the fact
+        // can work it out by counting.
+        var claims = new List<string>();
+
         for (var index = 0; index < running.Count; index++)
         {
             var step = running[index];
@@ -217,7 +226,11 @@ public static class CaseRun
                 // produces reds about a window nobody put into the state they describe. Measured in
                 // claude-tray, where a click that was never delivered left the case red about a text
                 // box on a page that had never been opened.
-                if (!Perform(step, subject, project, budget, trace, results, root, pointedAt, recalled, speaking))
+                var went = Perform(step, subject, project, budget, trace, results, root, pointedAt, recalled, speaking);
+                while (claims.Count < results.Count)
+                    claims.Add(step.Claimed);
+
+                if (!went)
                 {
                     stopped = index;
                     break;
@@ -235,6 +248,9 @@ public static class CaseRun
                 });
 
                 broke.Add(HarnessError.At(trace.Count, step.Name, thrown));
+                while (claims.Count < results.Count)
+                    claims.Add(step.Claimed);
+
                 stopped = index;
                 break;
             }
@@ -247,7 +263,7 @@ public static class CaseRun
 
         return new CaseResult(
             declared,
-            RunVerdict.Over(results, broke),
+            RunVerdict.Over(Walked(results, claims, members.Count), broke),
             new ReadOnlyCollection<TraceStep>(trace),
             new ReadOnlyCollection<StepDeclaration>(notReached),
             lent,
@@ -555,7 +571,7 @@ public static class CaseRun
                 // The last step of the locator, because that is the one the matches are of: a sweep
                 // over `TabItem` under `Window#main > TabItem` is about the tab items, and the frame
                 // above them is how they were reached.
-                var read = Resolve.Matching(root, subject.Locator.Steps[^1])
+                var read = Sweeping(root, subject.Locator)
                     .Select(one => ElementFacts.Of(one)?.Says)
                     .OfType<string>()
                     .ToList();
@@ -655,7 +671,7 @@ public static class CaseRun
                 wrong.Clear();
                 paired = 0;
 
-                var found = Resolve.Matching(root, subject.Locator.Steps[^1]);
+                var found = Sweeping(root, subject.Locator);
                 rows = found.Count;
 
                 var headers = found
@@ -727,6 +743,89 @@ public static class CaseRun
     }
 
     /// <summary>
+    /// The results of a repeated case, gathered so each claim is counted once over the whole walk.
+    /// <para>
+    /// WW276. A case walking six panels asserts one rule six times, and those are one claim. Left
+    /// apart, claude-tray's About panel — which holds prose and links and not one settings row — makes
+    /// the run degraded on every machine forever, so the suite around it goes red on a page behaving
+    /// exactly as designed or goes green over a hole. Neither is a reading anybody acts on.
+    /// </para>
+    /// <para>
+    /// The rule is the one the script this replaces wrote by hand: red where any member that carried
+    /// the claim failed, a hole only where <em>no</em> member carried it — the vacuous walk, which is
+    /// `WW263`'s empty-derivation guard one level in — and otherwise a pass saying how many of the
+    /// members carried it. That count is the half `WW263`'s design asked for and did not get: what was
+    /// visited, reported apart from what was asserted.
+    /// </para>
+    /// <para>
+    /// Nothing is collapsed for a case that runs once, and the trace is untouched either way: a reader
+    /// who wants the panel a red came from reads the line, and a summary that named six results for
+    /// one rule is a summary that says the rule was checked six times.
+    /// </para>
+    /// </summary>
+    /// <param name="results">Every result the run produced, in the order it produced them.</param>
+    /// <param name="claims">Which claim each of them belongs to, by the name the case gave it.</param>
+    /// <param name="members">How many members the case ran over. One where it repeats over nothing.</param>
+    private static List<AssertionResult> Walked(
+        List<AssertionResult> results, List<string> claims, int members)
+    {
+        if (members <= 1 || results.Count == 0)
+            return results;
+
+        var order = new List<string>();
+        var gathered = new Dictionary<string, List<AssertionResult>>(StringComparer.Ordinal);
+        for (var index = 0; index < results.Count; index++)
+        {
+            var claim = index < claims.Count ? claims[index] : results[index].Name;
+            if (!gathered.TryGetValue(claim, out var already))
+            {
+                order.Add(claim);
+                gathered[claim] = already = [];
+            }
+
+            already.Add(results[index]);
+        }
+
+        return order.Select(claim => Over(claim, gathered[claim], members)).ToList();
+    }
+
+    /// <summary>One claim's verdict over every member the walk made it against.</summary>
+    /// <param name="claim">What the case called it, without the member a repeated run adds.</param>
+    /// <param name="over">What each member answered, in the order they were visited.</param>
+    /// <param name="members">How many members the case ran over.</param>
+    private static AssertionResult Over(string claim, List<AssertionResult> over, int members)
+    {
+        var failed = over.Where(one => one.Outcome == AssertionOutcome.Failed).ToList();
+        var holes = over.Where(one => one.DidNotRun).ToList();
+        var carried = over.Count - holes.Count;
+
+        // Which member, always: "the rule is wrong somewhere" sends a reader through six panels and
+        // "the slider on Display says Language" sends them at one.
+        var said = $"{carried} of {members} member(s) carried this claim";
+        var aside = holes.Count == 0 ? "" : $"; {holes.Count} had nothing to check — {Listed(holes)}";
+        var step = over[0].Step;
+
+        AssertionResult settled;
+        if (failed.Count > 0)
+            settled = AssertionResult.Fail(claim, $"{Listed(failed)}. {said}{aside}.");
+        else if (carried == 0)
+            settled = AssertionResult.Unchecked(
+                claim,
+                Precondition.Absent(
+                    $"one of the {members} member(s) carries '{claim}'",
+                    $"not one of the {members} member(s) had anything to check — {Listed(holes)}"));
+        else
+            settled = AssertionResult.Pass(claim, $"{said}{aside}.");
+
+        return step > 0 ? settled.At(step) : settled;
+    }
+
+    /// <summary>What some of the members answered, each named by the member it was about.</summary>
+    /// <param name="these">The results to say.</param>
+    private static string Listed(List<AssertionResult> these) =>
+        string.Join("; ", these.Select(one => $"{one.Name}: {one.Detail}"));
+
+    /// <summary>
     /// One step with every key in its locator replaced by the string the project declares for it.
     /// <para>
     /// WW273. Out of the language the fixture said its window is in, and resolved here rather than at
@@ -761,6 +860,25 @@ public static class CaseRun
             throw new ScenarioRefusedException(step.Name, unusable.Message);
         }
     }
+
+    /// <summary>
+    /// Every element a sweep matches: its locator's last step, under the route the steps before it
+    /// name, and nothing at all where that route does not resolve.
+    /// <para>
+    /// WW277. The last step is the one the matches are of — `Panel#general &gt; ComboBox` is about the
+    /// pickers — and it was being matched against the whole window, so every step before it was
+    /// decoration. A case scoping a sweep to one panel got a sweep of the window with the panel's name
+    /// written beside it: a pass over more than was asked for, or a red about a control on a page the
+    /// case had never opened. The documentation had said the opposite of what the code did since the
+    /// first sweep shipped.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The window, or whatever the case was launched against.</param>
+    /// <param name="locator">The whole locator, last step included.</param>
+    private static IReadOnlyList<AutomationElement> Sweeping(AutomationElement root, Locator locator) =>
+        Resolve.Beneath(root, locator) is { } under
+            ? Resolve.Matching(under, locator.Steps[^1])
+            : [];
 
     /// <summary>
     /// What a sweep needed before there was anything to sweep: one element under its locator.
@@ -855,7 +973,7 @@ public static class CaseRun
                 spoken.Clear();
                 wrong.Clear();
 
-                var found = Resolve.Matching(root, subject.Locator.Steps[^1]);
+                var found = Sweeping(root, subject.Locator);
                 matched = found.Count;
                 foreach (var one in found)
                 {

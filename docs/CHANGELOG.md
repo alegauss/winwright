@@ -185,6 +185,8 @@
 - ✅ **WW272** **a sweep that matched nothing is a red, and a page with no rows is a fact about the application** — `eachSpoken` and `ownHeader` count a locator matching nothing as a hole naming it, so a page allowed to have no rows degrades rather than reds — unless the locator was built out of a declared string.
 - ✅ **WW273** **a locator can only name an element by a string typed into the case** — A locator carries `{a.key}` and the run reads it out of the project's strings in the fixture's language, refusing an undeclared key before the first act — the same hole `{}` already was.
 - ✅ **WW274** **a locator step names one control type, so a rule governing a family of controls cannot be swept** — A step names several control types with `|` between them, matched as one search, so a rule governing a family of controls is one sweep rather than one mostly-empty sweep per type.
+- ✅ **WW277** **a sweep matches its last step against the whole window, so every step scoping it is decoration** — A sweep walks the route its earlier steps name and matches its last step under what it reached, so a scope is a scope and a route that resolves to nothing sweeps nothing.
+- ✅ **WW276** **a repeated case makes its claim once per member, so a member with nothing to check holes on every run** — A repeated case's per-member claims are gathered into one: red where any member that carried it failed, a hole only where none did, and otherwise a pass saying how many carried it.
 
 ## Block G — The scenario — a case is a data file
 

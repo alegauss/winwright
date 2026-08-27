@@ -170,7 +170,7 @@ directions — a verb added without an entry is a red.
 
 | Family | What it does |
 | --- | --- |
-| `Resolve` | one look for a locator, the same polled to a deadline, or every element a step matches |
+| `Resolve` | one look for a locator, the same polled to a deadline, every element a step matches, or what a sweep looks under |
 | `Inspect` | the control view under a window or an element, as a tree or as lines a person reads |
 | `Locator` | parse a locator, or try to |
 | `UiaVocabulary` | whether a name is a control type or a pattern, and the nearest name to a misspelt one |
@@ -492,6 +492,17 @@ first. A key declaring **no** strings is refused rather than run: zero members m
 inside run zero times and report nothing at all. And a case repeating over a set no step's locator
 reaches is refused too — it would drive the same window N times and report N times the confidence for
 one reading.
+
+**The claim is judged over the walk, not once per member.** Six panels asserting one rule are one
+claim: red where any member that carried it failed, a **hole** only where *no* member carried it, and
+otherwise a pass saying **how many of them did**. That last number is what a run reports apart from
+what it asserted — claude-tray's About page holds prose and links and not one settings row, and a
+panel that was reached and had nothing to check is not one that got away. The trace still carries a
+line per member, so a red names the panel it came from.
+
+What is *not* one of those holes is a member the window does not have. Where the last step of the
+locator is the member itself, nothing matching means the strings declare a row this window does not
+draw, and that is a red on every machine — a fact about the file, not about the page.
 
 ### What a case needs, and why it exists
 

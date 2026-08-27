@@ -91,6 +91,21 @@ public sealed record LocatorStep
     public bool Disambiguated => Index is not null || Order is not null;
 
     /// <summary>
+    /// Whether any of the strings this step matches on carries that text.
+    /// <para>
+    /// WW276. It is asked of the <em>last</em> step of a locator and of no other, because that is the
+    /// one a sweep's matches are of. `Group[name="{}"]` finding nothing means the strings declare a
+    /// row this window does not draw; `Group[name="{}"] &gt; ComboBox` finding nothing means the row
+    /// is there and holds no picker, which is a different fact and a different verdict.
+    /// </para>
+    /// </summary>
+    /// <param name="what">The text to look for, such as the member placeholder.</param>
+    public bool Mentions(string what) =>
+        (Name?.Contains(what, StringComparison.Ordinal) ?? false)
+        || (AutomationId?.Contains(what, StringComparison.Ordinal) ?? false)
+        || (ClassName?.Contains(what, StringComparison.Ordinal) ?? false);
+
+    /// <summary>
     /// Two steps are equal where they constrain the same things, which the compiler's own answer
     /// stopped being the day <see cref="ControlTypes"/> became a list: a record compares a reference
     /// there, so two parses of one locator were unequal and the round-trip that proves the grammar

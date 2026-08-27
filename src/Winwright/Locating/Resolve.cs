@@ -135,6 +135,43 @@ public static class Resolve
         return by != 0 ? by : tieFirst.CompareTo(tieSecond);
     }
 
+    /// <summary>
+    /// What a sweep looks under: the element every step but the last names, or <paramref name="root"/>
+    /// where the locator has one step. Null where the route does not resolve.
+    /// <para>
+    /// WW277. A sweep matches its last step, because that is the one the matches are of. It was
+    /// matching it against the whole window, so every step before it was decoration — a case scoping
+    /// a sweep to one panel got a sweep of the window, and the sentence beside it said the panel's
+    /// name. That is the unearned green with a scope written on it, and the documentation had said
+    /// the opposite of what the code did since the first sweep shipped.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The window, or whatever the case was launched against.</param>
+    /// <param name="locator">The whole locator. Its last step is the one being swept and is not walked.</param>
+    /// <exception cref="AmbiguousLocatorException">Where a step on the way matches several and says nothing about which.</exception>
+    public static AutomationElement? Beneath(AutomationElement root, Locator locator)
+    {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(locator);
+
+        var here = root;
+        for (var index = 0; index < locator.Steps.Count - 1; index++)
+        {
+            var step = locator.Steps[index];
+            var matches = Matching(here, step);
+            if (matches.Count > 1 && !step.Disambiguated)
+                throw new AmbiguousLocatorException(step, matches.Select(Named).ToList());
+
+            var wanted = (step.Index ?? 1) - 1;
+            if (wanted >= matches.Count)
+                return null;
+
+            here = matches[wanted];
+        }
+
+        return here;
+    }
+
     private static AutomationElement? Walk(AutomationElement root, Locator locator)
     {
         var here = root;
