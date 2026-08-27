@@ -233,6 +233,7 @@
 - ✅ **WW243** **the keyboard case has never run green: the click it opens with is never sent, and the red names the step after it** — The case runs green once WW244 and WW246 land: three checks, nothing excused, against real keys on a real WPF window.
 - ✅ **WW247** **three cases were moved to an in-process dialog on an inference that turned out to be false** — The three false sentences are corrected to what was measured, and each says the dialog's reason is now WW248 rather than a rule about Windows.
 - ✅ **WW80** **the sessions case drives the one surface a capture provably cannot finish checking** — Two cases: the note's date matched as a pattern and the row's call tree read as a subtree that grew, the popup resolving from the main window's root; the field count is WW253.
+- ✅ **WW81** **the profiles case is the only thing in that repository that drives the picker** — The picker walks by position and back, the report comes back with it, and the not-yet line is never shown on the way — with three claims left open as WW268-WW270.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

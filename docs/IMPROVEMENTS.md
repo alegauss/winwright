@@ -220,6 +220,71 @@ structural rather than textual: of the controls in this row, each announces this
 header or its own text, and none announces a header belonging to another row on the page
 — with the set of headers derived from the page rather than listed.
 
+### §WW268 The other half of a comparison with a step
+
+`sameAs` claims a reading is back to what a named step read. The profiles case needs the
+opposite as well, and for the same reason it needed the first: two accounts can read the
+same percentage, so the switch is judged on the pair rather than on either alone.
+
+The script wrote it as *the report follows the picker* — the used percentage at the
+second stop differing from the first's, or the reset caption landing in a different
+minute. An identical reading at both means the panes were never repainted, or were
+repainted with the profile being left behind, which is the defect the whole case exists
+for.
+
+`moves` is the near miss and cannot answer it. It compares a reading across one act in
+one step, and this compares two steps with a walk and a wait between them. The reading
+being compared is also not the one the act was about: the picker moved, and what has to
+have moved with it is a number somewhere else on the page.
+
+It is the same machinery `sameAs` already has — the recall of a named step's reading —
+with the comparison the other way round, so what is left to decide is the word rather
+than the mechanism. Whatever it is called, it takes no value: the point is that a case
+cannot know either number, only that they must not match.
+
+### §WW269 A minute of tolerance, and only a minute
+
+The reset caption names when a quota window turns over, and it counts down while the
+window is open. Read twice across a round trip it is legitimately different: a run that
+crosses a minute boundary changes it by one, and nothing about the application is wrong.
+
+`sameAs` compares exactly, so the caption cannot go through it. Dropping the claim is
+worse than tolerating the minute: an hour of drift is another profile's window, which is
+precisely the defect `WW81` was filed against, and the caption is one of the two
+readings that would show it.
+
+The script drew the line where the reasoning does. It parsed the caption to minutes and
+allowed a difference of one, treating anything larger as a red — and where the caption
+could not be parsed at all it fell back to comparing the strings, so a format it did not
+recognise was still checked rather than waved through.
+
+What this is not is a general tolerance on `sameAs`. A percentage is either the same
+number or it is not, and a comparison that quietly allowed some drift on every reading
+would turn the round trip into a claim nobody can state. The tolerance belongs to
+readings that are about a clock, declared as that, so a reader of the case can see which
+claim was weakened and by how much.
+
+### §WW270 The label a reading must not be
+
+The live strip's headline is a reading either way. What tells a working one from a
+broken one is which string it is: the application declares a label for *throughput
+unavailable*, and a headline still reading it once a stop has settled means the tail was
+disposed on the way out of a profile and never restarted for the new config directory.
+
+A percentage cannot see that — the numbers are all present and all plausible. It is the
+one defect in the profiles case that no reading of a value would catch, and the claim is
+the shape `expect` has turned around: not this string, where the string is a key the
+project declares rather than words typed into a case.
+
+`never` is the near miss and answers a different question. It watches a whole window
+across a wait and stops looking when the locator arrives; this is one element at rest,
+after everything has settled, and a headline that goes back to *unavailable* a moment
+later is exactly what `never` would miss.
+
+`matches` cannot do it either. A negative lookahead would have to name the English
+words, which is what a translation rewrites — and a pattern matching the empty string is
+already refused, which is what the naive spelling of *not this* becomes.
+
 ## Block G — The scenario — a case is a data file
 
 ### §WW258 The notification area is a surface no locator addresses
@@ -300,14 +365,6 @@ navigate by clicking a control with no automation peer, resolve by id, type, rea
 through a pattern, traverse, and drive a range - and it is the case whose absence let a
 window ship with no keyboard input at all. Migrating it first means the engine is
 exercised end to end before anything else about it is claimed.
-
-### §WW81 The profiles case is the only thing that drives the picker
-
-Every capture renders one profile, which is structurally incapable of seeing three
-defects that all need a second switch and two of which need it to come back. It also
-carries a timing claim - a line that must never be observed on the way back - and that
-claim is void unless the walk reports how many selection changes it took. Migrating it
-proves the hop count and the watch-while-waiting shape both survive the move.
 
 ### §WW82 The menu case reads the notification area
 
