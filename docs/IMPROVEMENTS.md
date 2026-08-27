@@ -159,6 +159,80 @@ which assumes nothing about the text and costs a reading the adopter has to prov
 What it must not become is a general tolerance on `sameAs`. A percentage is the same
 number or it is not.
 
+### §WW273 a locator can only name an element by a string typed into the case
+
+Every expectation in this engine is derived. `covers`, `label`, `notLabel`, `never` and
+`forEach` all name a key and read the string out of the language the fixture says its
+window is in. A **locator** cannot. It carries the words, and the words are the one
+thing that goes stale the day somebody edits the strings file and is wrong in every
+other language the application ships from the moment it is written.
+
+Measured migrating `WW84`. claude-tray's settings sidebar is six bare `Border`s with no
+automation peer, so the `TextBlock` inside is what reaches the tree and its words are
+the only thing that addresses one. The script wrote `Nav-Settings $win (Label
+'settings.nav.claudeCode')`. A case cannot: it must write `Text[name="Claude Code"]`,
+and the migrated keyboard case says so in a comment — *'Claude Code' is the same string
+in all four languages this app ships, which is why the locator can name it.* That
+comment is the defect, holding still.
+
+It also blocks the derived walk `WW84` exists for. `forEach` puts a member into a
+locator through `{}`, which is the whole set; there is no way to put **one** declared
+string in, and a leaf key derives nothing so `forEach` refuses it.
+
+What is owed is a spelling for it in the grammar, resolved at declaration against the
+fixture's language, so a locator names what the application calls a thing rather than
+what it called it once.
+
+### §WW274 a locator step names one control type, so a rule governing a family of controls cannot be swept
+
+`eachSpoken` sweeps every element a locator matches, and a locator step names one
+control type. Where the rule under test governs a *family* of controls, there is no
+locator for it.
+
+Measured migrating `WW84`. claude-tray's `SettingsRow` names the controls that have no
+content of their own to derive a name from — a `ComboBox`, a `Slider`, a `TextBox`, and
+a switch, which reaches UIA as a `Button` carrying `TogglePattern`. The script said
+exactly that, in a filter over four control types, and noted that the exclusion is by
+*what a thing is* rather than by a list of ids: a Slider's `DecreaseLarge` and a
+ScrollBar's `PageUp` are plain unnamed Buttons and the rule must leave them alone.
+
+Written as four steps, each panel gets four sweeps and most match nothing, so `WW272`
+makes most of them holes and the run is permanently degraded — a report nobody reads.
+Written as one step it cannot be written at all.
+
+`ownHeader` covers the half about the *wrong* name and `label` covers the controls
+somebody already knew about. What is lost is the sweep that finds an **unnamed**
+contentless control on a panel nobody thought to name — which is the defect `T175`
+actually found, twice, on two controls nobody had thought to name.
+
+What is owed is a step that names several control types, refused where they are not
+types the way an unknown one already is.
+
+### §WW275 covers is two-way and reads as one-way
+
+`covers` holds where nothing is missing **and** nothing is unexpected. That is
+deliberate and it is the right default: the tab set it was built for is the whole of
+what a `TabItem` locator matches, and a window carrying one more tab than the
+expectation had heard of is exactly the defect it exists to catch.
+
+The README documents half of it — *every string declared under it reads somewhere this
+step's locator matches* — and a reader writing a case from that sentence gets a red they
+cannot explain from it.
+
+Measured migrating `WW84`. The claim wanted was *the sidebar offers every settings panel
+the strings declare*, and the sidebar items are the only elements addressable by their
+words, so the locator is `Text`. All six matched. It failed on nine strangers — a
+section heading, a value caption, `Save`, `Cancel` — because the panel beside the
+sidebar is full of Texts and no locator separates the two. There is no one-way form to
+fall back on, so the claim went unwritten.
+
+Its sentence has a plural fault as well: *'a', 'b', 'c' were read and **is** declared
+nowhere*.
+
+Two things are owed. The documentation should say both directions, in the paragraph that
+teaches the field. And a case that means the one-way claim should have a way to say so,
+rather than reaching for a locator that cannot exist.
+
 ## Block G — The scenario — a case is a data file
 
 ### §WW258 The notification area is a surface no locator addresses
@@ -243,6 +317,13 @@ labels, so a panel added later is covered with no edit here - and reads every co
 the naming rule is responsible for, covering both the branch that must fire and the
 branch that must not. Getting the second wrong gives three controls in one row the same
 name, which is worse for a screen reader than one unnamed.
+
+Both branches landed, on the two panels that carry them, with every label a key rather
+than a word. What did not is the derivation the headline promises. The sidebar items are
+bare `Border`s with no automation peer, so their words are the only thing that addresses
+one and a locator cannot be built out of a declared string — `WW273`. And the flat sweep
+governs a family of control types that no single locator names — `WW274`. The script
+stays until both land, because the proof of this migration is its deletion.
 
 ### §WW85 The environment sweep, last
 

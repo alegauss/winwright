@@ -245,6 +245,7 @@
 - ✅ **WW271** **a repack of the same version is invisible to the adopter, and the refusal then blames the case file** — `pack-local.cmd` packs and evicts together and refuses where the version it read packed no such file, and the bootstrap now names the refusal a stale package produces.
 - ✅ **WW239** **the release workflow keeps its own list of where the version lives, and the list was already wrong once** — One line names every copy, and the same flags raise them and read them back — so a copy nobody added is in neither half, and the README joined both.
 - ✅ **WW240** **a project that ships several languages cannot derive a set at all, and the language it runs in is knowable** — A fixture says which language its window is in and a set derives from the file for it, so claude-tray declares all five it ships instead of one.
+- ✅ **WW84 (the pairing and the exact-label reads)** **the names case observes what no screenshot can** — Both branches of the naming rule are checked on the two panels that carry them, with every label a key and not a word — seven exact reads and the row pairing, all derived.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
