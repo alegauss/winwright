@@ -448,31 +448,6 @@ the list being believed.
 
 What is left is the deletion the criterion measures.
 
-### §WW239 Where the version lives is spelled twice
-
-`publish.yml` raises the version by rewriting five named paths, and
-`Winwright.Concordance` checks four of them because the CI step names those four on its
-command line. Neither owns the list. The knowledge that a version lives in
-`Directory.Build.props`, `.claude-plugin/plugin.json`, two sample projects and the
-README is spelled in a YAML array, in two workflow invocations, and in `ReadmeTests` —
-and the first of those was wrong on its first run, which is how the fifth copy was
-found.
-
-The net held, and that is the only reason this is an improvement rather than a defect:
-the concordance check and `ReadmeTests` both run after the rewrite, so a forgotten file
-is a red in the same run. But a net is not an owner. A sixth copy added tomorrow reaches
-neither the array nor the check, and the failure it produces is a package that disagrees
-with the tree that built it.
-
-The shape that would own it is a verb on the tool that already reads them: the same
-flags that say which copies to compare would say which copies to raise, so a copy the
-rewrite forgot is a copy the check was never told about either — one list, and adding to
-it does both.
-
-What it must not become is a sweep over every file mentioning the old version.
-`docs/CHANGELOG.md` names versions that have shipped, and a release that rewrote its own
-history is worse than a stale pin.
-
 ### §WW240 The language belongs to the fixture, not to the project
 
 `DerivedSet.From(declaration, under)` refuses a project declaring more than one

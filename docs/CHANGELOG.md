@@ -235,6 +235,7 @@
 - ✅ **WW80** **the sessions case drives the one surface a capture provably cannot finish checking** — Two cases: the note's date matched as a pattern and the row's call tree read as a subtree that grew, the popup resolving from the main window's root; the field count is WW253.
 - ✅ **WW81** **the profiles case is the only thing in that repository that drives the picker** — The picker walks by position and back, the report comes back with it, and the not-yet line is never shown on the way — with three claims left open as WW268-WW270.
 - ✅ **WW271** **a repack of the same version is invisible to the adopter, and the refusal then blames the case file** — `pack-local.cmd` packs and evicts together and refuses where the version it read packed no such file, and the bootstrap now names the refusal a stale package produces.
+- ✅ **WW239** **the release workflow keeps its own list of where the version lives, and the list was already wrong once** — One line names every copy, and the same flags raise them and read them back — so a copy nobody added is in neither half, and the README joined both.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

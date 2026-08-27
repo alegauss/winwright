@@ -74,6 +74,14 @@ jobs:
       # because one of the copies is what the build actually produced, and before the packages are
       # kept because a disagreement is not an artifact worth publishing. The adopter's pinned
       # version is a literal somebody has to remember to bump - this is what remembers.
+      #
+      # WW239 deliberately did not fold this into publish.yml's COPIES, and the boundary is worth
+      # stating. That line is where the version lives for an adopter, and it owns both halves of a
+      # release: the same flags raise the copies and read them back, so one nobody added is in
+      # neither. This line is about what a build produced - the assembly this process loaded, and the
+      # two packages just packed - which is a question about the run rather than about the tree, and
+      # is asked on every push rather than on a release. Two lists that could drift is the defect;
+      # two questions is not.
       - name: Check the copies of the engine agree
         run: >
           dotnet exec tools/Winwright.Concordance/bin/Release/net10.0-windows/Winwright.Concordance.dll

@@ -42,6 +42,27 @@ jobs:
       # What lets the job ask GitHub for the token nuget.org validates. Nothing publishes without it.
       id-token: write
 
+    env:
+      # WW239. Where the version lives, named once for the two steps that care. Both the raise and the
+      # check take this line, so a copy that is not here is in neither — which is the whole point, and
+      # is what the two lists it replaces could not promise.
+      #
+      # The packed copies are deliberately absent: they are read out of what Pack writes, so they
+      # cannot be named in the step that runs before it. The check appends them.
+      #
+      # `--package` is read left to right and stays until it is changed, so this ends by putting it
+      # back to Winwright. Without that last flag the check's first `--packed` would silently be about
+      # the in-app half, and two copies of the wrong package agreeing is a green.
+      COPIES: >-
+        --declared Directory.Build.props
+        --manifest .
+        --pinned samples/Adopter/driving/Driving.csproj
+        --documented README.md
+        --package Winwright.InApp
+        --pinned samples/Adopter/Adopter.csproj
+        --documented README.md
+        --package Winwright
+
     steps:
       - uses: actions/checkout@v7
 
@@ -83,45 +104,33 @@ jobs:
           # off the version rather than off a second flag somebody has to remember to set.
           "prerelease=$(if ($now -like '*-*') { 'true' } else { 'false' })" >> $env:GITHUB_OUTPUT
 
-      - name: Raise it in every copy
-        shell: pwsh
-        run: |
-          # Five files hold the version, and WW70's whole point is that they hold the same one. This
-          # rewrites the exact old string in each, and the list is not trusted: the concordance check
-          # below compares four of these copies and ReadmeTests compares the fifth, so a file this
-          # forgot is a red rather than a surprise in somebody's restore.
-          #
-          # The fifth is here because it was measured. This list was four paths long and the suite
-          # went red on the README — which is the net working, and is why the net runs after the
-          # rewrite rather than the rewrite being believed.
-          #
-          # A sweep over every file mentioning the old version would need no list at all, and is
-          # refused: docs/CHANGELOG.md names versions that have shipped, and a release that rewrote
-          # its own history would be the one thing worse than a stale pin.
-          $was = '${{ steps.version.outputs.was }}'
-          $now = '${{ steps.version.outputs.now }}'
-
-          $copies = @(
-            'Directory.Build.props',
-            '.claude-plugin/plugin.json',
-            'samples/Adopter/Adopter.csproj',
-            'samples/Adopter/driving/Driving.csproj',
-            'README.md'
-          )
-
-          foreach ($copy in $copies) {
-            $text = Get-Content $copy -Raw
-            if ($text -notmatch [regex]::Escape($was)) { throw "$copy does not mention $was" }
-            ($text -replace [regex]::Escape($was), $now) | Set-Content $copy -NoNewline -Encoding utf8
-            Write-Host "  $copy"
-          }
-
-      # Built before packing, and that is not ceremony: measured on this workflow's first run, `dotnet
-      # pack` on the solution builds only what it can pack. Winwright.Concordance sets IsPackable
-      # false, so it was never compiled and the check below failed with the assembly missing rather
-      # than with anything about the versions. ci.yml already had this shape.
+      # Built before raising, because the tool that raises the copies is one of the things it builds.
+      # It was already built before packing for a measured reason — `dotnet pack` on the solution
+      # builds only what it can pack, and Winwright.Concordance sets IsPackable false, so it was never
+      # compiled and the check failed with the assembly missing rather than with anything about the
+      # versions. Now it is needed one step earlier still.
       - name: Build
         run: dotnet build Winwright.slnx --configuration Release -p:ContinuousIntegrationBuild=true
+
+      # WW239. One list, and it says both things. It used to be two — five paths in a YAML array that
+      # a PowerShell step rewrote, and four flags on a command line that the check read — with nothing
+      # owning either. The array was wrong on its first run, and the suite went red on the README,
+      # which is the net working and is exactly why a net is not an owner: a sixth copy added tomorrow
+      # would have reached neither half.
+      #
+      # Every copy is named once, here. `--raise` rewrites the ones that are files in the tree and
+      # names the ones that are not; the identical line without it reads all of them back. So a copy
+      # missing from this list is missing from the rewrite and from the check together, and cannot be
+      # in one but not the other.
+      #
+      # A sweep over every file mentioning the old version would need no list at all, and is refused:
+      # docs/CHANGELOG.md names versions that have shipped, and a release that rewrote its own history
+      # would be the one thing worse than a stale pin.
+      - name: Raise it in every copy
+        run: >
+          dotnet exec tools/Winwright.Concordance/bin/Release/net10.0-windows/Winwright.Concordance.dll
+          ${{ env.COPIES }}
+          --raise ${{ steps.version.outputs.now }}
 
       - name: Pack
         run: dotnet pack Winwright.slnx --configuration Release --no-build --output artifacts -p:ContinuousIntegrationBuild=true
@@ -130,15 +139,16 @@ jobs:
       # rewrote against each other and against what was just built. A version raised in three files
       # out of four is a package that disagrees with the tree that produced it, which is the exact
       # thing this tool exists to refuse — so it runs before anything is published and not after.
+      #
+      # The packed copies are named only here: they are read out of what Pack has just written, and
+      # nothing could have rewritten them a step earlier.
       - name: Check every copy agrees
         run: >
           dotnet exec tools/Winwright.Concordance/bin/Release/net10.0-windows/Winwright.Concordance.dll
-          --declared Directory.Build.props
+          ${{ env.COPIES }}
           --packed artifacts
           --package Winwright.InApp
           --packed artifacts
-          --pinned samples/Adopter/Adopter.csproj
-          --manifest .
 
       # Asked here and not at the top of the job: a key nuget.org issues is good for an hour, and a
       # pack that took longer than that would push with a credential that had already expired.

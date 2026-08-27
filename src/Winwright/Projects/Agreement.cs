@@ -322,6 +322,89 @@ public static class Engine
     }
 
     /// <summary>
+    /// Which file a manifest argument means: the one named, or the one a directory holds.
+    /// <para>
+    /// WW239. Public because a caller that raises the copies as well as reading them needs the file
+    /// and not the argument — <c>--manifest .</c> names a directory, and a rewrite has to know which
+    /// file inside it the reading came out of. Resolving it a second time in the caller would be the
+    /// two-lists defect one layer down.
+    /// </para>
+    /// </summary>
+    /// <param name="manifestOrDirectory">The manifest, or a directory holding one.</param>
+    public static string ManifestIn(string manifestOrDirectory)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(manifestOrDirectory);
+
+        var path = Path.GetFullPath(manifestOrDirectory.Trim());
+        if (!Directory.Exists(path))
+            return path;
+
+        var beside = Path.Combine(path, ManifestName);
+        return File.Exists(beside) ? beside : Path.Combine(path, ".claude-plugin", ManifestName);
+    }
+
+    /// <summary>
+    /// The version a document tells a reader to take, out of the package reference it shows them.
+    /// <para>
+    /// WW239. The README is the fifth copy of the version and was found by the suite going red on a
+    /// release that raised four — so it was in the rewrite list and in no reading. It is the copy an
+    /// adopter actually acts on: a stale one hands somebody a version that was never published, or an
+    /// old one, and nothing about the build disagrees with anything.
+    /// </para>
+    /// <para>
+    /// Read as text and not as XML, because the reference is inside a fence in a markdown file. Every
+    /// occurrence is read rather than the first: a document showing the same reference twice and
+    /// disagreeing with itself is exactly the shape a partial hand-edit leaves, and answering with
+    /// whichever came first would report it as settled.
+    /// </para>
+    /// </summary>
+    /// <param name="where">What this copy is, as a report names it.</param>
+    /// <param name="document">The file that shows the reference — a README, or any prose.</param>
+    /// <param name="package">The package id the reference is about.</param>
+    public static EngineCopy Documented(string where, string document, string package = "Winwright")
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(where);
+        ArgumentException.ThrowIfNullOrWhiteSpace(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(package);
+
+        var full = Path.GetFullPath(document.Trim());
+        if (!File.Exists(full))
+            return new EngineCopy(where, null, Pinning.Absent, $"{Path.GetFileName(full)} is not there");
+
+        string text;
+        try
+        {
+            text = File.ReadAllText(full);
+        }
+        catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
+        {
+            return new EngineCopy(where, null, Pinning.Absent, $"{Path.GetFileName(full)} could not be read: {unreadable.Message}");
+        }
+
+        var shown = System.Text.RegularExpressions.Regex.Matches(
+                text,
+                @"Include\s*=\s*""" + System.Text.RegularExpressions.Regex.Escape(package)
+                    + @"""\s+Version\s*=\s*""([^""]+)""",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase,
+                TimeSpan.FromSeconds(1))
+            .Select(one => one.Groups[1].Value.Trim())
+            .Where(one => one.Length > 0)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        return shown switch
+        {
+            [] => new EngineCopy(where, null, Pinning.Absent, $"{Path.GetFileName(full)} shows no reference to {package}"),
+            [var only] => Reading(where, only, Path.GetFileName(full)),
+            _ => new EngineCopy(
+                where,
+                null,
+                Pinning.Unpinnable,
+                $"{Path.GetFileName(full)} shows {package} as {string.Join(" and as ", shown)}, so it disagrees with itself"),
+        };
+    }
+
+    /// <summary>
     /// The version of a package that was actually built, read out of the nupkg itself.
     /// <para>
     /// WW122. Until the two halves were packable there was nothing here but a source tree and a
@@ -406,13 +489,7 @@ public static class Engine
         ArgumentException.ThrowIfNullOrWhiteSpace(where);
         ArgumentException.ThrowIfNullOrWhiteSpace(manifestOrDirectory);
 
-        var path = Path.GetFullPath(manifestOrDirectory.Trim());
-        if (Directory.Exists(path))
-        {
-            var beside = Path.Combine(path, ManifestName);
-            var under = Path.Combine(path, ".claude-plugin", ManifestName);
-            path = File.Exists(beside) ? beside : under;
-        }
+        var path = ManifestIn(manifestOrDirectory);
 
         if (!File.Exists(path))
             return new EngineCopy(where, null, Pinning.Absent, $"there is no {ManifestName} at {path}");

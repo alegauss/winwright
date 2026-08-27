@@ -41,6 +41,19 @@ public static class Program
             return Unusable;
         }
 
+        // WW239. The same line, doing the other half. A release used to rewrite five paths named in
+        // YAML and then check four named on a command line, and neither list owned the other — so the
+        // one that was wrong on its first run was found by the suite going red on the copy it forgot.
+        // Named once here, a copy the rewrite misses is a copy the check was never told about either.
+        if (roster.Raises)
+        {
+            var (said, raised) = roster.Raise();
+            foreach (var line in said)
+                (raised ? Console.Out : Console.Error).WriteLine(line);
+
+            return raised ? 0 : Disagreed;
+        }
+
         var read = roster.Read();
 
         // Asked rather than restated: the reading owns what agreement means, and a second spelling
