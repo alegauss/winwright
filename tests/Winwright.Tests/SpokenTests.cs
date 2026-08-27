@@ -149,17 +149,22 @@ public sealed class SpokenTests : IDisposable
     }
 
     [Fact]
-    public void A_sweep_that_matched_nothing_fails_rather_than_holding_over_an_empty_set()
+    public void A_sweep_that_matched_nothing_is_counted_as_a_hole_rather_than_held_or_failed()
     {
-        // The hole every derived claim in this engine exists to close: an empty set is met by an
-        // empty window, and a sweep that swept nothing would otherwise be a check nobody ran
-        // reported as one that passed.
+        // WW272. A pass would be the check nobody ran reported as one that passed. A red would be a
+        // lie about the application: this sweeps the window rather than a declared set, and a page
+        // with no rows the rule applies to is a page behaving as designed — claude-tray's About panel
+        // holds prose and links and not one settings row.
         var verdict = Run("Button#nothingDrewThis", each: true);
         if (verdict is null)
             return;
 
-        Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
-        Assert.Contains("met by an empty window", Said(verdict), StringComparison.Ordinal);
+        Assert.Equal(RunOutcome.Degraded, verdict.Outcome);
+
+        // Naming the locator, because a hole nobody can go and look at is a hole nobody can close.
+        var said = Said(verdict);
+        Assert.True(said.Contains("Button#nothingDrewThis", StringComparison.Ordinal), said);
+        Assert.True(said.Contains("swept nothing at all", StringComparison.Ordinal), said);
     }
 
     [Fact]

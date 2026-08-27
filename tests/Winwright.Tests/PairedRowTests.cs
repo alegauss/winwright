@@ -79,14 +79,20 @@ public sealed class PairedRowTests : IDisposable
     }
 
     [Fact]
-    public void A_locator_matching_no_row_fails_rather_than_pairing_nothing()
+    public void A_locator_matching_no_row_is_counted_as_a_hole_rather_than_pairing_nothing()
     {
+        // WW272. The same reading `eachSpoken` gets and for the same reason: this pairs what is on
+        // the page, so no rows is a fact about the application. A page allowed to have none of them
+        // must not red, and a sweep that swept nothing must not pass.
         var verdict = Run("paired", "Group[name=\"Nothing drew this\"]");
         if (verdict is null)
             return;
 
-        Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
-        Assert.Contains("met by an empty window", Said(verdict), StringComparison.Ordinal);
+        Assert.Equal(RunOutcome.Degraded, verdict.Outcome);
+
+        var said = Said(verdict);
+        Assert.True(said.Contains("Nothing drew this", StringComparison.Ordinal), said);
+        Assert.True(said.Contains("swept nothing at all", StringComparison.Ordinal), said);
     }
 
     [Fact]

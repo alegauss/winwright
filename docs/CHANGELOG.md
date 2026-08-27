@@ -182,6 +182,7 @@
 - ✅ **WW268** **a case can claim a reading came back to an earlier step's and never that it differs from one** — A step names an earlier one in `unlike` and claims its reading differs from what that one read, judged and refused wherever `sameAs` is.
 - ✅ **WW262** **a case can claim one element is named and a set of strings was read, and nothing about every element** — A step claims `eachSpoken`: every element its locator matches announces a name, judged by what tells a label from a glyph — and a locator matching nothing fails.
 - ✅ **WW264** **a control wearing its neighbour's label reads as named, and nothing can tell the two apart** — A step claims `ownHeader`: of the rows its locator matches, no control inside one announces a different row's header, with the headers derived from the page.
+- ✅ **WW272** **a sweep that matched nothing is a red, and a page with no rows is a fact about the application** — `eachSpoken` and `ownHeader` count a locator matching nothing as a hole naming it, so a page allowed to have no rows degrades rather than reds — unless the locator was built out of a declared string.
 
 ## Block G — The scenario — a case is a data file
 

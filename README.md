@@ -334,7 +334,7 @@ the wrong label reads differently from one announcing the right label in the wro
 each reads somewhere the locator matched; this asks whether every **element** the locator matches
 announces a label. It is what a settings page needs: thirty-odd rows under one naming rule, where an
 assertion written against three named controls covers the rule exactly where it was already known to
-work. A locator matching nothing fails rather than holding — an empty set is met by an empty window.
+work.
 
 `ownHeader` catches what a name-existence check is blind to by construction. A rule that pairs a
 row's control with the wrong row's header gives several controls one name — every one of them a real
@@ -343,6 +343,14 @@ headers are derived and never listed: they are the names of the rows the locator
 added to the page joins the set with no edit here. A control announcing its own row's header is
 right, and one keeping its own text is right — that second branch is the only one that can produce
 the duplicate, which is why a case checking the first alone is checking the easy half.
+
+Both of them sweep the **window**, so a locator that matched nothing is neither held nor failed but
+**counted as a hole** naming the locator. That is not where `covers` goes, and the difference is
+which side the set comes from: `covers` derives its set from what the project declares, so an empty
+one is a fact about the file and wrong on every machine. These two find what is on the page, and a
+page with no rows is a fact about the application — claude-tray's About panel holds prose and links
+and not one settings row, so a walk over every panel the navigation declares would otherwise red on
+a page behaving exactly as designed.
 
 `spoken` is what a screen reader gets, and no capture can tell it from a picture. It is never a
 count: claude-tray's script asserted *four or more* named fields on a conversation row, which is the

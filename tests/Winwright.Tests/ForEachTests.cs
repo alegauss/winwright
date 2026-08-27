@@ -76,8 +76,14 @@ public sealed class ForEachTests : IDisposable
         if (verdict is null)
             return;
 
-        Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
-        Assert.Contains("[Telemetry]", Said(verdict), StringComparison.Ordinal);
+        // WW272. A red and not the hole a sweep matching nothing otherwise gets. The difference is
+        // which side the set came from: this locator was built out of a string the project declares,
+        // so nothing matching is the file and the window disagreeing, and that is wrong everywhere.
+        Assert.Equal(RunOutcome.Failed, verdict.Outcome);
+
+        var said = Said(verdict);
+        Assert.True(said.Contains("[Telemetry]", StringComparison.Ordinal), said);
+        Assert.True(said.Contains("this window does not draw", StringComparison.Ordinal), said);
     }
 
     [Fact]
@@ -133,6 +139,17 @@ public sealed class ForEachTests : IDisposable
         Assert.Equal("Group[name=\"Startup\"]", one.Locator.Text);
         Assert.Contains("[Startup]", one.Name, StringComparison.Ordinal);
         Assert.False(one.NamesTheMember);
+
+        // WW272. What it was built out of, which is what tells a sweep matching nothing apart from a
+        // page that legitimately has none of these.
+        Assert.Equal("Startup", one.Carries);
+
+        // And a step that reaches no member is not made a claim about one by being repeated beside a
+        // step that does — every step of a repeated case is renamed, and only some of them derive.
+        var beside = StepDeclaration.Of("Group", "read", eachSpoken: true).For("Startup");
+
+        Assert.Null(beside.Carries);
+        Assert.Contains("[Startup]", beside.Name, StringComparison.Ordinal);
     }
 
     /// <summary>Everything the run said, so a red here carries its own explanation.</summary>

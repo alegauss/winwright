@@ -696,10 +696,13 @@ public static class CaseRun
             subject.DeadlineMs,
             subject.PollMs);
 
+        // WW272. Nothing matched is the third verdict rather than a red, unless the locator was built
+        // out of a string the project declares — see `SweptNothing`.
+        var swept = rows > 0 ? default : SweptNothing(step, "row", waited.WaitedMs);
+
         var detail = (rows, paired, wrong.Count) switch
         {
-            (0, _, _) => $"{step.Locator.Text} matched no row in {waited.WaitedMs}ms, so nothing was "
-                + "paired — an empty set is met by an empty window",
+            (0, _, _) => swept.Said,
             (_, 0, _) => $"{step.Locator.Text} matched {rows} row(s) and not one of them holds a control "
                 + $"that announces anything, so no pairing was checked. Waited {waited.WaitedMs}ms.",
             (_, _, > 0) => $"{wrong.Count} control(s) announce another row's header: "
@@ -717,15 +720,75 @@ public static class CaseRun
             WaitedMs = waited.WaitedMs,
             Polls = rows,
             Detail = waited.Happened ? null : detail,
-            Verdict = waited.Happened ? StepVerdict.Ok : StepVerdict.Failed,
+            Verdict = Reached(swept.Hole, waited.Happened),
         });
 
-        var result = waited.Happened
-            ? AssertionResult.Pass(step.Name, detail)
-            : AssertionResult.Fail(step.Name, detail);
-
-        results.Add(result.At(trace.Count));
+        results.Add(Settled(step, swept.Hole, waited.Happened, detail).At(trace.Count));
     }
+
+    /// <summary>
+    /// What a sweep needed before there was anything to sweep: one element under its locator.
+    /// <para>
+    /// WW272. A red was wrong here, and the sentence it carried borrowed `covers`' reason — an empty
+    /// set is met by an empty window. That reason does not transfer. `covers` derives its expected set
+    /// from what the project <em>declares</em>, so an empty one is a fact about the file and wrong on
+    /// every machine. These two derive nothing: they match against the <em>window</em>, and empty means
+    /// this window has none of these right now, which is sometimes a defect and sometimes the page.
+    /// </para>
+    /// <para>
+    /// Measured migrating `WW84`. claude-tray's About panel holds prose and links and not one settings
+    /// row, so a walk over every panel the navigation declares reds on a page behaving exactly as
+    /// designed — and the script it replaced said so in as many words: a panel is allowed to have no
+    /// row the rule applies to. A pass would be the unearned green and a red is a lie about the
+    /// application, so what is left is the verdict this whole tool is built on: counted, named, and
+    /// carrying the locator that matched nothing.
+    /// </para>
+    /// <para>
+    /// The one exception is a locator built out of a declared string, which a repeated case does. That
+    /// set comes from the file after all, so nothing matched is `WW263`'s disagreement — the strings
+    /// say this row is there and the window does not draw it — and that is a red naming both.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step whose locator swept nothing.</param>
+    /// <param name="kind">What it was sweeping for, as the sentence should say it.</param>
+    /// <param name="waitedMs">How long it waited for one to arrive.</param>
+    /// <returns>The absence where this is a hole and null where it is a red, and the sentence either way.</returns>
+    private static (Precondition? Hole, string Said) SweptNothing(StepDeclaration step, string kind, long waitedMs)
+    {
+        if (step.Carries is { } declared)
+        {
+            return (null, $"{step.Locator.Text} matched no {kind} in {waitedMs}ms, and it was built out "
+                + $"of \"{declared}\" — a string the project declares and this window does not draw");
+        }
+
+        var hole = Precondition.Absent(
+            $"{step.Locator.Text} matches at least one {kind}",
+            $"{step.Locator.Text} matched no {kind} in {waitedMs}ms, so this swept nothing at all — "
+                + "which is a fact about the window rather than about the claim, and a sweep that "
+                + "swept nothing did not run");
+
+        return (hole, hole.Absence);
+    }
+
+    /// <summary>How the trace reports a sweep: a hole where it swept nothing, otherwise the reading.</summary>
+    /// <param name="swept">The absence, where the locator matched nothing.</param>
+    /// <param name="held">Whether the claim held.</param>
+    private static StepVerdict Reached(Precondition? swept, bool held) => swept is not null
+        ? StepVerdict.Unchecked
+        : held ? StepVerdict.Ok : StepVerdict.Failed;
+
+    /// <summary>The same three ways, as the result a summary counts.</summary>
+    /// <param name="step">The step being reported.</param>
+    /// <param name="swept">The absence, where the locator matched nothing.</param>
+    /// <param name="held">Whether the claim held.</param>
+    /// <param name="detail">What was read, for the two outcomes that read something.</param>
+    private static AssertionResult Settled(
+        StepDeclaration step,
+        Precondition? swept,
+        bool held,
+        string detail) => swept is not null
+        ? AssertionResult.Unchecked(step.Name, swept)
+        : held ? AssertionResult.Pass(step.Name, detail) : AssertionResult.Fail(step.Name, detail);
 
     /// <summary>
     /// A step claiming that every element its locator matches announces a name.
@@ -735,9 +798,8 @@ public static class CaseRun
     /// pickers, and the panel above them is how they were reached.
     /// </para>
     /// <para>
-    /// A locator matching nothing fails rather than holding. An empty set is met by an empty window,
-    /// which is the hole every derived claim in this engine exists to close — and a sweep that swept
-    /// nothing is a check nobody ran reported as one that passed.
+    /// A locator matching nothing is neither held nor failed but counted as the hole it is, for the
+    /// reason <see cref="SweptNothing"/> gives: a page with no rows is a fact about the application.
     /// </para>
     /// </summary>
     private static void EachSpoke(
@@ -776,10 +838,13 @@ public static class CaseRun
             subject.DeadlineMs,
             subject.PollMs);
 
+        // WW272. Nothing matched is the third verdict rather than a red, unless the locator was built
+        // out of a string the project declares — see `SweptNothing`.
+        var swept = matched > 0 ? default : SweptNothing(step, "element", waited.WaitedMs);
+
         var detail = (matched, wrong.Count) switch
         {
-            (0, _) => $"{step.Locator.Text} matched nothing in {waited.WaitedMs}ms, so this swept no "
-                + "element at all — an empty set is met by an empty window",
+            (0, _) => swept.Said,
             (_, > 0) => $"{wrong.Count} of the {matched} element(s) {step.Locator.Text} matches announce "
                 + $"something that is not a name. {string.Join(" ", wrong.Select(one => one.Sentence("one of them")))} "
                 + $"Waited {waited.WaitedMs}ms.",
@@ -795,12 +860,10 @@ public static class CaseRun
             ReadBack = spoken.Count == 0 ? null : string.Join(", ", spoken),
             WaitedMs = waited.WaitedMs,
             Detail = waited.Happened ? null : detail,
-            Verdict = waited.Happened ? StepVerdict.Ok : StepVerdict.Failed,
+            Verdict = Reached(swept.Hole, waited.Happened),
         });
 
-        var result = waited.Happened
-            ? AssertionResult.Pass(step.Name, detail)
-            : AssertionResult.Fail(step.Name, detail);
+        var result = Settled(step, swept.Hole, waited.Happened, detail);
 
         results.Add(result.At(trace.Count));
     }

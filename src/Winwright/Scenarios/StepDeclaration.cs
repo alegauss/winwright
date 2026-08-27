@@ -908,11 +908,33 @@ public sealed record StepDeclaration
         if (!Locator.TryParse(text, out var parsed, out var because))
             throw new ScenarioRefusedException($"{Name} [{member}]", $"'{text}' does not parse: {because}");
 
-        return this with { Locator = parsed!, Name = $"{Name} [{member}]" };
+        return this with
+        {
+            Locator = parsed!,
+            Name = $"{Name} [{member}]",
+            Carries = NamesTheMember ? member : null,
+        };
     }
 
     /// <summary>Whether this step's locator names the member of a repeated case.</summary>
     public bool NamesTheMember => Locator.Text.Contains(Member, StringComparison.Ordinal);
+
+    /// <summary>
+    /// The declared string this step's locator was built out of, or null where it was built out of none.
+    /// <para>
+    /// WW272. It is what separates the two ways a sweep can match nothing. A locator carrying a string
+    /// the project declares and matching nothing is the disagreement `WW263` exists to produce — the
+    /// file says this row is there and the window does not draw it, which is wrong on every machine.
+    /// A locator carrying no such string and matching nothing says only that this window has none of
+    /// these right now, and that is sometimes the page.
+    /// </para>
+    /// <para>
+    /// Set only where the locator actually named the member: a repeated case renames all of its steps
+    /// so the trace says which run each line came from, and a step that does not reach the member is
+    /// not made a claim about it by being repeated alongside one that does.
+    /// </para>
+    /// </summary>
+    public string? Carries { get; private init; }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>
     public override string ToString() => (Expected, Moves) switch
