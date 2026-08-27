@@ -37,7 +37,9 @@ public sealed record StepDeclaration
         bool discloses,
         string? sameAs,
         string? never,
-        bool spoken)
+        bool spoken,
+        string? label,
+        string? notLabel)
     {
         Name = name;
         Locator = locator;
@@ -54,6 +56,8 @@ public sealed record StepDeclaration
         SameAs = sameAs;
         Never = never;
         Spoken = spoken;
+        Label = label;
+        NotLabel = notLabel;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -172,6 +176,43 @@ public sealed record StepDeclaration
     /// </summary>
     public bool Spoken { get; }
 
+    /// <summary>
+    /// The key whose declared string this step's reading should be, or null where it makes another
+    /// claim.
+    /// <para>
+    /// WW261. <see cref="Expected"/> takes a literal, which for a label is the hardcoded set with one
+    /// member: it goes stale the day somebody edits the string, and it is wrong in every other
+    /// language the application ships from the moment it is written. <see cref="Covers"/> derives the
+    /// strings <em>under</em> a key and is no answer for one control — a leaf key has no children, so
+    /// the derivation comes back empty and the sweep is broken rather than failed.
+    /// </para>
+    /// <para>
+    /// Not <see cref="Covers"/> with one member either. That claims a set was read <em>somewhere</em>
+    /// the locator matched; this claims <em>this</em> element says it, which is the difference between
+    /// a panel holding a label and a control announcing one.
+    /// </para>
+    /// </summary>
+    public string? Label { get; }
+
+    /// <summary>
+    /// The key whose declared string this step's reading must not be, or null where it makes another
+    /// claim.
+    /// <para>
+    /// WW270. The mirror, and it exists because some states an application has a word for are states
+    /// it must not be in. Measured on claude-tray's live strip: the headline is a reading either way,
+    /// and what tells a working one from a broken one is whether it is the <em>throughput
+    /// unavailable</em> label — which means the tail was disposed on the way out of a profile and
+    /// never restarted. No reading of a value could catch that; the numbers are all present.
+    /// </para>
+    /// <para>
+    /// A key rather than the words, for the reason every other declaration here is one: a phrase typed
+    /// in a case is one a translation rewrites. <see cref="Matches"/> cannot do it — a negative
+    /// lookahead would have to name the English, and a pattern matching the empty string is already
+    /// refused, which is what the naive spelling of <em>not this</em> becomes.
+    /// </para>
+    /// </summary>
+    public string? NotLabel { get; }
+
     /// <summary>Which reading the expectation is about. <see cref="ReadBack.Anything"/> by default.</summary>
     public ReadBack Reads { get; }
 
@@ -248,7 +289,8 @@ public sealed record StepDeclaration
     /// </summary>
     public bool Checkable =>
         Expected is not null || Moves || Answers || Covers is not null || Matches is not null || Discloses
-        || SameAs is not null || Never is not null || Spoken;
+        || SameAs is not null || Never is not null || Spoken
+        || Label is not null || NotLabel is not null;
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -279,6 +321,8 @@ public sealed record StepDeclaration
     /// <param name="sameAs">The earlier step this one claims its reading is back to.</param>
     /// <param name="never">The key whose strings must never show while this step waits for its locator.</param>
     /// <param name="spoken">That everything under the locator which says anything says a name.</param>
+    /// <param name="label">The key whose declared string the reading should be.</param>
+    /// <param name="notLabel">The key whose declared string the reading should not be.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static StepDeclaration Of(
         string locator,
@@ -295,7 +339,9 @@ public sealed record StepDeclaration
         bool discloses = false,
         string? sameAs = null,
         string? never = null,
-        bool spoken = false)
+        bool spoken = false,
+        string? label = null,
+        string? notLabel = null)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var subject = called ?? Describing(verb, locator);
@@ -335,8 +381,14 @@ public sealed record StepDeclaration
         // this one must not be refused as a step that makes none.
         var forbidden = string.IsNullOrWhiteSpace(never) ? null : never.Trim();
 
+        // WW261 and WW270, computed with the others and for the same reason: the rules that ask
+        // whether a step claims anything must know about a claim before it can name the right field.
+        var declared = string.IsNullOrWhiteSpace(label) ? null : label.Trim();
+        var undeclared = string.IsNullOrWhiteSpace(notLabel) ? null : notLabel.Trim();
+
         var claims = wanted is not null || moves || answers || sweeping is not null || pattern is not null
-            || discloses || back is not null || forbidden is not null || spoken;
+            || discloses || back is not null || forbidden is not null || spoken
+            || declared is not null || undeclared is not null;
 
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
         // says it moved where it was something else. A step asserting both would owe two assertion
@@ -494,6 +546,26 @@ public sealed record StepDeclaration
             }
         }
 
+        if (declared is not null && undeclared is not null)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims the reading is '{declared}' and also that it is not '{undeclared}'; a step "
+                    + "answers one thing, and these are two");
+        }
+
+        // One claim per step, as everywhere else. 'expect' names the value and this names the key the
+        // value comes from, and a step holding both owes two assertion results.
+        if ((declared is not null || undeclared is not null)
+            && (wanted is not null || moves || answers || sweeping is not null || pattern is not null
+                || discloses || back is not null || forbidden is not null || spoken))
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it names the '{declared ?? undeclared}' string and also makes another claim; the "
+                    + "key is where the value comes from rather than a second thing to check");
+        }
+
         if (spoken)
         {
             // One claim per step, as everywhere else. This one is about the subtree, and the others
@@ -628,7 +700,9 @@ public sealed record StepDeclaration
             discloses,
             back,
             forbidden,
-            spoken);
+            spoken,
+            declared,
+            undeclared);
     }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>

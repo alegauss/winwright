@@ -135,27 +135,6 @@ rather than a condition the case runs under. What is missing is a set the applic
 itself reports, declared once where the project declares its strings, and derived per
 run like the other one.
 
-### §WW261 One declared string is an expectation too
-
-`covers` derives the strings *under* a key and claims each reads somewhere the locator
-matches. That is the answer for a set. For one control it is no answer at all: a leaf
-key has no children, so the derivation comes back empty and the sweep is broken rather
-than failed — which is right, and leaves the claim unwritable.
-
-So a case asserting that the profile picker announces its label has to type the label.
-The script never did: it called the strings file for every one of them, and `WW84` is
-nine such reads. A typed label is the hardcoded set with one member — it goes stale the
-day somebody edits the string, and it is wrong in the other four languages this
-application ships from the moment it is written.
-
-The shape is the derivation `covers` already does, stopping one level higher: a key that
-names a string rather than a parent of them, resolved for the language the run resolved,
-compared against the reading the step names. It is not `covers` with one member — that
-claims a set was read *somewhere*, and this claims *this* element says it.
-
-The refusals it needs are the mirror of the sweep's: a key that names an object rather
-than a string, and a key nothing declares, both refused where the author wrote them.
-
 ### §WW262 The flat sweep is over elements, not over strings
 
 `covers` is one claim over many elements and it is about *strings*: every value the key
@@ -243,27 +222,6 @@ number or it is not, and a comparison that quietly allowed some drift on every r
 would turn the round trip into a claim nobody can state. The tolerance belongs to
 readings that are about a clock, declared as that, so a reader of the case can see which
 claim was weakened and by how much.
-
-### §WW270 The label a reading must not be
-
-The live strip's headline is a reading either way. What tells a working one from a
-broken one is which string it is: the application declares a label for *throughput
-unavailable*, and a headline still reading it once a stop has settled means the tail was
-disposed on the way out of a profile and never restarted for the new config directory.
-
-A percentage cannot see that — the numbers are all present and all plausible. It is the
-one defect in the profiles case that no reading of a value would catch, and the claim is
-the shape `expect` has turned around: not this string, where the string is a key the
-project declares rather than words typed into a case.
-
-`never` is the near miss and answers a different question. It watches a whole window
-across a wait and stops looking when the locator arrives; this is one element at rest,
-after everything has settled, and a headline that goes back to *unavailable* a moment
-later is exactly what `never` would miss.
-
-`matches` cannot do it either. A negative lookahead would have to name the English
-words, which is what a translation rewrites — and a pattern matching the empty string is
-already refused, which is what the naive spelling of *not this* becomes.
 
 ## Block G — The scenario — a case is a data file
 

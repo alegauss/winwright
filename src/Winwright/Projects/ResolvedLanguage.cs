@@ -56,6 +56,22 @@ public sealed record ResolvedLanguage
     /// </summary>
     public string? PreferenceMiss { get; }
 
+    /// <summary>
+    /// The language a caller already knows the window is in, taken as read.
+    /// <para>
+    /// WW261. Nothing is resolved here and nothing needs to be: a fixture that says its window is in
+    /// <c>pt-BR</c> has answered the question this type exists to ask, and asking it again off the
+    /// desk would be the guess the declaration replaced. <see cref="Resolve(ProjectDeclaration)"/> is
+    /// still what an attach uses, where there was no launch to have said anything.
+    /// </para>
+    /// </summary>
+    /// <param name="culture">What the window is in.</param>
+    public static ResolvedLanguage Speaking(CultureInfo culture)
+    {
+        ArgumentNullException.ThrowIfNull(culture);
+        return new ResolvedLanguage(culture, LanguageSource.DisplayLanguage, "the fixture that launched it", null);
+    }
+
     /// <summary>Resolve it from what the project declared, falling back to this machine's display language.</summary>
     public static ResolvedLanguage Resolve(ProjectDeclaration declaration)
     {

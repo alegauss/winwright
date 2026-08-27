@@ -363,13 +363,36 @@ public static class CaseRun
             return true;
         }
 
+        // WW261 and WW270. Resolved once, before the attempts, and out of the language the fixture
+        // said its window is in. A key that cannot be read is a scenario that is wrong rather than an
+        // application that is: the refusal names the key and the file, and it arrives before anything
+        // is compared rather than as a reading that answered nothing.
+        string? declared = null;
+        if ((step.Label ?? step.NotLabel) is { } declaring)
+        {
+            try
+            {
+                // The fixture's word where it gave one, and the way the application resolves it where
+                // nothing did — which is what an attach has to do, there being no launch to have said.
+                var language = speaking is null
+                    ? ResolvedLanguage.Resolve(project)
+                    : ResolvedLanguage.Speaking(speaking);
+
+                declared = Labels.For(declaring, project, language).Text;
+            }
+            catch (UnusableLabelException unusable)
+            {
+                throw new ScenarioRefusedException(step.Name, unusable.Message);
+            }
+        }
+
         // WW255. Looked up once, before the attempts: the value a round trip is about was read when
         // the earlier step ran, and a lookup inside the retry would be the same answer fetched three
         // times. Absent only where that step stopped the case, which is a state this never reaches.
         var backTo = step.SameAs is { } back && recalled.TryGetValue(back, out var read) ? read : null;
 
         var cap = step.Retryable ? project.Attempts : 1;
-        var attempted = Retry.Bounded(() => Attempting(step, subject, backTo), one => one.Held, cap);
+        var attempted = Retry.Bounded(() => Attempting(step, subject, backTo, declared), one => one.Held, cap);
         var landed = attempted.Last;
 
         if (landed.Acted is { } acted)
@@ -736,7 +759,8 @@ public static class CaseRun
         return loading.Computing ? $"{said} {loading.Sentence()}" : said;
     }
 
-    private static Landed Attempting(StepDeclaration step, Subject subject, string? backTo = null)
+    private static Landed Attempting(
+        StepDeclaration step, Subject subject, string? backTo = null, string? declared = null)
     {
         // WW229. Read before the act and only where a step claims movement, because that is the one
         // claim whose other half is a moment that has already gone. Everything else compares a
@@ -767,6 +791,13 @@ public static class CaseRun
 
         if (step.SameAs is not null)
             return Returned(step, subject, acted, backTo);
+
+        // WW261 and WW270. Both are about one declared string, so both are answered in one place: the
+        // positive is the expectation `expect` makes against a value the engine derived, and the
+        // negative says so through the same trick `discloses` uses to state a negative to a machine
+        // that compares for equality.
+        if (step.Label is not null || step.NotLabel is not null)
+            return Against(step, subject, acted, declared);
 
         if (step.Expected is not { } wanted)
             return new Landed(acted, null, acted?.Element);
@@ -810,6 +841,58 @@ public static class CaseRun
                 saw = look.Facts ?? saw;
                 var now = look.Found ? step.Reads.Of(look) : null;
                 return string.IsNullOrWhiteSpace(now) ? now : wanted;
+            },
+            subject.ActMs,
+            subject.PollMs);
+
+        return new Landed(acted, expectation, saw);
+    }
+
+    /// <summary>
+    /// A step whose expectation is a string the project declares, waited for the way every other one
+    /// is — either that the reading <em>is</em> it, or that it is not.
+    /// <para>
+    /// WW261 and WW270. What makes both worth having is that the value is never typed in the case. A
+    /// label written into a step is the hardcoded set with one member: it goes stale the day somebody
+    /// edits the string, and it is wrong in every other language the application ships from the moment
+    /// it is written. The key is the same declaration the project already makes.
+    /// </para>
+    /// <para>
+    /// The wanted sentence carries the key and the string, so a failure reads as what it is —
+    /// <em>wanted 'settings.general.interval' — Refresh interval, last read Intervalo</em> — and a
+    /// reader can tell a control announcing the wrong label from one announcing the right label in
+    /// the wrong language.
+    /// </para>
+    /// </summary>
+    private static Landed Against(StepDeclaration step, Subject subject, ActResult? acted, string? declared)
+    {
+        var saw = acted?.Element;
+        var key = step.Label ?? step.NotLabel;
+        var wanted = step.Label is not null
+            ? $"'{key}' — {declared}"
+            : $"anything but '{key}' — {declared}";
+
+        var expectation = Expect.That(
+            step.Name,
+            wanted,
+            () =>
+            {
+                var look = subject.ReadOnce();
+                saw = look.Facts ?? saw;
+                var now = look.Found ? step.Reads.Of(look) : null;
+
+                // A reading that answered nothing holds neither claim. For the positive that is
+                // obvious; for the negative it matters more — an element that says nothing is not
+                // evidence the application is out of the state this names, it is evidence nobody read
+                // it, and answering "anything but" to that would be the unearned green.
+                if (now is null)
+                    return null;
+
+                // The wanted sentence handed back where the claim holds, which is the trick `matches`
+                // and `discloses` both use to say something other than equality to a machine that
+                // compares for it — and what keeps the key in the sentence a failure carries.
+                var same = string.Equals(now, declared, StringComparison.Ordinal);
+                return (step.Label is not null) == same ? wanted : now;
             },
             subject.ActMs,
             subject.PollMs);

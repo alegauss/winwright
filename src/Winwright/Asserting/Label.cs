@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -169,6 +169,7 @@ public static class Labels
     /// <summary>The same, resolving the language from the project the way the application does.</summary>
     public static Label For(string key, ProjectDeclaration declaration) =>
         For(key, declaration, ResolvedLanguage.Resolve(declaration));
+
 
     /// <summary>
     /// Which of the project's strings files answers for a language, and the language that file is in.
