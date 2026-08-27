@@ -354,6 +354,15 @@ public static class CaseRun
             return true;
         }
 
+        // WW253. One claim over the elements under the locator, so it has its own wait for the reason
+        // a sweep does: what it waits for is a subtree that has finished drawing, and there is no one
+        // reading at the end of it to retry towards.
+        if (step.Spoken)
+        {
+            Spoke(step, subject, trace, results);
+            return true;
+        }
+
         // WW255. Looked up once, before the attempts: the value a round trip is about was read when
         // the earlier step ran, and a lookup inside the retry would be the same answer fetched three
         // times. Absent only where that step stopped the case, which is a state this never reaches.
@@ -496,6 +505,101 @@ public static class CaseRun
             Locator = step.Locator.Text,
             Asserted = step.Name,
             ReadBack = string.Join(", ", compared.Matched),
+            Detail = waited.Happened ? null : detail,
+            Verdict = waited.Happened ? StepVerdict.Ok : StepVerdict.Failed,
+        });
+
+        var result = waited.Happened
+            ? AssertionResult.Pass(step.Name, detail)
+            : AssertionResult.Fail(step.Name, detail);
+
+        results.Add(result.At(trace.Count));
+    }
+
+    /// <summary>
+    /// A step claiming that everything under the locator which announces anything announces a name,
+    /// and that something does.
+    /// <para>
+    /// WW253. Two halves, both count-free. The script asserted four or more named descendants on a
+    /// conversation row, and a typed count is the stale literal a derived set exists to refuse — the
+    /// row grows a column and the case goes on asserting four. So: something under here speaks, which
+    /// a row of pictures fails, and nothing under here announces a glyph, a template or its own
+    /// automation id, which a row of codepoints fails.
+    /// </para>
+    /// <para>
+    /// Polled to the resolve budget for the reason a sweep is: a subtree still being drawn has a
+    /// different tree a moment later, and reading once would make this a race. What it waits for is
+    /// both halves holding at once, so a name that arrives late is waited out and a glyph that is
+    /// never going to change costs the budget and then fails.
+    /// </para>
+    /// </summary>
+    private static void Spoke(
+        StepDeclaration step, Subject subject, List<TraceStep> trace, List<AssertionResult> results)
+    {
+        var spoken = new List<string>();
+        var wrong = new List<NameCheck>();
+        var under = 0;
+        var arrived = false;
+
+        var waited = Attempt.UntilTrue(
+            () =>
+            {
+                spoken.Clear();
+                wrong.Clear();
+
+                var element = subject.ResolveOnce().Element;
+                arrived = element is not null;
+                var beneath = element is null
+                    ? []
+                    : element.FindAll(TreeScope.Descendants, Condition.TrueCondition).Cast<AutomationElement>();
+
+                under = 0;
+                foreach (var one in beneath)
+                {
+                    under++;
+                    if (ElementFacts.Of(one) is not { } facts)
+                        continue;
+
+                    var check = Names.Of(facts);
+
+                    // Missing is not counted against it. A panel, a border, a layout element under a
+                    // row legitimately announces nothing, and demanding a name off every one of them
+                    // would be a claim about how the application nests its containers.
+                    if (check.IsALabel)
+                        spoken.Add(check.Printable);
+                    else if (check.Verdict != Named.Missing)
+                        wrong.Add(check);
+                }
+
+                return spoken.Count > 0 && wrong.Count == 0;
+            },
+            subject.DeadlineMs,
+            subject.PollMs);
+
+        // A locator that matched nothing is a failure about the locator and never a claim about a
+        // subtree. Reporting it as "nothing under it speaks" is true of a window that never drew the
+        // thing at all, and sends a reader looking at names when what is missing is the element.
+        var detail = (arrived, spoken.Count, wrong.Count) switch
+        {
+            (false, _, _) => $"{step.Locator.Text} never arrived in {waited.WaitedMs}ms, so nothing under it "
+                + "was ever looked at",
+            (_, 0, 0) => $"nothing under {step.Locator.Text} announces a name: {under} element(s), and not one "
+                + $"of them says anything a screen reader could read. Waited {waited.WaitedMs}ms.",
+            (_, _, > 0) => $"{wrong.Count} of the {under} element(s) under {step.Locator.Text} announce something "
+                + $"that is not a name. {string.Join(" ", wrong.Select(one => one.Sentence("one of them")))} "
+                + $"Waited {waited.WaitedMs}ms.",
+            _ => $"all {spoken.Count} of the {under} element(s) under {step.Locator.Text} that announce anything "
+                + $"announce a name, e.g. \"{spoken[0]}\".",
+        };
+
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = step.Verb.Name,
+            Locator = step.Locator.Text,
+            Asserted = step.Name,
+            ReadBack = spoken.Count == 0 ? null : string.Join(", ", spoken),
+            WaitedMs = waited.WaitedMs,
             Detail = waited.Happened ? null : detail,
             Verdict = waited.Happened ? StepVerdict.Ok : StepVerdict.Failed,
         });

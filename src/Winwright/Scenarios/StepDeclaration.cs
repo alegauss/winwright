@@ -36,7 +36,8 @@ public sealed record StepDeclaration
         System.Text.RegularExpressions.Regex? matches,
         bool discloses,
         string? sameAs,
-        string? never)
+        string? never,
+        bool spoken)
     {
         Name = name;
         Locator = locator;
@@ -52,6 +53,7 @@ public sealed record StepDeclaration
         Discloses = discloses;
         SameAs = sameAs;
         Never = never;
+        Spoken = spoken;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -144,6 +146,32 @@ public sealed record StepDeclaration
     /// </summary>
     public string? Never { get; }
 
+    /// <summary>
+    /// Whether this step claims everything under the locator that announces anything announces a
+    /// name — and that something does.
+    /// <para>
+    /// WW253. <see cref="Discloses"/> says there is more under the locator than there was. It does not
+    /// say that what is under it <em>reads</em>, and that is the claim the script made about a
+    /// conversation row before it ever clicked one: what a screen reader gets from a row is text or it
+    /// is a picture, and no capture can tell the two apart.
+    /// </para>
+    /// <para>
+    /// Never a count. The script asserted four or more named descendants, which is the stale literal a
+    /// derived set exists to refuse — the row grows a column and the case goes on asserting four. Two
+    /// halves instead, both count-free and both falsifiable: something under here speaks, so a row of
+    /// pictures fails, and nothing under here announces a glyph, a template or its own automation id,
+    /// so a row of codepoints fails. <see cref="Asserting.Names"/> is what tells those apart, and the last three
+    /// all satisfy non-empty while being silent to a screen reader.
+    /// </para>
+    /// <para>
+    /// Not <see cref="Answers"/> on the locator, which is worse than nothing here: measured on this
+    /// desk, every row in that list announces <c>ClaudeTray.SessionListRow</c> — the CLR type name —
+    /// so a step reading the row's own name and claiming it says something passes on a row whose every
+    /// field is unreadable.
+    /// </para>
+    /// </summary>
+    public bool Spoken { get; }
+
     /// <summary>Which reading the expectation is about. <see cref="ReadBack.Anything"/> by default.</summary>
     public ReadBack Reads { get; }
 
@@ -220,7 +248,7 @@ public sealed record StepDeclaration
     /// </summary>
     public bool Checkable =>
         Expected is not null || Moves || Answers || Covers is not null || Matches is not null || Discloses
-        || SameAs is not null || Never is not null;
+        || SameAs is not null || Never is not null || Spoken;
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -250,6 +278,7 @@ public sealed record StepDeclaration
     /// <param name="discloses">That the act put something under the locator that was not there before.</param>
     /// <param name="sameAs">The earlier step this one claims its reading is back to.</param>
     /// <param name="never">The key whose strings must never show while this step waits for its locator.</param>
+    /// <param name="spoken">That everything under the locator which says anything says a name.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static StepDeclaration Of(
         string locator,
@@ -265,7 +294,8 @@ public sealed record StepDeclaration
         string? matches = null,
         bool discloses = false,
         string? sameAs = null,
-        string? never = null)
+        string? never = null,
+        bool spoken = false)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var subject = called ?? Describing(verb, locator);
@@ -306,7 +336,7 @@ public sealed record StepDeclaration
         var forbidden = string.IsNullOrWhiteSpace(never) ? null : never.Trim();
 
         var claims = wanted is not null || moves || answers || sweeping is not null || pattern is not null
-            || discloses || back is not null || forbidden is not null;
+            || discloses || back is not null || forbidden is not null || spoken;
 
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
         // says it moved where it was something else. A step asserting both would owe two assertion
@@ -464,6 +494,31 @@ public sealed record StepDeclaration
             }
         }
 
+        if (spoken)
+        {
+            // One claim per step, as everywhere else. This one is about the subtree, and the others
+            // are about a reading of the element the locator matched.
+            if (wanted is not null || moves || answers || sweeping is not null || pattern is not null
+                || discloses || back is not null || forbidden is not null)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    "it claims everything under the locator is named and also makes another claim; "
+                        + "'spoken' is about the tree under it rather than about what it says");
+            }
+
+            // And no reading beside it, for the reason a disclosure takes none: the subject is the
+            // subtree, and a 'reads' here would look like it narrowed the claim and would narrow
+            // nothing. What the elements under it announce is their name, always.
+            if (!string.IsNullOrWhiteSpace(reads))
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims what is under the locator is named and names the '{reads.Trim()}' reading; "
+                        + "the claim is about what those elements announce, which is their name");
+            }
+        }
+
         if (forbidden is not null)
         {
             // One claim per step, as everywhere else — and here for a reason of its own. What ends the
@@ -572,7 +627,8 @@ public sealed record StepDeclaration
             pattern,
             discloses,
             back,
-            forbidden);
+            forbidden,
+            spoken);
     }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>

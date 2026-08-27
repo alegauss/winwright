@@ -112,28 +112,6 @@ reproduction rather than another hypothesis. The case now drives five rounds wit
 different string each and names the round it failed on, which is `TrayPlacementTests`'
 answer to the same shape.
 
-### §WW253 A row that reads as text is not a subtree that grew
-
-`discloses` says there is more under the locator than there was. It does not say that
-what is under it *reads*, and that is the claim the script made about a conversation row
-before it ever clicked one: what a screen reader gets from a row is text or it is a
-picture, and no capture can tell the two apart.
-
-Measured migrating `WW80`. The script asserted four or more named descendants on the
-row. That count is the stale literal a derived set exists to refuse — the row grows a
-column and the case goes on asserting four.
-
-`answers` on the row is worse than nothing here. Probed on this desk, every row in that
-list announces `ClaudeTray.SessionListRow`, which is the CLR type name: a step reading
-the row's name and claiming it says something passes on a row whose every field is
-unreadable. That is an unearned green in the one place the accessibility tree was the
-whole point.
-
-The honest shape is derived from the tree rather than typed: of the elements under this
-locator, the ones that could carry a name do. It is `covers` one level down — a set
-nobody lists, read out of what the window drew rather than out of the project's strings
-— and it is the claim every list, grid and row in every adopting project wants.
-
 ### §WW260 Some expected sets are the application's data, not its strings
 
 `covers` is the answer to the hardcoded list and it derives from one place: the language

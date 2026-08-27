@@ -176,6 +176,7 @@
 - ✅ **WW255** **a case cannot claim a reading came back to what an earlier step read, only that it moved** — A step names an earlier one in `sameAs` and claims its reading is back to what that one read, judged where the case knows all its steps and never against a value the file typed.
 - ✅ **WW256** **a case cannot claim a state was never observed while it waited, only what it read at the end** — A step names a key in `never` and claims it was showing at no moment while its locator was waited for, reporting how many times it looked and holing an absence a short walk found.
 - ✅ **WW266** **no reading answers what a picker has selected, and a ComboBox offers no value to read** — A step reads `picked` and gets what a container has chosen, which is also what `anything` now answers for a picker carrying no value of its own.
+- ✅ **WW253** **a case cannot claim a row reads as text rather than as a picture, only that its subtree grew** — A step claims `spoken`: everything under its locator that announces anything announces a name, and something does — two count-free halves, judged by what the tree drew.
 
 ## Block G — The scenario — a case is a data file
 

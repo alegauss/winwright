@@ -294,14 +294,24 @@ before it — an expander, a tree view, a details pane, a search that fills a li
 case types; the engine compares the subtree against what it read a moment earlier. `sameAs` is the
 sixth and is `moves` with a memory: it names the `named` of an earlier step in the same case and
 claims this step's reading is **back to what that one read** — the round trip, for the value a case
-cannot know at either end. `never` is the seventh and is the only claim about the **wait** rather
+cannot know at either end. `spoken` is the seventh and is about the tree under the locator rather
+than about any one reading: that everything under it which announces anything announces a **name** —
+never a font glyph, a template nobody filled in, or an automation id handed back — and that something
+does. `never` is the eighth and is the only claim about the **wait** rather
 than about what it ended on: it names a key whose string must not be showing anywhere in the window
-at any moment while this step waits for its locator. And `covers` is the eighth, which is one claim
+at any moment while this step waits for its locator. And `covers` is the ninth, which is one claim
 over many elements — see below.
 
 `sameAs` is judged where the case knows all its steps, so a pointer at a name nobody wrote, at a
 step further down, at a name two steps share, or at a step reading something else is refused before
 the run. It has to say which reading it is about: comparing a value to a name says nothing.
+
+`spoken` is what a screen reader gets, and no capture can tell it from a picture. It is never a
+count: claude-tray's script asserted *four or more* named fields on a conversation row, which is the
+stale literal a derived set exists to refuse — the row grows a column and the case goes on asserting
+four. Two count-free halves instead: something under here speaks, so a row of pictures fails, and
+nothing under here announces a glyph or an id, so a row of codepoints fails. An element that
+announces nothing at all is not counted against it, because a container legitimately does not.
 
 `never` exists because some claims cannot be read at the end. claude-tray's report comes back from a
 per-profile cache in 12ms, and is rebuilt from scratch in 961ms with a *no readings yet* line shown

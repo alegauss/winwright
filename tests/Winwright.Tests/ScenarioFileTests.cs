@@ -245,7 +245,7 @@ public class ScenarioFileTests
         Assert.Equal(
             [
                 "locator", "act", "with", "expect", "reads", "moves", "answers", "matches", "discloses",
-                "sameAs", "never", "covers", "meansIt", "named",
+                "sameAs", "spoken", "never", "covers", "meansIt", "named",
             ],
             ScenarioSchema.Step.Select(field => field.Name));
 
