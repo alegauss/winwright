@@ -36,12 +36,33 @@ internal sealed record Looks(int Taken, double ApartMs, int Wanted, int LastingM
     {
         ArgumentNullException.ThrowIfNull(atMs);
 
-        return new(
-            atMs.Count,
-            atMs.Count < 2 ? double.MaxValue : (atMs[^1] - atMs[0]) / (atMs.Count - 1),
-            wanted,
-            lastingMs);
+        return Gap(atMs.Count, atMs.Count < 2 ? 0 : atMs[^1] - atMs[0], wanted, lastingMs);
     }
+
+    /// <summary>
+    /// The same off a wait that polled, where the looks are its polls. A watch that stops when it
+    /// has seen enough keeps no times of its own, and the wait already counted both halves.
+    /// </summary>
+    /// <param name="waited">What the wait answered.</param>
+    /// <param name="wanted">How many looks each state has to get.</param>
+    /// <param name="lastingMs">How long each state lasts.</param>
+    internal static Looks Polling(Waited waited, int wanted, int lastingMs)
+    {
+        ArgumentNullException.ThrowIfNull(waited);
+
+        return Gap(waited.Polls, waited.WaitedMs, wanted, lastingMs);
+    }
+
+    /// <summary>
+    /// The average gap between looks, from however many there were and however long they spanned.
+    /// <para>
+    /// One look spans no gap, so it answers the largest number there is rather than dividing by
+    /// zero — which reads downstream as a cadence nothing could meet, and is then refused as an
+    /// excuse by <c>SlowMachine</c> rather than granted.
+    /// </para>
+    /// </summary>
+    private static Looks Gap(int taken, double overMs, int wanted, int lastingMs) =>
+        new(taken, taken < 2 ? double.MaxValue : overMs / (taken - 1), wanted, lastingMs);
 }
 
 /// <summary>

@@ -50,6 +50,30 @@ fact the result can carry — so the sentence becomes *the tray exited with 1 pa
 through* rather than a list of locators. That also covers the case this one does not: a
 tray that starts, is driven, and dies in the middle.
 
+### §WW283 The count that WW180 half-closed
+
+WW180 shipped against "a case counts two processes it launched a moment earlier and sees
+one, twice in eight guest runs". Its repair was to stop passing a candidate over in
+silence: one that will not say which binary it runs is named, and `InstanceCheckTests`
+counts `Others + Unreadable` so a process caught mid-start still counts.
+
+It recurred. On a guest run of 1,720 cases, two reds, both this shape:
+`A_resident_instance_showing_nothing` launched two and read `Others + Unreadable` as 1,
+and `A_different_executable_of_the_same_name` launched one and read `Others` as empty.
+So the missing process was in *neither* list — which is the one outcome WW180's repair
+cannot explain, because both of its arms require the process to have been enumerated.
+
+Two things about the run itself. It took 12m 2s against 9m 38s for the run before it, on
+the same guest with the same tree bar three test files, so the machine was busier. And
+the run before it was green on both cases. Nothing in either case's path changed between
+them.
+
+So the candidate is a process that has not yet appeared to whatever enumerates it, or
+one that was gone by the time it was asked — and `cmd.exe` launched with no console is a
+process that can exit on its own. Which of those it is decides the repair, and the
+reading cannot currently tell them apart: a process that was never there and one that
+has left both read as absent.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -369,26 +393,3 @@ mixes two things a reader must not confuse; the second keeps them apart and says
 "unknown" twice.
 
 Whichever it is, the run has to stop reporting a clean sweep it did not take.
-
-### §WW282 The neighbour that never got the guard
-
-WW280 fixed the verdict on the case that measures a cadence. The case beside it,
-`The_states_arrive_in_the_order_they_were_declared_in_and_come_round_again`, measures
-none — and its own comment says exactly what that costs: "the sampler skipped one and
-the order read as broken when it was the reading that could not keep up".
-
-It reads a sequence of states off a live window and asserts each is the declared
-successor of the one before. A skipped state does not read as a gap; it reads as a jump,
-which is indistinguishable from a fixture cycling in the wrong order. The protection it
-has is `ReadableMs`, the constant WW171 derived so a sampler would get three looks a
-state — and the guest run that filed WW280 was slower than that constant assumes. So
-this case is exposed to the run that already happened, and the reason it did not go red
-on it is that a skip has to land in the wrong place, not that anything stopped it.
-
-`The_animation_says_how_many_states_it_has_so_nothing_has_to_be_told` sits in the same
-file and counts distinct states, which is the same exposure a third way: a skipped state
-is a state the count never saw.
-
-The reading `Looks` already exists and the excuse is one call, so this is not a design
-question. What has to be decided is whether the cadence is read once per case or once
-for the class, since three cases watch the same window under the same flag.

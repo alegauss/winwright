@@ -674,7 +674,28 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         // WW159: sampled until the cycle has shown everything rather than for a fixed three
         // seconds. The count is still read off the window and never typed — an expectation typed
         // into a case is one that goes stale the day the animation gains a state.
-        var (said, declared) = Cycled(window);
+        var cycle = Cycled(window);
+
+        // WW282, and the order of the two conditions is the whole of it. A state nobody saw is
+        // only the machine's doing where the machine could not have seen it: a run that looked
+        // often enough and still missed one is a fixture that never showed it, and stays red.
+        if (cycle.Never.Count > 0 && !cycle.Looks.Enough)
+        {
+            SlowMachine.Excusing(cycle.Looks);
+            output.WriteLine(SlowMachine.Sentence(
+                $"all {cycle.Declared} states of a {ReadableMs}ms cycle "
+                    + $"(never saw {string.Join(", ", cycle.Never)})",
+                cycle.Looks));
+            return;
+        }
+
+        Assert.True(
+            cycle.Never.Count == 0,
+            $"the animation showed {cycle.Declared - cycle.Never.Count} of {cycle.Declared} state(s) over "
+                + $"{cycle.Waited.Polls} look(s) in {cycle.Waited.WaitedMs}ms, one every "
+                + $"{cycle.Looks.ApartMs:0}ms, and never showed: {string.Join(", ", cycle.Never)}");
+
+        var (said, declared) = (cycle.Said, cycle.Declared);
 
         Assert.True(declared > 1, $"an animation of {declared} state(s) is not one");
         Assert.Single(said.Select(one => one.Split(" of ")[1]).Distinct(StringComparer.Ordinal));
@@ -690,7 +711,22 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         // than it can be read, and that is a property of the check — which is why the number is
         // ReadableMs and not a fourth constant written here.
         var window = Launched($"--animate={ReadableMs}");
-        var seen = Changes(Sampled(window, TimeSpan.FromSeconds(5)));
+        var watched = Watched(window, TimeSpan.FromSeconds(5));
+
+        // WW282, and it is the comment above made into a check. A skipped state does not read as a
+        // gap here, it reads as a jump — which is what a fixture cycling in the wrong order reads
+        // as too, and the assertion below cannot tell them apart. The cadence is this case's own
+        // watch: load moves within a run, so what another case managed to read says nothing about
+        // whether this one saw a sequence.
+        var looks = Looks.Over(watched.Select(one => one.AtMs).ToList(), LooksPerState, ReadableMs);
+        if (!looks.Enough)
+        {
+            SlowMachine.Excusing(looks);
+            output.WriteLine(SlowMachine.Sentence($"the order of a {ReadableMs}ms cycle", looks));
+            return;
+        }
+
+        var seen = ChangesIn(watched).Select(one => one.Said).ToList();
 
         Assert.True(seen.Count >= 4, $"only {seen.Count} state change(s) were seen");
 
@@ -828,9 +864,6 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         return said;
     }
 
-    private static IReadOnlyList<string> Sampled(TopLevelWindow window, TimeSpan howLong) =>
-        Watched(window, howLong).Select(one => one.Said).ToList();
-
     /// <summary>The watch with the repeats removed, which is the sequence rather than the poll.</summary>
     private static IReadOnlyList<Shown> ChangesIn(IReadOnlyList<Shown> watched)
     {
@@ -855,7 +888,7 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
     /// </para>
     /// </summary>
     /// <param name="window">The fixture's window, drawn and animating.</param>
-    private static (IReadOnlyList<string> Said, int Declared) Cycled(TopLevelWindow window)
+    private static Cycle Cycled(TopLevelWindow window)
     {
         var root = AutomationElement.FromHandle(window.Handle);
         var first = Waits.Until("draw", "the fixture never showed an animation state", () => AnimationState(root));
@@ -880,29 +913,24 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
             .Where(one => !seen.Contains(one))
             .ToList();
 
-        Assert.True(
-            never.Count == 0,
-            $"the animation showed {seen.Count} of {declared} state(s) over {waited.Polls} look(s) in "
-                + $"{waited.WaitedMs}ms, and never showed: {string.Join(", ", never)}");
-
-        return (said, declared);
+        // WW282. Reported and no longer judged here. The assertion this used to make was right and
+        // it was made in the wrong place: a state nobody saw is a fixture that never showed it or a
+        // reader that never looked while it was up, and only the caller knows which of those it is
+        // entitled to conclude. The cadence goes back with it so the caller can tell.
+        return new Cycle(said, declared, never, Looks.Polling(waited, LooksPerState, ReadableMs), waited);
     }
+
+    /// <summary>What one watch of a whole cycle found, and how well it managed to look while finding it.</summary>
+    /// <param name="Said">Every reading it took, in order.</param>
+    /// <param name="Declared">How many states the animation says it has.</param>
+    /// <param name="Never">Which of them it never saw, empty where it saw them all.</param>
+    /// <param name="Looks">How often it managed to look, against how often it had to.</param>
+    /// <param name="Waited">What the wait underneath answered.</param>
+    private sealed record Cycle(
+        IReadOnlyList<string> Said, int Declared, IReadOnlyList<string> Never, Looks Looks, Waited Waited);
 
     /// <summary>Which state a reading is, out of the "n of m" the window announces itself with.</summary>
     private static string Ordinal(string said) => said.Split(' ')[0];
-
-    /// <summary>The samples with the repeats removed, which is the sequence rather than the poll.</summary>
-    private static IReadOnlyList<string> Changes(IReadOnlyList<string> sampled)
-    {
-        var changes = new List<string>();
-        foreach (var one in sampled)
-        {
-            if (changes.Count == 0 || !string.Equals(changes[^1], one, StringComparison.Ordinal))
-                changes.Add(one);
-        }
-
-        return changes;
-    }
 
     [Fact]
     public void Two_renders_of_the_fixed_surface_are_byte_identical()

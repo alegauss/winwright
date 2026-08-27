@@ -6,6 +6,7 @@
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
 - 📋 **WW279** (deps: —) **a resident launch that died on startup is reported as an application whose controls are all missing** — A tray that draws no window has nothing to wait for, so a process that exited before the first step reaches the case as reds about locators, not as a launch that observed nothing. → §WW279
+- 📋 **WW283** (deps: —) **WW180's count has recurred past its repair, and this time the process is in neither list** — Naming the unreadable covered a process that would not say what it runs, and a process nothing enumerates at all is passed over by a reading that never saw it. → §WW283
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -45,7 +46,6 @@
 
 - ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
 - 📋 **WW281** (deps: —) **a slow-machine excuse is written to the test's own output and counted nowhere** — The roll call reads the desk ledger alone, so a run that excused a wait or a cadence balances its arithmetic exactly like one where every check ran. → §WW281
-- 📋 **WW282** (deps: —) **the sequence case reads a skipped state as a broken order and has no guard at all** — Its comment says a sampler that cannot keep up makes the order read as broken, and it then asserts the order against a cadence it never measures. → §WW282
 
 ## Done when — Block A
 

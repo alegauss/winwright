@@ -299,3 +299,4 @@
 - ✅ **WW232** **eleven checks are excused on every green guest run, all for one condition** — Every excuse left is one whose subject is the absent foreground: five, all deliberate, down from eleven.
 - ✅ **WW234** **WW226 drew a ranges pane for a verb four cases already drove** — The pane stays for the scenario-level cases it suits, and nudge is proven on a trackbar this thread owns rather than in the process that cannot be driven.
 - ✅ **WW280** **a run too slow to observe the animation says so and goes red about it anyway** — A cadence this suite chose, missed because the machine was slow, is a hole naming the reading — gated so a run that kept pace, or got one look, is refused the excuse.
+- ✅ **WW282** **the sequence case reads a skipped state as a broken order and has no guard at all** — All three animation cases read their own cadence before they judge, and a state nobody saw is the machine's only where the machine could not have seen it.

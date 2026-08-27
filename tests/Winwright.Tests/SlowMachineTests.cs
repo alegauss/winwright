@@ -137,6 +137,20 @@ public sealed class SlowMachineTests
     }
 
     [Fact]
+    public void A_cadence_reads_the_same_off_a_wait_that_polled_as_off_the_times_it_kept()
+    {
+        // WW282. The second door exists because a watch that stops when it has seen enough keeps no
+        // times of its own — and it has to answer what the first one would, or two cases watching
+        // one window would be excused against two different rules.
+        var polled = Looks.Polling(new Waited(false, WaitedMs: 4820, Polls: 21), wanted: 3, lastingMs: 600);
+        var timed = Looks.Over(Enumerable.Range(0, 21).Select(one => one * 241.0).ToList(), 3, 600);
+
+        Assert.Equal(timed.Taken, polled.Taken);
+        Assert.Equal(timed.ApartMs, polled.ApartMs, 3);
+        Assert.False(polled.Enough);
+    }
+
+    [Fact]
     public void A_run_that_got_one_look_has_not_shown_the_machine_was_slow()
     {
         // The half that keeps the check. One look is a gap between nothing: it is as likely to be a
