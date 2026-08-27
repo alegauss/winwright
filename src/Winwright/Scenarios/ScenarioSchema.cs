@@ -151,6 +151,7 @@ public static class ScenarioSchema
         new("moves", false, Taking.Truth, "that the reading should end up different, where the case cannot know what it will be", []),
         new("answers", false, Taking.Truth, "that the reading it names should say something rather than nothing, where the case cannot know what", []),
         new("matches", false, Taking.Text, "the regular expression the reading should match, where the case cannot name the value but can name its shape", []),
+        new("discloses", false, Taking.Truth, "that the act put something under the locator that was not in the tree before it", []),
         new("covers", false, Taking.Text, "the key whose every string must be read somewhere the locator matches, without its trailing dot — derived from the project's own strings and never listed here", []),
         new("meansIt", false, Taking.Truth, "that this step means a destructive entry it names", []),
         new("named", false, Taking.Text, "what a report should call it, where the act and the locator will not do", []),

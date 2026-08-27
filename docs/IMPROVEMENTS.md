@@ -88,29 +88,6 @@ is ready, which is the engine's own contract being sometimes false.
 Deliberately not settled by reasoning. Two runs were spent today refuting hypotheses
 that looked certain, and the sentence that settles this arrives on the next guest red.
 
-### §WW251 A disclosure is not one reading moving
-
-`moves` claims one reading of one element ended up different. `covers` claims a derived
-set was read across many. Neither says *there is more here than there was*, and that is
-what a disclosure is.
-
-Measured while migrating `WW80`. Clicking a conversation row unfolds the call tree that
-produced it, and the script asserted two things about that: the row went from N readable
-fields to more than N, and at least one of the new ones is a task line. Both are claims
-about a subtree before and after an act, and a step can hold neither.
-
-The claim is worth having beyond this case. A tree view, an expander, a details pane, a
-search that fills a list — every one of them is *an act put something in the tree that
-was not there*, and each is currently written as an expectation about one element
-somebody picked out of the result, which is the hardcoded-list defect `WW236` closed one
-level down.
-
-What it must not be is a count somebody types. `at least 4 fields` is the same stale
-literal as a listed set: the row grows a field and the case goes on asserting four. The
-honest shape compares the subtree against itself a moment earlier, which is what `moves`
-already does for one reading — the same idea over a locator's descendants rather than
-over a single value.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

@@ -171,6 +171,7 @@
 - ✅ **WW248 (the reading)** **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — The roll carries the engine's own absence beside each excuse, so who held the desk is read rather than inferred.
 - ✅ **WW250** **a case can say what a reading is and that it says something, and nothing in between** — A step may name the shape of a reading it cannot name the value of, and a pattern matching the empty string is refused as `answers` wearing a check.
 - ✅ **WW252** **the routine that explains why a locator found nothing throws when the element arrives while it is explaining** — A chain that matches by the time the diagnosis walks it is a reading — a wait that was too short — rather than an index one past the end.
+- ✅ **WW251** **a case cannot claim that an act unfolded a subtree, only that one reading moved** — A step may claim the act put something under its locator that was not in the tree before it, compared against the engine's own reading rather than a count the case typed.
 
 ## Block G — The scenario — a case is a data file
 

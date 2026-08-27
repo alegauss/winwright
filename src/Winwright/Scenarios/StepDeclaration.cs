@@ -33,7 +33,8 @@ public sealed record StepDeclaration
         bool moves,
         string? covers,
         bool answers,
-        System.Text.RegularExpressions.Regex? matches)
+        System.Text.RegularExpressions.Regex? matches,
+        bool discloses)
     {
         Name = name;
         Locator = locator;
@@ -46,6 +47,7 @@ public sealed record StepDeclaration
         Covers = covers;
         Answers = answers;
         Matches = matches;
+        Discloses = discloses;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -82,6 +84,23 @@ public sealed record StepDeclaration
     /// </para>
     /// </summary>
     public System.Text.RegularExpressions.Regex? Matches { get; }
+
+    /// <summary>
+    /// Whether this step claims the act put something under the locator that was not in the tree
+    /// before it.
+    /// <para>
+    /// WW251. A disclosure is not one reading moving. Measured migrating claude-tray's sessions case:
+    /// clicking a conversation row unfolds the call tree that produced it, and what says so is more
+    /// elements under the row than there were. <see cref="Moves"/> is one reading of one element and
+    /// <see cref="Covers"/> is a derived set — neither says <em>there is more here than there was</em>.
+    /// </para>
+    /// <para>
+    /// Never a count the case types. `at least four fields` is the same stale literal as a hand-written
+    /// set: the row grows a field and the case goes on asserting four. The subtree is compared against
+    /// itself a moment earlier, which is what <see cref="Moves"/> does for a single value.
+    /// </para>
+    /// </summary>
+    public bool Discloses { get; }
 
     /// <summary>Which reading the expectation is about. <see cref="ReadBack.Anything"/> by default.</summary>
     public ReadBack Reads { get; }
@@ -157,7 +176,8 @@ public sealed record StepDeclaration
     /// movement and covers no set produces no assertion result, which is why a case made only of these
     /// is refused by <see cref="CaseDeclaration"/> rather than run to a green it did not earn.
     /// </summary>
-    public bool Checkable => Expected is not null || Moves || Answers || Covers is not null || Matches is not null;
+    public bool Checkable =>
+        Expected is not null || Moves || Answers || Covers is not null || Matches is not null || Discloses;
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -184,6 +204,7 @@ public sealed record StepDeclaration
     /// <param name="covers">The key whose every declared string this step's locator must read.</param>
     /// <param name="answers">That the reading should say something rather than nothing.</param>
     /// <param name="matches">The pattern the reading should match, where no case can name its value.</param>
+    /// <param name="discloses">That the act put something under the locator that was not there before.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static StepDeclaration Of(
         string locator,
@@ -196,7 +217,8 @@ public sealed record StepDeclaration
         bool moves = false,
         string? covers = null,
         bool answers = false,
-        string? matches = null)
+        string? matches = null,
+        bool discloses = false)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var subject = called ?? Describing(verb, locator);
@@ -238,7 +260,7 @@ public sealed record StepDeclaration
                     + "so 'moves' is for the claim that cannot name one");
         }
 
-        if (wanted is null && !moves && !answers && sweeping is null && pattern is null && !string.IsNullOrWhiteSpace(reads))
+        if (wanted is null && !moves && !answers && sweeping is null && pattern is null && !discloses && !string.IsNullOrWhiteSpace(reads))
         {
             throw new ScenarioRefusedException(
                 subject, $"it reads '{reading.Name}' and expects nothing of it, so the reading changes nothing");
@@ -247,7 +269,7 @@ public sealed record StepDeclaration
         // WW213. An act with no expectation is a navigation a later step is the check for. A read
         // with no expectation is nothing at all: it touches nothing and claims nothing, so a case
         // carrying one is a case with a step in it that could not fail.
-        if (wanted is null && !moves && !answers && sweeping is null && pattern is null && act.Reads)
+        if (wanted is null && !moves && !answers && sweeping is null && pattern is null && !discloses && act.Reads)
             throw new ScenarioRefusedException(subject, $"'{act.Name}' expects nothing, so the step does nothing at all");
 
         // A read moves nothing by construction, so a read claiming movement is a claim about whatever
@@ -297,6 +319,39 @@ public sealed record StepDeclaration
             // over 'focused' picks one of its two states, which is a claim that can be false — the
             // problem 'answers' has with that reading is that it asks only whether there was an answer,
             // and this asks which.
+        }
+
+        if (discloses)
+        {
+            // One claim per step, as everywhere else.
+            if (wanted is not null || moves || answers || sweeping is not null || pattern is not null)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    "it claims a disclosure and also makes another claim; 'discloses' is about the tree "
+                        + "under the locator rather than about a reading of it");
+            }
+
+            // A read discloses nothing. The claim is that an act put something there, so a step whose
+            // verb only looks would be asserting that a window changed while nobody touched it — which
+            // is either a race or a lie, and green either way.
+            if (act.Reads)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims a disclosure and '{act.Name}' only reads, so nothing it does could "
+                        + "have disclosed anything");
+            }
+
+            // And no reading beside it, because the subject is the subtree. A 'reads' here would look
+            // like it narrowed the claim and would narrow nothing.
+            if (!string.IsNullOrWhiteSpace(reads))
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims a disclosure and names the '{reads.Trim()}' reading; a disclosure is "
+                        + "about what is under the locator and not about what it says");
+            }
         }
 
         // WW238. The other half of the same rule: a reading the locator already selected by is fixed
@@ -375,7 +430,8 @@ public sealed record StepDeclaration
             moves,
             sweeping,
             answers,
-            pattern);
+            pattern,
+            discloses);
     }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>

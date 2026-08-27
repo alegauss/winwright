@@ -337,6 +337,7 @@ public sealed class ScenarioFile
         var moves = Truth(at, step, ScenarioSchema.Step, "moves");
         var answers = Truth(at, step, ScenarioSchema.Step, "answers");
         var matches = Text(at, step, ScenarioSchema.Step, "matches");
+        var discloses = Truth(at, step, ScenarioSchema.Step, "discloses");
         var covers = Text(at, step, ScenarioSchema.Step, "covers");
         var meansIt = Truth(at, step, ScenarioSchema.Step, "meansIt");
         var named = Text(at, step, ScenarioSchema.Step, "named");
@@ -344,7 +345,7 @@ public sealed class ScenarioFile
         return Addressed(
             at,
             () => StepDeclaration.Of(
-                locator!, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches));
+                locator!, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches, discloses));
     }
 
     /// <summary>

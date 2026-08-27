@@ -472,6 +472,11 @@ public static class CaseRun
         // reading to a string the case wrote down, and needs no before.
         var was = step.Moves ? step.Reads.Of(subject.Read()) : null;
 
+        // WW251. The other half of the same idea, and read before the act for the same reason: the
+        // subtree a disclosure is about is the one that existed a moment ago, and there is no reading
+        // it back afterwards.
+        var under = step.Discloses ? Beneath(subject.Resolve()) : -1;
+
         // A read never goes through Act: an act must have found something to press and a read need
         // not, so the element that was not there comes out as an expectation nothing answered rather
         // than a throw about a pattern the reader has to trace back to a locator.
@@ -485,6 +490,9 @@ public static class CaseRun
 
         if (step.Matches is not null)
             return Matched(step, subject, acted);
+
+        if (step.Discloses)
+            return Disclosed(step, subject, acted, under);
 
         if (step.Expected is not { } wanted)
             return new Landed(acted, null, acted?.Element);
@@ -528,6 +536,48 @@ public static class CaseRun
                 saw = look.Facts ?? saw;
                 var now = look.Found ? step.Reads.Of(look) : null;
                 return string.IsNullOrWhiteSpace(now) ? now : wanted;
+            },
+            subject.ActMs,
+            subject.PollMs);
+
+        return new Landed(acted, expectation, saw);
+    }
+
+    /// <summary>
+    /// How many elements are under a resolved subject, or -1 where nothing resolved.
+    /// <para>
+    /// WW251. Descendants and not children: a call tree unfolds as a tree, and counting one level of it
+    /// would report a disclosure that added a row and miss one that added a hundred under an existing
+    /// row. -1 rather than 0 for a subject that is not there, because a subtree of nothing and a
+    /// subtree of no elements are different facts and only the second one can grow.
+    /// </para>
+    /// </summary>
+    private static int Beneath(Resolution resolution) =>
+        resolution.Element is { } element
+            ? element.FindAll(TreeScope.Descendants, Condition.TrueCondition).Count
+            : -1;
+
+    /// <summary>
+    /// A step that claims the act disclosed something, waited for the way every other expectation is.
+    /// <para>
+    /// WW251. The wanted value carries the count it was measured against, so a failure reads as what it
+    /// is — <em>wanted more than the 4 element(s) that were under it, last read 4</em> — and the number
+    /// is the engine's own reading rather than anything a case typed.
+    /// </para>
+    /// </summary>
+    private static Landed Disclosed(StepDeclaration step, Subject subject, ActResult? acted, int under)
+    {
+        var wanted = $"more than the {under} element(s) that were under it";
+        var saw = acted?.Element;
+        var expectation = Expect.That(
+            step.Name,
+            wanted,
+            () =>
+            {
+                var resolution = subject.ResolveOnce();
+                saw = resolution.Facts ?? saw;
+                var now = Beneath(resolution);
+                return now > under ? wanted : $"{now}";
             },
             subject.ActMs,
             subject.PollMs);

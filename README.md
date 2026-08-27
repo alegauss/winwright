@@ -287,7 +287,10 @@ is the third — that the reading said something rather than nothing, for the va
 know. `matches` is the fourth: the pattern the reading should match, for the value a case cannot name
 but whose shape it can — a note carrying the date its figure came from, say. A pattern that matches
 the empty string is refused, because that is `answers` in a field that reads as though it checked
-more. And `covers` is the fifth, which is one claim over many elements — see below.
+more. `discloses` is the fifth: that the act put something under the locator that was not in the tree
+before it — an expander, a tree view, a details pane, a search that fills a list. Never a count the
+case types; the engine compares the subtree against what it read a moment earlier. And `covers` is
+the sixth, which is one claim over many elements — see below.
 
 A step with no `expect` is an act and not a check: it moves the window into the state a later step
 reads. An act that survives being repeated is attempted again where its read-back does not arrive; one
