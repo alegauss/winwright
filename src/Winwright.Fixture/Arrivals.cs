@@ -41,34 +41,45 @@ namespace Winwright.Fixture;
 internal sealed class Arrivals
 {
     private const int WmChar = 0x0102;
+    private const int WmKeyDown = 0x0100;
+
+    /// <summary>
+    /// VK_PACKET, which is the virtual key a <c>KEYEVENTF_UNICODE</c> injection arrives as. The
+    /// character it carries is in the scan code, which is the high word of the message's lParam.
+    /// </summary>
+    private const int VkPacket = 0xE7;
 
     private readonly StringBuilder said = new();
+    private readonly StringBuilder injected = new();
     private readonly TextBlock into;
+    private readonly TextBlock packets;
     private readonly nint window;
 
-    private Arrivals(TextBlock into, nint window)
+    private Arrivals(TextBlock into, TextBlock packets, nint window)
     {
         this.into = into;
+        this.packets = packets;
         this.window = window;
     }
 
     /// <summary>
-    /// Start recording into a caption, once the window has a handle whose messages can be told from
-    /// every other window's on the same thread.
+    /// Start recording into two captions, once the window has a handle whose messages can be told
+    /// from every other window's on the same thread.
     /// </summary>
     /// <param name="window">The window whose messages are read.</param>
-    /// <param name="into">The caption the record is written to, as its own text.</param>
+    /// <param name="into">The caption the characters are written to, as its own text.</param>
+    /// <param name="packets">The caption the injected keys are written to.</param>
     /// <returns>The recorder, held by the caller so it is not collected while it is still reading.</returns>
-    public static Arrivals On(Window window, TextBlock into)
+    public static Arrivals On(Window window, TextBlock into, TextBlock packets)
     {
         var handle = new WindowInteropHelper(window).Handle;
-        var recorder = new Arrivals(into, handle);
+        var recorder = new Arrivals(into, packets, handle);
 
         // Said and not skipped. The first guest run of this recorder read the caption's original text
         // back, which reads exactly like a window that was sent nothing — because a recorder that
         // could not attach reported it by doing nothing at all. An instrument that is not running
         // says so, in the one place its reading is ever taken from.
-        recorder.Say(handle == 0 ? "<no window to read>" : "<reading, nothing has arrived>");
+        recorder.Start(handle == 0 ? "<no window to read>" : "<reading, nothing has arrived>");
 
         if (handle != 0)
             ComponentDispatcher.ThreadFilterMessage += recorder.Heard;
@@ -87,16 +98,39 @@ internal sealed class Arrivals
         // Every window on this thread comes through here, the fixture's popups included, so the
         // handle is checked rather than assumed: a record mixing two windows is a record that
         // cannot be used to rule anything out.
-        if (message.hwnd != window || message.message != WmChar)
+        if (message.hwnd != window)
             return;
 
-        var character = (char)(message.wParam & 0xFFFF);
-        said.Append(char.IsControl(character) || character >= 0xE000
-            ? $"\\u{(int)character:X4}"
-            : character.ToString());
+        if (message.message == WmChar)
+        {
+            said.Append(Readable((char)(message.wParam & 0xFFFF)));
+            Say(into, said);
+            return;
+        }
 
-        Say(said.ToString());
+        // WW249. The injected key beside the character it becomes, because that is the one boundary
+        // left. Six reds say the window is delivered text with one character overwritten by the last
+        // one sent, which put the defect in the send rather than in WPF — and the send is still two
+        // things: what SendInput was given, and what TranslateMessage makes of what arrived.
+        //
+        // The whole word and not a field of it, which is measured rather than chosen. Reading the
+        // scan code at bits 16-23 answered zero for all seven of a round that typed correctly, so
+        // the character is not there: `WM_KEYDOWN` gives the scan code eight bits and a UTF-16 code
+        // unit does not fit in eight bits. What is recorded is therefore the message as it arrived,
+        // and the first thing it settles is whether the character is anywhere in it at all.
+        if (message.message == WmKeyDown && (message.wParam & 0xFFFF) == VkPacket)
+        {
+            injected.Append($"[{(uint)message.lParam:X8}]");
+            Say(packets, injected);
+        }
     }
+
+    /// <summary>What a console can draw, escaped where it cannot.</summary>
+    /// <param name="character">The code unit as it arrived.</param>
+    private static string Readable(char character) =>
+        char.IsControl(character) || character >= 0xE000
+            ? $"\\u{(int)character:X4}"
+            : character.ToString();
 
     /// <summary>
     /// Write one reading where a case can take it.
@@ -105,10 +139,27 @@ internal sealed class Arrivals
     /// and a reading taken through the name is the one a case can make — WW238 measured that.
     /// </para>
     /// </summary>
-    /// <param name="reading">What the caption now says.</param>
-    private void Say(string reading)
+    /// <param name="caption">Which caption is being written.</param>
+    /// <param name="reading">What it now says.</param>
+    private static void Say(TextBlock caption, StringBuilder reading)
     {
-        into.Text = reading;
-        System.Windows.Automation.AutomationProperties.SetName(into, reading);
+        caption.Text = reading.ToString();
+        System.Windows.Automation.AutomationProperties.SetName(caption, caption.Text);
+    }
+
+    /// <summary>Both captions, before either has anything to say.</summary>
+    /// <param name="reading">What each says until something arrives.</param>
+    private void Start(string reading)
+    {
+        said.Append(reading);
+        injected.Append(reading);
+        Say(into, said);
+        Say(packets, injected);
+
+        // Cleared so the first arrival is the first thing in the record rather than the second: the
+        // caption's opening words say the recorder is running, and a transcript that kept them would
+        // read as a window that was sent them.
+        said.Clear();
+        injected.Clear();
     }
 }

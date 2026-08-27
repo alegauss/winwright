@@ -201,6 +201,54 @@ internal static class SlowMachine
     /// </summary>
     internal const string Cadence = "the looks a sequence needs to have been observed";
 
+    /// <summary>The same for a duration that ran out while this run was still getting to it.</summary>
+    internal const string Window = "the time a run has to read something before it stops being true";
+
+    /// <summary>
+    /// That the hole is honest for a run that arrived too late rather than too slowly: a duration the
+    /// fixture was asked to hold, and a run that spent longer than that reaching it.
+    /// <para>
+    /// WW285. The third shape and not the second. A cadence is how often a run managed to look, and
+    /// this is a clock the run does not start and cannot pause — the window begins when the fixture
+    /// builds itself, and everything between that and the reading is spent. So the proof is elapsed
+    /// against declared, and nothing about how the reading was taken.
+    /// </para>
+    /// </summary>
+    /// <param name="holdingMs">How long the fixture was asked to hold what was being looked for.</param>
+    /// <param name="tookMs">How long this run took from asking to reading.</param>
+    /// <param name="gone">
+    /// That what was looked for is genuinely absent rather than wrong — the caller's own proof that
+    /// this is the clock. A caller passing false here is asking to excuse a real red.
+    /// </param>
+    internal static void Excusing(int holdingMs, double tookMs, bool gone)
+    {
+        Assert.True(
+            tookMs >= holdingMs,
+            $"this run took {tookMs:0}ms to read something the fixture was asked to hold for "
+                + $"{holdingMs}ms, so it was still there and there is nothing to excuse");
+
+        Assert.True(
+            gone,
+            $"the {holdingMs}ms window had passed and what was looked for was there anyway, which is "
+                + "a fact about the fixture rather than about how long this run took to arrive");
+
+        Excuses.Written(
+            ExcusedBy.Budget,
+            Window,
+            typeof(SlowMachine),
+            $"{tookMs:0}ms from asking to reading, against the {holdingMs}ms this run asked the "
+                + "fixture to hold it for");
+    }
+
+    /// <summary>The sentence for that one, which is the other way a run can be too late.</summary>
+    /// <param name="what">What was being looked for.</param>
+    /// <param name="holdingMs">How long the fixture was asked to hold it.</param>
+    /// <param name="tookMs">How long this run took from asking to reading.</param>
+    internal static string Sentence(string what, int holdingMs, double tookMs) =>
+        $"unchecked: {what} — this run took {tookMs:0}ms to get from launching to reading, and asked "
+            + $"the fixture to hold it for {holdingMs}ms. This machine was not given time; nothing "
+            + "here is a claim about the fixture.";
+
     /// <summary>The sentence a run that met one prints, which is what makes the hole readable.</summary>
     /// <param name="named">Which declared deadline ran out.</param>
     /// <param name="what">What was being waited for.</param>

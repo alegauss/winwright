@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System.Windows.Automation;
 
 using Winwright.Acting;
@@ -12,7 +12,7 @@ namespace Winwright.Tests;
 /// WW141. This block's criterion says every verb needing no cooperation runs against an application
 /// that references nothing, which is what keeps this usable on a product nobody here owns. Hundreds
 /// of cases do exactly that, so it held by accident of how the fixtures were written and no case
-/// anywhere stated it â€” and a rule met by whoever remembers is met by nobody.
+/// anywhere stated it — and a rule met by whoever remembers is met by nobody.
 /// <para>
 /// The window here is bare Win32: a frame and four controls made with CreateWindowExW, no
 /// presentation stack, no package, nothing written down for a harness to find. It is the closest
@@ -62,7 +62,7 @@ public sealed class NoCooperationTests : IDisposable
     /// An application that references nothing: bare Win32, no presentation stack, no package.
     /// <para>
     /// One caveat, stated rather than hidden. It runs inside this process, which does take the
-    /// in-app half â€” so the process-wide display awareness the half declares is in force here and
+    /// in-app half — so the process-wide display awareness the half declares is in force here and
     /// would not be in a product that never took it. That is not an API these verbs call; it is a
     /// condition the desk reading already measures and names, and it is the reason that condition
     /// exists rather than a gap in this case.
@@ -115,7 +115,7 @@ public sealed class NoCooperationTests : IDisposable
     public void The_scope_is_derived_and_the_namespaces_it_leaves_out_are_measured()
     {
         // WW209. The scope was two namespaces typed into this file, and the case above claims every
-        // verb the engine offers â€” of ten namespaces and about a hundred and fifty public statics
+        // verb the engine offers — of ten namespaces and about a hundred and fifty public statics
         // outside those two. It now reaches anything anywhere that touches the application, which
         // added eighteen verbs nobody had ever been asked about.
         var driving = Cooperating.Driving();
@@ -124,7 +124,7 @@ public sealed class NoCooperationTests : IDisposable
         Assert.Contains("AppTarget", driving, StringComparer.Ordinal);
         Assert.Contains("Obstruction", driving, StringComparer.Ordinal);
 
-        // And the four that compose rather than drive contribute nothing â€” measured on every run
+        // And the four that compose rather than drive contribute nothing — measured on every run
         // rather than promised once. A verdict assembled from results reaches no application, and
         // the day one does, it arrives here rather than staying outside the question.
         var composing = Checkout.SourcesIn(Checkout.Engine)
@@ -148,7 +148,7 @@ public sealed class NoCooperationTests : IDisposable
     /// The namespaces that compose values rather than drive anything.
     /// <para>
     /// WW57 took <c>Scenarios</c> off this list, and the measurement above is what noticed. The
-    /// declarations in it still compose — a step, a case, a vocabulary, a format — but the engine
+    /// declarations in it still compose � a step, a case, a vocabulary, a format � but the engine
     /// that runs one resolves locators under a root element, which is reaching the application by
     /// any reading. So it is swept as a driving namespace and <c>CaseRun.Of</c> is classified in the
     /// catalogue like every other verb, which is what this measurement exists to force.

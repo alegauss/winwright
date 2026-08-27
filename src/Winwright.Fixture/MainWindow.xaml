@@ -68,6 +68,12 @@
                what separates a send that arrived already wrong from a text box that dropped one
                under load, and those are opposite repairs in opposite repositories. -->
           <TextBlock x:Name="arrived" Margin="0,12,0,0" TextWrapping="Wrap" Text="nothing yet" />
+
+          <!-- WW249. The key each character was injected as, beside the character it became. Six
+               reds put the defect in the send, and the send is still two things: what SendInput was
+               given, and what TranslateMessage made of what arrived. These two captions are what
+               tell those apart. -->
+          <TextBlock x:Name="injected" Margin="0,8,0,0" TextWrapping="Wrap" Text="nothing yet" />
         </StackPanel>
       </TabItem>
     </TabControl>

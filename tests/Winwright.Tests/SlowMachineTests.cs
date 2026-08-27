@@ -163,6 +163,41 @@ public sealed class SlowMachineTests
     }
 
     [Fact]
+    public void A_run_that_arrived_after_the_window_closed_did_not_watch_the_fixture_lose_it()
+    {
+        // WW285. The third shape: a clock this run does not start and cannot pause. Six seconds
+        // asked for, eight spent getting there, and what was being held is gone.
+        SlowMachine.Excusing(holdingMs: 6000, tookMs: 8100, gone: true);
+
+        var said = SlowMachine.Sentence("a page still loading", 6000, 8100);
+
+        Assert.StartsWith("unchecked: ", said, StringComparison.Ordinal);
+        Assert.Contains("8100ms", said, StringComparison.Ordinal);
+        Assert.Contains("6000ms", said, StringComparison.Ordinal);
+        Assert.Contains("nothing here is a claim about the fixture", said, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_run_that_arrived_in_time_has_nothing_to_excuse()
+    {
+        var refused = Assert.ThrowsAny<Xunit.Sdk.XunitException>(
+            () => SlowMachine.Excusing(holdingMs: 6000, tookMs: 900, gone: true));
+
+        Assert.Contains("there is nothing to excuse", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Something_still_there_after_its_window_closed_is_the_fixtures_doing()
+    {
+        // The half that keeps the check. Late and still holding it is a fixture that did not let
+        // go, which is a claim about the fixture and stays red however late this run was.
+        var refused = Assert.ThrowsAny<Xunit.Sdk.XunitException>(
+            () => SlowMachine.Excusing(holdingMs: 6000, tookMs: 8100, gone: false));
+
+        Assert.Contains("rather than about how long this run took to arrive", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void This_gate_is_not_the_desks_and_says_so_by_taking_a_name_the_desk_would_refuse()
     {
         // The two excuses are deliberately not interchangeable. BusyDesk demands a condition the

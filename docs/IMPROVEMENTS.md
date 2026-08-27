@@ -111,31 +111,33 @@ keep.
 
 ### §WW249 The proof that WPF takes input is itself intermittent
 
-**Answered.** `Arrivals` records every `WM_CHAR` the fixture's window is delivered, read
-off the message pump below WPF. On the sixth red it said:
+**Which side it is on, answered.** `Arrivals` records every `WM_CHAR` the fixture's
+window is delivered, read off the message pump below WPF. On the sixth red it said:
 
         typed WW246-1     the control read WW146-1
         Windows delivered WW146-1
 
-So the characters **arrived at the window already substituted**. This is not a text box
-that lost one under load — the window was handed the wrong text — and that rules out
-WPF, the control, and everything above the queue. It is the send.
+So the characters **arrived at the window already substituted**. Not a text box that
+lost one under load — the window was handed the wrong text — which rules out WPF, the
+control and everything above the queue. It is the send.
 
-The rule the first five reds fitted holds on this one too: index 2's `2` became `1`, the
-last character sent, length for length. Six for six.
+The seventh said it again: `W1246-1` read, `W1246-1` delivered, seven injected keys for
+seven characters. The rule the first five fitted holds on both — one character becomes
+the last one sent, length for length. Seven for seven.
 
-`Keyboard.Send` builds one input pair per UTF-16 code unit, each a fresh struct, and
-hands them to a single `SendInput`. The union is written explicitly so its size is right
-on x64. That path was read for a defect that would produce this and has none, which is
-what made the reading necessary rather than another hypothesis. What it did not rule out
-is what happens to the array after `SendInput` takes it: the substitution is between the
-call and the queue.
+`Keyboard.Send` builds one input pair per UTF-16 code unit, each a fresh struct, into a
+single `SendInput`, with the union written so its size is right on x64. That path has no
+defect that would produce this, and what it does not cover is what happens to the array
+after `SendInput` takes it.
 
-Where it was taken matters and cost a run. Hooked through `HwndSource.AddHook`, the
-recorder saw End's keyup, seven Backspace keyups and seven VK_PACKET pairs and not one
-`WM_CHAR`, while the box read the text correctly — WPF answers the character messages
-first and `HwndWrapper` stops the chain at the first hook that answers. `AddHook` reads
-above WPF. The pump reads below it.
+**Splitting that further needs another instrument, and the obvious one is measured
+out.** Reading the character from the `VK_PACKET` message before `TranslateMessage`
+makes one of it: it is not there. Every packet's lParam is `00000001` — repeat count
+one, scan code zero — because `WM_KEYDOWN` gives the scan code eight bits and a code
+unit needs sixteen. What that reading can still claim is the count, one injected key per
+character, and it does.
+
+So the next one belongs on the harness side, not the fixture's.
 
 ### §WW260 Some expected sets are the application's data, not its strings
 
@@ -369,26 +371,3 @@ once. A genuine absence now carries how many icons the bar and the flyout held.
 
 What is left waits on the next occurrence rather than on any work: it will say which of
 the two it was.
-
-### §WW284 The dash that was encoded twice
-
-Six occurrences across two files, every one an em-dash written as `â€”`: the UTF-8 bytes
-for `—` decoded as Windows-1252 and then encoded as UTF-8 again. Four are comments in
-`NoCooperationTests`; two are in `Act.cs`, and one of those is a `<summary>` on a public
-member, so it is in the XML documentation the package ships.
-
-How it got there is not a mystery — a tool that reads a file without being told its
-encoding gets the system codepage on this machine, and writing it back makes the damage
-permanent. It was found by making exactly that mistake in this repository and then
-checking whether anything else carried the same signature.
-
-Nothing catches it. The compiler does not care what a comment says. The concordance
-reads sources for structure and never for prose. Nobody reads a doc comment closely
-enough to notice one wrong character, which is why six of them have sat in the tree.
-
-So this is two pieces of work and the second is the one that matters. The characters are
-a find and replace. The check is what stops the next tool doing it again: a case reading
-every tracked text file, refusing a byte sequence that is UTF-8 decoded as a codepage
-and re-encoded. That signature is narrow — `â€` before a punctuation byte is not a thing
-prose contains — and this repository has Portuguese strings in its language files, so
-the check has to pass those rather than banning non-ASCII.

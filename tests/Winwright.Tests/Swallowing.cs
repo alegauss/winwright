@@ -70,6 +70,10 @@ internal static class Swallowing
             "one look inside a deadline, and its own note says so: a dump caught half-written is a "
                 + "file this run has not finished writing, and the wait around it reports what it "
                 + "was still waiting for rather than turning the wait into the failure"),
+        new("EncodingTests.EncodedTwice", Swallowed.TheAnswer,
+            "the question is whether these bytes are valid UTF-8 for something shorter, so a strict "
+                + "decode that threw is the false this answers — and the throw is the reading rather "
+                + "than a failure of it, which is why the decoder is asked to throw at all"),
         new("FixtureTests.Alive", Swallowed.TheAnswer,
             "a pid the runtime will not build a process for is a pid nothing is running under, "
                 + "which is the false this answers"),

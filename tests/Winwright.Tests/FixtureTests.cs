@@ -596,9 +596,26 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
     {
         // The refusal's arm, at a moment this run chose. It was found on a machine that happened
         // to be slow, and reproducing it meant finding another one.
-        var window = Launched("--loading=6000");
+        const int holding = 6000;
+
+        // WW285. Timed from before the launch, because that is when the fixture's own clock starts:
+        // the window begins holding the note the moment it is built, and everything after that —
+        // starting the process, waiting for it to draw, walking another process's tree — is spent
+        // out of the same six seconds.
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        var window = Launched($"--loading={holding}");
 
         var names = Ids(window);
+        var took = clock.Elapsed.TotalMilliseconds;
+
+        // A run that arrived after the note was due to go is not a run that saw a fixture keep it.
+        // The content being there is the caller's proof that the page loaded rather than broke.
+        if (!names.Contains("loadingNote") && took >= holding && names.Contains("reportNote"))
+        {
+            SlowMachine.Excusing(holding, took, gone: true);
+            output.WriteLine(SlowMachine.Sentence("a page still loading", holding, took));
+            return;
+        }
 
         // Read on reportNote and not on reportSwatch: a Border has no automation peer, so
         // asserting its absence would pass on a page that never loaded at all.

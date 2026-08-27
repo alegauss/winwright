@@ -122,6 +122,10 @@ public sealed class WpfInputTests : IDisposable
             // dropped a character under load — opposite repairs, in opposite repositories.
             var before = Arrived();
 
+            // Both records accumulate across the rounds, so what this round did is the difference
+            // rather than the total — the same reason `before` is kept at all.
+            var beforePackets = Packets();
+
             // Assigned in one step on purpose: DeskAsks traces an excused reading back to the line
             // that assigned it, so an act and its assertion split across two names is an excuse the
             // catalogue cannot see. Measured — this is what it went red about.
@@ -140,8 +144,13 @@ public sealed class WpfInputTests : IDisposable
             // value was wrong and never which attempt: `W6246` for `WW246` is one character
             // substituted rather than lost, and knowing whether that was the first send or the fifth
             // is the difference between a race at the window and a race inside the send.
+            // WW249. Both readings, because the boundary they are for is between them: the packets
+            // are what SendInput put on the queue and the characters are what TranslateMessage made
+            // of them, so a packet already wrong and a right packet under a wrong character are
+            // different defects in different places.
             var said = $"round {round} of {Rounds}: {result}."
-                + $" Windows had delivered '{before}' and has now delivered '{Arrived()}'";
+                + $" Windows had delivered '{before}' and has now delivered '{Arrived()}',"
+                + $" injected as '{Injected()}'";
 
             Assert.True(result.Outcome == AssertionOutcome.Passed, said);
             Assert.True(typing == box.Read().Values.Value, said);
@@ -151,6 +160,13 @@ public sealed class WpfInputTests : IDisposable
             // happened on its first guest run, where it answered nothing at all and the measurement
             // it existed to take was lost.
             Assert.True(Arrived().EndsWith(typing, StringComparison.Ordinal), said);
+
+            // WW249. The same for the second reading, in the one claim it can make. The characters
+            // are not in the key message — the scan code is eight bits and a code unit is sixteen,
+            // and a round that typed correctly recorded seven of them all reading zero — so what
+            // this asserts is the count: one injected key per character sent, which is what would
+            // change if the send lost or repeated one before the window ever saw it.
+            Assert.True(typing.Length == Packets() - beforePackets, said);
         }
     }
 
@@ -166,6 +182,32 @@ public sealed class WpfInputTests : IDisposable
     /// </summary>
     private string Arrived() =>
         On("Text#arrived").Read().Facts?.Name ?? "<the recorder could not be read>";
+
+    /// <summary>
+    /// Every character this run injected, as the key it was injected as rather than as the character
+    /// the window then made of it.
+    /// <para>
+    /// WW249. The sixth red said the window is delivered the substituted text, which ruled out WPF
+    /// and the control and left the send. This was meant to split what is left, and it does not: the
+    /// character was expected in the packet's scan code, and a round that typed correctly recorded
+    /// seven packets whose scan code was zero. <c>WM_KEYDOWN</c> gives the scan code eight bits and
+    /// a UTF-16 code unit needs sixteen, so it was never going to be there.
+    /// </para>
+    /// <para>
+    /// What is left is the message as it arrived, which still says how many keys were injected and
+    /// in what order. That is a real claim about the send — one key per character — and it is not
+    /// the claim that was wanted, so the boundary this was for still needs an instrument.
+    /// </para>
+    /// </summary>
+    private string Injected() =>
+        On("Text#injected").Read().Facts?.Name ?? "<the recorder could not be read>";
+
+    /// <summary>
+    /// How many keys this run has injected so far, counted off the same record. One token per key,
+    /// so an unreadable recorder counts none rather than throwing — and the round then fails on a
+    /// difference of zero, which is the honest reading of an instrument that said nothing.
+    /// </summary>
+    private int Packets() => Injected().Count(one => one == '[');
 
     [Fact]
     public void A_click_reaches_a_wpf_checkbox()
