@@ -44,6 +44,7 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
+- 📋 **WW280** (deps: —) **a run too slow to observe the animation says so and goes red about it anyway** — The guard names the reading as the cause in its own message and is still an assertion, so a busy guest reports a fixture that cycled exactly as asked as a defect. → §WW280
 
 ## Done when — Block A
 

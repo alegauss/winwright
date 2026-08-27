@@ -345,3 +345,27 @@ once. A genuine absence now carries how many icons the bar and the flyout held.
 
 What is left waits on the next occurrence rather than on any work: it will say which of
 the two it was.
+
+### §WW280 The guard that diagnoses the reading and blames the fixture
+
+`FixtureTests.A_full_cycle_takes_about_as_long_as_the_length_the_run_declared` opens
+with a guard WW162 put there, and the guard is right: it compares how often the run
+managed to look against how long a state lasts, and refuses to conclude anything about
+the animation where the reading could not have seen the sequence. Its own message says
+so — "that is the reading being too slow and not the animation".
+
+Then it asserts it. On a guest run of 1,716 cases it was the only red: 241ms a look at a
+600ms state, fewer than three looks each. The fixture was cycling exactly as asked, and
+the suite reported a defect in it.
+
+This is the misattribution `BusyDesk` exists to refuse, arriving through a door
+`BusyDesk` does not have. Every fact `DeskFacts` names is about somebody else owning
+something — the foreground, the focus, the shell's flyout, a window left standing over
+the region — and each is answered by a `Precondition` the engine hands back. A machine
+too busy to read a window three times a state is none of those: nothing owns anything,
+the reading was simply not fast enough, and no engine reading answers it.
+
+So what this asks first is whether that is a desk fact at all. If it is, the engine
+names it and the case excuses itself the way every other one does; if it is not, the
+case still must not go red about the fixture, and what it does instead is a decision
+rather than an assumption.
