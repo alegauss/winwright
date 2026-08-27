@@ -418,7 +418,7 @@ only its own. A fixture is what the application is started with: `arguments`, `v
 ```json
 {
   "fixtures": [
-    { "name": "pt-BR", "environment": "pt-BR", "flag": "--language", "shareable": true }
+    { "name": "pt-BR", "environment": "pt-BR", "flag": "--language", "shareable": true, "language": "pt-BR" }
   ]
 }
 ```
@@ -430,6 +430,14 @@ assertions are only ever unchecked. A fixture that names an environment nothing 
 is refused, and so is one that names it twice: an argument spelling `--language=en` beside
 `"environment": "pt-BR"` is two places deciding one thing, and whichever the application reads last
 wins while the expectations still describe the other.
+
+`language` is the other field and is not that shape. It decides nothing about the launch — it says
+which language the window the launch produced is **in**, so a derived set reads the strings that
+window is actually showing. Without it a project shipping five languages had to declare one of them
+in `languageFiles` and pretend the other four were not there, because a set cannot be derived from
+five files and picking the first would expect a language nobody is looking at. With it, a project
+declares everything it ships and two fixtures in one file may be in two languages. A tag that is not
+a language is refused where it was written.
 
 Names resolve across the whole suite, so the launch three files need is declared once and a name two
 files declare is **refused, naming both** — before any case has resolved against either. Without that,

@@ -240,7 +240,7 @@ public class ScenarioFileTests
             ["name", "steps", "tags", "needs", "catches", "filed", "fixture", "onlyReads"],
             ScenarioSchema.Case.Select(field => field.Name));
         Assert.Equal(
-            ["name", "environment", "flag", "arguments", "variables", "shareable"],
+            ["name", "environment", "flag", "arguments", "variables", "shareable", "language"],
             ScenarioSchema.Fixture.Select(field => field.Name));
         Assert.Equal(
             [

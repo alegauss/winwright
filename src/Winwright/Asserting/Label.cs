@@ -145,15 +145,8 @@ public static class Labels
         ArgumentNullException.ThrowIfNull(declaration);
         ArgumentNullException.ThrowIfNull(language);
 
-        var tagged = Tagged(declaration);
-        if (tagged.Count == 0)
-            throw new UnusableLabelException(
-                UnusableLabel.NoLanguageFiles,
-                $"'{key}' is read from the project's strings and {declaration.Path} declares no languageFiles "
-                    + "whose names carry a language tag, such as strings.en.json");
-
         var wanted = language.Culture;
-        var chosen = Nearest(tagged, wanted) ?? Fallback(tagged, declaration, key, wanted);
+        var chosen = FileFor(declaration, wanted, key);
 
         var text = Read(chosen.File, key)
             ?? throw new UnusableLabelException(
@@ -176,6 +169,46 @@ public static class Labels
     /// <summary>The same, resolving the language from the project the way the application does.</summary>
     public static Label For(string key, ProjectDeclaration declaration) =>
         For(key, declaration, ResolvedLanguage.Resolve(declaration));
+
+    /// <summary>
+    /// Which of the project's strings files answers for a language, and the language that file is in.
+    /// <para>
+    /// WW240. Public because a derived set has exactly the same question and used to answer it a
+    /// different way: it refused a project declaring more than one file, so an application shipping
+    /// five languages had to declare one and pretend the other four were not there. Two answers to
+    /// one question is what this whole tool refuses one layer up, and it was doing it here.
+    /// </para>
+    /// <para>
+    /// The nearest match rather than the exact one, because that is the fallback a resource loader
+    /// makes and therefore the one the window in front of you already made: <c>pt-BR</c> is served by
+    /// <c>pt</c> where a project ships one. What is never invented is a default — falling back to
+    /// whichever file happens to be first is how an assertion ends up matching English against a
+    /// window that is not in English.
+    /// </para>
+    /// </summary>
+    /// <param name="declaration">The project, for the files it ships and what it falls back to.</param>
+    /// <param name="wanted">The language the window is in.</param>
+    /// <param name="about">What is being read, so a refusal names it.</param>
+    /// <exception cref="UnusableLabelException">
+    /// Where the project ships no tagged files, or ships none for that language and declares no
+    /// fallback, or falls back to one it does not ship.
+    /// </exception>
+    public static (string File, CultureInfo Culture) FileFor(
+        ProjectDeclaration declaration, CultureInfo wanted, string about)
+    {
+        ArgumentNullException.ThrowIfNull(declaration);
+        ArgumentNullException.ThrowIfNull(wanted);
+        ArgumentException.ThrowIfNullOrWhiteSpace(about);
+
+        var tagged = Tagged(declaration);
+        if (tagged.Count == 0)
+            throw new UnusableLabelException(
+                UnusableLabel.NoLanguageFiles,
+                $"'{about}' is read from the project's strings and {declaration.Path} declares no languageFiles "
+                    + "whose names carry a language tag, such as strings.en.json");
+
+        return Nearest(tagged, wanted) ?? Fallback(tagged, declaration, about, wanted);
+    }
 
     /// <summary>
     /// Whether a string carries a placeholder, which is what makes it unusable for an exact read.

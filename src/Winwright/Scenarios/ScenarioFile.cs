@@ -258,7 +258,8 @@ public sealed class ScenarioFile
                 Text(at, one, ScenarioSchema.Fixture, "flag"),
                 Words(at, one, ScenarioSchema.Fixture, "arguments"),
                 Pairs(at, one, ScenarioSchema.Fixture, "variables"),
-                Truth(at, one, ScenarioSchema.Fixture, "shareable")));
+                Truth(at, one, ScenarioSchema.Fixture, "shareable"),
+                Text(at, one, ScenarioSchema.Fixture, "language")));
 
             if (!seen.Add(declared.Name))
                 throw new ScenarioRefusedException(at, $"'{declared.Name}' is declared twice, so a case naming it names two");

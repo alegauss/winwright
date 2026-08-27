@@ -448,33 +448,6 @@ the list being believed.
 
 What is left is the deletion the criterion measures.
 
-### §WW240 The language belongs to the fixture, not to the project
-
-`DerivedSet.From(declaration, under)` refuses a project declaring more than one
-`languageFiles` entry, and the refusal is right: picking the first would derive an
-expectation in a language nobody is looking at. But the consequence is that an
-application shipping five languages has to declare one of them and pretend the other
-four are not there.
-
-Measured while migrating claude-tray, which ships `en`, `es`, `fr`, `pt-BR` and `pt-PT`.
-Declaring all five made `covers` refuse; declaring only `en.json` works, and works
-*because* every fixture in that repository launches with `--lang en`. So the answer the
-engine needs is already written down — one line above, in the fixture — and it is being
-supplied instead by a project-wide declaration that happens to agree with it.
-
-The shape that would own it: a fixture says which language its window is in, and a set
-derives from the file for that language. A project then declares every file it ships,
-which is what it actually has, and two cases in one file may read two languages without
-either lying.
-
-This is not academic for this block. claude-tray's Names case is *about* the languages —
-it reads accessible names across them — and it cannot be migrated while a run can only
-resolve one. It is also what makes `destructive` entries resolvable by key in a window
-that is not in English.
-
-Until then the single declaration is the honest thing, and the comment beside it says
-why it is not the general answer.
-
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW223 The repetition caught what a single green hides

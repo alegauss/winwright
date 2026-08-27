@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 
 namespace Winwright.Scenarios;
@@ -36,7 +36,8 @@ public sealed record FixtureDeclaration
         string flag,
         IReadOnlyList<string> arguments,
         IReadOnlyDictionary<string, string> variables,
-        bool shareable)
+        bool shareable,
+        string language)
     {
         Name = name;
         Environment = environment;
@@ -44,6 +45,7 @@ public sealed record FixtureDeclaration
         Arguments = arguments;
         Variables = variables;
         Shareable = shareable;
+        Language = language;
     }
 
     /// <summary>What the fixture is called, and what a report names the launch by.</summary>
@@ -71,12 +73,35 @@ public sealed record FixtureDeclaration
     /// <summary>Whether this window may be lent to a case that only reads it.</summary>
     public bool Shareable { get; }
 
+    /// <summary>
+    /// The language tag the window this launches is in, or empty where nothing said.
+    /// <para>
+    /// WW240. A derived set used to refuse a project declaring more than one strings file, so an
+    /// application shipping five languages had to declare one and pretend the other four were not
+    /// there. The answer was always a line above: claude-tray's fixtures launch with `--lang en`, and
+    /// the project-wide declaration that made the sweep work happened to agree with them.
+    /// </para>
+    /// <para>
+    /// A fact about the window rather than about the run, which is <see cref="Shareable"/>'s shape and
+    /// not <see cref="Environment"/>'s. The environment field is refused where nothing carries it to
+    /// the launch, because it decides what the application is started with; this decides nothing —
+    /// it says what the arguments produced, so that expectations are read out of the strings the
+    /// window is actually showing.
+    /// </para>
+    /// </summary>
+    public string Language { get; }
+
+    /// <summary>The language this window is in, or null where the fixture named none.</summary>
+    /// <exception cref="ScenarioRefusedException">Where the tag is not a language.</exception>
+    public System.Globalization.CultureInfo? Speaking =>
+        Language.Length == 0 ? null : Culture(Name, Language);
+
     /// <summary>Whether this fixture samples an environment at all.</summary>
     public bool Samples => Environment.Length > 0;
 
     /// <summary>The application as it comes: no arguments, no variables, nothing sampled.</summary>
     public static FixtureDeclaration Plain { get; } =
-        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false);
+        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "");
 
     /// <summary>
     /// Declare one.
@@ -87,8 +112,9 @@ public sealed record FixtureDeclaration
     /// <param name="arguments">Everything else the launch carries.</param>
     /// <param name="variables">The environment variables it sets. A value carrying the environment counts as carrying it.</param>
     /// <param name="shareable">That this window may be lent to a case that only reads it.</param>
+    /// <param name="language">The language tag the window it launches is in.</param>
     /// <exception cref="ScenarioRefusedException">
-    /// Where the environment reaches the launch nowhere, or reaches it twice.
+    /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not one.
     /// </exception>
     public static FixtureDeclaration Of(
         string name,
@@ -96,7 +122,8 @@ public sealed record FixtureDeclaration
         string? flag = null,
         IEnumerable<string>? arguments = null,
         IReadOnlyDictionary<string, string>? variables = null,
-        bool shareable = false)
+        bool shareable = false,
+        string? language = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
         if (string.IsNullOrWhiteSpace(name))
@@ -150,8 +177,45 @@ public sealed record FixtureDeclaration
             }
         }
 
+        // WW240. Judged here rather than where a set is derived: a tag that is not a language is
+        // wrong on every machine, and discovering it on the run that was going to sweep with it costs
+        // a launch to learn what the file already said.
+        var speaking = language?.Trim() ?? "";
+        if (speaking.Length > 0)
+            Culture(called, speaking);
+
         return new FixtureDeclaration(
-            called, sampled, through, new ReadOnlyCollection<string>(rest), new ReadOnlyDictionary<string, string>(set), shareable);
+            called,
+            sampled,
+            through,
+            new ReadOnlyCollection<string>(rest),
+            new ReadOnlyDictionary<string, string>(set),
+            shareable,
+            speaking);
+    }
+
+    /// <summary>
+    /// The culture a tag names, or a refusal saying it names none.
+    /// <para>
+    /// <c>predefinedOnly</c>, for the reason the label reader gives: without it .NET manufactures a
+    /// culture for any string at all, so a typo becomes a language this ships no strings for and the
+    /// refusal arrives about the wrong thing.
+    /// </para>
+    /// </summary>
+    /// <param name="called">The fixture, for the refusal.</param>
+    /// <param name="tag">The language tag.</param>
+    /// <exception cref="ScenarioRefusedException">Where it names no language.</exception>
+    private static System.Globalization.CultureInfo Culture(string called, string tag)
+    {
+        try
+        {
+            return System.Globalization.CultureInfo.GetCultureInfo(tag, predefinedOnly: true);
+        }
+        catch (System.Globalization.CultureNotFoundException)
+        {
+            throw new ScenarioRefusedException(
+                called, $"it says its window is in '{tag}', which is not a language tag such as en or pt-BR");
+        }
     }
 
     /// <summary>

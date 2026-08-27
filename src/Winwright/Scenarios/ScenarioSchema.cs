@@ -138,6 +138,7 @@ public static class ScenarioSchema
         new("arguments", false, Taking.Words, "everything else the launch carries, as an array", []),
         new("variables", false, Taking.Pairs, "the environment variables it sets, as an object", []),
         new("shareable", false, Taking.Truth, "that this window may be lent to a case that only reads it", []),
+        new("language", false, Taking.Text, "the language tag the window it launches is in, so a derived set reads the strings that window is actually showing", []),
     ]);
 
     /// <summary>What a step may say.</summary>

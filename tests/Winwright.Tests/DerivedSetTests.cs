@@ -178,10 +178,14 @@ public sealed class DerivedSetTests : IDisposable
 
         // Which one the application is showing is not answerable here, and picking the first
         // would derive an expectation in a language nobody is looking at.
+        //
+        // WW240 kept this and made it a smaller claim: it is now what happens when *nothing* said
+        // which language the window is in. A fixture that says so gets its set derived from the file
+        // for that language, which is FixtureLanguageTests.
         var refused = Assert.Throws<UnderivableSetException>(
             () => DerivedSet.From("the tab headers", ProjectDeclaration.Find(two), "tabs"));
         Assert.Contains("declares 2 language files", refused.Message);
-        Assert.Contains("name the file", refused.Message);
+        Assert.Contains("no fixture said which language", refused.Message);
     }
 
     [Fact]

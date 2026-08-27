@@ -303,13 +303,44 @@ public sealed record DerivedSet
     }
 
     /// <summary>
-    /// The same, from the one language file the project declares. Refused where it declares
-    /// several: which of them the application is showing is a question this cannot answer, and
-    /// picking the first would derive an expectation in a language nobody is looking at.
+    /// The same, from the language file that answers for the window under test.
+    /// <para>
+    /// WW240. Where <paramref name="language"/> says which language the window is in, the file is
+    /// chosen exactly as a label's is — one owner for the question, which is what this did not have.
+    /// Measured migrating claude-tray, which ships five languages: declaring all five made a sweep
+    /// refuse, and declaring only English worked <em>because</em> every fixture there launches with
+    /// `--lang en`. The answer was already written down one line above, in the fixture, and was being
+    /// supplied instead by a project-wide declaration that happened to agree with it.
+    /// </para>
+    /// <para>
+    /// With no language named it is the old rule and for the old reason: one file is the answer, and
+    /// several is a question nothing here can settle. Picking the first would derive an expectation
+    /// in a language nobody is looking at, which is worse than refusing.
+    /// </para>
     /// </summary>
-    public static DerivedSet From(string named, ProjectDeclaration declaration, string under)
+    /// <param name="named">What the set is, as a report names it.</param>
+    /// <param name="declaration">The project, for the files it ships.</param>
+    /// <param name="under">The key whose strings the set is.</param>
+    /// <param name="language">What the window is in, or null where nothing said.</param>
+    public static DerivedSet From(
+        string named, ProjectDeclaration declaration, string under, System.Globalization.CultureInfo? language = null)
     {
         ArgumentNullException.ThrowIfNull(declaration);
+
+        if (language is not null)
+        {
+            try
+            {
+                return From(named, Labels.FileFor(declaration, language, named).File, under);
+            }
+            catch (UnusableLabelException unusable)
+            {
+                // Its own kind of refusal, because a caller catching one of these is deciding what a
+                // set that could not be derived means — and a label's exception reaching them would
+                // be about a key nobody asked for.
+                throw new UnderivableSetException(unusable.Message);
+            }
+        }
 
         return declaration.LanguageFiles.Count switch
         {
@@ -317,8 +348,9 @@ public sealed record DerivedSet
                 $"{named} is derived from the project's strings and {declaration.Path} declares no languageFiles"),
             1 => From(named, declaration.LanguageFiles[0], under),
             _ => throw new UnderivableSetException(
-                $"{named}: {declaration.Path} declares {declaration.LanguageFiles.Count} language files, and which "
-                    + "one the application is showing is not answerable here — name the file"),
+                $"{named}: {declaration.Path} declares {declaration.LanguageFiles.Count} language files and no "
+                    + "fixture said which language the window is in, so which of them it is showing is not "
+                    + "answerable here — name the language on the fixture, or the file here"),
         };
     }
 

@@ -162,6 +162,11 @@ public static class CaseRun
             .ToHashSet(StringComparer.Ordinal);
         var recalled = new Dictionary<string, string?>(StringComparer.Ordinal);
 
+        // WW240. What language the window this case was launched against is in, where the fixture
+        // said. A derived set then reads the strings that window is actually showing, rather than the
+        // one file a project had to pretend was the only one it ships.
+        var speaking = declared.Fixture.Speaking;
+
         // WW61. Before the first act, not after the first red: a case whose precondition is absent
         // would otherwise fail on the step that could not find what the absence explains, and the
         // reader of that red goes looking for a defect in the application.
@@ -182,7 +187,7 @@ public static class CaseRun
                 // produces reds about a window nobody put into the state they describe. Measured in
                 // claude-tray, where a click that was never delivered left the case red about a text
                 // box on a page that had never been opened.
-                if (!Perform(step, subject, project, budget, trace, results, root, pointedAt, recalled))
+                if (!Perform(step, subject, project, budget, trace, results, root, pointedAt, recalled, speaking))
                 {
                     stopped = index;
                     break;
@@ -305,9 +310,10 @@ public static class CaseRun
         List<AssertionResult> results,
         AutomationElement root,
         HashSet<string> pointedAt,
-        Dictionary<string, string?> recalled)
+        Dictionary<string, string?> recalled,
+        System.Globalization.CultureInfo? speaking)
     {
-        var went = Performing(step, subject, project, budget, trace, results, root, recalled);
+        var went = Performing(step, subject, project, budget, trace, results, root, recalled, speaking);
 
         // WW255. Read after the step rather than kept from inside it, and only for a step something
         // points back at. What a later step compares against is what this one left the window reading,
@@ -328,13 +334,14 @@ public static class CaseRun
         List<TraceStep> trace,
         List<AssertionResult> results,
         AutomationElement root,
-        Dictionary<string, string?> recalled)
+        Dictionary<string, string?> recalled,
+        System.Globalization.CultureInfo? speaking)
     {
         // WW236. A sweep is one claim over many elements, so it does not go through the attempt loop —
         // it has its own wait, over the resolve budget, which WW241 gave it.
         if (step.Covers is { } key)
         {
-            Swept(step, key, subject, project, root, trace, results);
+            Swept(step, key, subject, project, root, trace, results, speaking);
             return true;
         }
 
@@ -436,12 +443,13 @@ public static class CaseRun
         ProjectDeclaration project,
         AutomationElement root,
         List<TraceStep> trace,
-        List<AssertionResult> results)
+        List<AssertionResult> results,
+        System.Globalization.CultureInfo? speaking)
     {
         DerivedSet derived;
         try
         {
-            derived = DerivedSet.From(step.Name, project, key);
+            derived = DerivedSet.From(step.Name, project, key, speaking);
         }
         catch (UnderivableSetException underivable)
         {
