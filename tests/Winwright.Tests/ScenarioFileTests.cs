@@ -237,7 +237,7 @@ public class ScenarioFileTests
         // The two lists cannot drift because there is only one, and this is what says so.
         Assert.Equal(["cases", "fixtures"], ScenarioSchema.File.Select(field => field.Name));
         Assert.Equal(
-            ["name", "steps", "tags", "needs", "catches", "filed", "fixture", "onlyReads"],
+            ["name", "steps", "tags", "needs", "catches", "filed", "fixture", "forEach", "onlyReads"],
             ScenarioSchema.Case.Select(field => field.Name));
         Assert.Equal(
             ["name", "environment", "flag", "arguments", "variables", "shareable", "language"],

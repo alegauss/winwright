@@ -126,6 +126,7 @@ public static class ScenarioSchema
         new(Catches, false, Taking.Text, "the defect it exists to catch — what went wrong without it", []),
         new("filed", false, Taking.Text, "the task it was filed under", []),
         new("fixture", false, Taking.Text, $"which of this file's '{Fixtures}' to launch it against", []),
+        new("forEach", false, Taking.Text, "the key whose every declared string this case runs once for — derived from the project's own strings, with the member reaching a locator through '{}'", []),
         new("onlyReads", false, Taking.Truth, "that it leaves the window as it found it, so a window may be lent to it", []),
     ]);
 

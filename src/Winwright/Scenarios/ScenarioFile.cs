@@ -300,9 +300,10 @@ public sealed class ScenarioFile
         var filed = Text(at, one, ScenarioSchema.Case, "filed");
         var against = Against(at, one, fixtures);
         var onlyReads = Truth(at, one, ScenarioSchema.Case, "onlyReads");
+        var forEach = Text(at, one, ScenarioSchema.Case, "forEach");
 
         return Addressed(at, () => CaseDeclaration.Declared(
-            name!, declared, tags, needs, catches, filed, against, onlyReads));
+            name!, declared, tags, needs, catches, filed, against, onlyReads, forEach));
     }
 
     /// <summary>

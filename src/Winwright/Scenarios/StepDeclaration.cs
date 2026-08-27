@@ -67,10 +67,14 @@ public sealed record StepDeclaration
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
-    public string Name { get; }
+    public string Name { get; private init; }
 
-    /// <summary>What it acts on, parsed at declaration and never re-parsed at run time.</summary>
-    public Locator Locator { get; }
+    /// <summary>
+    /// What it acts on, parsed at declaration and never re-parsed at run time — with the one exception
+    /// <see cref="For"/> is: a case repeating over a derived set substitutes the member and parses the
+    /// result, which is a different locator and faces the same door.
+    /// </summary>
+    public Locator Locator { get; private init; }
 
     /// <summary>What it does.</summary>
     public ActVerb Verb { get; }
@@ -420,6 +424,17 @@ public sealed record StepDeclaration
 
         if (string.IsNullOrWhiteSpace(locator))
             throw new ScenarioRefusedException(subject, "a step acts on something, and this one names nothing");
+
+        // WW263. A locator naming the member has to parse with something in it as well as with the
+        // placeholder, and both are facts about the file rather than about a run. Probed here so the
+        // refusal arrives where the locator was written, not on the member that happened to expose it.
+        if (locator.Contains(Member, StringComparison.Ordinal)
+            && !Locator.TryParse(locator.Replace(Member, "probe", StringComparison.Ordinal), out _, out var wrongly))
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it names the member of a repeated case and does not parse with one in it: {wrongly}");
+        }
 
         // Parsed here rather than at run time on purpose: a locator that does not parse is wrong on
         // every machine, and the reader of a red about one is opening the wrong repository.
@@ -866,6 +881,38 @@ public sealed record StepDeclaration
             eachSpoken,
             ownHeader);
     }
+
+    /// <summary>What a locator writes where the member of a repeated case belongs.</summary>
+    public const string Member = "{}";
+
+    /// <summary>
+    /// This step with <see cref="Member"/> replaced by one member of the set its case repeats over.
+    /// <para>
+    /// WW263. The locator is re-parsed rather than patched, because a locator is parsed once at
+    /// declaration on purpose and a substituted one is a different locator: it has to face the same
+    /// door. A member that makes it unparseable is refused naming both, which is the only run-time
+    /// refusal this feature can have and is why the declaration proves a probe substitutes first.
+    /// </para>
+    /// <para>
+    /// The name carries the member too. Twelve steps across four panels reported under four identical
+    /// names is a trace a reader has to count lines in to use.
+    /// </para>
+    /// </summary>
+    /// <param name="member">One string of the derived set.</param>
+    /// <exception cref="ScenarioRefusedException">Where the substituted locator does not parse.</exception>
+    public StepDeclaration For(string member)
+    {
+        ArgumentNullException.ThrowIfNull(member);
+
+        var text = Locator.Text.Replace(Member, member, StringComparison.Ordinal);
+        if (!Locator.TryParse(text, out var parsed, out var because))
+            throw new ScenarioRefusedException($"{Name} [{member}]", $"'{text}' does not parse: {because}");
+
+        return this with { Locator = parsed!, Name = $"{Name} [{member}]" };
+    }
+
+    /// <summary>Whether this step's locator names the member of a repeated case.</summary>
+    public bool NamesTheMember => Locator.Text.Contains(Member, StringComparison.Ordinal);
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>
     public override string ToString() => (Expected, Moves) switch

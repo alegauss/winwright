@@ -24,7 +24,6 @@
 
 - 📋 **WW258** (deps: —) **a case cannot name a tray icon or open its menu, and the engine has done both since block D** — `NotificationArea` finds an icon by the name the shell gives it, opens the overflow to reach a hidden one and asks for the menu; no step may write any of it. → §WW258
 - 📋 **WW259** (deps: —) **`expand` goes through the pattern, and the submenu the menu case is about only opens to a key** — An empty WinForms submenu exposes no ExpandCollapse, so the pattern route cannot ask the question that was broken; `Menu.Expand` walks it and no case can name it. → §WW259
-- 📋 **WW263** (deps: —) **a case has a fixed list of steps, and the panels it must visit are derived from the strings** — The names case opens every settings panel the page declares and makes the same claims on each, and a data file cannot say "once per member" of a set it does not list. → §WW263
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
@@ -35,7 +34,7 @@
 - ⏳ **WW78** (deps: WW230 ⏳) **the keyboard case is the only observable of a live input path and it lives in a script** — The runner now carries claude-tray to the guest, and the restore there fails: the engine's package exists only in a folder this repository does not ship. → §WW78
 - 📋 **WW82** (deps: WW257, WW258, WW259, WW260) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
 - 📋 **WW83** (deps: Block G) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
-- 📋 **WW84** (deps: WW261 ✅, WW262 ✅, WW263, WW264 ✅) **the names case observes what no screenshot can** — Migrated with the derived panel sweep and the exact-label reads, including the rule that must fire and the one that must not. → §WW84
+- 📋 **WW84** (deps: WW261 ✅, WW262 ✅, WW263 ✅, WW264 ✅) **the names case observes what no screenshot can** — Migrated with the derived panel sweep and the exact-label reads, including the rule that must fire and the one that must not. → §WW84
 - 📋 **WW85** (deps: Block G) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
 - 📋 **WW86** (deps: WW78 ⏳, WW79 ✅, WW80 ✅, WW81 ✅, WW82, WW83, WW84, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - 📋 **WW87** (deps: Block G, Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87

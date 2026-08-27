@@ -197,6 +197,7 @@
 - ✅ **WW225** **a case can name no synthesised input, so migrating one that proves input stops proving it** — A case names four synthesised acts and reads what holds the focus, so the keyboard case's three assertions are all writable.
 - ✅ **WW254** **the engine walks a picker and reports the hops, and no case can name that act** — A case names `pick`, hands it the value in `with`, and reads the route and the switch count in the step's own line; one claiming nothing of what it reached is refused.
 - ✅ **WW267** **a picker is reached by naming a value, and the values are the machine's own data** — A step names `pick at` with a position, and the walk reaches whatever sits there — reporting by name what the case could not have written.
+- ✅ **WW263** **a case has a fixed list of steps, and the panels it must visit are derived from the strings** — A case names `forEach` and runs its steps once per string the key declares, with the member reaching a locator through `{}` and an empty derivation refused.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

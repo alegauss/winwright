@@ -36,7 +36,8 @@ public sealed record CaseDeclaration
         string catches,
         string filed,
         FixtureDeclaration fixture,
-        bool onlyReads)
+        bool onlyReads,
+        string? forEach)
     {
         Name = name;
         Steps = steps;
@@ -46,6 +47,7 @@ public sealed record CaseDeclaration
         Filed = filed;
         Fixture = fixture;
         OnlyReads = onlyReads;
+        ForEach = forEach;
     }
 
     /// <summary>What the case is called, and the name a run of it is reported under.</summary>
@@ -97,6 +99,23 @@ public sealed record CaseDeclaration
     /// </para>
     /// </summary>
     public bool OnlyReads { get; }
+
+    /// <summary>
+    /// The key whose declared strings this case runs once for each of, or null where it runs once.
+    /// <para>
+    /// WW263. Steps are an array and the array is written out, which is right for every case that
+    /// knows what it drives. The names case does not: the panels it visits come from the strings the
+    /// application ships, so the number of steps is data the file must not carry. Listing them is the
+    /// defect the derivation exists to refuse — a panel added later is swept by nothing, and the run
+    /// reports a clean pass over the panels somebody remembered.
+    /// </para>
+    /// <para>
+    /// The member reaches the steps through <see cref="StepDeclaration.Member"/> in a locator, and a
+    /// case repeating over a set no step names is refused: it would run its steps N times against the
+    /// same window and report N times the confidence for one reading.
+    /// </para>
+    /// </summary>
+    public string? ForEach { get; }
 
     /// <summary>Whether this case says what it exists to catch.</summary>
     public bool Justified => Catches.Length > 0;
@@ -162,6 +181,7 @@ public sealed record CaseDeclaration
     /// <param name="filed">The task it was filed under.</param>
     /// <param name="fixture">What to launch it against. Null for the application as it comes.</param>
     /// <param name="onlyReads">That it leaves the window as it found it, so a window may be lent to it.</param>
+    /// <param name="forEach">The key whose declared strings this case runs once for each of.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static CaseDeclaration Declared(
         string name,
@@ -171,7 +191,8 @@ public sealed record CaseDeclaration
         string? catches = null,
         string? filed = null,
         FixtureDeclaration? fixture = null,
-        bool onlyReads = false)
+        bool onlyReads = false,
+        string? forEach = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed case>" : name.Trim();
         if (string.IsNullOrWhiteSpace(name))
@@ -194,6 +215,18 @@ public sealed record CaseDeclaration
 
         Pointing(called, collected);
 
+        // WW263. A case repeating over a set no step reaches would run its steps N times against the
+        // same window and report N times the confidence for one reading — which is the unearned green
+        // this project exists to refuse, arriving as arithmetic.
+        var repeating = string.IsNullOrWhiteSpace(forEach) ? null : forEach.Trim();
+        if (repeating is not null && !collected.Exists(step => step.NamesTheMember))
+        {
+            throw new ScenarioRefusedException(
+                called,
+                $"it runs once for each string under '{repeating}' and no step's locator names the "
+                    + $"member with '{StepDeclaration.Member}', so every run would drive the same window");
+        }
+
         // A present-but-blank justification is worse than an absent one: it reads as answered.
         if (catches is not null && catches.Trim().Length == 0)
             throw new ScenarioRefusedException(called, "it says what it catches and then says nothing, which reads as answered");
@@ -209,7 +242,8 @@ public sealed record CaseDeclaration
             catches?.Trim() ?? "",
             filed?.Trim() ?? "",
             fixture ?? FixtureDeclaration.Plain,
-            onlyReads);
+            onlyReads,
+            repeating);
     }
 
     /// <summary>The same as <see cref="Declared"/>, kept for the two fields a selection reads.</summary>

@@ -27,14 +27,27 @@ public sealed class CaseResult
         RunVerdict verdict,
         IReadOnlyList<TraceStep> trace,
         IReadOnlyList<StepDeclaration> notReached,
-        bool lent = false)
+        bool lent = false,
+        int across = 1)
     {
         Declared = declared;
         Verdict = verdict;
         Trace = trace;
         NotReached = notReached;
         Lent = lent;
+        Across = across;
     }
+
+    /// <summary>
+    /// How many members of a derived set this case ran over. One where it repeats over nothing.
+    /// <para>
+    /// WW263. A repeated case makes its declared checks once per member, so the count a summary shows
+    /// is the product — and a line reading <em>over 12 of 3 check(s)</em> is one a reader stops
+    /// trusting. What was visited is also what the script counted apart from what was asserted, and
+    /// this is where that number comes from rather than from the case.
+    /// </para>
+    /// </summary>
+    public int Across { get; }
 
     /// <summary>The case this is a run of.</summary>
     public CaseDeclaration Declared { get; }
@@ -80,7 +93,11 @@ public sealed class CaseResult
         var where = Against.Samples ? $", sampling {Against.Environment}" : "";
         var window = Lent ? ", on a borrowed window" : "";
 
-        return $"{Declared.Name}: {Verdict.Outcome} over {Verdict.Ran} of {Declared.Checks} check(s)"
+        var over = Across == 1
+            ? $"{Declared.Checks} check(s)"
+            : $"{Declared.Checks * Across} check(s) across {Across} member(s)";
+
+        return $"{Declared.Name}: {Verdict.Outcome} over {Verdict.Ran} of {over}"
             + $"{short_fall}{where}{window}";
     }
 }
@@ -167,15 +184,28 @@ public static class CaseRun
         // one file a project had to pretend was the only one it ships.
         var speaking = declared.Fixture.Speaking;
 
+        // WW263. The steps as they will actually be run: once as declared, or once per member of the
+        // set the case repeats over, with the member substituted into every locator that names it.
+        // Derived before the first act for the reason the precondition below is — a set that cannot be
+        // derived is a case that is wrong, and finding that out halfway through is a window driven for
+        // nothing.
+        var members = Members(declared, project, speaking);
+        var running = new List<StepDeclaration>();
+        foreach (var member in members)
+        {
+            foreach (var step in declared.Steps)
+                running.Add(member is null ? step : step.For(member));
+        }
+
         // WW61. Before the first act, not after the first red: a case whose precondition is absent
         // would otherwise fail on the step that could not find what the absence explains, and the
         // reader of that red goes looking for a defect in the application.
         if (Absent(declared, measured) is { } missing)
             return NotOn(declared, missing, lent);
 
-        for (var index = 0; index < declared.Steps.Count; index++)
+        for (var index = 0; index < running.Count; index++)
         {
-            var step = declared.Steps[index];
+            var step = running[index];
             var subject = new Subject(root, step.Locator, project);
             if (step.MeansIt)
                 subject = subject.MeaningIt();
@@ -212,15 +242,16 @@ public static class CaseRun
 
         var notReached = new List<StepDeclaration>();
         if (stopped >= 0)
-            for (var index = stopped + 1; index < declared.Steps.Count; index++)
-                notReached.Add(declared.Steps[index]);
+            for (var index = stopped + 1; index < running.Count; index++)
+                notReached.Add(running[index]);
 
         return new CaseResult(
             declared,
             RunVerdict.Over(results, broke),
             new ReadOnlyCollection<TraceStep>(trace),
             new ReadOnlyCollection<StepDeclaration>(notReached),
-            lent);
+            lent,
+            members.Count);
     }
 
     /// <summary>
@@ -556,6 +587,41 @@ public static class CaseRun
             : AssertionResult.Fail(step.Name, detail);
 
         results.Add(result.At(trace.Count));
+    }
+
+    /// <summary>
+    /// The members a case runs over: one null where it repeats over nothing, or every string the key
+    /// it names declares.
+    /// <para>
+    /// WW263. An empty derivation is refused rather than run, which is the guard the script wrote by
+    /// hand before its own walk: zero panels makes every assertion inside run zero times and report
+    /// nothing at all — a clean run over nothing, which is this project's founding defect reached
+    /// through a language flag.
+    /// </para>
+    /// </summary>
+    /// <exception cref="ScenarioRefusedException">Where the set cannot be derived, or is empty.</exception>
+    private static IReadOnlyList<string?> Members(
+        CaseDeclaration declared, ProjectDeclaration project, System.Globalization.CultureInfo? speaking)
+    {
+        if (declared.ForEach is not { } key)
+            return [null];
+
+        DerivedSet derived;
+        try
+        {
+            derived = DerivedSet.From(declared.Name, project, key, speaking);
+        }
+        catch (UnderivableSetException underivable)
+        {
+            throw new ScenarioRefusedException(declared.Name, underivable.Message);
+        }
+
+        return derived.Expected.Count == 0
+            ? throw new ScenarioRefusedException(
+                declared.Name,
+                $"it runs once for each string under '{key}' and that key declares none, so every step "
+                    + "in it would run zero times and the case would report a clean run over nothing")
+            : derived.Expected.Cast<string?>().ToList();
     }
 
     /// <summary>

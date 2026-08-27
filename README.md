@@ -441,6 +441,26 @@ Two refusals are about a case that cannot fail. One with no steps drives nothing
 expect nothing acts and never looks, so it passes on a build with the defect still in it — the same
 unearned green the third verdict exists to prevent, arriving as a file instead.
 
+### A case that runs once per string the application ships
+
+`forEach` names a key, and the case runs its steps once for **each string declared under it**, with
+the member reaching a locator through `{}`:
+
+```json
+{ "forEach": "settings.nav", "steps": [ { "locator": "Group[name=\"{}\"]", "act": "read", "eachSpoken": true } ] }
+```
+
+The number of runs is data the file must not carry. claude-tray's settings page has six panels under
+one naming rule, and a case listing them is a case that reports a clean pass over the panels somebody
+remembered — a panel added later is swept by nothing. That is the hardcoded-set defect one level up
+from `covers`.
+
+Two guards belong to the engine rather than to the case, and both were loops somebody wrote by hand
+first. A key declaring **no** strings is refused rather than run: zero members makes every assertion
+inside run zero times and report nothing at all. And a case repeating over a set no step's locator
+reaches is refused too — it would drive the same window N times and report N times the confidence for
+one reading.
+
 ### What a case needs, and why it exists
 
 `needs` names what this machine has to have before there is anything to observe — a second profile,

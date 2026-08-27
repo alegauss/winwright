@@ -89,28 +89,26 @@ keep.
 ### §WW249 The proof that WPF takes input is itself intermittent
 
 `WpfInputTests` is the negative control `WW246` was missing, and it does not hold every
-time. Measured with nothing changed between runs: host green, guest green, guest red,
-guest green. The red was `Failed` rather than a hole, so the keys were sent and the
-read-back did not match.
-
-What the red said was `Expected: Passed / Actual: Failed` and nothing else, because the
-assertion threw its own evidence away. Fixed then, and it paid: the next guest red named
-what the box read.
-
-Then eight consecutive host runs of that one case, and none of them red. So it is the
+time. Host green, guest green, guest red, guest green, with nothing changed between the
+runs — and eight consecutive host runs of that one case, none of them red. So it is the
 guest that reproduces it, which is a fact about timing rather than about logic.
 
-The hypothesis was a focus arriving while the keys were already going, so the box reads
-part of what was typed. That is refuted. `WW246` was typed and the box read `W6246`:
-five characters for five, one **substituted** rather than lost, and the replacement is
-the character two later in the same string. Not a truncated read — the order the keys
-arrived in, which points at the send.
+The first hypothesis was a focus arriving while the keys were already going, so the box
+reads part of what was typed. Refuted. **Two reds now, and the same rule fits both:**
 
-The typing path was then read for a defect that would produce it and has none: one input
-pair per code unit, each a fresh struct, one `SendInput`. So what is owed is a
-reproduction rather than another hypothesis. The case now drives five rounds with a
-different string each and names the round it failed on, which is `TrayPlacementTests`'
-answer to the same shape.
+    typed WW246    read W6246       the second character became the last
+    typed WW246-4  read W4246-4     the second character became the last
+
+Five characters for five and seven for seven — one **substituted**, never lost. The
+second was round four of five, so it is not the first send after a focus either.
+
+The typing path was read for a defect that would produce it and has none: one input pair
+per code unit, each a fresh struct, one `SendInput`, and an `INPUT` union written
+explicitly so its size is right on x64.
+
+So the next thing owed is still not a hypothesis. It is a reading of what actually
+reaches the box — the same keys sent to a control that records every `WM_CHAR` it gets,
+which separates a send that went wrong from a WPF text box that dropped one under load.
 
 ### §WW260 Some expected sets are the application's data, not its strings
 
@@ -206,27 +204,6 @@ that refused it is a hole naming the absence and never a red about the applicati
 It is separable from `WW258`. That one is about reaching a menu at all; this is about a
 menu that is already open, and it is the same question for a menu bar as for a tray
 icon's.
-
-### §WW263 A case cannot repeat itself over a set it did not list
-
-Steps are an array and the array is written out. That is right for every case so far,
-and it is what stops `WW84`: the panels it visits come from the `settings.nav.*` keys,
-so the number of steps is data the file must not carry. Listing them is the defect the
-derivation exists to refuse — a panel added later is swept by nothing, and the run
-reports a clean pass over the panels somebody remembered.
-
-The script solved it with a loop and paid for it in the ways a loop costs. It counted
-panels opened apart from panels asserted, because a panel with no row control had still
-been visited and rolling the two together would report it as one that got away. It
-guarded on the derived list being empty before walking, because zero panels makes every
-assertion inside run zero times and report nothing at all — a clean run over nothing,
-which is this project's founding defect reached through a language flag.
-
-Both of those are the runner's job here, not the case's. What the format needs is a
-step, or a group of them, that says *once for each member of this derived set*, with the
-member reaching the locator — and the two guards owned by the engine: an empty
-derivation is broken and never passed, and what was visited is counted apart from what
-was asserted.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
