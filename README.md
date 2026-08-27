@@ -602,11 +602,19 @@ Written against what has shipped, so it does not promise a line that is still a 
 ```
 run-tests.cmd            build and run the suite, taking the roll call as part of the run
 run-tests-vm.cmd         the same in a VMware guest, so the host stays usable
+pack-local.cmd           pack into packages\ for a side-by-side adopting clone, and evict the old copy
 ```
 
 The suite creates real windows, takes the foreground and synthesises input, which is why the second
 one exists. A bare `dotnet test` takes the roll call too: a run short of what discovery found is not
 reported as a pass.
+
+The third exists only until the engine is published, and it is a trap rather than a convenience.
+The version in `packages\` never changes, and NuGet extracts a package once per version — so a plain
+`dotnet pack` over the same number leaves an adopting clone restoring exactly what it already had.
+What that looks like from over there is every case file refusing to load, naming a field of the case
+that is perfectly correct. Measured three times in one session. `pack-local.cmd` packs and evicts
+together so the sequence cannot be half-done.
 
 ### Running an adopting project's cases off the desk
 
