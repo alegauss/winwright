@@ -191,6 +191,12 @@ public static class Resolve
             reached++;
         }
 
+        // WW252. Every step matched, which a diagnosis of a failed resolve cannot do unless the
+        // element arrived between the two. Answered rather than indexed past the end: a diagnosis is a
+        // page about a failure and never a second thing that can fail.
+        if (reached >= locator.Steps.Count)
+            return new LocatorMiss(locator, reached, deepest, MissKind.ArrivedLate, null, 0, []);
+
         var stopped = locator.Steps[reached];
 
         // Elsewhere first, and deliberately: if the thing is in this window under some other

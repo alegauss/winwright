@@ -88,31 +88,6 @@ is ready, which is the engine's own contract being sometimes false.
 Deliberately not settled by reasoning. Two runs were spent today refuting hypotheses
 that looked certain, and the sentence that settles this arrives on the next guest red.
 
-### §WW250 Between naming a value and naming nothing
-
-`expect` names the value exactly. `answers` says there is one. There is no third, and a
-real claim sits between them.
-
-Measured while migrating `WW80`. claude-tray's list-price note interpolates the date its
-rate card was read, so no case can name what it says — and the script it replaces
-asserted exactly the right thing: that the note carries `\d{4}-\d{2}-\d{2}`. A figure
-whose provenance has gone is the defect, and a note that lost its date still *answers*.
-
-So the migration has to drop that assertion or weaken it to `answers`, and weakening it
-is worse than dropping: it reads as covered.
-
-The shape that fits is a `matches` field beside `expect`, taking a regular expression,
-mutually exclusive with it as the other three claims already are. What it must not
-become is a way to write a loose `expect`: `.*` is a claim that cannot fail, which is
-the same unearned green `WW237` and `WW238` closed twice, and a pattern that matches
-everything has to be refused the way an always-answering reading is.
-
-There is a second reason to be careful. `T361` is written into that script: an assertion
-matched the English words *list prices*, found nothing in the other four languages, and
-reported a readable note as unreadable. A pattern is exactly where that mistake is
-easiest, so whatever this becomes should be as hard to write against a translated string
-as `expect` already is.
-
 ### §WW251 A disclosure is not one reading moving
 
 `moves` claims one reading of one element ended up different. `covers` claims a derived

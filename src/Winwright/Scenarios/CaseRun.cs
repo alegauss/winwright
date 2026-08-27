@@ -483,6 +483,9 @@ public static class CaseRun
         if (step.Answers)
             return Answered(step, subject, acted);
 
+        if (step.Matches is not null)
+            return Matched(step, subject, acted);
+
         if (step.Expected is not { } wanted)
             return new Landed(acted, null, acted?.Element);
 
@@ -525,6 +528,35 @@ public static class CaseRun
                 saw = look.Facts ?? saw;
                 var now = look.Found ? step.Reads.Of(look) : null;
                 return string.IsNullOrWhiteSpace(now) ? now : wanted;
+            },
+            subject.ActMs,
+            subject.PollMs);
+
+        return new Landed(acted, expectation, saw);
+    }
+
+    /// <summary>
+    /// A step that claims the reading matches a pattern, waited for the way every other expectation is.
+    /// <para>
+    /// WW250. The wanted value is the pattern in a sentence, so the failure reads as what it is —
+    /// <em>wanted something matching '\d{4}-\d{2}-\d{2}', last read 'no date here'</em> — and the
+    /// reading itself is what comes back on a miss, because what a reader needs is what the control
+    /// actually said and not that it failed to match.
+    /// </para>
+    /// </summary>
+    private static Landed Matched(StepDeclaration step, Subject subject, ActResult? acted)
+    {
+        var wanted = $"something matching '{step.Matches}'";
+        var saw = acted?.Element;
+        var expectation = Expect.That(
+            step.Name,
+            wanted,
+            () =>
+            {
+                var look = subject.ReadOnce();
+                saw = look.Facts ?? saw;
+                var now = look.Found ? step.Reads.Of(look) : null;
+                return now is not null && step.Matches!.IsMatch(now) ? wanted : now;
             },
             subject.ActMs,
             subject.PollMs);

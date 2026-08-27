@@ -23,6 +23,21 @@ public enum MissKind
     /// nothing closed, it is genuinely not there.
     /// </summary>
     Absent,
+
+    /// <summary>
+    /// The whole chain matches now, and did not while it was looked for.
+    /// <para>
+    /// WW252. A diagnosis runs after a resolve gave up, so at first sight nothing can match all the
+    /// way — what can is time. Measured against a pane whose numbers render from a transcript scan:
+    /// the read timed out and the value was there a moment later, and naming the step that stopped
+    /// the walk indexed one past the last one there was.
+    /// </para>
+    /// <para>
+    /// It is a reading rather than an accident, and one no other sentence here makes: it is the
+    /// signature of a wait that was too short, which is a fact about the case and not the window.
+    /// </para>
+    /// </summary>
+    ArrivedLate,
 }
 
 /// <summary>One thing in the window that is shut, and how it would be opened.</summary>
@@ -67,7 +82,16 @@ public sealed record LocatorMiss
     public int Reached { get; }
 
     /// <summary>The step that did not resolve.</summary>
-    public LocatorStep Stopped => Locator.Steps[Reached];
+    /// <summary>
+    /// The step the walk stopped at, or the last one where it stopped at none.
+    /// <para>
+    /// WW252. <see cref="MissKind.ArrivedLate"/> is the whole chain matching, so there is no step it
+    /// stopped at and the index would be one past the end — the second place the same arithmetic was
+    /// written, and the one that would have thrown again after the first was fixed.
+    /// </para>
+    /// </summary>
+    public LocatorStep Stopped =>
+        Locator.Steps[Math.Min(Reached, Locator.Steps.Count - 1)];
 
     /// <summary>What the search was under when it stopped, or null where that was the window itself.</summary>
     public ElementFacts? Deepest { get; }
@@ -98,6 +122,9 @@ public sealed record LocatorMiss
                 + "the chain is wrong rather than the control missing.",
             MissKind.NavigationNeeded =>
                 $"{Stopped} is not in the tree under {under}, and it will not be until {Route}.",
+            MissKind.ArrivedLate =>
+                $"{Stopped} matches now and did not while it was looked for: the window was still "
+                + "drawing, so this is a wait that was too short rather than anything about the control.",
             _ when ClosedDoors.Count > 0 =>
                 $"nothing in the window matches {Stopped}: it was renamed, removed, or it is behind "
                 + $"something that is not showing — {string.Join(", ", ClosedDoors)} "

@@ -32,7 +32,8 @@ public sealed record StepDeclaration
         bool meansIt,
         bool moves,
         string? covers,
-        bool answers)
+        bool answers,
+        System.Text.RegularExpressions.Regex? matches)
     {
         Name = name;
         Locator = locator;
@@ -44,6 +45,7 @@ public sealed record StepDeclaration
         Moves = moves;
         Covers = covers;
         Answers = answers;
+        Matches = matches;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -63,6 +65,23 @@ public sealed record StepDeclaration
     /// act and nothing else — a navigation whose consequence a later step is the check for.
     /// </summary>
     public string? Expected { get; }
+
+    /// <summary>
+    /// The pattern <see cref="Reads"/> should match once the act has landed, or null where the step
+    /// makes one of the other claims.
+    /// <para>
+    /// WW250. Between naming the value and saying only that there is one, and a real claim sits there.
+    /// Measured on claude-tray's list-price note: it interpolates the date its rate card was read, so
+    /// no case can name what it says — and a note that lost that date is the defect, while still
+    /// answering. `expect` could not be written and `answers` would have read as covered.
+    /// </para>
+    /// <para>
+    /// Compiled at declaration, like the locator, and for the same reason: a pattern that does not
+    /// parse is wrong on every machine. It carries a timeout, because a regular expression is the one
+    /// field of this format that can be made to cost a run rather than fail it.
+    /// </para>
+    /// </summary>
+    public System.Text.RegularExpressions.Regex? Matches { get; }
 
     /// <summary>Which reading the expectation is about. <see cref="ReadBack.Anything"/> by default.</summary>
     public ReadBack Reads { get; }
@@ -138,7 +157,7 @@ public sealed record StepDeclaration
     /// movement and covers no set produces no assertion result, which is why a case made only of these
     /// is refused by <see cref="CaseDeclaration"/> rather than run to a green it did not earn.
     /// </summary>
-    public bool Checkable => Expected is not null || Moves || Answers || Covers is not null;
+    public bool Checkable => Expected is not null || Moves || Answers || Covers is not null || Matches is not null;
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -164,6 +183,7 @@ public sealed record StepDeclaration
     /// <param name="moves">That the reading should end up different from what it was.</param>
     /// <param name="covers">The key whose every declared string this step's locator must read.</param>
     /// <param name="answers">That the reading should say something rather than nothing.</param>
+    /// <param name="matches">The pattern the reading should match, where no case can name its value.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static StepDeclaration Of(
         string locator,
@@ -175,7 +195,8 @@ public sealed record StepDeclaration
         string? named = null,
         bool moves = false,
         string? covers = null,
-        bool answers = false)
+        bool answers = false,
+        string? matches = null)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var subject = called ?? Describing(verb, locator);
@@ -201,6 +222,11 @@ public sealed record StepDeclaration
         // of it — and a refusal that names the wrong field is a refusal somebody fixes the wrong way.
         var sweeping = string.IsNullOrWhiteSpace(covers) ? null : covers.Trim();
 
+        // WW250, computed here for the same reason and with the same history: the two rules under this
+        // one do not know about it, so a step whose only claim is a pattern would be refused as a step
+        // that claims nothing — a refusal naming the wrong field, which somebody then fixes wrongly.
+        var pattern = string.IsNullOrWhiteSpace(matches) ? null : Compiled(subject, matches.Trim());
+
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
         // says it moved where it was something else. A step asserting both would owe two assertion
         // results, and a trace line that stands for two things is one a reader has to take apart.
@@ -212,7 +238,7 @@ public sealed record StepDeclaration
                     + "so 'moves' is for the claim that cannot name one");
         }
 
-        if (wanted is null && !moves && !answers && sweeping is null && !string.IsNullOrWhiteSpace(reads))
+        if (wanted is null && !moves && !answers && sweeping is null && pattern is null && !string.IsNullOrWhiteSpace(reads))
         {
             throw new ScenarioRefusedException(
                 subject, $"it reads '{reading.Name}' and expects nothing of it, so the reading changes nothing");
@@ -221,7 +247,7 @@ public sealed record StepDeclaration
         // WW213. An act with no expectation is a navigation a later step is the check for. A read
         // with no expectation is nothing at all: it touches nothing and claims nothing, so a case
         // carrying one is a case with a step in it that could not fail.
-        if (wanted is null && !moves && !answers && sweeping is null && act.Reads)
+        if (wanted is null && !moves && !answers && sweeping is null && pattern is null && act.Reads)
             throw new ScenarioRefusedException(subject, $"'{act.Name}' expects nothing, so the step does nothing at all");
 
         // A read moves nothing by construction, so a read claiming movement is a claim about whatever
@@ -241,6 +267,36 @@ public sealed record StepDeclaration
                 subject,
                 $"it claims '{reading.Name}' answers, and that reading answers for every element that "
                     + "resolved at all; the claim could never be false, so it says nothing");
+        }
+
+        if (pattern is not null)
+        {
+            // One claim per step, like the other three. 'expect' names the value and this names the
+            // shape of it, and a step holding both owes two assertion results.
+            if (wanted is not null || moves || answers || sweeping is not null)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it matches '{pattern}' and also makes another claim; 'matches' is for the reading "
+                        + "whose value a case cannot name");
+            }
+
+            // The unearned green this field is easiest to write. A pattern that matches the empty
+            // string matches every answer there is, so the step holds wherever the reading answered at
+            // all — which is what 'answers' says, in a field that reads as though it checked more.
+            // The same shape WW237 and WW238 each closed once.
+            if (pattern.IsMatch(""))
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"'{pattern}' matches the empty string, so it holds for every answer there is; "
+                        + "say 'answers' if that is the claim");
+            }
+
+            // Deliberately no rule about an always-answering reading here, unlike 'answers'. A pattern
+            // over 'focused' picks one of its two states, which is a claim that can be false — the
+            // problem 'answers' has with that reading is that it asks only whether there was an answer,
+            // and this asks which.
         }
 
         // WW238. The other half of the same rule: a reading the locator already selected by is fixed
@@ -318,7 +374,8 @@ public sealed record StepDeclaration
             meansIt,
             moves,
             sweeping,
-            answers);
+            answers,
+            pattern);
     }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>
@@ -328,6 +385,30 @@ public sealed record StepDeclaration
         (_, true) => $"{Name} → {Reads.Name} moves",
         _ => Name,
     };
+
+    /// <summary>
+    /// The pattern, compiled, or a refusal naming what is wrong with it.
+    /// <para>
+    /// WW250. The timeout is the point of doing this here rather than inline: a regular expression is
+    /// the one field of this format a file can use to cost a run instead of failing it, and a match
+    /// that never returns is a case nobody can report on.
+    /// </para>
+    /// </summary>
+    /// <exception cref="ScenarioRefusedException">Where it does not parse.</exception>
+    private static System.Text.RegularExpressions.Regex Compiled(string subject, string pattern)
+    {
+        try
+        {
+            return new System.Text.RegularExpressions.Regex(
+                pattern,
+                System.Text.RegularExpressions.RegexOptions.CultureInvariant,
+                TimeSpan.FromSeconds(1));
+        }
+        catch (ArgumentException wrong)
+        {
+            throw new ScenarioRefusedException(subject, $"its pattern does not parse - {wrong.Message}");
+        }
+    }
 
     private static string Describing(string? verb, string locator) =>
         $"{(string.IsNullOrWhiteSpace(verb) ? "<no verb>" : verb.Trim())} {locator.Trim()}";

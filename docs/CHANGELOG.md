@@ -169,6 +169,8 @@
 - ✅ **WW245** **the hole about a refused foreground names who holds it and never what was wanted, so two faults read alike** — Every absence about the foreground names both sides, so a hole says what it compared against and not only who answered.
 - ✅ **WW246** **the window under test reads as nothing against a real window, so no act on it can ever own the foreground** — An element with no handle of its own belongs to the window the run attached to, so synthesised input reaches a WPF application at all.
 - ✅ **WW248 (the reading)** **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — The roll carries the engine's own absence beside each excuse, so who held the desk is read rather than inferred.
+- ✅ **WW250** **a case can say what a reading is and that it says something, and nothing in between** — A step may name the shape of a reading it cannot name the value of, and a pattern matching the empty string is refused as `answers` wearing a check.
+- ✅ **WW252** **the routine that explains why a locator found nothing throws when the element arrives while it is explaining** — A chain that matches by the time the diagnosis walks it is a reading — a wait that was too short — rather than an index one past the end.
 
 ## Block G — The scenario — a case is a data file
 
