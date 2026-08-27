@@ -157,7 +157,7 @@ directions — a verb added without an entry is a red.
 | `Attempt` / `Retry` | a deadline on a sighting or a condition; an act attempted to a cap and counted |
 | `Preflight` | what each declared act needs, checked against the tree before anything is pressed |
 | `Act` | invoke, toggle, set a value or a range, select, expand, collapse — through the control's own patterns |
-| `Synthesised` | the acts a case can name that put real input on the desk — type, click, nudge, press — each carrying what it needed of the machine |
+| `Synthesised` | the acts a case can name that put real input on the desk — type, click, nudge, press, pick — each carrying what it needed of the machine |
 | `Selecting` / `Pick` | select and confirm; every value a picker holds, and reaching one |
 | `Surface` | record controls as a case found them and put them back |
 | `Pointer` | synthesised mouse input, and the declared readings about why an act needs it |
@@ -274,7 +274,7 @@ their expectations are fields, and the loop, the waits, the attempts and the ver
 
 A case has a `name` and its `steps`, and may carry `tags`, `needs`, `catches` and `filed`.
 `locator` and `act` are the two fields every step has. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`. `expect` is what the element should read
+`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`. `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
 `toggle`, `selected`, `expanded`, `text`, `name`, `focused`, defaulting to `anything`, the one value the element
 reports, in the order a reader looks at them. `name` is what a label says: a caption's words are in its
@@ -316,7 +316,7 @@ element, and a step answers one thing. The act must be `read`, because one act o
 not a claim. A key that declares no strings is **broken and not failed** — an empty expected set is
 met by an empty window, which is the hole the derivation exists to close.
 
-### The four that synthesise input
+### The five that can put real input on the desk
 
 `type`, `click`, `nudge` and `press` put real input on the desk instead of asking the control. Each has a
 pattern act beside it that reads almost the same and proves something else, and **which one a case
@@ -327,6 +327,14 @@ keys and did not. Likewise `set range` against `nudge`, and `invoke` against `cl
 `nudge` presses an arrow key at a range control, in whichever direction can actually move it — at the
 maximum a press upward is a legitimate no-op, so it goes the other way and the check stays about
 whether the control responds rather than about where it started.
+
+`pick` is the fifth and the only one that tries not to be. It reaches a value in a picker by name —
+the selection pattern first, which needs nothing of the desk, and the keyboard where that refuses,
+anchored at whichever end of the list is nearer. What comes back says which route it took **and how
+many selection changes it cost**, because a claim about one switch is void when the walk made
+several: each intermediate stop is a switch of its own. It is also the one act whose landing the
+engine can see, so a `pick` that claims nothing of what it reached is refused where it was written —
+every step after it would be read against whichever value the walk happened to stop at.
 
 They cost something the other eight do not. A synthesised act needs the window in the foreground,
 which Windows does not always grant — so its result carries **what it needed**, and a step that was

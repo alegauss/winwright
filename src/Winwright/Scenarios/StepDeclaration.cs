@@ -272,6 +272,21 @@ public sealed record StepDeclaration
         if (wanted is null && !moves && !answers && sweeping is null && pattern is null && !discloses && act.Reads)
             throw new ScenarioRefusedException(subject, $"'{act.Name}' expects nothing, so the step does nothing at all");
 
+        // WW254. The one act whose landing the engine can see. It was handed a value by name and can
+        // read what the picker settled on, so a step that walks a picker and claims nothing has thrown
+        // that answer away — and every step after it is then read against whichever value the walk
+        // happened to stop at. That is WW244's failure with the act delivered rather than dropped, and
+        // the migration this verb exists for made exactly this claim in the script: the picker walked
+        // one label to another and back, checked at each stop.
+        if (act.Reaches && wanted is null && !moves && !answers && sweeping is null && pattern is null && !discloses)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"'{act.Name}' is told what to reach and claims nothing of what it reached; name the "
+                    + "value in 'expect', because a walk that stopped somewhere else is every step "
+                    + "after this one reading the wrong thing");
+        }
+
         // A read moves nothing by construction, so a read claiming movement is a claim about whatever
         // else is happening on the desk rather than about this step.
         if (moves && act.Reads)

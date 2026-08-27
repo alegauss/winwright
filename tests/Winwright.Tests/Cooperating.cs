@@ -190,6 +190,11 @@ internal static class Cooperating
         new("Synthesised.Nudge", Cooperation.None, true, "an arrow key at a range control, as a step"),
         new("Synthesised.Press", Cooperation.None, true, "a traversal key at the window, as a step"),
         new("Pick.Value", Cooperation.None, true, "reach a value, by keyboard where the pattern will not"),
+
+        // WW254. The same walk as a step answers it. On the desk axis with the four above rather than
+        // beside the pattern acts: the pattern route needs nothing, but the fallback is keys, and a
+        // verb filed as needing nothing would promise that for the runs where it does.
+        new("Synthesised.Pick", Cooperation.None, true, "reaching a value in a picker, as a step"),
         new("Menu.Enter", Cooperation.None, true, "enter a menu bar the way a keyboard user does"),
         new("Menu.To", Cooperation.None, true, "walk to an entry"),
         new("Menu.Expand", Cooperation.None, true, "open a submenu"),

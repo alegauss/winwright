@@ -185,6 +185,7 @@
 - ✅ **WW213** **a step that only reads has to borrow an act that means nothing** — Reading is a verb: a read touches nothing, is never retried, expects something or is refused, and an element nothing drew is a failure naming the locator instead of a throw.
 - ✅ **WW214** **a fixture two files both need is written twice and the second copy drifts** — A fixture name resolves across the whole suite, so one launch is declared once, and a name two files declare is refused naming both before any case resolves against either.
 - ✅ **WW225** **a case can name no synthesised input, so migrating one that proves input stops proving it** — A case names four synthesised acts and reads what holds the focus, so the keyboard case's three assertions are all writable.
+- ✅ **WW254** **the engine walks a picker and reports the hops, and no case can name that act** — A case names `pick`, hands it the value in `with`, and reads the route and the switch count in the step's own line; one claiming nothing of what it reached is refused.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

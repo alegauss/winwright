@@ -236,8 +236,11 @@ public sealed class SynthesisedActTests : IDisposable
     public void The_vocabulary_says_which_acts_a_busy_desk_can_take_away()
     {
         // Data rather than a note, so a report can name the acts in a case that needed the machine.
+        // WW254: 'pick' is here although it tries the selection pattern first, because the flag
+        // answers whether a busy desk can take the act away and for that one it can — the keyboard
+        // fallback exists precisely because the pattern route sometimes refuses.
         Assert.Equal(
-            ["type", "click", "nudge", "press"],
+            ["type", "click", "nudge", "press", "pick"],
             ActVerb.All.Where(one => one.Synthesises).Select(one => one.Name));
 
         Assert.All(

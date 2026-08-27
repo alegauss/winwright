@@ -16,10 +16,12 @@ public class ActVerbTests
     {
         // WW225 and WW226 added the four that synthesise input, at the end: the order is the order a
         // reader is shown them, and the pattern acts come first because a pattern act is the default.
+        // WW254 added 'pick' after those, which is where it belongs on both counts — it can need the
+        // desk, and it is the newest.
         Assert.Equal(
             [
                 "read", "invoke", "toggle", "set value", "set range", "select", "expand", "collapse",
-                "type", "click", "nudge", "press",
+                "type", "click", "nudge", "press", "pick",
             ],
             ActVerb.All.Select(verb => verb.Name));
 

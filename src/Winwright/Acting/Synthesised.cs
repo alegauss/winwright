@@ -144,6 +144,40 @@ public static class Synthesised
     }
 
     /// <summary>
+    /// Reach a value in a picker, by the selection pattern where that works and by the keyboard where
+    /// it does not.
+    /// <para>
+    /// WW254. <see cref="Acting.Pick"/> has walked pickers since block D and no case could name it, so
+    /// the profiles case — the only thing in claude-tray that drives one — had no first step to write.
+    /// The value the case asks for is the argument; the route and the number of switches it took come
+    /// back in the field a pattern act puts its pattern in, because a claim about one switch is void
+    /// when the walk made several and the reader of that claim is reading this line.
+    /// </para>
+    /// <para>
+    /// Here rather than on <see cref="Act"/> for the same reason as the four above it: the fallback
+    /// sends keys, and block D's criterion is that the default act reaches no send at any depth. It is
+    /// the only one of the five that tries not to — the pattern route is attempted first and needs
+    /// nothing of the desk, which is why <see cref="ActResult.Needed"/> and not the verb is what says
+    /// whether this particular run was one a busy desk could have taken away.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">The picker.</param>
+    /// <param name="wanted">The value to reach, by name.</param>
+    /// <exception cref="NotActionableException">
+    /// Where the picker cannot take the act, or holds no value by that name — and then the refusal
+    /// lists what it does hold.
+    /// </exception>
+    public static ActResult Pick(Subject subject, string wanted)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+
+        var before = subject.Read();
+        var picked = Acting.Pick.Value(subject, wanted);
+
+        return Landed(subject, "pick", picked.Door, picked.Container, before, picked.Foreground);
+    }
+
+    /// <summary>
     /// What a synthesised act answers: the readings either side, and what it needed of the machine —
     /// which is the field the pattern acts leave null and none of these can.
     /// </summary>

@@ -80,6 +80,24 @@ public sealed record ActVerb
             (subject, argument) => Synthesised.Press(subject, Traversing(argument!)),
             synthesises: true,
             accepts: Enum.GetValues<TraversalKey>().Select(one => one.ToString()).ToList()),
+
+        // WW254. The picker walk, which the engine has done since WW28 and no case could name — so
+        // the one case in claude-tray that drives a picker had no first step to write. 'select' is
+        // the verb that looks closest and is not it: it asks a single item through
+        // SelectionItemPattern, and a WPF ComboBox realises its items when its popup opens, so there
+        // is nothing there to select until something has walked the picker.
+        //
+        // Filed under the acts a busy desk can take away even though it tries not to be one: the
+        // pattern route is attempted first and needs nothing, and the keyboard fallback exists
+        // precisely because that route sometimes refuses. Listing it beside the acts nothing about
+        // the desk stops would be a promise about the half of the runs that take the keys.
+        new(
+            "pick",
+            Takes.Text,
+            repeatable: false,
+            (subject, argument) => Synthesised.Pick(subject, argument!),
+            synthesises: true,
+            reaches: true),
     ];
 
     private readonly Func<Subject, string?, ActResult>? doing;
@@ -90,13 +108,15 @@ public sealed record ActVerb
         bool repeatable,
         Func<Subject, string?, ActResult>? doing,
         bool synthesises = false,
-        IReadOnlyList<string>? accepts = null)
+        IReadOnlyList<string>? accepts = null,
+        bool reaches = false)
     {
         Name = name;
         Wants = takes;
         Repeatable = repeatable;
         Synthesises = synthesises;
         Accepts = accepts ?? [];
+        Reaches = reaches;
         this.doing = doing;
     }
 
@@ -141,6 +161,18 @@ public sealed record ActVerb
     /// go undoes or repeats the first, and the engine attempts one of those exactly once.
     /// </summary>
     public bool Repeatable { get; }
+
+    /// <summary>
+    /// Whether the act is told what to reach and the engine can read whether it got there.
+    /// <para>
+    /// WW254. Every other act asks a control to do something, and what it ended up on is whatever the
+    /// control then reads. A pick is handed a value by name and can be asked what the picker settled
+    /// on — so a step naming one and claiming nothing has thrown away the one answer the engine had.
+    /// A click with no expectation is a navigation the next step is the check for; a pick with none
+    /// is every step after it read against whichever value the walk happened to stop at.
+    /// </para>
+    /// </summary>
+    public bool Reaches { get; }
 
     /// <summary>
     /// Whether this verb reads and never acts.

@@ -96,6 +96,13 @@ internal static class Synthesising
         new("Synthesised.Nudge", Asking.ItIsTheAct, "an arrow key at a range control, as a step"),
         new("Synthesised.Press", Asking.ItIsTheAct, "a traversal key at the window, as a step"),
 
+        // WW254. The fifth, and the only one that reaches the send by falling back rather than by
+        // being it: the selection pattern is asked first and needs nothing of the desk. Catalogued
+        // as the act anyway, because what a case names is 'pick' and the keys are inside it — the
+        // caller who has to know is the one reading whether the walk's own count still holds.
+        new("Synthesised.Pick", Asking.ItIsTheAct,
+            "reaching a value in a picker, by the pattern where that works and by the keyboard where it does not"),
+
         // A menu is entered the way a keyboard user enters one, and that is Block D's third
         // criterion rather than an escalation: reaching a destructive entry by invoke is refused
         // at the door, so walking is the only route there is.

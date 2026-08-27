@@ -72,6 +72,25 @@ public sealed record PickResult
     /// <summary>Whether the picker ended up on the value that was asked for.</summary>
     public bool Landed => string.Equals(Selected, Wanted, StringComparison.Ordinal);
 
+    /// <summary>
+    /// Which door this went through and how many switches it took, as one phrase.
+    /// <para>
+    /// WW254. A case naming <c>pick</c> gets a step reported in the same field a pattern act reports
+    /// its pattern in, so the count has to travel with the route or it reaches nothing a reader sees.
+    /// <see cref="AsTraceStep"/> puts it in <c>Polls</c>, which is a trace field and not a line — and
+    /// the person a hop count is for is the one reading whether the claim beside it still holds.
+    /// </para>
+    /// </summary>
+    public string Door
+    {
+        get
+        {
+            var door = Route == PickRoute.Pattern ? "SelectionItem" : Synthesised.ByKeyboard;
+            var by = SelectionChanges == 1 ? "1 change" : $"{SelectionChanges} changes";
+            return $"{door} in {by}";
+        }
+    }
+
     /// <summary>What happened, with the route and the count both in it.</summary>
     public override string ToString()
     {

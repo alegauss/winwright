@@ -17,6 +17,8 @@
 - ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
 - 📋 **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Four runs measured: host green, guest green, guest red, guest green, with nothing changed between them — so what it proves is that typing reaches a WPF box sometimes. → §WW249
 - 📋 **WW253** (deps: —) **a case cannot claim a row reads as text rather than as a picture, only that its subtree grew** — The script counted four readable fields on a row, and a typed count is the stale literal a derived set exists to refuse — so nothing writes the claim at all. → §WW253
+- 📋 **WW255** (deps: —) **a case cannot claim a reading came back to what an earlier step read, only that it moved** — The round trip is the whole of the profiles case — switch away, switch back, same number — and `moves` compares against the act before it and nothing else. → §WW255
+- 📋 **WW256** (deps: —) **a case cannot claim a state was never observed while it waited, only what it read at the end** — The claim is that coming back never shows the not-yet line at all, and a read taken after the wait passes just the same on a switch that flashed one. → §WW256
 
 ## Block G — The scenario — a case is a data file
 
@@ -27,7 +29,7 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW78** (deps: WW230 ⏳) **the keyboard case is the only observable of a live input path and it lives in a script** — The runner now carries claude-tray to the guest, and the restore there fails: the engine's package exists only in a folder this repository does not ship. → §WW78
-- 📋 **WW81** (deps: Block G ✅) **the profiles case is the only thing in that repository that drives the picker** — Migrated with the round trip and the timing observation, both of which need the hop count the walk reports to mean anything. → §WW81
+- 📋 **WW81** (deps: WW254 ✅, WW255, WW256) **the profiles case is the only thing in that repository that drives the picker** — Migrated with the round trip and the timing observation, both of which need the hop count the walk reports to mean anything. → §WW81
 - 📋 **WW82** (deps: WW225 ✅) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
 - 📋 **WW83** (deps: Block G ✅) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
 - 📋 **WW84** (deps: WW236 ✅) **the names case observes what no screenshot can** — Migrated with the derived panel sweep and the exact-label reads, including the rule that must fire and the one that must not. → §WW84

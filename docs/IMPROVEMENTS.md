@@ -110,6 +110,52 @@ locator, the ones that could carry a name do. It is `covers` one level down — 
 nobody lists, read out of what the window drew rather than out of the project's strings
 — and it is the claim every list, grid and row in every adopting project wants.
 
+### §WW255 A round trip is a comparison with a step, not with a moment ago
+
+`moves` compares a reading against the same reading a moment earlier, in the same step,
+across the same act. That is one shape of *changed*, and the profiles case needs the
+other: a value that changed and then came back.
+
+The script walked the picker 0 → 1 → 0 and held three stops in a variable. Two of its
+assertions are comparisons between the third stop and the first — the used percentage is
+the same, and the reset caption is the same to within a minute, for the same profile.
+Neither is a claim about the act that preceded it. Both are claims about a step several
+steps back.
+
+It is the field report and not a nicety. The defect it was written for repainted the
+panes with the profile being left behind, so coming back showed another account's
+numbers while every reading, taken on its own, looked perfectly healthy.
+
+The honest shape is a step naming an earlier step and claiming its reading is back.
+Never a value typed here: the whole point is that the case cannot know what the number
+is, only that it is the one from before. That is `moves` with a memory, and the memory
+is what a data file has no way to spell.
+
+The minute of tolerance the caption needs is the second question and a real one — a run
+that straddles a minute boundary must not be a red build.
+
+### §WW256 Some claims are about the wait and not about what it ended on
+
+An expectation is read after the wait. The profiles case carries one that is about the
+wait itself: coming back to a profile seen seconds ago shows its report without ever
+showing the *no readings yet* line, because that line means the per-profile cache did
+not put the report back.
+
+A read after the wait cannot see it. The line is gone by then — which is what passing
+looks like and also what a switch that flashed it looks like, so a case reading the end
+state goes green on both.
+
+The script measured it by clearing a sighting per stop and watching while it polled: the
+status line at 162ms and the panes back after 961ms without the cache; the line never
+shown and the panes at 12ms with it. That probe was a scratch file and is gone, which is
+why the assertion is written as *the line was never observed* rather than as *the panes
+returned within N ms*. The distinction is worth keeping: a deadline is the one assertion
+in that file that would go red on a slow machine for a correct reason.
+
+The project already declares `loading` keys, and the engine refuses a reading taken
+while the page still says *not yet*. This is the same key turned around — a state that
+must not be seen at all, rather than one that must be over before anybody reads.
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
