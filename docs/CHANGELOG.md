@@ -116,6 +116,7 @@
 - ✅ **WW216** **a project declaring nine attempts breaks every step instead of being refused once** — Both ends of the cap Retry publishes are checked where the number is declared, so nine is refused once with the file named instead of thrown once per step.
 - ✅ **WW217** **the tray cases go red about the shell on a guest that placed no icon and shut its own flyout** — A desk placing no icon anywhere is a hole naming it, asked by a new reading after the search fails, and the second call of a pair is excused like the first.
 - ✅ **WW220** **a search misses an icon in a flyout that opened and had laid out somebody else's** — A search that opened the flyout polls for the name it was given, so a stranger laid out first is no longer answered as this icon being absent from everywhere.
+- ✅ **WW265** **the picker walk reads the items of a shut picker, and a WPF ComboBox has none until it opens** — The walk opens a picker that holds nothing, reads what appeared and puts it back only where it opened it — driven by a WPF picker the fixture had never carried.
 
 ## Block E — Capture — the picture that proves what it photographed
 

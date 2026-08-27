@@ -38,6 +38,9 @@ public partial class MainWindow : Window
         if (Shapes.Has("ranges"))
             RangesPane.AddTo(panes);
 
+        if (Shapes.Has("pickers"))
+            PickersPane.AddTo(panes);
+
         if (Shapes.Has("peerless"))
             Peerless.AddTo(panes);
 

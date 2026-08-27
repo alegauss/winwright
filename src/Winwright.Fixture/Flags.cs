@@ -240,6 +240,11 @@ public sealed record Flags
             "a pane carrying the three answers a key pressed at a range has - room either way, already at the maximum, and no room at all",
             "Traversal.Nudge chose its direction from where the control already sat and nothing here drove it, so the branch that presses the other way at the end of a range had never run against a real control"),
         new Flag(
+            "pickers",
+            "",
+            "a pane carrying the two answers 'what does this picker hold' has - one shut, whose items are in no tree until it opens, and one already dropped down",
+            "Pick was driven only against a Win32 combo, which holds its items either way, so the walk read 'it holds nothing' about a WPF picker holding two and refused the case it was built for"),
+        new Flag(
             "backdrop",
             "kind",
             "a window that opted into a system backdrop, which transmits what is behind it through the glass",

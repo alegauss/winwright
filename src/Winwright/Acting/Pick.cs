@@ -175,40 +175,145 @@ public static class Pick
         var admitted = Admitted.To(container, "Selection");
         var facts = admitted.Facts;
         var element = admitted.Do(picker => picker);
-        var items = Items(element);
-        var index = items.FindIndex(item => string.Equals(item.Name, wanted, StringComparison.Ordinal));
-        if (index < 0)
+
+        // WW265. Opened where it holds nothing, and put back after. A Win32 combo holds its items
+        // whether or not it is dropped down; a WPF one realises them when its popup opens and has
+        // none in the tree before that — so reading a shut picker's items answers "it holds nothing"
+        // about a picker that holds two, which is the refusal this walk gave the one case it was
+        // built for.
+        var opened = Opening(container, element);
+        try
         {
-            throw new NotActionableException(
-                container.Locator.Text,
-                Actionable.NotInTree,
-                $"{facts} holds no \"{wanted}\"; it holds "
-                + (items.Count == 0 ? "nothing" : string.Join(", ", items.Select(item => $"\"{item.Name}\""))));
-        }
+            var items = Items(element);
+            var index = items.FindIndex(item => string.Equals(item.Name, wanted, StringComparison.Ordinal));
+            if (index < 0)
+            {
+                throw new NotActionableException(
+                    container.Locator.Text,
+                    Actionable.NotInTree,
+                    $"{facts} holds no \"{wanted}\"; it holds "
+                    + (items.Count == 0 ? "nothing" : string.Join(", ", items.Select(item => $"\"{item.Name}\""))));
+            }
 
-        var met = Precondition.Met(Windowing.Foreground.PreconditionName);
-        string? refused = null;
-        if (!byKeyboard && TryThePattern(items[index].Element, out refused))
+            var met = Precondition.Met(Windowing.Foreground.PreconditionName);
+            string? refused = null;
+            if (!byKeyboard && TryThePattern(items[index].Element, out refused))
+            {
+                return new PickResult(
+                    wanted, facts, PickRoute.Pattern, [wanted], Selected(element), null, met);
+            }
+
+            // The keyboard route needs the desktop; the pattern one never did.
+            var foreground = Windowing.Foreground.Check(admitted.Window).AsPrecondition();
+            if (!foreground.Satisfied)
+                return new PickResult(wanted, facts, PickRoute.Keyboard, [], Selected(element), refused, foreground);
+
+            return Walked(container, element, facts, items, index, wanted, refused, foreground);
+        }
+        finally
         {
-            return new PickResult(
-                wanted, facts, PickRoute.Pattern, [wanted], Selected(element), null, met);
+            // Owed whether the walk landed, refused or threw. A picker left dropped down holds the
+            // desk in a way that outlives the step, and the next one finds a foreground it cannot
+            // name — which is the failure Surface.AsFound exists for one floor up.
+            Shutting(container, element, opened);
         }
-
-        // The keyboard route needs the desktop; the pattern one never did.
-        var foreground = Windowing.Foreground.Check(admitted.Window).AsPrecondition();
-        if (!foreground.Satisfied)
-            return new PickResult(wanted, facts, PickRoute.Keyboard, [], Selected(element), refused, foreground);
-
-        return Walked(container, element, facts, items, index, wanted, refused, foreground);
     }
 
-    /// <summary>Every value a picker holds, in the order it holds them.</summary>
+    /// <summary>
+    /// Drop the picker down where it holds nothing, and say whether this opened it.
+    /// <para>
+    /// WW265. Only where it holds nothing: a picker whose items are already in the tree is one where
+    /// opening buys nothing and costs a state change the case did not ask for. The wait is the
+    /// container's own, because how long a popup takes to realise its items is a property of the
+    /// application rather than a number this file should carry.
+    /// </para>
+    /// </summary>
+    /// <param name="container">The picker, for its budget.</param>
+    /// <param name="element">The picker itself.</param>
+    /// <returns>Whether this call opened it, which is what decides whether it owes a close.</returns>
+    private static bool Opening(Subject container, AutomationElement element)
+    {
+        if (Items(element).Count > 0)
+            return false;
+
+        try
+        {
+            if (element.GetCurrentPattern(ExpandCollapsePattern.Pattern) is not ExpandCollapsePattern expand)
+                return false;
+
+            if (expand.Current.ExpandCollapseState == ExpandCollapseState.Expanded)
+                return false;
+
+            expand.Expand();
+        }
+        catch (Exception cannot)
+            when (cannot is InvalidOperationException or ElementNotAvailableException)
+        {
+            // A picker that offers no ExpandCollapse and holds nothing is a picker that holds
+            // nothing, which is what the refusal below will say. Nothing was changed, so nothing
+            // is owed.
+            return false;
+        }
+
+        Attempt.UntilTrue(() => Items(element).Count > 0, container.ActMs, container.PollMs);
+        return true;
+    }
+
+    /// <summary>Put a picker this walk dropped down back the way it was found.</summary>
+    /// <param name="container">The picker, for its budget.</param>
+    /// <param name="element">The picker itself.</param>
+    /// <param name="opened">Whether this walk was the one that opened it.</param>
+    private static void Shutting(Subject container, AutomationElement element, bool opened)
+    {
+        if (!opened)
+            return;
+
+        try
+        {
+            if (element.GetCurrentPattern(ExpandCollapsePattern.Pattern) is ExpandCollapsePattern expand)
+            {
+                expand.Collapse();
+                Attempt.UntilTrue(
+                    () => expand.Current.ExpandCollapseState != ExpandCollapseState.Expanded,
+                    container.ActMs,
+                    container.PollMs);
+            }
+        }
+        catch (Exception gone)
+            when (gone is InvalidOperationException or ElementNotAvailableException)
+        {
+            // The picker went while it was being put back. There is nothing left to close and
+            // nothing a caller could do about it, and throwing here would replace whatever the walk
+            // was actually reporting with a sentence about the tidying up.
+        }
+    }
+
+    /// <summary>
+    /// Every value a picker holds, in the order it holds them.
+    /// <para>
+    /// WW265. Opens one that holds nothing and shuts it again, for the reason <see cref="Value"/>
+    /// does: a WPF picker has no items in the tree until its popup opens, and answering <em>nothing</em>
+    /// about a picker holding two is worse than answering slowly.
+    /// </para>
+    /// </summary>
+    /// <param name="container">The picker.</param>
     public static IReadOnlyList<string> Values(Subject container)
     {
         ArgumentNullException.ThrowIfNull(container);
 
         var element = container.ReadOnce().Resolution.Element;
-        return element is null ? [] : Items(element).Select(item => item.Name).ToList();
+        if (element is null)
+            return [];
+
+        var opened = Opening(container, element);
+        try
+        {
+            return Items(element).Select(item => item.Name).ToList();
+        }
+        finally
+        {
+            Shutting(container, element, opened);
+        }
     }
 
     private static PickResult Walked(

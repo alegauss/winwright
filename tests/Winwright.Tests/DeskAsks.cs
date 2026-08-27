@@ -184,6 +184,10 @@ internal static class DeskAsks
             Unaffected.Refused,
             "the picker is asked for a value it does not have and refuses with the ones it does, "
                 + "which is read off the control and never off the screen"),
+        new("ShutPickerTests.A_value_a_shut_picker_does_not_hold_is_refused_with_the_ones_it_does",
+            Unaffected.Refused,
+            "the same refusal against a WPF picker, which WW265 opens first so the list it refuses "
+                + "with is the five values it holds rather than the nothing a shut one shows"),
         new("PointerTests.A_click_count_of_nothing_is_refused",
             Unaffected.Refused,
             "zero clicks is refused as an argument, before the act has a foreground to want"),
@@ -193,6 +197,19 @@ internal static class DeskAsks
                 + "asked for the desktop"),
 
         // --- nothing is read off the desk ----------------------------------------------------------
+
+        // WW265's two, and they are NoDesk by assertion rather than by hope. The selection pattern
+        // needs no foreground, and each case asserts the route it took — so a fall-through to the
+        // keyboard is a red naming the route rather than a reading blamed on the control.
+        new("ShutPickerTests.A_shut_picker_is_walked_and_left_shut",
+            Unaffected.NoDesk,
+            "the walk takes the selection pattern once the picker has been opened, which asks the "
+                + "control; the case asserts that route, so nothing here is answered by the desk"),
+        new("ShutPickerTests.A_picker_already_open_is_left_open",
+            Unaffected.NoDesk,
+            "the same pattern route against a picker that was already dropped down, and what is "
+                + "asserted beside it is that the walk left it that way"),
+
         new("CheckoutTests.A_line_is_read_as_code_and_never_as_what_somebody_wrote_about_it",
             Unaffected.NoDesk,
             "it names a tray call as text and never makes one — and it is here rather than invisible "
