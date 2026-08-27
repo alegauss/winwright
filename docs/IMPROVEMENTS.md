@@ -159,30 +159,6 @@ which assumes nothing about the text and costs a reading the adopter has to prov
 What it must not become is a general tolerance on `sameAs`. A percentage is the same
 number or it is not.
 
-### §WW273 a locator can only name an element by a string typed into the case
-
-Every expectation in this engine is derived. `covers`, `label`, `notLabel`, `never` and
-`forEach` all name a key and read the string out of the language the fixture says its
-window is in. A **locator** cannot. It carries the words, and the words are the one
-thing that goes stale the day somebody edits the strings file and is wrong in every
-other language the application ships from the moment it is written.
-
-Measured migrating `WW84`. claude-tray's settings sidebar is six bare `Border`s with no
-automation peer, so the `TextBlock` inside is what reaches the tree and its words are
-the only thing that addresses one. The script wrote `Nav-Settings $win (Label
-'settings.nav.claudeCode')`. A case cannot: it must write `Text[name="Claude Code"]`,
-and the migrated keyboard case says so in a comment — *'Claude Code' is the same string
-in all four languages this app ships, which is why the locator can name it.* That
-comment is the defect, holding still.
-
-It also blocks the derived walk `WW84` exists for. `forEach` puts a member into a
-locator through `{}`, which is the whole set; there is no way to put **one** declared
-string in, and a leaf key derives nothing so `forEach` refuses it.
-
-What is owed is a spelling for it in the grammar, resolved at declaration against the
-fixture's language, so a locator names what the application calls a thing rather than
-what it called it once.
-
 ### §WW274 a locator step names one control type, so a rule governing a family of controls cannot be swept
 
 `eachSpoken` sweeps every element a locator matches, and a locator step names one

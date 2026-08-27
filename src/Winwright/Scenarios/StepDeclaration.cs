@@ -425,15 +425,16 @@ public sealed record StepDeclaration
         if (string.IsNullOrWhiteSpace(locator))
             throw new ScenarioRefusedException(subject, "a step acts on something, and this one names nothing");
 
-        // WW263. A locator naming the member has to parse with something in it as well as with the
-        // placeholder, and both are facts about the file rather than about a run. Probed here so the
-        // refusal arrives where the locator was written, not on the member that happened to expose it.
-        if (locator.Contains(Member, StringComparison.Ordinal)
-            && !Locator.TryParse(locator.Replace(Member, "probe", StringComparison.Ordinal), out _, out var wrongly))
+        // WW263 and WW273. A locator with a brace in it has to parse with something in it as well as
+        // with the placeholder, and both are facts about the file rather than about a run. Probed here
+        // so the refusal arrives where the locator was written, not on the member — or the string —
+        // that happened to expose it.
+        if (Braced.IsMatch(locator)
+            && !Locator.TryParse(Braced.Replace(locator, "probe"), out _, out var wrongly))
         {
             throw new ScenarioRefusedException(
                 subject,
-                $"it names the member of a repeated case and does not parse with one in it: {wrongly}");
+                $"it is built out of something the run substitutes and does not parse with one in it: {wrongly}");
         }
 
         // Parsed here rather than at run time on purpose: a locator that does not parse is wrong on
@@ -918,6 +919,64 @@ public sealed record StepDeclaration
 
     /// <summary>Whether this step's locator names the member of a repeated case.</summary>
     public bool NamesTheMember => Locator.Text.Contains(Member, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Anything a run substitutes into a locator: <c>{}</c> for the member, <c>{a.key}</c> for a
+    /// string the project declares. Empty braces and a key are one shape on purpose — a reader who
+    /// has seen either knows a brace is a hole the run fills.
+    /// </summary>
+    private static readonly System.Text.RegularExpressions.Regex Braced = new(
+        @"\{([^{}]*)\}",
+        System.Text.RegularExpressions.RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(1));
+
+    /// <summary>
+    /// The keys this step's locator is built out of, in the order they are written. Empty where it
+    /// names its element in words.
+    /// </summary>
+    public IReadOnlyList<string> Declares() => Braced.Matches(Locator.Text)
+        .Select(one => one.Groups[1].Value)
+        .Where(one => one.Length > 0)
+        .Distinct(StringComparer.Ordinal)
+        .ToList();
+
+    /// <summary>
+    /// This step with every <c>{a.key}</c> in its locator replaced by the string that key declares.
+    /// <para>
+    /// WW273. Every other expectation in this engine is derived and a locator was not: it carried the
+    /// words, and the words go stale the day somebody edits the strings file and are wrong in every
+    /// other language the application ships from the moment they are written. claude-tray's settings
+    /// sidebar is six bare Borders with no automation peer, so the words are the only thing that
+    /// addresses one — and the migrated keyboard case had to say in a comment that the label it names
+    /// happens to be the same in all four languages, which is the defect holding still.
+    /// </para>
+    /// <para>
+    /// The locator is re-parsed for the reason <see cref="For"/> re-parses: a substituted locator is a
+    /// different locator and has to face the same door. The text becomes the substituted one, so what
+    /// the trace records is the words the run actually looked for — which is the reading a red is
+    /// about. The key stays in the case file, one line away, for the reader who wants to know why.
+    /// </para>
+    /// </summary>
+    /// <param name="reading">What a key declares, or a throw saying why it cannot be read.</param>
+    /// <exception cref="ScenarioRefusedException">
+    /// Where a key declares nothing, or the substituted locator does not parse. Both are the scenario
+    /// being wrong rather than the application, so both arrive before anything is driven.
+    /// </exception>
+    public StepDeclaration Naming(Func<string, string> reading)
+    {
+        ArgumentNullException.ThrowIfNull(reading);
+        if (Declares().Count == 0)
+            return this;
+
+        var text = Braced.Replace(Locator.Text, one => one.Groups[1].Value.Length == 0
+            ? one.Value
+            : reading(one.Groups[1].Value));
+
+        if (!Locator.TryParse(text, out var parsed, out var because))
+            throw new ScenarioRefusedException(Name, $"'{text}' does not parse: {because}");
+
+        return this with { Locator = parsed! };
+    }
 
     /// <summary>
     /// The declared string this step's locator was built out of, or null where it was built out of none.

@@ -20,8 +20,17 @@ namespace Winwright.Locating;
 /// Button[pattern=Invoke]                        it must carry that pattern
 /// Text[name="Statistics"][order=left]           the leftmost of the ones that match
 /// MenuItem[order=top][index=2]                   the second from the top
+/// Text[name="{settings.nav.about}"]             what the project's strings call it
+/// Group[name="{}"]                              the member, in a case that repeats
 /// Window#main &gt; Pane &gt; Button#save        a descendant of, at any depth
 /// </code>
+/// <para>
+/// A brace is a hole the run fills, and neither of them is this type's business: a locator with one
+/// in it parses as the literal text, and <see cref="Scenarios.StepDeclaration"/> substitutes and
+/// re-parses before the first act. That is on purpose — what a key declares is a property of the
+/// project and of the language a window is in, and a grammar that resolved either would be a grammar
+/// that cannot be read without both.
+/// </para>
 /// <para>
 /// <c>&gt;</c> is <em>a descendant of</em> and not a direct child, and that is a decision rather
 /// than a shorthand: UI Automation wraps controls in panes that differ between frameworks, between

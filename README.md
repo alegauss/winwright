@@ -127,8 +127,23 @@ Pane[class=Chrome_WidgetWin_1]           the window class
 Button[pattern=Invoke]                   it must carry that pattern
 Text[name="Statistics"][order=left]      the leftmost of the ones that match
 MenuItem[order=top][index=2]             the second from the top
+Text[name="{settings.nav.about}"]        what the project's strings call it
+Group[name="{}"]                         the member, in a case that repeats
 Window#main > Pane > Button#save         a descendant of, at any depth
 ```
+
+A brace is a hole the run fills. `{a.key}` is read out of the project's own strings in the language
+the fixture says its window is in, and `{}` is the member of the set a repeating case walks. A
+locator naming an element in words is the hardcoded set at its smallest: it goes stale the day
+somebody edits the strings file, and it is wrong in every other language the application ships from
+the moment it is written. claude-tray's settings sidebar is six bare `Border`s with no automation
+peer, so the words are the only thing that addresses one — and the case that had to type them said
+so in a comment, that the label happens to be the same in all four languages.
+
+Both are refused at declaration where the locator will not parse with something in it, and a key
+that declares nothing is refused before the first act, naming the key and the file. What the trace
+records is the substituted locator: the words the run actually looked for are what a red is about,
+and the key is one line away in the case file.
 
 `>` means **a descendant of**, not a direct child. That is a decision, not a shorthand: UI Automation
 wraps controls in panes that differ between frameworks, between versions of one framework, and

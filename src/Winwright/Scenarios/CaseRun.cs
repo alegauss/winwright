@@ -194,7 +194,7 @@ public static class CaseRun
         foreach (var member in members)
         {
             foreach (var step in declared.Steps)
-                running.Add(member is null ? step : step.For(member));
+                running.Add(Naming(member is null ? step : step.For(member), project, speaking));
         }
 
         // WW61. Before the first act, not after the first red: a case whose precondition is absent
@@ -724,6 +724,42 @@ public static class CaseRun
         });
 
         results.Add(Settled(step, swept.Hole, waited.Happened, detail).At(trace.Count));
+    }
+
+    /// <summary>
+    /// One step with every key in its locator replaced by the string the project declares for it.
+    /// <para>
+    /// WW273. Out of the language the fixture said its window is in, and resolved here rather than at
+    /// declaration for the reason `label` is: the declaration knows the case and not the project, and
+    /// a locator resolved against the wrong language is a locator that finds nothing and reports it as
+    /// an application defect. A key that cannot be read is the scenario being wrong, so it refuses,
+    /// naming the key and the file — and it refuses before anything is driven.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step, already carrying its member where its case repeats.</param>
+    /// <param name="project">The project, which is where the strings files are declared.</param>
+    /// <param name="speaking">What the fixture said its window is in, or null where nothing did.</param>
+    /// <exception cref="ScenarioRefusedException">Where a key cannot be read, or the result will not parse.</exception>
+    private static StepDeclaration Naming(
+        StepDeclaration step, ProjectDeclaration project, System.Globalization.CultureInfo? speaking)
+    {
+        if (step.Declares().Count == 0)
+            return step;
+
+        // The fixture's word where it gave one, and the way the application resolves it where nothing
+        // did — which is what an attach has to do, there being no launch to have said.
+        var language = speaking is null
+            ? ResolvedLanguage.Resolve(project)
+            : ResolvedLanguage.Speaking(speaking);
+
+        try
+        {
+            return step.Naming(key => Labels.For(key, project, language).Text);
+        }
+        catch (UnusableLabelException unusable)
+        {
+            throw new ScenarioRefusedException(step.Name, unusable.Message);
+        }
     }
 
     /// <summary>
