@@ -143,6 +143,21 @@ public sealed class TypeUnionTests : IDisposable
     }
 
     [Fact]
+    public void A_route_that_matches_several_is_swept_under_every_one_of_them()
+    {
+        // The difference between a route and a sweep. Resolving refuses a step that matches several
+        // and says nothing about which, because an act would one day land on the other one and be
+        // green — and a sweep means the other one too. Demanding this case say *which row* would be
+        // demanding it list the rows, which is what deriving the set exists to refuse.
+        var verdict = Run("Group > ComboBox|Slider|Edit");
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+        Assert.Contains("all 3 element(s)", Said(verdict), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_route_that_resolves_to_nothing_sweeps_nothing_rather_than_the_window()
     {
         // The other half, and it is what a bug here would look like from a green: a scope naming a row

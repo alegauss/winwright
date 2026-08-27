@@ -136,8 +136,9 @@ public static class Resolve
     }
 
     /// <summary>
-    /// What a sweep looks under: the element every step but the last names, or <paramref name="root"/>
-    /// where the locator has one step. Null where the route does not resolve.
+    /// What a sweep looks under: every element the steps before the last one reach, or
+    /// <paramref name="root"/> alone where the locator has one step. Empty where the route resolves
+    /// to nothing.
     /// <para>
     /// WW277. A sweep matches its last step, because that is the one the matches are of. It was
     /// matching it against the whole window, so every step before it was decoration — a case scoping
@@ -145,28 +146,44 @@ public static class Resolve
     /// name. That is the unearned green with a scope written on it, and the documentation had said
     /// the opposite of what the code did since the first sweep shipped.
     /// </para>
+    /// <para>
+    /// A set and never one element, which is the difference between a route and a sweep. Resolving
+    /// refuses a step that matches several and says nothing about which, because an act would one day
+    /// land on the other one and be green. A sweep means the other one too: `Group[class=SettingsRow]
+    /// &gt; ComboBox` is every picker in every row, and demanding the case say <em>which row</em>
+    /// would be demanding it list the rows.
+    /// </para>
     /// </summary>
     /// <param name="root">The window, or whatever the case was launched against.</param>
     /// <param name="locator">The whole locator. Its last step is the one being swept and is not walked.</param>
-    /// <exception cref="AmbiguousLocatorException">Where a step on the way matches several and says nothing about which.</exception>
-    public static AutomationElement? Beneath(AutomationElement root, Locator locator)
+    public static IReadOnlyList<AutomationElement> Beneath(AutomationElement root, Locator locator)
     {
         ArgumentNullException.ThrowIfNull(root);
         ArgumentNullException.ThrowIfNull(locator);
 
-        var here = root;
-        for (var index = 0; index < locator.Steps.Count - 1; index++)
+        var here = new List<AutomationElement> { root };
+        for (var index = 0; index < locator.Steps.Count - 1 && here.Count > 0; index++)
         {
             var step = locator.Steps[index];
-            var matches = Matching(here, step);
-            if (matches.Count > 1 && !step.Disambiguated)
-                throw new AmbiguousLocatorException(step, matches.Select(Named).ToList());
+            var next = new List<AutomationElement>();
+            foreach (var one in here)
+            {
+                var matches = Matching(one, step);
 
-            var wanted = (step.Index ?? 1) - 1;
-            if (wanted >= matches.Count)
-                return null;
+                // An index still picks one, per parent: a case saying `[index=2]` on the way is saying
+                // which of that parent's children it meant, and a sweep does not turn that into all.
+                if (step.Index is { } ordinal)
+                {
+                    if (ordinal - 1 < matches.Count)
+                        next.Add(matches[ordinal - 1]);
+                }
+                else
+                {
+                    next.AddRange(matches);
+                }
+            }
 
-            here = matches[wanted];
+            here = next.Distinct().ToList();
         }
 
         return here;

@@ -121,7 +121,7 @@ internal static class Cooperating
         new("Resolve.Once", Cooperation.None, false, "one look for a locator under a root"),
         new("Resolve.Until", Cooperation.None, false, "the same, polled to a deadline"),
         new("Resolve.Matching", Cooperation.None, false, "every element one step matches"),
-        new("Resolve.Beneath", Cooperation.None, false, "the element a locator's steps before its last one name"),
+        new("Resolve.Beneath", Cooperation.None, false, "every element a locator's steps before its last one reach"),
         new("Inspect.Window", Cooperation.None, false, "the control view under a window handle"),
         new("Inspect.Under", Cooperation.None, false, "the same under an element already in hand"),
         new("Inspect.Render", Cooperation.None, false, "that tree as lines a person reads"),

@@ -876,9 +876,10 @@ public static class CaseRun
     /// <param name="root">The window, or whatever the case was launched against.</param>
     /// <param name="locator">The whole locator, last step included.</param>
     private static IReadOnlyList<AutomationElement> Sweeping(AutomationElement root, Locator locator) =>
-        Resolve.Beneath(root, locator) is { } under
-            ? Resolve.Matching(under, locator.Steps[^1])
-            : [];
+        Resolve.Beneath(root, locator)
+            .SelectMany(under => Resolve.Matching(under, locator.Steps[^1]))
+            .Distinct()
+            .ToList();
 
     /// <summary>
     /// What a sweep needed before there was anything to sweep: one element under its locator.
