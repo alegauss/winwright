@@ -179,28 +179,6 @@ structural rather than textual: of the controls in this row, each announces this
 header or its own text, and none announces a header belonging to another row on the page
 — with the set of headers derived from the page rather than listed.
 
-### §WW268 The other half of a comparison with a step
-
-`sameAs` claims a reading is back to what a named step read. The profiles case needs the
-opposite as well, and for the same reason it needed the first: two accounts can read the
-same percentage, so the switch is judged on the pair rather than on either alone.
-
-The script wrote it as *the report follows the picker* — the used percentage at the
-second stop differing from the first's, or the reset caption landing in a different
-minute. An identical reading at both means the panes were never repainted, or were
-repainted with the profile being left behind, which is the defect the whole case exists
-for.
-
-`moves` is the near miss and cannot answer it. It compares a reading across one act in
-one step, and this compares two steps with a walk and a wait between them. The reading
-being compared is also not the one the act was about: the picker moved, and what has to
-have moved with it is a number somewhere else on the page.
-
-It is the same machinery `sameAs` already has — the recall of a named step's reading —
-with the comparison the other way round, so what is left to decide is the word rather
-than the mechanism. Whatever it is called, it takes no value: the point is that a case
-cannot know either number, only that they must not match.
-
 ### §WW269 A minute of tolerance, and only a minute
 
 The reset caption names when a quota window turns over, and it counts down while the
@@ -209,19 +187,23 @@ crosses a minute boundary changes it by one, and nothing about the application i
 
 `sameAs` compares exactly, so the caption cannot go through it. Dropping the claim is
 worse than tolerating the minute: an hour of drift is another profile's window, which is
-precisely the defect `WW81` was filed against, and the caption is one of the two
-readings that would show it.
+precisely the defect `WW81` was filed against.
 
-The script drew the line where the reasoning does. It parsed the caption to minutes and
-allowed a difference of one, treating anything larger as a red — and where the caption
-could not be parsed at all it fell back to comparing the strings, so a format it did not
-recognise was still checked rather than waved through.
+**The script's answer cannot be copied, and that is the finding.** It parsed the caption
+to minutes by matching `(\d+)\s*d`, `h` and `m` — English letters. In the four other
+languages this application ships those letters differ, so a parser keyed on them reads
+nothing and the tolerance silently becomes an exact comparison. That is `T361`: an
+assertion matching English is loud when it fails and silent one step over, where it
+matches nothing and passes.
 
-What this is not is a general tolerance on `sameAs`. A percentage is either the same
-number or it is not, and a comparison that quietly allowed some drift on every reading
-would turn the round trip into a claim nobody can state. The tolerance belongs to
-readings that are about a clock, declared as that, so a reader of the case can see which
-claim was weakened and by how much.
+So the shape is open rather than decided, and two candidates are worth measuring before
+either is built. Compare the digits and ignore the letters, which is
+language-independent and assumes the caption counts down with its smallest unit last. Or
+have the application report the instant through the in-app half and compare instants,
+which assumes nothing about the text and costs a reading the adopter has to provide.
+
+What it must not become is a general tolerance on `sameAs`. A percentage is the same
+number or it is not.
 
 ## Block G — The scenario — a case is a data file
 

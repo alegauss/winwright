@@ -39,7 +39,8 @@ public sealed record StepDeclaration
         string? never,
         bool spoken,
         string? label,
-        string? notLabel)
+        string? notLabel,
+        string? unlike)
     {
         Name = name;
         Locator = locator;
@@ -58,6 +59,7 @@ public sealed record StepDeclaration
         Spoken = spoken;
         Label = label;
         NotLabel = notLabel;
+        Unlike = unlike;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -213,6 +215,25 @@ public sealed record StepDeclaration
     /// </summary>
     public string? NotLabel { get; }
 
+    /// <summary>
+    /// The earlier step this one claims its reading differs from, or null where it makes another
+    /// claim.
+    /// <para>
+    /// WW268. <see cref="SameAs"/>'s other half, and the profiles case needs both for the same reason
+    /// it needed the first: two accounts can read the same percentage, so a switch is judged on the
+    /// pair rather than on either alone. The script wrote it as <em>the report follows the picker</em>
+    /// — an identical reading at both stops means the panes were never repainted, or were repainted
+    /// with the profile being left behind.
+    /// </para>
+    /// <para>
+    /// <see cref="Moves"/> is the near miss and cannot answer it. That compares a reading across one
+    /// act in one step; this compares two steps with a walk and a wait between them, and the reading
+    /// is not the one the act was about — the picker moved, and what has to have moved with it is a
+    /// number somewhere else on the page.
+    /// </para>
+    /// </summary>
+    public string? Unlike { get; }
+
     /// <summary>Which reading the expectation is about. <see cref="ReadBack.Anything"/> by default.</summary>
     public ReadBack Reads { get; }
 
@@ -290,7 +311,7 @@ public sealed record StepDeclaration
     public bool Checkable =>
         Expected is not null || Moves || Answers || Covers is not null || Matches is not null || Discloses
         || SameAs is not null || Never is not null || Spoken
-        || Label is not null || NotLabel is not null;
+        || Label is not null || NotLabel is not null || Unlike is not null;
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -323,6 +344,7 @@ public sealed record StepDeclaration
     /// <param name="spoken">That everything under the locator which says anything says a name.</param>
     /// <param name="label">The key whose declared string the reading should be.</param>
     /// <param name="notLabel">The key whose declared string the reading should not be.</param>
+    /// <param name="unlike">The earlier step this one claims its reading differs from.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static StepDeclaration Of(
         string locator,
@@ -341,7 +363,8 @@ public sealed record StepDeclaration
         string? never = null,
         bool spoken = false,
         string? label = null,
-        string? notLabel = null)
+        string? notLabel = null,
+        string? unlike = null)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var subject = called ?? Describing(verb, locator);
@@ -377,6 +400,10 @@ public sealed record StepDeclaration
         // and a claim any of them had not heard of is a refusal naming the wrong field.
         var back = string.IsNullOrWhiteSpace(sameAs) ? null : sameAs.Trim();
 
+        // WW268, the same shape as the one above it: the rules that ask whether a step claims
+        // anything have to know about this one before they can name the right field.
+        var apart = string.IsNullOrWhiteSpace(unlike) ? null : unlike.Trim();
+
         // WW256, and the same again: a claim about the wait is still a claim, so a step making only
         // this one must not be refused as a step that makes none.
         var forbidden = string.IsNullOrWhiteSpace(never) ? null : never.Trim();
@@ -387,8 +414,8 @@ public sealed record StepDeclaration
         var undeclared = string.IsNullOrWhiteSpace(notLabel) ? null : notLabel.Trim();
 
         var claims = wanted is not null || moves || answers || sweeping is not null || pattern is not null
-            || discloses || back is not null || forbidden is not null || spoken
-            || declared is not null || undeclared is not null;
+            || discloses || back is not null || apart is not null || forbidden is not null || spoken
+            || declared is not null || undeclared is not null || apart is not null;
 
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
         // says it moved where it was something else. A step asserting both would owe two assertion
@@ -510,27 +537,41 @@ public sealed record StepDeclaration
             }
         }
 
-        if (back is not null)
+        // WW268. Both point at a step and both are refused for the same three things, so they are
+        // judged together: two copies of these rules is where the second one goes on saying the old
+        // thing after the first moves.
+        if (back is not null && apart is not null)
         {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims its reading is back to '{back}' and also that it differs from '{apart}'; "
+                    + "a step answers one thing, and these are two");
+        }
+
+        if ((back ?? apart) is { } pointed)
+        {
+            var field = back is not null ? "sameAs" : "unlike";
+            var claim = back is not null ? "is back to" : "differs from";
+
             // One claim per step, as everywhere else. 'expect' names the value and this is the claim
-            // for a value the case cannot name — it only knows which earlier step read the same one.
+            // for a value the case cannot name — it only knows which earlier step to compare with.
             if (wanted is not null || moves || answers || sweeping is not null || pattern is not null || discloses)
             {
                 throw new ScenarioRefusedException(
                     subject,
-                    $"it claims its reading is back to '{back}' and also makes another claim; 'sameAs' "
+                    $"it claims its reading {claim} '{pointed}' and also makes another claim; '{field}' "
                         + "is for the value a case cannot name and can only point at");
             }
 
-            // A step comparing itself to itself holds by construction. It is the one spelling of this
-            // field that could never be false, and it is also the easy typo: the round trip's third
-            // stop and its first read the same element under the same verb, so a case that left both
-            // unnamed would have written this by accident.
-            if (string.Equals(back, subject, StringComparison.Ordinal))
+            // A step comparing itself to itself is answered before the window is: `sameAs` holds
+            // whatever it did and `unlike` fails whatever it did, and neither is a reading. It is also
+            // the easy typo — a round trip's stops read the same element under the same verb, so a
+            // case that left them unnamed would have written this by accident.
+            if (string.Equals(pointed, subject, StringComparison.Ordinal))
             {
                 throw new ScenarioRefusedException(
                     subject,
-                    "it claims its reading is back to itself, which holds whatever the window did; "
+                    $"it claims its reading {claim} itself, which is answered before the window is; "
                         + "name the earlier step in 'named' and point at that");
             }
 
@@ -541,8 +582,9 @@ public sealed record StepDeclaration
             {
                 throw new ScenarioRefusedException(
                     subject,
-                    $"it claims its reading is back to '{back}' and does not say which reading; 'sameAs' "
-                        + "compares two of them, so the default would compare whichever answered first");
+                    $"it claims its reading {claim} '{pointed}' and does not say which reading; "
+                        + $"'{field}' compares two of them, so the default would compare whichever "
+                        + "answered first");
             }
         }
 
@@ -702,7 +744,8 @@ public sealed record StepDeclaration
             forbidden,
             spoken,
             declared,
-            undeclared);
+            undeclared,
+            apart);
     }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>

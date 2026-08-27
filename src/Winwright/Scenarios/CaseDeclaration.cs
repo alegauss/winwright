@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
 namespace Winwright.Scenarios;
 
@@ -229,7 +229,8 @@ public sealed record CaseDeclaration
     }
 
     /// <summary>
-    /// Judge every <see cref="StepDeclaration.SameAs"/> against the steps it could be pointing at.
+    /// Judge every pointer at another step — <see cref="StepDeclaration.SameAs"/> and
+    /// <see cref="StepDeclaration.Unlike"/> — against the steps it could be pointing at.
     /// <para>
     /// WW255. A step is declared on its own and this claim is not about the step: it names another one,
     /// so the only place it can be judged is where the case knows all of them. Here rather than at run
@@ -248,7 +249,9 @@ public sealed record CaseDeclaration
     {
         for (var index = 0; index < steps.Count; index++)
         {
-            if (steps[index].SameAs is not { } back)
+            // WW268. Either field, judged the same way: both name an earlier step and both are wrong
+            // in the same four ways, so one loop answers for both.
+            if ((steps[index].SameAs ?? steps[index].Unlike) is not { } back)
                 continue;
 
             var earlier = new List<StepDeclaration>();
@@ -264,7 +267,7 @@ public sealed record CaseDeclaration
             {
                 throw new ScenarioRefusedException(
                     called,
-                    $"'{steps[index].Name}' claims its reading is back to '{back}', and no step before "
+                    $"'{steps[index].Name}' compares its reading with '{back}', and no step before "
                         + $"it is called that; the steps before it are {Named(steps, index)}");
             }
 
@@ -276,7 +279,7 @@ public sealed record CaseDeclaration
             {
                 throw new ScenarioRefusedException(
                     called,
-                    $"'{steps[index].Name}' claims its reading is back to '{back}' and {earlier.Count} "
+                    $"'{steps[index].Name}' compares its reading with '{back}' and {earlier.Count} "
                         + "steps before it are called that; give the one it means its own 'named'");
             }
 
@@ -284,7 +287,7 @@ public sealed record CaseDeclaration
             {
                 throw new ScenarioRefusedException(
                     called,
-                    $"'{steps[index].Name}' reads '{steps[index].Reads.Name}' and claims it is back to "
+                    $"'{steps[index].Name}' reads '{steps[index].Reads.Name}' and compares it with "
                         + $"'{back}', which reads '{earlier[0].Reads.Name}'; two readings of a control "
                         + "are two different values and comparing them says nothing");
             }

@@ -306,9 +306,13 @@ than about what it ended on: it names a key whose string must not be showing any
 at any moment while this step waits for its locator. And `covers` is the eleventh, which is one claim
 over many elements — see below.
 
-`sameAs` is judged where the case knows all its steps, so a pointer at a name nobody wrote, at a
-step further down, at a name two steps share, or at a step reading something else is refused before
-the run. It has to say which reading it is about: comparing a value to a name says nothing.
+`sameAs` and `unlike` are judged where the case knows all its steps, so a pointer at a name nobody
+wrote, at a step further down, at a name two steps share, or at a step reading something else is
+refused before the run. Both have to say which reading they are about: comparing a value to a name
+says nothing. A pointer at the step's own name is refused too — `sameAs` would hold whatever the
+window did and `unlike` would fail whatever it did, and neither is a reading. And an earlier step
+that read nothing settles neither: an element that says nothing is not evidence a value changed, it
+is evidence nobody read it.
 
 `label` and `notLabel` exist because a label typed into a case is the hardcoded set with one member:
 it goes stale the day somebody edits the string, and it is wrong in every other language the

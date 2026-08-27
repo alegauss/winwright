@@ -154,6 +154,7 @@ public static class ScenarioSchema
         new("matches", false, Taking.Text, "the regular expression the reading should match, where the case cannot name the value but can name its shape", []),
         new("discloses", false, Taking.Truth, "that the act put something under the locator that was not in the tree before it", []),
         new("sameAs", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to be back to, for the round trip whose value no case can name", []),
+        new("unlike", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to differ from, for the change whose value no case can name at either end", []),
         new("label", false, Taking.Text, "the key whose declared string the reading should be — the label itself, derived from the project's own strings and never typed here", []),
         new("notLabel", false, Taking.Text, "the key whose declared string the reading should not be, for the state an application has a word for and must not be showing", []),
         new("spoken", false, Taking.Truth, "that everything under the locator which announces anything announces a name — never a glyph, a template or an id handed back — and that something does", []),

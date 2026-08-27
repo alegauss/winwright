@@ -20,7 +20,6 @@
 - 📋 **WW260** (deps: —) **an expected set is derived from the project's strings and never from what the application reports** — The menu case counts profile entries against the app's own read-out, and `covers` derives only from the language files, so the number would be typed here. → §WW260
 - 📋 **WW262** (deps: —) **a case can claim one element is named and a set of strings was read, and nothing about every element** — `NameCheck` tells a label from a glyph, a template and an id echoed back, and no step reaches it — least of all over the thirty-odd controls one rule names. → §WW262
 - 📋 **WW264** (deps: —) **a control wearing its neighbour's label reads as named, and nothing can tell the two apart** — The naming rule pairs a row's control with that row's header, and getting it wrong gives three controls one name — which every check that asks whether a name exists passes. → §WW264
-- 📋 **WW268** (deps: —) **a case can claim a reading came back to an earlier step's and never that it differs from one** — The profiles case asserts the report followed the picker, which is one stop's number being unlike another's — the inverse of `sameAs` and the half that was not built. → §WW268
 - 📋 **WW269** (deps: —) **a caption counting down in real time cannot survive an exact comparison across a round trip** — `sameAs` compares two readings exactly, and a run that straddles a minute boundary would then be a red build about a clock rather than about the application. → §WW269
 
 ## Block G — The scenario — a case is a data file

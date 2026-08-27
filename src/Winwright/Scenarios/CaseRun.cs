@@ -157,7 +157,7 @@ public static class CaseRun
         // are read again after they run: remembering every step's reading would pay for a resolve per
         // step on every case in the suite to serve the two or three that ever point backwards.
         var pointedAt = declared.Steps
-            .Select(one => one.SameAs)
+            .Select(one => one.SameAs ?? one.Unlike)
             .OfType<string>()
             .ToHashSet(StringComparer.Ordinal);
         var recalled = new Dictionary<string, string?>(StringComparer.Ordinal);
@@ -389,7 +389,9 @@ public static class CaseRun
         // WW255. Looked up once, before the attempts: the value a round trip is about was read when
         // the earlier step ran, and a lookup inside the retry would be the same answer fetched three
         // times. Absent only where that step stopped the case, which is a state this never reaches.
-        var backTo = step.SameAs is { } back && recalled.TryGetValue(back, out var read) ? read : null;
+        var backTo = (step.SameAs ?? step.Unlike) is { } back && recalled.TryGetValue(back, out var read)
+            ? read
+            : null;
 
         var cap = step.Retryable ? project.Attempts : 1;
         var attempted = Retry.Bounded(() => Attempting(step, subject, backTo, declared), one => one.Held, cap);
@@ -789,7 +791,7 @@ public static class CaseRun
         if (step.Discloses)
             return Disclosed(step, subject, acted, under);
 
-        if (step.SameAs is not null)
+        if (step.SameAs is not null || step.Unlike is not null)
             return Returned(step, subject, acted, backTo);
 
         // WW261 and WW270. Both are about one declared string, so both are answered in one place: the
@@ -918,29 +920,44 @@ public static class CaseRun
     private static Landed Returned(StepDeclaration step, Subject subject, ActResult? acted, string? backTo)
     {
         var saw = acted?.Element;
+        var pointed = step.SameAs ?? step.Unlike;
+        var same = step.SameAs is not null;
+
         if (string.IsNullOrEmpty(backTo))
         {
+            // WW268. True of both claims and for the same reason: a step that read nothing left no
+            // value, and neither *is it back to that* nor *is it unlike that* is a claim anybody can
+            // settle against nothing. Answering the second one true would be the unearned green.
             var never = Expect.That(
                 step.Name,
-                $"the '{step.Reads.Name}' that '{step.SameAs}' read",
-                () => "nothing: that step read nothing, so there is no value to be back to",
+                $"the '{step.Reads.Name}' that '{pointed}' read",
+                () => "nothing: that step read nothing, so there is no value to compare with",
                 subject.ActMs,
                 subject.PollMs);
 
             return new Landed(acted, never, saw);
         }
 
+        var wanted = same
+            ? $"the '{step.Reads.Name}' that '{pointed}' read — {backTo}"
+            : $"a '{step.Reads.Name}' other than the {backTo} that '{pointed}' read";
+
         var expectation = Expect.That(
             step.Name,
-            $"the '{step.Reads.Name}' that '{step.SameAs}' read — {backTo}",
+            wanted,
             () =>
             {
                 var look = subject.ReadOnce();
                 saw = look.Facts ?? saw;
                 var now = look.Found ? step.Reads.Of(look) : null;
-                return string.Equals(now, backTo, StringComparison.Ordinal)
-                    ? $"the '{step.Reads.Name}' that '{step.SameAs}' read — {backTo}"
-                    : now;
+
+                // A reading that answered nothing settles neither claim, which matters most for the
+                // negative: an element that says nothing is not evidence the value changed, it is
+                // evidence nobody read it.
+                if (now is null)
+                    return null;
+
+                return string.Equals(now, backTo, StringComparison.Ordinal) == same ? wanted : now;
             },
             subject.ActMs,
             subject.PollMs);

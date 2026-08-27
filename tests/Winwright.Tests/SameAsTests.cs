@@ -1,4 +1,4 @@
-using Winwright.Processes;
+﻿using Winwright.Processes;
 using Winwright.Projects;
 using Winwright.Scenarios;
 using Winwright.Verdicts;
@@ -195,6 +195,107 @@ public sealed class SameAsTests : IDisposable
             StepDeclaration.Of("Edit", "read", reads: "value", sameAs: "the first stop", named: "back where it started")));
 
         Assert.Contains("two different values", refusal.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_reading_that_had_to_change_holds_where_it_did()
+    {
+        // WW268, and it is the other half of the same machinery: the profiles case judges a switch on
+        // the pair, because two accounts can read the same percentage and either reading alone looks
+        // perfectly healthy.
+        var verdict = Run("""
+            {
+              "cases": [
+                {
+                  "name": "the value follows the switch",
+                  "catches": "a switch that repaints nothing, which every reading taken on its own looks healthy for",
+                  "steps": [
+                    {
+                      "locator": "Edit", "act": "set value", "with": "alpha",
+                      "expect": "alpha", "reads": "value", "named": "the first stop"
+                    },
+                    {
+                      "locator": "Edit", "act": "set value", "with": "bravo",
+                      "reads": "value", "unlike": "the first stop",
+                      "named": "the second stop reads something else"
+                    }
+                  ]
+                }
+              ]
+            }
+            """);
+
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void A_reading_that_did_not_change_fails_and_names_what_it_stayed()
+    {
+        var verdict = Run("""
+            {
+              "cases": [
+                {
+                  "name": "the value did not follow the switch",
+                  "catches": "a claim that something changed, passing on a window where nothing did",
+                  "steps": [
+                    {
+                      "locator": "Edit", "act": "set value", "with": "alpha",
+                      "expect": "alpha", "reads": "value", "named": "the first stop"
+                    },
+                    {
+                      "locator": "Edit", "act": "set value", "with": "alpha",
+                      "reads": "value", "unlike": "the first stop",
+                      "named": "the second stop reads something else"
+                    }
+                  ]
+                }
+              ]
+            }
+            """);
+
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
+
+        var said = Said(verdict);
+        Assert.True(said.Contains("other than", StringComparison.Ordinal), said);
+        Assert.True(said.Contains("alpha", StringComparison.Ordinal), said);
+    }
+
+    [Fact]
+    public void Claiming_a_reading_is_back_and_also_unlike_is_two_things()
+    {
+        var refusal = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of(
+                "Edit", "read", reads: "value", sameAs: "the first stop", unlike: "the second stop"));
+
+        Assert.Contains("a step answers one thing", refusal.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_unlike_pointing_at_itself_is_answered_before_the_window_is()
+    {
+        // `sameAs` holds whatever the window did and `unlike` fails whatever it did. Neither is a
+        // reading, and both are the same typo.
+        var refusal = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of("Edit", "read", reads: "value", named: "the stop", unlike: "the stop"));
+
+        Assert.Contains("answered before the window is", refusal.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_unlike_is_judged_against_the_steps_the_case_has_like_its_twin()
+    {
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => CaseDeclaration.Of(
+            "a case pointing at a step nobody wrote",
+            StepDeclaration.Of("Edit", "read", reads: "value", answers: true, named: "the first stop"),
+            StepDeclaration.Of("Edit", "read", reads: "value", unlike: "the stop before", named: "the second")));
+
+        Assert.Contains("no step before it is called that", refusal.Because, StringComparison.Ordinal);
     }
 
     /// <summary>Everything the run said, so a red here carries its own explanation.</summary>
