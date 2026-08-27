@@ -126,20 +126,64 @@ public sealed class ExcusedTests : IDisposable
         // WW233. A ledger from an older build, or a frame the stack could not answer for, still says
         // how many — so a line with no name is read as unnamed rather than refused.
         Assert.Equal(
-            ("a foreground to take", "NudgeTests.A_range_with_room", null),
+            ("a foreground to take", "NudgeTests.A_range_with_room", null, Readers.Desk),
             Readers.Excuse("a foreground to take\tNudgeTests.A_range_with_room"));
 
-        Assert.Equal(("a display that renders", null, null), Readers.Excuse("a display that renders"));
-        Assert.Equal(("a display that renders", null, null), Readers.Excuse("a display that renders\t   "));
+        Assert.Equal(("a display that renders", null, null, Readers.Desk), Readers.Excuse("a display that renders"));
+        Assert.Equal(("a display that renders", null, null, Readers.Desk), Readers.Excuse("a display that renders\t   "));
 
         // WW248. The third field is what the engine said was missing, and it is what tells a desk
         // somebody else was using from this suite's own dialog standing in front of the window under
         // test. A ledger written before it still reads, which is the promise the second field made.
         Assert.Equal(
-            ("a foreground to take", "NudgeTests.A_range_with_room", "the foreground belongs to Code, and the window under test is the fixture"),
+            ("a foreground to take", "NudgeTests.A_range_with_room", "the foreground belongs to Code, and the window under test is the fixture", Readers.Desk),
             Readers.Excuse(
                 "a foreground to take\tNudgeTests.A_range_with_room\t"
                     + "the foreground belongs to Code, and the window under test is the fixture"));
+    }
+
+    [Fact]
+    public void A_line_says_which_kind_of_thing_was_not_met_and_a_line_without_one_is_the_desks()
+    {
+        // WW281. The promise the second and third fields both made, made a third time: every row
+        // written before this column existed was a desk row, so a missing kind is the answer and
+        // never unknown.
+        Assert.Equal(Readers.Desk, Readers.Excuse("a foreground to take\tA.Case\tsomebody else has it").Kind);
+        Assert.Equal(Readers.Desk, Readers.Excuse("a foreground to take").Kind);
+
+        Assert.Equal(
+            Readers.Budget,
+            Readers.Excuse("wrote\tFixtureTests.A_dump\tnothing after 5000ms\tBudget").Kind);
+
+        // The kind is last, so anything past the fourth tab lands inside it — and a kind this reader
+        // does not recognise reads as the desk's rather than as a category of its own. That is the
+        // rule one level down: the safe reading of a row nobody understands keeps the tool reporting
+        // rather than excusing.
+        Assert.Equal(
+            Readers.Desk,
+            Readers.Excuse("wrote\tA.Case\tnothing after 5000ms\tBudget\tand more").Kind);
+
+        Assert.Equal(Readers.Desk, Readers.Excuse("wrote\tA.Case\tnothing\tSomethingElse").Kind);
+    }
+
+    [Fact]
+    public void The_sentence_splits_the_two_kinds_only_where_a_run_met_both()
+    {
+        // One kind needs no split — the facts that follow already name it. Both kinds is where a
+        // reader has two different next moves, and the count alone cannot say which they need.
+        var mixed = Roll.Of(
+            ["A.B"],
+            [new("A.B", "Passed", true)],
+            ["a foreground to take\tA.Case\tsomebody else has it", "wrote\tA.Other\tnothing after 5000ms\tBudget"]);
+
+        Assert.Contains(
+            "(1 by the desk, 1 by a budget this suite chose)", mixed.Sentence(), StringComparison.Ordinal);
+
+        var desk = Roll.Of(
+            ["A.B"], [new("A.B", "Passed", true)], ["a foreground to take\tA.Case\tsomebody else has it"]);
+
+        Assert.DoesNotContain("by the desk,", desk.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("1 check(s) were excused", desk.Sentence(), StringComparison.Ordinal);
     }
 
     [Fact]

@@ -107,7 +107,7 @@ public static class Readers
     /// </para>
     /// </summary>
     /// <param name="line">A line as the ledger wrote it.</param>
-    public static (string Fact, string? Case, string? Absence) Excuse(string line)
+    public static (string Fact, string? Case, string? Absence, string Kind) Excuse(string line)
     {
         ArgumentNullException.ThrowIfNull(line);
 
@@ -117,12 +117,41 @@ public static class Readers
         // comparison. A reader of the roll can then tell a desk somebody else was using from this
         // suite's own window standing in front of the one under test, and that difference is what
         // decides whether an excuse is circumstance or structure.
-        var apart = line.Split('\t', 3);
+        // WW281: four, and the fourth says which kind of thing was not met — a fact about the desk,
+        // or a budget this suite chose. It is last because this reader was written to tolerate a row
+        // an older build wrote, and every one of those is a desk row: a missing kind is not unknown
+        // here, it is the answer.
+        var apart = line.Split('\t', 4);
         return (
             apart[0].Trim(),
             apart.Length > 1 && apart[1].Trim().Length > 0 ? apart[1].Trim() : null,
-            apart.Length > 2 && apart[2].Trim().Length > 0 ? apart[2].Trim() : null);
+            apart.Length > 2 && apart[2].Trim().Length > 0 ? apart[2].Trim() : null,
+            apart.Length > 3 ? Kind(apart[3]) : Desk);
     }
+
+    /// <summary>What the kind column says for a check the desk excused, and for every row without one.</summary>
+    public const string Desk = "Desk";
+
+    /// <summary>What it says for a budget this suite chose and could not meet.</summary>
+    public const string Budget = "Budget";
+
+    /// <summary>
+    /// Which kind a row says it is, out of the two there are.
+    /// <para>
+    /// A closed set and not the field as written, because this one is last: the split stops at four
+    /// so the earlier fields cannot run into each other, which leaves anything after the fourth tab
+    /// sitting inside the kind. Naming the two is also what stops a row from a newer build inventing
+    /// a category this reader would then count under its own name.
+    /// </para>
+    /// <para>
+    /// Unrecognised reads as the desk's, which is the same rule <see cref="NeverRan" /> follows one
+    /// level down: the safe reading of a row this tool does not understand is the one that keeps it
+    /// reporting rather than excusing.
+    /// </para>
+    /// </summary>
+    /// <param name="said">The fourth field, as the ledger wrote it.</param>
+    private static string Kind(string said) =>
+        said.Trim().Equals(Budget, StringComparison.Ordinal) ? Budget : Desk;
 
 
     /// <summary>

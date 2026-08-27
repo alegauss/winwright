@@ -149,6 +149,16 @@ internal static class SlowMachine
             absent,
             $"'{named}' ran out and the thing waited for was partly there, which is a fact about "
                 + "what wrote it rather than about how long this suite waited");
+
+        // WW281. After the validation and never before it, which is the rule BusyDesk is held to for
+        // the same reason: an excuse this method is about to refuse is not an excuse, and writing it
+        // down would put a hole in the count that the run does not have.
+        Excuses.Written(
+            ExcusedBy.Budget,
+            named,
+            typeof(SlowMachine),
+            $"nothing after {waited.WaitedMs}ms over {waited.Polls} look(s), against the {budget}ms "
+                + "this suite declares");
     }
 
     /// <summary>
@@ -172,7 +182,24 @@ internal static class SlowMachine
             looks.Enough,
             $"this run looked every {looks.ApartMs:0}ms at a state lasting {looks.LastingMs}ms, which "
                 + $"is {looks.Wanted} looks each or better, so there is nothing to excuse");
+
+        // WW281, and the name is the cadence rather than a deadline, because that is what was not
+        // met. A ledger row saying only "the machine was slow" would count the hole and leave the
+        // reader with nowhere to go.
+        Excuses.Written(
+            ExcusedBy.Budget,
+            Cadence,
+            typeof(SlowMachine),
+            $"{looks.Taken} look(s), one every {looks.ApartMs:0}ms at a state lasting "
+                + $"{looks.LastingMs}ms, against the {looks.Wanted} looks each this suite needs");
     }
+
+    /// <summary>
+    /// What a cadence is called in the ledger. One name for all of them: the numbers differ per case
+    /// and belong in the absence, and a name that carried them would group into one row apiece —
+    /// which is a listing rather than the count the roll call is for.
+    /// </summary>
+    internal const string Cadence = "the looks a sequence needs to have been observed";
 
     /// <summary>The sentence a run that met one prints, which is what makes the hole readable.</summary>
     /// <param name="named">Which declared deadline ran out.</param>

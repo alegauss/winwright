@@ -111,31 +111,31 @@ keep.
 
 ### §WW249 The proof that WPF takes input is itself intermittent
 
-`WpfInputTests` is the negative control `WW246` was missing, and it does not hold every
-time. Host green, guest green, guest red, guest green, nothing changed between the runs
-— and eight consecutive host runs of that case, none of them red. So the guest
-reproduces it, which is a fact about timing rather than about logic.
+**Answered.** `Arrivals` records every `WM_CHAR` the fixture's window is delivered, read
+off the message pump below WPF. On the sixth red it said:
 
-The first hypothesis, a focus arriving while the keys were already going, is refuted.
-**Five reds, and the last two refuted the rule the first three fitted:**
+        typed WW246-1     the control read WW146-1
+        Windows delivered WW146-1
 
-        WW246     -> W6246       index 1 became the last character
-        WW246-4   -> W4246-4     index 1 became the last character
-        T142check -> Tk42check   index 1 became the last character
-        WW246-2   -> WW242-2     index 4 became the last character
-        WW246-1   -> the dash at index 5 became the last character
+So the characters **arrived at the window already substituted**. This is not a text box
+that lost one under load — the window was handed the wrong text — and that rules out
+WPF, the control, and everything above the queue. It is the send.
 
-So it is not *the second* character. What holds across all five is that **one character
-is overwritten by the last one sent** — length for length, never lost. Round four of
-five once, so not the first send after a focus; claude-tray once, so neither fixture nor
-guest. The typing path has no defect that would produce it.
+The rule the first five reds fitted holds on this one too: index 2's `2` became `1`, the
+last character sent, length for length. Six for six.
 
-What was owed was a reading, and it exists: `Arrivals` records every `WM_CHAR` the
-window is delivered, **off the message pump, which was measured**. Hooked through
-`HwndSource.AddHook` instead, a run typing `WW246-1` recorded seven VK_PACKET pairs and
-seven keyups and not one `WM_CHAR`, while the box read the text correctly — WPF answers
-the character messages first and the hook chain stops there. What is left waits on the
-next red.
+`Keyboard.Send` builds one input pair per UTF-16 code unit, each a fresh struct, and
+hands them to a single `SendInput`. The union is written explicitly so its size is right
+on x64. That path was read for a defect that would produce this and has none, which is
+what made the reading necessary rather than another hypothesis. What it did not rule out
+is what happens to the array after `SendInput` takes it: the substitution is between the
+call and the queue.
+
+Where it was taken matters and cost a run. Hooked through `HwndSource.AddHook`, the
+recorder saw End's keyup, seven Backspace keyups and seven VK_PACKET pairs and not one
+`WM_CHAR`, while the box read the text correctly — WPF answers the character messages
+first and `HwndWrapper` stops the chain at the first hook that answers. `AddHook` reads
+above WPF. The pump reads below it.
 
 ### §WW260 Some expected sets are the application's data, not its strings
 
@@ -370,26 +370,25 @@ once. A genuine absence now carries how many icons the bar and the flyout held.
 What is left waits on the next occurrence rather than on any work: it will say which of
 the two it was.
 
-### §WW281 The other excuse the roll call cannot see
+### §WW284 The dash that was encoded twice
 
-WW231 withdrew a green that covered checks nobody ran: `BusyDesk` writes every excuse to
-a ledger, and the roll call reports how many the desk excused and for which facts.
-`SlowMachine` does neither. It validates the excuse as strictly — more strictly, since
-the caller must prove it met the machine and not the fixture — and then the case writes
-a sentence to `ITestOutputHelper` and returns.
+Six occurrences across two files, every one an em-dash written as `â€”`: the UTF-8 bytes
+for `—` decoded as Windows-1252 and then encoded as UTF-8 again. Four are comments in
+`NoCooperationTests`; two are in `Act.cs`, and one of those is a `<summary>` on a public
+member, so it is in the XML documentation the package ships.
 
-xunit records a pass. `Readers.ExcusedIn` reads `BusyDesk.Ledger` and nothing else, so a
-run where two waits ran out and a watch could not keep pace has the same
-discovery-against-results arithmetic as a run where all of it was checked. That is
-WW231's founding defect surviving in the excuse WW211 added afterwards, and it is worse
-in one way: a desk excuse at least names a condition the engine declares, while this one
-is prose in a log nobody parses.
+How it got there is not a mystery — a tool that reads a file without being told its
+encoding gets the system codepage on this machine, and writing it back makes the damage
+permanent. It was found by making exactly that mistake in this repository and then
+checking whether anything else carried the same signature.
 
-What it is not is the same fix. The desk ledger's rows are `fact`, `whose`, `absence`,
-and a slow-machine excuse has no fact — that is why WW211 refused to borrow the gate. So
-either the ledger grows a column saying which kind of excuse a row is, or the second
-kind gets its own file and the roll call reads two. The first keeps one arithmetic and
-mixes two things a reader must not confuse; the second keeps them apart and says
-"unknown" twice.
+Nothing catches it. The compiler does not care what a comment says. The concordance
+reads sources for structure and never for prose. Nobody reads a doc comment closely
+enough to notice one wrong character, which is why six of them have sat in the tree.
 
-Whichever it is, the run has to stop reporting a clean sweep it did not take.
+So this is two pieces of work and the second is the one that matters. The characters are
+a find and replace. The check is what stops the next tool doing it again: a case reading
+every tracked text file, refusing a byte sequence that is UTF-8 decoded as a codepage
+and re-encoded. That signature is narrow — `â€` before a punctuation byte is not a thing
+prose contains — and this repository has Portuguese strings in its language files, so
+the check has to pass those rather than banning non-ASCII.

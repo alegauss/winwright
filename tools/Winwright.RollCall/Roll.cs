@@ -295,7 +295,24 @@ public sealed record Roll
             .OrderByDescending(one => one.Count())
             .Select(one => $"{one.Count()} for {one.Key}");
 
-        return $", and {Excused.Count} check(s) were excused — {string.Join(", ", facts)}";
+        // WW281. One count and then the split, because the two questions arrive in that order: how
+        // much of this green is real, and then whose doing the rest was. A desk excuse says come back
+        // when the machine is quiet; a budget this suite chose and missed says the number is wrong,
+        // and a reader who cannot tell them apart cannot act on either.
+        return $", and {Excused.Count} check(s) were excused{Kinds(Excused)} — {string.Join(", ", facts)}";
+    }
+
+    /// <summary>
+    /// How the excuses divide between the desk and this suite's own budgets, said only where both
+    /// are present: a run with one kind has already named it in the facts that follow.
+    /// </summary>
+    /// <param name="excused">The rows, which the caller has already found to be there and non-empty.</param>
+    private static string Kinds(IReadOnlyList<string> excused)
+    {
+        var budgets = excused.Count(one => Readers.Excuse(one).Kind == Readers.Budget);
+        return budgets == 0 || budgets == excused.Count
+            ? ""
+            : $" ({excused.Count - budgets} by the desk, {budgets} by a budget this suite chose)";
     }
 
     /// <summary>The whole reading: the sentence, then the methods, bounded so a wipeout is readable.</summary>

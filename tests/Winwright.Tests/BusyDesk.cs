@@ -45,7 +45,7 @@ internal sealed class DeskRefusedException : Exception
 internal static class BusyDesk
 {
     /// <summary>
-    /// Where an excuse is written down, beside the assembly that made it.
+    /// Where an excuse is written down.
     /// <para>
     /// WW231. This was called at eighty-one sites and counted nowhere. An excused case returns and
     /// xunit records a pass, so a run on a locked desk reported every case passing and the roll call's
@@ -54,32 +54,11 @@ internal static class BusyDesk
     /// a number, and this moved none.
     /// </para>
     /// <para>
-    /// A file rather than a counter, because the process that excuses is not the process that reports:
-    /// the roll call runs after the test host, including after one that died, which is the whole
-    /// reason it is its own program. A counter in memory would go with the host it was counting.
+    /// WW281 moved the file itself to <see cref="Excuses" />, because the desk stopped being the only
+    /// thing that excuses anything the day <see cref="SlowMachine" /> was written.
     /// </para>
     /// </summary>
-    internal static string Ledger { get; } = Path.Combine(AppContext.BaseDirectory, "excused.txt");
-
-    private static readonly object Writing = new();
-
-    /// <summary>
-    /// Truncated once, which is once per run: this type is touched by every desk-dependent class, and
-    /// a file left from an earlier run would be read as this one's excuses. Absent afterwards means
-    /// nothing was excused; absent because nobody wrote it is what the roll call reports as unknown.
-    /// </summary>
-    static BusyDesk()
-    {
-        try
-        {
-            File.WriteAllText(Ledger, "");
-        }
-        catch (Exception unwritable) when (unwritable is IOException or UnauthorizedAccessException)
-        {
-            // Deliberately swallowed. A suite that cannot write its own ledger still has a suite to
-            // run, and the roll call reports the absence rather than this failing every case.
-        }
-    }
+    internal static string Ledger => Excuses.Ledger;
 
     /// <summary>
     /// Build a fixture, answering null where the desk refused rather than letting the throw stand.
@@ -149,46 +128,13 @@ internal static class BusyDesk
     }
 
     /// <summary>
-    /// Which case is being excused, read off the stack.
-    /// <para>
-    /// WW233. The count landed without the names, and the trade was written up as eighty-one call
-    /// sites each taking an argument — which is a price nobody should pay and was the wrong list of
-    /// options. The stack already knows: the first frame outside this type is the case, or the
-    /// initialiser that built its fixture, and neither xunit nor any call site has to be asked.
-    /// </para>
-    /// <para>
-    /// It catches nothing, and that is a correction rather than an omission. The first version wrapped
-    /// the walk in a catch answering <c>&lt;unnamed&gt;</c> — a defensive catch with no failure mode
-    /// anybody could name, which is exactly what <see cref="Swallowing"/> exists to refuse: a value
-    /// answered out of a catch block is "I could not tell" spelled like an answer. A frame whose
-    /// method is unreadable is skipped, and a walk that finds nothing outside this type says so.
-    /// </para>
-    /// </summary>
-    private static string Whose()
-    {
-        foreach (var frame in new System.Diagnostics.StackTrace(fNeedFileInfo: false).GetFrames())
-        {
-            if (frame.GetMethod() is { DeclaringType: { } owner } method && owner != typeof(BusyDesk))
-                return $"{owner.Name}.{method.Name}";
-        }
-
-        return "<unnamed>";
-    }
-
-    /// <summary>
     /// That the hole is an honest one, and about the desk rather than about anything the machine
     /// could have arranged.
     /// </summary>
-    /// <summary>
-    /// One line of it, because the ledger is tab-separated and a newline in a field is a second row
-    /// that parses as a fact nobody measured.
-    /// </summary>
-    private static string OneLine(string absence) =>
-        absence.Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ').Trim();
-
     private static void Excusing(Precondition missing)
     {
         Assert.False(missing.Satisfied);
+        Excuses.Named(missing.Name);
         Assert.False(string.IsNullOrWhiteSpace(missing.Absence));
 
         // WW183. The engine says which conditions are the desk's, so this no longer keeps a list.
@@ -203,22 +149,10 @@ internal static class BusyDesk
         // WW231. Written down after the validation and never before it: an excuse this method is
         // about to refuse is not an excuse, and recording it would put a hole in the count that the
         // run does not have.
-        lock (Writing)
-        {
-            try
-            {
-                // WW248: the absence as well, because the name alone cannot say whether the desk
-                // belonged to a person or to this suite's own dialog — and an excuse that arrives on
-                // every run because of the second is a check nobody is running.
-                File.AppendAllText(
-                    Ledger,
-                    $"{missing.Name}\t{Whose()}\t{OneLine(missing.Absence)}{Environment.NewLine}");
-            }
-            catch (Exception unwritable) when (unwritable is IOException or UnauthorizedAccessException)
-            {
-                // As above: the case it excused is still excused, and a ledger that could not be
-                // written is a number the roll call says it does not have.
-            }
-        }
+        //
+        // WW248: the absence as well, because the name alone cannot say whether the desk belonged to
+        // a person or to this suite's own dialog — and an excuse that arrives on every run because of
+        // the second is a check nobody is running.
+        Excuses.Written(ExcusedBy.Desk, missing.Name, typeof(BusyDesk), missing.Absence);
     }
 }

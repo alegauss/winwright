@@ -17,7 +17,7 @@
 ## Block F — Assert — the expectation is derived, never typed
 
 - ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
-- ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Five reds now and it is not one guest run in four — what holds across all of them is that one character is overwritten by the last one sent, length for length. → §WW249
+- ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Six reds, and the recorder settles which side it is on: the window is delivered the substituted text, so the defect is in the send and not in WPF or the control. → §WW249
 - 📋 **WW260** (deps: —) **an expected set is derived from the project's strings and never from what the application reports** — The menu case counts profile entries against the app's own read-out, and `covers` derives only from the language files, so the number would be typed here. → §WW260
 - 📋 **WW269** (deps: —) **a caption counting down in real time cannot survive an exact comparison across a round trip** — `sameAs` compares two readings exactly, and a run that straddles a minute boundary would then be a red build about a clock rather than about the application. → §WW269
 - 📋 **WW275** (deps: —) **covers is two-way and reads as one-way, so a completeness claim against a shared container cannot be written** — The README says every declared string reads somewhere the locator matched; the engine also refuses every stranger, and its sentence misagrees with itself. → §WW275
@@ -45,7 +45,7 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
-- 📋 **WW281** (deps: —) **a slow-machine excuse is written to the test's own output and counted nowhere** — The roll call reads the desk ledger alone, so a run that excused a wait or a cadence balances its arithmetic exactly like one where every check ran. → §WW281
+- 📋 **WW284** (deps: —) **two committed source files carry a double-encoded em-dash, one of them in shipped documentation** — The bytes decode as UTF-8 to a dash that was already UTF-8 when something re-encoded it, and nothing in the build reads a comment closely enough to notice. → §WW284
 
 ## Done when — Block A
 
