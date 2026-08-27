@@ -363,6 +363,15 @@ public static class CaseRun
             return true;
         }
 
+        // WW262. A sweep over elements rather than over the strings a key declares, so it goes the way
+        // `covers` goes and not through the attempt loop: what it waits for is a page that has finished
+        // drawing, and there is no one reading at the end of it to retry towards.
+        if (step.EachSpoken)
+        {
+            EachSpoke(step, subject, root, trace, results);
+            return true;
+        }
+
         // WW261 and WW270. Resolved once, before the attempts, and out of the language the fixture
         // said its window is in. A key that cannot be read is a scenario that is wrong rather than an
         // application that is: the refusal names the key and the file, and it arrives before anything
@@ -530,6 +539,84 @@ public static class CaseRun
             Locator = step.Locator.Text,
             Asserted = step.Name,
             ReadBack = string.Join(", ", compared.Matched),
+            Detail = waited.Happened ? null : detail,
+            Verdict = waited.Happened ? StepVerdict.Ok : StepVerdict.Failed,
+        });
+
+        var result = waited.Happened
+            ? AssertionResult.Pass(step.Name, detail)
+            : AssertionResult.Fail(step.Name, detail);
+
+        results.Add(result.At(trace.Count));
+    }
+
+    /// <summary>
+    /// A step claiming that every element its locator matches announces a name.
+    /// <para>
+    /// WW262. The last step of the locator, because that is the one the matches are of — the same rule
+    /// a sweep over strings goes by, and for the same reason: `Panel#general > ComboBox` is about the
+    /// pickers, and the panel above them is how they were reached.
+    /// </para>
+    /// <para>
+    /// A locator matching nothing fails rather than holding. An empty set is met by an empty window,
+    /// which is the hole every derived claim in this engine exists to close — and a sweep that swept
+    /// nothing is a check nobody ran reported as one that passed.
+    /// </para>
+    /// </summary>
+    private static void EachSpoke(
+        StepDeclaration step,
+        Subject subject,
+        AutomationElement root,
+        List<TraceStep> trace,
+        List<AssertionResult> results)
+    {
+        var spoken = new List<string>();
+        var wrong = new List<NameCheck>();
+        var matched = 0;
+
+        var waited = Attempt.UntilTrue(
+            () =>
+            {
+                spoken.Clear();
+                wrong.Clear();
+
+                var found = Resolve.Matching(root, subject.Locator.Steps[^1]);
+                matched = found.Count;
+                foreach (var one in found)
+                {
+                    if (ElementFacts.Of(one) is not { } facts)
+                        continue;
+
+                    var check = Names.Of(facts);
+                    if (check.IsALabel)
+                        spoken.Add(check.Printable);
+                    else
+                        wrong.Add(check);
+                }
+
+                return matched > 0 && wrong.Count == 0;
+            },
+            subject.DeadlineMs,
+            subject.PollMs);
+
+        var detail = (matched, wrong.Count) switch
+        {
+            (0, _) => $"{step.Locator.Text} matched nothing in {waited.WaitedMs}ms, so this swept no "
+                + "element at all — an empty set is met by an empty window",
+            (_, > 0) => $"{wrong.Count} of the {matched} element(s) {step.Locator.Text} matches announce "
+                + $"something that is not a name. {string.Join(" ", wrong.Select(one => one.Sentence("one of them")))} "
+                + $"Waited {waited.WaitedMs}ms.",
+            _ => $"all {matched} element(s) {step.Locator.Text} matches announce a name, e.g. \"{spoken[0]}\".",
+        };
+
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = step.Verb.Name,
+            Locator = step.Locator.Text,
+            Asserted = step.Name,
+            ReadBack = spoken.Count == 0 ? null : string.Join(", ", spoken),
+            WaitedMs = waited.WaitedMs,
             Detail = waited.Happened ? null : detail,
             Verdict = waited.Happened ? StepVerdict.Ok : StepVerdict.Failed,
         });

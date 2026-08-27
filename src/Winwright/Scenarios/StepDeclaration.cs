@@ -40,7 +40,8 @@ public sealed record StepDeclaration
         bool spoken,
         string? label,
         string? notLabel,
-        string? unlike)
+        string? unlike,
+        bool eachSpoken)
     {
         Name = name;
         Locator = locator;
@@ -60,6 +61,7 @@ public sealed record StepDeclaration
         Label = label;
         NotLabel = notLabel;
         Unlike = unlike;
+        EachSpoken = eachSpoken;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -177,6 +179,28 @@ public sealed record StepDeclaration
     /// </para>
     /// </summary>
     public bool Spoken { get; }
+
+    /// <summary>
+    /// Whether this step claims every element its locator matches announces a name.
+    /// <para>
+    /// WW262. <see cref="Covers"/> is one claim over many elements and it is about <em>strings</em>:
+    /// every value a key declares reads somewhere the locator matched. This is the other axis — every
+    /// element the locator matches announces a label, where the case cannot know and should not care
+    /// which. <see cref="Spoken"/> is neither: that is about what sits <em>under</em> one element.
+    /// </para>
+    /// <para>
+    /// The predicate is not <em>non-empty</em>, and the engine already knows the difference: a font
+    /// glyph, a template nobody filled in and an automation id handed back all satisfy non-empty while
+    /// being silent, or worse, to a screen reader.
+    /// </para>
+    /// <para>
+    /// What it is for is the shape a settings page repeats: thirty-odd rows across six panels under
+    /// one naming rule, with the assertion written against three controls of one panel. Naming those
+    /// three covers the rule where it was already known to work, and a row added to a panel nobody
+    /// listed is covered by nothing — the hardcoded-list defect wearing element clothes.
+    /// </para>
+    /// </summary>
+    public bool EachSpoken { get; }
 
     /// <summary>
     /// The key whose declared string this step's reading should be, or null where it makes another
@@ -311,7 +335,7 @@ public sealed record StepDeclaration
     public bool Checkable =>
         Expected is not null || Moves || Answers || Covers is not null || Matches is not null || Discloses
         || SameAs is not null || Never is not null || Spoken
-        || Label is not null || NotLabel is not null || Unlike is not null;
+        || Label is not null || NotLabel is not null || Unlike is not null || EachSpoken;
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -345,6 +369,7 @@ public sealed record StepDeclaration
     /// <param name="label">The key whose declared string the reading should be.</param>
     /// <param name="notLabel">The key whose declared string the reading should not be.</param>
     /// <param name="unlike">The earlier step this one claims its reading differs from.</param>
+    /// <param name="eachSpoken">That every element the locator matches announces a name.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static StepDeclaration Of(
         string locator,
@@ -364,7 +389,8 @@ public sealed record StepDeclaration
         bool spoken = false,
         string? label = null,
         string? notLabel = null,
-        string? unlike = null)
+        string? unlike = null,
+        bool eachSpoken = false)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var subject = called ?? Describing(verb, locator);
@@ -415,7 +441,7 @@ public sealed record StepDeclaration
 
         var claims = wanted is not null || moves || answers || sweeping is not null || pattern is not null
             || discloses || back is not null || apart is not null || forbidden is not null || spoken
-            || declared is not null || undeclared is not null || apart is not null;
+            || declared is not null || undeclared is not null || apart is not null || eachSpoken;
 
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
         // says it moved where it was something else. A step asserting both would owe two assertion
@@ -608,6 +634,41 @@ public sealed record StepDeclaration
                     + "key is where the value comes from rather than a second thing to check");
         }
 
+        if (eachSpoken)
+        {
+            // One claim per step, as everywhere else.
+            if (wanted is not null || moves || answers || sweeping is not null || pattern is not null
+                || discloses || back is not null || apart is not null || forbidden is not null || spoken
+                || declared is not null || undeclared is not null)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    "it claims every element it matches is named and also makes another claim; a sweep "
+                        + "is one claim over many elements, and every other field on a step is about one");
+            }
+
+            // The same rule `covers` is under, and for its reason: a sweep reads every element its
+            // locator matches, and one act over many of them is not a claim about any of them.
+            if (!act.Reads)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims every element it matches is named and acts with '{act.Name}'; a sweep "
+                        + "reads every element its locator matches, and one act over many of them is "
+                        + "not a claim");
+            }
+
+            // And no reading beside it, for the reason a disclosure takes none: what these elements
+            // announce is their name, always, and a 'reads' here would narrow nothing.
+            if (!string.IsNullOrWhiteSpace(reads))
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims every element it matches is named and names the '{reads.Trim()}' "
+                        + "reading; the claim is about what those elements announce, which is their name");
+            }
+        }
+
         if (spoken)
         {
             // One claim per step, as everywhere else. This one is about the subtree, and the others
@@ -745,7 +806,8 @@ public sealed record StepDeclaration
             spoken,
             declared,
             undeclared,
-            apart);
+            apart,
+            eachSpoken);
     }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>

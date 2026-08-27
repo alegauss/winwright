@@ -157,6 +157,7 @@ public static class ScenarioSchema
         new("unlike", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to differ from, for the change whose value no case can name at either end", []),
         new("label", false, Taking.Text, "the key whose declared string the reading should be — the label itself, derived from the project's own strings and never typed here", []),
         new("notLabel", false, Taking.Text, "the key whose declared string the reading should not be, for the state an application has a word for and must not be showing", []),
+        new("eachSpoken", false, Taking.Truth, "that every element this step's locator matches announces a name — a sweep over elements, where 'covers' is a sweep over the strings a key declares", []),
         new("spoken", false, Taking.Truth, "that everything under the locator which announces anything announces a name — never a glyph, a template or an id handed back — and that something does", []),
         new("never", false, Taking.Text, "the key whose string must not be showing anywhere in the window at any moment while this step waits for its locator — a key and never the text, like the project's own loading strings", []),
         new("covers", false, Taking.Text, "the key whose every string must be read somewhere the locator matches, without its trailing dot — derived from the project's own strings and never listed here", []),

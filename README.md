@@ -294,16 +294,24 @@ before it — an expander, a tree view, a details pane, a search that fills a li
 case types; the engine compares the subtree against what it read a moment earlier. `sameAs` is the
 sixth and is `moves` with a memory: it names the `named` of an earlier step in the same case and
 claims this step's reading is **back to what that one read** — the round trip, for the value a case
-cannot know at either end. `label` is the seventh and is `expect` with the value derived rather than typed: it names the key
+cannot know at either end. `unlike` is the seventh and is that read the other way: it names an earlier
+step and claims this step's reading **differs** from what that one read, for the change whose value a
+case cannot know at either end either.
+
+`label` is the eighth and is `expect` with the value derived rather than typed: it names the key
 whose declared string the reading should be, read out of the language the fixture says its window is
-in. `notLabel` is the eighth and is its mirror — the reading must **not** be that string, for the
-states an application has a word for and must not be showing. `spoken` is the ninth and is about the
-tree under the locator rather
-than about any one reading: that everything under it which announces anything announces a **name** —
-never a font glyph, a template nobody filled in, or an automation id handed back — and that something
-does. `never` is the tenth and is the only claim about the **wait** rather
+in. `notLabel` is the ninth and is its mirror — the reading must **not** be that string, for the
+states an application has a word for and must not be showing.
+
+`spoken` is the tenth and is about the tree under the locator rather than about any one reading: that
+everything under it which announces anything announces a **name** — never a font glyph, a template
+nobody filled in, or an automation id handed back — and that something does. `eachSpoken` is the
+eleventh and is the same predicate over a different set: every element the locator **matches**
+announces a name.
+
+`never` is the twelfth and is the only claim about the **wait** rather
 than about what it ended on: it names a key whose string must not be showing anywhere in the window
-at any moment while this step waits for its locator. And `covers` is the eleventh, which is one claim
+at any moment while this step waits for its locator. And `covers` is the thirteenth, which is one claim
 over many elements — see below.
 
 `sameAs` and `unlike` are judged where the case knows all its steps, so a pointer at a name nobody
@@ -320,6 +328,12 @@ application ships from the moment it is written. `covers` is not the answer for 
 derives the strings *under* a key, and a leaf key has no children, so the sweep comes back broken
 rather than failed. The failure sentence carries the key **and** the string, so a control announcing
 the wrong label reads differently from one announcing the right label in the wrong language.
+
+`eachSpoken` is `covers` on the other axis. That one derives a set of **strings** and asks whether
+each reads somewhere the locator matched; this asks whether every **element** the locator matches
+announces a label. It is what a settings page needs: thirty-odd rows under one naming rule, where an
+assertion written against three named controls covers the rule exactly where it was already known to
+work. A locator matching nothing fails rather than holding — an empty set is met by an empty window.
 
 `spoken` is what a screen reader gets, and no capture can tell it from a picture. It is never a
 count: claude-tray's script asserted *four or more* named fields on a conversation row, which is the

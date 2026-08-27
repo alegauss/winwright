@@ -180,6 +180,7 @@
 - ✅ **WW261** **a case expecting a label has to type it, which is the hardcoded set one control down** — A step names a key in `label` and the reading is compared against the string it declares, read out of the language the fixture says its window is in.
 - ✅ **WW270** **a case can claim a reading is one declared string and never that it is not one** — A step names a key in `notLabel` and the reading must not be the string it declares, with a reading that answered nothing holding neither claim.
 - ✅ **WW268** **a case can claim a reading came back to an earlier step's and never that it differs from one** — A step names an earlier one in `unlike` and claims its reading differs from what that one read, judged and refused wherever `sameAs` is.
+- ✅ **WW262** **a case can claim one element is named and a set of strings was read, and nothing about every element** — A step claims `eachSpoken`: every element its locator matches announces a name, judged by what tells a label from a glyph — and a locator matching nothing fails.
 
 ## Block G — The scenario — a case is a data file
 

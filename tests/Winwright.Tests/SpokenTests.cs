@@ -118,6 +118,75 @@ public sealed class SpokenTests : IDisposable
     }
 
     [Fact]
+    public void A_sweep_over_elements_fails_where_any_one_of_them_is_not_named()
+    {
+        // WW262, and the other axis: `spoken` is about what sits under one element, this is about
+        // every element a locator matches. Measured — the pane's buttons are the whole naming rule at
+        // once, so the sweep meets a glyph, an id handed back and one with no name at all.
+        var verdict = Run("Button", each: true);
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
+
+        var said = Said(verdict);
+        Assert.True(said.Contains("is not a name", StringComparison.Ordinal), said);
+
+        // "N of M", because a sweep that reported only whether would be the count this whole engine
+        // refuses — and M above one is what says it swept many rather than resolved one.
+        Assert.True(said.Contains(" of the ", StringComparison.Ordinal), said);
+    }
+
+    [Fact]
+    public void A_sweep_over_elements_that_are_all_named_holds()
+    {
+        var verdict = Run("Button#spoken", each: true);
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+        Assert.Contains("announce a name", Said(verdict), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_sweep_that_matched_nothing_fails_rather_than_holding_over_an_empty_set()
+    {
+        // The hole every derived claim in this engine exists to close: an empty set is met by an
+        // empty window, and a sweep that swept nothing would otherwise be a check nobody ran
+        // reported as one that passed.
+        var verdict = Run("Button#nothingDrewThis", each: true);
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
+        Assert.Contains("met by an empty window", Said(verdict), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_sweep_over_elements_is_a_read_and_one_claim_like_every_other()
+    {
+        // The same two rules `covers` is under: one act over many elements is not a claim about any
+        // of them, and a step answers one thing.
+        Assert.Contains(
+            "not a claim",
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of("Button", "invoke", eachSpoken: true)).Because,
+            StringComparison.Ordinal);
+
+        Assert.Contains(
+            "also makes another claim",
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of("Button", "read", answers: true, eachSpoken: true)).Because,
+            StringComparison.Ordinal);
+
+        Assert.Contains(
+            "which is their name",
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of("Button", "read", reads: "value", eachSpoken: true)).Because,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void It_is_one_claim_like_every_other_one()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
@@ -155,7 +224,7 @@ public sealed class SpokenTests : IDisposable
             .Concat(verdict.Ran.SelectMany(one => one.Trace.Select(each => each.ToString()))));
 
     /// <summary>Claim that subtree is spoken, or null where this desk cannot observe.</summary>
-    private SuiteVerdict? Run(string locator)
+    private SuiteVerdict? Run(string locator, bool each = false)
     {
         if (!Desk.Read().CanObserve)
             return null;
@@ -180,7 +249,7 @@ public sealed class SpokenTests : IDisposable
                     {
                       "locator": {{System.Text.Json.JsonSerializer.Serialize(locator)}},
                       "act": "read",
-                      "spoken": true,
+                      {{(each ? "\"eachSpoken\": true" : "\"spoken\": true")}},
                       "named": "everything under it that speaks says a name"
                     }
                   ]

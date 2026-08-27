@@ -135,29 +135,6 @@ rather than a condition the case runs under. What is missing is a set the applic
 itself reports, declared once where the project declares its strings, and derived per
 run like the other one.
 
-### §WW262 The flat sweep is over elements, not over strings
-
-`covers` is one claim over many elements and it is about *strings*: every value the key
-declares reads somewhere the locator matched. The names case needs the other axis —
-every element the locator matches answers something, where the case cannot know and
-should not care what.
-
-The predicate is not *non-empty* and the engine already knows it. `NameCheck` sorts a
-name into spoken, missing, a font glyph, a template nobody filled in, and the automation
-id handed back — and the last three all satisfy non-empty while being silent, or worse,
-to a screen reader. It has been in `Winwright.Asserting` since block F and nothing in a
-case file reaches it.
-
-What it is for is the shape a settings page repeats: thirty-odd rows across six panels,
-one naming rule, and the assertion written against three controls of one panel. A case
-that names those three covers the rule where it was already known to work, and adding a
-row to a panel nobody listed is covered by nothing — the hardcoded-list defect wearing
-element clothes.
-
-It is not `answers` over many. `answers` asks whether a reading said anything; this asks
-whether what it said is a name, which is the whole of what `WW175` measured and what a
-picture can never show.
-
 ### §WW264 A name that belongs to the row next door
 
 A sweep proves a control announces something. It cannot prove the something is its own
