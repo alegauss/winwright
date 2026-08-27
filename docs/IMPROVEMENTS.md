@@ -133,28 +133,6 @@ locator, the ones that could carry a name do. It is `covers` one level down — 
 nobody lists, read out of what the window drew rather than out of the project's strings
 — and it is the claim every list, grid and row in every adopting project wants.
 
-### §WW256 Some claims are about the wait and not about what it ended on
-
-An expectation is read after the wait. The profiles case carries one that is about the
-wait itself: coming back to a profile seen seconds ago shows its report without ever
-showing the *no readings yet* line, because that line means the per-profile cache did
-not put the report back.
-
-A read after the wait cannot see it. The line is gone by then — which is what passing
-looks like and also what a switch that flashed it looks like, so a case reading the end
-state goes green on both.
-
-The script measured it by clearing a sighting per stop and watching while it polled: the
-status line at 162ms and the panes back after 961ms without the cache; the line never
-shown and the panes at 12ms with it. That probe was a scratch file and is gone, which is
-why the assertion is written as *the line was never observed* rather than as *the panes
-returned within N ms*. The distinction is worth keeping: a deadline is the one assertion
-in that file that would go red on a slow machine for a correct reason.
-
-The project already declares `loading` keys, and the engine refuses a reading taken
-while the page still says *not yet*. This is the same key turned around — a state that
-must not be seen at all, rather than one that must be over before anybody reads.
-
 ### §WW260 Some expected sets are the application's data, not its strings
 
 `covers` is the answer to the hardcoded list and it derives from one place: the language
@@ -177,6 +155,71 @@ absent by the adopting project's runner, and this is a count the expectation is 
 rather than a condition the case runs under. What is missing is a set the application
 itself reports, declared once where the project declares its strings, and derived per
 run like the other one.
+
+### §WW261 One declared string is an expectation too
+
+`covers` derives the strings *under* a key and claims each reads somewhere the locator
+matches. That is the answer for a set. For one control it is no answer at all: a leaf
+key has no children, so the derivation comes back empty and the sweep is broken rather
+than failed — which is right, and leaves the claim unwritable.
+
+So a case asserting that the profile picker announces its label has to type the label.
+The script never did: it called the strings file for every one of them, and `WW84` is
+nine such reads. A typed label is the hardcoded set with one member — it goes stale the
+day somebody edits the string, and it is wrong in the other four languages this
+application ships from the moment it is written.
+
+The shape is the derivation `covers` already does, stopping one level higher: a key that
+names a string rather than a parent of them, resolved for the language the run resolved,
+compared against the reading the step names. It is not `covers` with one member — that
+claims a set was read *somewhere*, and this claims *this* element says it.
+
+The refusals it needs are the mirror of the sweep's: a key that names an object rather
+than a string, and a key nothing declares, both refused where the author wrote them.
+
+### §WW262 The flat sweep is over elements, not over strings
+
+`covers` is one claim over many elements and it is about *strings*: every value the key
+declares reads somewhere the locator matched. The names case needs the other axis —
+every element the locator matches answers something, where the case cannot know and
+should not care what.
+
+The predicate is not *non-empty* and the engine already knows it. `NameCheck` sorts a
+name into spoken, missing, a font glyph, a template nobody filled in, and the automation
+id handed back — and the last three all satisfy non-empty while being silent, or worse,
+to a screen reader. It has been in `Winwright.Asserting` since block F and nothing in a
+case file reaches it.
+
+What it is for is the shape a settings page repeats: thirty-odd rows across six panels,
+one naming rule, and the assertion written against three controls of one panel. A case
+that names those three covers the rule where it was already known to work, and adding a
+row to a panel nobody listed is covered by nothing — the hardcoded-list defect wearing
+element clothes.
+
+It is not `answers` over many. `answers` asks whether a reading said anything; this asks
+whether what it said is a name, which is the whole of what `WW175` measured and what a
+picture can never show.
+
+### §WW264 A name that belongs to the row next door
+
+A sweep proves a control announces something. It cannot prove the something is its own
+row's header, because it has no idea which row the control is in — and the failure that
+hides there is worse than the one it does catch. A rule that pairs the wrong two things
+gives three controls in a row one name, and a screen reader then reads the same label
+three times over three different controls.
+
+The claude-tray rule has two branches and the case has to cover both. The one that must
+fire: a picker, a slider, a text box or a switch with no content of its own takes its
+row's header. The one that must **not**: a field with a labelled button beside it keeps
+the header on the field, and each button keeps its own text. Only the second branch can
+produce the duplicate, which is why the case that only checked the first was checking
+the easy half.
+
+What makes it askable is that the row has an automation peer of its own, so its header
+is readable and the controls under it are reachable from it. The claim is then
+structural rather than textual: of the controls in this row, each announces this row's
+header or its own text, and none announces a header belonging to another row on the page
+— with the set of headers derived from the page rather than listed.
 
 ## Block G — The scenario — a case is a data file
 
@@ -223,6 +266,27 @@ that refused it is a hole naming the absence and never a red about the applicati
 It is separable from `WW258`. That one is about reaching a menu at all; this is about a
 menu that is already open, and it is the same question for a menu bar as for a tray
 icon's.
+
+### §WW263 A case cannot repeat itself over a set it did not list
+
+Steps are an array and the array is written out. That is right for every case so far,
+and it is what stops `WW84`: the panels it visits come from the `settings.nav.*` keys,
+so the number of steps is data the file must not carry. Listing them is the defect the
+derivation exists to refuse — a panel added later is swept by nothing, and the run
+reports a clean pass over the panels somebody remembered.
+
+The script solved it with a loop and paid for it in the ways a loop costs. It counted
+panels opened apart from panels asserted, because a panel with no row control had still
+been visited and rolling the two together would report it as one that got away. It
+guarded on the derived list being empty before walking, because zero panels makes every
+assertion inside run zero times and report nothing at all — a clean run over nothing,
+which is this project's founding defect reached through a language flag.
+
+Both of those are the runner's job here, not the case's. What the format needs is a
+step, or a group of them, that says *once for each member of this derived set*, with the
+member reaching the locator — and the two guards owned by the engine: an empty
+derivation is broken and never passed, and what was visited is counted apart from what
+was asserted.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

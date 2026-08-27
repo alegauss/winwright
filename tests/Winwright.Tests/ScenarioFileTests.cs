@@ -1,4 +1,4 @@
-using Winwright.Scenarios;
+﻿using Winwright.Scenarios;
 
 using Xunit;
 
@@ -245,7 +245,7 @@ public class ScenarioFileTests
         Assert.Equal(
             [
                 "locator", "act", "with", "expect", "reads", "moves", "answers", "matches", "discloses",
-                "sameAs", "covers", "meansIt", "named",
+                "sameAs", "never", "covers", "meansIt", "named",
             ],
             ScenarioSchema.Step.Select(field => field.Name));
 

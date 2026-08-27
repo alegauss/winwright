@@ -7,6 +7,14 @@ using Winwright.Verdicts;
 
 namespace Winwright.Asserting;
 
+/// <summary>Whether one declared string is showing in a window, and whether the look was whole.</summary>
+/// <param name="Text">What carries it, quoted, or null where nothing does.</param>
+/// <param name="Whole">
+/// Whether the walk reached everything. False also where nothing could be read at all: an absence
+/// found by a look that did not happen is not an absence either.
+/// </param>
+public sealed record Showing(string? Text, bool Whole);
+
 /// <summary>What asking a window whether it is still computing turned out to say.</summary>
 public sealed record LoadingCheck
 {
@@ -194,36 +202,73 @@ public static class Loading
         // turn an unanswerable check into a page that has finished.
         var watched = declaration.Loading.Select(key => Labels.For(key, declaration)).ToList();
 
-        List<string> texts;
-        var notWalked = 0;
-        try
-        {
-            var tree = Inspect.Under(root, depth);
-            if (tree is null)
-            {
-                return new LoadingCheck(
-                    watched, [], 0, "the window has no control view to read, so nothing it is showing can be seen");
-            }
-
-            // WW189: what the walk did not reach, carried rather than dropped. Above zero, not
-            // finding a loading string is not the same as the page not showing one.
-            notWalked = tree.NotWalked;
-            texts = tree
-                .Walk()
-                .Select(one => one.Facts.Name)
-                .Where(one => one.Length > 0)
-                .ToList();
-        }
-        catch (Exception gone)
-            when (gone is ElementNotAvailableException or InvalidOperationException)
-        {
-            return new LoadingCheck(watched, [], 0, $"the window went away while it was being read: {gone.Message}");
-        }
+        var (texts, notWalked, absence) = Names(root, depth);
+        if (absence.Length > 0)
+            return new LoadingCheck(watched, [], 0, absence);
 
         var showing = watched
             .Where(one => texts.Any(text => text.Contains(one.Text, StringComparison.Ordinal)))
             .ToList();
 
         return new LoadingCheck(watched, showing, notWalked, "");
+    }
+
+    /// <summary>
+    /// Whether one declared string is showing in a window at this moment, and whether the look reached
+    /// the whole of it.
+    /// <para>
+    /// WW256. <see cref="In"/> asks the same question of the strings a project declared as its loading
+    /// text; this asks it of one string a case named, and it is the same question either way — the
+    /// difference is only which declaration says which string matters. Contained rather than exact,
+    /// as there: a line a window puts inside a longer name is still the line being shown.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The window to look in.</param>
+    /// <param name="watched">The string, already resolved for the language the run is in.</param>
+    /// <param name="depth">How deep to walk.</param>
+    /// <returns>What carries it, or null where nothing does, and whether the walk was whole.</returns>
+    public static Showing Sighted(AutomationElement root, Label watched, int depth = Deep)
+    {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(watched);
+
+        var (texts, notWalked, absence) = Names(root, depth);
+        if (absence.Length > 0)
+            return new Showing(null, false);
+
+        var carrying = texts.FirstOrDefault(text => text.Contains(watched.Text, StringComparison.Ordinal));
+        return new Showing(carrying is null ? null : $"'{carrying}'", notWalked == 0);
+    }
+
+    /// <summary>
+    /// Every name a window is showing, what the walk did not reach, and why nothing was read where
+    /// nothing was.
+    /// <para>
+    /// One walk for both questions. <see cref="In"/> and <see cref="Sighted"/> ask different things of
+    /// the same reading, and two copies of a tree walk are two places for the truncation rule to be
+    /// remembered in one of them.
+    /// </para>
+    /// </summary>
+    private static (IReadOnlyList<string> Texts, int NotWalked, string Absence) Names(
+        AutomationElement root, int depth)
+    {
+        try
+        {
+            var tree = Inspect.Under(root, depth);
+            if (tree is null)
+                return ([], 0, "the window has no control view to read, so nothing it is showing can be seen");
+
+            // WW189: what the walk did not reach, carried rather than dropped. Above zero, not
+            // finding a loading string is not the same as the page not showing one.
+            return (
+                tree.Walk().Select(one => one.Facts.Name).Where(one => one.Length > 0).ToList(),
+                tree.NotWalked,
+                "");
+        }
+        catch (Exception gone)
+            when (gone is ElementNotAvailableException or InvalidOperationException)
+        {
+            return ([], 0, $"the window went away while it was being read: {gone.Message}");
+        }
     }
 }

@@ -34,7 +34,9 @@
   <text x="90" y="356" font-family="DejaVu Sans, sans-serif" font-size="62" font-weight="bold" fill="#ece7fb">A green never covers</text>
   <text x="90" y="428" font-family="DejaVu Sans, sans-serif" font-size="62" font-weight="bold" fill="#a396ff">a check that did not run.</text>
 
-  <text x="92" y="494" font-family="DejaVu Sans, sans-serif" font-size="26" fill="#ada4cd">Drive a Windows desktop app from a test, and report what was actually observed.</text>
+  <!-- measured at 958px against the 1020px between the gutters; the previous
+       line ran 48px past x=1110 -->
+  <text x="92" y="494" font-family="DejaVu Sans, sans-serif" font-size="26" fill="#ada4cd">Drive a Windows desktop app from a test, and report what was observed.</text>
 
   <!-- the four verdicts, as the badge -->
   <rect x="90" y="532" width="512" height="46" rx="23" fill="#181231" stroke="#322a5c"/>

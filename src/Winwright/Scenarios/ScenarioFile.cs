@@ -339,6 +339,7 @@ public sealed class ScenarioFile
         var matches = Text(at, step, ScenarioSchema.Step, "matches");
         var discloses = Truth(at, step, ScenarioSchema.Step, "discloses");
         var sameAs = Text(at, step, ScenarioSchema.Step, "sameAs");
+        var never = Text(at, step, ScenarioSchema.Step, "never");
         var covers = Text(at, step, ScenarioSchema.Step, "covers");
         var meansIt = Truth(at, step, ScenarioSchema.Step, "meansIt");
         var named = Text(at, step, ScenarioSchema.Step, "named");
@@ -347,7 +348,7 @@ public sealed class ScenarioFile
             at,
             () => StepDeclaration.Of(
                 locator!, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches, discloses,
-                sameAs));
+                sameAs, never));
     }
 
     /// <summary>

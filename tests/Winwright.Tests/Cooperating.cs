@@ -245,6 +245,13 @@ internal static class Cooperating
             "whether a page has finished computing, read off the tree against the project's own "
                 + "loading label — and a page it could not walk answers that it did not look"),
 
+        // WW256. The same walk asked of one string a case named rather than of the ones the project
+        // declared as its loading text, and on the same axis for the same reason: it reads the tree
+        // against a declaration, and needs nothing of the application beyond being drawn.
+        new("Loading.Sighted", Cooperation.None, false,
+            "whether one declared string is showing right now, and whether the look reached the "
+                + "whole window — which is what makes an absence an absence"),
+
         // --- WW57, the one verb a whole case is run by -----------------------------------------------
         // It needs nothing the acts it dispatches do not need, which is the answer that matters: a
         // case declared as data drives a product nobody here owns, exactly as far as the pattern

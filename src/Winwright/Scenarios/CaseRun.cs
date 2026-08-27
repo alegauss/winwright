@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Automation;
 
 using Winwright.Acting;
@@ -107,6 +107,13 @@ public sealed class CaseResult
 /// </summary>
 public static class CaseRun
 {
+    /// <summary>
+    /// What a `never` whose absence rests on a truncated walk is missing. WW189's rule as a
+    /// precondition: seeing the string is evidence a short walk cannot take away, and not seeing it
+    /// is only an answer where the walk reached everything.
+    /// </summary>
+    private const string WalkedWhole = "the whole window could be walked";
+
     /// <summary>
     /// Run one case against a root element.
     /// </summary>
@@ -331,6 +338,15 @@ public static class CaseRun
             return true;
         }
 
+        // WW256. A claim about the wait rather than about what it ended on, so it has its own wait for
+        // the reason a sweep does: what the attempt loop retries towards is a reading, and this one
+        // has nothing to read at the end — the answer is everything it saw on the way.
+        if (step.Never is { } forbidden)
+        {
+            Watched(step, forbidden, subject, project, root, trace, results);
+            return true;
+        }
+
         // WW255. Looked up once, before the attempts: the value a round trip is about was read when
         // the earlier step ran, and a lookup inside the retry would be the same answer fetched three
         // times. Absent only where that step stopped the case, which is a state this never reaches.
@@ -479,6 +495,110 @@ public static class CaseRun
         var result = waited.Happened
             ? AssertionResult.Pass(step.Name, detail)
             : AssertionResult.Fail(step.Name, detail);
+
+        results.Add(result.At(trace.Count));
+    }
+
+    /// <summary>
+    /// A step whose claim is about the wait: while the locator was being waited for, the string the
+    /// project declares under <paramref name="key"/> was never showing anywhere in the window.
+    /// <para>
+    /// WW256. Every other claim is read once the waiting is over, and this one cannot be: the line it
+    /// is about is gone by then, which is what passing looks like and also what a switch that flashed
+    /// one looks like. Measured on claude-tray, where coming back to a profile seen seconds ago showed
+    /// its report at 12ms with the cache and showed the <em>no readings yet</em> line at 162ms without
+    /// it — the same window, a second apart, indistinguishable to anything reading the end state.
+    /// </para>
+    /// <para>
+    /// The locator is what says when to stop looking rather than what to look at, so a locator that
+    /// never arrives is a failure and not a pass: a claim that nothing was seen during a wait that
+    /// never ended is a claim about a window that never got where the case was taking it.
+    /// </para>
+    /// <para>
+    /// WW189's rule applies and is the reason a truncated walk is a hole. Seeing the string is
+    /// positive evidence a short walk cannot take away; <em>not</em> seeing it is only an answer where
+    /// the walk reached everything, and reporting the other case as never-seen would be a green over a
+    /// look that never got to the control it was about.
+    /// </para>
+    /// </summary>
+    private static void Watched(
+        StepDeclaration step,
+        string key,
+        Subject subject,
+        ProjectDeclaration project,
+        AutomationElement root,
+        List<TraceStep> trace,
+        List<AssertionResult> results)
+    {
+        Label watched;
+        try
+        {
+            watched = Labels.For(key, project);
+        }
+        catch (UnusableLabelException unusable)
+        {
+            throw new ScenarioRefusedException(step.Name, unusable.Message);
+        }
+
+        string? seen = null;
+        var whole = true;
+        var looks = 0;
+
+        var waited = Attempt.UntilTrue(
+            () =>
+            {
+                // The window first and the locator second, in that order. The poll that finds the
+                // locator is the last one there will be, so looking at the end state first would let
+                // whatever was on screen at that moment go unlooked-at — which is the one moment this
+                // claim is most likely to be false at.
+                looks++;
+                var showing = Loading.Sighted(root, watched);
+                seen ??= showing.Text;
+                whole = whole && showing.Whole;
+                return subject.ResolveOnce().Found;
+            },
+            subject.DeadlineMs,
+            subject.PollMs);
+
+        var (verdict, detail) = (seen, waited.Happened, whole) switch
+        {
+            (not null, _, _) => (
+                StepVerdict.Failed,
+                $"'{watched.Text}' ({watched.Key}) was showing {seen} while this step waited, "
+                    + $"{waited.WaitedMs}ms over {looks} look(s)."),
+            (_, false, _) => (
+                StepVerdict.Failed,
+                $"{step.Locator.Text} never arrived in {waited.WaitedMs}ms, so nothing waited for "
+                    + $"'{watched.Text}' ({watched.Key}) not to show."),
+            (_, _, false) => (
+                StepVerdict.Unchecked,
+                $"'{watched.Text}' ({watched.Key}) was not seen, and at least one of the {looks} look(s) "
+                    + "did not reach the whole window, so its absence is not an absence."),
+            _ => (
+                StepVerdict.Ok,
+                $"'{watched.Text}' ({watched.Key}) never showed while this step waited, "
+                    + $"{waited.WaitedMs}ms over {looks} look(s)."),
+        };
+
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = step.Verb.Name,
+            Locator = step.Locator.Text,
+            Asserted = step.Name,
+            WaitedMs = waited.WaitedMs,
+            Polls = looks,
+            Detail = verdict == StepVerdict.Ok ? null : detail,
+            Verdict = verdict,
+        });
+
+        var result = verdict switch
+        {
+            StepVerdict.Ok => AssertionResult.Pass(step.Name, detail),
+            StepVerdict.Unchecked => AssertionResult.Unchecked(
+                step.Name, Precondition.Absent(WalkedWhole, detail)),
+            _ => AssertionResult.Fail(step.Name, detail),
+        };
 
         results.Add(result.At(trace.Count));
     }

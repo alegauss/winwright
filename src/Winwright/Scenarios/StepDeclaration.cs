@@ -35,7 +35,8 @@ public sealed record StepDeclaration
         bool answers,
         System.Text.RegularExpressions.Regex? matches,
         bool discloses,
-        string? sameAs)
+        string? sameAs,
+        string? never)
     {
         Name = name;
         Locator = locator;
@@ -50,6 +51,7 @@ public sealed record StepDeclaration
         Matches = matches;
         Discloses = discloses;
         SameAs = sameAs;
+        Never = never;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -121,6 +123,26 @@ public sealed record StepDeclaration
     /// </para>
     /// </summary>
     public string? SameAs { get; }
+
+    /// <summary>
+    /// The key whose strings must never be showing while this step waits for its locator, or null
+    /// where it makes another claim.
+    /// <para>
+    /// WW256. Every other claim is read after the wait. This one is about the wait: coming back to a
+    /// profile seen seconds ago shows its report without ever showing the <em>no readings yet</em>
+    /// line, because that line means the per-profile cache did not put the report back. A read taken
+    /// afterwards cannot see it — the line is gone by then, which is what passing looks like and also
+    /// what a switch that flashed one looks like.
+    /// </para>
+    /// <para>
+    /// A key and never the text, for the reason the project's loading strings are keys: a phrase
+    /// written in a case is one a translation rewrites, and a check comparing against it starts
+    /// matching nothing the day somebody ships another language. This is that same declaration turned
+    /// around — a state that must not be seen at all, rather than one that must be over before
+    /// anybody reads.
+    /// </para>
+    /// </summary>
+    public string? Never { get; }
 
     /// <summary>Which reading the expectation is about. <see cref="ReadBack.Anything"/> by default.</summary>
     public ReadBack Reads { get; }
@@ -197,7 +219,8 @@ public sealed record StepDeclaration
     /// is refused by <see cref="CaseDeclaration"/> rather than run to a green it did not earn.
     /// </summary>
     public bool Checkable =>
-        Expected is not null || Moves || Answers || Covers is not null || Matches is not null || Discloses;
+        Expected is not null || Moves || Answers || Covers is not null || Matches is not null || Discloses
+        || SameAs is not null || Never is not null;
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -226,6 +249,7 @@ public sealed record StepDeclaration
     /// <param name="matches">The pattern the reading should match, where no case can name its value.</param>
     /// <param name="discloses">That the act put something under the locator that was not there before.</param>
     /// <param name="sameAs">The earlier step this one claims its reading is back to.</param>
+    /// <param name="never">The key whose strings must never show while this step waits for its locator.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
     public static StepDeclaration Of(
         string locator,
@@ -240,7 +264,8 @@ public sealed record StepDeclaration
         bool answers = false,
         string? matches = null,
         bool discloses = false,
-        string? sameAs = null)
+        string? sameAs = null,
+        string? never = null)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var subject = called ?? Describing(verb, locator);
@@ -275,8 +300,13 @@ public sealed record StepDeclaration
         // local the rules below ask, because the clause they each carried had grown to six negations
         // and a claim any of them had not heard of is a refusal naming the wrong field.
         var back = string.IsNullOrWhiteSpace(sameAs) ? null : sameAs.Trim();
+
+        // WW256, and the same again: a claim about the wait is still a claim, so a step making only
+        // this one must not be refused as a step that makes none.
+        var forbidden = string.IsNullOrWhiteSpace(never) ? null : never.Trim();
+
         var claims = wanted is not null || moves || answers || sweeping is not null || pattern is not null
-            || discloses || back is not null;
+            || discloses || back is not null || forbidden is not null;
 
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
         // says it moved where it was something else. A step asserting both would owe two assertion
@@ -434,6 +464,35 @@ public sealed record StepDeclaration
             }
         }
 
+        if (forbidden is not null)
+        {
+            // One claim per step, as everywhere else — and here for a reason of its own. What ends the
+            // wait this claim is about is the locator resolving, so a second claim beside it would be
+            // read at a moment this one chose, and a reader could not tell which of the two the step
+            // is reporting.
+            if (wanted is not null || moves || answers || sweeping is not null
+                || pattern is not null || discloses || back is not null)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims '{forbidden}' never shows and also makes another claim; what ends the "
+                        + "wait a 'never' is about is the locator arriving, so the two would be read "
+                        + "at one moment and reported as one line");
+            }
+
+            // A reading beside it narrows nothing. The claim is about the window, not about this
+            // element: the string may show anywhere, and the locator is what says when to stop
+            // looking rather than what to look at.
+            if (!string.IsNullOrWhiteSpace(reads))
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims '{forbidden}' never shows and names the '{reads.Trim()}' reading; the "
+                        + "claim is about the window while this step waited, and the locator is what "
+                        + "says when the waiting is over");
+            }
+        }
+
         // WW238. The other half of the same rule: a reading the locator already selected by is fixed
         // before the act runs, so a step reading it asserts what chose the element. Refused whatever
         // the claim is — 'expect' repeats the locator, 'answers' holds because the locator matched,
@@ -512,7 +571,8 @@ public sealed record StepDeclaration
             answers,
             pattern,
             discloses,
-            back);
+            back,
+            forbidden);
     }
 
     /// <summary>The one line a trace and a refusal both name it by.</summary>

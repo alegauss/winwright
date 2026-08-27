@@ -173,6 +173,7 @@
 - ✅ **WW252** **the routine that explains why a locator found nothing throws when the element arrives while it is explaining** — A chain that matches by the time the diagnosis walks it is a reading — a wait that was too short — rather than an index one past the end.
 - ✅ **WW251** **a case cannot claim that an act unfolded a subtree, only that one reading moved** — A step may claim the act put something under its locator that was not in the tree before it, compared against the engine's own reading rather than a count the case typed.
 - ✅ **WW255** **a case cannot claim a reading came back to what an earlier step read, only that it moved** — A step names an earlier one in `sameAs` and claims its reading is back to what that one read, judged where the case knows all its steps and never against a value the file typed.
+- ✅ **WW256** **a case cannot claim a state was never observed while it waited, only what it read at the end** — A step names a key in `never` and claims it was showing at no moment while its locator was waited for, reporting how many times it looked and holing an absence a short walk found.
 
 ## Block G — The scenario — a case is a data file
 

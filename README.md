@@ -292,12 +292,23 @@ before it — an expander, a tree view, a details pane, a search that fills a li
 case types; the engine compares the subtree against what it read a moment earlier. `sameAs` is the
 sixth and is `moves` with a memory: it names the `named` of an earlier step in the same case and
 claims this step's reading is **back to what that one read** — the round trip, for the value a case
-cannot know at either end. And `covers` is the seventh, which is one claim over many elements — see
-below.
+cannot know at either end. `never` is the seventh and is the only claim about the **wait** rather
+than about what it ended on: it names a key whose string must not be showing anywhere in the window
+at any moment while this step waits for its locator. And `covers` is the eighth, which is one claim
+over many elements — see below.
 
 `sameAs` is judged where the case knows all its steps, so a pointer at a name nobody wrote, at a
 step further down, at a name two steps share, or at a step reading something else is refused before
 the run. It has to say which reading it is about: comparing a value to a name says nothing.
+
+`never` exists because some claims cannot be read at the end. claude-tray's report comes back from a
+per-profile cache in 12ms, and is rebuilt from scratch in 961ms with a *no readings yet* line shown
+on the way — and once the waiting is over those two windows read identically. So the locator says
+when to stop looking rather than what to look at, the key is a key and never the text for the same
+reason the project's `loading` strings are, and the result says **how many times it looked**, because
+that number is the whole strength of a negative claim. A locator that never arrives fails rather than
+holding on having seen nothing, and an absence found by a walk that did not reach the whole window is
+a hole and not a pass.
 
 A step with no `expect` is an act and not a check: it moves the window into the state a later step
 reads. An act that survives being repeated is attempted again where its read-back does not arrive; one
