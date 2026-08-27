@@ -1,4 +1,4 @@
-using Winwright.Locating;
+﻿using Winwright.Locating;
 
 using Xunit;
 
@@ -18,13 +18,13 @@ public class LocatorTests
         var step = Only("#saveButton");
 
         Assert.Equal("saveButton", step.AutomationId);
-        Assert.Null(step.ControlType);
+        Assert.Empty(step.ControlTypes);
     }
 
     [Fact]
     public void A_control_type_stands_on_its_own()
     {
-        Assert.Equal("Button", Only("Button").ControlType);
+        Assert.Equal(["Button"], Only("Button").ControlTypes);
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public class LocatorTests
     {
         var step = Only("""Button#save[name="Save as..."][class=Chrome_WidgetWin_1][pattern=Invoke][index=2]""");
 
-        Assert.Equal("Button", step.ControlType);
+        Assert.Equal(["Button"], step.ControlTypes);
         Assert.Equal("save", step.AutomationId);
         Assert.Equal("Save as...", step.Name);
         Assert.Equal("Chrome_WidgetWin_1", step.ClassName);

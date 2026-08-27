@@ -33,7 +33,7 @@ public enum MatchOrder
 public sealed record LocatorStep
 {
     internal LocatorStep(
-        string? controlType,
+        IReadOnlyList<string> controlTypes,
         string? automationId,
         string? name,
         string? className,
@@ -41,7 +41,7 @@ public sealed record LocatorStep
         int? index,
         MatchOrder? order = null)
     {
-        ControlType = controlType;
+        ControlTypes = controlTypes;
         AutomationId = automationId;
         Name = name;
         ClassName = className;
@@ -50,8 +50,18 @@ public sealed record LocatorStep
         Order = order;
     }
 
-    /// <summary>The UI Automation control type, spelled as UI Automation spells it.</summary>
-    public string? ControlType { get; }
+    /// <summary>
+    /// The UI Automation control types this step matches, spelled as UI Automation spells them, and
+    /// empty where the step says nothing about the type.
+    /// <para>
+    /// WW274. Several and not one, because a rule under test governs a family of controls as often as
+    /// it governs one. claude-tray's row rule names every control with no content of its own to derive
+    /// a name from — a ComboBox, a Slider, a TextBox, and a switch — and excludes the rest by <em>what
+    /// they are</em> rather than by a list of ids. Written as one step per type, most of the steps
+    /// match nothing on any given panel and the run is a page of holes.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> ControlTypes { get; }
 
     /// <summary>The automation id — the one field an application controls and a locator should prefer.</summary>
     public string? AutomationId { get; }
@@ -80,12 +90,45 @@ public sealed record LocatorStep
     /// </summary>
     public bool Disambiguated => Index is not null || Order is not null;
 
+    /// <summary>
+    /// Two steps are equal where they constrain the same things, which the compiler's own answer
+    /// stopped being the day <see cref="ControlTypes"/> became a list: a record compares a reference
+    /// there, so two parses of one locator were unequal and the round-trip that proves the grammar
+    /// writes what it reads went red on two identical lines.
+    /// </summary>
+    /// <param name="other">The step to compare with.</param>
+    public bool Equals(LocatorStep? other) =>
+        other is not null
+        && ControlTypes.SequenceEqual(other.ControlTypes, StringComparer.Ordinal)
+        && string.Equals(AutomationId, other.AutomationId, StringComparison.Ordinal)
+        && string.Equals(Name, other.Name, StringComparison.Ordinal)
+        && string.Equals(ClassName, other.ClassName, StringComparison.Ordinal)
+        && string.Equals(Pattern, other.Pattern, StringComparison.Ordinal)
+        && Index == other.Index
+        && Order == other.Order;
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        foreach (var one in ControlTypes)
+            hash.Add(one, StringComparer.Ordinal);
+
+        hash.Add(AutomationId, StringComparer.Ordinal);
+        hash.Add(Name, StringComparer.Ordinal);
+        hash.Add(ClassName, StringComparer.Ordinal);
+        hash.Add(Pattern, StringComparer.Ordinal);
+        hash.Add(Index);
+        hash.Add(Order);
+        return hash.ToHashCode();
+    }
+
     /// <summary>The step as the grammar writes it, in a fixed order, so a parse round-trips.</summary>
     public override string ToString()
     {
         var text = new StringBuilder();
-        if (ControlType is not null)
-            text.Append(ControlType);
+        if (ControlTypes.Count > 0)
+            text.Append(string.Join("|", ControlTypes));
         if (AutomationId is not null)
             text.Append('#').Append(Quoted(AutomationId, bare: Bare(AutomationId)));
         if (Name is not null)

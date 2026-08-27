@@ -68,7 +68,7 @@ public sealed record ElementFacts(
     /// </para>
     /// </summary>
     public LocatorStep AsLocatorStep() => new(
-        UiaVocabulary.IsControlType(ControlType) ? ControlType : null,
+        UiaVocabulary.IsControlType(ControlType) ? [ControlType] : [],
         string.IsNullOrEmpty(AutomationId) ? null : AutomationId,
         string.IsNullOrEmpty(Name) ? null : Name,
         string.IsNullOrEmpty(ClassName) ? null : ClassName,

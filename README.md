@@ -125,6 +125,7 @@ Button#saveButton                        both
 Button[name="Save as..."]                the name
 Pane[class=Chrome_WidgetWin_1]           the window class
 Button[pattern=Invoke]                   it must carry that pattern
+ComboBox|Slider|Edit                     any one of several control types
 Text[name="Statistics"][order=left]      the leftmost of the ones that match
 MenuItem[order=top][index=2]             the second from the top
 Text[name="{settings.nav.about}"]        what the project's strings call it
@@ -144,6 +145,14 @@ Both are refused at declaration where the locator will not parse with something 
 that declares nothing is refused before the first act, naming the key and the file. What the trace
 records is the substituted locator: the words the run actually looked for are what a red is about,
 and the key is one line away in the case file.
+
+`|` at the type position means **any one of these**, and it is there because a rule under test governs
+a family of controls as often as it governs one. claude-tray's settings rows name every control with
+no content of its own to derive a name from — a ComboBox, a Slider, a TextBox — and exclude the rest
+by *what they are* rather than by a list of ids. Written as one step per type, most steps match
+nothing on any given panel, each of those is a hole, and the run is a page of holes. The predicates
+after a union apply to the whole of it, and a type named twice is refused: that is a step written
+twice, not a wider set.
 
 `>` means **a descendant of**, not a direct child. That is a decision, not a shorthand: UI Automation
 wraps controls in panes that differ between frameworks, between versions of one framework, and

@@ -184,6 +184,7 @@
 - ✅ **WW264** **a control wearing its neighbour's label reads as named, and nothing can tell the two apart** — A step claims `ownHeader`: of the rows its locator matches, no control inside one announces a different row's header, with the headers derived from the page.
 - ✅ **WW272** **a sweep that matched nothing is a red, and a page with no rows is a fact about the application** — `eachSpoken` and `ownHeader` count a locator matching nothing as a hole naming it, so a page allowed to have no rows degrades rather than reds — unless the locator was built out of a declared string.
 - ✅ **WW273** **a locator can only name an element by a string typed into the case** — A locator carries `{a.key}` and the run reads it out of the project's strings in the fixture's language, refusing an undeclared key before the first act — the same hole `{}` already was.
+- ✅ **WW274** **a locator step names one control type, so a rule governing a family of controls cannot be swept** — A step names several control types with `|` between them, matched as one search, so a rule governing a family of controls is one sweep rather than one mostly-empty sweep per type.
 
 ## Block G — The scenario — a case is a data file
 

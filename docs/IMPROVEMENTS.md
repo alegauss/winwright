@@ -159,31 +159,6 @@ which assumes nothing about the text and costs a reading the adopter has to prov
 What it must not become is a general tolerance on `sameAs`. A percentage is the same
 number or it is not.
 
-### §WW274 a locator step names one control type, so a rule governing a family of controls cannot be swept
-
-`eachSpoken` sweeps every element a locator matches, and a locator step names one
-control type. Where the rule under test governs a *family* of controls, there is no
-locator for it.
-
-Measured migrating `WW84`. claude-tray's `SettingsRow` names the controls that have no
-content of their own to derive a name from — a `ComboBox`, a `Slider`, a `TextBox`, and
-a switch, which reaches UIA as a `Button` carrying `TogglePattern`. The script said
-exactly that, in a filter over four control types, and noted that the exclusion is by
-*what a thing is* rather than by a list of ids: a Slider's `DecreaseLarge` and a
-ScrollBar's `PageUp` are plain unnamed Buttons and the rule must leave them alone.
-
-Written as four steps, each panel gets four sweeps and most match nothing, so `WW272`
-makes most of them holes and the run is permanently degraded — a report nobody reads.
-Written as one step it cannot be written at all.
-
-`ownHeader` covers the half about the *wrong* name and `label` covers the controls
-somebody already knew about. What is lost is the sweep that finds an **unnamed**
-contentless control on a panel nobody thought to name — which is the defect `T175`
-actually found, twice, on two controls nobody had thought to name.
-
-What is owed is a step that names several control types, refused where they are not
-types the way an unknown one already is.
-
 ### §WW275 covers is two-way and reads as one-way
 
 `covers` holds where nothing is missing **and** nothing is unexpected. That is

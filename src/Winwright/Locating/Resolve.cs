@@ -246,9 +246,20 @@ public static class Resolve
     private static Condition ConditionFor(LocatorStep step)
     {
         var conditions = new List<Condition>();
-        if (step.ControlType is not null)
-            conditions.Add(new PropertyCondition(
-                AutomationElement.ControlTypeProperty, UiaVocabulary.ControlTypeFor(step.ControlType)));
+
+        // WW274. An Or where the step names several types, which is the whole of what a union costs
+        // here: UI Automation takes the tree walk either way, so a family of controls is one search
+        // rather than one search per type with the answers stitched together afterwards.
+        var types = step.ControlTypes
+            .Select(one => (Condition)new PropertyCondition(
+                AutomationElement.ControlTypeProperty, UiaVocabulary.ControlTypeFor(one)))
+            .ToList();
+
+        if (types.Count == 1)
+            conditions.Add(types[0]);
+        else if (types.Count > 1)
+            conditions.Add(new OrCondition([.. types]));
+
         if (step.AutomationId is not null)
             conditions.Add(new PropertyCondition(AutomationElement.AutomationIdProperty, step.AutomationId));
         if (step.Name is not null)

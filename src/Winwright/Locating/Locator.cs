@@ -18,6 +18,7 @@ namespace Winwright.Locating;
 /// Button[name="Save as..."]                     the name
 /// Pane[class=Chrome_WidgetWin_1]                the window class
 /// Button[pattern=Invoke]                        it must carry that pattern
+/// ComboBox|Slider|Edit                          any one of several control types
 /// Text[name="Statistics"][order=left]           the leftmost of the ones that match
 /// MenuItem[order=top][index=2]                   the second from the top
 /// Text[name="{settings.nav.about}"]             what the project's strings call it
@@ -104,7 +105,7 @@ public sealed record Locator
         SkipSpace(text, ref at);
         var began = at;
 
-        string? controlType = null;
+        var controlTypes = new List<string>();
         string? automationId = null;
         string? name = null;
         string? className = null;
@@ -114,16 +115,18 @@ public sealed record Locator
 
         if (at < text.Length && (char.IsLetter(text[at]) || text[at] == '_'))
         {
-            var word = Word(text, ref at);
-            if (!UiaVocabulary.IsControlType(word))
-                throw new LocatorSyntaxException(
-                    LocatorFault.UnknownControlType,
-                    text,
-                    at - word.Length,
-                    $"'{word}' is no UI Automation control type; nearest are "
-                    + string.Join(", ", UiaVocabulary.Nearest(word, UiaVocabulary.ControlTypes)));
+            // WW274. One type, or several with '|' between them. A rule under test governs a family
+            // of controls as often as it governs one — claude-tray's row rule names every ComboBox,
+            // Slider, TextBox and switch on a panel — and written as one step per type, most of them
+            // match nothing and the run is a page of holes.
+            while (true)
+            {
+                controlTypes.Add(ControlType(text, ref at, controlTypes));
+                if (at >= text.Length || text[at] != '|')
+                    break;
 
-            controlType = word;
+                at++;
+            }
         }
 
         if (at < text.Length && text[at] == '#')
@@ -203,14 +206,50 @@ public sealed record Locator
             }
         }
 
-        if (controlType is null && automationId is null && name is null && className is null
+        if (controlTypes.Count == 0 && automationId is null && name is null && className is null
             && pattern is null && index is null && order is null)
         {
             throw new LocatorSyntaxException(
                 LocatorFault.StepConstrainsNothing, text, began, "a step that constrains nothing addresses everything, so it is refused");
         }
 
-        return new LocatorStep(controlType, automationId, name, className, pattern, index, order);
+        return new LocatorStep(controlTypes, automationId, name, className, pattern, index, order);
+    }
+
+    /// <summary>
+    /// One control type of a step, refused where it is no type or where the step already names it.
+    /// </summary>
+    /// <param name="text">The whole locator, for a refusal that can point into it.</param>
+    /// <param name="at">Where reading is, moved past the word.</param>
+    /// <param name="already">The types this step has read so far.</param>
+    /// <exception cref="LocatorSyntaxException">Where the word is no control type, or is a repeat.</exception>
+    private static string ControlType(string text, ref int at, List<string> already)
+    {
+        SkipSpace(text, ref at);
+        var word = Word(text, ref at);
+
+        // A bar with nothing after it. Said here rather than left to the vocabulary, which is asked
+        // for the nearest spelling to a word and has nothing to answer about no word at all.
+        if (word.Length == 0)
+            throw new LocatorSyntaxException(
+                LocatorFault.UnknownControlType, text, at, "'|' separates control types and there is none after this one");
+
+        if (!UiaVocabulary.IsControlType(word))
+            throw new LocatorSyntaxException(
+                LocatorFault.UnknownControlType,
+                text,
+                at - word.Length,
+                $"'{word}' is no UI Automation control type; nearest are "
+                + string.Join(", ", UiaVocabulary.Nearest(word, UiaVocabulary.ControlTypes)));
+
+        // A repeat is not a wider set, it is a step written twice — and the reader of one is looking
+        // for the difference between the two halves that is not there.
+        if (already.Contains(word, StringComparer.Ordinal))
+            throw new LocatorSyntaxException(
+                LocatorFault.KeyClaimedTwice, text, at - word.Length, $"'{word}' is named twice in one step");
+
+        SkipSpace(text, ref at);
+        return word;
     }
 
     private static void Once(string text, int at, string? already, string key)
