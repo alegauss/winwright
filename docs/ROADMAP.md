@@ -11,6 +11,8 @@
 
 ## Block D — Act — patterns before pointers
 
+- 📋 **WW288** (deps: —) **a search whose flyout shut mid-look gives up, so the icon case is a hole on the runs the shell decides** — `Find` polls `Hidden()` and stops where the overflow closed, with deadline left that could have reopened it, so what the case covers turns on the shell's timing. → §WW288
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
@@ -42,8 +44,6 @@
 - ⏳ **WW230** (deps: —) **the only place the engine's package exists is a folder inside this repository** — Nothing is published yet, so the adopter's `nuget.config` is still a path across two clones. → §WW230
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-- ⏳ **WW223** (deps: —) **adding a tray icon and finding it does not hold every time** — Whether that was the cause is unknown until it recurs, and the next occurrence names itself instead of costing a second investigation. → §WW223
 
 ## Done when — Block A
 

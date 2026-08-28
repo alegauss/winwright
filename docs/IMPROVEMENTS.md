@@ -55,6 +55,31 @@ a seam opened for it, which is the difference between a case and a rehearsal.
 
 ## Block D — Act — patterns before pointers
 
+### §WW288 The flyout that shuts, and whether a search should open it again
+
+WW223 built the distinction and then waited for the occurrence to say which of its two
+arms it was. The occurrence arrived on a guest run of 1735:
+`TrayPlacementTests.Adding_one_and_finding_it_holds_every_time_rather_than_most_times`
+was excused — *the overflow shut while this search was looking in it, so the flyout was
+not read to the end*. So it is the flyout, not an absent icon, and the two earlier runs
+of the same tree passed the same case. Do not go looking for a placement bug.
+
+What that leaves is coverage. The case now reports a hole instead of a red, which is
+right and is not the same as answering: on the runs the shell shuts the flyout, nothing
+checks that an added icon can be found, and nothing outside the excuse ledger says how
+often that is.
+
+The shape is open. `Find` has deadline left when it gives up — it opened the overflow,
+polled `Hidden()`, and read the desk once after the poll — so reopening and carrying on
+inside the same budget is available and would turn most of these holes into answers.
+
+Against it: whatever shut the flyout is unexplained, and if an application can close it
+then reopening is the search papering over a fact about the application. That is the
+same mistake WW168 was filed against, pointed the other way.
+
+Measure first, then decide. What shuts it is the question, and the excuse ledger across
+runs is where the rate is.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
@@ -324,27 +349,3 @@ the list being believed.
 What is left is the deletion the criterion measures.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW223 The repetition caught what a single green hides
-
-`TrayPlacementTests.Adding_one_and_finding_it_holds_every_time_rather_than_most_times`
-repeats five rounds precisely because a single green is what the old fixture produced
-about half the time. On the guest run of WW67 it failed on round 1 — "it is on neither
-the taskbar nor the overflow" — and passed on an immediate re-run of the same tree. So
-the claim in the case's own name is false, and the evidence is the case doing exactly
-what it was written to do.
-
-**Ruled out.** This was first filed suspecting `TrayIconFixture.Add` of returning before
-the shell had placed the icon, round 0 having just shut the flyout. WW220 had already
-closed that: `Find` polls `Hidden()` for the name rather than reading once, and its
-comment describes this exact sequence. Do not go back there.
-
-What landed instead is the distinction the sentence was missing. "On neither" covered
-two different things — an icon that is absent, and a flyout that shut while the poll was
-running, after which `Hidden()` answers empty for the rest of the deadline and the
-absence is assembled out of a desk that stopped being lookable. The second is now a hole
-under the search's own condition, which is the shape WW168, WW174 and WW179 each caught
-once. A genuine absence now carries how many icons the bar and the flyout held.
-
-What is left waits on the next occurrence rather than on any work: it will say which of
-the two it was.
