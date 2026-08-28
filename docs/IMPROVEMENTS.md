@@ -119,6 +119,31 @@ insertion and `WM_CHAR`, which is the queue.
 `VK_PACKET` before `TranslateMessage` is measured out. Every lParam is `00000001`, the
 scan code having eight bits where a code unit needs sixteen. The count is all it claims.
 
+### §WW302 An experiment rather than a tenth observation
+
+Ten reds have narrowed WW249 to one boundary and stopped there. WPF, the control and the
+message pump are out — `Arrivals` shows the characters reaching the window already
+substituted. The send is out by reading: `Keyboard.Send` builds one input pair per
+UTF-16 code unit into a single array, and `SendInput` queues them before returning, so
+nothing afterwards can reach a message. What is left is between insertion and `WM_CHAR`.
+
+The eleventh red will say the same. `WpfInputTests` types five rounds and stops at the
+first substitution, so a run yields at most one measurement and only about one run in
+four yields any — ten afternoons for ten data points, all of the same kind.
+
+What divides the boundary is a comparison, not another sighting. `Press` sends the whole
+array in one `SendInput`; the same text as one call per code unit is the other side of
+it. If the substitution follows the batch, the array is implicated despite the reasoning
+ruling it out, and the reasoning is what is wrong. If it follows both, the queue theory
+survives having been tested rather than assumed.
+
+Counted rather than asserted, and in one run rather than across many: some hundreds of
+rounds each way, reporting the rate and the positions, with no red at all. A measurement
+that fails is one nobody repeats.
+
+It belongs beside the suite and not in it — a run that types for minutes is not a check
+every guest run should pay for.
+
 ## Block G — The scenario — a case is a data file
 
 ### §WW296 Six fields for two ideas

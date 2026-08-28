@@ -18,6 +18,7 @@
 
 - ⏳ **WW248** (deps: WW300 ✅) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — WW300 reads which excuses recur, so what is left is making a structural one red; both obvious rules misfire on cases that take the desk on purpose. → §WW248
 - ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Ten reds, and the substituted character is always the last one sent — one or more of them, at no fixed position, with the array ruled out. → §WW249
+- 📋 **WW302** (deps: WW249) **WW249 gains a red every fourth run and no experiment, so each one observes what nine already did** — The theory stalls between SendInput and WM_CHAR; one send per code unit against one batch, counted over many rounds in one run, would divide it. → §WW302
 
 ## Block G — The scenario — a case is a data file
 
