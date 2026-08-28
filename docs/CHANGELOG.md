@@ -206,6 +206,7 @@
 - ✅ **WW269** **a caption counting down in real time cannot survive an exact comparison across a round trip** — `sameCountdownAs` compares the numbers and ignores the words, allowing the last to have ticked down by one, so a caption that counts is not a red build about a clock.
 - ✅ **WW294** **an expectation whose value the application reports can only be a set, and the submenu's marks are single values** — claude-tray answers `--menu-state` as one line by the same calls its report makes, so the profile a check mark should be on is a value and no longer a regex over prose.
 - ✅ **WW295** **a locator can be built out of a declared string but never out of a value the application reports** — A locator brace spelled `{report:name}` is answered by asking the application, once per run, so a case can select the element only the machine's own state can name.
+- ✅ **WW300** **which excuses recur across runs is unreadable, so this suite's own structure and a busy desk read alike** — The four earlier ledgers are intersected by case: a guest run of 1816 said 8 excused, and none of them is new — one clause, because all eight recurring made a per-line mark useless.
 
 ## Block G — The scenario — a case is a data file
 

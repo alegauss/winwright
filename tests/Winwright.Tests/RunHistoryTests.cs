@@ -5,14 +5,25 @@ using Xunit;
 namespace Winwright.Tests;
 
 /// <summary>
-/// WW289. A guest run of 1747 passed having excused 49 checks where every run before it excused 8: a
-/// Windows notification toast held the foreground, so forty-three input cases could send nothing and
-/// each answered the hole it is built to answer.
+/// What the runs before this one said, and the three readings that take from it.
 /// <para>
-/// Everything worked. WW133 makes a refused foreground a hole, WW281 puts every excuse in one ledger,
-/// and all forty-nine were printed. What was missing is comparison — the number that matters is not
-/// 49 but 49-against-8, and a reader told only the first has no way to know whether the run they are
-/// holding is the ordinary one.
+/// WW289 is where it starts. A guest run of 1747 passed having excused 49 checks where every run
+/// before it excused 8: a Windows notification toast held the foreground, so forty-three input cases
+/// could send nothing and each answered the hole it is built to answer. Everything worked — WW133
+/// makes a refused foreground a hole, WW281 puts every excuse in one ledger, and all forty-nine were
+/// printed. What was missing is comparison: the number that matters is not 49 but 49-against-8, and
+/// a reader told only the first cannot know whether the run they are holding is the ordinary one.
+/// </para>
+/// <para>
+/// WW298 made that a series rather than one difference, so a desk busy for two runs cannot become
+/// its own baseline. WW299 reads the same history for what each run discovered, because a suite that
+/// quietly stopped loading a class is whole by its own arithmetic. WW248 reads it for which excuses
+/// recur, which is the difference between this suite's own structure and a desk somebody else was
+/// using.
+/// </para>
+/// <para>
+/// One rule throughout: absent is <em>unknown</em> and never <em>none</em>. A first run reported as
+/// zero would read as an improvement on nothing.
 /// </para>
 /// </summary>
 public sealed class RunHistoryTests : IDisposable
@@ -20,6 +31,13 @@ public sealed class RunHistoryTests : IDisposable
     private readonly string root = Directory.CreateTempSubdirectory("winwright-before-").FullName;
 
     public void Dispose() => Directory.Delete(root, recursive: true);
+
+    /// <summary>
+    /// One excused row in the shape the suite writes it: fact, case, absence, kind, tab-separated.
+    /// </summary>
+    /// <param name="named">The case the row is about, which is what recurrence is counted by.</param>
+    private static string Row(string named) =>
+        $"the foreground belongs to the window under test	Winwright.Tests.{named}	something held it	Desk";
 
     /// <summary>One run's results directory, carrying a ledger of that many excuses.</summary>
     /// <param name="named">What the run is called, which is never what orders it.</param>
@@ -30,7 +48,7 @@ public sealed class RunHistoryTests : IDisposable
         var directory = Directory.CreateDirectory(Path.Combine(root, named)).FullName;
         var ledger = Path.Combine(directory, Readers.Excused);
 
-        File.WriteAllLines(ledger, Enumerable.Range(0, excuses).Select(one => $"desk|a fact|{one}"));
+        File.WriteAllLines(ledger, Enumerable.Range(0, excuses).Select(one => Row($"Case{one}")));
         File.SetLastWriteTimeUtc(ledger, written);
 
         if (discovered is not { } many)
@@ -99,7 +117,7 @@ public sealed class RunHistoryTests : IDisposable
             ["Winwright.Tests.A.One"],
             [new Recorded("Winwright.Tests.A.One", "Passed", true)],
             ["desk|the foreground belongs to the window under test|x"],
-            recent: [8]);
+            new Earlier([8], [], []));
 
         var said = roll.Sentence();
 
@@ -113,7 +131,7 @@ public sealed class RunHistoryTests : IDisposable
             ["Winwright.Tests.A.One"],
             [new Recorded("Winwright.Tests.A.One", "Passed", true)],
             ["desk|the foreground belongs to the window under test|x"],
-            recent: []);
+            new Earlier([], [], []));
 
         Assert.Contains("no earlier run", roll.Sentence(), StringComparison.Ordinal);
     }
@@ -127,7 +145,7 @@ public sealed class RunHistoryTests : IDisposable
             ["Winwright.Tests.A.One"],
             [new Recorded("Winwright.Tests.A.One", "Passed", true)],
             ["desk|the foreground belongs to the window under test|x"],
-            recent: [8, 43, 8, 8]);
+            new Earlier([8, 43, 8, 8], [], []));
 
         Assert.Contains("where the 4 runs before it excused 8, 43, 8 and 8", roll.Sentence(), StringComparison.Ordinal);
     }
@@ -141,12 +159,98 @@ public sealed class RunHistoryTests : IDisposable
             ["Winwright.Tests.A.One"],
             [new Recorded("Winwright.Tests.A.One", "Passed", true)],
             ["desk|the foreground belongs to the window under test|x"],
-            recent: [8, 8, 43]);
+            new Earlier([8, 8, 43], [], []));
 
         var said = roll.Sentence();
 
         Assert.Contains("8, 8 and 43", said, StringComparison.Ordinal);
         Assert.DoesNotContain("the run before ", said, StringComparison.Ordinal);
+    }
+
+    /// <summary>One run whose ledger names exactly these cases.</summary>
+    /// <param name="named">What the run is called.</param>
+    /// <param name="cases">The cases it excused.</param>
+    /// <param name="written">When it ran, which is what orders it.</param>
+    private string Excusing(string named, IEnumerable<string> cases, DateTime written)
+    {
+        var directory = Directory.CreateDirectory(Path.Combine(root, named)).FullName;
+        var ledger = Path.Combine(directory, Readers.Excused);
+
+        File.WriteAllLines(ledger, cases.Select(Row));
+        File.SetLastWriteTimeUtc(ledger, written);
+
+        return directory;
+    }
+
+    [Fact]
+    public void An_excuse_every_earlier_run_made_is_told_from_one_that_happened_once()
+    {
+        // WW248's whole difference. NudgeTests holds a dialog that takes the foreground from the
+        // fixture launched beside it, so it is excused every run; a desk somebody else was using is
+        // not. Both are honest excuses and only one is the suite's own structure.
+        Excusing("first", ["NudgeTests.A_nudge", "PointerTests.A_click"], new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        Excusing("second", ["NudgeTests.A_nudge"], new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+        Excusing("third", ["NudgeTests.A_nudge"], new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc));
+        var mine = Excusing("this-run", ["NudgeTests.A_nudge"], DateTime.UtcNow);
+
+        Assert.Equal(["Winwright.Tests.NudgeTests.A_nudge"], Readers.ExcusedEveryTime(root, mine));
+    }
+
+    [Fact]
+    public void One_earlier_run_is_not_a_pattern_and_agrees_with_itself()
+    {
+        // A single run agreeing with itself would make the first coincidence structural, which is the
+        // conclusion this reading exists to refuse.
+        Excusing("only", ["NudgeTests.A_nudge"], new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        var mine = Excusing("this-run", ["NudgeTests.A_nudge"], DateTime.UtcNow);
+
+        Assert.Empty(Readers.ExcusedEveryTime(root, mine));
+    }
+
+    [Fact]
+    public void A_recurring_excuse_is_marked_with_what_was_read_and_never_with_the_word_structural()
+    {
+        var roll = Roll.Of(
+            ["Winwright.Tests.NudgeTests.A_nudge"],
+            [new Recorded("Winwright.Tests.NudgeTests.A_nudge", "Passed", true)],
+            [Row("NudgeTests.A_nudge"), Row("PointerTests.A_click")],
+            new Earlier([2, 2, 2, 2], [], ["Winwright.Tests.NudgeTests.A_nudge"]));
+
+        var said = roll.ToString();
+
+        Assert.Contains("NudgeTests.A_nudge: the foreground belongs", said, StringComparison.Ordinal);
+        Assert.Contains("(in all 4 runs before it)", said, StringComparison.Ordinal);
+        Assert.DoesNotContain("structural", said, StringComparison.OrdinalIgnoreCase);
+
+        // Per line because the two excuses differ. Where they do not, the same fact is one clause in
+        // the sentence instead — see below.
+        Assert.DoesNotContain("none of them is new", said, StringComparison.Ordinal);
+
+        // The one that happened once carries no mark, because a mark on every line marks nothing.
+        var once = said.Split('\n').Single(one => one.Contains("PointerTests.A_click", StringComparison.Ordinal));
+        Assert.DoesNotContain("runs before it", once, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Where_every_excuse_recurs_it_is_said_once_and_not_on_every_line()
+    {
+        // Measured on a guest run of 1815: all eight excuses recurred and all eight carried the mark,
+        // because this suite's steady state is that every excuse it makes is its own structure — the
+        // cases that make them open a decoy or declare a budget on purpose. A mark on every line
+        // marks nothing, so the whole story is told once.
+        var roll = Roll.Of(
+            ["Winwright.Tests.NudgeTests.A_nudge"],
+            [new Recorded("Winwright.Tests.NudgeTests.A_nudge", "Passed", true)],
+            [Row("NudgeTests.A_nudge"), Row("PointerTests.A_click")],
+            new Earlier(
+                [2, 2, 2, 2],
+                [],
+                ["Winwright.Tests.NudgeTests.A_nudge", "Winwright.Tests.PointerTests.A_click"]));
+
+        var said = roll.ToString();
+
+        Assert.Contains("excused 2, 2, 2 and 2, and none of them is new", said, StringComparison.Ordinal);
+        Assert.DoesNotContain("(in all 4 runs before it)", said, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -180,8 +284,7 @@ public sealed class RunHistoryTests : IDisposable
             Enumerable.Range(0, 1204).Select(one => $"Winwright.Tests.A.Case{one}"),
             Enumerable.Range(0, 1204).Select(one => new Recorded($"Winwright.Tests.A.Case{one}", "Passed", true)),
             excused: null,
-            recent: [8, 8, 8, 8],
-            discovering: [1807, 1807, 1805, 1807]);
+            new Earlier([8, 8, 8, 8], [1807, 1807, 1805, 1807], []));
 
         Assert.Contains(
             "all 1204 discovered cases ran, where the 4 runs before it discovered 1807, 1807, 1805 and 1807",
@@ -198,8 +301,7 @@ public sealed class RunHistoryTests : IDisposable
             ["Winwright.Tests.A.One"],
             [new Recorded("Winwright.Tests.A.One", "Passed", true)],
             excused: null,
-            recent: [8],
-            discovering: [4, 1]);
+            new Earlier([8], [4, 1], []));
 
         Assert.DoesNotContain("discovered 4", roll.Sentence(), StringComparison.Ordinal);
     }
@@ -215,8 +317,7 @@ public sealed class RunHistoryTests : IDisposable
                 new Recorded("Winwright.Tests.A.Two", "Passed", true),
             ],
             excused: null,
-            recent: [8],
-            discovering: [1]);
+            new Earlier([8], [1], []));
 
         Assert.Contains("where the run before discovered 1", roll.Sentence(), StringComparison.Ordinal);
     }

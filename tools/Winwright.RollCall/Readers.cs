@@ -127,6 +127,69 @@ public static class Readers
     private static IReadOnlyList<int> Series(
         string root, string thisRun, int most, string named, Func<string, int?> count)
     {
+        var earlier = Kept(root, thisRun, most, named)
+            .Select(count)
+            .Where(one => one is not null)
+            .Select(one => one!.Value)
+            .ToList();
+
+        return new ReadOnlyCollection<int>(earlier);
+    }
+
+    /// <summary>
+    /// The cases every one of the last few runs excused, which is what recurs rather than what
+    /// happened once.
+    /// <para>
+    /// WW248. An excuse that arrives every time is structural — a dialog this process shows takes the
+    /// foreground from a fixture launched beside it — and one that arrives once is a desk somebody
+    /// else was using. One run cannot tell them apart, and the ledgers of four can.
+    /// </para>
+    /// <para>
+    /// Empty where fewer than two earlier runs were found. One run agreeing with itself is not a
+    /// pattern, and reporting it as one would call the first coincidence structural.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The results root every run writes a directory under.</param>
+    /// <param name="thisRun">This run's own directory, which is not its own predecessor.</param>
+    /// <param name="most">How many of the most recent to read; the default is what the tool uses.</param>
+    public static IReadOnlyList<string> ExcusedEveryTime(string root, string thisRun, int most = Recent)
+    {
+        var ledgers = Kept(root, thisRun, most, Excused);
+        if (ledgers.Count < 2)
+            return [];
+
+        var everywhere = ledgers
+            .Select(one => ExcusedIn(one)?
+                .Select(row => Excuse(row).Case)
+                .Where(named => named is not null)
+                .Select(named => named!)
+                .ToHashSet(StringComparer.Ordinal))
+            .Where(one => one is not null)
+            .Select(one => one!)
+            .ToList();
+
+        if (everywhere.Count < 2)
+            return [];
+
+        // Intersected and not counted: "in all four" is the claim, so a run missing it ends the
+        // matter. A threshold like "three of four" is a number somebody tunes the day it refuses.
+        var always = everywhere.Aggregate(
+            new HashSet<string>(everywhere[0], StringComparer.Ordinal),
+            (standing, one) =>
+            {
+                standing.IntersectWith(one);
+                return standing;
+            });
+
+        return new ReadOnlyCollection<string>(always.OrderBy(one => one, StringComparer.Ordinal).ToList());
+    }
+
+    /// <summary>
+    /// The file each of the last few runs kept under the root, oldest last read first — the part both
+    /// series and the recurrence reading ask identically, so they cannot drift apart on it.
+    /// </summary>
+    private static IReadOnlyList<string> Kept(string root, string thisRun, int most, string named)
+    {
         ArgumentException.ThrowIfNullOrWhiteSpace(root);
         ArgumentException.ThrowIfNullOrWhiteSpace(thisRun);
 
@@ -140,21 +203,16 @@ public static class Readers
         try
         {
             // Newest first to take from, then reversed: the caller reads them as time runs, and
-            // taking the most recent is what the ordering is for. A file that will not open is
-            // dropped rather than counted as zero, which is the rule the ledger itself is under.
-            var earlier = Directory.GetDirectories(root)
+            // taking the most recent is what the ordering is for. A file that is not there is a run
+            // that kept none, and is dropped rather than read as zero.
+            return Directory.GetDirectories(root)
                 .Where(one => !string.Equals(Path.GetFullPath(one), mine, StringComparison.OrdinalIgnoreCase))
                 .Select(one => Path.Combine(one, named))
                 .Where(File.Exists)
                 .OrderByDescending(File.GetLastWriteTimeUtc)
                 .Take(most)
-                .Select(count)
-                .Where(one => one is not null)
-                .Select(one => one!.Value)
                 .Reverse()
                 .ToList();
-
-            return new ReadOnlyCollection<int>(earlier);
         }
         catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
         {

@@ -113,8 +113,7 @@ public static class Program
                     Readers.DiscoveredIn(listing),
                     Readers.RecordedIn(results),
                     Readers.ExcusedIn(excused),
-                    Readers.ExcusedRecently(against, Path.GetDirectoryName(Path.GetFullPath(results)) ?? against),
-                    Readers.DiscoveredRecently(against, Path.GetDirectoryName(Path.GetFullPath(results)) ?? against)),
+                    Read(against, Path.GetDirectoryName(Path.GetFullPath(results)) ?? against)),
             };
         }
         catch (Exception unreadable) when (unreadable is IOException or InvalidDataException or UnauthorizedAccessException)
@@ -132,4 +131,20 @@ public static class Program
 
         return roll.Whole ? 0 : Short;
     }
+
+    /// <summary>
+    /// Everything the runs before this one left under the root, read in one place.
+    /// <para>
+    /// Three readings and one walk of the same directories, so a run cannot be counted as earlier by
+    /// one of them and not by another — which is the only way the three numbers could describe
+    /// different sets of runs while reading as though they described one.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The results root every run writes a directory under.</param>
+    /// <param name="thisRun">This run's own directory, which is not its own predecessor.</param>
+    private static Earlier Read(string root, string thisRun) =>
+        new(
+            Readers.ExcusedRecently(root, thisRun),
+            Readers.DiscoveredRecently(root, thisRun),
+            Readers.ExcusedEveryTime(root, thisRun));
 }

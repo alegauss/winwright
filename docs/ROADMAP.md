@@ -16,7 +16,7 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
+- ⏳ **WW248** (deps: WW300 ✅) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — WW300 reads which excuses recur, so what is left is making a structural one red; both obvious rules misfire on cases that take the desk on purpose. → §WW248
 - ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Ten reds, and the substituted character is always the last one sent — one or more of them, at no fixed position, with the array ruled out. → §WW249
 
 ## Block G — The scenario — a case is a data file

@@ -80,8 +80,7 @@ public sealed record Roll
         string? lastAnswered,
         IReadOnlyList<string>? excused,
         bool asked,
-        IReadOnlyList<int> recent,
-        IReadOnlyList<int> discovering,
+        Earlier earlier,
         bool comparing)
     {
         Discovered = discovered;
@@ -92,8 +91,7 @@ public sealed record Roll
         LastAnswered = lastAnswered;
         Excused = excused;
         Asked = asked;
-        Recent = recent;
-        Found = discovering;
+        Earlier = earlier;
         Comparing = comparing;
     }
 
@@ -109,33 +107,15 @@ public sealed record Roll
     public bool Comparing { get; }
 
     /// <summary>
-    /// What the runs before this one excused, oldest first, empty where there was no earlier run.
+    /// What the runs before this one said, and empty throughout where there was no earlier run.
     /// <para>
     /// WW289. Measured: a guest run passed having excused 49 checks where every run before it excused
     /// 8, because a notification toast held the foreground. Every one of the 49 was printed and the
     /// run still read exactly like one that checked them all — the count was honest and nothing
-    /// compared it with anything.
-    /// </para>
-    /// <para>
-    /// WW298. Several and not one, because one predecessor is a difference and not a baseline. A
-    /// notification toast is not a thing that appears for a single run and leaves: where the desk
-    /// stays busy for two, the second reads 43 against 43 and says nothing changed, so the anomaly
-    /// becomes its own baseline exactly when it is worst. Several counts said as they are need no
-    /// threshold to tune and promote no run to normal by repeating.
+    /// compared it with anything. Everything here is that same shape, for a different number.
     /// </para>
     /// </summary>
-    public IReadOnlyList<int> Recent { get; }
-
-    /// <summary>
-    /// What the runs before this one discovered, oldest first, empty where there was no earlier run.
-    /// <para>
-    /// WW299. Discovery is the one number the roll never checked against anything but itself: it is
-    /// weighed against what the run recorded, and both fall together where a class stops loading or
-    /// a `[Fact]` goes with the method it annotated. A run that found 1,204 of 1,807 then says all
-    /// 1,204 discovered cases ran, in the words a whole run uses.
-    /// </para>
-    /// </summary>
-    public IReadOnlyList<int> Found { get; }
+    public Earlier Earlier { get; }
 
     /// <summary>
     /// Whether anybody asked what the run excused. Three states and not two: a caller that never
@@ -216,7 +196,7 @@ public sealed record Roll
     /// but a green covering 1,551 of 1,563 checks has to say so.
     /// </remarks>
     public static Roll Of(IEnumerable<string> discovered, IEnumerable<Recorded> recorded) =>
-        Taken(discovered, recorded, null, asked: false, recent: [], discovering: [], comparing: false);
+        Taken(discovered, recorded, null, asked: false, Earlier.Nothing, comparing: false);
 
     /// <inheritdoc cref="Of(IEnumerable{string}, IEnumerable{Recorded})" />
     /// <param name="discovered">The cases discovery reported.</param>
@@ -227,42 +207,35 @@ public sealed record Roll
     /// </param>
     public static Roll Of(
         IEnumerable<string> discovered, IEnumerable<Recorded> recorded, IEnumerable<string>? excused) =>
-        Taken(discovered, recorded, excused, asked: true, recent: [], discovering: [], comparing: false);
+        Taken(discovered, recorded, excused, asked: true, Earlier.Nothing, comparing: false);
 
     /// <inheritdoc cref="Of(IEnumerable{string}, IEnumerable{Recorded})" />
     /// <param name="discovered">The cases discovery reported.</param>
     /// <param name="recorded">The cases the run wrote down.</param>
     /// <param name="excused">What the run excused, or null where the ledger was not there.</param>
-    /// <param name="recent">
-    /// What the runs before this one excused, oldest first, empty where there was no earlier run.
-    /// WW289: calling this overload is the asking, so empty here is <em>there was none</em> and never
-    /// zero. WW298: several rather than one, so a desk that stays busy cannot become its own baseline.
-    /// </param>
-    /// <param name="discovering">
-    /// What the runs before this one discovered, oldest first. WW299: said only where this run found
-    /// a different number, so a suite that quietly stopped loading a class cannot read as whole.
+    /// <param name="earlier">
+    /// What the runs before this one said. Calling this overload is the asking, so an empty field in
+    /// it is <em>there was none</em> and never zero — a first run read as an improvement on nothing
+    /// is the one reading this must not produce.
     /// </param>
     public static Roll Of(
         IEnumerable<string> discovered,
         IEnumerable<Recorded> recorded,
         IEnumerable<string>? excused,
-        IEnumerable<int> recent,
-        IEnumerable<int>? discovering = null) =>
-        Taken(discovered, recorded, excused, asked: true, recent, discovering ?? [], comparing: true);
+        Earlier earlier) =>
+        Taken(discovered, recorded, excused, asked: true, earlier, comparing: true);
 
     private static Roll Taken(
         IEnumerable<string> discovered,
         IEnumerable<Recorded> recorded,
         IEnumerable<string>? excused,
         bool asked,
-        IEnumerable<int> recent,
-        IEnumerable<int> discovering,
+        Earlier earlier,
         bool comparing)
     {
         ArgumentNullException.ThrowIfNull(discovered);
         ArgumentNullException.ThrowIfNull(recorded);
-        ArgumentNullException.ThrowIfNull(recent);
-        ArgumentNullException.ThrowIfNull(discovering);
+        ArgumentNullException.ThrowIfNull(earlier);
 
         var found = Named(discovered);
         var written = recorded
@@ -309,8 +282,7 @@ public sealed record Roll
             answered.Count == 0 ? null : answered[^1].Name,
             excused is null ? null : new ReadOnlyCollection<string>(excused.Where(one => !string.IsNullOrWhiteSpace(one)).ToList()),
             asked,
-            new ReadOnlyCollection<int>(recent.ToList()),
-            new ReadOnlyCollection<int>(discovering.ToList()),
+            earlier,
             comparing);
     }
 
@@ -362,16 +334,16 @@ public sealed record Roll
     /// </summary>
     private string Finding()
     {
-        if (Found.Count == 0 || Found[^1] == Discovered.Count)
+        if (Earlier.Discovered.Count == 0 || Earlier.Discovered[^1] == Discovered.Count)
             return "";
 
-        var all = Found.Count == 1
-            ? Found[0].ToString(CultureInfo.InvariantCulture)
-            : string.Join(", ", Found.Take(Found.Count - 1)) + " and " + Found[^1];
+        var all = Earlier.Discovered.Count == 1
+            ? Earlier.Discovered[0].ToString(CultureInfo.InvariantCulture)
+            : string.Join(", ", Earlier.Discovered.Take(Earlier.Discovered.Count - 1)) + " and " + Earlier.Discovered[^1];
 
-        return Found.Count == 1
+        return Earlier.Discovered.Count == 1
             ? $", where the run before discovered {all}"
-            : $", where the {Found.Count} runs before it discovered {all}";
+            : $", where the {Earlier.Discovered.Count} runs before it discovered {all}";
     }
 
     /// <summary>
@@ -387,20 +359,20 @@ public sealed record Roll
         if (!Comparing)
             return "";
 
-        if (Recent.Count == 0)
+        if (Earlier.Excused.Count == 0)
             return " and no earlier run was there to compare with";
 
         // One reads as a comparison and several read as a series, and the two want different words:
         // "against 8 the run before" says what changed, where "8, 43, 8 and 8" says what is usual.
-        if (Recent.Count == 1)
-            return $" against {Recent[0]} the run before";
+        if (Earlier.Excused.Count == 1)
+            return $" against {Earlier.Excused[0]} the run before";
 
-        var all = string.Join(", ", Recent.Take(Recent.Count - 1)) + " and " + Recent[^1];
+        var all = string.Join(", ", Earlier.Excused.Take(Earlier.Excused.Count - 1)) + " and " + Earlier.Excused[^1];
 
         // Oldest first, so the numbers read left to right as time does and the last one named is the
         // run immediately before this one. Said in the clause rather than explained by a parenthesis
         // about ordering, which is a thing a reader has to hold rather than read.
-        return $" where the {Recent.Count} runs before it excused {all}";
+        return $" where the {Earlier.Excused.Count} runs before it excused {all}";
     }
 
     /// <summary>
@@ -435,7 +407,8 @@ public sealed record Roll
         // much of this green is real, and then whose doing the rest was. A desk excuse says come back
         // when the machine is quiet; a budget this suite chose and missed says the number is wrong,
         // and a reader who cannot tell them apart cannot act on either.
-        return $", and {Excused.Count} check(s) were excused{Against()}{Kinds(Excused)} — {string.Join(", ", facts)}";
+        return $", and {Excused.Count} check(s) were excused{Against()}{Always()}{Kinds(Excused)}"
+            + $" — {string.Join(", ", facts)}";
     }
 
     /// <summary>
@@ -479,7 +452,8 @@ public sealed record Roll
         var lines = read
             .Take(most)
             .Select(one => $"  excused   {one.Case ?? "<unnamed>"}: {one.Fact}"
-                + (one.Absence is null ? "" : $" — {one.Absence}"))
+                + (one.Absence is null ? "" : $" — {one.Absence}")
+                + Recurring(one.Case))
             .ToList();
 
         if (read.Count > most)
@@ -487,6 +461,58 @@ public sealed record Roll
 
         return lines;
     }
+
+    /// <summary>
+    /// What to add to one excused case's line where every earlier run excused it too.
+    /// <para>
+    /// WW248. A dialog this process shows takes the foreground, so a fixture launched in the same
+    /// class is left without it and every act against it is a hole — reported correctly, for a reason
+    /// nobody wrote down. What tells that from a desk somebody else was using is that it happens
+    /// every time, and one run cannot say every time.
+    /// </para>
+    /// <para>
+    /// The number is said and not the word: "in all 4 runs before it" is what was read, where
+    /// "structural" is the conclusion a reader draws and this tool has not earned. Silent where the
+    /// case did not recur, because a mark on every line marks nothing.
+    /// </para>
+    /// </summary>
+    /// <param name="named">The case the excused row names, which an older ledger may not carry.</param>
+    private string Recurring(string? named) =>
+        !Everywhere && named is not null && Earlier.Always.Contains(named, StringComparer.Ordinal)
+            ? $" (in all {Earlier.Excused.Count} runs before it)"
+            : "";
+
+    /// <summary>
+    /// Whether every excuse this run made was made by every run before it too.
+    /// <para>
+    /// Measured on a guest run of 1815: all eight recurred, and all eight carried the mark. A mark on
+    /// every line marks nothing — this suite's steady state is that every excuse it makes is its own
+    /// structure, because the cases that make them open a decoy or declare a budget on purpose. So
+    /// the fact is said once in the sentence where it covers everything, and per line only where it
+    /// divides the excuses into two kinds.
+    /// </para>
+    /// </summary>
+    private bool Everywhere =>
+        Excused is { Count: > 0 }
+        && Earlier.Always.Count > 0
+        && Excused.All(one =>
+            Readers.Excuse(one).Case is { } named && Earlier.Always.Contains(named, StringComparer.Ordinal));
+
+    /// <summary>
+    /// That every one of them has been excused every run, said once where that is the whole story.
+    /// <para>
+    /// WW248. This is the reading a person wants on a normal run: not which excuse is structural, but
+    /// that none of them is news. The run where it goes quiet is the run where something new was
+    /// excused, and that is the one worth reading the list of.
+    /// </para>
+    /// <para>
+    /// Said as the negative and without repeating which runs. The clause before it has just named
+    /// them and their counts, and "every one of them in each of the 4 runs before it" put "the 4 runs
+    /// before it" in the same breath twice. New means new to those runs, which the reader has just
+    /// been told the extent of.
+    /// </para>
+    /// </summary>
+    private string Always() => Everywhere ? ", and none of them is new" : "";
 
     /// <summary>The reading as a block of text.</summary>
     public override string ToString() => string.Join('\n', Render());
