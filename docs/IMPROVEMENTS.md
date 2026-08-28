@@ -28,29 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW298 One predecessor is not a baseline
-
-WW289 shipped the comparison and it works: a run says "8 excused against 8 the run
-before", and a number that was meaningless alone now has something beside it. The
-weakness is in the shape, and is worth writing down before somebody trusts it further
-than it goes.
-
-One predecessor is a difference, not a baseline. The measurement that started WW289 was
-49 against a steady 8 — but a notification toast is not a thing that appears for one run
-and leaves. Where the desk stays busy for two runs, the second reads "43 against 43" and
-says, in the tool's own words, that nothing changed. The anomaly becomes its own
-baseline exactly when it is worst.
-
-What is wanted is not an average, which hides the same thing more slowly. It is the
-several most recent counts, said as they are: 49, where the last four runs excused 8, 8,
-43 and 8. That is read in one glance and needs no rule for what counts as a jump — no
-threshold to tune, and no run quietly promoted to normal by repetition.
-
-The storage is already right for it. Each run files its own ledger under the history
-root, `Readers.ExcusedBefore` already orders them by write time, and reading four rather
-than one is a `Take` and not a new mechanism. What changes is `Roll`, which holds one
-nullable count where it wants a short list.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

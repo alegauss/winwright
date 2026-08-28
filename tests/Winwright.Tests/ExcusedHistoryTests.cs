@@ -15,7 +15,7 @@ namespace Winwright.Tests;
 /// holding is the ordinary one.
 /// </para>
 /// </summary>
-public sealed class ExcusedBeforeTests : IDisposable
+public sealed class ExcusedHistoryTests : IDisposable
 {
     private readonly string root = Directory.CreateTempSubdirectory("winwright-before-").FullName;
 
@@ -46,7 +46,7 @@ public sealed class ExcusedBeforeTests : IDisposable
         Run("aaa-newest", 8, new DateTime(2026, 8, 1, 0, 0, 0, DateTimeKind.Utc));
         var mine = Run("mmm-this-run", 49, new DateTime(2026, 8, 28, 0, 0, 0, DateTimeKind.Utc));
 
-        Assert.Equal(8, Readers.ExcusedBefore(root, mine));
+        Assert.Equal([3, 8], Readers.ExcusedRecently(root, mine));
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public sealed class ExcusedBeforeTests : IDisposable
         // The obvious way to get 49-against-49 and report a toast-ridden run as ordinary.
         var mine = Run("only-run", 49, DateTime.UtcNow);
 
-        Assert.Null(Readers.ExcusedBefore(root, mine));
+        Assert.Empty(Readers.ExcusedRecently(root, mine));
     }
 
     [Fact]
@@ -64,8 +64,8 @@ public sealed class ExcusedBeforeTests : IDisposable
         // A fresh checkout is always this, and reporting it as zero would read a first run as an
         // improvement on nothing — the same collapse between "unknown" and "none" the ledger itself
         // is careful about.
-        Assert.Null(Readers.ExcusedBefore(root, Path.Combine(root, "this-run")));
-        Assert.Null(Readers.ExcusedBefore(Path.Combine(root, "nothing-here"), Path.Combine(root, "this-run")));
+        Assert.Empty(Readers.ExcusedRecently(root, Path.Combine(root, "this-run")));
+        Assert.Empty(Readers.ExcusedRecently(Path.Combine(root, "nothing-here"), Path.Combine(root, "this-run")));
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public sealed class ExcusedBeforeTests : IDisposable
         Run("with-ledger", 8, new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
         var mine = Run("this-run", 49, DateTime.UtcNow);
 
-        Assert.Equal(8, Readers.ExcusedBefore(root, mine));
+        Assert.Equal([8], Readers.ExcusedRecently(root, mine));
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public sealed class ExcusedBeforeTests : IDisposable
             ["Winwright.Tests.A.One"],
             [new Recorded("Winwright.Tests.A.One", "Passed", true)],
             ["desk|the foreground belongs to the window under test|x"],
-            before: 8);
+            recent: [8]);
 
         var said = roll.Sentence();
 
@@ -101,9 +101,40 @@ public sealed class ExcusedBeforeTests : IDisposable
             ["Winwright.Tests.A.One"],
             [new Recorded("Winwright.Tests.A.One", "Passed", true)],
             ["desk|the foreground belongs to the window under test|x"],
-            before: null);
+            recent: []);
 
         Assert.Contains("no earlier run", roll.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Several_earlier_runs_are_said_as_a_series_rather_than_reduced_to_one()
+    {
+        // WW298's whole point in one reading: the run excused nine, the four before it excused eight
+        // apiece bar one that excused forty-three, and a reader sees that without a threshold.
+        var roll = Roll.Of(
+            ["Winwright.Tests.A.One"],
+            [new Recorded("Winwright.Tests.A.One", "Passed", true)],
+            ["desk|the foreground belongs to the window under test|x"],
+            recent: [8, 43, 8, 8]);
+
+        Assert.Contains("where the 4 runs before it excused 8, 43, 8 and 8", roll.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_busy_desk_twice_over_no_longer_reads_as_a_steady_state()
+    {
+        // The defect WW298 is: with one predecessor this said "43 against 43", which is the tool
+        // reporting that nothing changed on the second of two runs a toast had ruined.
+        var roll = Roll.Of(
+            ["Winwright.Tests.A.One"],
+            [new Recorded("Winwright.Tests.A.One", "Passed", true)],
+            ["desk|the foreground belongs to the window under test|x"],
+            recent: [8, 8, 43]);
+
+        var said = roll.Sentence();
+
+        Assert.Contains("8, 8 and 43", said, StringComparison.Ordinal);
+        Assert.DoesNotContain("the run before ", said, StringComparison.Ordinal);
     }
 
     [Fact]

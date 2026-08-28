@@ -69,12 +69,16 @@ public static class Readers
     }
 
     /// <summary>
-    /// How many checks the run before this one excused, or null where there was no earlier run.
+    /// What the runs before this one excused, oldest first, empty where there was no earlier run.
     /// <para>
     /// WW289. Every run writes under its own directory beneath the results root, so the runs before
-    /// this one are the sibling directories that carry a ledger. The most recent of them is the
-    /// comparison a reader wants: not an average, and not the best — the last time this suite ran,
-    /// which is what "the usual number" means to somebody reading one run.
+    /// this one are the sibling directories that carry a ledger. Not an average and not the best —
+    /// the counts themselves, which is what "the usual number" means to somebody reading one run.
+    /// </para>
+    /// <para>
+    /// WW298. Several and not one. A desk that is busy for two runs makes the second read as a steady
+    /// state, so a single predecessor turns the anomaly into its own baseline exactly where it is
+    /// worst. Four counts read as a series need no threshold and hide no repetition.
     /// </para>
     /// <para>
     /// By write time and never by name. A caller may name its own run — the VM runner does — so the
@@ -82,43 +86,65 @@ public static class Readers
     /// rather than whichever ran last.
     /// </para>
     /// <para>
-    /// Null where there is no earlier run at all, which a first run on a fresh checkout always is.
+    /// Empty where there is no earlier run at all, which a first run on a fresh checkout always is.
     /// That is a different fact from zero, and reporting it as zero would read a first run as an
     /// improvement on nothing.
     /// </para>
     /// </summary>
     /// <param name="root">The results root every run writes a directory under.</param>
     /// <param name="thisRun">This run's own directory, which is not its own predecessor.</param>
-    public static int? ExcusedBefore(string root, string thisRun)
+    /// <param name="most">How many of the most recent to read; the default is what the tool uses.</param>
+    public static IReadOnlyList<int> ExcusedRecently(string root, string thisRun, int most = Recent)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(root);
         ArgumentException.ThrowIfNullOrWhiteSpace(thisRun);
 
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(most);
+
         if (!Directory.Exists(root))
-            return null;
+            return [];
 
         var mine = Path.GetFullPath(thisRun);
 
         try
         {
+            // Newest first to take from, then reversed: the caller reads them as time runs, and
+            // taking the most recent is what the ordering is for. A ledger that will not open is
+            // dropped rather than counted as zero, which is the rule the ledger itself is under.
             var earlier = Directory.GetDirectories(root)
                 .Where(one => !string.Equals(Path.GetFullPath(one), mine, StringComparison.OrdinalIgnoreCase))
                 .Select(one => Path.Combine(one, Excused))
                 .Where(File.Exists)
                 .OrderByDescending(File.GetLastWriteTimeUtc)
-                .FirstOrDefault();
+                .Take(most)
+                .Select(one => ExcusedIn(one)?.Count)
+                .Where(one => one is not null)
+                .Select(one => one!.Value)
+                .Reverse()
+                .ToList();
 
-            return earlier is null ? null : ExcusedIn(earlier)?.Count;
+            return new ReadOnlyCollection<int>(earlier);
         }
         catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
         {
             // Unreadable is unknown and never zero, which is the rule the ledger itself is under.
-            return null;
+            return [];
         }
     }
 
     /// <summary>What a run's ledger is called where it is kept beside that run's own results.</summary>
     public const string Excused = "excused.txt";
+
+    /// <summary>
+    /// How many earlier runs are read to say what this one's count is worth.
+    /// <para>
+    /// WW298. Four, because the question a reader has is whether this run is the ordinary one, and
+    /// four numbers answer it by being read rather than by being tested against a threshold. One is
+    /// too few — a desk busy for two runs makes the second read as a steady state — and a long tail
+    /// is a sentence nobody finishes.
+    /// </para>
+    /// </summary>
+    public const int Recent = 4;
 
     /// <summary>
     /// The desk facts a run excused a check for, one per line, or null where nobody wrote them down.

@@ -113,7 +113,7 @@ public static class Program
                     Readers.DiscoveredIn(listing),
                     Readers.RecordedIn(results),
                     Readers.ExcusedIn(excused),
-                    Readers.ExcusedBefore(against, Path.GetDirectoryName(Path.GetFullPath(results)) ?? against)),
+                    Readers.ExcusedRecently(against, Path.GetDirectoryName(Path.GetFullPath(results)) ?? against)),
             };
         }
         catch (Exception unreadable) when (unreadable is IOException or InvalidDataException or UnauthorizedAccessException)

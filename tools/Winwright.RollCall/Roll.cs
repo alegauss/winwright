@@ -79,7 +79,7 @@ public sealed record Roll
         string? lastAnswered,
         IReadOnlyList<string>? excused,
         bool asked,
-        int? before,
+        IReadOnlyList<int> recent,
         bool comparing)
     {
         Discovered = discovered;
@@ -90,7 +90,7 @@ public sealed record Roll
         LastAnswered = lastAnswered;
         Excused = excused;
         Asked = asked;
-        Before = before;
+        Recent = recent;
         Comparing = comparing;
     }
 
@@ -106,15 +106,22 @@ public sealed record Roll
     public bool Comparing { get; }
 
     /// <summary>
-    /// How many checks the run before this one excused, or null where there was no earlier run.
+    /// What the runs before this one excused, oldest first, empty where there was no earlier run.
     /// <para>
     /// WW289. Measured: a guest run passed having excused 49 checks where every run before it excused
     /// 8, because a notification toast held the foreground. Every one of the 49 was printed and the
     /// run still read exactly like one that checked them all — the count was honest and nothing
     /// compared it with anything.
     /// </para>
+    /// <para>
+    /// WW298. Several and not one, because one predecessor is a difference and not a baseline. A
+    /// notification toast is not a thing that appears for a single run and leaves: where the desk
+    /// stays busy for two, the second reads 43 against 43 and says nothing changed, so the anomaly
+    /// becomes its own baseline exactly when it is worst. Several counts said as they are need no
+    /// threshold to tune and promote no run to normal by repeating.
+    /// </para>
     /// </summary>
-    public int? Before { get; }
+    public IReadOnlyList<int> Recent { get; }
 
     /// <summary>
     /// Whether anybody asked what the run excused. Three states and not two: a caller that never
@@ -195,7 +202,7 @@ public sealed record Roll
     /// but a green covering 1,551 of 1,563 checks has to say so.
     /// </remarks>
     public static Roll Of(IEnumerable<string> discovered, IEnumerable<Recorded> recorded) =>
-        Taken(discovered, recorded, null, asked: false, before: null, comparing: false);
+        Taken(discovered, recorded, null, asked: false, recent: [], comparing: false);
 
     /// <inheritdoc cref="Of(IEnumerable{string}, IEnumerable{Recorded})" />
     /// <param name="discovered">The cases discovery reported.</param>
@@ -206,33 +213,35 @@ public sealed record Roll
     /// </param>
     public static Roll Of(
         IEnumerable<string> discovered, IEnumerable<Recorded> recorded, IEnumerable<string>? excused) =>
-        Taken(discovered, recorded, excused, asked: true, before: null, comparing: false);
+        Taken(discovered, recorded, excused, asked: true, recent: [], comparing: false);
 
     /// <inheritdoc cref="Of(IEnumerable{string}, IEnumerable{Recorded})" />
     /// <param name="discovered">The cases discovery reported.</param>
     /// <param name="recorded">The cases the run wrote down.</param>
     /// <param name="excused">What the run excused, or null where the ledger was not there.</param>
-    /// <param name="before">
-    /// How many the run before this one excused, or null where there was no earlier run. WW289:
-    /// calling this overload is the asking, so null here is <em>there was none</em> and never zero.
+    /// <param name="recent">
+    /// What the runs before this one excused, oldest first, empty where there was no earlier run.
+    /// WW289: calling this overload is the asking, so empty here is <em>there was none</em> and never
+    /// zero. WW298: several rather than one, so a desk that stays busy cannot become its own baseline.
     /// </param>
     public static Roll Of(
         IEnumerable<string> discovered,
         IEnumerable<Recorded> recorded,
         IEnumerable<string>? excused,
-        int? before) =>
-        Taken(discovered, recorded, excused, asked: true, before, comparing: true);
+        IEnumerable<int> recent) =>
+        Taken(discovered, recorded, excused, asked: true, recent, comparing: true);
 
     private static Roll Taken(
         IEnumerable<string> discovered,
         IEnumerable<Recorded> recorded,
         IEnumerable<string>? excused,
         bool asked,
-        int? before,
+        IEnumerable<int> recent,
         bool comparing)
     {
         ArgumentNullException.ThrowIfNull(discovered);
         ArgumentNullException.ThrowIfNull(recorded);
+        ArgumentNullException.ThrowIfNull(recent);
 
         var found = Named(discovered);
         var written = recorded
@@ -279,7 +288,7 @@ public sealed record Roll
             answered.Count == 0 ? null : answered[^1].Name,
             excused is null ? null : new ReadOnlyCollection<string>(excused.Where(one => !string.IsNullOrWhiteSpace(one)).ToList()),
             asked,
-            before,
+            new ReadOnlyCollection<int>(recent.ToList()),
             comparing);
     }
 
@@ -328,9 +337,20 @@ public sealed record Roll
         if (!Comparing)
             return "";
 
-        return Before is { } before
-            ? $" against {before} the run before"
-            : " and no earlier run was there to compare with";
+        if (Recent.Count == 0)
+            return " and no earlier run was there to compare with";
+
+        // One reads as a comparison and several read as a series, and the two want different words:
+        // "against 8 the run before" says what changed, where "8, 43, 8 and 8" says what is usual.
+        if (Recent.Count == 1)
+            return $" against {Recent[0]} the run before";
+
+        var all = string.Join(", ", Recent.Take(Recent.Count - 1)) + " and " + Recent[^1];
+
+        // Oldest first, so the numbers read left to right as time does and the last one named is the
+        // run immediately before this one. Said in the clause rather than explained by a parenthesis
+        // about ordering, which is a thing a reader has to hold rather than read.
+        return $" where the {Recent.Count} runs before it excused {all}";
     }
 
     /// <summary>

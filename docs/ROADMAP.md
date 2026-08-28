@@ -5,7 +5,6 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-- 📋 **WW298** (deps: WW289 ✅) **the excused count is compared with one predecessor, so a second busy-desk run in a row reads as ordinary** — WW289 compares this run with the last one, so a desk that stays busy reads as a steady state; what a reader needs is where this run sits among several. → §WW298
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
