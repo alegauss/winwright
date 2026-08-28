@@ -335,6 +335,22 @@ cannot know at either end. `unlike` is the seventh and is that read the other wa
 step and claims this step's reading **differs** from what that one read, for the change whose value a
 case cannot know at either end either.
 
+`sameCountdownAs` is `sameAs` for a reading that **ticks while the case runs**. A caption naming when
+a quota window turns over counts down as you watch it, so a run crossing a minute boundary reads it
+one lower and nothing about the application is wrong — and an exact comparison there is a red build
+about a clock. It reads the numbers and ignores the words: every number must match except the last,
+which may be lower by one, never higher, since a caption that counted *up* is the window having turned
+over rather than the clock having moved. A different count of numbers is a different caption. Two
+readings with no digits at all are refused rather than matched, because a claim that a countdown came
+back is not settled by two strings that never counted.
+
+Its own field and never a tolerance on `sameAs`, deliberately: a percentage is the same number or it
+is not, and a general tolerance would soften every exact claim in every project to serve one caption.
+One limit worth knowing before you rely on it — it does not span a unit rolling over, so `3h 00m`
+reading later as `2h 59m` fails though it is a minute apart. That is one minute in sixty of the ones
+this tolerates, and the alternative is teaching the engine what `h` means: a format it would then have
+to be kept in step with, which is what the derived expectation refuses everywhere else.
+
 `label` is the eighth and is `expect` with the value derived rather than typed: it names the key
 whose declared string the reading should be, read out of the language the fixture says its window is
 in. `notLabel` is the ninth and is its mirror — the reading must **not** be that string, for the

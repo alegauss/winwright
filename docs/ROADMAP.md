@@ -19,7 +19,6 @@
 
 - ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
 - ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Nine reds, and the substituted character is always the last one sent — one or more of them, at no fixed position, with the array ruled out. → §WW249
-- 📋 **WW269** (deps: —) **a caption counting down in real time cannot survive an exact comparison across a round trip** — The units are ASCII in all five languages, so the digits-only comparison is safe and the in-app instant is accuracy this claim does not want. → §WW269
 
 ## Block G — The scenario — a case is a data file
 

@@ -252,7 +252,7 @@ public class ScenarioFileTests
         Assert.Equal(
             [
                 "locator", "tray", "act", "with", "expect", "reads", "moves", "answers", "matches", "discloses",
-                "sameAs", "unlike", "label", "notLabel", "ownHeader", "eachSpoken", "spoken", "never", "covers",
+                "sameAs", "unlike", "sameCountdownAs", "label", "notLabel", "ownHeader", "eachSpoken", "spoken", "never", "covers",
                 "coversAtLeast", "coversWithin", "meansIt", "named",
             ],
             ScenarioSchema.Step.Select(field => field.Name));

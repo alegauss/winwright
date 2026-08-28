@@ -199,6 +199,7 @@
 - ✅ **WW292** **a menu entry decorates the value it is about, so no set claim compares against it and the script counted instead** — `coversWithin` claims each declared value appears inside a matched name, so an entry that decorates what it is about is compared rather than counted.
 - ✅ **WW290** **a set name declared in both wells resolves to the reported one and the strings key is shadowed in silence** — A reported set whose name the strings also declare says which key it shadowed, so the second declaration is stated rather than passed over in silence.
 - ✅ **WW291** **the one read-out reportedSets was written for is a diagnostic report, and every line of it becomes a member** — `--profile-names` answers one label per line by the same discovery route as the report, so a derived set comes from the application and the report is left to its reader.
+- ✅ **WW269** **a caption counting down in real time cannot survive an exact comparison across a round trip** — `sameCountdownAs` compares the numbers and ignores the words, allowing the last to have ticked down by one, so a caption that counts is not a red build about a clock.
 
 ## Block G — The scenario — a case is a data file
 

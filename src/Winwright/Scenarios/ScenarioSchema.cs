@@ -204,6 +204,7 @@ public static class ScenarioSchema
         new("discloses", false, Taking.Truth, "that the act put something under the locator that was not in the tree before it", []),
         new("sameAs", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to be back to, for the round trip whose value no case can name", []),
         new("unlike", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to differ from, for the change whose value no case can name at either end", []),
+        new("sameCountdownAs", false, Taking.Text, "the same claim as 'sameAs' for a reading that counts down while the case runs — the numbers in it must match, except the last, which may have ticked by one", []),
         new("label", false, Taking.Text, "the key whose declared string the reading should be — the label itself, derived from the project's own strings and never typed here", []),
         new("notLabel", false, Taking.Text, "the key whose declared string the reading should not be, for the state an application has a word for and must not be showing", []),
         new("ownHeader", false, Taking.Truth, "that no control inside a row this locator matches announces a different row's header — the pairing a check for whether a name exists is blind to", []),

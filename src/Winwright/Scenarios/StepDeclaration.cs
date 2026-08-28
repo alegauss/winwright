@@ -42,6 +42,7 @@ public sealed record StepDeclaration
         string? label,
         string? notLabel,
         string? unlike,
+        string? sameCountdownAs,
         bool eachSpoken,
         bool ownHeader,
         Asserting.SetMatch matching = Asserting.SetMatch.Exactly)
@@ -67,6 +68,7 @@ public sealed record StepDeclaration
         Label = label;
         NotLabel = notLabel;
         Unlike = unlike;
+        SameCountdownAs = sameCountdownAs;
         EachSpoken = eachSpoken;
         OwnHeader = ownHeader;
     }
@@ -308,6 +310,32 @@ public sealed record StepDeclaration
     /// </summary>
     public string? Unlike { get; }
 
+    /// <summary>
+    /// The earlier step this one claims its reading is back to, for a reading that counts down while
+    /// the case is running.
+    /// <para>
+    /// WW269. <see cref="SameAs"/> compares exactly, and the reset caption on claude-tray's Statistics
+    /// page cannot go through it: it names when a quota window turns over and counts down while the
+    /// window is open, so a run that crosses a minute boundary reads it one minute lower and nothing
+    /// about the application is wrong. Dropping the claim is worse than tolerating the minute — an
+    /// hour of drift is another profile's window, which is the defect WW81 was filed against.
+    /// </para>
+    /// <para>
+    /// The numbers and never the words, which was measured rather than assumed. The task said the
+    /// script's parser keyed on `d`, `h` and `m` and that those letters differ in the four other
+    /// languages this application ships; they do not. Both of its formatters write them as literal
+    /// ASCII and only `dur.now` is translated — so ignoring everything that is not a digit is
+    /// language-independent here for a reason, and not by luck.
+    /// </para>
+    /// <para>
+    /// Its own field and never a tolerance on <see cref="SameAs"/>, which is the line the task drew: a
+    /// percentage is the same number or it is not, and a general tolerance would soften every exact
+    /// claim in every adopting project to serve one caption. The name says the shape it is licensed
+    /// for, so nobody reaches for it to quiet a comparison that ought to be exact.
+    /// </para>
+    /// </summary>
+    public string? SameCountdownAs { get; }
+
     /// <summary>Which reading the expectation is about. <see cref="ReadBack.Anything"/> by default.</summary>
     public ReadBack Reads { get; }
 
@@ -433,7 +461,8 @@ public sealed record StepDeclaration
         Tray is not null
         || Expected is not null || Moves || Answers || Sweeps is not null || Matches is not null || Discloses
         || SameAs is not null || Never is not null || Spoken
-        || Label is not null || NotLabel is not null || Unlike is not null || EachSpoken || OwnHeader;
+        || Label is not null || NotLabel is not null || Unlike is not null || SameCountdownAs is not null
+        || EachSpoken || OwnHeader;
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -467,6 +496,11 @@ public sealed record StepDeclaration
     /// <param name="label">The key whose declared string the reading should be.</param>
     /// <param name="notLabel">The key whose declared string the reading should not be.</param>
     /// <param name="unlike">The earlier step this one claims its reading differs from.</param>
+    /// <param name="sameCountdownAs">
+    /// The earlier step this one claims its reading is back to, allowing the last number in it to have
+    /// ticked down by one. WW269, and at most one of this, <paramref name="sameAs"/> and
+    /// <paramref name="unlike"/>.
+    /// </param>
     /// <param name="eachSpoken">That every element the locator matches announces a name.</param>
     /// <param name="ownHeader">That no control in a row announces another row's header.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
@@ -502,6 +536,7 @@ public sealed record StepDeclaration
         string? label = null,
         string? notLabel = null,
         string? unlike = null,
+        string? sameCountdownAs = null,
         bool eachSpoken = false,
         bool ownHeader = false,
         string? tray = null,
@@ -554,7 +589,7 @@ public sealed record StepDeclaration
         }
 
         if (named_tray is not null)
-            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, unlike, eachSpoken, ownHeader);
+            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, unlike, sameCountdownAs, eachSpoken, ownHeader);
 
         // WW263 and WW273. A locator with a brace in it has to parse with something in it as well as
         // with the placeholder, and both are facts about the file rather than about a run. Probed here
@@ -602,6 +637,18 @@ public sealed record StepDeclaration
         // anything have to know about this one before they can name the right field.
         var apart = string.IsNullOrWhiteSpace(unlike) ? null : unlike.Trim();
 
+        // WW269, and the same again. It is `sameAs` for a reading that ticks while the case runs, so
+        // every rule below that names one of the three has to know about it or it names the wrong one.
+        var ticking = string.IsNullOrWhiteSpace(sameCountdownAs) ? null : sameCountdownAs.Trim();
+
+        if (ticking is not null && (back ?? apart) is { } alsoPointing)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims its reading is back to '{ticking}' give or take a tick and also compares it "
+                    + $"with '{alsoPointing}'; a step answers one thing, and these are two");
+        }
+
         // WW256, and the same again: a claim about the wait is still a claim, so a step making only
         // this one must not be refused as a step that makes none.
         var forbidden = string.IsNullOrWhiteSpace(never) ? null : never.Trim();
@@ -613,7 +660,7 @@ public sealed record StepDeclaration
 
         var claims = wanted is not null || moves || answers || sweeping is not null || pattern is not null
             || discloses || back is not null || apart is not null || forbidden is not null || spoken
-            || declared is not null || undeclared is not null || apart is not null || eachSpoken || ownHeader;
+            || declared is not null || undeclared is not null || ticking is not null || eachSpoken || ownHeader;
 
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
         // says it moved where it was something else. A step asserting both would owe two assertion
@@ -746,10 +793,10 @@ public sealed record StepDeclaration
                     + "a step answers one thing, and these are two");
         }
 
-        if ((back ?? apart) is { } pointed)
+        if ((back ?? apart ?? ticking) is { } pointed)
         {
-            var field = back is not null ? "sameAs" : "unlike";
-            var claim = back is not null ? "is back to" : "differs from";
+            var field = back is not null ? "sameAs" : apart is not null ? "unlike" : "sameCountdownAs";
+            var claim = apart is not null ? "differs from" : "is back to";
 
             // One claim per step, as everywhere else. 'expect' names the value and this is the claim
             // for a value the case cannot name — it only knows which earlier step to compare with.
@@ -1013,6 +1060,7 @@ public sealed record StepDeclaration
             declared,
             undeclared,
             apart,
+            ticking,
             eachSpoken,
             ownHeader,
             matching);
@@ -1052,6 +1100,7 @@ public sealed record StepDeclaration
         string? label,
         string? notLabel,
         string? unlike,
+        string? sameCountdownAs,
         bool eachSpoken,
         bool ownHeader)
     {
@@ -1080,6 +1129,7 @@ public sealed record StepDeclaration
             ("discloses", discloses),
             ("sameAs", sameAs is not null),
             ("unlike", unlike is not null),
+            ("sameCountdownAs", sameCountdownAs is not null),
             ("label", label is not null),
             ("notLabel", notLabel is not null),
             ("never", never is not null),
@@ -1105,7 +1155,7 @@ public sealed record StepDeclaration
 
         return new StepDeclaration(
             subject, null, tray, act, null, null, ReadBack.Named(null), false, false, null, false, null,
-            false, null, null, false, null, null, null, false, false);
+            false, null, null, false, null, null, null, null, false, false);
     }
 
     /// <summary>

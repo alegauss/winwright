@@ -212,7 +212,7 @@ public static class CaseRun
         // are read again after they run: remembering every step's reading would pay for a resolve per
         // step on every case in the suite to serve the two or three that ever point backwards.
         var pointedAt = declared.Steps
-            .Select(one => one.SameAs ?? one.Unlike)
+            .Select(one => one.SameAs ?? one.Unlike ?? one.SameCountdownAs)
             .OfType<string>()
             .ToHashSet(StringComparer.Ordinal);
         var recalled = new Dictionary<string, string?>(StringComparer.Ordinal);
@@ -566,7 +566,7 @@ public static class CaseRun
         // WW255. Looked up once, before the attempts: the value a round trip is about was read when
         // the earlier step ran, and a lookup inside the retry would be the same answer fetched three
         // times. Absent only where that step stopped the case, which is a state this never reaches.
-        var backTo = (step.SameAs ?? step.Unlike) is { } back && recalled.TryGetValue(back, out var read)
+        var backTo = (step.SameAs ?? step.Unlike ?? step.SameCountdownAs) is { } back && recalled.TryGetValue(back, out var read)
             ? read
             : null;
 
@@ -1400,7 +1400,7 @@ public static class CaseRun
         if (step.Discloses)
             return Disclosed(step, subject, acted, under);
 
-        if (step.SameAs is not null || step.Unlike is not null)
+        if (step.SameAs is not null || step.Unlike is not null || step.SameCountdownAs is not null)
             return Returned(step, subject, acted, backTo);
 
         // WW261 and WW270. Both are about one declared string, so both are answered in one place: the
@@ -1526,11 +1526,63 @@ public static class CaseRun
     /// end — which is the same unearned green a pattern matching the empty string would be.
     /// </para>
     /// </summary>
+    /// <summary>
+    /// Whether two readings of a counting-down caption are the same one, a tick apart.
+    /// <para>
+    /// WW269. The numbers and never the words: `2d 4h` and `3h 20m` carry their units as literal ASCII
+    /// in every language this was measured against, so a comparison that ignores everything but the
+    /// digits is language-independent for a reason rather than by luck. Every number has to match
+    /// except the last, which is the one that ticks — and it may be lower by one, never higher, because
+    /// a caption that counted <em>up</em> across a round trip is the window having turned over and not
+    /// the clock having moved.
+    /// </para>
+    /// <para>
+    /// A different count of numbers is a different caption, not a tick: `3h 20m` reading later as `45m`
+    /// is a window that changed shape, and the claim is about it having stayed put.
+    /// </para>
+    /// <para>
+    /// The limit, said out loud because it is the one a reader will meet: this does not span a unit
+    /// rolling over. `3h 00m` reading later as `2h 59m` is a minute apart and two of its numbers moved,
+    /// so it fails. That is one minute in every sixty of the ones this exists to tolerate, and the
+    /// alternative is teaching the engine what `h` means — a format it would then have to be kept in
+    /// step with, which is what the whole derived-expectation rule refuses.
+    /// </para>
+    /// </summary>
+    /// <param name="before">What the earlier step read.</param>
+    /// <param name="now">What this one read.</param>
+    private static bool Ticked(string before, string now)
+    {
+        var was = Digits.Matches(before).Select(one => one.Value).ToList();
+        var is_ = Digits.Matches(now).Select(one => one.Value).ToList();
+
+        if (was.Count == 0 || was.Count != is_.Count)
+            return false;
+
+        for (var index = 0; index < was.Count - 1; index++)
+        {
+            if (!string.Equals(was[index], is_[index], StringComparison.Ordinal))
+                return false;
+        }
+
+        // Parsed rather than compared as text, so `20` and `19` are a tick and `20` and `02` are not.
+        // Either side that will not parse is not a countdown, and a claim about one is not settled by
+        // guessing what it might have been.
+        if (!int.TryParse(was[^1], out var last) || !int.TryParse(is_[^1], out var ticked))
+            return false;
+
+        return ticked == last || ticked == last - 1;
+    }
+
+    /// <summary>Every run of digits in a reading, which is all a countdown comparison looks at.</summary>
+    private static readonly System.Text.RegularExpressions.Regex Digits =
+        new(@"\d+", System.Text.RegularExpressions.RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1));
+
     private static Landed Returned(StepDeclaration step, Subject subject, ActResult? acted, string? backTo)
     {
         var saw = acted?.Element;
-        var pointed = step.SameAs ?? step.Unlike;
+        var pointed = step.SameAs ?? step.Unlike ?? step.SameCountdownAs;
         var same = step.SameAs is not null;
+        var ticking = step.SameCountdownAs is not null;
 
         if (string.IsNullOrEmpty(backTo))
         {
@@ -1547,9 +1599,12 @@ public static class CaseRun
             return new Landed(acted, never, saw);
         }
 
-        var wanted = same
-            ? $"the '{step.Reads.Name}' that '{pointed}' read — {backTo}"
-            : $"a '{step.Reads.Name}' other than the {backTo} that '{pointed}' read";
+        var wanted = (same, ticking) switch
+        {
+            (_, true) => $"the '{step.Reads.Name}' that '{pointed}' read, give or take a tick — {backTo}",
+            (true, _) => $"the '{step.Reads.Name}' that '{pointed}' read — {backTo}",
+            _ => $"a '{step.Reads.Name}' other than the {backTo} that '{pointed}' read",
+        };
 
         var expectation = Expect.That(
             step.Name,
@@ -1565,6 +1620,9 @@ public static class CaseRun
                 // evidence nobody read it.
                 if (now is null)
                     return null;
+
+                if (ticking)
+                    return Ticked(backTo, now) ? wanted : now;
 
                 return string.Equals(now, backTo, StringComparison.Ordinal) == same ? wanted : now;
             },
