@@ -170,32 +170,6 @@ which assumes nothing about the text and costs a reading the adopter has to prov
 What it must not become is a general tolerance on `sameAs`. A percentage is the same
 number or it is not.
 
-### §WW291 The read-out that is a report and not a set
-
-WW260 built the second well from the script's description of itself — *the script asked
-the application, running it with a flag that prints them* — and that sentence is true
-about intent and wrong about mechanism. `--profiles` prints a diagnostic report: a
-paragraph per profile with its directory, plan, account and accent band, then a dozen
-lines about following and polling. The script never read it as a set. It pulled counts
-out with regexes — `submenu with (\d+) entries`, `polled every
-interval:\s*\d+\s+of\s+(\d+)`.
-
-So `Reported`'s contract, one value per line, is met by nothing this adopter has.
-Pointed at it, the derived set is every non-empty line of the report.
-
-The engine must not learn to parse it: a regex in a project file is the hardcoded
-expectation with an extra step, which is what the derived set exists to refuse.
-
-So the read-out moves: an application asked for a set answers one, on its own flag, one
-value per line, with the report left alone. That is a change to the adopted application
-and not to the engine — block I's shape, the application cooperating rather than the
-harness guessing.
-
-It is the bottleneck rather than one task's blocker. Every claude-tray migration derives
-from this read-out — WW82 needs the count and the entries, WW85 asks
-`Expected-ProfileCount` before its `other` mode may run, WW83 reads
-`Expected-ProfileState`. All three said `Block G` and looked ready.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
