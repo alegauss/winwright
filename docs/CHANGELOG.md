@@ -69,6 +69,7 @@
 - ✅ **WW286** **a lent launch that exited is recorded at the end of the run and read by nothing** — The register collects every departure and `EarlyExits` reads them, so a run whose lent launch died says so, counting apart the exit no single case can claim.
 - ✅ **WW287** **the sentence for an exit code Windows would not name has nothing that provokes it** — Removed rather than provoked, on a measurement: the state that makes `ExitCode` throw makes `HasExited` throw one line earlier, so nothing could reach the sentence it bought.
 - ✅ **WW293** **the runner's adopter parameters cannot be passed through the command its own comment says a person types** — The wrapper forwards `%*`, so the four flags an adopter needs reach the runner through the command they are told to type rather than around it.
+- ✅ **WW289** **a toast takes the desk and the run excuses 43 checks, reading as green as one that excused 8** — Every run now says its count against the run before it; measured, 8 against 8, on a third guest run — the first two proving it reads nothing where nothing was filed.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

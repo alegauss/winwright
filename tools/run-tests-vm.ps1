@@ -360,6 +360,13 @@ rem WW150: the name this run's results go under, read by MSBuild as a property t
 rem every environment variable. Set here rather than passed through run-tests.cmd, so the guest
 rem types the same command a developer does.
 set "RollCallRun=$script:RunName"
+
+rem WW289: where a run's ledger of excused checks is kept so the next run can say its own count
+rem beside it. Under the sync folder and never under the tree, because sync.ps1 deletes the tree
+rem whole and re-extracts it - a history inside it is gone before anything can read it, and every
+rem run would report that no earlier run existed. Read by MSBuild as a property, like RollCallRun
+rem above.
+set "RollCallRoot=$script:GuestSync\history"
 dotnet build-server shutdown >nul 2>&1
 
 cd /d "$script:GuestRepo"

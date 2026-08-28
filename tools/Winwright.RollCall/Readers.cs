@@ -69,6 +69,58 @@ public static class Readers
     }
 
     /// <summary>
+    /// How many checks the run before this one excused, or null where there was no earlier run.
+    /// <para>
+    /// WW289. Every run writes under its own directory beneath the results root, so the runs before
+    /// this one are the sibling directories that carry a ledger. The most recent of them is the
+    /// comparison a reader wants: not an average, and not the best — the last time this suite ran,
+    /// which is what "the usual number" means to somebody reading one run.
+    /// </para>
+    /// <para>
+    /// By write time and never by name. A caller may name its own run — the VM runner does — so the
+    /// names are not ordered, and sorting them would compare against whichever directory sorts last
+    /// rather than whichever ran last.
+    /// </para>
+    /// <para>
+    /// Null where there is no earlier run at all, which a first run on a fresh checkout always is.
+    /// That is a different fact from zero, and reporting it as zero would read a first run as an
+    /// improvement on nothing.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The results root every run writes a directory under.</param>
+    /// <param name="thisRun">This run's own directory, which is not its own predecessor.</param>
+    public static int? ExcusedBefore(string root, string thisRun)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(root);
+        ArgumentException.ThrowIfNullOrWhiteSpace(thisRun);
+
+        if (!Directory.Exists(root))
+            return null;
+
+        var mine = Path.GetFullPath(thisRun);
+
+        try
+        {
+            var earlier = Directory.GetDirectories(root)
+                .Where(one => !string.Equals(Path.GetFullPath(one), mine, StringComparison.OrdinalIgnoreCase))
+                .Select(one => Path.Combine(one, Excused))
+                .Where(File.Exists)
+                .OrderByDescending(File.GetLastWriteTimeUtc)
+                .FirstOrDefault();
+
+            return earlier is null ? null : ExcusedIn(earlier)?.Count;
+        }
+        catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
+        {
+            // Unreadable is unknown and never zero, which is the rule the ledger itself is under.
+            return null;
+        }
+    }
+
+    /// <summary>What a run's ledger is called where it is kept beside that run's own results.</summary>
+    public const string Excused = "excused.txt";
+
+    /// <summary>
     /// The desk facts a run excused a check for, one per line, or null where nobody wrote them down.
     /// <para>
     /// WW231. Null and empty are different answers and this is the one place that matters: a suite

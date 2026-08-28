@@ -78,7 +78,9 @@ public sealed record Roll
         IReadOnlyList<Attendance> unexpected,
         string? lastAnswered,
         IReadOnlyList<string>? excused,
-        bool asked)
+        bool asked,
+        int? before,
+        bool comparing)
     {
         Discovered = discovered;
         Recorded = recorded;
@@ -88,7 +90,31 @@ public sealed record Roll
         LastAnswered = lastAnswered;
         Excused = excused;
         Asked = asked;
+        Before = before;
+        Comparing = comparing;
     }
+
+    /// <summary>
+    /// Whether anybody asked how this run's excuses compare with the run before it.
+    /// <para>
+    /// WW289. The same three states <see cref="Asked"/> keeps, and for the same reason: a caller that
+    /// never asked is silent, one that asked on a machine with no earlier run is told there is nothing
+    /// to compare with, and one that found a run gets the number. Collapsing the middle into zero
+    /// would report a first run as an improvement on nothing.
+    /// </para>
+    /// </summary>
+    public bool Comparing { get; }
+
+    /// <summary>
+    /// How many checks the run before this one excused, or null where there was no earlier run.
+    /// <para>
+    /// WW289. Measured: a guest run passed having excused 49 checks where every run before it excused
+    /// 8, because a notification toast held the foreground. Every one of the 49 was printed and the
+    /// run still read exactly like one that checked them all — the count was honest and nothing
+    /// compared it with anything.
+    /// </para>
+    /// </summary>
+    public int? Before { get; }
 
     /// <summary>
     /// Whether anybody asked what the run excused. Three states and not two: a caller that never
@@ -169,7 +195,7 @@ public sealed record Roll
     /// but a green covering 1,551 of 1,563 checks has to say so.
     /// </remarks>
     public static Roll Of(IEnumerable<string> discovered, IEnumerable<Recorded> recorded) =>
-        Taken(discovered, recorded, null, asked: false);
+        Taken(discovered, recorded, null, asked: false, before: null, comparing: false);
 
     /// <inheritdoc cref="Of(IEnumerable{string}, IEnumerable{Recorded})" />
     /// <param name="discovered">The cases discovery reported.</param>
@@ -180,10 +206,30 @@ public sealed record Roll
     /// </param>
     public static Roll Of(
         IEnumerable<string> discovered, IEnumerable<Recorded> recorded, IEnumerable<string>? excused) =>
-        Taken(discovered, recorded, excused, asked: true);
+        Taken(discovered, recorded, excused, asked: true, before: null, comparing: false);
+
+    /// <inheritdoc cref="Of(IEnumerable{string}, IEnumerable{Recorded})" />
+    /// <param name="discovered">The cases discovery reported.</param>
+    /// <param name="recorded">The cases the run wrote down.</param>
+    /// <param name="excused">What the run excused, or null where the ledger was not there.</param>
+    /// <param name="before">
+    /// How many the run before this one excused, or null where there was no earlier run. WW289:
+    /// calling this overload is the asking, so null here is <em>there was none</em> and never zero.
+    /// </param>
+    public static Roll Of(
+        IEnumerable<string> discovered,
+        IEnumerable<Recorded> recorded,
+        IEnumerable<string>? excused,
+        int? before) =>
+        Taken(discovered, recorded, excused, asked: true, before, comparing: true);
 
     private static Roll Taken(
-        IEnumerable<string> discovered, IEnumerable<Recorded> recorded, IEnumerable<string>? excused, bool asked)
+        IEnumerable<string> discovered,
+        IEnumerable<Recorded> recorded,
+        IEnumerable<string>? excused,
+        bool asked,
+        int? before,
+        bool comparing)
     {
         ArgumentNullException.ThrowIfNull(discovered);
         ArgumentNullException.ThrowIfNull(recorded);
@@ -232,7 +278,9 @@ public sealed record Roll
             new ReadOnlyCollection<Attendance>(unexpected),
             answered.Count == 0 ? null : answered[^1].Name,
             excused is null ? null : new ReadOnlyCollection<string>(excused.Where(one => !string.IsNullOrWhiteSpace(one)).ToList()),
-            asked);
+            asked,
+            before,
+            comparing);
     }
 
     /// <summary>What the roll found, in the one sentence a reader skims.</summary>
@@ -268,6 +316,24 @@ public sealed record Roll
     }
 
     /// <summary>
+    /// What this run's count is worth beside the one before it, or nothing where nobody asked.
+    /// <para>
+    /// WW289. The number that matters is not 49 but 49-against-8: a reader who is told only the first
+    /// has no way to know whether this run is the ordinary one. Said next to the count rather than
+    /// after the conditions, because it changes how much the whole sentence is worth.
+    /// </para>
+    /// </summary>
+    private string Against()
+    {
+        if (!Comparing)
+            return "";
+
+        return Before is { } before
+            ? $" against {before} the run before"
+            : " and no earlier run was there to compare with";
+    }
+
+    /// <summary>
     /// What the excuses add to either sentence, or nothing at all where none were made.
     /// <para>
     /// Silent on a run that excused nothing, because a clause saying "and none were excused" on every
@@ -299,7 +365,7 @@ public sealed record Roll
         // much of this green is real, and then whose doing the rest was. A desk excuse says come back
         // when the machine is quiet; a budget this suite chose and missed says the number is wrong,
         // and a reader who cannot tell them apart cannot act on either.
-        return $", and {Excused.Count} check(s) were excused{Kinds(Excused)} — {string.Join(", ", facts)}";
+        return $", and {Excused.Count} check(s) were excused{Against()}{Kinds(Excused)} — {string.Join(", ", facts)}";
     }
 
     /// <summary>

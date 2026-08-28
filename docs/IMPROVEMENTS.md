@@ -28,31 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW289 A green that excused forty-three checks
-
-Measured on a guest run of 1747: it passed, and excused **49** checks where every run before excused
-8. Forty-three name one holder — `ShellExperienceHost 'Nova notificação'`. A notification toast took
-the foreground and held it, so the input cases could send nothing and each answered its own hole.
-
-Everything worked: WW133 makes a refused foreground a hole, WW281 puts every excuse in
-one ledger, and all forty-nine were printed. Nothing is silent — the reading is honest
-and the conclusion a reader draws is not, because a run that checked forty-three fewer
-things exits zero and prints the same word as one that checked them all.
-
-**Where it belongs is settled; the storage is a line short.** `TakeTheRoll` reads the
-ledger from `$(TargetDir)` and not `$(RollCallResults)`, so each run overwrites the one
-before and none survives — though every run already has a results directory to keep one
-in. Copying it there is the missing step; then the comparison is history, not a typed
-budget, which is the rule elsewhere.
-
-The shape: `RollCall` takes the results root, finds the most recent run that is not this
-one, reads its ledger and says *49, where the run before excused 8*. The logic lives in
-the tool the suite tests, and MSBuild passes one path rather than enumerating
-directories.
-
-Two arms it needs. A first run has no previous and must read as unknown, never as zero.
-And it stays a finding: the desk is not a defect in the code.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

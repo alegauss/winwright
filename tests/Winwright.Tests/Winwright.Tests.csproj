@@ -66,6 +66,19 @@
          it owns keeping it unique. -->
     <RollCallRun Condition="'$(RollCallRun)' == ''">$([System.DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss-fff'))-$([System.Guid]::NewGuid().ToString('N').Substring(0, 6))</RollCallRun>
     <RollCallResults>$(MSBuildThisFileDirectory)..\..\TestResults\$(RollCallRun)</RollCallResults>
+
+    <!-- WW289. The root every run keeps its ledger under, so this run's excuses can be said beside
+         the run before it. Held as its own property because the roll is passed the root and finds
+         the predecessor itself - MSBuild enumerating directories and picking the latest would put
+         the choosing in a place no test can reach.
+
+         Overridable, and that is the whole of what makes it work in the guest: the VM runner deletes
+         and re-extracts the repository tree every run, so a history under this repository's own
+         TestResults is gone before the next run can read it, and every guest run would report no
+         earlier run forever. The runner sets this to a directory outside the tree it wipes, the same
+         way WW150 sets RollCallRun - as an environment variable, which MSBuild reads as a property,
+         so the guest still types the command a developer types. -->
+    <RollCallRoot Condition="'$(RollCallRoot)' == ''">$(MSBuildThisFileDirectory)..\..\TestResults</RollCallRoot>
     <RollCallTool>$(MSBuildThisFileDirectory)..\..\tools\Winwright.RollCall\bin\$(Configuration)\$(TargetFramework)\Winwright.RollCall.dll</RollCallTool>
 
     <!-- A run writes no results file unless somebody asks for one, and the roll reads results. So
@@ -101,13 +114,25 @@
 
          The flag is described rather than spelled, because an XML comment cannot carry two hyphens in
          a row and this file refused to load with MSB4025 over exactly that. -->
-    <Exec Command="dotnet exec &quot;$(RollCallTool)&quot; --discovered &quot;$(RollCallResults)\discovered.txt&quot; --results &quot;$(RollCallResults)\winwright.trx&quot; --excused &quot;$(TargetDir)excused.txt&quot; 2&gt;&amp;1"
+    <Exec Command="dotnet exec &quot;$(RollCallTool)&quot; --discovered &quot;$(RollCallResults)\discovered.txt&quot; --results &quot;$(RollCallResults)\winwright.trx&quot; --excused &quot;$(TargetDir)excused.txt&quot; --against &quot;$(RollCallRoot)&quot; 2&gt;&amp;1"
           IgnoreExitCode="true"
           ConsoleToMSBuild="true"
           StandardOutputImportance="low">
       <Output TaskParameter="ExitCode" PropertyName="RollCallExit" />
       <Output TaskParameter="ConsoleOutput" ItemName="RollCallSaid" />
     </Exec>
+
+    <!-- WW289: this run's ledger kept for the run after this one, because $(TargetDir) holds one
+         ledger that every run truncates - the count is only still on disk if somebody puts a copy
+         somewhere named for the run that produced it.
+
+         After the roll and never before it: the roll reads this root for a predecessor, and a ledger
+         filed under this run's own name while it is still being taken is a run comparing itself with
+         itself and finding nothing changed. Conditional because a run that excused nothing writes no
+         ledger at all, which is a copy that would otherwise fail on the cleanest run there is. -->
+    <Copy SourceFiles="$(TargetDir)excused.txt"
+          DestinationFolder="$(RollCallRoot)\$(RollCallRun)"
+          Condition="Exists('$(TargetDir)excused.txt')" />
 
     <Error Condition="'$(RollCallExit)' != '0'"
            Code="WW117"

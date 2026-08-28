@@ -5,7 +5,6 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-- 📋 **WW289** (deps: —) **a toast takes the desk and the run excuses 43 checks, reading as green as one that excused 8** — The count is compared with nothing, and the ledger the comparison needs is overwritten each run rather than kept beside that run's own results. → §WW289
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -18,7 +17,7 @@
 ## Block F — Assert — the expectation is derived, never typed
 
 - ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
-- ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Nine reds, and the substituted character is always the last one sent — one or more of them, at no fixed position, with the array ruled out. → §WW249
+- ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Ten reds, and the substituted character is always the last one sent — one or more of them, at no fixed position, with the array ruled out. → §WW249
 
 ## Block G — The scenario — a case is a data file
 

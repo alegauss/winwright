@@ -50,6 +50,7 @@ public static class Program
         string? listing = null;
         string? results = null;
         string? excused = null;
+        string? against = null;
         var most = 25;
 
         for (var index = 0; index + 1 < args.Length; index += 2)
@@ -68,6 +69,14 @@ public static class Program
                 case "--excused":
                     excused = args[index + 1];
                     break;
+
+                // WW289. The results root every run writes a directory under, so this run's count can
+                // be said beside the one before it. Optional and asked the same way `--excused` is:
+                // not passing it is not asking, and a root with no earlier run in it answers "there
+                // was none" rather than zero.
+                case "--against":
+                    against = args[index + 1];
+                    break;
                 case "--most" when int.TryParse(args[index + 1], out var many) && many > 0:
                     most = many;
                     break;
@@ -80,7 +89,7 @@ public static class Program
         {
             wrong.WriteLine(
                 "usage: Winwright.RollCall --discovered <dotnet test --list-tests output> "
-                    + "--results <trx> [--excused <ledger>] [--most n]");
+                    + "--results <trx> [--excused <ledger>] [--against <results root>] [--most n]");
             return Unreadable;
         }
 
@@ -91,9 +100,21 @@ public static class Program
             // one and hears nothing about excuses; a caller that did takes the three-argument one, and
             // a ledger that is not there then reads as unknown rather than as none. Calling the second
             // either way is what made every run of this tool claim its excuses were unread.
-            roll = excused is null
-                ? Roll.Of(Readers.DiscoveredIn(listing), Readers.RecordedIn(results))
-                : Roll.Of(Readers.DiscoveredIn(listing), Readers.RecordedIn(results), Readers.ExcusedIn(excused));
+            // WW289. Three overloads and three questions, and which one is called is the asking: no
+            // ledger flag hears nothing about excuses, a ledger alone hears the count, and a ledger
+            // with a root hears it beside the run before. `--against` without `--excused` is a caller
+            // asking to compare a number nobody read, so it is ignored rather than answered.
+            roll = (excused, against) switch
+            {
+                (null, _) => Roll.Of(Readers.DiscoveredIn(listing), Readers.RecordedIn(results)),
+                (_, null) => Roll.Of(
+                    Readers.DiscoveredIn(listing), Readers.RecordedIn(results), Readers.ExcusedIn(excused)),
+                _ => Roll.Of(
+                    Readers.DiscoveredIn(listing),
+                    Readers.RecordedIn(results),
+                    Readers.ExcusedIn(excused),
+                    Readers.ExcusedBefore(against, Path.GetDirectoryName(Path.GetFullPath(results)) ?? against)),
+            };
         }
         catch (Exception unreadable) when (unreadable is IOException or InvalidDataException or UnauthorizedAccessException)
         {
