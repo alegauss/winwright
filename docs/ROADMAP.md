@@ -23,6 +23,8 @@
 
 ## Block G — The scenario — a case is a data file
 
+- 📋 **WW296** (deps: —) **one concept is spelled as three step fields, twice over, and a reader meets six** — The engine models each as a target and a mode, and the format publishes the modes as separate keys — so the grammar grew six fields for two ideas in one session. → §WW296
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness

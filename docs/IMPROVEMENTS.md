@@ -172,6 +172,30 @@ are derived at all.
 
 ## Block G — The scenario — a case is a data file
 
+### §WW296 Six fields for two ideas
+
+`covers`, `coversAtLeast` and `coversWithin` are one set compared three ways. `sameAs`,
+`unlike` and `sameCountdownAs` are one earlier step compared three ways. Inside, each is
+already a target and a mode — `Sweeps` with `Matching`, and one pointer with a flag
+beside it — and the format publishes the modes as six keys.
+
+All six landed in one session, each from a real migration and each justified where it
+sits. That is how a grammar grows sideways: no single field is wrong, and the sixth is
+not obviously worse than the fifth.
+
+The argument for keeping them is this project's own. WW267 refused a second meaning for
+`with` because a step whose argument means different things depending on what the
+application contains is one nobody can read, and a mode key brings that back — `covers`
+plus `covering: within` is two things to hold to know what one step claims, and a file
+omitting the mode reads as the exact claim whether or not the author meant it.
+
+The argument against is the count. Six keys where a reader looks for one idea is a
+format that teaches itself badly, and the families are already spelled as families: the
+prefix says which idea and the suffix which mode, in the name rather than in a value.
+
+Not a refactor to reach for. What it wants first is a reader who did not write them
+saying which costs more, because the author of the sixth is the worst judge of that.
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
