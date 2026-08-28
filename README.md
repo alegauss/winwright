@@ -850,8 +850,11 @@ pack-local.cmd           pack into packages\ for a side-by-side adopting clone, 
 ```
 
 The suite creates real windows, takes the foreground and synthesises input, which is why the second
-one exists. A bare `dotnet test` takes the roll call too: a run short of what discovery found is not
-reported as a pass.
+one exists. A bare `dotnet test` takes the roll call on a run that passed and not on one that failed:
+MSBuild skips an `AfterTargets` where the target it follows failed, so the roll goes quiet on exactly
+the run whose reading is hardest. The first goes through a target that reaches it either way, which
+is why it is the command rather than a convenience over one — a run short of what discovery found is
+not reported as a pass, and a red run still says what it excused.
 
 The third exists only until the engine is published, and it is a trap rather than a convenience.
 The version in `packages\` never changes, and NuGet extracts a package once per version — so a plain
