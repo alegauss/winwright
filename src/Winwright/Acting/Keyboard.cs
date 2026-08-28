@@ -301,17 +301,18 @@ public static class Keyboard
         // One input pair per UTF-16 code unit, as Unicode rather than as a virtual key: a scan
         // code would go through the keyboard layout, and then what arrives depends on which one
         // the desk happens to have loaded.
-        var inputs = new List<Win32.Input>(text.Length * 2);
+        //
+        // WW249: one call per pair, and never one call carrying the whole string. Measured by WW302
+        // over 400 rounds each way, alternated under one desk — a single `SendInput` carrying every
+        // code unit substituted 14 times, and sending them a call at a time substituted none. What
+        // arrived was the last code unit of the batch, at a position that varied, which is why the
+        // reds said `WW246-2` had been read as `W2246-2`.
+        //
+        // The argument this replaces was that the array could not be the cause, `SendInput` being
+        // documented to queue the events and return. That predicted no difference between the two
+        // shapes, and there is one — so the reading was wrong and the measurement stands.
         foreach (var character in text)
-        {
-            inputs.Add(Typed(character, 0));
-            inputs.Add(Typed(character, Win32.KeyUp));
-        }
-
-        if (inputs.Count == 0)
-            return;
-
-        Press([.. inputs]);
+            Press([Typed(character, 0), Typed(character, Win32.KeyUp)]);
     }
 
     private static Win32.Input Typed(char character, uint flags) => new()
