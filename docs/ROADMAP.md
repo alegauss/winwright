@@ -37,6 +37,7 @@
 - 📋 **WW87** (deps: Block G, Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 - ⏳ **WW230** (deps: —) **the only place the engine's package exists is a folder inside this repository** — Nothing is published yet, so the adopter's `nuget.config` is still a path across two clones. → §WW230
+- 💭 **WW301** (deps: —) **the engine's package never reaches the guest, so no adoption case can run there** — packages/ is gitignored so the runner never carries it and the guest fails NU1301; carrying it would unblock WW78 and WW82 without publishing, at the cost of WW271's trap. → §WW301
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
