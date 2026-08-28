@@ -91,6 +91,16 @@ public static class Program
             return 0;
         }
 
+        // WW294. The scalar beside `--profiles`: one line, so a case can compare a reading against a
+        // fact this application knows and no case could type. The first of the set, deliberately —
+        // what matters is that the two answer consistently, which is what a case asserting the marks
+        // on a submenu is actually about.
+        if (shapes.Has("profile"))
+        {
+            Console.Out.WriteLine(Store.Profiles[0]);
+            return 0;
+        }
+
         // WW279. Before the resident arm and before any window: what this shape is is a launch that
         // is gone by the time anything looks at it, and a process that drew something first would be
         // a different defect. It exits rather than throwing, because a tray that crashes on startup

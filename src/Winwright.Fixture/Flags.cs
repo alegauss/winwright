@@ -299,6 +299,12 @@ public sealed record Flags
             "the menu case counts profile entries against the application's own read-out, and profiles are the machine's data rather than the product's vocabulary - so there was no strings file to derive the expected set from and the number would have been typed into the case",
             Draws: false),
         new Flag(
+            "profile",
+            "",
+            "print the one profile this application is currently using, and exit - the single value a case compares against, where the set flag prints them all",
+            "the states a tray submenu marks - which profile the icon follows, which one the environment selects - are single facts about this machine rather than a list, and a case naming one passes on the desk it was written on and fails on every other",
+            Draws: false),
+        new Flag(
             "dies",
             "",
             "a launch that exits on startup, drawing nothing and leaving nothing for a step to find",

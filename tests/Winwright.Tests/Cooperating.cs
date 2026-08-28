@@ -264,6 +264,11 @@ internal static class Cooperating
         new("DerivedSet.Reported", Cooperation.None, false,
             "the expected set out of what the application prints when the project's arguments ask it"),
 
+        // WW294. The scalar beside it, and on the same axis for the same reason: an application that
+        // can be asked what it is doing is one with a flag, not one carrying the harness's other half.
+        new("DerivedSet.ReportedValue", Cooperation.None, false,
+            "one expected value out of what the application prints, where the answer is not a set"),
+
         new("Loading.In", Cooperation.None, false,
             "whether a page has finished computing, read off the tree against the project's own "
                 + "loading label — and a page it could not walk answers that it did not look"),

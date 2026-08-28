@@ -59,29 +59,47 @@ public sealed class ProjectDeclaration
         Timeouts = Timeouts.Declared(shape.Timeouts, path);
         Destructive = Destructive.Of(shape.Destructive, LanguageFiles, path);
 
-        // WW260. Names trimmed and arguments kept as written: a name is what a case says, and the
-        // arguments are what the application is asked. A set declared with no arguments is refused
-        // here rather than at the run that would have asked the application nothing and read whatever
-        // it prints when it is asked nothing.
-        var reported = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
-        foreach (var (name, arguments) in shape.ReportedSets ?? [])
+        // WW260, and WW294 beside it. Both wells are a name and the arguments that answer it, so both
+        // are read by one thing: a second spelling of that would be a second set of rules to keep in
+        // step. What differs between them is what comes back, which is the reader's business and not
+        // the declaration's.
+        ReportedSets = new ReadOnlyDictionary<string, IReadOnlyList<string>>(
+            Asked(shape.ReportedSets, "reportedSet", path));
+
+        ReportedValues = new ReadOnlyDictionary<string, IReadOnlyList<string>>(
+            Asked(shape.ReportedValues, "reportedValue", path));
+    }
+
+    /// <summary>
+    /// One well of things the application reports, by name, with the arguments that ask for each.
+    /// WW294: written once because the set well and the value well differ in what they read back and
+    /// in nothing about how they are declared.
+    /// </summary>
+    /// <param name="declared">What the file said, or null where it said nothing.</param>
+    /// <param name="what">What one of them is called, as a refusal spells it.</param>
+    /// <param name="path">The declaration file, for the refusal.</param>
+    private static Dictionary<string, IReadOnlyList<string>> Asked(
+        Dictionary<string, IReadOnlyList<string>>? declared, string what, string path)
+    {
+        var asked = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+        foreach (var (name, arguments) in declared ?? [])
         {
             var called = name?.Trim() ?? "";
             if (called.Length == 0)
-                throw new ArgumentException($"{path} declares a reportedSet with no name", nameof(shape));
+                throw new ArgumentException($"{path} declares a {what} with no name", nameof(declared));
 
             if (arguments is null || arguments.Count == 0)
             {
                 throw new ArgumentException(
-                    $"{path} declares the reportedSet '{called}' with no arguments, so nothing says how "
-                        + "the application is asked for it",
-                    nameof(shape));
+                    $"{path} declares the {what} '{called}' with no arguments, so nothing says how the "
+                        + "application is asked for it",
+                    nameof(declared));
             }
 
-            reported[called] = new ReadOnlyCollection<string>([.. arguments]);
+            asked[called] = new ReadOnlyCollection<string>([.. arguments]);
         }
 
-        ReportedSets = new ReadOnlyDictionary<string, IReadOnlyList<string>>(reported);
+        return asked;
     }
 
     /// <summary>The declaration file that was read.</summary>
@@ -172,6 +190,24 @@ public sealed class ProjectDeclaration
     /// </para>
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyList<string>> ReportedSets { get; }
+
+    /// <summary>
+    /// The single values the application reports about itself, by name, each holding the arguments
+    /// that make it print one.
+    /// <para>
+    /// WW294. The scalar beside <see cref="ReportedSets"/>, and it exists because that one is the
+    /// wrong shape for most of what an application knows about itself. Measured reading claude-tray's
+    /// check script: it pulls eight facts out of one report, and only the first is a set — the rest
+    /// are single values, like which profile the icon follows and which one the environment selects.
+    /// </para>
+    /// <para>
+    /// <c>label</c> is the near miss and answers a different question: that derives a value from the
+    /// project's <em>strings</em>, which is right for a word the product ships and wrong for a fact
+    /// about this machine. A case can type neither — an account name passes on the desk it was written
+    /// on and fails on every other.
+    /// </para>
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> ReportedValues { get; }
 
     /// <summary>The source root a staleness check compares the built binary against.</summary>
     /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
@@ -295,6 +331,8 @@ public sealed class ProjectDeclaration
         [JsonPropertyName("destructive")] public IReadOnlyList<System.Text.Json.JsonElement>? Destructive { get; init; }
 
         [JsonPropertyName("reportedSets")] public Dictionary<string, IReadOnlyList<string>>? ReportedSets { get; init; }
+
+        [JsonPropertyName("reportedValues")] public Dictionary<string, IReadOnlyList<string>>? ReportedValues { get; init; }
     }
 
     private sealed record LanguageShape

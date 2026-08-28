@@ -43,6 +43,7 @@ public sealed record StepDeclaration
         string? notLabel,
         string? unlike,
         string? sameCountdownAs,
+        string? expectReported,
         bool eachSpoken,
         bool ownHeader,
         Asserting.SetMatch matching = Asserting.SetMatch.Exactly)
@@ -69,6 +70,7 @@ public sealed record StepDeclaration
         NotLabel = notLabel;
         Unlike = unlike;
         SameCountdownAs = sameCountdownAs;
+        ExpectReported = expectReported;
         EachSpoken = eachSpoken;
         OwnHeader = ownHeader;
     }
@@ -336,6 +338,24 @@ public sealed record StepDeclaration
     /// </summary>
     public string? SameCountdownAs { get; }
 
+    /// <summary>
+    /// The name whose value the application reports and this step's reading should be, or null where
+    /// the step makes another claim.
+    /// <para>
+    /// WW294. `expect` with the value read from the application rather than typed. <see cref="Label"/>
+    /// is the near miss and answers a different question: that derives from the project's
+    /// <em>strings</em>, which is right for a word the product ships and wrong for a fact about this
+    /// machine. Which profile a tray icon follows is neither typed nor translated — it is what this
+    /// desk happens to be doing, and a case naming it passes here and fails everywhere else.
+    /// </para>
+    /// <para>
+    /// The scalar beside `covers` and its two relatives, which all compare a set. Measured reading
+    /// claude-tray's check script: it pulls eight facts out of one read-out and only the first is a
+    /// set — the rest are single values, and there was nowhere for them to be declared.
+    /// </para>
+    /// </summary>
+    public string? ExpectReported { get; }
+
     /// <summary>Which reading the expectation is about. <see cref="ReadBack.Anything"/> by default.</summary>
     public ReadBack Reads { get; }
 
@@ -462,6 +482,7 @@ public sealed record StepDeclaration
         || Expected is not null || Moves || Answers || Sweeps is not null || Matches is not null || Discloses
         || SameAs is not null || Never is not null || Spoken
         || Label is not null || NotLabel is not null || Unlike is not null || SameCountdownAs is not null
+        || ExpectReported is not null
         || EachSpoken || OwnHeader;
 
     /// <summary>
@@ -496,6 +517,10 @@ public sealed record StepDeclaration
     /// <param name="label">The key whose declared string the reading should be.</param>
     /// <param name="notLabel">The key whose declared string the reading should not be.</param>
     /// <param name="unlike">The earlier step this one claims its reading differs from.</param>
+    /// <param name="expectReported">
+    /// The name whose value the application reports and the reading should be, declared in the
+    /// project's <c>reportedValues</c>. WW294, and never beside <paramref name="expected"/>.
+    /// </param>
     /// <param name="sameCountdownAs">
     /// The earlier step this one claims its reading is back to, allowing the last number in it to have
     /// ticked down by one. WW269, and at most one of this, <paramref name="sameAs"/> and
@@ -537,6 +562,7 @@ public sealed record StepDeclaration
         string? notLabel = null,
         string? unlike = null,
         string? sameCountdownAs = null,
+        string? expectReported = null,
         bool eachSpoken = false,
         bool ownHeader = false,
         string? tray = null,
@@ -589,7 +615,7 @@ public sealed record StepDeclaration
         }
 
         if (named_tray is not null)
-            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, unlike, sameCountdownAs, eachSpoken, ownHeader);
+            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, unlike, sameCountdownAs, expectReported, eachSpoken, ownHeader);
 
         // WW263 and WW273. A locator with a brace in it has to parse with something in it as well as
         // with the placeholder, and both are facts about the file rather than about a run. Probed here
@@ -641,6 +667,20 @@ public sealed record StepDeclaration
         // every rule below that names one of the three has to know about it or it names the wrong one.
         var ticking = string.IsNullOrWhiteSpace(sameCountdownAs) ? null : sameCountdownAs.Trim();
 
+        // WW294, computed with the others for the reason all of them are: a step whose only claim is
+        // this one must not be refused as a step that claims nothing.
+        var reportedly = string.IsNullOrWhiteSpace(expectReported) ? null : expectReported.Trim();
+
+        // It is `expect` with the value read from the application, so the two together are one claim
+        // written twice — and which of them the run would honour is whichever the code reads first.
+        if (reportedly is not null && !string.IsNullOrWhiteSpace(expected))
+        {
+            throw new ScenarioRefusedException(
+                string.IsNullOrWhiteSpace(named) ? "<a step>" : named.Trim(),
+                $"it expects '{expected}' and also the value the application reports under "
+                    + $"'{reportedly}'; a step answers one thing, and these are two");
+        }
+
         if (ticking is not null && (back ?? apart) is { } alsoPointing)
         {
             throw new ScenarioRefusedException(
@@ -660,7 +700,8 @@ public sealed record StepDeclaration
 
         var claims = wanted is not null || moves || answers || sweeping is not null || pattern is not null
             || discloses || back is not null || apart is not null || forbidden is not null || spoken
-            || declared is not null || undeclared is not null || ticking is not null || eachSpoken || ownHeader;
+            || declared is not null || undeclared is not null || ticking is not null || reportedly is not null
+            || eachSpoken || ownHeader;
 
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
         // says it moved where it was something else. A step asserting both would owe two assertion
@@ -1061,6 +1102,7 @@ public sealed record StepDeclaration
             undeclared,
             apart,
             ticking,
+            reportedly,
             eachSpoken,
             ownHeader,
             matching);
@@ -1101,6 +1143,7 @@ public sealed record StepDeclaration
         string? notLabel,
         string? unlike,
         string? sameCountdownAs,
+        string? expectReported,
         bool eachSpoken,
         bool ownHeader)
     {
@@ -1130,6 +1173,7 @@ public sealed record StepDeclaration
             ("sameAs", sameAs is not null),
             ("unlike", unlike is not null),
             ("sameCountdownAs", sameCountdownAs is not null),
+            ("expectReported", expectReported is not null),
             ("label", label is not null),
             ("notLabel", notLabel is not null),
             ("never", never is not null),
@@ -1155,7 +1199,7 @@ public sealed record StepDeclaration
 
         return new StepDeclaration(
             subject, null, tray, act, null, null, ReadBack.Named(null), false, false, null, false, null,
-            false, null, null, false, null, null, null, null, false, false);
+            false, null, null, false, null, null, null, null, null, false, false);
     }
 
     /// <summary>

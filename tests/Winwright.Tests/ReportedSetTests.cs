@@ -170,8 +170,12 @@ public sealed class ReportedSetTests : IDisposable
             "profiles"));
 
         // Refused for having exited non-zero, which is the arm above the empty one: what an
-        // application prints on its way to a failure is not a set either.
-        Assert.Contains("is not a set", refused.Message, StringComparison.Ordinal);
+        // application prints on its way to a failure is not an answer.
+        //
+        // WW294 widened that word. The reader is now shared with the value well, so a refusal saying
+        // "is not a set" would be wrong half the time it fires — the run failed, and what it printed
+        // is not an answer to either question.
+        Assert.Contains("is not an answer", refused.Message, StringComparison.Ordinal);
     }
 
     [Fact]

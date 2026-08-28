@@ -563,6 +563,26 @@ public static class CaseRun
             }
         }
 
+        // WW294. Resolved beside the label above and for the same reason: both turn a name into the
+        // value an expectation is about, and both must be answered before anything is compared. The
+        // difference is only the well — one reads the strings the project ships, the other asks the
+        // application what this machine is doing.
+        //
+        // Once and not per attempt: asking the application three times for one expectation is three
+        // launches for one answer, and a value that changed between them would make a retry compare
+        // against a moving target.
+        if (step.ExpectReported is { } reported)
+        {
+            try
+            {
+                declared = DerivedSet.ReportedValue(step.Name, project, reported);
+            }
+            catch (UnderivableSetException underivable)
+            {
+                throw new ScenarioRefusedException(step.Name, underivable.Message);
+            }
+        }
+
         // WW255. Looked up once, before the attempts: the value a round trip is about was read when
         // the earlier step ran, and a lookup inside the retry would be the same answer fetched three
         // times. Absent only where that step stopped the case, which is a state this never reaches.
@@ -1407,7 +1427,7 @@ public static class CaseRun
         // positive is the expectation `expect` makes against a value the engine derived, and the
         // negative says so through the same trick `discloses` uses to state a negative to a machine
         // that compares for equality.
-        if (step.Label is not null || step.NotLabel is not null)
+        if (step.Label is not null || step.NotLabel is not null || step.ExpectReported is not null)
             return Against(step, subject, acted, declared);
 
         if (step.Expected is not { } wanted)
@@ -1478,10 +1498,18 @@ public static class CaseRun
     private static Landed Against(StepDeclaration step, Subject subject, ActResult? acted, string? declared)
     {
         var saw = acted?.Element;
-        var key = step.Label ?? step.NotLabel;
-        var wanted = step.Label is not null
-            ? $"'{key}' — {declared}"
-            : $"anything but '{key}' — {declared}";
+        var key = step.Label ?? step.NotLabel ?? step.ExpectReported;
+
+        // WW294 joins the positive arm: it is `expect` with the value read from the application, so
+        // the comparison is the one `label` already makes and only where the value came from differs.
+        // The sentence says which well it was, because a reader of a red needs to know whether to go
+        // to a strings file or to the machine.
+        var wanted = (step.NotLabel, step.ExpectReported) switch
+        {
+            (not null, _) => $"anything but '{key}' — {declared}",
+            (_, not null) => $"the '{key}' this application reports — {declared}",
+            _ => $"'{key}' — {declared}",
+        };
 
         var expectation = Expect.That(
             step.Name,
@@ -1503,7 +1531,7 @@ public static class CaseRun
                 // and `discloses` both use to say something other than equality to a machine that
                 // compares for it — and what keeps the key in the sentence a failure carries.
                 var same = string.Equals(now, declared, StringComparison.Ordinal);
-                return (step.Label is not null) == same ? wanted : now;
+                return (step.NotLabel is null) == same ? wanted : now;
             },
             subject.ActMs,
             subject.PollMs);

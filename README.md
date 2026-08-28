@@ -248,6 +248,7 @@ needs one this file does not declare is **recorded as not taken**, never quietly
   "fingerprintStore": "%APPDATA%/YourApp",
   "languageFiles": ["strings.en.json", "strings.pt-BR.json"],
   "reportedSets": { "profiles": ["--print-profiles"] },
+  "reportedValues": { "activeProfile": ["--print-active-profile"] },
   "loading": ["report.computing", "common.pleaseWait"],
   "language": { "preferenceFile": "settings.json", "preferenceKey": "ui.language", "fallback": "en" },
   "timeouts": { "resolve": 5000, "stop": 5000 },
@@ -482,7 +483,21 @@ a case naming the flag would be a case that runs on one checkout. The applicatio
 line, and an empty report or a non-zero exit is **broken and not failed**, since an empty expected set
 is met by an empty window. A name declared in both wells derives from the application and says so —
 the set's source names the strings key it shadowed, because a collision is not necessarily a mistake
-and a silent one is. This is what makes a count derived rather than typed — a case asserting two
+and a silent one is.
+
+Most of what an application knows about itself is **not** a set, so `reportedValues` is the scalar
+beside it and `expectReported` names one:
+
+```json
+{ "locator": "Text#profile", "act": "read", "reads": "name", "expectReported": "activeProfile" }
+```
+
+That is `expect` with the value read from the application rather than typed. `label` is the near miss
+and answers a different question — it derives from the project's **strings**, which is right for a word
+the product ships and wrong for a fact about this machine. Which account is in use, which one an
+environment variable selects, whether a toggle is on: a case naming any of those passes on the desk it
+was written on and fails on every other. The read-out must print exactly one line; several is a set and
+says so, and none has told the case nothing. This is what makes a count derived rather than typed — a case asserting two
 profile entries goes on asserting two after a third is added, and says nothing when it stops covering
 what it was written for.
 

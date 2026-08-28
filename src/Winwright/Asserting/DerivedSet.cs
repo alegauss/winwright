@@ -428,6 +428,56 @@ public sealed record DerivedSet
     }
 
     /// <summary>
+    /// One value the application reports about itself, read by running it the way the project says.
+    /// <para>
+    /// WW294. The scalar beside <see cref="Reported"/>, and it exists because most of what an
+    /// application knows about itself is not a set: which profile an icon follows, which one the
+    /// environment selects, whether a toggle is on. A case can type none of them — they are this
+    /// machine's state, so a case naming one passes on the desk it was written on and fails on every
+    /// other, which is the defect the derived expectation exists to refuse.
+    /// </para>
+    /// <para>
+    /// One line and exactly one. A read-out that answers several is a set and belongs in the other
+    /// well, and one that answers none has told the case nothing — both are refused rather than
+    /// guessed at, for the reason an empty set is: what a run cannot read, it cannot claim.
+    /// </para>
+    /// </summary>
+    /// <param name="named">What the value is, as a report names it.</param>
+    /// <param name="declaration">The project, for the executable and what it declared.</param>
+    /// <param name="under">The name of the reported value, as the project declares it.</param>
+    /// <exception cref="UnderivableSetException">Where the project declares no such value, or it cannot be read.</exception>
+    public static string ReportedValue(string named, ProjectDeclaration declaration, string under)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(named);
+        ArgumentNullException.ThrowIfNull(declaration);
+        ArgumentException.ThrowIfNullOrWhiteSpace(under);
+
+        var key = under.Trim();
+        if (!declaration.ReportedValues.TryGetValue(key, out var arguments))
+        {
+            var has = declaration.ReportedValues.Count == 0
+                ? "it declares no reportedValues at all"
+                : $"it declares {string.Join(", ", declaration.ReportedValues.Keys.Select(one => $"'{one}'"))}";
+
+            throw new UnderivableSetException(
+                $"{named} is derived from what the application reports under '{key}', and {declaration.Path}: {has}");
+        }
+
+        var lines = Printed(named, declaration, key, arguments);
+
+        return lines.Count switch
+        {
+            1 => lines[0],
+            0 => throw new UnderivableSetException(
+                $"{named}: {declaration.Executable} reported nothing under '{key}', so there is no value to "
+                    + "compare against"),
+            _ => throw new UnderivableSetException(
+                $"{named}: {declaration.Executable} reported {lines.Count} lines under '{key}' and a value is "
+                    + "one — declare it as a reportedSet where it is a set"),
+        };
+    }
+
+    /// <summary>
     /// The set the application reports about itself, derived by running it the way the project says
     /// and reading one value per line.
     /// <para>
@@ -469,49 +519,9 @@ public sealed record DerivedSet
                 $"{named} is derived from what the application reports under '{key}', and {declaration.Path}: {has}");
         }
 
-        var start = new System.Diagnostics.ProcessStartInfo(declaration.Executable)
-        {
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-        };
-
-        foreach (var argument in arguments)
-            start.ArgumentList.Add(argument);
-
-        string printed;
-        int code;
-        try
-        {
-            using var running = System.Diagnostics.Process.Start(start)
-                ?? throw new UnderivableSetException(
-                    $"{named}: {declaration.Executable} started nothing that could be asked for '{key}'");
-
-            // Read before the wait: a process filling a redirected pipe nobody is reading blocks on
-            // the write, and this would then wait out an application that had already done its work.
-            printed = running.StandardOutput.ReadToEnd();
-            running.WaitForExit();
-            code = running.ExitCode;
-        }
-        catch (Exception refused) when (refused is System.ComponentModel.Win32Exception or InvalidOperationException)
-        {
-            throw new UnderivableSetException(
-                $"{named}: {declaration.Executable} could not be asked for '{key}' — {refused.Message}");
-        }
-
-        if (code != 0)
-        {
-            throw new UnderivableSetException(
-                $"{named}: {declaration.Executable} exited {code} when asked for '{key}', so what it printed "
-                    + "is not a set");
-        }
-
-        var values = printed
-            .Split('\n')
-            .Select(one => one.Trim())
-            .Where(one => one.Length > 0)
-            .Distinct(StringComparer.Ordinal)
-            .ToList();
+        // Distinct here and not in the reader: a value well reading two identical lines has been asked
+        // for one thing and answered twice, which is a refusal rather than a set of one.
+        var values = Printed(named, declaration, key, arguments).Distinct(StringComparer.Ordinal).ToList();
 
         if (values.Count == 0)
         {
@@ -657,6 +667,67 @@ public sealed record DerivedSet
         }
 
         return $"{where}, less {string.Join(" and ", parts)}";
+    }
+
+    /// <summary>
+    /// Run the application the way the project says and hand back the lines it printed, blank ones
+    /// dropped and order kept.
+    /// <para>
+    /// WW260 and WW294. One reader for both wells: a set is the lines and a value is the single line,
+    /// and everything before that — starting it, reading the pipe before waiting so a full buffer
+    /// cannot deadlock, and refusing a run that failed — is the same question asked once.
+    /// </para>
+    /// <para>
+    /// Nothing is parsed beyond the split. A format with structure in it is a second thing to keep in
+    /// step with the application, and the only thing an expectation needs is what the values are.
+    /// </para>
+    /// </summary>
+    /// <param name="named">What is being derived, for the refusals.</param>
+    /// <param name="declaration">The project, for the executable.</param>
+    /// <param name="key">The name being asked for, for the refusals.</param>
+    /// <param name="arguments">What the application is run with.</param>
+    /// <exception cref="UnderivableSetException">Where it will not start, or exits non-zero.</exception>
+    private static List<string> Printed(
+        string named, ProjectDeclaration declaration, string key, IReadOnlyList<string> arguments)
+    {
+        var start = new System.Diagnostics.ProcessStartInfo(declaration.Executable)
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+        };
+
+        foreach (var argument in arguments)
+            start.ArgumentList.Add(argument);
+
+        string printed;
+        int code;
+        try
+        {
+            using var running = System.Diagnostics.Process.Start(start)
+                ?? throw new UnderivableSetException(
+                    $"{named}: {declaration.Executable} started nothing that could be asked for '{key}'");
+
+            // Read before the wait: a process filling a redirected pipe nobody is reading blocks on
+            // the write, and this would then wait out an application that had already done its work.
+            printed = running.StandardOutput.ReadToEnd();
+            running.WaitForExit();
+            code = running.ExitCode;
+        }
+        catch (Exception refused) when (refused is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            throw new UnderivableSetException(
+                $"{named}: {declaration.Executable} could not be asked for '{key}' — {refused.Message}");
+        }
+
+        if (code != 0)
+        {
+            throw new UnderivableSetException(
+                $"{named}: {declaration.Executable} exited {code} when asked for '{key}', so what it printed "
+                    + "is not an answer");
+        }
+
+        return printed.Split('\n').Select(one => one.Trim()).Where(one => one.Length > 0).ToList();
     }
 
     /// <summary>
