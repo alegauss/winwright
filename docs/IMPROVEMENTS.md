@@ -100,49 +100,21 @@ So the characters **arrived at the window already substituted**. Not a text box 
 lost one under load — the window was handed the wrong text — which rules out WPF, the
 control and everything above the queue. It is the send.
 
-**The eighth sharpens the rule and breaks half of it.** Seven reds fitted *one character
-becomes the last one sent, length for length*. The eighth substituted two:
+**The rule, over ten reds.** One character or more becomes the last one sent, length for
+length, at no fixed position. The eighth substituted two — `WW246-5` delivered
+`W5245-5`, both becoming `5` — and the ninth put it at index 0.
 
-        typed WW246-5     delivered W5245-5
+**The batch is necessary, and the earlier acquittal was wrong.** WW302 typed 400 rounds
+each way, alternated under one desk. One `SendInput` carrying every code unit
+substituted 14 times; the same text as one call per code unit substituted none. The
+argument that cleared the array — that `SendInput` queues serially and returns, so
+nothing afterwards can reach a message — predicted no difference, and there is one. All
+14 keep the rule: `WW302-88` read `8W302-88`, `WW302-165` read `WW302-155`.
 
-Both became `5`, the last character sent, seven for seven. So it is one **or more**,
-each taking the last element's value — and the ninth, `2W246-2`, put it at index 0, so
-no slot is fixed either.
-
-`Keyboard.Send` builds one input pair per UTF-16 code unit, each a fresh struct, into a
-single `SendInput`, the union written so its size is right on x64. That path has no
-defect producing this, and **the array is ruled out with it.** `SendInput` inserts the
-events serially and returns once they are queued, so nothing the array does afterwards
-can reach a message — the standing suspect was never one. What is left is between
-insertion and `WM_CHAR`, which is the queue.
-
-`VK_PACKET` before `TranslateMessage` is measured out. Every lParam is `00000001`, the
-scan code having eight bits where a code unit needs sixteen. The count is all it claims.
-
-### §WW302 An experiment rather than a tenth observation
-
-Ten reds have narrowed WW249 to one boundary and stopped there. WPF, the control and the
-message pump are out — `Arrivals` shows the characters reaching the window already
-substituted. The send is out by reading: `Keyboard.Send` builds one input pair per
-UTF-16 code unit into a single array, and `SendInput` queues them before returning, so
-nothing afterwards can reach a message. What is left is between insertion and `WM_CHAR`.
-
-The eleventh red will say the same. `WpfInputTests` types five rounds and stops at the
-first substitution, so a run yields at most one measurement and only about one run in
-four yields any — ten afternoons for ten data points, all of the same kind.
-
-What divides the boundary is a comparison, not another sighting. `Press` sends the whole
-array in one `SendInput`; the same text as one call per code unit is the other side of
-it. If the substitution follows the batch, the array is implicated despite the reasoning
-ruling it out, and the reasoning is what is wrong. If it follows both, the queue theory
-survives having been tested rather than assumed.
-
-Counted rather than asserted, and in one run rather than across many: some hundreds of
-rounds each way, reporting the rate and the positions, with no red at all. A measurement
-that fails is one nobody repeats.
-
-It belongs beside the suite and not in it — a run that types for minutes is not a check
-every guest run should pay for.
+So it is the batch rather than the queue at large, and reading rather than measuring is
+what got this wrong twice. `VK_PACKET` before `TranslateMessage` stays measured out:
+every lParam is `00000001`, the scan code having eight bits where a code unit needs
+sixteen.
 
 ## Block G — The scenario — a case is a data file
 

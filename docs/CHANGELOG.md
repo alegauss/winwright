@@ -207,6 +207,7 @@
 - ✅ **WW294** **an expectation whose value the application reports can only be a set, and the submenu's marks are single values** — claude-tray answers `--menu-state` as one line by the same calls its report makes, so the profile a check mark should be on is a value and no longer a regex over prose.
 - ✅ **WW295** **a locator can be built out of a declared string but never out of a value the application reports** — A locator brace spelled `{report:name}` is answered by asking the application, once per run, so a case can select the element only the machine's own state can name.
 - ✅ **WW300** **which excuses recur across runs is unreadable, so this suite's own structure and a busy desk read alike** — The four earlier ledgers are intersected by case: a guest run of 1816 said 8 excused, and none of them is new — one clause, because all eight recurring made a per-line mark useless.
+- ✅ **WW302** **WW249 gains a red every fourth run and no experiment, so each one observes what nine already did** — 400 rounds each way, alternated under one desk: 14 substitutions batched against 0 sent one code unit at a time, which is the division ten sightings could not make.
 
 ## Block G — The scenario — a case is a data file
 
