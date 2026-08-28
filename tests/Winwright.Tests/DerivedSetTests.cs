@@ -45,6 +45,67 @@ public sealed class DerivedSetTests : IDisposable
         """);
 
     [Fact]
+    public void The_one_way_claim_holds_over_values_the_set_does_not_declare()
+    {
+        // WW275. The claim that had no way to be written: every declared string is read here, and a
+        // stranger is allowed. Measured migrating WW84 — a sidebar whose items are the only elements
+        // addressable by their words, so the locator has to be `Text`, and the panel beside it is
+        // full of Texts that no locator separates from them.
+        var set = DerivedSet.From("the sidebar panels", FourTabs(), "tabs");
+
+        var compared = set.Against(
+            ["Panes", "Status", "Config", "Logs", "Save", "Cancel", "Refresh interval"], exactly: false);
+
+        Assert.True(compared.Held, compared.Sentence());
+        Assert.Empty(compared.Missing);
+
+        // Allowed is not the same as unrecorded: they are still counted and still said, on the pass.
+        Assert.Equal(3, compared.Unexpected.Count);
+        Assert.Contains("3 other value(s) were read here", compared.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("which this claim allows", compared.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_one_way_claim_still_fails_on_a_declared_string_nothing_read()
+    {
+        // The half it does not give up. Allowing strangers is not allowing absences, or the field
+        // would be a way of asserting nothing at all.
+        var set = DerivedSet.From("the sidebar panels", FourTabs(), "tabs");
+
+        var compared = set.Against(["Panes", "Status", "Config", "Save"], exactly: false);
+
+        Assert.False(compared.Held);
+        Assert.Equal(["Logs"], compared.Missing);
+    }
+
+    [Fact]
+    public void The_exact_claim_is_the_default_and_still_refuses_a_stranger()
+    {
+        // The control for the two above: nothing about `covers` moved, and a window carrying one more
+        // tab than the expectation had heard of is still the defect it exists to catch.
+        var set = DerivedSet.From("the tab headers", FourTabs(), "tabs");
+
+        Assert.False(set.Against(["Panes", "Status", "Config", "Logs", "Debug"]).Held);
+    }
+
+    [Fact]
+    public void The_sentence_agrees_with_itself_when_more_than_one_is_wrong()
+    {
+        // WW275. Both clauses carried a verb written for the singular, so the sentence read
+        // "'a', 'b' were read and is declared nowhere" — and the missing half had the same fault
+        // one clause over, which the task did not name.
+        var set = DerivedSet.From("the tab headers", FourTabs(), "tabs");
+
+        var compared = set.Against(["Panes", "Status", "Debug", "Trace"]);
+        var said = compared.Sentence();
+
+        Assert.Contains("are declared and were not read", said, StringComparison.Ordinal);
+        Assert.Contains("were read and are declared nowhere", said, StringComparison.Ordinal);
+        Assert.DoesNotContain("were read and is declared", said, StringComparison.Ordinal);
+        Assert.DoesNotContain("are declared and was not", said, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_tab_the_strings_declare_and_the_window_does_not_show_is_a_red()
     {
         var set = DerivedSet.From("the tab headers", FourTabs(), "tabs");

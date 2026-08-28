@@ -43,8 +43,10 @@ public sealed record StepDeclaration
         string? notLabel,
         string? unlike,
         bool eachSpoken,
-        bool ownHeader)
+        bool ownHeader,
+        string? coversAtLeast = null)
     {
+        CoversAtLeast = coversAtLeast;
         Name = name;
         Claimed = name;
         Locator = locator;
@@ -55,7 +57,9 @@ public sealed record StepDeclaration
         Reads = reads;
         MeansIt = meansIt;
         Moves = moves;
-        Covers = covers;
+        // WW275. The two are a discriminated view of one key: whichever the case wrote is the set to
+        // derive, and which of the two properties holds it is what says how the comparison reads.
+        Covers = coversAtLeast is null ? covers : null;
         Answers = answers;
         Matches = matches;
         Discloses = discloses;
@@ -358,6 +362,33 @@ public sealed record StepDeclaration
     public string? Covers { get; }
 
     /// <summary>
+    /// The same set, claimed one way: every declared string is read here, and a value that is not in
+    /// the set is allowed rather than a failure.
+    /// <para>
+    /// WW275. <see cref="Covers"/> holds where nothing is missing <em>and</em> nothing is unexpected,
+    /// which is right for the tab set it was built for and cannot express the claim a shared container
+    /// needs. Measured migrating WW84: the claim wanted was <em>the sidebar offers every settings panel
+    /// the strings declare</em>, all six matched, and it failed on nine strangers — a section heading, a
+    /// value caption, Save, Cancel — because the panel beside the sidebar is full of Texts and no
+    /// locator separates the two. There was no one-way form to fall back on, so the claim went
+    /// unwritten.
+    /// </para>
+    /// <para>
+    /// Its own field and not a flag beside <see cref="Covers"/>, for the reason WW267 gave `pick at`:
+    /// one key that means two different claims depending on a second field is a step a reader has to
+    /// hold two things in mind to understand. The strangers are still counted and still named in the
+    /// sentence — allowed is not the same as unrecorded.
+    /// </para>
+    /// </summary>
+    public string? CoversAtLeast { get; }
+
+    /// <summary>The set this step sweeps, whichever way it claims it. Null where it sweeps none.</summary>
+    public string? Sweeps => Covers ?? CoversAtLeast;
+
+    /// <summary>Whether a value read here that the set does not declare fails this step. WW275.</summary>
+    public bool SweepsExactly => Covers is not null;
+
+    /// <summary>
     /// Whether this step claims the reading it names says something rather than nothing.
     /// <para>
     /// WW237. claude-tray's panes case asserts a pane's body is attached by reading a number from
@@ -389,7 +420,7 @@ public sealed record StepDeclaration
     /// </summary>
     public bool Checkable =>
         Tray is not null
-        || Expected is not null || Moves || Answers || Covers is not null || Matches is not null || Discloses
+        || Expected is not null || Moves || Answers || Sweeps is not null || Matches is not null || Discloses
         || SameAs is not null || Never is not null || Spoken
         || Label is not null || NotLabel is not null || Unlike is not null || EachSpoken || OwnHeader;
 
@@ -433,6 +464,10 @@ public sealed record StepDeclaration
     /// WW258: exactly one of the two, which <see cref="ScenarioSchema.Miscarried"/> enforces at the
     /// point of insertion and this refuses again for a caller that did not come through the loader.
     /// </param>
+    /// <param name="coversAtLeast">
+    /// The key whose every declared string must be read somewhere the locator matches, allowing values
+    /// the set does not declare. WW275, and at most one of this and <paramref name="covers"/>.
+    /// </param>
     public static StepDeclaration Of(
         string? locator,
         string verb,
@@ -454,8 +489,25 @@ public sealed record StepDeclaration
         string? unlike = null,
         bool eachSpoken = false,
         bool ownHeader = false,
-        string? tray = null)
+        string? tray = null,
+        string? coversAtLeast = null)
     {
+        // WW275. At most one of the two, and refused where they are written: a step naming both is
+        // making the exact claim and the completeness-only claim about one set, and the run would
+        // silently honour whichever the code reads first.
+        if (!string.IsNullOrWhiteSpace(covers) && !string.IsNullOrWhiteSpace(coversAtLeast))
+        {
+            throw new ScenarioRefusedException(
+                string.IsNullOrWhiteSpace(named) ? "<a step>" : named.Trim(),
+                "it carries 'covers' and 'coversAtLeast'; those are the same set claimed two different "
+                    + "ways, so name the one this step means");
+        }
+
+        // The one-way claim derives the same set through the same door, so everything below reads it
+        // as `covers` and only the comparison is told which way round the claim is.
+        var oneWay = !string.IsNullOrWhiteSpace(coversAtLeast);
+        covers = oneWay ? coversAtLeast : covers;
+
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var named_tray = string.IsNullOrWhiteSpace(tray) ? null : tray.Trim();
         var subject = called ?? Describing(verb, locator ?? $"tray icon '{named_tray}'");
@@ -935,7 +987,8 @@ public sealed record StepDeclaration
             undeclared,
             apart,
             eachSpoken,
-            ownHeader);
+            ownHeader,
+            oneWay ? sweeping : null);
     }
 
     /// <summary>

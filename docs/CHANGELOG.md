@@ -193,6 +193,7 @@
 - ✅ **WW274** **a locator step names one control type, so a rule governing a family of controls cannot be swept** — A step names several control types with `|` between them, matched as one search, so a rule governing a family of controls is one sweep rather than one mostly-empty sweep per type.
 - ✅ **WW277** **a sweep matches its last step against the whole window, so every step scoping it is decoration** — A sweep walks the route its earlier steps name and matches its last step under what it reached, so a scope is a scope and a route that resolves to nothing sweeps nothing.
 - ✅ **WW276** **a repeated case makes its claim once per member, so a member with nothing to check holes on every run** — A repeated case's per-member claims are gathered into one: red where any member that carried it failed, a hole only where none did, and otherwise a pass saying how many carried it.
+- ✅ **WW275** **covers is two-way and reads as one-way, so a completeness claim against a shared container cannot be written** — The README teaches both directions, `coversAtLeast` writes the completeness-only claim for a container no locator separates, and both clauses agree with their count.
 
 ## Block G — The scenario — a case is a data file
 

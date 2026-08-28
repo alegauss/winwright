@@ -21,7 +21,6 @@
 - ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Eight reds, and the eighth substituted two characters rather than one, both of them the last sent — with the array now ruled out, what is left is the queue itself. → §WW249
 - 📋 **WW260** (deps: —) **an expected set is derived from the project's strings and never from what the application reports** — The menu case counts profile entries against the app's own read-out, and `covers` derives only from the language files, so the number would be typed here. → §WW260
 - 📋 **WW269** (deps: —) **a caption counting down in real time cannot survive an exact comparison across a round trip** — `sameAs` compares two readings exactly, and a run that straddles a minute boundary would then be a red build about a clock rather than about the application. → §WW269
-- 📋 **WW275** (deps: —) **covers is two-way and reads as one-way, so a completeness claim against a shared container cannot be written** — The README says every declared string reads somewhere the locator matched; the engine also refuses every stranger, and its sentence misagrees with itself. → §WW275
 
 ## Block G — The scenario — a case is a data file
 

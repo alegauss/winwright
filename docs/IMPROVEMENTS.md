@@ -193,31 +193,6 @@ which assumes nothing about the text and costs a reading the adopter has to prov
 What it must not become is a general tolerance on `sameAs`. A percentage is the same
 number or it is not.
 
-### §WW275 covers is two-way and reads as one-way
-
-`covers` holds where nothing is missing **and** nothing is unexpected. That is
-deliberate and it is the right default: the tab set it was built for is the whole of
-what a `TabItem` locator matches, and a window carrying one more tab than the
-expectation had heard of is exactly the defect it exists to catch.
-
-The README documents half of it — *every string declared under it reads somewhere this
-step's locator matches* — and a reader writing a case from that sentence gets a red they
-cannot explain from it.
-
-Measured migrating `WW84`. The claim wanted was *the sidebar offers every settings panel
-the strings declare*, and the sidebar items are the only elements addressable by their
-words, so the locator is `Text`. All six matched. It failed on nine strangers — a
-section heading, a value caption, `Save`, `Cancel` — because the panel beside the
-sidebar is full of Texts and no locator separates the two. There is no one-way form to
-fall back on, so the claim went unwritten.
-
-Its sentence has a plural fault as well: *'a', 'b', 'c' were read and **is** declared
-nowhere*.
-
-Two things are owed. The documentation should say both directions, in the paragraph that
-teaches the field. And a case that means the one-way claim should have a way to say so,
-rather than reaching for a locator that cannot exist.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

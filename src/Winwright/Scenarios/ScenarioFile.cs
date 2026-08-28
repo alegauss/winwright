@@ -351,6 +351,7 @@ public sealed class ScenarioFile
         var eachSpoken = Truth(at, step, ScenarioSchema.Step, "eachSpoken");
         var ownHeader = Truth(at, step, ScenarioSchema.Step, "ownHeader");
         var covers = Text(at, step, ScenarioSchema.Step, "covers");
+        var coversAtLeast = Text(at, step, ScenarioSchema.Step, "coversAtLeast");
         var meansIt = Truth(at, step, ScenarioSchema.Step, "meansIt");
         var named = Text(at, step, ScenarioSchema.Step, "named");
 
@@ -371,7 +372,7 @@ public sealed class ScenarioFile
             at,
             () => StepDeclaration.Of(
                 locator, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches, discloses,
-                sameAs, never, spoken, label, notLabel, unlike, eachSpoken, ownHeader, tray));
+                sameAs, never, spoken, label, notLabel, unlike, eachSpoken, ownHeader, tray, coversAtLeast));
     }
 
     /// <summary>

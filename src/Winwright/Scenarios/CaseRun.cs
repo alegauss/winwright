@@ -499,7 +499,7 @@ public static class CaseRun
     {
         // WW236. A sweep is one claim over many elements, so it does not go through the attempt loop —
         // it has its own wait, over the resolve budget, which WW241 gave it.
-        if (step.Covers is { } key)
+        if (step.Sweeps is { } key)
         {
             Swept(step, key, subject, project, root, trace, results, speaking);
             return true;
@@ -689,7 +689,9 @@ public static class CaseRun
                     .OfType<string>()
                     .ToList();
 
-                compared = derived.Against(read);
+                // WW275. Which way the claim reads is the step's, not the set's: `covers` fails on a
+                // value nothing declares, `coversAtLeast` allows it and still counts it.
+                compared = derived.Against(read, step.SweepsExactly);
                 return compared.Held;
             },
             project.Timeouts.For("resolve"),

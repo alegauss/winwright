@@ -58,6 +58,41 @@ public sealed class CoversTests : IDisposable
     }
 
     [Fact]
+    public void A_step_carrying_both_ways_of_claiming_one_set_is_refused()
+    {
+        // WW275. They are the same set claimed two different ways, so a step naming both would have
+        // the run honour whichever the code reads first — the shape WW258's subject group refuses one
+        // field over.
+        var refused = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of("Text", "read", covers: "stats.tab", coversAtLeast: "stats.tab"));
+
+        Assert.Contains("'covers' and 'coversAtLeast'", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("name the one this step means", refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_one_way_claim_is_a_sweep_and_faces_the_same_doors()
+    {
+        // It derives the same set through the same well, so every rule a sweep is under applies to it
+        // — and a case writing one is a case that checks something, which is what makes it a claim.
+        var step = StepDeclaration.Of("Text", "read", coversAtLeast: "stats.tab");
+
+        Assert.Equal("stats.tab", step.CoversAtLeast);
+        Assert.Null(step.Covers);
+        Assert.Equal("stats.tab", step.Sweeps);
+        Assert.False(step.SweepsExactly);
+        Assert.True(step.Checkable);
+
+        // The same refusal an exact sweep gets, reached through the other field: one act over many
+        // elements is not a claim, whichever way round the set is compared.
+        Assert.Contains(
+            "one act over many of them is not a claim",
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of("Text", "invoke", coversAtLeast: "stats.tab")).Because,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_sweep_that_acts_is_refused_because_one_act_over_many_is_not_a_claim()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(

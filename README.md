@@ -411,12 +411,29 @@ opposite state.
 
 ### An expectation nobody types
 
-`covers` names a key in the project's strings, and the claim is that **every string declared under it
-reads somewhere this step's locator matches**:
+`covers` names a key in the project's strings, and the claim runs **both ways**: every string declared
+under it reads somewhere this step's locator matches, **and nothing else does**:
 
 ```json
 { "locator": "Text", "act": "read", "covers": "stats.tab" }
 ```
+
+Both directions matter, and the second is easy to meet by accident. The tab set this was built for is
+the whole of what a `TabItem` locator matches, so a window carrying one more tab than the expectation
+had heard of is exactly the defect it exists to catch — and a step that only checked for missing
+strings would pass over it. Where the locator cannot be narrowed to the container you mean, say so
+with `coversAtLeast` instead:
+
+```json
+{ "locator": "Text", "act": "read", "coversAtLeast": "settings.panels" }
+```
+
+That claims only that every declared string is read here, and allows values the set does not declare.
+It is the form a shared container needs: measured migrating a sidebar whose items are the only
+elements addressable by their words, so the locator has to be `Text` — all six panels matched and the
+step failed on nine strangers, because the panel beside the sidebar is full of Texts and no locator
+separates the two. The strangers are still counted and still named in the sentence: allowed is not the
+same as unrecorded.
 
 The set is derived and never listed, and that is the whole point. claude-tray's harness named three
 tab keys by hand; the window grew a fourth, and the case went on reporting *all three tab headers

@@ -59,14 +59,28 @@ public sealed record LeftOut(string Key, string Value, Provenance Where, LeftOut
 /// <param name="Matched">Values that were expected and read, in the set's own order.</param>
 /// <param name="Missing">Values the strings declare that nothing read.</param>
 /// <param name="Unexpected">Values that were read and the strings do not declare.</param>
+/// <param name="Exactly">
+/// Whether a value read here that the strings do not declare fails the claim.
+/// <para>
+/// WW275. True is what `covers` has always meant and stays the default: the tab set it was built for
+/// is the whole of what a `TabItem` locator matches, and a window carrying one more tab than the
+/// expectation had heard of is exactly the defect it exists to catch. False is the claim that had no
+/// way to be written — <em>every declared string reads here</em>, with strangers allowed — which is
+/// what a shared container needs, since no locator separates a sidebar's Texts from the panel's.
+/// </para>
+/// </param>
 public sealed record SetComparison(
     DerivedSet Set,
     IReadOnlyList<string> Matched,
     IReadOnlyList<string> Missing,
-    IReadOnlyList<string> Unexpected)
+    IReadOnlyList<string> Unexpected,
+    bool Exactly = true)
 {
-    /// <summary>Whether everything the strings declare was read, and nothing else was.</summary>
-    public bool Held => Missing.Count == 0 && Unexpected.Count == 0;
+    /// <summary>
+    /// Whether everything the strings declare was read — and, where the claim is the exact one,
+    /// nothing else was.
+    /// </summary>
+    public bool Held => Missing.Count == 0 && (!Exactly || Unexpected.Count == 0);
 
     /// <summary>
     /// What was expected, what was read, and which way they differ — never the word <em>all</em>
@@ -76,17 +90,38 @@ public sealed record SetComparison(
     public string Sentence()
     {
         if (Held)
-            return $"{Set.Named}: all {Matched.Count} of {Listed(Matched)} were read, {Set.Source}.";
+        {
+            // WW275. What was passed over is said on the pass, not left out of it: a one-way claim
+            // that held over nine strangers held over nine strangers, and a reader who is not told
+            // cannot tell this from the exact claim holding.
+            var passed = Exactly || Unexpected.Count == 0
+                ? ""
+                : $" {Unexpected.Count} other value(s) were read here and are declared nowhere, which "
+                    + "this claim allows";
+
+            return $"{Set.Named}: all {Matched.Count} of {Listed(Matched)} were read, {Set.Source}.{passed}";
+        }
 
         var parts = new List<string>();
 
         // The missing ones carry their line and the unexpected ones cannot: a value the strings
         // declare has somewhere to be looked at, and one that was only ever read has nowhere.
+        //
+        // WW275. Both verbs agree with the count, and both used to be written for the singular: the
+        // sentence read "'a', 'b', 'c' were read and is declared nowhere".
         if (Missing.Count > 0)
-            parts.Add($"{Traced(Missing)} {(Missing.Count == 1 ? "is" : "are")} declared and was not read");
+        {
+            parts.Add(Missing.Count == 1
+                ? $"{Traced(Missing)} is declared and was not read"
+                : $"{Traced(Missing)} are declared and were not read");
+        }
 
         if (Unexpected.Count > 0)
-            parts.Add($"{Listed(Unexpected)} {(Unexpected.Count == 1 ? "was" : "were")} read and is declared nowhere");
+        {
+            parts.Add(Unexpected.Count == 1
+                ? $"{Listed(Unexpected)} was read and is declared nowhere"
+                : $"{Listed(Unexpected)} were read and are declared nowhere");
+        }
 
         return $"{Set.Named}: {string.Join("; ", parts)} — {Matched.Count} of {Set.Expected.Count} matched, {Set.Source}.";
     }
@@ -359,7 +394,12 @@ public sealed record DerivedSet
     /// the expectation from being derived from the thing it is asserting.
     /// </summary>
     /// <param name="read">What the tree actually held.</param>
-    public SetComparison Against(IEnumerable<string> read)
+    /// <param name="exactly">
+    /// Whether a value read here that this set does not declare fails the claim. WW275: true is what
+    /// `covers` means and the default; false is the completeness-only claim, and the strangers are
+    /// still counted and still said — allowed is not the same as unrecorded.
+    /// </param>
+    public SetComparison Against(IEnumerable<string> read, bool exactly = true)
     {
         ArgumentNullException.ThrowIfNull(read);
 
@@ -371,7 +411,8 @@ public sealed record DerivedSet
             this,
             new ReadOnlyCollection<string>(Expected.Where(found.Contains).ToList()),
             new ReadOnlyCollection<string>(Expected.Where(value => !found.Contains(value)).ToList()),
-            new ReadOnlyCollection<string>(seen.Where(value => !wanted.Contains(value)).Distinct(StringComparer.Ordinal).ToList()));
+            new ReadOnlyCollection<string>(seen.Where(value => !wanted.Contains(value)).Distinct(StringComparer.Ordinal).ToList()),
+            exactly);
     }
 
     /// <summary>
