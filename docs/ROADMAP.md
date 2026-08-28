@@ -21,6 +21,8 @@
 - ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Eight reds, and the eighth substituted two characters rather than one, both of them the last sent — with the array now ruled out, what is left is the queue itself. → §WW249
 - 📋 **WW269** (deps: —) **a caption counting down in real time cannot survive an exact comparison across a round trip** — `sameAs` compares two readings exactly, and a run that straddles a minute boundary would then be a red build about a clock rather than about the application. → §WW269
 - 📋 **WW290** (deps: —) **a set name declared in both wells resolves to the reported one and the strings key is shadowed in silence** — The dispatch asks `reportedSets` first, so a project that declares a name in both derives from one well and never says the other was passed over. → §WW290
+- 📋 **WW291** (deps: —) **the one read-out reportedSets was written for is a diagnostic report, and every line of it becomes a member** — `Reported` takes each non-empty line as a value, and claude-tray's `--profiles` prints a paragraph per profile, so the derived set is thirty strings of prose. → §WW291
+- 📋 **WW292** (deps: WW291) **a menu entry decorates the value it is about, so no set claim compares against it and the script counted instead** — `covers` matches a name exactly and the entry for a profile reads `Pessoal  active now`, so what WW82 needs is each declared value appearing inside one. → §WW292
 
 ## Block G — The scenario — a case is a data file
 
@@ -31,7 +33,7 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW78** (deps: WW230 ⏳) **the keyboard case is the only observable of a live input path and it lives in a script** — The runner now carries claude-tray to the guest, and the restore there fails: the engine's package exists only in a folder this repository does not ship. → §WW78
-- 📋 **WW82** (deps: WW257 ✅, WW258 ✅, WW259 ✅, WW260 ✅) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
+- 📋 **WW82** (deps: WW257 ✅, WW258 ✅, WW259 ✅, WW260 ✅, WW291, WW292) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
 - 📋 **WW83** (deps: Block G ✅) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
 - 📋 **WW85** (deps: Block G ✅) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
 - 📋 **WW86** (deps: WW78 ⏳, WW79 ✅, WW80 ✅, WW81 ✅, WW82, WW83, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
