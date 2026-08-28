@@ -17,7 +17,8 @@
 ## Block F — Assert — the expectation is derived, never typed
 
 - ⏳ **WW248** (deps: WW300 ✅) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — WW300 reads which excuses recur, so what is left is making a structural one red; both obvious rules misfire on cases that take the desk on purpose. → §WW248
-- ⏳ **WW249** (deps: WW302 ✅) **the case proving that typing reaches a WPF box fails about one guest run in four** — WW302 divided it: one call carrying every code unit substituted 14 times in 400, and one call per code unit none, so the batch is necessary and the array was cleared wrongly. → §WW249
+- ⏳ **WW249** (deps: WW302 ✅) **the case proving that typing reaches a WPF box fails about one guest run in four** — One call per code unit changed nothing — 11 in 400 against 14 — so it is the time between them and not the batch, and the quiet arm does a whole Type between characters. → §WW249
+- 📋 **WW304** (deps: WW302 ✅) **nothing separates the delay between code units from the work the quiet arm does between them** — WW302's arms differ in more than time — one does a whole Type per character — so a third that only spaces the same send would say which half is doing it. → §WW304
 
 ## Block G — The scenario — a case is a data file
 

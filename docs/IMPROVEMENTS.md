@@ -101,20 +101,44 @@ lost one under load — the window was handed the wrong text — which rules out
 control and everything above the queue. It is the send.
 
 **The rule, over ten reds.** One character or more becomes the last one sent, length for
-length, at no fixed position. The eighth substituted two — `WW246-5` delivered
-`W5245-5`, both becoming `5` — and the ninth put it at index 0.
+length, at no fixed position: `WW246-5` delivered `W5245-5`, `WW302-88` read `8W302-88`.
 
-**The batch is necessary, and the earlier acquittal was wrong.** WW302 typed 400 rounds
-each way, alternated under one desk. One `SendInput` carrying every code unit
-substituted 14 times; the same text as one call per code unit substituted none. The
-argument that cleared the array — that `SendInput` queues serially and returns, so
-nothing afterwards can reach a message — predicted no difference, and there is one. All
-14 keep the rule: `WW302-88` read `8W302-88`, `WW302-165` read `WW302-155`.
+**It is the spacing and not the batch.** WW302 typed 400 rounds each way: one `Type`
+substituted 14 times and the same text as one `Type` per code unit substituted none.
+That looked like the array, so the send was changed to one `SendInput` per code unit —
+and the rate did not move, 11 in 400 against 0. Same call count, same result. What the
+quiet arm also does is a whole `Type` between characters, resolving the element and
+reading back, so what separates them is the time between code units rather than how many
+calls carry them.
 
-So it is the batch rather than the queue at large, and reading rather than measuring is
-what got this wrong twice. `VK_PACKET` before `TranslateMessage` stays measured out:
-every lParam is `00000001`, the scan code having eight bits where a code unit needs
-sixteen.
+`VK_PACKET` before `TranslateMessage` stays measured out: every lParam is `00000001`,
+the scan code having eight bits where a code unit needs sixteen.
+
+What divides it next is a delay and nothing else changed — same call, same batch,
+spaced.
+
+### §WW304 Spacing, separated from the work
+
+WW302 measured 14 in 400 against 0, and the first reading of that was the array. It was
+wrong: sending one `SendInput` per code unit instead of one carrying the string left the
+rate where it was, 11 in 400. Same call count, same result, so the number of calls is
+not what the quiet arm was buying.
+
+What that arm also does is a whole `Type` per character — resolve the element, check the
+foreground and the focus, erase, send, read back. Tens of milliseconds between code
+units. So the remaining candidate is the time itself, never varied on its own.
+
+The third arm is that and nothing else: the same call, the same batch, a delay between
+the pairs. If a few milliseconds takes it to zero, the cause is temporal and the repair
+is a delay somebody can price. If it does not, the time is not what mattered either, and
+what remains is the rest of what a `Type` does — one of which is doing this by accident.
+
+Priced before it is chosen. A delay per code unit is paid by every keystroke this engine
+sends, so the number comes from the measurement rather than from taste: the smallest
+spacing that takes 400 rounds to zero, with its cost said in the same sentence.
+
+The method already worked once. A hypothesis went into the engine, the experiment
+refused it, and it came straight back out — which is what makes the next one cheap.
 
 ## Block G — The scenario — a case is a data file
 
