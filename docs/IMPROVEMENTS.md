@@ -203,30 +203,4 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW230 The feed was a folder in the tool's own tree
-
-`Winwright.0.1.0.nupkg` existed in gitignored `packages/` and nowhere else, so
-claude-tray's driving project carried a `nuget.config` naming
-`..\..\..\winwright\packages` — a path that assumes two clones side by side, and a path
-into the tool from the project adopting it. Measured in the guest the moment WW227 could
-carry claude-tray there: `NU1301: the local source 'C:\src\winwright\packages' does not
-exist`. The tree was there; the folder never travels.
-
-Answered by publishing to nuget.org from `.github/workflows/publish.yml`, keylessly.
-Trusted publishing means no API key exists in this repository or its settings: the run
-asks GitHub for an OIDC token, nuget.org exchanges it for a key good for an hour, and
-the file's own name is half of what nuget.org trusts. Renaming it breaks the publish,
-deliberately.
-
-A release is one manual dispatch. It raises the last number of the declared version —
-one rule that reads as the prerelease counter or as the patch — writes it into every
-copy, packs, and only then publishes, tags and cuts the release. Publishing first is the
-decision: a tag says a version exists, so nothing can point at nothing.
-
-The copy list was four files long and the suite went red on the fifth, the README. That
-is the net working, and is why the concordance check runs after the rewrite rather than
-the list being believed.
-
-What is left is the deletion the criterion measures.
-
 ## Block K — The proving ground — a fixture app built to be hard to test
