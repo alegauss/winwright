@@ -10,7 +10,7 @@
 
 ## Block D — Act — patterns before pointers
 
-- ⏳ **WW288** (deps: —) **a search whose flyout shut mid-look gives up, so the icon case is a hole on the runs the shell decides** — Whether a search should reopen a flyout that shut mid-look is still undecided, and the rate is still only in one run's excuse ledger. → §WW288
+- ⏳ **WW288** (deps: —) **a search whose flyout shut mid-look gives up, so the icon case is a hole on the runs the shell decides** — Measured over 11 guest rolls: the flyout shut mid-look once, so the rate has a denominator at last; whether a search should reopen it is still undecided. → §WW288
 
 ## Block E — Capture — the picture that proves what it photographed
 
