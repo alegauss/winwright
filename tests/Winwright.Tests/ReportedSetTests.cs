@@ -69,6 +69,86 @@ public sealed class ReportedSetTests : IDisposable
     }
 
     [Fact]
+    public void A_name_declared_in_both_wells_says_which_one_it_shadowed()
+    {
+        // WW290. The dispatch asks `reportedSets` first, so this name derives from the application and
+        // the strings key of the same name is never read. Which one wins is not the problem — a rule
+        // has to pick — the silence was: a passing sweep gave the reader no way to know their strings
+        // key was dead, and a red sent them to the wrong file.
+        var strings = Path.Combine(root, "strings.en.json");
+        File.WriteAllText(strings, """{ "profiles": { "mine": "Pessoal", "work": "VILT Group" } }""");
+
+        var path = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "languageFiles": ["strings.en.json"],
+              "reportedSets": { "profiles": ["--profiles"] }
+            }
+            """);
+
+        var set = DerivedSet.Reported("the profiles", ProjectDeclaration.Load(path), "profiles");
+
+        // Still derived from the application — the rule did not change — and the source now says the
+        // other declaration is there and was passed over.
+        Assert.Equal(["alpha", "bravo"], set.Expected);
+        Assert.Contains("shadows the 'profiles'", set.Source, StringComparison.Ordinal);
+        Assert.Contains("strings.en.json", set.Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_name_in_only_one_well_says_nothing_about_shadowing()
+    {
+        // The other half, and what keeps the clause meaning something: a project whose strings have no
+        // such key gets no note, so a reader who sees one knows there really are two declarations.
+        var strings = Path.Combine(root, "strings.en.json");
+        File.WriteAllText(strings, """{ "tabs": { "one": "Panes" } }""");
+
+        var path = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "languageFiles": ["strings.en.json"],
+              "reportedSets": { "profiles": ["--profiles"] }
+            }
+            """);
+
+        Assert.DoesNotContain(
+            "shadows",
+            DerivedSet.Reported("the profiles", ProjectDeclaration.Load(path), "profiles").Source,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_strings_file_that_will_not_parse_is_not_reported_as_a_shadow()
+    {
+        // It is also not this reading's refusal to make. A broken strings file is what `From` refuses
+        // when somebody derives from it, and borrowing that here would turn an unrelated problem into
+        // a failure about a reported set that reads perfectly well.
+        File.WriteAllText(Path.Combine(root, "strings.en.json"), "{ this is not json");
+
+        var path = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "languageFiles": ["strings.en.json"],
+              "reportedSets": { "profiles": ["--profiles"] }
+            }
+            """);
+
+        var set = DerivedSet.Reported("the profiles", ProjectDeclaration.Load(path), "profiles");
+
+        Assert.Equal(["alpha", "bravo"], set.Expected);
+        Assert.DoesNotContain("shadows", set.Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_set_the_project_does_not_declare_is_refused_with_the_ones_it_does()
     {
         var refused = Assert.Throws<UnderivableSetException>(

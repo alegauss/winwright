@@ -20,7 +20,6 @@
 - ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
 - ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Nine reds, and the substituted character is always the last one sent — one or more of them, at no fixed position, with the array ruled out. → §WW249
 - 📋 **WW269** (deps: —) **a caption counting down in real time cannot survive an exact comparison across a round trip** — `sameAs` compares two readings exactly, and a run that straddles a minute boundary would then be a red build about a clock rather than about the application. → §WW269
-- 📋 **WW290** (deps: —) **a set name declared in both wells resolves to the reported one and the strings key is shadowed in silence** — The dispatch asks `reportedSets` first, so a project that declares a name in both derives from one well and never says the other was passed over. → §WW290
 - 📋 **WW291** (deps: —) **the one read-out reportedSets was written for is a diagnostic report, and every line of it becomes a member** — `Reported` takes each non-empty line as a value, and claude-tray's `--profiles` prints a paragraph per profile, so the derived set is thirty strings of prose. → §WW291
 
 ## Block G — The scenario — a case is a data file

@@ -523,6 +523,15 @@ public sealed record DerivedSet
         var how = $"reported by {System.IO.Path.GetFileName(declaration.Executable)} "
             + $"{string.Join(" ", arguments)}";
 
+        // WW290. A name declared in both wells resolves here and shadowed the strings key in silence.
+        // Which one wins is not the problem — a rule has to pick — the silence is: the reader of a
+        // passing sweep could not know their strings key was dead, and the reader of a red went to the
+        // wrong file. Said in the source rather than refused, because a collision is not necessarily a
+        // mistake: `profiles` is exactly the kind of name that is both a data set and a UI label, and
+        // refusing would break a project whose two are legitimately unrelated.
+        if (ShadowedIn(declaration, key) is { } shadowed)
+            how += $", which shadows the '{key}' declared in {shadowed}";
+
         var members = new ReadOnlyCollection<string>(values);
 
         return new DerivedSet(
@@ -648,6 +657,43 @@ public sealed record DerivedSet
         }
 
         return $"{where}, less {string.Join(" and ", parts)}";
+    }
+
+    /// <summary>
+    /// The strings file that also declares this key, or null where none does.
+    /// <para>
+    /// WW290. Asked of every declared file rather than of one, which is what makes it cheap enough to
+    /// ask at all: picking a file is what refuses where a project ships several and no fixture said
+    /// which language the window is in, and this picks none — it asks whether any of them has the key.
+    /// A project declaring no language files pays nothing, which is most projects using this well.
+    /// </para>
+    /// <para>
+    /// A file that will not parse is not a shadow. This exists to tell a reader where a second
+    /// declaration is, and a broken file is `From`'s refusal to make when somebody derives from it —
+    /// borrowing it here would turn an unrelated strings problem into a failure about a reported set.
+    /// </para>
+    /// </summary>
+    private static string? ShadowedIn(ProjectDeclaration declaration, string key)
+    {
+        foreach (var file in declaration.LanguageFiles)
+        {
+            try
+            {
+                using var document = JsonDocument.Parse(
+                    File.ReadAllText(file),
+                    new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+
+                var root = document.RootElement;
+                if ((Nested(root, key) ?? Flat(root, key)) is { Count: > 0 })
+                    return System.IO.Path.GetFileName(file);
+            }
+            catch (Exception unreadable) when (unreadable is JsonException or IOException or UnauthorizedAccessException)
+            {
+                // Not a shadow, and not this reading's refusal to make. See above.
+            }
+        }
+
+        return null;
     }
 
     private static List<KeyValuePair<string, string>>? Nested(JsonElement root, string key)

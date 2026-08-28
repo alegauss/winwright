@@ -464,7 +464,9 @@ and a step names it exactly as it names a strings key — `"covers": "profiles"`
 comes out of is the project's business, for the same reason which strings file it is has always been:
 a case naming the flag would be a case that runs on one checkout. The application prints one value per
 line, and an empty report or a non-zero exit is **broken and not failed**, since an empty expected set
-is met by an empty window. This is what makes a count derived rather than typed — a case asserting two
+is met by an empty window. A name declared in both wells derives from the application and says so —
+the set's source names the strings key it shadowed, because a collision is not necessarily a mistake
+and a silent one is. This is what makes a count derived rather than typed — a case asserting two
 profile entries goes on asserting two after a third is added, and says nothing when it stops covering
 what it was written for.
 

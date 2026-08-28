@@ -170,31 +170,6 @@ which assumes nothing about the text and costs a reading the adopter has to prov
 What it must not become is a general tolerance on `sameAs`. A percentage is the same
 number or it is not.
 
-### §WW290 A name declared in both wells
-
-WW260 gave a derived set a second well and left the dispatch one-sided: `covers`
-resolves against `reportedSets` where the project declares the name there, and against
-the strings otherwise. A project declaring `profiles` in both derives from the
-application and never hears that a strings key of the same name exists.
-
-Which one it picks is not the problem — a rule has to pick. The silence is. The reader
-of a passing sweep cannot know their strings key is dead, and the reader of a red goes
-to the wrong file. That is the shape `covers` was built against, one level up: not a
-wrong answer, an answer whose provenance nobody stated.
-
-Refusing it is the obvious repair and is not free. Asking whether the strings declare a
-key means parsing the language files, and `DerivedSet.From` refuses outright where a
-project ships several and no fixture said which language the window is in — so the check
-inherits that refusal or needs a weaker question of its own, and a project using only
-reported sets must not be made to answer a language question it has no stake in.
-
-So the shape is open: refuse at load, refuse at derive, or name the shadowed key in the
-set's `Source` and let it stand. The last is cheapest and the only one costing a project
-nothing.
-
-Measured against nothing yet — no project here declares a name in both. Filed because
-the first to do it will not find out.
-
 ### §WW291 The read-out that is a report and not a set
 
 WW260 built the second well from the script's description of itself — *the script asked
