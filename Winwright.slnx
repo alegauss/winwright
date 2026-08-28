@@ -6,6 +6,7 @@
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Winwright.RollCall/Winwright.RollCall.csproj" />
+    <Project Path="tools/Winwright.Typing/Winwright.Typing.csproj" />
     <Project Path="tools/Winwright.Concordance/Winwright.Concordance.csproj" />
     <Project Path="tools/Winwright.Mcp/Winwright.Mcp.csproj" />
     <Project Path="tools/Winwright.Guard/Winwright.Guard.csproj" />
