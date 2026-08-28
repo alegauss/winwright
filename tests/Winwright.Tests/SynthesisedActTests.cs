@@ -239,8 +239,10 @@ public sealed class SynthesisedActTests : IDisposable
         // WW254: 'pick' is here although it tries the selection pattern first, because the flag
         // answers whether a busy desk can take the act away and for that one it can — the keyboard
         // fallback exists precisely because the pattern route sometimes refuses.
+        // WW259: 'open submenu' joins them, and it is the least ambiguous member of the set — the whole
+        // act is a keypress at a menu, so a desk that refused the foreground took the gesture entirely.
         Assert.Equal(
-            ["type", "click", "nudge", "press", "pick", "pick at"],
+            ["type", "click", "nudge", "press", "pick", "pick at", "open submenu"],
             ActVerb.All.Where(one => one.Synthesises).Select(one => one.Name));
 
         Assert.All(

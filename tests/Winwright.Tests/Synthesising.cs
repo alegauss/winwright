@@ -108,6 +108,13 @@ internal static class Synthesising
         new("Synthesised.PickAt", Asking.ItIsTheAct,
             "reaching whatever sits at a position in a picker, by the same two routes"),
 
+        // WW259. The keyboard half of the pair `expand` is the pattern half of, and it is the act
+        // rather than an escalation for the reason the four above it are: the whole verb is a keypress
+        // at a menu, so there is no pattern route it fell back from. `Menu.Expand` below is the same
+        // gesture without a step around it, and both are catalogued because a caller can reach either.
+        new("Synthesised.ExpandMenu", Asking.ItIsTheAct,
+            "opening the highlighted entry's submenu with Right, as a step's own result"),
+
         // A menu is entered the way a keyboard user enters one, and that is Block D's third
         // criterion rather than an escalation: reaching a destructive entry by invoke is refused
         // at the door, so walking is the only route there is.

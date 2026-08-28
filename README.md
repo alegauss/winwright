@@ -298,7 +298,7 @@ their expectations are fields, and the loop, the waits, the attempts and the ver
 
 A case has a `name` and its `steps`, and may carry `tags`, `needs`, `catches` and `filed`.
 `locator` and `act` are the two fields every step has. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`. `expect` is what the element should read
+`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`, `open submenu`. `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
 `toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `focused`, defaulting to `anything`, the one value the element
 reports, in the order a reader looks at them. `selected` asks whether *this* element is chosen and
@@ -442,6 +442,16 @@ a device. Naming one of those is the hardcoded expectation with the worst possib
 on the desk it was written on and fails on every other. A position is what the picker's own order
 supplies and no machine's data changes. Its own verb and not a second meaning for `with`, because a
 picker may hold a value spelled `1`.
+
+`open submenu` is the keyboard half of the pair `expand` is the pattern half of, and it exists
+because the pattern half cannot ask the question. A WinForms submenu that is empty when the menu
+opens exposes no ExpandCollapse at all and draws no arrow, and the shell then handles Right as
+*activate a plain command* — which dismisses the whole menu. A mouse hover always worked, which is
+why it went unnoticed until something drove it from the keyboard. A case naming `expand` there asks
+a pattern that is not present and reports a control rather than the gesture. What comes back is the
+entry the menu **landed on** rather than what the locator matched, so `reads: name` compares against
+the submenu entry; the locator names any element of the window, because a menu popup is its own
+window and its entries are not reliably addressable.
 
 They cost something the other eight do not. A synthesised act needs the window in the foreground,
 which Windows does not always grant — so its result carries **what it needed**, and a step that was

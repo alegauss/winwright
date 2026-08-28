@@ -216,29 +216,6 @@ writes is a name in `with` and not a locator — which means the shape here is n
 verb over the existing grammar but a second kind of subject, and that is the question
 worth settling before anything is added.
 
-### §WW259 A submenu that only opens to a key needs the verb that presses one
-
-`expand` asks ExpandCollapsePattern, and every other synthesised verb has a pattern act
-beside it for exactly this reason: which of the two a case names is the whole of what an
-interaction loop is for. The menu walk has no such pair. `Menu.Enter`, `Menu.To` and
-`Menu.Expand` go in the way a keyboard user goes in, and nothing a step may write
-reaches them.
-
-The defect that shape exists to catch is already on record. A WinForms submenu that is
-empty when the menu opens exposes no ExpandCollapse at all, draws no arrow, and the
-shell handles Right as *activate a plain command* — which dismisses the whole menu. A
-mouse hover always worked, which is precisely why it went unnoticed until something
-drove it from the keyboard. A case naming `expand` against that menu would ask the
-pattern, get nothing to ask, and report a control rather than the gesture.
-
-So this is the fifth pair: `expand` through the pattern and a menu walk that presses
-Right, with the same rule as the other four — the walk needs the foreground, so a desk
-that refused it is a hole naming the absence and never a red about the application.
-
-It is separable from `WW258`. That one is about reaching a menu at all; this is about a
-menu that is already open, and it is the same question for a menu bar as for a tray
-icon's.
-
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness

@@ -200,6 +200,12 @@ internal static class Cooperating
         // verb filed as needing nothing would promise that for the runs where it does.
         new("Synthesised.Pick", Cooperation.None, true, "reaching a value in a picker, as a step"),
         new("Synthesised.PickAt", Cooperation.None, true, "reaching a position in a picker, as a step"),
+
+        // WW259. `Menu.Expand` below as a step answers it, and on the same axis: nothing is asked of
+        // the application, and the foreground is what it needs — which the pattern half, `expand`,
+        // does not, and that difference is the whole of why the pair exists.
+        new("Synthesised.ExpandMenu", Cooperation.None, true, "opening a submenu with Right, as a step"),
+
         new("Menu.Enter", Cooperation.None, true, "enter a menu bar the way a keyboard user does"),
         new("Menu.To", Cooperation.None, true, "walk to an entry"),
         new("Menu.Expand", Cooperation.None, true, "open a submenu"),

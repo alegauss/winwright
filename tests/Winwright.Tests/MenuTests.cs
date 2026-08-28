@@ -1,4 +1,8 @@
+using System.Windows.Automation;
+
 using Winwright.Acting;
+using Winwright.Locating;
+using Winwright.Scenarios;
 using Winwright.Windowing;
 
 using Xunit;
@@ -100,6 +104,92 @@ public sealed class MenuTests : IDisposable
         Assert.True(expanded.Reached);
         Assert.Equal("one.txt", expanded.Highlighted);
     }
+
+    [Fact]
+    public void A_case_can_name_the_walk_that_presses_right_rather_than_only_the_pattern()
+    {
+        // WW259. The same gesture as the case above, reached the way a step reaches it: the pair
+        // 'expand' is the pattern half of, answered in the shape a case is answered in. Until this
+        // verb existed nothing a data file could write got to `Menu.Expand` at all, and a case naming
+        // 'expand' against this menu would have asked ExpandCollapse — which an empty WinForms
+        // submenu does not offer, so the red would have been about a control and not about the walk.
+        Menu.Enter(dialog.Frame);
+        Menu.To(dialog.Frame, "Recent");
+
+        var acted = Synthesised.ExpandMenu(On());
+
+        if (BusyDesk.Excused(acted.Needed!))
+            return;
+
+        // The element handed back is what the menu landed on and not what the locator matched, which
+        // is the whole of how a case states this claim: `reads: name` answers `Facts.Says`, so it is
+        // the submenu entry the expectation compares against and not the window the locator found.
+        Assert.Equal("one.txt", acted.Element.Says);
+        Assert.NotEqual(acted.Element.Says, On().Read().Facts?.Says);
+        Assert.Equal(Synthesised.ByKeyboard, acted.Pattern);
+        Assert.Equal(Synthesised.ExpandsMenu, acted.Verb);
+    }
+
+    [Fact]
+    public void The_walk_a_step_names_is_attempted_once_because_right_again_goes_deeper()
+    {
+        // Not a preference. Right on an entry whose submenu is already open walks into it, so a
+        // retried step asserts against a menu one level below the one it was written about — which is
+        // the same reason 'toggle' is not repeatable, arrived at from the other direction.
+        Assert.False(ActVerb.Named(Synthesised.ExpandsMenu).Repeatable);
+        Assert.True(ActVerb.Named(Synthesised.ExpandsMenu).Synthesises);
+        Assert.Equal(Takes.Nothing, ActVerb.Named(Synthesised.ExpandsMenu).Wants);
+    }
+
+    [Fact]
+    public void A_step_naming_the_walk_with_an_argument_is_refused_where_the_author_wrote_it()
+    {
+        // The author's end of the same verb, and what proves a data file reaches it at all: the name
+        // loads, and the arity is enforced at the point of insertion rather than on the run that was
+        // going to walk the menu. WW225's rule, applied to the fifth pair.
+        var refused = Assert.Throws<ScenarioRefusedException>(() => ScenarioFile.Read("menu.cases.json", """
+            {
+              "cases": [
+                {
+                  "name": "a",
+                  "steps": [
+                    {
+                      "locator": "Window",
+                      "act": "open submenu",
+                      "with": "Right",
+                      "expect": "one.txt",
+                      "reads": "name"
+                    }
+                  ]
+                }
+              ]
+            }
+            """));
+
+        Assert.Contains("'open submenu' takes nothing", refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_element_in_no_window_is_a_hole_rather_than_a_menu_that_refused()
+    {
+        // The arm `press` already answers, and for the same reason: a locator that matched nothing is
+        // in no window a key could go to, and reporting that as a menu which would not open would
+        // send a reader to the application for something the tree never held.
+        var acted = Synthesised.ExpandMenu(
+            Subject.Unguarded(
+                AutomationElement.RootElement,
+                Locator.Parse("Button#nothingIsCalledThisOnAnyDesktop"),
+                deadlineMs: 200,
+                pollMs: 20));
+
+        Assert.NotNull(acted.Needed);
+        Assert.False(acted.Needed!.Satisfied);
+        Assert.Contains("in no window", acted.Needed.Absence, StringComparison.Ordinal);
+    }
+
+    /// <summary>The dialog under test as a step's subject, which is what carries its window.</summary>
+    private Subject On() => Subject.Unguarded(
+        dialog.Root, Locator.Parse("Window"), deadlineMs: 1000, pollMs: 25);
 
     [Fact]
     public void Expanding_something_with_no_submenu_says_which_entry_it_was()

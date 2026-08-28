@@ -40,6 +40,13 @@ public static class Synthesised
     public const string ByKeyboard = "synthesised keyboard";
 
     /// <summary>
+    /// What <see cref="ExpandMenu" /> reports itself as, which is the same word a case writes.
+    /// Named once so the verb and the act cannot spell it two ways — the drift
+    /// <see cref="OverflowState" />'s own condition name was fixed for.
+    /// </summary>
+    public const string ExpandsMenu = "open submenu";
+
+    /// <summary>
     /// Type into a control with real keys, and read back what it says afterwards.
     /// </summary>
     /// <param name="subject">What to type into.</param>
@@ -141,6 +148,58 @@ public static class Synthesised
 
         var pressed = Traversal.Press(window, key, subject.ActMs, subject.PollMs);
         return Landed(subject, $"press {key}", ByKeyboard, before.Facts, before, pressed.Foreground);
+    }
+
+    /// <summary>
+    /// Open the submenu of whatever is highlighted in this window's menu, by pressing Right — the
+    /// keyboard half of the pair <c>expand</c> is the pattern half of.
+    /// <para>
+    /// WW259. <c>expand</c> asks ExpandCollapsePattern, and the menu this exists for exposes none: a
+    /// WinForms submenu that is empty when the menu opens offers no ExpandCollapse at all, draws no
+    /// arrow, and the shell handles Right as <em>activate a plain command</em>, which dismisses the
+    /// whole menu. A mouse hover always worked, which is why it went unnoticed until something drove
+    /// it from the keyboard — and a case naming <c>expand</c> against that menu would ask the pattern,
+    /// find nothing to ask, and report a control rather than the gesture.
+    /// </para>
+    /// <para>
+    /// The element handed back is what the menu landed on rather than what the locator matched, and
+    /// that is the whole of how a case states the claim: paired with the <c>name</c> reading, an
+    /// <c>expect</c> names the submenu entry and <c>moves</c> says the highlight went somewhere
+    /// without naming where. No new reading is needed, because the highlight already is the focus.
+    /// </para>
+    /// <para>
+    /// Not repeatable, for the reason <see cref="Menu" /> gives about its own retries: Right again
+    /// walks deeper rather than arriving again, so a second attempt is a different gesture. And the
+    /// locator is the element the step is about rather than the menu — a menu popup is its own window
+    /// and its entries are not reliably addressable, which is why the walk is window-scoped.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">Any element of the window whose menu is open.</param>
+    public static ActResult ExpandMenu(Subject subject)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+
+        var before = subject.Read();
+
+        // The same hole `Press` answers with, and for the same reason: an element in no window is an
+        // element no key could be sent at, which is a fact about the tree and not a menu that refused.
+        if (subject.Window == 0)
+        {
+            return Landed(
+                subject,
+                ExpandsMenu,
+                ByKeyboard,
+                before.Facts,
+                before,
+                Precondition.Absent(
+                    Windowing.Desk.ForegroundToTake, "this element is in no window a menu key could be sent to"));
+        }
+
+        var walk = Menu.Expand(subject.Window, subject.ActMs, subject.PollMs);
+
+        // What the menu landed on where it landed anywhere, and what the locator matched otherwise.
+        // A walk the desk refused read nothing, so its own reading is not one to hand back.
+        return Landed(subject, ExpandsMenu, ByKeyboard, walk.Focus.Held ?? before.Facts, before, walk.Foreground);
     }
 
     /// <summary>

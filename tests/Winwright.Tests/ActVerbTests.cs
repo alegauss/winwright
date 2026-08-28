@@ -17,11 +17,13 @@ public class ActVerbTests
         // WW225 and WW226 added the four that synthesise input, at the end: the order is the order a
         // reader is shown them, and the pattern acts come first because a pattern act is the default.
         // WW254 added 'pick' after those, which is where it belongs on both counts — it can need the
-        // desk, and it is the newest.
+        // desk, and it is the newest. WW259 added 'open submenu' at the end on the same two counts,
+        // after 'pick at' rather than beside 'expand': the pair it belongs to is a pattern act and a
+        // keyboard act, and this list is ordered by which door a verb takes, not by what it pairs with.
         Assert.Equal(
             [
                 "read", "invoke", "toggle", "set value", "set range", "select", "expand", "collapse",
-                "type", "click", "nudge", "press", "pick", "pick at",
+                "type", "click", "nudge", "press", "pick", "pick at", "open submenu",
             ],
             ActVerb.All.Select(verb => verb.Name));
 

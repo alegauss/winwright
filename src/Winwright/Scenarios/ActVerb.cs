@@ -120,6 +120,21 @@ public sealed record ActVerb
             (subject, argument) => Synthesised.PickAt(subject, Position(argument!)),
             synthesises: true,
             reaches: true),
+
+        // WW259. The fifth pair, and the one whose pattern half cannot ask the question: an empty
+        // WinForms submenu exposes no ExpandCollapse, so a case naming 'expand' against the menu this
+        // was filed for asks a pattern that is not there and reports a control rather than the gesture.
+        // Right is how a keyboard user opens it, and nothing a step could write reached the walk.
+        //
+        // Not repeatable, and that is the rule 'toggle' is not repeatable under rather than a separate
+        // judgement: Right again walks deeper into the submenu instead of arriving where it already is,
+        // so a retry is a different gesture and its red would be about the wrong menu.
+        new(
+            Synthesised.ExpandsMenu,
+            Takes.Nothing,
+            repeatable: false,
+            (subject, _) => Synthesised.ExpandMenu(subject),
+            synthesises: true),
     ];
 
     private readonly Func<Subject, string?, ActResult>? doing;
