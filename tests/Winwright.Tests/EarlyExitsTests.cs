@@ -58,6 +58,35 @@ public sealed class EarlyExitsTests : IDisposable
     }
 
     [Fact]
+    public void A_handle_nobody_holds_refuses_HasExited_before_anything_could_ask_its_code()
+    {
+        // WW287. The premise `LaunchedProcess.Left` rests on, pinned here because it is a fact about
+        // `Process` and not about this engine — so a runtime that changed it would fail this rather
+        // than quietly leave an unguarded read where a guard used to be justified.
+        //
+        // `Left` reads ExitCode with no try, and the reason is that the only state making ExitCode
+        // throw is a handle nobody holds. That state refuses HasExited too, with the same exception,
+        // and `Left` is only ever called after HasExited answered true.
+        var launched = Process.Start(Brief())!;
+        Assert.True(launched.WaitForExit(30_000));
+
+        // Read as true first, which is the ordering that matters: it does not make the code
+        // answerable once the handle is gone, so nothing can arrive at Left with a live HasExited
+        // and a dead ExitCode.
+        launched.Refresh();
+        Assert.True(launched.HasExited);
+        Assert.Equal(7, launched.ExitCode);
+
+        launched.Dispose();
+
+        // Silent, which is why the refusal is not here.
+        launched.Refresh();
+
+        Assert.Throws<InvalidOperationException>(() => launched.HasExited);
+        Assert.Throws<InvalidOperationException>(() => launched.ExitCode);
+    }
+
+    [Fact]
     public void A_register_nobody_asked_says_it_never_looked_rather_than_that_everything_was_running()
     {
         using var register = new ProcessRegister();

@@ -28,29 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW287 The exit code nobody could read
-
-`LaunchedProcess.Left` reads `ExitCode` inside a try, and a code it cannot read becomes
-null rather than a zero: an exit nobody could name and a clean shutdown are different
-facts, and reporting the first as the second would make a crash read as a case closing
-the application on purpose. `Departure` renders that arm as its own sentence.
-
-Nothing in the suite reaches it. The catch is justified by where it sits — `Left` is
-called from `Stop`, which `Suite.Launch` calls inside the `finally` that gives a case's
-process back, and a throw there replaces whatever the case was already failing with. So
-the guard stays. What is missing is anything that provokes it, which is this project's
-rule about a refusal pointed at a rendering: the words a reader would get are unchecked,
-and a shape nothing exercises is one that quietly stops working.
-
-Two candidates, neither measured. Make the register's look at the exit code a seam a
-case can answer for, which is a hole cut in the class for one case's benefit. Or find a
-real process whose code cannot be read after `HasExited` — and WW283's own reading
-suggests one exists on the guest, where a candidate the enumeration could not classify
-is the shape that has now recurred across five runs.
-
-The second is worth trying first. It would pair this arm with a machine rather than with
-a seam opened for it, which is the difference between a case and a rehearsal.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

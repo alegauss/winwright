@@ -67,6 +67,7 @@
 - ✅ **WW283** **WW180's count has recurred past its repair, and this time the process is in neither list** — A candidate running a different binary is recorded rather than skipped in silence, so `Candidates` accounts for all three and a red carries the path it claimed to be running.
 - ✅ **WW279** **a resident launch that died on startup is reported as an application whose controls are all missing** — A launch the register found already gone is recorded as a `Departure`, and the case's own line names the exit before the outcome rather than sending a reader to its locators.
 - ✅ **WW286** **a lent launch that exited is recorded at the end of the run and read by nothing** — The register collects every departure and `EarlyExits` reads them, so a run whose lent launch died says so, counting apart the exit no single case can claim.
+- ✅ **WW287** **the sentence for an exit code Windows would not name has nothing that provokes it** — Removed rather than provoked, on a measurement: the state that makes `ExitCode` throw makes `HasExited` throw one line earlier, so nothing could reach the sentence it bought.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

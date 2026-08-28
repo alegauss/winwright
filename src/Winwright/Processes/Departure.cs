@@ -40,22 +40,25 @@ public enum DepartureSeen
 /// <param name="Pid">The process id, which is what a file-lock message names.</param>
 /// <param name="Executable">What was launched, as it was launched.</param>
 /// <param name="Code">
-/// What it exited with, or null where Windows would not say. Null rather than a zero: an exit code
-/// nobody could read and a clean exit are different facts, and the second one is the one that makes
-/// a case ending in a deliberate shutdown unremarkable.
+/// What it exited with.
+/// <para>
+/// WW287. This was <c>int?</c>, for a code Windows would not name, and the arm was removed on a
+/// measurement: the only state that makes <see cref="System.Diagnostics.Process.ExitCode" /> throw is
+/// a handle nobody holds, and that state makes <c>HasExited</c> throw the same exception one line
+/// earlier — so nothing could reach a null, and the second sentence it produced was reader-facing
+/// text no run could ever show.
+/// </para>
 /// </param>
 /// <param name="Seen">
 /// Where the register was standing when it found it gone. WW286: what bounds how much anything
 /// reading this may claim about when the application went.
 /// </param>
-public sealed record Departure(int Pid, string Executable, int? Code, DepartureSeen Seen)
+public sealed record Departure(int Pid, string Executable, int Code, DepartureSeen Seen)
 {
     /// <summary>
     /// The fact and nothing about what it means, which is the caller's to say: a case that ended by
     /// closing the application under test left this behind on purpose, and a phrase claiming the run
     /// was cut short would be a false finding on exactly that case.
     /// </summary>
-    public override string ToString() => Code is { } code
-        ? $"exited with {code}"
-        : "exited, and Windows would not say with what";
+    public override string ToString() => $"exited with {Code}";
 }
