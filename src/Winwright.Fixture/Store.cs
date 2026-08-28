@@ -33,6 +33,13 @@ public static class Store
     public const string ProfilesFile = "profiles.json";
 
     /// <summary>
+    /// The profiles this application has. WW260: the set `--profiles` prints and the set the store
+    /// writes are the same list rather than two copies, because a fixture that answered one thing and
+    /// wrote another would let a case pass against a read-out nothing else agrees with.
+    /// </summary>
+    public static IReadOnlyList<string> Profiles { get; } = ["alpha", "bravo"];
+
+    /// <summary>
     /// Write the store, mutating it where the run asked. Called before any window: a check that
     /// fingerprints around a launch must see the whole write, not the part that finished first.
     /// </summary>
@@ -49,6 +56,9 @@ public static class Store
         // a store that wrote either differently on two runs would fail a check about neither.
         var utf8 = new UTF8Encoding(false);
         File.WriteAllText(Path.Combine(full, SettingsFile), mutating ? Mutated : Settled, utf8);
-        File.WriteAllText(Path.Combine(full, ProfilesFile), @"[ ""alpha"", ""bravo"" ]", utf8);
+        File.WriteAllText(
+            Path.Combine(full, ProfilesFile),
+            $"[ {string.Join(", ", Profiles.Select(one => $"\"{one}\""))} ]",
+            utf8);
     }
 }

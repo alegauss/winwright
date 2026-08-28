@@ -80,6 +80,17 @@ public static class Program
         if (shapes.Value("render") is string path)
             return Rendered(path, shapes);
 
+        // WW260. On the output stream and before any window, exactly as `--flags` is: this is an
+        // answer the application gives about itself, and a case derives its expected set from it
+        // rather than from a strings file. One per line, because that is all a set needs.
+        if (shapes.Has("profiles"))
+        {
+            foreach (var profile in Store.Profiles)
+                Console.Out.WriteLine(profile);
+
+            return 0;
+        }
+
         // WW279. Before the resident arm and before any window: what this shape is is a launch that
         // is gone by the time anything looks at it, and a process that drew something first would be
         // a different defect. It exits rather than throwing, because a tray that crashes on startup

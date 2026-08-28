@@ -247,6 +247,7 @@ needs one this file does not declare is **recorded as not taken**, never quietly
   "sourceIgnore": ["bin", "obj"],
   "fingerprintStore": "%APPDATA%/YourApp",
   "languageFiles": ["strings.en.json", "strings.pt-BR.json"],
+  "reportedSets": { "profiles": ["--print-profiles"] },
   "loading": ["report.computing", "common.pleaseWait"],
   "language": { "preferenceFile": "settings.json", "preferenceKey": "ui.language", "fallback": "en" },
   "timeouts": { "resolve": 5000, "stop": 5000 },
@@ -435,7 +436,25 @@ step failed on nine strangers, because the panel beside the sidebar is full of T
 separates the two. The strangers are still counted and still named in the sentence: allowed is not the
 same as unrecorded.
 
-The set is derived and never listed, and that is the whole point. claude-tray's harness named three
+Some sets are not in a strings file at all. Profiles, accounts, devices — that is the machine's data,
+and the number is whatever this machine has, so there is nothing to derive from the product's
+vocabulary. For those the project says how to ask the application itself:
+
+```json
+"reportedSets": { "profiles": ["--print-profiles"] }
+```
+
+and a step names it exactly as it names a strings key — `"covers": "profiles"`. Which well the set
+comes out of is the project's business, for the same reason which strings file it is has always been:
+a case naming the flag would be a case that runs on one checkout. The application prints one value per
+line, and an empty report or a non-zero exit is **broken and not failed**, since an empty expected set
+is met by an empty window. This is what makes a count derived rather than typed — a case asserting two
+profile entries goes on asserting two after a third is added, and says nothing when it stops covering
+what it was written for.
+
+`DerivedSet` is the engine's side of this, and it has two doors: one derives the set from the strings
+a project declares, the other from what the application prints when asked. The set is derived and
+never listed, and that is the whole point. claude-tray's harness named three
 tab keys by hand; the window grew a fourth, and the case went on reporting *all three tab headers
 read* against a four-tab window. A list stops covering what it was written for and says nothing when
 it does. Add a string to the file and this step fails until the window carries it — with no edit here.

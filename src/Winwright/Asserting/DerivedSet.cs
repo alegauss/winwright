@@ -390,6 +390,121 @@ public sealed record DerivedSet
     }
 
     /// <summary>
+    /// The set the application reports about itself, derived by running it the way the project says
+    /// and reading one value per line.
+    /// <para>
+    /// WW260. The second well, and it exists because the first one is the wrong place for some sets:
+    /// `covers` derives from the language files, which is right for every tab header the strings
+    /// declare and wrong for what claude-tray's menu case counts. Profiles are this machine's data and
+    /// the number is whatever this machine has, so neither half is in a strings file — and typing it
+    /// is the defect this whole shape exists to refuse, one well over.
+    /// </para>
+    /// <para>
+    /// One value per line, blank lines dropped, order preserved. Nothing is parsed beyond that: a
+    /// format with structure in it is a second thing to keep in step with the application, and the
+    /// only thing the expectation needs is which values there are.
+    /// </para>
+    /// <para>
+    /// An empty report is refused for the reason an empty key is: a set with no members is met by an
+    /// empty window, which is the hole this whole shape exists to close. So is a run that failed —
+    /// what an application prints on its way to a non-zero exit is not a set.
+    /// </para>
+    /// </summary>
+    /// <param name="named">What the set is, as a report names it.</param>
+    /// <param name="declaration">The project, for the executable and what it declared.</param>
+    /// <param name="under">The name of the reported set, as the project declares it.</param>
+    /// <exception cref="UnderivableSetException">Where the project declares no such set, or it cannot be read.</exception>
+    public static DerivedSet Reported(string named, ProjectDeclaration declaration, string under)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(named);
+        ArgumentNullException.ThrowIfNull(declaration);
+        ArgumentException.ThrowIfNullOrWhiteSpace(under);
+
+        var key = under.Trim();
+        if (!declaration.ReportedSets.TryGetValue(key, out var arguments))
+        {
+            var has = declaration.ReportedSets.Count == 0
+                ? "it declares no reportedSets at all"
+                : $"it declares {string.Join(", ", declaration.ReportedSets.Keys.Select(one => $"'{one}'"))}";
+
+            throw new UnderivableSetException(
+                $"{named} is derived from what the application reports under '{key}', and {declaration.Path}: {has}");
+        }
+
+        var start = new System.Diagnostics.ProcessStartInfo(declaration.Executable)
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+        };
+
+        foreach (var argument in arguments)
+            start.ArgumentList.Add(argument);
+
+        string printed;
+        int code;
+        try
+        {
+            using var running = System.Diagnostics.Process.Start(start)
+                ?? throw new UnderivableSetException(
+                    $"{named}: {declaration.Executable} started nothing that could be asked for '{key}'");
+
+            // Read before the wait: a process filling a redirected pipe nobody is reading blocks on
+            // the write, and this would then wait out an application that had already done its work.
+            printed = running.StandardOutput.ReadToEnd();
+            running.WaitForExit();
+            code = running.ExitCode;
+        }
+        catch (Exception refused) when (refused is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            throw new UnderivableSetException(
+                $"{named}: {declaration.Executable} could not be asked for '{key}' — {refused.Message}");
+        }
+
+        if (code != 0)
+        {
+            throw new UnderivableSetException(
+                $"{named}: {declaration.Executable} exited {code} when asked for '{key}', so what it printed "
+                    + "is not a set");
+        }
+
+        var values = printed
+            .Split('\n')
+            .Select(one => one.Trim())
+            .Where(one => one.Length > 0)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        if (values.Count == 0)
+        {
+            throw new UnderivableSetException(
+                $"{named}: {declaration.Executable} reported nothing under '{key}', and an empty expected "
+                    + "set is met by an empty window — which is the hole this set exists to close");
+        }
+
+        var how = $"reported by {System.IO.Path.GetFileName(declaration.Executable)} "
+            + $"{string.Join(" ", arguments)}";
+
+        var members = new ReadOnlyCollection<string>(values);
+
+        return new DerivedSet(
+            named,
+            how,
+
+            // The values are their own keys: a reported set has no key-to-string layer, which is the
+            // whole difference between this well and the strings one.
+            members,
+            members,
+
+            // Unknown, and nothing left out. A reported value has no line in a file to point at, and
+            // the two reasons a declared string is excluded — a placeholder, a note — are both facts
+            // about a strings file, so claiming either here would be inventing one.
+            Provenance.Unknown,
+            new ReadOnlyCollection<Provenance>([]),
+            new ReadOnlyCollection<LeftOut>([]));
+    }
+
+    /// <summary>
     /// Compare the set with what was read. The only door readings come in by, which is what keeps
     /// the expectation from being derived from the thing it is asserting.
     /// </summary>

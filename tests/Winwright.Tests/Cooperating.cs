@@ -252,6 +252,18 @@ internal static class Cooperating
         // one run: the engine assembly carries no reference to that half, so no verb here can be
         // waiting on one. What this reads is the tree, against a label resolved from the project's
         // own strings — which is a declaration and not an artefact the application wrote down.
+        // WW260. Both of `DerivedSet`'s doors, and the type is here at all because `Reported` starts
+        // the application — which is what makes every verb on it need declaring, `From` included. That
+        // is the catalogue reading the source rather than a list somebody kept.
+        //
+        // Neither needs the in-app half. `From` reads a strings file the project ships, and `Reported`
+        // runs the article and reads what it prints: an application that can be asked for its own
+        // profiles is one with a flag, not one carrying the harness's other half.
+        new("DerivedSet.From", Cooperation.None, false,
+            "the expected set out of the strings the project declares"),
+        new("DerivedSet.Reported", Cooperation.None, false,
+            "the expected set out of what the application prints when the project's arguments ask it"),
+
         new("Loading.In", Cooperation.None, false,
             "whether a page has finished computing, read off the tree against the project's own "
                 + "loading label — and a page it could not walk answers that it did not look"),

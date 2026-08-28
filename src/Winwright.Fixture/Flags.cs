@@ -293,6 +293,12 @@ public sealed record Flags
             "a resident tray showing nothing runs on every developer machine here, and a refusal firing on it would need an override everybody passes always",
             Draws: false),
         new Flag(
+            "profiles",
+            "",
+            "print the profiles this application has, one per line, and exit - the set a case derives from what the application reports rather than from a strings file",
+            "the menu case counts profile entries against the application's own read-out, and profiles are the machine's data rather than the product's vocabulary - so there was no strings file to derive the expected set from and the number would have been typed into the case",
+            Draws: false),
+        new Flag(
             "dies",
             "",
             "a launch that exits on startup, drawing nothing and leaving nothing for a step to find",

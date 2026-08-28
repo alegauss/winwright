@@ -660,7 +660,13 @@ public static class CaseRun
         DerivedSet derived;
         try
         {
-            derived = DerivedSet.From(step.Name, project, key, speaking);
+            // WW260. Which well the set comes out of is the project's business and never the case's,
+            // exactly as which strings file it is has always been: a case naming the flag that prints
+            // the profiles would be a case that runs on one checkout. A name the project declares as
+            // reported is asked of the application; anything else is a key in its strings.
+            derived = project.ReportedSets.ContainsKey(key)
+                ? DerivedSet.Reported(step.Name, project, key)
+                : DerivedSet.From(step.Name, project, key, speaking);
         }
         catch (UnderivableSetException underivable)
         {
@@ -740,7 +746,12 @@ public static class CaseRun
         DerivedSet derived;
         try
         {
-            derived = DerivedSet.From(declared.Name, project, key, speaking);
+            // WW260, and the same dispatch a sweep makes: a set is a set, and a case repeating once
+            // per profile is the shape the environment sweep already needs. An asymmetry where one
+            // field could reach the reported well and the other could not is one a reader trips on.
+            derived = project.ReportedSets.ContainsKey(key)
+                ? DerivedSet.Reported(declared.Name, project, key)
+                : DerivedSet.From(declared.Name, project, key, speaking);
         }
         catch (UnderivableSetException underivable)
         {

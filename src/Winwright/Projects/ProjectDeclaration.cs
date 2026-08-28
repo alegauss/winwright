@@ -58,6 +58,30 @@ public sealed class ProjectDeclaration
         Attempts = shape.Attempts is { } declared ? Capped(declared, path) : Acting.Retry.DefaultCap;
         Timeouts = Timeouts.Declared(shape.Timeouts, path);
         Destructive = Destructive.Of(shape.Destructive, LanguageFiles, path);
+
+        // WW260. Names trimmed and arguments kept as written: a name is what a case says, and the
+        // arguments are what the application is asked. A set declared with no arguments is refused
+        // here rather than at the run that would have asked the application nothing and read whatever
+        // it prints when it is asked nothing.
+        var reported = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+        foreach (var (name, arguments) in shape.ReportedSets ?? [])
+        {
+            var called = name?.Trim() ?? "";
+            if (called.Length == 0)
+                throw new ArgumentException($"{path} declares a reportedSet with no name", nameof(shape));
+
+            if (arguments is null || arguments.Count == 0)
+            {
+                throw new ArgumentException(
+                    $"{path} declares the reportedSet '{called}' with no arguments, so nothing says how "
+                        + "the application is asked for it",
+                    nameof(shape));
+            }
+
+            reported[called] = new ReadOnlyCollection<string>([.. arguments]);
+        }
+
+        ReportedSets = new ReadOnlyDictionary<string, IReadOnlyList<string>>(reported);
     }
 
     /// <summary>The declaration file that was read.</summary>
@@ -129,6 +153,25 @@ public sealed class ProjectDeclaration
     /// <summary>The application under test.</summary>
     /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
     public string Executable => Require(executable, "executable", "launching the application under test");
+
+    /// <summary>
+    /// The sets the application reports about itself, by name, each holding the arguments that make it
+    /// print one per line.
+    /// <para>
+    /// WW260. The second well a derived set can come from, and it exists because the first one is the
+    /// wrong place for some sets. `covers` derives from the language files, which is right for every
+    /// tab header the strings declare and wrong for what claude-tray's menu case counts: profiles are
+    /// this machine's data, the number is whatever this machine has, and neither half is in a strings
+    /// file. Typing it is the defect `covers` exists to refuse, one well over — a case asserting two
+    /// profile entries goes on asserting two after a third is added.
+    /// </para>
+    /// <para>
+    /// Declared here rather than named in a case for the same reason a strings file is: how the
+    /// application is asked is the project's business, and a case naming the flag would be a case that
+    /// runs on one checkout.
+    /// </para>
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> ReportedSets { get; }
 
     /// <summary>The source root a staleness check compares the built binary against.</summary>
     /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
@@ -250,6 +293,8 @@ public sealed class ProjectDeclaration
         [JsonPropertyName("attempts")] public int? Attempts { get; init; }
 
         [JsonPropertyName("destructive")] public IReadOnlyList<System.Text.Json.JsonElement>? Destructive { get; init; }
+
+        [JsonPropertyName("reportedSets")] public Dictionary<string, IReadOnlyList<string>>? ReportedSets { get; init; }
     }
 
     private sealed record LanguageShape

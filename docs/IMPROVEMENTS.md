@@ -144,29 +144,6 @@ insertion and `WM_CHAR`, which is the queue.
 `VK_PACKET` before `TranslateMessage` is measured out. Every lParam is `00000001`, the
 scan code having eight bits where a code unit needs sixteen. The count is all it claims.
 
-### §WW260 Some expected sets are the application's data, not its strings
-
-`covers` is the answer to the hardcoded list and it derives from one place: the language
-files the project declares. That is right for the set it was built for — every tab
-header the strings declare has to read somewhere — and it is the wrong well for the menu
-case.
-
-What that case counts is profiles. The script asked the application, running it with a
-flag that prints them, and compared the submenu against what came back: one entry per
-profile plus the two toggles the submenu carries. Neither half of that is in a strings
-file. The profiles are this machine's data, and the number is whatever this machine has.
-
-Typing it is the defect `covers` exists to refuse, one well over. A case asserting two
-profile entries goes on asserting two after a third is added, and it says nothing when
-it stops covering what it was written for — which is the shape a run reported as *all
-three tab headers read* against a four-tab window.
-
-`needs` is the near miss and does not answer it. A requirement is measured as present or
-absent by the adopting project's runner, and this is a count the expectation is about
-rather than a condition the case runs under. What is missing is a set the application
-itself reports, declared once where the project declares its strings, and derived per
-run like the other one.
-
 ### §WW269 A minute of tolerance, and only a minute
 
 The reset caption names when a quota window turns over, and it counts down while the
@@ -192,6 +169,31 @@ which assumes nothing about the text and costs a reading the adopter has to prov
 
 What it must not become is a general tolerance on `sameAs`. A percentage is the same
 number or it is not.
+
+### §WW290 A name declared in both wells
+
+WW260 gave a derived set a second well and left the dispatch one-sided: `covers`
+resolves against `reportedSets` where the project declares the name there, and against
+the strings otherwise. A project declaring `profiles` in both derives from the
+application and never hears that a strings key of the same name exists.
+
+Which one it picks is not the problem — a rule has to pick. The silence is. The reader
+of a passing sweep cannot know their strings key is dead, and the reader of a red goes
+to the wrong file. That is the shape `covers` was built against, one level up: not a
+wrong answer, an answer whose provenance nobody stated.
+
+Refusing it is the obvious repair and is not free. Asking whether the strings declare a
+key means parsing the language files, and `DerivedSet.From` refuses outright where a
+project ships several and no fixture said which language the window is in — so the check
+inherits that refusal or needs a weaker question of its own, and a project using only
+reported sets must not be made to answer a language question it has no stake in.
+
+So the shape is open: refuse at load, refuse at derive, or name the shadowed key in the
+set's `Source` and let it stand. The last is cheapest and the only one costing a project
+nothing.
+
+Measured against nothing yet — no project here declares a name in both. Filed because
+the first to do it will not find out.
 
 ## Block G — The scenario — a case is a data file
 
