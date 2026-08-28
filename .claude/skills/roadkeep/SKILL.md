@@ -63,7 +63,10 @@ be in play at once — the plugin your hook and this file come from, the action 
 and whatever `roadkeep` you are calling — and they are allowed to differ. **`engines`
 reads all three** and answers `agreed`, `behind` or `unpinnable` — the last being one
 version and a modified checkout, which is no commit the plugin could match and so is not
-agreement; it exits 1 on either of the two that are not. Reach for it when a hook denies a
+agreement; it exits 1 on either of the two that are not. **A fourth is read and never
+judged**: the merge driver git would run, which is a command and not a version, so it is a
+row and not a verdict — the copy that runs when nobody is watching, and `merge --check` is
+where whether git can run it is answered. Reach for it when a hook denies a
 write the command you just ran would have made, because then the refusal is that copy's
 rule and not this one's. **And `engines --invoke` prints, on one line and alone, the
 command that reaches the copy wired to this project** — reach for it before composing any
@@ -262,7 +265,9 @@ order is the answer and no score is printed, for the reason above. **And the `ad
 that read back whether or not you made it**: every insertion names the three entries of its
 block nearest the symptom it just filed, because that is the moment nothing is spent but an
 id and `restate` and `retire` are one call away. Same order, same silence about scores, and
-never a refusal — it is the read volunteered, not the gate the measurement rules out. A letter nothing
+never a refusal — it is the read volunteered, not the gate the measurement rules out. Three
+of however many the block holds, and the row says which of how many and names this command
+for the rest, so the volunteered half is bounded out loud rather than read as the whole. A letter nothing
 declares is **refused** rather than answered `nothing`, that answer being read as
 evidence, and where the block exists
 the reply says which of live, paused, finished or empty it is. **`reversals` is how you
@@ -587,14 +592,23 @@ widest first, against `[reads] brief`. Declared, that ceiling is the gate's — 
 the task whose brief does not fit. **`cost --session`** is both halves against their cadences —
 the served schema once at connect and every `[budgets]` file each turn — which is what a
 session pays before it calls anything, and the one figure neither of the other two can give.
-A bare `cost` is refused naming the three: they are three cadences, and privileging one would
-make the other two read as narrowings of it. **And `config` is the read about `roadkeep.toml` itself**:
-every table, key, TOML type and default this build accepts, with the sentence its
-source already carries and whether *this* project declared it — `--table <name>` for one,
-`--table ""` for the top level. Reach for it before writing a key rather than after the
-refusal, and read the build it names: a key nothing declares is a typo, a key this copy
-predates is an upgrade, and the file cannot tell them apart. **`govern <address> [<n>]` is
-the write beside it**, and the only one on that file besides `declare`: the four tables whose
+**`cost --skill`** is the fourth cadence: what this file costs the turns that load it, beside
+the served schema and with the sections it went to — no ceiling, because none is declared and
+one chosen before this reading would be a number nobody argued for.
+**`cost --deny`** is the fifth, and the one this surface is *for*: what a refused write costs
+the session that meets it, beside the notice from the same module that has a ceiling. CLI
+only — over this transport you are handed the denial itself.
+A bare `cost` is refused naming the five: they are five cadences, and privileging one would
+make the others read as narrowings of it. **And `config` is the read about `roadkeep.toml` itself**:
+every table, key, TOML type and default this build accepts, with the sentence its source
+already carries and whether *this* project declared it — `--table <name>` for one,
+`--table ""` for the top level. **And the boundary of that same question**: what this
+build *fixes* from its own corpus and no project may declare, with the reading it
+follows — so *is this mine to set?* is answered rather than guessed. Reach for it before
+writing a key rather than after the refusal, and read the build it names: a key nothing
+declares is a typo, a key this copy predates is an upgrade, and the file cannot tell
+them apart. **`govern <address> [<n>]` is the write beside it**, and the only one on that
+file besides `declare`: the four tables whose
 value is a judgement about a number — `[limits]`, `[budgets]`, `[tools]`, `[claims]` — each
 already had the read that decides it somewhere else, so this takes the reading and writes the
 number in one call. With no number it prints the reading alone; `--role` and `--file` name the
