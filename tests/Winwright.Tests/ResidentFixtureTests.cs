@@ -67,6 +67,47 @@ public sealed class ResidentFixtureTests : IDisposable
     }
 
     [Fact]
+    public void A_resident_launch_that_died_is_named_by_the_case_rather_than_by_its_locators()
+    {
+        if (!Desk.Read().CanObserve)
+            return;
+
+        // WW279. The same fixture and the same step as the case above, with `--dies` the only
+        // difference: the launch exits on startup, so the step finds nothing for a second reason and
+        // the reds it produces are identical. What has to differ is the case's own line.
+        var verdict = Run(resident: true, "Button#nothingIsCalledThisOnAnyDesktop", "--dies");
+        var line = Assert.Single(verdict.Ran).ToString();
+
+        // The number off the fixture's own catalogue and never typed here: WW161, and a case
+        // asserting a transcription would go on agreeing with itself after the fixture changed.
+        Assert.Contains($"exited with {Fixture.ExitFor("dies")}", line, StringComparison.Ordinal);
+
+        // Before the outcome, which is the whole of what was wrong: a reader who meets the outcome
+        // first goes to the locator lines, and every one of those is about a desk the application
+        // had already left.
+        Assert.True(
+            line.IndexOf("exited with", StringComparison.Ordinal)
+                < line.IndexOf(RunOutcome.Failed.ToString(), StringComparison.Ordinal),
+            line);
+    }
+
+    [Fact]
+    public void A_resident_launch_the_run_stopped_itself_says_nothing_about_having_exited()
+    {
+        if (!Desk.Read().CanObserve)
+            return;
+
+        // The other half, and it is what makes the clause above mean anything. This launch behaves —
+        // it runs, shows nothing, and the register stops it — so a line that named an exit here would
+        // name one on every tray in the suite, which is a sentence nobody reads by the third case.
+        var verdict = Run(resident: true, "Button#nothingIsCalledThisOnAnyDesktop");
+        var ran = Assert.Single(verdict.Ran);
+
+        Assert.Null(ran.Departed);
+        Assert.DoesNotContain("exited", ran.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_fixture_says_which_it_is_in_the_line_a_report_prints()
     {
         // A reader of a red wants to know what it was run against, and "resident" is the difference
@@ -115,7 +156,8 @@ public sealed class ResidentFixtureTests : IDisposable
     /// <summary>Run one case against a launch that draws nothing.</summary>
     /// <param name="resident">Whether the fixture says so.</param>
     /// <param name="locator">What the one step looks for.</param>
-    private SuiteVerdict Run(bool resident, string locator)
+    /// <param name="also">Whatever else the launch carries, after <c>--resident</c>.</param>
+    private SuiteVerdict Run(bool resident, string locator, params string[] also)
     {
         var declaration = Path.Combine(root, ProjectDeclaration.FileName);
         File.WriteAllText(
@@ -132,7 +174,7 @@ public sealed class ResidentFixtureTests : IDisposable
               "fixtures": [
                 {
                   "name": "the fixture that draws nothing",
-                  "arguments": ["--resident"],
+                  "arguments": [{{string.Join(", ", new[] { "--resident" }.Concat(also).Select(one => System.Text.Json.JsonSerializer.Serialize(one)))}}],
                   "resident": {{(resident ? "true" : "false")}}
                 }
               ],

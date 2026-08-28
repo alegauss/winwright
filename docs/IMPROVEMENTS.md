@@ -28,51 +28,52 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW279 a resident launch that died on startup reads as an application full of missing controls
+### §WW286 A departure the run records and nobody reads
 
-`WW257` let a fixture say its launch draws no window, because a tray is a process that
-draws none and the window there is what a click on the icon is supposed to produce. What
-went with the window was the wait, and with the wait went the one thing that noticed a
-launch which never arrived.
+WW279 put the exit on the case's line, and it reaches only a case that owned its
+process. A fixture declared shareable and asked for by several read-only cases is
+launched once and held until the run ends, so `Suite.Launch` never stops it at a case
+boundary — the `if (!borrowing)` arm is the one that looks. That launch is read by
+`StopAll` instead, which records the `Departure` and hands back survivors.
 
-A tray that crashes on startup now reaches the case as a run against the desktop, and
-every step in it reds about a locator that matched nothing. Those reds are about the
-application, which is half right — it did fail to start — and they name the wrong thing:
-a reader is sent looking for a missing icon on a desk where nothing was ever drawn.
+Nothing reads it from there. `AsFinding` is about what outlived the run, and a process
+that left early outlived nothing, so a run whose shared application died reports
+*nothing outlived the run* — true, and the same unhelpful sentence WW279 was filed
+against, one level up.
 
-Two shapes were tried and neither is it. Asking `HasExited` once at the launch is a
-race, because a process that exits still takes a moment to do it; asking with a wait is
-the window deadline paid by every tray that behaves, which is the cost `WW257` removed.
+What makes this its own line rather than a widening of WW279 is that the honest answer
+differs. No case can claim the exit: the launch is held across several of them and none
+can say which one it went during, which is exactly why the stop is not at a case
+boundary. So the reading belongs to the run — the register's finding, or the suite's own
+sentence — and it has to say what it cannot say as well: that the application went at
+some point across these three cases.
 
-What is probably right is asking at the other end. The run already stops the process
-where the case finishes, and a resident process that had gone before it got there is a
-fact the result can carry — so the sentence becomes *the tray exited with 1 partway
-through* rather than a list of locators. That also covers the case this one does not: a
-tray that starts, is driven, and dies in the middle.
+Not a widening of the case line. A case that owned its process already answers, and
+answering twice would make the shared reading look like the owned one, which is the
+distinction WW62 keeps.
 
-### §WW283 The count that WW180 half-closed
+### §WW287 The exit code nobody could read
 
-WW180 shipped against "a case counts two processes it launched a moment earlier and sees
-one, twice in eight guest runs". Its repair was to stop passing a candidate over in
-silence: one that will not say which binary it runs is named, and `InstanceCheckTests`
-counts `Others + Unreadable` so a process caught mid-start still counts.
+`LaunchedProcess.Left` reads `ExitCode` inside a try, and a code it cannot read becomes
+null rather than a zero: an exit nobody could name and a clean shutdown are different
+facts, and reporting the first as the second would make a crash read as a case closing
+the application on purpose. `Departure` renders that arm as its own sentence.
 
-It recurred. On a guest run of 1,720 cases, two reds, both this shape:
-`A_resident_instance_showing_nothing` launched two and read `Others + Unreadable` as 1,
-and `A_different_executable_of_the_same_name` launched one and read `Others` as empty.
-So the missing process was in *neither* list — which is the one outcome WW180's repair
-cannot explain, because both of its arms require the process to have been enumerated.
+Nothing in the suite reaches it. The catch is justified by where it sits — `Left` is
+called from `Stop`, which `Suite.Launch` calls inside the `finally` that gives a case's
+process back, and a throw there replaces whatever the case was already failing with. So
+the guard stays. What is missing is anything that provokes it, which is this project's
+rule about a refusal pointed at a rendering: the words a reader would get are unchecked,
+and a shape nothing exercises is one that quietly stops working.
 
-Two things about the run itself. It took 12m 2s against 9m 38s for the run before it, on
-the same guest with the same tree bar three test files, so the machine was busier. And
-the run before it was green on both cases. Nothing in either case's path changed between
-them.
+Two candidates, neither measured. Make the register's look at the exit code a seam a
+case can answer for, which is a hole cut in the class for one case's benefit. Or find a
+real process whose code cannot be read after `HasExited` — and WW283's own reading
+suggests one exists on the guest, where a candidate the enumeration could not classify
+is the shape that has now recurred across five runs.
 
-So the candidate is a process that has not yet appeared to whatever enumerates it, or
-one that was gone by the time it was asked — and `cmd.exe` launched with no console is a
-process that can exit on its own. Which of those it is decides the repair, and the
-reading cannot currently tell them apart: a process that was never there and one that
-has left both read as absent.
+The second is worth trying first. It would pair this arm with a machine rather than with
+a seam opened for it, which is the difference between a case and a rehearsal.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

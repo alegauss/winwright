@@ -293,6 +293,13 @@ public sealed record Flags
             "a resident tray showing nothing runs on every developer machine here, and a refusal firing on it would need an override everybody passes always",
             Draws: false),
         new Flag(
+            "dies",
+            "",
+            "a launch that exits on startup, drawing nothing and leaving nothing for a step to find",
+            "a tray that crashed on startup reached the case as a run against the desktop, and every step in it reported a locator that matched nothing - so the reds named missing controls on a desk where the application had never existed",
+            Draws: false,
+            Exits: Program.Died),
+        new Flag(
             "store",
             "directory",
             "a settings store of the fixture's own, written from constants, which a run may break",

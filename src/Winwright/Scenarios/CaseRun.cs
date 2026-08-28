@@ -4,6 +4,7 @@ using System.Windows.Automation;
 using Winwright.Acting;
 using Winwright.Asserting;
 using Winwright.Locating;
+using Winwright.Processes;
 using Winwright.Projects;
 using Winwright.Tracing;
 using Winwright.Verdicts;
@@ -28,7 +29,8 @@ public sealed class CaseResult
         IReadOnlyList<TraceStep> trace,
         IReadOnlyList<StepDeclaration> notReached,
         bool lent = false,
-        int across = 1)
+        int across = 1,
+        Departure? departed = null)
     {
         Declared = declared;
         Verdict = verdict;
@@ -36,6 +38,7 @@ public sealed class CaseResult
         NotReached = notReached;
         Lent = lent;
         Across = across;
+        Departed = departed;
     }
 
     /// <summary>
@@ -73,6 +76,18 @@ public sealed class CaseResult
     /// <summary>What it earned, derived by <see cref="RunVerdict"/> and set by nobody.</summary>
     public RunVerdict Verdict { get; }
 
+    /// <summary>
+    /// That the application had already gone when the run came to stop it, or null where it had not.
+    /// <para>
+    /// WW279. The reading is not changed by it and the line is: a launch that exited really did fail,
+    /// so the reds stay reds, and what was wrong was that they named locators on a desk where nothing
+    /// had ever been drawn. Left out of the outcome for the other reason — a case whose last step
+    /// closes the application ends with the process gone on purpose, and degrading that would make the
+    /// shutdown case impossible to write.
+    /// </para>
+    /// </summary>
+    public Departure? Departed { get; }
+
     /// <summary>Every step the run recorded, in order, with the ordinals the results refer to.</summary>
     public IReadOnlyList<TraceStep> Trace { get; }
 
@@ -84,6 +99,18 @@ public sealed class CaseResult
 
     /// <summary>Whether every declared step was attempted.</summary>
     public bool Finished => NotReached.Count == 0;
+
+    /// <summary>
+    /// The same reading, saying that the application had gone before the run asked it to stop.
+    /// <para>
+    /// WW279. Read after the stop and therefore added afterwards, which is why this exists rather
+    /// than a field the constructor takes: the run's own look at the process happens where the case
+    /// finishes, and by then the result has been built.
+    /// </para>
+    /// </summary>
+    /// <param name="departure">What the register found.</param>
+    internal CaseResult After(Departure departure) =>
+        new(Declared, Verdict, Trace, NotReached, Lent, Across, departure);
 
     /// <summary>The one line a summary shows: what it was, what it earned, and what it skipped.</summary>
     public override string ToString()
@@ -101,7 +128,14 @@ public sealed class CaseResult
             ? $"{Declared.Checks} check(s)"
             : $"{Declared.Checks} check(s) across {Across} member(s)";
 
-        return $"{Declared.Name}: {Verdict.Outcome} over {Verdict.Ran} of {over}"
+        // WW279. Before the outcome, because a reader who meets "Failed over 0 of 3 check(s)" first
+        // goes to the locator lines, and every one of those names a control on a desk the application
+        // had already left. The clause says the exit and never what it caused — "exited with 0" beside
+        // "Passed" is a case that closed the thing under test on purpose, and the same clause reads
+        // correctly there without a second branch nothing in the suite would exercise.
+        var died = Departed is null ? "" : $"the application {Departed} — ";
+
+        return $"{Declared.Name}: {died}{Verdict.Outcome} over {Verdict.Ran} of {over}"
             + $"{short_fall}{where}{window}";
     }
 }

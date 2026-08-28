@@ -41,6 +41,29 @@ public sealed record Unidentified(int Pid, string Because)
 }
 
 /// <summary>
+/// A process carrying the right name that answered a different binary.
+/// <para>
+/// WW283. WW180 closed one of the two ways a candidate leaves without being counted, and this is the
+/// other: a candidate that answers is compared against the path asked about, and one that does not
+/// match was skipped by a bare <c>continue</c>. Not being this application is the correct verdict —
+/// what was missing is that the reading then could not tell "no such process" from "one, and it said
+/// it was running something else".
+/// </para>
+/// <para>
+/// Measured, and it is why this exists: the case that launches two copies of a binary and counts them
+/// read one, in four guest runs of five, with the missing one in neither list. A count that cannot
+/// name what it passed over sends the next reader to look for a process that was there all along.
+/// </para>
+/// </summary>
+/// <param name="Pid">The process carrying the name.</param>
+/// <param name="Binary">What it said it was running instead.</param>
+public sealed record Elsewhere(int Pid, string Binary)
+{
+    /// <summary>The one line a summary names it by.</summary>
+    public override string ToString() => $"pid {Pid} (running {Binary})";
+}
+
+/// <summary>
 /// Whether anything else is already showing the application under test.
 /// <para>
 /// Only a windowed instance counts, and that is the whole judgement here: a resident tray showing
@@ -58,11 +81,13 @@ public sealed class InstanceCheck
         string executable,
         IReadOnlyList<OtherInstance> others,
         IReadOnlyList<Unidentified> unreadable,
+        IReadOnlyList<Elsewhere> elsewhere,
         bool allowedOthers)
     {
         Executable = executable;
         Others = others;
         Unreadable = unreadable;
+        Named = elsewhere;
         AllowedOthers = allowedOthers;
         Windowed = new ReadOnlyCollection<OtherInstance>(others.Where(other => other.Windowed).ToList());
         Resident = new ReadOnlyCollection<OtherInstance>(others.Where(other => !other.Windowed).ToList());
@@ -91,8 +116,31 @@ public sealed class InstanceCheck
     /// </summary>
     public IReadOnlyList<Unidentified> Unreadable { get; }
 
-    /// <summary>Whether every candidate answered, so a count of none means none.</summary>
+    /// <summary>
+    /// Candidates carrying the right name that answered a different binary.
+    /// <para>
+    /// WW283. Not counted either, and for a better reason than the ones above: each of these gave a
+    /// definite answer, and the answer was no. What they are for is the count — a reader who finds
+    /// fewer processes than they launched can see whether one of them is here, saying it is running
+    /// something else, rather than having to go and look for it.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<Elsewhere> Named { get; }
+
+    /// <summary>
+    /// Whether every candidate answered, so a count of none means none.
+    /// <para>
+    /// WW283 does not enter this. A candidate that named a different binary answered the question;
+    /// only one that would not answer at all leaves the count uncertain.
+    /// </para>
+    /// </summary>
     public bool Certain => Unreadable.Count == 0;
+
+    /// <summary>
+    /// Every candidate that carried the name, however it was classified. What a caller counting
+    /// processes it launched itself wants: one of these per process, or one of them is gone.
+    /// </summary>
+    public int Candidates => Others.Count + Unreadable.Count + Named.Count;
 
     /// <summary>Whether the caller said to run anyway.</summary>
     public bool AllowedOthers { get; }
@@ -115,6 +163,7 @@ public sealed class InstanceCheck
         var others = new List<OtherInstance>();
 
         var unreadable = new List<Unidentified>();
+        var elsewhere = new List<Elsewhere>();
 
         foreach (var candidate in Process.GetProcessesByName(Path.GetFileNameWithoutExtension(named)))
             using (candidate)
@@ -131,19 +180,28 @@ public sealed class InstanceCheck
                     continue;
                 }
 
+                // WW283. Written down rather than skipped, and the verdict is unchanged: a candidate
+                // running a different binary is not this application. What it now cannot do is leave
+                // without a trace, which is what made a count of one indistinguishable from a count
+                // of two where one of them said it was something else.
                 if (!string.Equals(running.Binary, named, StringComparison.OrdinalIgnoreCase))
+                {
+                    elsewhere.Add(new Elsewhere(candidate.Id, running.Binary));
                     continue;
+                }
 
                 others.Add(new OtherInstance(candidate.Id, named, TopLevelWindows.OfProcess(candidate.Id)));
             }
 
         others.Sort((left, right) => left.Pid.CompareTo(right.Pid));
         unreadable.Sort((left, right) => left.Pid.CompareTo(right.Pid));
+        elsewhere.Sort((left, right) => left.Pid.CompareTo(right.Pid));
 
         return new InstanceCheck(
             named,
             new ReadOnlyCollection<OtherInstance>(others),
             new ReadOnlyCollection<Unidentified>(unreadable),
+            new ReadOnlyCollection<Elsewhere>(elsewhere),
             allowOthers);
     }
 
@@ -168,6 +226,15 @@ public sealed class InstanceCheck
             ? ""
             : $" {Unreadable.Count} candidate(s) carrying the name would not say what they are running "
                 + $"and were passed over: {string.Join(", ", Unreadable)}.";
+
+        // WW283. The other half of the same sentence, and for the same reason: "nothing else is
+        // running this application" is true and unhelpful on a machine where something carrying the
+        // name answered that it is running a different binary. A reader counting processes they
+        // launched needs to know one is here before they go looking for it.
+        passed += Named.Count == 0
+            ? ""
+            : $" {Named.Count} candidate(s) carrying the name are running a different binary: "
+                + $"{string.Join(", ", Named)}.";
 
         if (Windowed.Count == 0)
         {

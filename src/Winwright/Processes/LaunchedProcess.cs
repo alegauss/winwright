@@ -27,6 +27,16 @@ public sealed class LaunchedProcess
     /// <summary>Whether it has already gone on its own.</summary>
     public bool HasExited => process.HasExited;
 
+    /// <summary>
+    /// That it had already gone when the register came to stop it, or null where it had not.
+    /// <para>
+    /// WW279. Written by the register and by nothing else, for the same reason nothing outside the
+    /// register may start or end a process: the stop is the one moment something looks, and a second
+    /// place that could set this is a second answer about whether the launch survived its case.
+    /// </para>
+    /// </summary>
+    public Departure? Departed { get; private set; }
+
     /// <summary>Its exit code. Reading this while it is still running is an error, as it is on <see cref="Process"/>.</summary>
     public int ExitCode => process.ExitCode;
 
@@ -40,4 +50,26 @@ public sealed class LaunchedProcess
     public void Refresh() => process.Refresh();
 
     internal Process Underlying => process;
+
+    /// <summary>
+    /// Record that the register found it already gone. Kept where it was first recorded: the first
+    /// look is the one that happened at the case boundary, and a later stop asking again would move
+    /// the fact to a moment nobody was asserting about.
+    /// </summary>
+    internal void Left()
+    {
+        int? code;
+        try
+        {
+            code = process.ExitCode;
+        }
+        catch (Exception unreadable) when (unreadable is InvalidOperationException or NotSupportedException)
+        {
+            // A code nobody could read is said as one rather than reported as a zero — the exit is
+            // the finding, and inventing a clean one would make a crash read as a shutdown.
+            code = null;
+        }
+
+        Departed ??= new Departure(Pid, Executable, code);
+    }
 }

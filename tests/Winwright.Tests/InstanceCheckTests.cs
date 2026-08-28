@@ -159,7 +159,12 @@ public sealed class InstanceCheckTests : IDisposable
             // both had finished starting by the time this line ran. Measured twice in eight guest
             // runs: a process created a moment earlier has not mapped its image yet, so it answered
             // nothing to the question and dropped out of a count that then read one.
-            Assert.Equal(2, check.Others.Count + check.Unreadable.Count);
+            //
+            // WW283. Across all three, because WW180 closed one of the two ways a candidate leaves
+            // and this recurred through the other — the count read one again, in four guest runs of
+            // five, with the missing process in neither list. The sentence is the message so a red
+            // says which of the three it landed in and what it claimed to be running.
+            Assert.True(check.Candidates == 2, $"{check.Candidates} of 2 accounted for: {check.Sentence()}");
             Assert.Empty(check.Windowed);
             Assert.False(check.Refuses);
             check.RequireSole();
@@ -207,8 +212,17 @@ public sealed class InstanceCheckTests : IDisposable
             var register = running.Register;
             register.Launch(Windowless(there));
 
-            Assert.Empty(InstanceCheck.Of(here).Others);
-            Assert.Single(InstanceCheck.Of(there).Others);
+            // WW283. The one running `there` is not an instance of `here`, and it is now said so
+            // rather than skipped: asked about `here`, the reading names it as a candidate running a
+            // different binary, which is the claim this case is actually about.
+            var asked = InstanceCheck.Of(here);
+
+            Assert.Empty(asked.Others);
+            Assert.True(asked.Candidates == 1, $"nothing carried the name at all: {asked.Sentence()}");
+            Assert.Contains(there, asked.Sentence(), StringComparison.OrdinalIgnoreCase);
+
+            var itself = InstanceCheck.Of(there);
+            Assert.True(itself.Others.Count == 1, itself.Sentence());
         }
         finally
         {

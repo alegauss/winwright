@@ -24,6 +24,16 @@ public static class Program
     public const int UnknownFlag = 2;
 
     /// <summary>
+    /// What a run exits with where it was asked to be a launch that dies on startup.
+    /// <para>
+    /// WW279. One rather than zero because a tray that crashed did not succeed, and its own number
+    /// rather than <see cref="UnknownFlag" /> or <see cref="Refused" /> for the reason those two are
+    /// apart: a shape that died because it was asked to must be tellable from a fixture driven wrong.
+    /// </para>
+    /// </summary>
+    public const int Died = 1;
+
+    /// <summary>
     /// What a run exits with where the shape it was asked for was refused by the in-app half.
     /// <para>
     /// Its own code and not <see cref="UnknownFlag" />: a shape that provoked the refusal it exists
@@ -69,6 +79,13 @@ public static class Program
         // reading the harness makes about every capture it takes.
         if (shapes.Value("render") is string path)
             return Rendered(path, shapes);
+
+        // WW279. Before the resident arm and before any window: what this shape is is a launch that
+        // is gone by the time anything looks at it, and a process that drew something first would be
+        // a different defect. It exits rather than throwing, because a tray that crashes on startup
+        // reaches a run as a process that has left and never as a message anybody caught.
+        if (shapes.Has("dies"))
+            return Died;
 
         if (shapes.Has("resident"))
             return Resident();

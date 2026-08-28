@@ -64,6 +64,8 @@
 - ✅ **WW205** **the register stops what it started and cannot say when it is gone, so every caller needing that writes the wait** — The register answers a three-state reading of stopped and gone, and the suite's copy of the wait is deleted rather than kept beside it.
 - ✅ **WW215** **an unshared run keeps every window it launched open until the last case ends** — A case that owns its process gives it back when it finishes, so the criterion holds during the run and not only at the end of it.
 - ✅ **WW257** **a launch that draws no window is refused, and a tray is a process that draws none** — A fixture says `resident` and the run holds the launch as a process against the desktop, keeping the drew-no-window refusal for every fixture that did not say so.
+- ✅ **WW283** **WW180's count has recurred past its repair, and this time the process is in neither list** — A candidate running a different binary is recorded rather than skipped in silence, so `Candidates` accounts for all three and a red carries the path it claimed to be running.
+- ✅ **WW279** **a resident launch that died on startup is reported as an application whose controls are all missing** — A launch the register found already gone is recorded as a `Departure`, and the case's own line names the exit before the outcome rather than sending a reader to its locators.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

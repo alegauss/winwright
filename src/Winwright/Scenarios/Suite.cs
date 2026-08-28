@@ -202,9 +202,10 @@ public static class Suite
             // The first case through a lent fixture pays the launch and does not borrow it: it is
             // the one that owns the window until the run ends, so the reading it takes is the same
             // reading it would take alone.
+            CaseResult result;
             try
             {
-                ran.Add(CaseRun.Of(one, window, project, Diagnosis.DefaultBudget, measured, lent: false));
+                result = CaseRun.Of(one, window, project, Diagnosis.DefaultBudget, measured, lent: false);
             }
             finally
             {
@@ -219,6 +220,13 @@ public static class Suite
                 if (!borrowing)
                     register.Stop(process);
             }
+
+            // WW279. After the stop, because the stop is where the register looks: a resident launch
+            // draws no window and so has nothing whose absence would have noticed it going, and a
+            // process that had left before the case finished is what a reading full of missing
+            // locators is actually about. A borrowed launch is not stopped here and gets this at the
+            // end of the run instead, where no one case can claim it.
+            ran.Add(process.Departed is { } departed ? result.After(departed) : result);
         }
 
         return new SuiteVerdict(asked, new ReadOnlyCollection<CaseResult>(ran), new ReadOnlyCollection<NotRun>(skipped));

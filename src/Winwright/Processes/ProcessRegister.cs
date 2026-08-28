@@ -160,7 +160,15 @@ public sealed class ProcessRegister : IDisposable
 
         registered.Refresh();
         if (registered.HasExited)
+        {
+            // WW279. Still null — nothing outlived its case, which is what this answers — and the
+            // other half is now written down rather than dropped. A process that had gone before the
+            // stop asked is the fact a case reporting nothing but missing locators is about, and this
+            // is the one moment anything looks: at the launch it is a race, and with a wait it is the
+            // window deadline WW257 removed.
+            registered.Left();
             return null;
+        }
 
         // The pid is read before the stop: afterwards the process object may no longer answer for
         // one, and a leftover reported without the number a file lock names is a leftover a reader
@@ -196,7 +204,14 @@ public sealed class ProcessRegister : IDisposable
         {
             registered.Refresh();
             if (registered.HasExited)
+            {
+                // WW279, and the same look. This one is at the end of the run rather than at a case
+                // boundary, so it is the only reading a lent launch gets — a fixture held for several
+                // cases is not stopped where any one of them finishes, and none of them can say which
+                // one it went during.
+                registered.Left();
                 continue;
+            }
 
             var pid = registered.Pid;
             left.Add(new Survivor(pid, registered.Executable, Ending(registered)));
