@@ -6,6 +6,7 @@
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
 - 📋 **WW289** (deps: —) **a toast takes the desk and the run excuses 43 checks, reading as green as one that excused 8** — The ledger counts every excuse and nothing compares the count to what a run usually spends, so the weakest evidence a suite produces is spelled exactly like the strongest. → §WW289
+- 📋 **WW293** (deps: —) **the runner's adopter parameters cannot be passed through the command its own comment says a person types** — `run-tests-vm.cmd` forwards three tokens after the configuration and carrying another tree needs eight, so the flags built for adopters reach the script only by bypassing it. → §WW293
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -30,7 +31,7 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW78** (deps: WW230 ⏳) **the keyboard case is the only observable of a live input path and it lives in a script** — The runner now carries claude-tray to the guest, and the restore there fails: the engine's package exists only in a folder this repository does not ship. → §WW78
-- 📋 **WW82** (deps: WW257 ✅, WW258 ✅, WW259 ✅, WW260 ✅, WW291 ✅, WW292 ✅) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
+- 📋 **WW82** (deps: WW257 ✅, WW258 ✅, WW259 ✅, WW260 ✅, WW291 ✅, WW292 ✅, WW230 ⏳) **the menu case reads the notification area and nothing else does** — Migrated with the overflow flyout, the keyboard expansion and the expectations derived from the app's own read-out. → §WW82
 - 📋 **WW83** (deps: Block G ✅, WW291 ✅) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
 - 📋 **WW85** (deps: Block G ✅, WW291 ✅) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
 - 📋 **WW86** (deps: WW78 ⏳, WW79 ✅, WW80 ✅, WW81 ✅, WW82, WW83, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86

@@ -53,6 +53,27 @@ it.
 The cheaper half is separate and worth doing anyway: the guest is a machine this project
 controls, so it can be told to raise no notifications at all.
 
+### §WW293 The wrapper that forwards three of eight
+
+WW157 wrote `run-tests-vm.cmd` as *the one command a person types*, and it ends with
+`%CONFIG% %2 %3 %4`. Three tokens. The runner then grew `-Tree`, `-Name`, `-Run` and
+`-ResultsIn` — four flags with four values, eight tokens — for the adopting project
+whose migrated cases had nowhere to run but the desk somebody is working at.
+
+So the parameters that exist for adopters cannot be given to the thing adopters are told
+to run. Measured by hitting it: the invocation silently truncated and PowerShell refused
+with `Falta um argumento para o parâmetro 'Name'`, which names the parameter that lost
+its value and not the wrapper that dropped it. The script itself takes them all, so the
+workaround is to call the `.ps1` and step around the door.
+
+Truncation is the part worth fixing rather than the count. `%*` forwards everything and
+cannot go stale the next time the script grows a flag, where raising three to eight is
+the same defect with a larger number in it — and `%*` carries the configuration too, so
+the positional first argument has to move or be read out of the rest.
+
+Not a refusal to add. A wrapper that refused what it could not forward would be honest
+and would still not let an adopter type the command, which is the thing it exists for.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
