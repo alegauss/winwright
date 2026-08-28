@@ -10,14 +10,14 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW288** (deps: —) **a search whose flyout shut mid-look gives up, so the icon case is a hole on the runs the shell decides** — `Find` polls `Hidden()` and stops where the overflow closed, with deadline left that could have reopened it, so what the case covers turns on the shell's timing. → §WW288
+- ⏳ **WW288** (deps: —) **a search whose flyout shut mid-look gives up, so the icon case is a hole on the runs the shell decides** — Whether a search should reopen a flyout that shut mid-look is still undecided, and the rate is still only in one run's excuse ledger. → §WW288
 
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
 
 - ⏳ **WW248** (deps: —) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — A structural excuse is still not a red, and telling one from circumstance needs a history across runs. → §WW248
-- ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Seven reds, and the recorder settles which side it is on: the window is delivered the substituted text, so the defect is in the send and not in WPF or the control. → §WW249
+- ⏳ **WW249** (deps: —) **the case proving that typing reaches a WPF box fails about one guest run in four** — Eight reds, and the eighth substituted two characters rather than one, both of them the last sent — with the array now ruled out, what is left is the queue itself. → §WW249
 - 📋 **WW260** (deps: —) **an expected set is derived from the project's strings and never from what the application reports** — The menu case counts profile entries against the app's own read-out, and `covers` derives only from the language files, so the number would be typed here. → §WW260
 - 📋 **WW269** (deps: —) **a caption counting down in real time cannot survive an exact comparison across a round trip** — `sameAs` compares two readings exactly, and a run that straddles a minute boundary would then be a red build about a clock rather than about the application. → §WW269
 - 📋 **WW275** (deps: —) **covers is two-way and reads as one-way, so a completeness claim against a shared container cannot be written** — The README says every declared string reads somewhere the locator matched; the engine also refuses every stranger, and its sentence misagrees with itself. → §WW275

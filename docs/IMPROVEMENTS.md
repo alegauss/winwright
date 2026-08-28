@@ -100,23 +100,24 @@ So the characters **arrived at the window already substituted**. Not a text box 
 lost one under load — the window was handed the wrong text — which rules out WPF, the
 control and everything above the queue. It is the send.
 
-The seventh said it again: `W1246-1` read, `W1246-1` delivered, seven injected keys for
-seven characters. The rule the first five fitted holds on both — one character becomes
-the last one sent, length for length. Seven for seven.
+**The eighth sharpens the rule and breaks half of it.** Seven reds fitted *one character
+becomes the last one sent, length for length*. The eighth substituted two:
+
+        typed WW246-5     delivered W5245-5
+
+Both became `5`, the last character sent; seven for seven, over 35 packets for five
+rounds. So it is not one character but one **or more**, each taking the value of the
+last element written.
 
 `Keyboard.Send` builds one input pair per UTF-16 code unit, each a fresh struct, into a
-single `SendInput`, with the union written so its size is right on x64. That path has no
-defect that would produce this, and what it does not cover is what happens to the array
-after `SendInput` takes it.
+single `SendInput`, the union written so its size is right on x64. That path has no
+defect producing this, and **the array is ruled out with it.** `SendInput` inserts the
+events serially and returns once they are queued, so nothing the array does afterwards
+can reach a message — the standing suspect was never one. What is left is between
+insertion and `WM_CHAR`, which is the queue.
 
-**Splitting that further needs another instrument, and the obvious one is measured
-out.** Reading the character from the `VK_PACKET` message before `TranslateMessage`
-makes one of it: it is not there. Every packet's lParam is `00000001` — repeat count
-one, scan code zero — because `WM_KEYDOWN` gives the scan code eight bits and a code
-unit needs sixteen. What that reading can still claim is the count, one injected key per
-character, and it does.
-
-So the next one belongs on the harness side, not the fixture's.
+`VK_PACKET` before `TranslateMessage` is measured out. Every lParam is `00000001`, the
+scan code having eight bits where a code unit needs sixteen. The count is all it claims.
 
 ### §WW260 Some expected sets are the application's data, not its strings
 

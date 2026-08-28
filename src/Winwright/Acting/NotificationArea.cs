@@ -468,11 +468,34 @@ public static class NotificationArea
     /// WW165: answers a reading rather than a bool. A run that could not work the flyout said only
     /// <c>false</c>, and a red naming no cause sends a reader to a re-run rather than to the shell.
     /// </para>
+    /// <para>
+    /// WW288. A flyout that was already standing goes through the same gate as one this call opened,
+    /// and it used to go through none: the window existing was enough. So the same desk got two
+    /// different answers depending on who had opened it, and the permissive one was the answer a
+    /// caller acted on — <see cref="Find" /> then polled a flyout nothing had established was usable,
+    /// which is the poll WW223 traced its recurrence to.
+    /// </para>
     /// </summary>
     public static OverflowState OpenOverflow(int settleMs = 2000, int pollMs = 25)
     {
+        // WW288. Gated, and waited for rather than read once, because a flyout somebody else opened a
+        // moment ago is in exactly the state the comment below describes: the window arrives before
+        // its icons do. `already` still says who opened it, since that is what decides whether a
+        // caller may shut it again.
         if (Overflow() is not null)
-            return new OverflowState("opened", true, already: true, null);
+        {
+            var standing = Attempt.UntilTrue(Usable, settleMs, pollMs);
+            if (standing.Happened)
+                return new OverflowState("opened", true, already: true, null);
+
+            var went = Overflow() is null;
+            var because = went
+                ? $"the flyout was standing and had gone within {standing.WaitedMs}ms, so it was on its "
+                    + "way out rather than open"
+                : $"the flyout was standing and laid out no icon within {standing.WaitedMs}ms";
+
+            return new OverflowState("opened", false, already: true, because);
+        }
 
         var chevron = Chevron();
         if (chevron is null)
@@ -494,10 +517,11 @@ public static class NotificationArea
         // Waiting for the flyout to exist is not waiting for it to be usable: measured, the
         // window arrives before its icons are laid out, and an icon read in that gap reports a
         // rectangle of nothing — which is the one address these icons have.
-        var came = Attempt.UntilTrue(
-            () => Overflow() is not null && Hidden().Any(icon => icon.Rectangle.Width > 0),
-            settleMs,
-            pollMs);
+        //
+        // WW288. The predicate is shared with the already-standing path above rather than written
+        // twice. Two spellings of one gate is how they came to disagree, and the disagreement was
+        // the whole defect: a flyout somebody else opened passed a test this one would have failed.
+        var came = Attempt.UntilTrue(Usable, settleMs, pollMs);
 
         if (came.Happened)
             return new OverflowState("opened", true, false, null);
@@ -512,6 +536,20 @@ public static class NotificationArea
                 ? $"the chevron was pressed and no flyout came within {came.WaitedMs}ms"
                 : $"the flyout came and laid out no icon within {came.WaitedMs}ms");
     }
+
+    /// <summary>
+    /// Whether the flyout is not merely there but can be read: open, with at least one icon that has
+    /// laid out to a width.
+    /// <para>
+    /// WW288. One predicate, because this used to be two — the path that pressed the chevron waited
+    /// for this, and the path that found a flyout already standing waited for nothing at all. The
+    /// second is the one <see cref="Find" /> was polling behind when WW223 recurred: a window that
+    /// exists is not a desk that can be looked at, and it is also what a flyout on its way out looks
+    /// like.
+    /// </para>
+    /// </summary>
+    private static bool Usable() =>
+        Overflow() is not null && Hidden().Any(icon => icon.Rectangle.Width > 0);
 
     /// <summary>Shut it again, so a run leaves the taskbar the way it found it.</summary>
     public static OverflowState CloseOverflow(int settleMs = 2000, int pollMs = 25)
