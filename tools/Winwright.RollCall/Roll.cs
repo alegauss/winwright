@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace Winwright.RollCall;
 
@@ -80,6 +81,7 @@ public sealed record Roll
         IReadOnlyList<string>? excused,
         bool asked,
         IReadOnlyList<int> recent,
+        IReadOnlyList<int> discovering,
         bool comparing)
     {
         Discovered = discovered;
@@ -91,6 +93,7 @@ public sealed record Roll
         Excused = excused;
         Asked = asked;
         Recent = recent;
+        Found = discovering;
         Comparing = comparing;
     }
 
@@ -122,6 +125,17 @@ public sealed record Roll
     /// </para>
     /// </summary>
     public IReadOnlyList<int> Recent { get; }
+
+    /// <summary>
+    /// What the runs before this one discovered, oldest first, empty where there was no earlier run.
+    /// <para>
+    /// WW299. Discovery is the one number the roll never checked against anything but itself: it is
+    /// weighed against what the run recorded, and both fall together where a class stops loading or
+    /// a `[Fact]` goes with the method it annotated. A run that found 1,204 of 1,807 then says all
+    /// 1,204 discovered cases ran, in the words a whole run uses.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<int> Found { get; }
 
     /// <summary>
     /// Whether anybody asked what the run excused. Three states and not two: a caller that never
@@ -202,7 +216,7 @@ public sealed record Roll
     /// but a green covering 1,551 of 1,563 checks has to say so.
     /// </remarks>
     public static Roll Of(IEnumerable<string> discovered, IEnumerable<Recorded> recorded) =>
-        Taken(discovered, recorded, null, asked: false, recent: [], comparing: false);
+        Taken(discovered, recorded, null, asked: false, recent: [], discovering: [], comparing: false);
 
     /// <inheritdoc cref="Of(IEnumerable{string}, IEnumerable{Recorded})" />
     /// <param name="discovered">The cases discovery reported.</param>
@@ -213,7 +227,7 @@ public sealed record Roll
     /// </param>
     public static Roll Of(
         IEnumerable<string> discovered, IEnumerable<Recorded> recorded, IEnumerable<string>? excused) =>
-        Taken(discovered, recorded, excused, asked: true, recent: [], comparing: false);
+        Taken(discovered, recorded, excused, asked: true, recent: [], discovering: [], comparing: false);
 
     /// <inheritdoc cref="Of(IEnumerable{string}, IEnumerable{Recorded})" />
     /// <param name="discovered">The cases discovery reported.</param>
@@ -224,12 +238,17 @@ public sealed record Roll
     /// WW289: calling this overload is the asking, so empty here is <em>there was none</em> and never
     /// zero. WW298: several rather than one, so a desk that stays busy cannot become its own baseline.
     /// </param>
+    /// <param name="discovering">
+    /// What the runs before this one discovered, oldest first. WW299: said only where this run found
+    /// a different number, so a suite that quietly stopped loading a class cannot read as whole.
+    /// </param>
     public static Roll Of(
         IEnumerable<string> discovered,
         IEnumerable<Recorded> recorded,
         IEnumerable<string>? excused,
-        IEnumerable<int> recent) =>
-        Taken(discovered, recorded, excused, asked: true, recent, comparing: true);
+        IEnumerable<int> recent,
+        IEnumerable<int>? discovering = null) =>
+        Taken(discovered, recorded, excused, asked: true, recent, discovering ?? [], comparing: true);
 
     private static Roll Taken(
         IEnumerable<string> discovered,
@@ -237,11 +256,13 @@ public sealed record Roll
         IEnumerable<string>? excused,
         bool asked,
         IEnumerable<int> recent,
+        IEnumerable<int> discovering,
         bool comparing)
     {
         ArgumentNullException.ThrowIfNull(discovered);
         ArgumentNullException.ThrowIfNull(recorded);
         ArgumentNullException.ThrowIfNull(recent);
+        ArgumentNullException.ThrowIfNull(discovering);
 
         var found = Named(discovered);
         var written = recorded
@@ -289,6 +310,7 @@ public sealed record Roll
             excused is null ? null : new ReadOnlyCollection<string>(excused.Where(one => !string.IsNullOrWhiteSpace(one)).ToList()),
             asked,
             new ReadOnlyCollection<int>(recent.ToList()),
+            new ReadOnlyCollection<int>(discovering.ToList()),
             comparing);
     }
 
@@ -303,7 +325,7 @@ public sealed record Roll
         // week. What it changes is the claim — "all 1,563 ran" is false of a run where twelve of them
         // looked at the desk and left, and that sentence was the only thing anybody read.
         if (Whole)
-            return $"all {Discovered.Count} discovered cases ran{Excusing()}.";
+            return $"all {Discovered.Count} discovered cases ran{Finding()}{Excusing()}.";
 
         var parts = new List<string>();
         if (Missing.Count > 0)
@@ -322,6 +344,34 @@ public sealed record Roll
             parts.Add($"{Unexpected.Count} method(s) answered with cases discovery never found");
 
         return string.Join("; ", parts) + Excusing() + ".";
+    }
+
+    /// <summary>
+    /// What the runs before this one discovered, said only where this run found a different number.
+    /// <para>
+    /// WW299. Unlike the excuses, which move with the desk and need a baseline to be read at all,
+    /// discovery is meant to hold still — so the informative event is the change, and a series
+    /// printed beside every run would be a clause nobody finishes reading. Said on a rise as well as
+    /// a fall: cases landing is how a reader sees the suite grow, and a rule that only ever reports
+    /// bad news is one that gets read as noise.
+    /// </para>
+    /// <para>
+    /// Silent where nothing was asked or no earlier run was found, and never "unchanged": the run
+    /// before is the only claim this makes, and it is made by naming the numbers.
+    /// </para>
+    /// </summary>
+    private string Finding()
+    {
+        if (Found.Count == 0 || Found[^1] == Discovered.Count)
+            return "";
+
+        var all = Found.Count == 1
+            ? Found[0].ToString(CultureInfo.InvariantCulture)
+            : string.Join(", ", Found.Take(Found.Count - 1)) + " and " + Found[^1];
+
+        return Found.Count == 1
+            ? $", where the run before discovered {all}"
+            : $", where the {Found.Count} runs before it discovered {all}";
     }
 
     /// <summary>

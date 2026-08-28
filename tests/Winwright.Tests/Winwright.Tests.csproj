@@ -134,6 +134,15 @@
           DestinationFolder="$(RollCallRoot)\$(RollCallRun)"
           Condition="Exists('$(TargetDir)excused.txt')" />
 
+    <!-- WW299: discovery's own output kept the same way and for the same reason. The roll weighs
+         discovered against recorded and both come from this run, so a run that discovered 1,204 of
+         1,807 is whole by its own measure - the count is only worth anything beside what the runs
+         before it found. The listing itself and not a number written out of it: same file, same
+         parser, and nothing second to keep true. -->
+    <Copy SourceFiles="$(RollCallResults)\discovered.txt"
+          DestinationFolder="$(RollCallRoot)\$(RollCallRun)"
+          Condition="Exists('$(RollCallResults)\discovered.txt')" />
+
     <Error Condition="'$(RollCallExit)' != '0'"
            Code="WW117"
            Text="the roll call refused this run: @(RollCallSaid, '%0A')" />

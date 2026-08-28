@@ -5,7 +5,6 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-- 📋 **WW299** (deps: WW298 ✅) **a run that discovers 600 fewer cases than the last still reads as green** — The roll checks only that everything discovered ran, so a fall in discovery takes the recorded count down with it and reads as whole; the history WW298 added makes it comparable. → §WW299
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

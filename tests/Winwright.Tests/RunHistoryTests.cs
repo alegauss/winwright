@@ -15,7 +15,7 @@ namespace Winwright.Tests;
 /// holding is the ordinary one.
 /// </para>
 /// </summary>
-public sealed class ExcusedHistoryTests : IDisposable
+public sealed class RunHistoryTests : IDisposable
 {
     private readonly string root = Directory.CreateTempSubdirectory("winwright-before-").FullName;
 
@@ -25,13 +25,25 @@ public sealed class ExcusedHistoryTests : IDisposable
     /// <param name="named">What the run is called, which is never what orders it.</param>
     /// <param name="excuses">How many lines its ledger holds.</param>
     /// <param name="written">When it ran, so the ordering is by clock and not by name.</param>
-    private string Run(string named, int excuses, DateTime written)
+    private string Run(string named, int excuses, DateTime written, int? discovered = null)
     {
         var directory = Directory.CreateDirectory(Path.Combine(root, named)).FullName;
         var ledger = Path.Combine(directory, Readers.Excused);
 
         File.WriteAllLines(ledger, Enumerable.Range(0, excuses).Select(one => $"desk|a fact|{one}"));
         File.SetLastWriteTimeUtc(ledger, written);
+
+        if (discovered is not { } many)
+            return directory;
+
+        // Discovery's own output, in the shape the parser reads: a preamble, then one indented name
+        // per case. Written as the real file is rather than as a count, because the count is derived.
+        var listing = Path.Combine(directory, Readers.Listing);
+        var lines = new List<string> { "Os Testes a seguir estão disponíveis:" };
+        lines.AddRange(Enumerable.Range(0, many).Select(one => $"    Winwright.Tests.A.Case{one}"));
+
+        File.WriteAllLines(listing, lines);
+        File.SetLastWriteTimeUtc(listing, written);
 
         return directory;
     }
@@ -135,6 +147,78 @@ public sealed class ExcusedHistoryTests : IDisposable
 
         Assert.Contains("8, 8 and 43", said, StringComparison.Ordinal);
         Assert.DoesNotContain("the run before ", said, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void What_earlier_runs_discovered_is_read_off_the_listing_they_kept()
+    {
+        Run("older", 8, new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), discovered: 1805);
+        Run("newer", 8, new DateTime(2026, 8, 1, 0, 0, 0, DateTimeKind.Utc), discovered: 1807);
+        var mine = Run("this-run", 8, DateTime.UtcNow, discovered: 1807);
+
+        Assert.Equal([1805, 1807], Readers.DiscoveredRecently(root, mine));
+    }
+
+    [Fact]
+    public void A_run_that_kept_no_listing_is_not_counted_as_having_discovered_nothing()
+    {
+        // The whole rule this file is under: absent is unknown, and never zero. Counting a run that
+        // filed no listing as zero would put a collapse in the series that never happened.
+        Run("no-listing", 8, new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        Run("with-listing", 8, new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc), discovered: 1805);
+        var mine = Run("this-run", 8, DateTime.UtcNow, discovered: 1805);
+
+        Assert.Equal([1805], Readers.DiscoveredRecently(root, mine));
+    }
+
+    [Fact]
+    public void A_suite_that_quietly_stopped_discovering_600_cases_says_what_the_runs_before_found()
+    {
+        // WW299 itself: 1204 of 1807, which the roll's own arithmetic calls whole because discovery
+        // and recording fell together.
+        var roll = Roll.Of(
+            Enumerable.Range(0, 1204).Select(one => $"Winwright.Tests.A.Case{one}"),
+            Enumerable.Range(0, 1204).Select(one => new Recorded($"Winwright.Tests.A.Case{one}", "Passed", true)),
+            excused: null,
+            recent: [8, 8, 8, 8],
+            discovering: [1807, 1807, 1805, 1807]);
+
+        Assert.Contains(
+            "all 1204 discovered cases ran, where the 4 runs before it discovered 1807, 1807, 1805 and 1807",
+            roll.Sentence(),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_run_that_discovered_what_the_last_one_did_says_nothing_about_discovery()
+    {
+        // Discovery is meant to hold still, so the change is the news. A series printed beside every
+        // run is a clause nobody finishes, and then the one that matters reads the same.
+        var roll = Roll.Of(
+            ["Winwright.Tests.A.One"],
+            [new Recorded("Winwright.Tests.A.One", "Passed", true)],
+            excused: null,
+            recent: [8],
+            discovering: [4, 1]);
+
+        Assert.DoesNotContain("discovered 4", roll.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_suite_that_grew_says_so_as_readily_as_one_that_shrank()
+    {
+        // Both directions, because a rule that only ever reports bad news gets read as noise.
+        var roll = Roll.Of(
+            ["Winwright.Tests.A.One", "Winwright.Tests.A.Two"],
+            [
+                new Recorded("Winwright.Tests.A.One", "Passed", true),
+                new Recorded("Winwright.Tests.A.Two", "Passed", true),
+            ],
+            excused: null,
+            recent: [8],
+            discovering: [1]);
+
+        Assert.Contains("where the run before discovered 1", roll.Sentence(), StringComparison.Ordinal);
     }
 
     [Fact]

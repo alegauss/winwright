@@ -94,7 +94,38 @@ public static class Readers
     /// <param name="root">The results root every run writes a directory under.</param>
     /// <param name="thisRun">This run's own directory, which is not its own predecessor.</param>
     /// <param name="most">How many of the most recent to read; the default is what the tool uses.</param>
-    public static IReadOnlyList<int> ExcusedRecently(string root, string thisRun, int most = Recent)
+    public static IReadOnlyList<int> ExcusedRecently(string root, string thisRun, int most = Recent) =>
+        Series(root, thisRun, most, Excused, one => ExcusedIn(one)?.Count);
+
+    /// <summary>
+    /// What the runs before this one discovered, oldest first, empty where there was no earlier run.
+    /// <para>
+    /// WW299. The roll's own arithmetic is discovered against recorded, and both come from the same
+    /// run — so a run where discovery itself fell short is whole by its own measure and says "all
+    /// 1,204 discovered cases ran" in the words it uses for 1,807. A class made internal, a deleted
+    /// `[Fact]`, a `#if` that stopped matching: each takes both numbers down together.
+    /// </para>
+    /// <para>
+    /// Read off the listing this run's own roll was taken from, which is the same file and the same
+    /// parser. A count kept in a format of its own would be a second thing to keep true.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The results root every run writes a directory under.</param>
+    /// <param name="thisRun">This run's own directory, which is not its own predecessor.</param>
+    /// <param name="most">How many of the most recent to read; the default is what the tool uses.</param>
+    public static IReadOnlyList<int> DiscoveredRecently(string root, string thisRun, int most = Recent) =>
+        Series(root, thisRun, most, Listing, one => DiscoveredIn(one).Count);
+
+    /// <summary>
+    /// One number per earlier run, oldest first, read off the file each run left under the root.
+    /// <para>
+    /// Shared by the two series so they cannot drift apart on the parts that are the same question:
+    /// which directories are earlier runs, which of them left the file, and which four are most
+    /// recent. What differs is the file's name and how a count is got out of it.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<int> Series(
+        string root, string thisRun, int most, string named, Func<string, int?> count)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(root);
         ArgumentException.ThrowIfNullOrWhiteSpace(thisRun);
@@ -109,15 +140,15 @@ public static class Readers
         try
         {
             // Newest first to take from, then reversed: the caller reads them as time runs, and
-            // taking the most recent is what the ordering is for. A ledger that will not open is
+            // taking the most recent is what the ordering is for. A file that will not open is
             // dropped rather than counted as zero, which is the rule the ledger itself is under.
             var earlier = Directory.GetDirectories(root)
                 .Where(one => !string.Equals(Path.GetFullPath(one), mine, StringComparison.OrdinalIgnoreCase))
-                .Select(one => Path.Combine(one, Excused))
+                .Select(one => Path.Combine(one, named))
                 .Where(File.Exists)
                 .OrderByDescending(File.GetLastWriteTimeUtc)
                 .Take(most)
-                .Select(one => ExcusedIn(one)?.Count)
+                .Select(count)
                 .Where(one => one is not null)
                 .Select(one => one!.Value)
                 .Reverse()
@@ -134,6 +165,9 @@ public static class Readers
 
     /// <summary>What a run's ledger is called where it is kept beside that run's own results.</summary>
     public const string Excused = "excused.txt";
+
+    /// <summary>What discovery's own output is called where a run keeps it beside its results.</summary>
+    public const string Listing = "discovered.txt";
 
     /// <summary>
     /// How many earlier runs are read to say what this one's count is worth.

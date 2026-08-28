@@ -72,6 +72,7 @@
 - ✅ **WW289** **a toast takes the desk and the run excuses 43 checks, reading as green as one that excused 8** — Every run now says its count against the run before it; measured, 8 against 8, on a third guest run — the first two proving it reads nothing where nothing was filed.
 - ✅ **WW297** **the roll call never runs on a failing suite, so the worst runs report no excuses and file no ledger** — CallTarget makes the failure a task's, so OnError reaches the roll: a red guest run printed 9 excused against 8 the run before, filed its ledger, and still exited 1.
 - ✅ **WW298** **the excused count is compared with one predecessor, so a second busy-desk run in a row reads as ordinary** — Four counts read as a series rather than one difference: a guest run said 8, where the 4 before it excused 8, 8, 8 and 9, so a repeated anomaly cannot become the baseline.
+- ✅ **WW299** **a run that discovers 600 fewer cases than the last still reads as green** — Read off the listing each run keeps and said only where it moved: a guest run printed all 1813 discovered cases ran, where the run before discovered 1812.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
