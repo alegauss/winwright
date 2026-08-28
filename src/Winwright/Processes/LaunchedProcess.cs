@@ -56,7 +56,8 @@ public sealed class LaunchedProcess
     /// look is the one that happened at the case boundary, and a later stop asking again would move
     /// the fact to a moment nobody was asserting about.
     /// </summary>
-    internal void Left()
+    /// <param name="seen">Where the register was standing when it looked. WW286.</param>
+    internal Departure Left(DepartureSeen seen)
     {
         int? code;
         try
@@ -70,6 +71,7 @@ public sealed class LaunchedProcess
             code = null;
         }
 
-        Departed ??= new Departure(Pid, Executable, code);
+        Departed ??= new Departure(Pid, Executable, code, seen);
+        return Departed;
     }
 }

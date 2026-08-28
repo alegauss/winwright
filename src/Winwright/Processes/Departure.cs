@@ -1,6 +1,25 @@
 namespace Winwright.Processes;
 
 /// <summary>
+/// Where the register was standing when it found a launch already gone. Two answers, because they
+/// support different claims and collapsing them would let a run say more than it knows.
+/// <para>
+/// WW286. WW279 read the departure where a case gives its process back, which says which case the
+/// application went during. A lent launch is held across several cases and is not stopped at any of
+/// their boundaries, so the only look it gets is the end of the run — and a reading that reported
+/// the two alike would put an exit inside a case that may not have been running when it happened.
+/// </para>
+/// </summary>
+public enum DepartureSeen
+{
+    /// <summary>At the boundary of the case that owned it, so the case it went during is known.</summary>
+    WhereItsCaseEnded,
+
+    /// <summary>At the end of the run, which is the only look a lent launch gets.</summary>
+    WhereTheRunEnded,
+}
+
+/// <summary>
 /// One process that had already gone when the register came to stop it — the counterpart of
 /// <see cref="Survivor" />, and the fact a case that observed nothing is actually about.
 /// <para>
@@ -25,7 +44,11 @@ namespace Winwright.Processes;
 /// nobody could read and a clean exit are different facts, and the second one is the one that makes
 /// a case ending in a deliberate shutdown unremarkable.
 /// </param>
-public sealed record Departure(int Pid, string Executable, int? Code)
+/// <param name="Seen">
+/// Where the register was standing when it found it gone. WW286: what bounds how much anything
+/// reading this may claim about when the application went.
+/// </param>
+public sealed record Departure(int Pid, string Executable, int? Code, DepartureSeen Seen)
 {
     /// <summary>
     /// The fact and nothing about what it means, which is the caller's to say: a case that ended by

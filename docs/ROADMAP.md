@@ -5,7 +5,6 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-- 📋 **WW286** (deps: —) **a lent launch that exited is recorded at the end of the run and read by nothing** — `StopAll` writes the departure and only a case that owned its process reads one, so a shared fixture whose application died reports survivors and never the exit. → §WW286
 - 📋 **WW287** (deps: —) **the sentence for an exit code Windows would not name has nothing that provokes it** — The catch keeps `Left` from throwing inside the finally that gives a case's process back, and nothing reaches it, so a sentence a reader would get is unchecked. → §WW287
 
 ## Block C — Locate — the locator grammar and the tree an agent reads

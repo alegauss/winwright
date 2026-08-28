@@ -35,6 +35,18 @@ public sealed class ProcessRegister : IDisposable
     /// </summary>
     private readonly List<Survivor> outlived = [];
 
+    /// <summary>
+    /// Every launch a stop found already gone, in the order the stops happened.
+    /// <para>
+    /// WW286. WW279 put the same fact on the case's own line and that reaches only a case that owned
+    /// its process — a lent fixture is held across several and stopped at none of their boundaries, so
+    /// its exit was recorded on the launch and read by nothing at all. Kept here because the register
+    /// is the one thing that saw every look, and because the run is the only level that can honestly
+    /// report an exit no single case can claim.
+    /// </para>
+    /// </summary>
+    private readonly List<Departure> departed = [];
+
     private readonly int stopTimeoutMs;
     private IReadOnlyList<Survivor>? survivors;
 
@@ -56,6 +68,14 @@ public sealed class ProcessRegister : IDisposable
 
     /// <summary>Everything this run started, in the order it started them.</summary>
     public IReadOnlyList<LaunchedProcess> Launched => new ReadOnlyCollection<LaunchedProcess>(launched);
+
+    /// <summary>
+    /// Every launch a stop found already gone, in the order the stops happened. WW286, and read
+    /// through <see cref="EarlyExits" /> rather than counted here: a list has no way to say the roll
+    /// was never taken, and an empty one means both <em>nothing left early</em> and <em>nobody asked
+    /// yet</em>.
+    /// </summary>
+    public IReadOnlyList<Departure> Departures => new ReadOnlyCollection<Departure>(departed);
 
     /// <summary>
     /// What was still alive when the run ended, once <see cref="StopAll"/> has run. Empty until
@@ -166,7 +186,9 @@ public sealed class ProcessRegister : IDisposable
             // stop asked is the fact a case reporting nothing but missing locators is about, and this
             // is the one moment anything looks: at the launch it is a race, and with a wait it is the
             // window deadline WW257 removed.
-            registered.Left();
+            // WW286. Collected as well as recorded on the launch, so the run can read what no one
+            // case can claim. At a case boundary, which is what makes this one attributable.
+            departed.Add(registered.Left(DepartureSeen.WhereItsCaseEnded));
             return null;
         }
 
@@ -209,7 +231,12 @@ public sealed class ProcessRegister : IDisposable
                 // boundary, so it is the only reading a lent launch gets — a fixture held for several
                 // cases is not stopped where any one of them finishes, and none of them can say which
                 // one it went during.
-                registered.Left();
+                // WW286. The list rather than only the launch, and `WhereTheRunEnded` because that is
+                // all this look can support: a lent fixture was held across several cases and none of
+                // them can say which it went during.
+                if (registered.Departed is null)
+                    departed.Add(registered.Left(DepartureSeen.WhereTheRunEnded));
+
                 continue;
             }
 

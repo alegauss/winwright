@@ -130,6 +130,12 @@ public static class Running
                 ? ProcessSummary.Sentence(register.Survivors)
                 : $"{ProcessSummary.Sentence(register.Survivors)} {string.Join("; ", register.Survivors)}");
 
+            // WW286. The other direction, and the run is the only level that can say it: a lent
+            // fixture is held across several cases and stopped at none of their boundaries, so its
+            // exit reaches no case's line and the survivor sentence answers about the opposite thing.
+            // After StopAll, because before it an empty list and a clean run read alike.
+            lines.Add(EarlyExits.Of(register).Sentence());
+
             return new Answer(string.Join('\n', lines));
         }
         catch (ScenarioRefusedException refused)

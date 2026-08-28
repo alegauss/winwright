@@ -145,6 +145,8 @@ internal static class Rendered
             null, "which declared acts the tree can take, never claiming an unchecked one"),
         new("ProcessSummary.Sentence", "ProcessRegisterTests.The_summary_counts_what_stopped_apart_from_what_would_not",
             null, "what the run had to stop, apart from what would not stop"),
+        new("EarlyExits.Sentence", "EarlyExitsTests.An_exit_only_the_end_of_the_run_saw_is_counted_apart_and_says_why",
+            null, "which launches had gone before the run asked, and which of those no case can claim"),
         new("RenderMatch.Sentence", "UnchangedTests.Two_renders_of_unchanged_code_are_byte_identical",
             null, "whether two renders are the same bytes, and where they are not, whether the picture "
                 + "changed with them"),

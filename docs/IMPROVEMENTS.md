@@ -28,30 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW286 A departure the run records and nobody reads
-
-WW279 put the exit on the case's line, and it reaches only a case that owned its
-process. A fixture declared shareable and asked for by several read-only cases is
-launched once and held until the run ends, so `Suite.Launch` never stops it at a case
-boundary — the `if (!borrowing)` arm is the one that looks. That launch is read by
-`StopAll` instead, which records the `Departure` and hands back survivors.
-
-Nothing reads it from there. `AsFinding` is about what outlived the run, and a process
-that left early outlived nothing, so a run whose shared application died reports
-*nothing outlived the run* — true, and the same unhelpful sentence WW279 was filed
-against, one level up.
-
-What makes this its own line rather than a widening of WW279 is that the honest answer
-differs. No case can claim the exit: the launch is held across several of them and none
-can say which one it went during, which is exactly why the stop is not at a case
-boundary. So the reading belongs to the run — the register's finding, or the suite's own
-sentence — and it has to say what it cannot say as well: that the application went at
-some point across these three cases.
-
-Not a widening of the case line. A case that owned its process already answers, and
-answering twice would make the shared reading look like the owned one, which is the
-distinction WW62 keeps.
-
 ### §WW287 The exit code nobody could read
 
 `LaunchedProcess.Left` reads `ExitCode` inside a try, and a code it cannot read becomes
