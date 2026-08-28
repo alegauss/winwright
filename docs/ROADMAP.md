@@ -37,8 +37,7 @@
 - 📋 **WW86** (deps: WW78 ⏳, WW79 ✅, WW80 ✅, WW81 ✅, WW82, WW83, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - 📋 **WW87** (deps: Block G, Block E ✅, WW77 ✅) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
-- ⏳ **WW230** (deps: —) **the only place the engine's package exists is a folder inside this repository** — Nothing is published yet, so the adopter's `nuget.config` is still a path across two clones. → §WW230
-- 💭 **WW301** (deps: —) **the engine's package never reaches the guest, so no adoption case can run there** — packages/ is gitignored so the guest fails NU1301; but publish.yml exists and a release is one dispatch, so carrying the file buys little and spreads WW271's trap. → §WW301
+- ⏳ **WW230** (deps: —) **the only place the engine's package exists is a folder inside this repository** — 0.1.0-alpha.3 is on nuget.org, so what is left is the deletion — claude-tray's bootstrap nuget.config, which the file itself says goes the day this happened. → §WW230
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

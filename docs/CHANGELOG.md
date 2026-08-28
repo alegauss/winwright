@@ -274,6 +274,7 @@
 - ✅ **WW84** **the names case observes what no screenshot can** — The walk visits all six panels the strings declare and asserts both branches of the naming rule on each, with every label a key — passing with no hole and no word typed anywhere in the file.
 - ✅ **WW278** **the sessions note stays open after the click that should close it, so the case leaves the window changed** — The case restores the window by clicking away, which is how the application says the note closes — measured green, so the dot's second click reopens what it dismissed and the clicks were landing.
 - ✅ **WW303** **the raise refuses the second copy in a file that holds two, so the publish stops before publishing** — A file already reading the new version is this having worked, not a disagreement; only a file reading neither refuses, and two cases now cover a raise nothing covered.
+- 🗑 **WW301** **the engine's package never reaches the guest, so no adoption case can run there** — abandoned: The choice it filed is settled by the publish: the package is on nuget.org, so carrying a local folder into the guest buys nothing and there is no eviction machinery to own.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

@@ -257,28 +257,4 @@ the list being believed.
 
 What is left is the deletion the criterion measures.
 
-### §WW301 Carrying the package, or waiting for it to be published
-
-WW78 and WW82 are filed as waiting on WW230, and they are not quite. What stops an
-adoption case running in the guest is narrower: `packages\` is gitignored, the runner
-carries `git ls-files -c -o --exclude-standard`, and ignored files are not on that list.
-So the guest has no folder for the adopter's `nuget.config` to point at and the restore
-fails NU1301. Publishing would fix it, and so would carrying the file.
-
-The cost of carrying it is WW271, which cost two guest runs this session. The version in
-`packages\` never changes and NuGet extracts a package once per version, so an adopter
-restores whatever it extracted the first time. `pack-local.cmd` exists because of that:
-it packs and evicts the extracted copy together.
-
-In the guest the trap is worse, not better. The tree is wiped every run but the NuGet
-cache lives in the user profile and survives, so a guest could run adoption cases
-against an engine several changes old and report them green — on a machine nobody looks
-at. Any carrying has to evict there too, which is more machinery in service of an
-arrangement meant to be temporary.
-
-And publishing is not far off, which mostly settles it. `publish.yml` is written and
-keyless: a release is one manual dispatch. The stopgap would be machinery, plus eviction
-machinery, to avoid one button — so this stays an idea, for the case where publishing is
-held back and the adoption cases still need somewhere to run.
-
 ## Block K — The proving ground — a fixture app built to be hard to test
