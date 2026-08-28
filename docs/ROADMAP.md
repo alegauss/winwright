@@ -6,7 +6,6 @@
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
 - 📋 **WW289** (deps: —) **a toast takes the desk and the run excuses 43 checks, reading as green as one that excused 8** — The ledger counts every excuse and nothing compares the count to what a run usually spends, so the weakest evidence a suite produces is spelled exactly like the strongest. → §WW289
-- 📋 **WW293** (deps: —) **the runner's adopter parameters cannot be passed through the command its own comment says a person types** — `run-tests-vm.cmd` forwards three tokens after the configuration and carrying another tree needs eight, so the flags built for adopters reach the script only by bypassing it. → §WW293
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

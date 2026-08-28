@@ -7,10 +7,20 @@ rem VMware guest so the host stays usable, and is the one command a person types
 rem
 rem It arranges nothing. Credentials come from a file outside this tree - tools\run-tests-vm.ps1
 rem says which, and says why the out-of-tree spelling is the default.
+rem WW293. Everything is forwarded, and that is the whole of the fix. This read
+rem `-Configuration %CONFIG% %2 %3 %4` - three tokens after the configuration - and the runner has
+rem since grown `-Tree`, `-Name`, `-Run` and `-ResultsIn` for the adopting project whose migrated
+rem cases had nowhere to run but the desk somebody is working at. Four flags with four values is
+rem eight tokens, so the parameters that exist for adopters could not be given to the command
+rem adopters are told to run: the invocation truncated in silence and PowerShell then refused with
+rem `Falta um argumento para o parametro 'Name'`, naming the parameter that lost its value rather
+rem than the wrapper that dropped it.
+rem
+rem `%*` and not a larger number, because raising three to eight is the same defect with more room in
+rem it and goes stale the next time the script grows a flag. The configuration goes with it: it is
+rem the script's first parameter, so `run-tests-vm.cmd Release` still binds positionally, and a bare
+rem `run-tests-vm.cmd` gets the default the script itself declares rather than one spelled twice.
 setlocal
 
-set CONFIG=%1
-if "%CONFIG%"=="" set CONFIG=Debug
-
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\run-tests-vm.ps1" -Configuration %CONFIG% %2 %3 %4
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\run-tests-vm.ps1" %*
 exit /b %ERRORLEVEL%
