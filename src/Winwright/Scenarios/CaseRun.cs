@@ -229,10 +229,14 @@ public static class CaseRun
         // nothing.
         var members = Members(declared, project, speaking);
         var running = new List<StepDeclaration>();
+
+        // WW295. One per run, so a locator asking the application what to select costs one launch
+        // however many steps and members carry it.
+        var reported = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var member in members)
         {
             foreach (var step in declared.Steps)
-                running.Add(Naming(member is null ? step : step.For(member), project, speaking));
+                running.Add(Naming(member is null ? step : step.For(member), project, speaking, reported));
         }
 
         // WW61. Before the first act, not after the first red: a case whose precondition is absent
@@ -985,9 +989,13 @@ public static class CaseRun
     /// <param name="step">The step, already carrying its member where its case repeats.</param>
     /// <param name="project">The project, which is where the strings files are declared.</param>
     /// <param name="speaking">What the fixture said its window is in, or null where nothing did.</param>
+    /// <param name="reported">What this run has already asked the application, so it is asked once.</param>
     /// <exception cref="ScenarioRefusedException">Where a key cannot be read, or the result will not parse.</exception>
     private static StepDeclaration Naming(
-        StepDeclaration step, ProjectDeclaration project, System.Globalization.CultureInfo? speaking)
+        StepDeclaration step,
+        ProjectDeclaration project,
+        System.Globalization.CultureInfo? speaking,
+        Dictionary<string, string> reported)
     {
         if (step.Declares().Count == 0)
             return step;
@@ -1000,13 +1008,59 @@ public static class CaseRun
 
         try
         {
-            return step.Naming(key => Labels.For(key, project, language).Text);
+            return step.Naming(key => Substituted(step, project, language, key, reported));
         }
         catch (UnusableLabelException unusable)
         {
             throw new ScenarioRefusedException(step.Name, unusable.Message);
         }
+        catch (UnderivableSetException underivable)
+        {
+            throw new ScenarioRefusedException(step.Name, underivable.Message);
+        }
     }
+
+    /// <summary>What one brace in a locator resolves to, out of whichever well its spelling names.</summary>
+    /// <param name="step">The step, for the refusals.</param>
+    /// <param name="project">The project, which declares both wells.</param>
+    /// <param name="language">What the window is in, for the strings well.</param>
+    /// <param name="key">The brace's content, prefix and all.</param>
+    /// <param name="reported">What this run has already asked the application, so it is asked once.</param>
+    private static string Substituted(
+        StepDeclaration step,
+        ProjectDeclaration project,
+        ResolvedLanguage language,
+        string key,
+        Dictionary<string, string> reported)
+    {
+        // WW295. Two wells and two spellings, and the prefix is what keeps them apart. `{a.key}` is
+        // answered out of the strings before the window is — the same value on every desk — and
+        // `{report:name}` is answered by asking the application, which is the point: the entry a check
+        // mark should be on is whichever profile this machine's icon follows, and no case can name it.
+        //
+        // Opt-in by syntax rather than by lookup order. A locator that quietly became run-time
+        // because a name happened to exist in the other well is the drift WW290 is about, and here it
+        // would change when a selector resolves rather than only what it resolves to.
+        if (!key.StartsWith(Reports, StringComparison.Ordinal))
+            return Labels.For(key, project, language).Text;
+
+        var name = key[Reports.Length..].Trim();
+
+        // Asked once per run and remembered. A locator carrying one is resolved per step and per
+        // member of a repeated case, and launching the application for each of those is a process per
+        // substitution — and a value that moved between two of them would leave one step selecting
+        // something the next one does not.
+        if (!reported.TryGetValue(name, out var value))
+        {
+            value = DerivedSet.ReportedValue(step.Name, project, name);
+            reported[name] = value;
+        }
+
+        return value;
+    }
+
+    /// <summary>How a locator spells the well that asks the application. WW295.</summary>
+    private const string Reports = "report:";
 
     /// <summary>
     /// Every element a sweep matches: its locator's last step, under the route the steps before it

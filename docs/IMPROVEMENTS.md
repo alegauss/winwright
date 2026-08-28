@@ -170,33 +170,6 @@ names — the report left alone for its reader.
 Not measured against a second adopter: this is the only one with a submenu whose marks
 are derived at all.
 
-### §WW295 A locator built out of what the application reports
-
-WW273 let a locator name an element by a string the project declares —
-`Text[name="{settings.nav.about}"]` — and WW294 let an expectation be a value the
-application reports. Reading `Assert-ProfileSubmenu` to finish WW294 shows the two do
-not meet, and that the gap is where the interesting claim lives.
-
-Its central assertion is not an equality. It is *the check mark is on exactly one entry,
-and that entry is the profile the icon follows* — the icon's profile coming from the
-read-out, and the entry being one of many the locator matched. To write it, a case has
-to select **that** entry, and the only interpolation a locator has resolves through the
-strings.
-
-`expectReported` cannot stand in. It compares one element's reading with a reported
-value, and this needs the element chosen by one before anything is read. Nor can
-`coversWithin`: that asks whether every reported name is inside some entry, which is the
-claim one line above the check mark's.
-
-So the shape is a locator that reads the other well — `{report:iconFollows}` beside
-`{a.key}`, or a second brace the resolver knows. What it must not become is a selector
-that launches the application to decide what it matches: the strings interpolation is
-answered before the window is, and run-time resolution wearing the same syntax is a
-different thing.
-
-Filed before the read-outs it needs, deliberately: their shape follows from this and not
-the reverse.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

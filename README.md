@@ -129,6 +129,7 @@ ComboBox|Slider|Edit                     any one of several control types
 Text[name="Statistics"][order=left]      the leftmost of the ones that match
 MenuItem[order=top][index=2]             the second from the top
 Text[name="{settings.nav.about}"]        what the project's strings call it
+MenuItem[name="{report:activeProfile}"]  what the application says it is
 Group[name="{}"]                         the member, in a case that repeats
 Window#main > Pane > Button#save         a descendant of, at any depth
 ```
@@ -372,6 +373,14 @@ over many elements — see below.
 `sameAs` and `unlike` are judged where the case knows all its steps, so a pointer at a name nobody
 wrote, at a step further down, at a name two steps share, or at a step reading something else is
 refused before the run. Both have to say which reading they are about: comparing a value to a name
+A brace reads one of two wells and the spelling says which. `{a.key}` is answered out of the project's
+strings **before the window is** and reads the same on every desk. `{report:name}` is answered by
+running the application the way `reportedValues` declares — for the element no case can name, like the
+menu entry for whichever profile this machine's icon happens to follow. The application is asked once
+per run however many braces name it, so a locator carrying one costs a launch and not a launch per
+step. A name the project declares in neither well is refused where it was written, because a locator
+that matched nothing would send the reader to the application for something the file got wrong.
+
 says nothing. A pointer at the step's own name is refused too — `sameAs` would hold whatever the
 window did and `unlike` would fail whatever it did, and neither is a reading. And an earlier step
 that read nothing settles neither: an element that says nothing is not evidence a value changed, it

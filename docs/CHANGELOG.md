@@ -201,6 +201,7 @@
 - ✅ **WW291** **the one read-out reportedSets was written for is a diagnostic report, and every line of it becomes a member** — `--profile-names` answers one label per line by the same discovery route as the report, so a derived set comes from the application and the report is left to its reader.
 - ✅ **WW269** **a caption counting down in real time cannot survive an exact comparison across a round trip** — `sameCountdownAs` compares the numbers and ignores the words, allowing the last to have ticked down by one, so a caption that counts is not a red build about a clock.
 - ✅ **WW294 (the engine's half)** **an expectation whose value the application reports can only be a set, and the submenu's marks are single values** — A project declares `reportedValues` and a step names one with `expectReported`, so an expectation can be a fact about this machine rather than a string typed in.
+- ✅ **WW295** **a locator can be built out of a declared string but never out of a value the application reports** — A locator brace spelled `{report:name}` is answered by asking the application, once per run, so a case can select the element only the machine's own state can name.
 
 ## Block G — The scenario — a case is a data file
 
