@@ -146,29 +146,31 @@ scan code having eight bits where a code unit needs sixteen. The count is all it
 
 ### §WW269 A minute of tolerance, and only a minute
 
-The reset caption names when a quota window turns over, and it counts down while the
-window is open. Read twice across a round trip it is legitimately different: a run that
-crosses a minute boundary changes it by one, and nothing about the application is wrong.
+The reset caption names when a quota window turns over and counts down while the window
+is open. Read twice across a round trip it is legitimately different: a run crossing a
+minute boundary changes it by one, and nothing about the application is wrong.
 
 `sameAs` compares exactly, so the caption cannot go through it. Dropping the claim is
 worse than tolerating the minute: an hour of drift is another profile's window, which is
-precisely the defect `WW81` was filed against.
+the defect `WW81` was filed against.
 
-**The script's answer cannot be copied, and that is the finding.** It parsed the caption
-to minutes by matching `(\d+)\s*d`, `h` and `m` — English letters. In the four other
-languages this application ships those letters differ, so a parser keyed on them reads
-nothing and the tolerance silently becomes an exact comparison. That is `T361`: an
-assertion matching English is loud when it fails and silent one step over, where it
-matches nothing and passes.
+**The reason given for not copying the script is wrong, and measured so.** This said the
+script matched `(\d+)\s*d`, `h` and `m` — English letters — which differ in the other
+four languages, so a parser keyed on them reads nothing and the tolerance silently
+becomes exact. They do not differ. Both formatters, `StatisticsPage.Dur` and
+`TrayContext.FmtDays`, write `d`, `h` and `m` as literal ASCII; only `dur.now` goes
+through `L.T`.
 
-So the shape is open rather than decided, and two candidates are worth measuring before
-either is built. Compare the digits and ignore the letters, which is
-language-independent and assumes the caption counts down with its smallest unit last. Or
-have the application report the instant through the in-app half and compare instants,
-which assumes nothing about the text and costs a reading the adopter has to provide.
+So T361's hazard is not in this caption, and the fork closes on the cheaper arm: compare
+the digits and ignore the letters, which needs nothing of the application. Having the
+in-app half report an instant buys accuracy this claim does not want — it is a
+tolerance, not a clock.
 
 What it must not become is a general tolerance on `sameAs`. A percentage is the same
 number or it is not.
+
+What the letters do not settle: `dur.now` is localised, so `now` and `agora` both carry
+no digits and compare equal — the right answer for the wrong reason.
 
 ## Block G — The scenario — a case is a data file
 
