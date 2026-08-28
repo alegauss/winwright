@@ -251,8 +251,9 @@ against an engine several changes old and report them green — on a machine nob
 at. Any carrying has to evict there too, which is more machinery in service of an
 arrangement meant to be temporary.
 
-So this is a choice and not a defect: build the stopgap and own the eviction, or leave
-the adoption arm parked until WW230. Filed as an idea rather than work because the
-answer turns on how far off publishing is, which is not a thing this repository knows.
+And publishing is not far off, which mostly settles it. `publish.yml` is written and
+keyless: a release is one manual dispatch. The stopgap would be machinery, plus eviction
+machinery, to avoid one button — so this stays an idea, for the case where publishing is
+held back and the adoption cases still need somewhere to run.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
