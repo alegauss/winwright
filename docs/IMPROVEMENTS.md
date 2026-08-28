@@ -30,28 +30,29 @@ it.
 
 ### §WW289 A green that excused forty-three checks
 
-Measured on a guest run of 1747: it passed, and excused **49** checks where every run
-before it excused 8. Forty-three name one holder — `ShellExperienceHost 'Nova
-notificação'`. A Windows notification toast took the foreground and held it, so the
-input cases could send nothing and each answered the hole it is built to answer.
+Measured on a guest run of 1747: it passed, and excused **49** checks where every run before excused
+8. Forty-three name one holder — `ShellExperienceHost 'Nova notificação'`. A notification toast took
+the foreground and held it, so the input cases could send nothing and each answered its own hole.
 
-Everything worked. WW133 turned a refused foreground into a hole rather than a red,
-WW281 put every excuse in one ledger, and the run printed all forty-nine. Nothing is
-silent, and that is what makes this worth filing: the reading is honest and the
-conclusion a reader draws is not, because a run that checked forty-three fewer things
-exits zero and prints the same word as one that checked them all.
+Everything worked: WW133 makes a refused foreground a hole, WW281 puts every excuse in
+one ledger, and all forty-nine were printed. Nothing is silent, and that is the point —
+the reading is honest and the conclusion a reader draws is not, because a run that
+checked forty-three fewer things exits zero and prints the same word as one that checked
+them all.
 
-So the missing piece is comparison. A run has no idea what it usually spends, and the
-number that matters is not 49 but 49-against-8. Where that belongs is open: the runner
-could carry a declared budget and say a run went over, or report the count against the
-previous run's, which needs somewhere to keep it.
+**Where it belongs is settled, and the storage exists.** `Excuses.Ledger` is
+`excused.txt` beside the test assembly, truncated per run; `Roll` reads it through
+`--excused`. `RollCallRun` gives every run its own `TestResults\<run>\`, so the run
+before is still on disk — the comparison is history rather than a typed budget, which is
+this project's rule everywhere else.
 
-Two things not to do. Not a failure — the desk is not a defect in the code, which is
-this block's own criterion. And not a retry, which hides the toast rather than reporting
-it.
+The shape: `RollCall` takes the results root, finds the most recent run that is not this
+one, reads its ledger and says *49, where the run before excused 8*. The logic lives in
+the tool the suite already tests, and MSBuild passes one path rather than enumerating
+directories.
 
-The cheaper half is separate and worth doing anyway: the guest is a machine this project
-controls, so it can be told to raise no notifications at all.
+Two arms it needs. A first run has no previous and must read as unknown, never as zero.
+And it stays a finding: the desk is not a defect in the code.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

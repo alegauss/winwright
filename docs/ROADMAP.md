@@ -5,7 +5,7 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-- 📋 **WW289** (deps: —) **a toast takes the desk and the run excuses 43 checks, reading as green as one that excused 8** — The ledger counts every excuse and nothing compares the count to what a run usually spends, so the weakest evidence a suite produces is spelled exactly like the strongest. → §WW289
+- 📋 **WW289** (deps: —) **a toast takes the desk and the run excuses 43 checks, reading as green as one that excused 8** — The count is compared with nothing, and the run before it is still on disk under its own results directory — so the comparison is history rather than a typed budget. → §WW289
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
