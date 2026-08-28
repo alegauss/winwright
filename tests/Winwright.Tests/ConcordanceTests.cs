@@ -22,6 +22,52 @@ public sealed class ConcordanceTests : IDisposable
     public void Dispose() => Directory.Delete(root, recursive: true);
 
     [Fact]
+    public void A_file_holding_two_copies_is_raised_once_and_the_second_is_not_a_refusal()
+    {
+        // WW303, measured on a publish that stopped before publishing anything. The README shows the
+        // reference once per package, so the list names it once per package too — and every
+        // occurrence is replaced at once, with all the versions read before any is written. The
+        // second copy is therefore handed the old version and meets a file already raised.
+        var readme = Path.Combine(root, "README.md");
+        File.WriteAllText(
+            readme,
+            """
+            <PackageReference Include="Winwright" Version="0.1.0-alpha.2" />
+            <PackageReference Include="Winwright.InApp" Version="0.1.0-alpha.2" />
+            """);
+
+        var copy = new WritableCopy("README.md's reference to Winwright", readme);
+        var second = new WritableCopy("README.md's reference to Winwright.InApp", readme);
+
+        var first = copy.Raise("0.1.0-alpha.2", "0.1.0-alpha.3");
+        var again = second.Raise("0.1.0-alpha.2", "0.1.0-alpha.3");
+
+        Assert.True(WritableCopy.Wrote(first), first);
+        Assert.False(WritableCopy.Refused(again), again);
+        Assert.Contains("already reads 0.1.0-alpha.3", again, StringComparison.Ordinal);
+
+        // Both lines, because raising one and leaving the other is the disagreement the reading
+        // itself would then report — and is why the replace is every occurrence in the first place.
+        var raised = File.ReadAllText(readme);
+        Assert.DoesNotContain("0.1.0-alpha.2", raised, StringComparison.Ordinal);
+        Assert.Equal(2, raised.Split("0.1.0-alpha.3").Length - 1);
+    }
+
+    [Fact]
+    public void A_file_reading_as_neither_version_is_still_a_refusal()
+    {
+        // The case the guard exists for, kept apart from the one above: a copy the reader and the
+        // file disagree about is a raise that would write nothing and say it had.
+        var pinned = Path.Combine(root, "Other.csproj");
+        File.WriteAllText(pinned, """<PackageReference Include="Winwright" Version="9.9.9" />""");
+
+        var said = new WritableCopy("Other.csproj's reference to Winwright", pinned)
+            .Raise("0.1.0-alpha.2", "0.1.0-alpha.3");
+
+        Assert.True(WritableCopy.Refused(said), said);
+    }
+
+    [Fact]
     public void Three_copies_naming_one_version_agree_and_the_gate_exits_zero()
     {
         var tree = Declaring("Directory.Build.props", "0.4.1");

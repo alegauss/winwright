@@ -50,9 +50,23 @@ public sealed record WritableCopy(string Where, string Path)
         var raised = text.Replace(was, version, StringComparison.Ordinal);
         if (string.Equals(text, raised, StringComparison.Ordinal))
         {
-            // It read as `was` and does not contain it, which means the reader and the file disagree
-            // about what this copy says. Refused rather than reported as done: a raise that wrote
-            // nothing and said it did is the half-done sequence this whole task is about.
+            // Nothing changed, and there are two ways to arrive here that are not the same fact.
+            //
+            // The file already reads the new version. That is what happens when one file holds two
+            // copies — the README shows the reference once per package — because every occurrence is
+            // replaced at once and the versions are all read before any of them is written. So the
+            // second copy is handed the old version and finds a file that has already been raised,
+            // which is this having worked rather than having failed.
+            //
+            // Measured: WW239 put `--documented README.md` in the list once per package, the raise
+            // refused on the second, and the publish stopped before it published anything. That is
+            // the guard doing its job on a tree that was in fact correct.
+            if (text.Contains(version, StringComparison.Ordinal))
+                return $"{Where} already reads {version}";
+
+            // Or it reads as neither, which means the reader and the file disagree about what this
+            // copy says. Refused rather than reported as done: a raise that wrote nothing and said it
+            // did is the half-done sequence this whole task is about.
             return $"{Where} reads {was} and the file does not contain it, so nothing was written";
         }
 
