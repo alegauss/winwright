@@ -141,4 +141,25 @@
     <Message Condition="'$(RollCallExit)' == '0'" Importance="high" Text="@(RollCallSaid, '%0A')" />
   </Target>
 
+  <!-- WW297. The way in that reaches the roll on both verdicts, and the reason it exists is
+       measured: a target hung on AfterTargets="VSTest" is skipped where VSTest failed, so the roll
+       went silent on exactly the runs whose reading is hardest - a red run that also excused forty
+       checks said only that one test failed.
+
+       CallTarget and not DependsOnTargets, which is the whole mechanism: OnError runs where a TASK
+       in this target failed, and CallTarget is a task. A dependency that fails never starts the
+       target that depends on it, and OnError would never be reached.
+
+       Both verdicts, once each. Green: CallTarget succeeds and TakeTheRoll fires through its own
+       AfterTargets, measured to still fire under CallTarget. Red: AfterTargets is skipped and
+       OnError runs it instead. The two cannot both happen, so the roll is never taken twice.
+
+       OnError does not swallow what failed - measured, exit 1 - and it must not. The suite's verdict
+       is the headline and the exit code belongs to it; the roll is a second sentence printed beside
+       a red run, never a thing that changes what the run concluded. -->
+  <Target Name="TestAndRoll">
+    <CallTarget Targets="VSTest" />
+    <OnError ExecuteTargets="TakeTheRoll" />
+  </Target>
+
 </Project>

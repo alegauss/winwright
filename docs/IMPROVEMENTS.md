@@ -28,32 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW297 The roll goes quiet on the runs that need it most
-
-Measured on a guest run that went red on WW249. The suite reported one failure out of
-1805, and the roll call printed nothing — no count of what ran, no excuses, and no
-ledger filed for the run after it.
-
-`TakeTheRoll` is `AfterTargets="VSTest"`, and MSBuild runs such a target only where the
-one it follows succeeded. The VSTest task fails when a test fails, so the roll is
-skipped by exactly the runs whose reading is hardest. A red run that also excused forty
-checks says only that one test failed, and nothing tells the reader the other forty
-never ran — the confusion this block exists to remove, arriving by a door nobody
-checked.
-
-It also cuts the history WW289 built. A red run files no ledger, so the run after it
-compares against whichever run last went green, however many runs ago, and calls that
-one "the run before".
-
-What this must not become is a target that swallows the failure. The suite's verdict is
-the headline and the exit code belongs to it; the roll is a second sentence printed
-beside a red run, never a thing that changes what the run concluded.
-
-Which hook runs on both paths is to be measured rather than named here. The two
-candidates — a target that also follows the failing path, and letting the test run
-continue on error with its verdict re-raised after — differ in whether the exit code
-survives, and that decides it.
-
 ### §WW298 One predecessor is not a baseline
 
 WW289 shipped the comparison and it works: a run says "8 excused against 8 the run
