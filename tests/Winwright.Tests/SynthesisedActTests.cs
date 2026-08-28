@@ -241,8 +241,11 @@ public sealed class SynthesisedActTests : IDisposable
         // fallback exists precisely because the pattern route sometimes refuses.
         // WW259: 'open submenu' joins them, and it is the least ambiguous member of the set — the whole
         // act is a keypress at a menu, so a desk that refused the foreground took the gesture entirely.
+        // WW258: 'open tray menu' too. Its route is focus and the application key, so a desk that
+        // refused the focus took the whole act — and there is no pointer half to fall back to, since
+        // a synthesised right-click opens nothing at all on this shell.
         Assert.Equal(
-            ["type", "click", "nudge", "press", "pick", "pick at", "open submenu"],
+            ["type", "click", "nudge", "press", "pick", "pick at", "open submenu", "open tray menu"],
             ActVerb.All.Where(one => one.Synthesises).Select(one => one.Name));
 
         Assert.All(

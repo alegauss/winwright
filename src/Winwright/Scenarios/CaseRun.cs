@@ -342,11 +342,45 @@ public static class CaseRun
         List<TraceStep> trace,
         List<AssertionResult> results)
     {
-        var search = NotificationArea.Find(
-            icon, openingTheOverflow: true, project.Timeouts.For("resolve"), project.Timeouts.For("poll"));
+        var settleMs = project.Timeouts.For("resolve");
+        var pollMs = project.Timeouts.For("poll");
 
-        trace.Add(search.AsTraceStep(step.Name) with { Step = trace.Count + 1 });
-        results.Add(search.AsAssertion(step.Name).At(trace.Count));
+        // WW258. Whether a flyout was standing before this step, so the step can put the desk back the
+        // way it found it. `Find` opens the overflow to look in it and does not shut it again — which
+        // is right for a caller that wants to keep looking, and wrong for a case: a flyout left
+        // standing is the next case's flake, and this block's criterion is that a run leaves the
+        // machine as it found it. Measured, and by the case that says so: `TrayPlacementTests`
+        // went red on a flyout this step had opened and walked away from.
+        var stood = NotificationArea.Overflow() is not null;
+
+        // WW258. Asking for the menu is the other act a tray takes, and it answers its own three ways
+        // for the same reason the search does — WW174 put the desk apart from the application here,
+        // so a shell that would not open the flyout is a hole and not a menu that failed to appear.
+        try
+        {
+            if (step.OpensTheTrayMenu)
+            {
+                var menu = NotificationArea.OpenMenu(icon, settleMs, pollMs);
+
+                trace.Add(menu.AsTraceStep() with { Step = trace.Count + 1, Asserted = step.Name });
+                results.Add(menu.AsAssertion(step.Name).At(trace.Count));
+                return;
+            }
+
+            var search = NotificationArea.Find(icon, openingTheOverflow: true, settleMs, pollMs);
+
+            trace.Add(search.AsTraceStep(step.Name) with { Step = trace.Count + 1 });
+            results.Add(search.AsAssertion(step.Name).At(trace.Count));
+        }
+        finally
+        {
+            // Only what this step opened, which is the rule `Reachable` already keeps one floor down:
+            // a flyout that was already standing belongs to whoever opened it, and shutting that one
+            // would answer their next look with a closed desk. In a finally because the promise is
+            // about the desk and not about how the step ended.
+            if (!stood && NotificationArea.Overflow() is not null)
+                NotificationArea.CloseOverflow(settleMs, pollMs);
+        }
     }
 
     /// <summary>

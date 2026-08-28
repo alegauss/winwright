@@ -976,12 +976,13 @@ public sealed record StepDeclaration
         bool ownHeader)
     {
         var act = ActVerb.Named(verb);
-        if (!act.Reads)
+        if (!act.OnATray)
         {
             throw new ScenarioRefusedException(
                 subject,
-                $"it is about a tray icon and names '{act.Name}'; the only act a tray icon takes so far "
-                    + "is 'read', which asks whether the shell is showing it");
+                $"it is about a tray icon and names '{act.Name}'; an icon is not an element, so the acts "
+                    + $"that ask a control through its patterns do not apply — it takes "
+                    + $"{string.Join(" or ", ActVerb.All.Where(one => one.OnATray).Select(one => $"'{one.Name}'"))}");
         }
 
         if (act.Refuses(argument) is { } wrong)
@@ -1026,6 +1027,13 @@ public sealed record StepDeclaration
             subject, null, tray, act, null, null, ReadBack.Named(null), false, false, null, false, null,
             false, null, null, false, null, null, null, false, false);
     }
+
+    /// <summary>
+    /// Whether this step asks a tray icon for its menu rather than only whether it is showing. WW258,
+    /// and asked off the verb rather than stored: the vocabulary is the one place a tray act is
+    /// declared, and a second flag would be a second answer about the same word.
+    /// </summary>
+    public bool OpensTheTrayMenu => Tray is not null && !Verb.Reads;
 
     /// <summary>What a locator writes where the member of a repeated case belongs.</summary>
     public const string Member = "{}";

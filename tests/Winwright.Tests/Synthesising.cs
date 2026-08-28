@@ -115,6 +115,23 @@ internal static class Synthesising
         new("Synthesised.ExpandMenu", Asking.ItIsTheAct,
             "opening the highlighted entry's submenu with Right, as a step's own result"),
 
+        // WW258. The three that run a case, and they arrive here because a tray step reaches
+        // `NotificationArea.OpenMenu` from the engine directly rather than through a verb's delegate —
+        // an icon is not an element, so there is no subject to hand one and no `Synthesised.*` to put
+        // between them. What that changed is the *visibility* and not the fact: a case naming 'type'
+        // or 'click' has always ended in a send, and the `Func` a verb holds is all that kept the walk
+        // from seeing it. Recorded rather than routed around, because the walk is right.
+        //
+        // How a caller finds out is the same door every synthesised act uses: the step's own result
+        // carries what it needed, so a desk that refused the focus comes back as a hole naming the
+        // absence rather than as a menu the application failed to show.
+        new("CaseRun.Of", Asking.TheResultSaysWhichRouteRan,
+            "running a case, which reaches a send where one of its steps is a synthesised act"),
+        new("Suite.Launch", Asking.TheResultSaysWhichRouteRan,
+            "running the cases a selection asked for, each of which may hold one"),
+        new("Suite.Run", Asking.TheResultSaysWhichRouteRan,
+            "the same against a window the caller already has"),
+
         // A menu is entered the way a keyboard user enters one, and that is Block D's third
         // criterion rather than an escalation: reaching a destructive entry by invoke is refused
         // at the door, so walking is the only route there is.

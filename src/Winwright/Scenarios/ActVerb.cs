@@ -135,9 +135,23 @@ public sealed record ActVerb
             repeatable: false,
             (subject, _) => Synthesised.ExpandMenu(subject),
             synthesises: true),
+
+        // WW258. The one act a tray icon takes, and it carries no delegate because there is no subject
+        // to hand one: an icon is a rectangle and a tooltip in the shell's tree, so the engine reaches
+        // `NotificationArea.OpenMenu` by name where a step's subject is a tray. Synthesising, because
+        // the route is focus and the application key — a synthesised right-click opens nothing at all
+        // on this shell, which is why there is no pointer half of this pair to name.
+        new(
+            "open tray menu",
+            Takes.Nothing,
+            repeatable: false,
+            null,
+            synthesises: true,
+            onATray: true),
     ];
 
     private readonly Func<Subject, string?, ActResult>? doing;
+    private readonly bool onATray;
 
     private ActVerb(
         string name,
@@ -146,7 +160,8 @@ public sealed record ActVerb
         Func<Subject, string?, ActResult>? doing,
         bool synthesises = false,
         IReadOnlyList<string>? accepts = null,
-        bool reaches = false)
+        bool reaches = false,
+        bool onATray = false)
     {
         Name = name;
         Wants = takes;
@@ -155,6 +170,7 @@ public sealed record ActVerb
         Accepts = accepts ?? [];
         Reaches = reaches;
         this.doing = doing;
+        this.onATray = onATray;
     }
 
     /// <summary>
@@ -227,7 +243,19 @@ public sealed record ActVerb
     /// of the entry that ends the run does not press it.
     /// </para>
     /// </summary>
-    public bool Reads => doing is null;
+    public bool Reads => doing is null && !onATray;
+
+    /// <summary>
+    /// Whether a step whose subject is a tray icon may name it.
+    /// <para>
+    /// WW258. A tray icon is not an element, so none of the verbs that ask a control through its
+    /// patterns applies to one and <see cref="Perform"/> could not be handed a subject for it. What is
+    /// left is the two a shell exposes: reading whether the icon is showing, and asking for its menu.
+    /// A verb outside this set is refused where the author wrote it rather than on the run that would
+    /// have had nothing to act on.
+    /// </para>
+    /// </summary>
+    public bool OnATray => onATray || Reads;
 
     /// <summary>
     /// The verb of that name, or a refusal listing the ones there are.

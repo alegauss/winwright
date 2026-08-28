@@ -307,6 +307,11 @@ internal static class DeskAsks
             "the flyout is read either side and the two are compared, so whatever the shell was "
                 + "showing is what the reading has to leave it showing — which holds on a desk that "
                 + "would not open it at all, and is the same claim WW197 made literal one case down"),
+        new("TraySubjectTests.A_tray_step_leaves_the_overflow_the_way_it_found_it",
+            Unaffected.Shape,
+            "WW258, and the same claim as the two above it: the flyout is read either side and the "
+                + "two are compared, so a desk that would not open one at all still satisfies it. The "
+                + "step under test opened one and walked away, which is what this now refuses"),
         new("TrayPlacementTests.The_fixture_leaves_the_overflow_the_way_it_found_it",
             Unaffected.Shape,
             "WW197 made the claim literal: the flyout is read either side and the two are compared, "

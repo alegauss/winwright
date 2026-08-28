@@ -220,27 +220,6 @@ rather than reaching for a locator that cannot exist.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW258 The notification area is a surface no locator addresses
-
-Every locator in a case resolves against the window the fixture launched. The
-notification area is in the shell's tree and not in that window's, so there is no
-locator that reaches it — and the icon has no clickable point either, which is why
-`NotificationArea` addresses it by rectangle and finds it by the name the shell gives it
-rather than through the grammar at all.
-
-The engine does the hard parts already. It opens the overflow flyout, because an icon in
-it is not in the tree until it is open; it puts the flyout back; it names the icon by
-tooltip, which is the only name the shell exposes; and `OpenMenu` answers whether a menu
-came up with the desk fact that stopped it where one did — the collapse `WW174` closed,
-so that a shell which would not open the flyout is not read as an application that would
-not show a menu.
-
-None of it is nameable from a data file, and `WW82` is the only case in any of these
-repositories that drives it. The icon is named rather than located, so what a step
-writes is a name in `with` and not a locator — which means the shape here is not another
-verb over the existing grammar but a second kind of subject, and that is the question
-worth settling before anything is added.
-
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness

@@ -210,7 +210,7 @@
 - ✅ **WW267** **a picker is reached by naming a value, and the values are the machine's own data** — A step names `pick at` with a position, and the walk reaches whatever sits there — reporting by name what the case could not have written.
 - ✅ **WW263** **a case has a fixed list of steps, and the panels it must visit are derived from the strings** — A case names `forEach` and runs its steps once per string the key declares, with the member reaching a locator through `{}` and an empty derivation refused.
 - ✅ **WW259** **`expand` goes through the pattern, and the submenu the menu case is about only opens to a key** — A step names `open submenu` and reaches the keyboard walk, handing back the entry the menu landed on so `reads: name` compares against the submenu rather than the window.
-- ✅ **WW258 (naming the icon)** **a case cannot name a tray icon or open its menu, and the engine has done both since block D** — A step carries a `tray` naming the icon instead of a `locator`, exactly one of the two, and the search's own pass, fail or hole becomes the step's.
+- ✅ **WW258** **a case cannot name a tray icon or open its menu, and the engine has done both since block D** — A tray step also names `open tray menu`, reaching the focus-and-application-key route, and puts the overflow back the way it found it.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

@@ -304,8 +304,13 @@ has no clickable point either, so it is addressed by name and not by the grammar
 is that the icon **can be found**, so it carries no `expect` and no `reads`: an icon is a rectangle
 and a tooltip, it has no patterns to read, and a search that could not open the overflow is a hole
 naming the desk rather than an application that placed no icon. Naming both a `locator` and a `tray`
-is refused, and so is naming neither. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`, `open submenu`. `expect` is what the element should read
+is refused, and so is naming neither.
+
+A tray step takes two acts and no others, because an icon is not an element: `read` asks whether the
+shell is showing it, and `open tray menu` asks for its menu — by focus and the application key, which
+is the only route that reaches one on this shell. Every other act asks a control through its patterns,
+and a step naming one against a `tray` is refused where it was written. `act` is one of `read`, `invoke`, `toggle`,
+`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`. `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
 `toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `focused`, defaulting to `anything`, the one value the element
 reports, in the order a reader looks at them. `selected` asks whether *this* element is chosen and
