@@ -119,11 +119,16 @@ public class ScenarioFileTests
     [Fact]
     public void A_required_field_that_is_not_there_is_refused_where_it_would_have_been()
     {
+        // WW258 moved the example off 'locator'. That field is no longer unconditionally required —
+        // a step carries it or a 'tray', and a missing one of those is refused by the group with the
+        // step's own address, because there is no single field to point at when either would do. The
+        // rule this case is about is the other one, so it is asserted through a field that still has
+        // to be there on every step.
         var refusal = Assert.Throws<ScenarioRefusedException>(() => ScenarioFile.Read("one.cases.json", """
-            { "cases": [ { "name": "a", "steps": [ { "act": "invoke" } ] } ] }
+            { "cases": [ { "name": "a", "steps": [ { "locator": "Button" } ] } ] }
             """));
 
-        Assert.Equal("one.cases.json cases[0].steps[0].locator", refusal.Subject);
+        Assert.Equal("one.cases.json cases[0].steps[0].act", refusal.Subject);
         Assert.Contains("it is not there, and it has to be", refusal.Because);
     }
 
@@ -225,7 +230,9 @@ public class ScenarioFileTests
         var rendered = string.Join('\n', ScenarioSchema.Render());
 
         Assert.Contains("'cases': an array of cases", rendered);
-        Assert.Contains("locator: what to act on", rendered);
+        // WW258: 'locator' now carries which group it belongs to rather than nothing, because neither
+        // "required" nor "optional" is true of it — a step needs it or a 'tray', and exactly one.
+        Assert.Contains($"locator (one of the {ScenarioSchema.Subject}): what to act on", rendered);
         Assert.Contains("one of: read, invoke, toggle, set value, set range, select, expand, collapse", rendered);
         Assert.Contains("one of: anything, value, range, toggle, selected, picked, expanded, text", rendered);
         Assert.Contains("(optional)", rendered);
@@ -244,7 +251,7 @@ public class ScenarioFileTests
             ScenarioSchema.Fixture.Select(field => field.Name));
         Assert.Equal(
             [
-                "locator", "act", "with", "expect", "reads", "moves", "answers", "matches", "discloses",
+                "locator", "tray", "act", "with", "expect", "reads", "moves", "answers", "matches", "discloses",
                 "sameAs", "unlike", "label", "notLabel", "ownHeader", "eachSpoken", "spoken", "never", "covers", "meansIt", "named",
             ],
             ScenarioSchema.Step.Select(field => field.Name));

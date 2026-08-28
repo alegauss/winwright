@@ -97,7 +97,15 @@ public sealed class McpTests
         var format = Said(Served.To(Message(2, "tools/call", Calling("winwright_format")))!);
         var vocabulary = Said(Served.To(Message(3, "tools/call", Calling("winwright_vocabulary")))!);
 
-        Assert.Contains("locator: what to act on", format, StringComparison.Ordinal);
+        // WW258. The same rendering ScenarioFileTests pins, asserted again here because this is the
+        // answer a tool actually receives: 'locator' now says which group it belongs to, since a step
+        // needs it or a 'tray' and neither "required" nor "optional" is true of either.
+        Assert.Contains(
+            $"locator (one of the {Winwright.Scenarios.ScenarioSchema.Subject}): what to act on",
+            format,
+            StringComparison.Ordinal);
+
+        Assert.Contains($"tray (one of the {Winwright.Scenarios.ScenarioSchema.Subject}):", format, StringComparison.Ordinal);
         Assert.Contains("one of: true, false", format, StringComparison.Ordinal);
 
         foreach (var verb in ActVerb.All)

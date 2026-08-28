@@ -297,7 +297,14 @@ their expectations are fields, and the loop, the waits, the attempts and the ver
 ```
 
 A case has a `name` and its `steps`, and may carry `tags`, `needs`, `catches` and `filed`.
-`locator` and `act` are the two fields every step has. `act` is one of `read`, `invoke`, `toggle`,
+Every step says what it acts on and what to do: `act`, plus **exactly one of `locator` or `tray`**.
+`tray` names a notification-area icon by the name the shell gives it — a tooltip — for the surface no
+locator reaches: the notification area is in the shell's tree rather than the window's, and an icon
+has no clickable point either, so it is addressed by name and not by the grammar. A tray step's claim
+is that the icon **can be found**, so it carries no `expect` and no `reads`: an icon is a rectangle
+and a tooltip, it has no patterns to read, and a search that could not open the overflow is a hole
+naming the desk rather than an application that placed no icon. Naming both a `locator` and a `tray`
+is refused, and so is naming neither. `act` is one of `read`, `invoke`, `toggle`,
 `set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`, `open submenu`. `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
 `toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `focused`, defaulting to `anything`, the one value the element

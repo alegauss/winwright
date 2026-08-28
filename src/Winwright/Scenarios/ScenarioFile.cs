@@ -333,6 +333,7 @@ public sealed class ScenarioFile
         // Every field is read before anything is declared, so a refusal about a field's kind wears
         // that field's own address and never the step's with the field's in brackets after it.
         var locator = Text(at, step, ScenarioSchema.Step, "locator");
+        var tray = Text(at, step, ScenarioSchema.Step, "tray");
         var act = Text(at, step, ScenarioSchema.Step, "act");
         var with = Text(at, step, ScenarioSchema.Step, "with");
         var expect = Text(at, step, ScenarioSchema.Step, "expect");
@@ -353,11 +354,24 @@ public sealed class ScenarioFile
         var meansIt = Truth(at, step, ScenarioSchema.Step, "meansIt");
         var named = Text(at, step, ScenarioSchema.Step, "named");
 
+        // WW258. Asked of the schema rather than checked here, so the rule and the `oneOf` a tool is
+        // published cannot drift: the group is declared on the fields, and a third way of addressing a
+        // step joins it without this line changing.
+        foreach (var group in ScenarioSchema.Groups(ScenarioSchema.Step))
+        {
+            var carried = ScenarioSchema.Grouped(ScenarioSchema.Step, group)
+                .Where(one => step.TryGetProperty(one, out var value) && value.ValueKind != JsonValueKind.Null)
+                .ToList();
+
+            if (ScenarioSchema.Miscarried(ScenarioSchema.Step, group, carried) is { } wrong)
+                throw new ScenarioRefusedException(at, wrong);
+        }
+
         return Addressed(
             at,
             () => StepDeclaration.Of(
-                locator!, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches, discloses,
-                sameAs, never, spoken, label, notLabel, unlike, eachSpoken, ownHeader));
+                locator, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches, discloses,
+                sameAs, never, spoken, label, notLabel, unlike, eachSpoken, ownHeader, tray));
     }
 
     /// <summary>

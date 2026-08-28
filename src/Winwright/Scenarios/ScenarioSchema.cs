@@ -50,8 +50,29 @@ public enum Taking
 /// field too: what a boolean accepts is already said by what it holds, and saying it twice is the
 /// second spelling that goes on saying the old thing after the first moves.
 /// </param>
-public sealed record Field(string Name, bool Required, Taking Holds, string Means, IReadOnlyList<string> OneOf)
+/// <param name="Instead">
+/// The group of fields exactly one of which a step has to carry, or empty where this field stands
+/// alone.
+/// <para>
+/// WW258. <see cref="Required"/> is a boolean per field and cannot say <em>one of these two</em>,
+/// which is what a second kind of subject needs: a tray icon is named by the shell rather than
+/// located in the window's tree, so a step addresses either a <c>locator</c> or a <c>tray</c> and a
+/// step carrying both addresses two things. Said here rather than checked in the loader, for the
+/// reason every other constraint is: the schema a tool publishes and the rule the run enforces are
+/// one list, and the copy that drifts is always the published one.
+/// </para>
+/// </param>
+public sealed record Field(
+    string Name,
+    bool Required,
+    Taking Holds,
+    string Means,
+    IReadOnlyList<string> OneOf,
+    string Instead = "")
 {
+    /// <summary>Whether it belongs to a group exactly one of which has to be carried.</summary>
+    public bool Alternative => Instead.Length > 0;
+
     /// <summary>The one line a listing of the format shows.</summary>
     public override string ToString()
     {
@@ -62,7 +83,17 @@ public sealed record Field(string Name, bool Required, Taking Holds, string Mean
             _ => "",
         };
 
-        return $"{Name}{(Required ? "" : " (optional)")}: {Means}{of}";
+        // WW258. Neither "required" nor "optional" is true of one of these, and printing either
+        // would be the misleading half: a step with no subject at all is refused, and so is one
+        // with two.
+        var required = (Required, Alternative) switch
+        {
+            (_, true) => $" (one of the {Instead})",
+            (false, _) => " (optional)",
+            _ => "",
+        };
+
+        return $"{Name}{required}: {Means}{of}";
     }
 }
 
@@ -106,6 +137,12 @@ public static class ScenarioSchema
     public const string Fixtures = "fixtures";
 
     /// <summary>
+    /// The group naming the two ways a step says what it is about. WW258: one word, so the schema,
+    /// the loader's refusal and the JSON Schema's <c>oneOf</c> cannot spell it three ways.
+    /// </summary>
+    public const string Subject = "subject";
+
+    /// <summary>
     /// What the file itself may say. Here for the same reason the other three lists are: a
     /// misspelled <c>"fixtres"</c> that loads is every case in the file silently launched against
     /// the application as it comes, with expectations describing an environment nothing set up.
@@ -146,7 +183,17 @@ public static class ScenarioSchema
     /// <summary>What a step may say.</summary>
     public static IReadOnlyList<Field> Step { get; } = new ReadOnlyCollection<Field>(
     [
-        new("locator", true, Taking.Text, "what to act on, in the locator grammar", []),
+        // WW258. No longer unconditionally required, and the `Instead` group is why: a tray icon is
+        // the second kind of subject a step can have, so exactly one of these two addresses it.
+        new("locator", false, Taking.Text, "what to act on, in the locator grammar", [], Subject),
+        new(
+            "tray",
+            false,
+            Taking.Text,
+            "the notification-area icon to act on, by the name the shell gives it — a tooltip, matched "
+                + "on its first line, for the surface no locator reaches",
+            [],
+            Subject),
         new("act", true, Taking.Text, "what to do to it", ActVerb.All.Select(verb => verb.Name).ToList()),
         new("with", false, Taking.Text, "what the act needs said, where it needs anything", []),
         new("expect", false, Taking.Text, "what the reading should be once the act has landed", []),
@@ -237,6 +284,50 @@ public static class ScenarioSchema
     internal static string Spelled(IReadOnlyList<Field> fields) =>
         string.Join(", ", fields.Select(field => field.Name));
 
+    /// <summary>
+    /// Every group of fields exactly one of which has to be carried, by the group's own name.
+    /// WW258, and read off the fields rather than listed: a third way of addressing a step joins the
+    /// group by declaring it, and nothing here has to be told.
+    /// </summary>
+    internal static IReadOnlyList<string> Groups(IReadOnlyList<Field> fields) =>
+        fields.Where(one => one.Alternative)
+            .Select(one => one.Instead)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+    /// <summary>The members of one such group, in the order the schema declares them.</summary>
+    internal static IReadOnlyList<string> Grouped(IReadOnlyList<Field> fields, string group) =>
+        fields.Where(one => string.Equals(one.Instead, group, StringComparison.Ordinal))
+            .Select(one => one.Name)
+            .ToList();
+
+    /// <summary>
+    /// Why a step's subject is wrong, or null where it is not: no member of a group carried, or more
+    /// than one.
+    /// <para>
+    /// WW258. Both arms, because both are the same mistake seen from either side and each sends a
+    /// different reader somewhere useful — a step with no subject says nothing about what it acts on,
+    /// and a step with two says two things and the run would silently honour whichever the code reads
+    /// first. Answered off the schema so the sentence names whatever the group holds today.
+    /// </para>
+    /// </summary>
+    /// <param name="fields">The field list the group is declared in.</param>
+    /// <param name="group">Which group.</param>
+    /// <param name="carried">The members this step actually wrote.</param>
+    internal static string? Miscarried(IReadOnlyList<Field> fields, string group, IReadOnlyList<string> carried)
+    {
+        var members = Grouped(fields, group);
+        var spelled = string.Join(" or ", members.Select(one => $"'{one}'"));
+
+        return carried.Count switch
+        {
+            0 => $"a step says what it acts on, and this one carries neither — it needs {spelled}",
+            1 => null,
+            _ => $"a step acts on one thing, and this one carries {string.Join(" and ", carried.Select(one => $"'{one}'"))}"
+                + $"; it needs {spelled} and not both",
+        };
+    }
+
     /// <summary>Whether <paramref name="fields"/> knows <paramref name="key"/>.</summary>
     internal static bool Knows(IReadOnlyList<Field> fields, string key)
     {
@@ -268,6 +359,27 @@ public static class ScenarioSchema
 
         if (required.Count > 0)
             shape["required"] = required;
+
+        // WW258. Each group becomes a `oneOf` over its members, which is JSON Schema's own way of
+        // saying exactly one — so a caller carrying both a locator and a tray, or neither, is
+        // expressing something the schema refuses rather than something the loader explains
+        // afterwards. Same reason `additionalProperties` is false: the misspelling and the missing
+        // subject are both mistakes better made impossible than reported.
+        // Under `allOf` even for the single group there is today, rather than written to `oneOf`
+        // directly: a second group assigned to the same key would silently replace the first, and one
+        // constraint quietly dropped is worse than a schema that is a line longer than it needs.
+        var groups = new JsonArray();
+        foreach (var group in Groups(fields))
+        {
+            var either = new JsonArray();
+            foreach (var member in Grouped(fields, group))
+                either.Add(new JsonObject { ["required"] = new JsonArray { member } });
+
+            groups.Add(new JsonObject { ["oneOf"] = either });
+        }
+
+        if (groups.Count > 0)
+            shape["allOf"] = groups;
 
         return shape;
     }

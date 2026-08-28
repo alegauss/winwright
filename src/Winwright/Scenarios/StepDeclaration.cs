@@ -24,7 +24,8 @@ public sealed record StepDeclaration
 {
     private StepDeclaration(
         string name,
-        Locator locator,
+        Locator? locator,
+        string? tray,
         ActVerb verb,
         string? argument,
         string? expected,
@@ -47,6 +48,7 @@ public sealed record StepDeclaration
         Name = name;
         Claimed = name;
         Locator = locator;
+        Tray = tray;
         Verb = verb;
         Argument = argument;
         Expected = expected;
@@ -74,8 +76,28 @@ public sealed record StepDeclaration
     /// What it acts on, parsed at declaration and never re-parsed at run time — with the one exception
     /// <see cref="For"/> is: a case repeating over a derived set substitutes the member and parses the
     /// result, which is a different locator and faces the same door.
+    /// <para>
+    /// WW258. Null on a step whose subject is <see cref="Tray"/>, which is the whole of what a second
+    /// kind of subject means: the notification area is in the shell's tree rather than the window's,
+    /// and a tray icon has no clickable point either, so there is no locator that reaches one. Read
+    /// <see cref="Addressed"/> where what is wanted is the sentence a report shows — that one answers
+    /// for both, and every claim that resolves a locator is reached only down the locator branch.
+    /// </para>
     /// </summary>
-    public Locator Locator { get; private init; }
+    public Locator? Locator { get; private init; }
+
+    /// <summary>
+    /// The notification-area icon this step is about, by the name the shell gives it. Null on a step
+    /// addressed by <see cref="Locator"/>, and exactly one of the two is always set.
+    /// </summary>
+    public string? Tray { get; }
+
+    /// <summary>
+    /// What this step is about, as a sentence — the locator's text, or the icon's name. WW258: what a
+    /// trace line and a refusal want, and the one accessor that cannot be wrong about which kind of
+    /// subject a step has.
+    /// </summary>
+    public string Addressed => Locator?.Text ?? $"tray icon '{Tray}'";
 
     /// <summary>What it does.</summary>
     public ActVerb Verb { get; }
@@ -357,9 +379,17 @@ public sealed record StepDeclaration
     /// Whether this step says anything a run could find false. A step that expects nothing, claims no
     /// movement and covers no set produces no assertion result, which is why a case made only of these
     /// is refused by <see cref="CaseDeclaration"/> rather than run to a green it did not earn.
+    /// <para>
+    /// WW258. A tray step is checkable while carrying none of the fields below, and that is not an
+    /// exception to the rule but the rule read properly: the claim is <em>this icon can be found</em>,
+    /// which the search answers pass, fail or hole. The unearned-green guard is about a step that
+    /// produces no assertion result, and this one always produces exactly one — so a case made of
+    /// tray steps has earned whatever it reads.
+    /// </para>
     /// </summary>
     public bool Checkable =>
-        Expected is not null || Moves || Answers || Covers is not null || Matches is not null || Discloses
+        Tray is not null
+        || Expected is not null || Moves || Answers || Covers is not null || Matches is not null || Discloses
         || SameAs is not null || Never is not null || Spoken
         || Label is not null || NotLabel is not null || Unlike is not null || EachSpoken || OwnHeader;
 
@@ -398,8 +428,13 @@ public sealed record StepDeclaration
     /// <param name="eachSpoken">That every element the locator matches announces a name.</param>
     /// <param name="ownHeader">That no control in a row announces another row's header.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
+    /// <param name="tray">
+    /// The notification-area icon this step is about, where that is its subject rather than a locator.
+    /// WW258: exactly one of the two, which <see cref="ScenarioSchema.Miscarried"/> enforces at the
+    /// point of insertion and this refuses again for a caller that did not come through the loader.
+    /// </param>
     public static StepDeclaration Of(
-        string locator,
+        string? locator,
         string verb,
         string? argument = null,
         string? expected = null,
@@ -418,20 +453,38 @@ public sealed record StepDeclaration
         string? notLabel = null,
         string? unlike = null,
         bool eachSpoken = false,
-        bool ownHeader = false)
+        bool ownHeader = false,
+        string? tray = null)
     {
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
-        var subject = called ?? Describing(verb, locator);
+        var named_tray = string.IsNullOrWhiteSpace(tray) ? null : tray.Trim();
+        var subject = called ?? Describing(verb, locator ?? $"tray icon '{named_tray}'");
 
-        if (string.IsNullOrWhiteSpace(locator))
+        // WW258. Both arms, and here as well as in the schema: the loader comes through
+        // `ScenarioSchema.Miscarried`, and a caller building a declaration in code does not — so the
+        // rule that a step addresses exactly one thing lives on the type that cannot be bypassed.
+        if (string.IsNullOrWhiteSpace(locator) && named_tray is null)
             throw new ScenarioRefusedException(subject, "a step acts on something, and this one names nothing");
+
+        if (!string.IsNullOrWhiteSpace(locator) && named_tray is not null)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                "a step acts on one thing, and this one names a locator and a tray icon; a tray icon is "
+                    + "not in the window's tree, so no locator reaches it and naming both names two subjects");
+        }
+
+        if (named_tray is not null)
+            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, unlike, eachSpoken, ownHeader);
 
         // WW263 and WW273. A locator with a brace in it has to parse with something in it as well as
         // with the placeholder, and both are facts about the file rather than about a run. Probed here
         // so the refusal arrives where the locator was written, not on the member — or the string —
         // that happened to expose it.
-        if (Braced.IsMatch(locator)
-            && !Locator.TryParse(Braced.Replace(locator, "probe"), out _, out var wrongly))
+        // Not null from here: the two guards above returned for a tray step and threw for a step that
+        // named neither, so what is left named a locator.
+        if (Braced.IsMatch(locator!)
+            && !Locator.TryParse(Braced.Replace(locator!, "probe"), out _, out var wrongly))
         {
             throw new ScenarioRefusedException(
                 subject,
@@ -440,7 +493,7 @@ public sealed record StepDeclaration
 
         // Parsed here rather than at run time on purpose: a locator that does not parse is wrong on
         // every machine, and the reader of a red about one is opening the wrong repository.
-        if (!Locator.TryParse(locator, out var parsed, out var because))
+        if (!Locator.TryParse(locator!, out var parsed, out var because))
             throw new ScenarioRefusedException(subject, $"its locator does not parse — {because}");
 
         var act = ActVerb.Named(verb);
@@ -864,6 +917,7 @@ public sealed record StepDeclaration
         return new StepDeclaration(
             called ?? Describing(act.Name, parsed.Text),
             parsed,
+            null,
             act,
             string.IsNullOrWhiteSpace(argument) ? null : argument.Trim(),
             wanted,
@@ -882,6 +936,95 @@ public sealed record StepDeclaration
             apart,
             eachSpoken,
             ownHeader);
+    }
+
+    /// <summary>
+    /// A step whose subject is a notification-area icon.
+    /// <para>
+    /// WW258. The claim a tray step makes is <em>this icon can be found</em>, and that is the whole of
+    /// it: <see cref="Acting.NotificationArea.Find"/> matches by the name the shell gives an icon, so
+    /// an expectation about the name would be comparing the search's own argument with its own answer.
+    /// Everything else a step can claim is about a reading taken through a control's patterns, and a
+    /// tray icon has none — it is a rectangle and a tooltip.
+    /// </para>
+    /// <para>
+    /// So every one of those fields is refused rather than accepted and ignored. That is this format's
+    /// founding rule pointed at its own newest field: a key that loads and does nothing is a check the
+    /// author wrote and the run never made, and the second subject would ship with a dozen of them.
+    /// </para>
+    /// </summary>
+    private static StepDeclaration Trayed(
+        string subject,
+        string tray,
+        string verb,
+        string? argument,
+        string? expected,
+        string? reads,
+        bool meansIt,
+        bool moves,
+        string? covers,
+        bool answers,
+        string? matches,
+        bool discloses,
+        string? sameAs,
+        string? never,
+        bool spoken,
+        string? label,
+        string? notLabel,
+        string? unlike,
+        bool eachSpoken,
+        bool ownHeader)
+    {
+        var act = ActVerb.Named(verb);
+        if (!act.Reads)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it is about a tray icon and names '{act.Name}'; the only act a tray icon takes so far "
+                    + "is 'read', which asks whether the shell is showing it");
+        }
+
+        if (act.Refuses(argument) is { } wrong)
+            throw new ScenarioRefusedException(subject, wrong);
+
+        // Named one by one rather than as a count, so the refusal says which field to delete.
+        var claimed = new List<string>();
+        foreach (var (field, written) in new (string, bool)[]
+        {
+            ("expect", expected is not null),
+            ("reads", reads is not null),
+            ("moves", moves),
+            ("answers", answers),
+            ("matches", matches is not null),
+            ("discloses", discloses),
+            ("sameAs", sameAs is not null),
+            ("unlike", unlike is not null),
+            ("label", label is not null),
+            ("notLabel", notLabel is not null),
+            ("never", never is not null),
+            ("covers", covers is not null),
+            ("spoken", spoken),
+            ("eachSpoken", eachSpoken),
+            ("ownHeader", ownHeader),
+            ("meansIt", meansIt),
+        })
+        {
+            if (written)
+                claimed.Add($"'{field}'");
+        }
+
+        if (claimed.Count > 0)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it is about a tray icon and carries {string.Join(", ", claimed)}; those are claims about "
+                    + "a reading taken through a control's patterns, and an icon has none — it is a "
+                    + "rectangle and a tooltip, so the claim a tray step makes is that it can be found");
+        }
+
+        return new StepDeclaration(
+            subject, null, tray, act, null, null, ReadBack.Named(null), false, false, null, false, null,
+            false, null, null, false, null, null, null, false, false);
     }
 
     /// <summary>What a locator writes where the member of a repeated case belongs.</summary>
@@ -905,6 +1048,13 @@ public sealed record StepDeclaration
     public StepDeclaration For(string member)
     {
         ArgumentNullException.ThrowIfNull(member);
+
+        // WW258. A repeated case calls this on every step it holds, not only the ones naming the
+        // member — so a tray step reaches here and has no locator to substitute into. It takes the
+        // member into its reported name and nothing else, which is what a step that does not name the
+        // member gets anyway.
+        if (Locator is null)
+            return this with { Name = $"{Name} [{member}]" };
 
         var text = Locator.Text.Replace(Member, member, StringComparison.Ordinal);
         if (!Locator.TryParse(text, out var parsed, out var because))
@@ -933,8 +1083,11 @@ public sealed record StepDeclaration
     /// </summary>
     public string Claimed { get; private init; }
 
-    /// <summary>Whether this step's locator names the member of a repeated case.</summary>
-    public bool NamesTheMember => Locator.Text.Contains(Member, StringComparison.Ordinal);
+    /// <summary>
+    /// Whether this step's locator names the member of a repeated case. False for a tray step, which
+    /// has no locator to name it in — WW258.
+    /// </summary>
+    public bool NamesTheMember => Locator is { } one && one.Text.Contains(Member, StringComparison.Ordinal);
 
     /// <summary>
     /// Anything a run substitutes into a locator: <c>{}</c> for the member, <c>{a.key}</c> for a
@@ -950,7 +1103,7 @@ public sealed record StepDeclaration
     /// The keys this step's locator is built out of, in the order they are written. Empty where it
     /// names its element in words.
     /// </summary>
-    public IReadOnlyList<string> Declares() => Braced.Matches(Locator.Text)
+    public IReadOnlyList<string> Declares() => Locator is null ? [] : Braced.Matches(Locator.Text)
         .Select(one => one.Groups[1].Value)
         .Where(one => one.Length > 0)
         .Distinct(StringComparer.Ordinal)
@@ -984,7 +1137,8 @@ public sealed record StepDeclaration
         if (Declares().Count == 0)
             return this;
 
-        var text = Braced.Replace(Locator.Text, one => one.Groups[1].Value.Length == 0
+        // Not null here: `Declares()` answers empty for a tray step, so the return above took it.
+        var text = Braced.Replace(Locator!.Text, one => one.Groups[1].Value.Length == 0
             ? one.Value
             : reading(one.Groups[1].Value));
 

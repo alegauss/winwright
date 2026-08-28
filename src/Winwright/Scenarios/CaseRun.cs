@@ -249,7 +249,22 @@ public static class CaseRun
         for (var index = 0; index < running.Count; index++)
         {
             var step = running[index];
-            var subject = new Subject(root, step.Locator, project);
+
+            // WW258. The second kind of subject, answered before a subject is built rather than
+            // inside one: the notification area is in the shell's tree and not in the window's, and a
+            // tray icon has no clickable point either, so there is no locator to resolve and nothing
+            // for `Subject` to hold. A step here never reaches any of the claims below, which is why
+            // every one of them may still assume a locator.
+            if (step.Tray is { } icon)
+            {
+                Trayed(step, icon, project, trace, results);
+                while (claims.Count < results.Count)
+                    claims.Add(step.Claimed);
+
+                continue;
+            }
+
+            var subject = new Subject(root, step.Locator!, project);
             if (step.MeansIt)
                 subject = subject.MeaningIt();
 
@@ -276,7 +291,7 @@ public static class CaseRun
                 {
                     Step = trace.Count + 1,
                     Verb = step.Verb.Name,
-                    Locator = step.Locator.Text,
+                    Locator = step.Addressed,
                     Verdict = StepVerdict.Threw,
                     Detail = thrown.Message,
                 });
@@ -302,6 +317,36 @@ public static class CaseRun
             new ReadOnlyCollection<StepDeclaration>(notReached),
             lent,
             members.Count);
+    }
+
+    /// <summary>
+    /// A step whose subject is a notification-area icon: ask whether the shell is showing it, and
+    /// record the three-way answer the search already gives.
+    /// <para>
+    /// WW258. The claim is <em>this icon can be found</em> and nothing else, which is why no
+    /// expectation is read here — <see cref="NotificationArea.Find"/> matches by the name the shell
+    /// gives an icon, so an expectation about that name would compare the search's argument with its
+    /// own answer.
+    /// </para>
+    /// <para>
+    /// The three ways are the search's own, and taken from it rather than re-derived: found is a pass,
+    /// not found having looked everywhere is a failure the case asked about, and not found because the
+    /// overflow could not be opened is a hole naming the desk. That last one is WW168, and re-deriving
+    /// it here is exactly how it would come back.
+    /// </para>
+    /// </summary>
+    private static void Trayed(
+        StepDeclaration step,
+        string icon,
+        ProjectDeclaration project,
+        List<TraceStep> trace,
+        List<AssertionResult> results)
+    {
+        var search = NotificationArea.Find(
+            icon, openingTheOverflow: true, project.Timeouts.For("resolve"), project.Timeouts.For("poll"));
+
+        trace.Add(search.AsTraceStep(step.Name) with { Step = trace.Count + 1 });
+        results.Add(search.AsAssertion(step.Name).At(trace.Count));
     }
 
     /// <summary>
@@ -348,7 +393,7 @@ public static class CaseRun
             {
                 Step = trace.Count + 1,
                 Verb = step.Verb.Name,
-                Locator = step.Locator.Text,
+                Locator = step.Addressed,
                 Verdict = StepVerdict.Unchecked,
                 Detail = missing.Absence,
             });
@@ -543,7 +588,7 @@ public static class CaseRun
                 recorded with
                 {
                     Verb = step.Verb.Name,
-                    Locator = step.Locator.Text,
+                    Locator = step.Addressed,
                     Resolved = landed.Saw?.ToString(),
                     Asserted = step.Name,
                 },
@@ -625,7 +670,7 @@ public static class CaseRun
         {
             Step = trace.Count + 1,
             Verb = step.Verb.Name,
-            Locator = step.Locator.Text,
+            Locator = step.Addressed,
             Asserted = step.Name,
             ReadBack = string.Join(", ", compared.Matched),
             Detail = waited.Happened ? null : detail,
@@ -753,7 +798,7 @@ public static class CaseRun
         var detail = (rows, paired, wrong.Count) switch
         {
             (0, _, _) => swept.Said,
-            (_, 0, _) => $"{step.Locator.Text} matched {rows} row(s) and not one of them holds a control "
+            (_, 0, _) => $"{step.Addressed} matched {rows} row(s) and not one of them holds a control "
                 + $"that announces anything, so no pairing was checked. Waited {waited.WaitedMs}ms.",
             (_, _, > 0) => $"{wrong.Count} control(s) announce another row's header: "
                 + $"{string.Join("; ", wrong)}. Waited {waited.WaitedMs}ms.",
@@ -765,7 +810,7 @@ public static class CaseRun
         {
             Step = trace.Count + 1,
             Verb = step.Verb.Name,
-            Locator = step.Locator.Text,
+            Locator = step.Addressed,
             Asserted = step.Name,
             WaitedMs = waited.WaitedMs,
             Polls = rows,
@@ -946,13 +991,13 @@ public static class CaseRun
     {
         if (step.Carries is { } declared)
         {
-            return (null, $"{step.Locator.Text} matched no {kind} in {waitedMs}ms, and it was built out "
+            return (null, $"{step.Addressed} matched no {kind} in {waitedMs}ms, and it was built out "
                 + $"of \"{declared}\" — a string the project declares and this window does not draw");
         }
 
         var hole = Precondition.Absent(
-            $"{step.Locator.Text} matches at least one {kind}",
-            $"{step.Locator.Text} matched no {kind} in {waitedMs}ms, so this swept nothing at all — "
+            $"{step.Addressed} matches at least one {kind}",
+            $"{step.Addressed} matched no {kind} in {waitedMs}ms, so this swept nothing at all — "
                 + "which is a fact about the window rather than about the claim, and a sweep that "
                 + "swept nothing did not run");
 
@@ -1034,17 +1079,17 @@ public static class CaseRun
         var detail = (matched, wrong.Count) switch
         {
             (0, _) => swept.Said,
-            (_, > 0) => $"{wrong.Count} of the {matched} element(s) {step.Locator.Text} matches announce "
+            (_, > 0) => $"{wrong.Count} of the {matched} element(s) {step.Addressed} matches announce "
                 + $"something that is not a name. {string.Join(" ", wrong.Select(one => one.Sentence("one of them")))} "
                 + $"Waited {waited.WaitedMs}ms.",
-            _ => $"all {matched} element(s) {step.Locator.Text} matches announce a name, e.g. \"{spoken[0]}\".",
+            _ => $"all {matched} element(s) {step.Addressed} matches announce a name, e.g. \"{spoken[0]}\".",
         };
 
         trace.Add(new TraceStep
         {
             Step = trace.Count + 1,
             Verb = step.Verb.Name,
-            Locator = step.Locator.Text,
+            Locator = step.Addressed,
             Asserted = step.Name,
             ReadBack = spoken.Count == 0 ? null : string.Join(", ", spoken),
             WaitedMs = waited.WaitedMs,
@@ -1122,14 +1167,14 @@ public static class CaseRun
         // thing at all, and sends a reader looking at names when what is missing is the element.
         var detail = (arrived, spoken.Count, wrong.Count) switch
         {
-            (false, _, _) => $"{step.Locator.Text} never arrived in {waited.WaitedMs}ms, so nothing under it "
+            (false, _, _) => $"{step.Addressed} never arrived in {waited.WaitedMs}ms, so nothing under it "
                 + "was ever looked at",
-            (_, 0, 0) => $"nothing under {step.Locator.Text} announces a name: {under} element(s), and not one "
+            (_, 0, 0) => $"nothing under {step.Addressed} announces a name: {under} element(s), and not one "
                 + $"of them says anything a screen reader could read. Waited {waited.WaitedMs}ms.",
-            (_, _, > 0) => $"{wrong.Count} of the {under} element(s) under {step.Locator.Text} announce something "
+            (_, _, > 0) => $"{wrong.Count} of the {under} element(s) under {step.Addressed} announce something "
                 + $"that is not a name. {string.Join(" ", wrong.Select(one => one.Sentence("one of them")))} "
                 + $"Waited {waited.WaitedMs}ms.",
-            _ => $"all {spoken.Count} of the {under} element(s) under {step.Locator.Text} that announce anything "
+            _ => $"all {spoken.Count} of the {under} element(s) under {step.Addressed} that announce anything "
                 + $"announce a name, e.g. \"{spoken[0]}\".",
         };
 
@@ -1137,7 +1182,7 @@ public static class CaseRun
         {
             Step = trace.Count + 1,
             Verb = step.Verb.Name,
-            Locator = step.Locator.Text,
+            Locator = step.Addressed,
             Asserted = step.Name,
             ReadBack = spoken.Count == 0 ? null : string.Join(", ", spoken),
             WaitedMs = waited.WaitedMs,
@@ -1221,7 +1266,7 @@ public static class CaseRun
                     + $"{waited.WaitedMs}ms over {looks} look(s)."),
             (_, false, _) => (
                 StepVerdict.Failed,
-                $"{step.Locator.Text} never arrived in {waited.WaitedMs}ms, so nothing waited for "
+                $"{step.Addressed} never arrived in {waited.WaitedMs}ms, so nothing waited for "
                     + $"'{watched.Text}' ({watched.Key}) not to show."),
             (_, _, false) => (
                 StepVerdict.Unchecked,
@@ -1237,7 +1282,7 @@ public static class CaseRun
         {
             Step = trace.Count + 1,
             Verb = step.Verb.Name,
-            Locator = step.Locator.Text,
+            Locator = step.Addressed,
             Asserted = step.Name,
             WaitedMs = waited.WaitedMs,
             Polls = looks,

@@ -28,6 +28,31 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
+### §WW289 A green that excused forty-three checks
+
+Measured on a guest run of 1747: it passed, and excused **49** checks where every run
+before it excused 8. Forty-three name one holder — `ShellExperienceHost 'Nova
+notificação'`. A Windows notification toast took the foreground and held it, so the
+input cases could send nothing and each answered the hole it is built to answer.
+
+Everything worked. WW133 turned a refused foreground into a hole rather than a red,
+WW281 put every excuse in one ledger, and the run printed all forty-nine. Nothing is
+silent, and that is what makes this worth filing: the reading is honest and the
+conclusion a reader draws is not, because a run that checked forty-three fewer things
+exits zero and prints the same word as one that checked them all.
+
+So the missing piece is comparison. A run has no idea what it usually spends, and the
+number that matters is not 49 but 49-against-8. Where that belongs is open: the runner
+could carry a declared budget and say a run went over, or report the count against the
+previous run's, which needs somewhere to keep it.
+
+Two things not to do. Not a failure — the desk is not a defect in the code, which is
+this block's own criterion. And not a retry, which hides the toast rather than reporting
+it.
+
+The cheaper half is separate and worth doing anyway: the guest is a machine this project
+controls, so it can be told to raise no notifications at all.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

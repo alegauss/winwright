@@ -194,7 +194,9 @@ public sealed class ForEachTests : IDisposable
 
         var one = step.For("Startup");
 
-        Assert.Equal("Group[name=\"Startup\"]", one.Locator.Text);
+        // WW258 made `Locator` nullable for the tray subject; this step named one, so `Addressed`
+        // answers the locator's text and asserts through the accessor a report actually reads.
+        Assert.Equal("Group[name=\"Startup\"]", one.Addressed);
         Assert.Contains("[Startup]", one.Name, StringComparison.Ordinal);
         Assert.False(one.NamesTheMember);
 
