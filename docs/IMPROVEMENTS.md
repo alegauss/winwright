@@ -144,6 +144,32 @@ insertion and `WM_CHAR`, which is the queue.
 `VK_PACKET` before `TranslateMessage` is measured out. Every lParam is `00000001`, the
 scan code having eight bits where a code unit needs sixteen. The count is all it claims.
 
+### §WW294 A reported value, where the well only answers sets
+
+WW260 gave a derived set a second well and WW291 made one adopter answer it. Reading
+`WW83` and `WW85` to schedule them shows the well is the wrong shape for what they need.
+`Expected-ProfileState` pulls eight facts out of the `--profiles` report by regex, and
+only the first is a set: the profile labels. The rest are single values — which profile
+the icon follows, which one the environment selects, whether those two agree, the
+shared-transcript directory, and the two toggles' positions.
+
+A case cannot type any of them. They are this machine's accounts and this machine's
+environment, so a case naming one passes here and fails everywhere else — the defect the
+derived set exists to refuse, one shape over.
+
+`label` is the near miss and does not answer it: that derives a value from the project's
+**strings**, which is right for a word the product ships and wrong for a fact about the
+machine. `covers` and its two relatives all compare a *set*. What is missing is `expect`
+with the value read from the application rather than typed — the scalar beside
+`reportedSets`.
+
+Both halves are open. The engine needs somewhere for a reported value to be declared and
+named, and the adopter needs to answer these eight the way WW291 made it answer the
+names — the report left alone for its reader.
+
+Not measured against a second adopter: this is the only one with a submenu whose marks
+are derived at all.
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
