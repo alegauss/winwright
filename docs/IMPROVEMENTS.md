@@ -183,18 +183,18 @@ interval:\s*\d+\s+of\s+(\d+)`.
 So `Reported`'s contract, one value per line, is met by nothing this adopter has.
 Pointed at it, the derived set is every non-empty line of the report.
 
-The engine must not learn to parse it. A format with structure in it is a second thing
-to keep in step with the application, and a regex in a project file is the hardcoded
-expectation with an extra step — which is the defect the whole derived set exists to
-refuse.
+The engine must not learn to parse it: a regex in a project file is the hardcoded
+expectation with an extra step, which is what the derived set exists to refuse.
 
-So the read-out is what moves: an application asked for a set answers a set, on its own
-flag, one value per line, with the report left alone for whoever reads it. That is a
-change to the adopted application rather than to the engine, and it is the shape block I
-is about — the application cooperating with the harness rather than the harness
-guessing.
+So the read-out moves: an application asked for a set answers one, on its own flag, one
+value per line, with the report left alone. That is a change to the adopted application
+and not to the engine — block I's shape, the application cooperating rather than the
+harness guessing.
 
-Not measured against a second adopter. This is the only one with such a read-out at all.
+It is the bottleneck rather than one task's blocker. Every claude-tray migration derives
+from this read-out — WW82 needs the count and the entries, WW85 asks
+`Expected-ProfileCount` before its `other` mode may run, WW83 reads
+`Expected-ProfileState`. All three said `Block G` and looked ready.
 
 ## Block G — The scenario — a case is a data file
 
