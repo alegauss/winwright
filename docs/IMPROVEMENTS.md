@@ -28,6 +28,31 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
+### §WW299 Discovery is only ever compared with itself
+
+The roll's arithmetic is discovered against recorded: every case discovery found has to
+be written down, and one that is not makes the run a lost host. Both numbers come from
+the same run, so a run where discovery itself fell short is whole by its own measure.
+`Discovered.Count > 0` is the only floor there is.
+
+The ways down are quiet ones. A test class made internal is skipped by xUnit without a
+word. A `[Fact]` deleted with the method it annotated leaves nothing behind. A `#if`
+that stops matching, a trait filter in a runsettings file, an assembly that half-loads —
+each lowers discovery and recording together, and the sentence reads "all 1,204
+discovered cases ran" in the same words it uses for 1,807.
+
+Measured this session, in the mildest direction: the suite went 1,805 to 1,807 across
+consecutive runs and nothing remarked on it. Nothing would have remarked on 1,205
+either.
+
+This is WW289 one level up, and the same answer fits. The excused count was honest and
+compared with nothing; so is this one. What changed is that the comparison is now cheap:
+WW298 already reads the four most recent runs out of the history root, and a run's
+discovered count is one more number to keep beside its ledger.
+
+What it must not become is a floor to maintain. A typed minimum is a number somebody
+lowers on the day it refuses, which is the day it was right.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
