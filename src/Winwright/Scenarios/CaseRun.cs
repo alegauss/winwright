@@ -695,9 +695,10 @@ public static class CaseRun
                     .OfType<string>()
                     .ToList();
 
-                // WW275. Which way the claim reads is the step's, not the set's: `covers` fails on a
-                // value nothing declares, `coversAtLeast` allows it and still counts it.
-                compared = derived.Against(read, step.SweepsExactly);
+                // WW275 and WW292. Which claim this is belongs to the step and never to the set: the
+                // same derived values are compared for equality both ways, for equality one way, or
+                // for appearing inside what was read — and the step is the only thing that knows.
+                compared = derived.Against(read, step.Matching);
                 return compared.Held;
             },
             project.Timeouts.For("resolve"),

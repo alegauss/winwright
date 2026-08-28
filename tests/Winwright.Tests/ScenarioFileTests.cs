@@ -253,7 +253,7 @@ public class ScenarioFileTests
             [
                 "locator", "tray", "act", "with", "expect", "reads", "moves", "answers", "matches", "discloses",
                 "sameAs", "unlike", "label", "notLabel", "ownHeader", "eachSpoken", "spoken", "never", "covers",
-                "coversAtLeast", "meansIt", "named",
+                "coversAtLeast", "coversWithin", "meansIt", "named",
             ],
             ScenarioSchema.Step.Select(field => field.Name));
 

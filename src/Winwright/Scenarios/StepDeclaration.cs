@@ -44,9 +44,9 @@ public sealed record StepDeclaration
         string? unlike,
         bool eachSpoken,
         bool ownHeader,
-        string? coversAtLeast = null)
+        Asserting.SetMatch matching = Asserting.SetMatch.Exactly)
     {
-        CoversAtLeast = coversAtLeast;
+        Matching = matching;
         Name = name;
         Claimed = name;
         Locator = locator;
@@ -57,9 +57,7 @@ public sealed record StepDeclaration
         Reads = reads;
         MeansIt = meansIt;
         Moves = moves;
-        // WW275. The two are a discriminated view of one key: whichever the case wrote is the set to
-        // derive, and which of the two properties holds it is what says how the comparison reads.
-        Covers = coversAtLeast is null ? covers : null;
+        Sweeps = covers;
         Answers = answers;
         Matches = matches;
         Discloses = discloses;
@@ -359,7 +357,7 @@ public sealed record StepDeclaration
     /// one would be a case that runs on one checkout.
     /// </para>
     /// </summary>
-    public string? Covers { get; }
+    public string? Covers => Sweeps is { } key && Matching == Asserting.SetMatch.Exactly ? key : null;
 
     /// <summary>
     /// The same set, claimed one way: every declared string is read here, and a value that is not in
@@ -380,13 +378,26 @@ public sealed record StepDeclaration
     /// sentence — allowed is not the same as unrecorded.
     /// </para>
     /// </summary>
-    public string? CoversAtLeast { get; }
+    public string? CoversAtLeast => Sweeps is { } key && Matching == Asserting.SetMatch.AtLeast ? key : null;
+
+    /// <summary>
+    /// The same set, claimed by containment: each declared value appears inside the name of something
+    /// the locator matched rather than equalling it. WW292, for the entry that decorates what it is
+    /// about — a profile's menu entry reads <c>Pessoal  active now</c>, and equality is false of it.
+    /// </summary>
+    public string? CoversWithin => Sweeps is { } key && Matching == Asserting.SetMatch.Within ? key : null;
 
     /// <summary>The set this step sweeps, whichever way it claims it. Null where it sweeps none.</summary>
-    public string? Sweeps => Covers ?? CoversAtLeast;
+    public string? Sweeps { get; }
+
+    /// <summary>
+    /// Which of the three ways this step compares its set. WW275 and WW292: one choice, so the three
+    /// properties above are a view of it rather than three things that could disagree.
+    /// </summary>
+    public Asserting.SetMatch Matching { get; }
 
     /// <summary>Whether a value read here that the set does not declare fails this step. WW275.</summary>
-    public bool SweepsExactly => Covers is not null;
+    public bool SweepsExactly => Matching == Asserting.SetMatch.Exactly;
 
     /// <summary>
     /// Whether this step claims the reading it names says something rather than nothing.
@@ -468,6 +479,10 @@ public sealed record StepDeclaration
     /// The key whose every declared string must be read somewhere the locator matches, allowing values
     /// the set does not declare. WW275, and at most one of this and <paramref name="covers"/>.
     /// </param>
+    /// <param name="coversWithin">
+    /// The key whose every declared string must appear <em>inside</em> the name of something the
+    /// locator matched. WW292, and at most one of the three ways of claiming a set.
+    /// </param>
     public static StepDeclaration Of(
         string? locator,
         string verb,
@@ -490,23 +505,35 @@ public sealed record StepDeclaration
         bool eachSpoken = false,
         bool ownHeader = false,
         string? tray = null,
-        string? coversAtLeast = null)
+        string? coversAtLeast = null,
+        string? coversWithin = null)
     {
-        // WW275. At most one of the two, and refused where they are written: a step naming both is
-        // making the exact claim and the completeness-only claim about one set, and the run would
-        // silently honour whichever the code reads first.
-        if (!string.IsNullOrWhiteSpace(covers) && !string.IsNullOrWhiteSpace(coversAtLeast))
+        // WW275 and WW292. At most one of the three, and refused where they are written: they are one
+        // set claimed three different ways, and a step naming two would have the run honour whichever
+        // the code reads first.
+        var ways = new List<string>();
+        if (!string.IsNullOrWhiteSpace(covers))
+            ways.Add("'covers'");
+        if (!string.IsNullOrWhiteSpace(coversAtLeast))
+            ways.Add("'coversAtLeast'");
+        if (!string.IsNullOrWhiteSpace(coversWithin))
+            ways.Add("'coversWithin'");
+
+        if (ways.Count > 1)
         {
             throw new ScenarioRefusedException(
                 string.IsNullOrWhiteSpace(named) ? "<a step>" : named.Trim(),
-                "it carries 'covers' and 'coversAtLeast'; those are the same set claimed two different "
+                $"it carries {string.Join(" and ", ways)}; those are the same set claimed different "
                     + "ways, so name the one this step means");
         }
 
-        // The one-way claim derives the same set through the same door, so everything below reads it
-        // as `covers` and only the comparison is told which way round the claim is.
-        var oneWay = !string.IsNullOrWhiteSpace(coversAtLeast);
-        covers = oneWay ? coversAtLeast : covers;
+        // All three derive the same set through the same door, so everything below reads it as
+        // `covers` and only the comparison is told which claim it is.
+        var matching = !string.IsNullOrWhiteSpace(coversAtLeast) ? Asserting.SetMatch.AtLeast
+            : !string.IsNullOrWhiteSpace(coversWithin) ? Asserting.SetMatch.Within
+            : Asserting.SetMatch.Exactly;
+
+        covers = ways.Count == 0 ? covers : (covers ?? coversAtLeast ?? coversWithin);
 
         var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
         var named_tray = string.IsNullOrWhiteSpace(tray) ? null : tray.Trim();
@@ -988,7 +1015,7 @@ public sealed record StepDeclaration
             apart,
             eachSpoken,
             ownHeader,
-            oneWay ? sweeping : null);
+            matching);
     }
 
     /// <summary>

@@ -54,7 +54,7 @@ public sealed class DerivedSetTests : IDisposable
         var set = DerivedSet.From("the sidebar panels", FourTabs(), "tabs");
 
         var compared = set.Against(
-            ["Panes", "Status", "Config", "Logs", "Save", "Cancel", "Refresh interval"], exactly: false);
+            ["Panes", "Status", "Config", "Logs", "Save", "Cancel", "Refresh interval"], SetMatch.AtLeast);
 
         Assert.True(compared.Held, compared.Sentence());
         Assert.Empty(compared.Missing);
@@ -72,10 +72,62 @@ public sealed class DerivedSetTests : IDisposable
         // would be a way of asserting nothing at all.
         var set = DerivedSet.From("the sidebar panels", FourTabs(), "tabs");
 
-        var compared = set.Against(["Panes", "Status", "Config", "Save"], exactly: false);
+        var compared = set.Against(["Panes", "Status", "Config", "Save"], SetMatch.AtLeast);
 
         Assert.False(compared.Held);
         Assert.Equal(["Logs"], compared.Missing);
+    }
+
+    [Fact]
+    public void A_value_inside_a_decorated_name_is_accounted_for()
+    {
+        // WW292, and the shape it was measured against: claude-tray's Profile submenu renders one
+        // entry per profile and decorates each — `Pessoal` becomes `Pessoal  active now`, or carries
+        // `pinned` or `sign-in needed`. Equality is false of every one, so neither claim above can be
+        // written and the script it replaces counted entries instead.
+        var set = DerivedSet.From("the tab headers", FourTabs(), "tabs");
+
+        var compared = set.Against(
+            ["Panes  active now", "Status — pinned", "Config (sign-in needed)", "Logs", "Follow the active profile"],
+            SetMatch.Within);
+
+        Assert.True(compared.Held, compared.Sentence());
+        Assert.Empty(compared.Missing);
+        Assert.Equal(4, compared.Matched.Count);
+
+        // The entry about no declared value at all — the submenu's toggles, which the script counted
+        // separately as "+2". Allowed, and still counted, and still said.
+        Assert.Equal(["Follow the active profile"], compared.Unexpected);
+        Assert.Contains("inside what was read", compared.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Containment_still_fails_where_a_declared_value_is_in_nothing()
+    {
+        // What it does not give up, and the reason it is not merely a weaker `covers`: a profile the
+        // application declares and the menu never renders is exactly the defect a count cannot see,
+        // because the right number of wrong entries passes a count.
+        var set = DerivedSet.From("the tab headers", FourTabs(), "tabs");
+
+        var compared = set.Against(["Panes  active now", "Status — pinned", "Config"], SetMatch.Within);
+
+        Assert.False(compared.Held);
+        Assert.Equal(["Logs"], compared.Missing);
+        Assert.Contains("is in nothing that was read", compared.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Containment_is_ordinal_so_the_wrong_capitalisation_is_not_a_match()
+    {
+        // The same rule every other comparison here is under. An account name rendered `PESSOAL`
+        // where the application declares `Pessoal` is a defect somebody wants to hear about, and a
+        // case-insensitive match is how it would go unmentioned.
+        var set = DerivedSet.From("the tab headers", FourTabs(), "tabs");
+
+        var compared = set.Against(["PANES active now", "Status", "Config", "Logs"], SetMatch.Within);
+
+        Assert.False(compared.Held);
+        Assert.Equal(["Panes"], compared.Missing);
     }
 
     [Fact]

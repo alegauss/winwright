@@ -212,6 +212,7 @@ public static class ScenarioSchema
         new("never", false, Taking.Text, "the key whose string must not be showing anywhere in the window at any moment while this step waits for its locator — a key and never the text, like the project's own loading strings", []),
         new("covers", false, Taking.Text, "the key whose every string must be read somewhere the locator matches, and nothing else — derived from the project's own strings and never listed here", []),
         new("coversAtLeast", false, Taking.Text, "the same set, claiming only that every declared string is read here and allowing values that are not in it — for a container the locator cannot separate from its neighbours", []),
+        new("coversWithin", false, Taking.Text, "the same set, claiming each declared string appears inside the name of something read rather than equalling it — for an entry that decorates what it is about", []),
         new("meansIt", false, Taking.Truth, "that this step means a destructive entry it names", []),
         new("named", false, Taking.Text, "what a report should call it, where the act and the locator will not do", []),
     ]);

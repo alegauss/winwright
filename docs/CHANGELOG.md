@@ -195,6 +195,7 @@
 - ✅ **WW276** **a repeated case makes its claim once per member, so a member with nothing to check holes on every run** — A repeated case's per-member claims are gathered into one: red where any member that carried it failed, a hole only where none did, and otherwise a pass saying how many carried it.
 - ✅ **WW275** **covers is two-way and reads as one-way, so a completeness claim against a shared container cannot be written** — The README teaches both directions, `coversAtLeast` writes the completeness-only claim for a container no locator separates, and both clauses agree with their count.
 - ✅ **WW260** **an expected set is derived from the project's strings and never from what the application reports** — A project declares `reportedSets` and a step names one the way it names a strings key, so a count comes from what the application prints rather than from the case.
+- ✅ **WW292** **a menu entry decorates the value it is about, so no set claim compares against it and the script counted instead** — `coversWithin` claims each declared value appears inside a matched name, so an entry that decorates what it is about is compared rather than counted.
 
 ## Block G — The scenario — a case is a data file
 

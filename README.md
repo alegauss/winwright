@@ -436,6 +436,22 @@ step failed on nine strangers, because the panel beside the sidebar is full of T
 separates the two. The strangers are still counted and still named in the sentence: allowed is not the
 same as unrecorded.
 
+A third form is for the reading that **decorates** what it is about. A menu entry for the profile
+`Pessoal` renders as `Pessoal  active now`, or carries `pinned` or `sign-in needed` — so equality is
+false of every entry and neither claim above can be written:
+
+```json
+{ "locator": "MenuItem", "act": "read", "coversWithin": "profiles" }
+```
+
+`coversWithin` claims each declared value appears **inside** the name of something the locator
+matched. One-way only, because a submenu also carries entries about no declared value at all — the
+toggles beside the profiles — and demanding every name hold one would fail on those. It is deliberately
+not a substring option on `covers`: weakening the exact claim everywhere to catch this would take the
+second direction away from every project that relies on it. The alternative a hand-written harness
+reaches for is counting entries, and a count passes when the right number of *wrong* entries is
+present — the hardcoded list's failure on a different axis.
+
 Some sets are not in a strings file at all. Profiles, accounts, devices — that is the machine's data,
 and the number is whatever this machine has, so there is nothing to derive from the product's
 vocabulary. For those the project says how to ask the application itself:

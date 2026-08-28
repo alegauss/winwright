@@ -68,6 +68,30 @@ public sealed class CoversTests : IDisposable
 
         Assert.Contains("'covers' and 'coversAtLeast'", refused.Because, StringComparison.Ordinal);
         Assert.Contains("name the one this step means", refused.Because, StringComparison.Ordinal);
+
+        // WW292 made it three ways rather than two, and the refusal names whichever pair was written
+        // rather than the first one somebody thought of.
+        Assert.Contains(
+            "'coversAtLeast' and 'coversWithin'",
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of("Text", "read", coversAtLeast: "stats.tab", coversWithin: "stats.tab")).Because,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_containment_claim_is_a_sweep_and_says_which_way_it_compares()
+    {
+        // WW292. The third way of claiming one set, and the three properties are a view of one choice
+        // rather than three things that could disagree with each other.
+        var step = StepDeclaration.Of("MenuItem", "read", coversWithin: "profiles");
+
+        Assert.Equal("profiles", step.CoversWithin);
+        Assert.Null(step.Covers);
+        Assert.Null(step.CoversAtLeast);
+        Assert.Equal("profiles", step.Sweeps);
+        Assert.Equal(Winwright.Asserting.SetMatch.Within, step.Matching);
+        Assert.False(step.SweepsExactly);
+        Assert.True(step.Checkable);
     }
 
     [Fact]

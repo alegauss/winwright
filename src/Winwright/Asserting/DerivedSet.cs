@@ -54,33 +54,61 @@ public sealed record LeftOut(string Key, string Value, Provenance Where, LeftOut
         Where.Known ? $"'{Key}' = '{Value}' ({Where})" : $"'{Key}' = '{Value}'";
 }
 
+/// <summary>
+/// How a derived set is compared with what was read.
+/// <para>
+/// WW292. Three and not a pair of booleans, because they are one choice: a step names the claim it
+/// means, and a reader of the sentence is told which of the three it was rather than working it out
+/// from two flags.
+/// </para>
+/// </summary>
+public enum SetMatch
+{
+    /// <summary>
+    /// Every declared value was read, and nothing else was. What `covers` has always meant: the tab
+    /// set it was built for is the whole of what a `TabItem` locator matches, so one more tab than the
+    /// expectation had heard of is the defect it exists to catch.
+    /// </summary>
+    Exactly,
+
+    /// <summary>
+    /// Every declared value was read, and a value the set does not declare is allowed. WW275, for the
+    /// container no locator separates from its neighbours.
+    /// </summary>
+    AtLeast,
+
+    /// <summary>
+    /// Every declared value appears <em>inside</em> the name of something that was read, and a name
+    /// holding none of them is allowed.
+    /// <para>
+    /// WW292. For the reading that decorates what it is about: a menu entry for the profile `Pessoal`
+    /// renders as <c>Pessoal  active now</c>, or carries `pinned` or `sign-in needed`, so equality is
+    /// false of every entry and both claims above are unwritable. One-way only — a submenu also
+    /// carries toggles that are about no profile at all, and demanding every name hold a declared
+    /// value would fail on the two entries the script counted separately.
+    /// </para>
+    /// </summary>
+    Within,
+}
+
 /// <summary>What a set derived from the project's strings turned out to be, compared with what was read.</summary>
 /// <param name="Set">The set that was expected, and where it came from.</param>
 /// <param name="Matched">Values that were expected and read, in the set's own order.</param>
 /// <param name="Missing">Values the strings declare that nothing read.</param>
 /// <param name="Unexpected">Values that were read and the strings do not declare.</param>
-/// <param name="Exactly">
-/// Whether a value read here that the strings do not declare fails the claim.
-/// <para>
-/// WW275. True is what `covers` has always meant and stays the default: the tab set it was built for
-/// is the whole of what a `TabItem` locator matches, and a window carrying one more tab than the
-/// expectation had heard of is exactly the defect it exists to catch. False is the claim that had no
-/// way to be written — <em>every declared string reads here</em>, with strangers allowed — which is
-/// what a shared container needs, since no locator separates a sidebar's Texts from the panel's.
-/// </para>
-/// </param>
+/// <param name="Match">Which of the three claims this comparison is. WW275 and WW292.</param>
 public sealed record SetComparison(
     DerivedSet Set,
     IReadOnlyList<string> Matched,
     IReadOnlyList<string> Missing,
     IReadOnlyList<string> Unexpected,
-    bool Exactly = true)
+    SetMatch Match = SetMatch.Exactly)
 {
     /// <summary>
-    /// Whether everything the strings declare was read — and, where the claim is the exact one,
-    /// nothing else was.
+    /// Whether everything the set declares was accounted for — and, where the claim is the exact one,
+    /// that nothing else was read.
     /// </summary>
-    public bool Held => Missing.Count == 0 && (!Exactly || Unexpected.Count == 0);
+    public bool Held => Missing.Count == 0 && (Match != SetMatch.Exactly || Unexpected.Count == 0);
 
     /// <summary>
     /// What was expected, what was read, and which way they differ — never the word <em>all</em>
@@ -94,12 +122,17 @@ public sealed record SetComparison(
             // WW275. What was passed over is said on the pass, not left out of it: a one-way claim
             // that held over nine strangers held over nine strangers, and a reader who is not told
             // cannot tell this from the exact claim holding.
-            var passed = Exactly || Unexpected.Count == 0
+            var passed = Match == SetMatch.Exactly || Unexpected.Count == 0
                 ? ""
                 : $" {Unexpected.Count} other value(s) were read here and are declared nowhere, which "
                     + "this claim allows";
 
-            return $"{Set.Named}: all {Matched.Count} of {Listed(Matched)} were read, {Set.Source}.{passed}";
+            // WW292. Said, because a reader who is told "all four were read" of a set matched inside
+            // decorated names would take it for equality — and the two claims are not the same
+            // evidence about the application.
+            var how = Match == SetMatch.Within ? " inside what was read" : "";
+
+            return $"{Set.Named}: all {Matched.Count} of {Listed(Matched)} were read{how}, {Set.Source}.{passed}";
         }
 
         var parts = new List<string>();
@@ -111,9 +144,14 @@ public sealed record SetComparison(
         // sentence read "'a', 'b', 'c' were read and is declared nowhere".
         if (Missing.Count > 0)
         {
+            // WW292. "was not read" is false of a containment claim — the value may be nowhere, or it
+            // may be somewhere no matched name holds it, and the reader's next move differs.
+            var absent = Match == SetMatch.Within ? "is in nothing that was read" : "was not read";
+            var absents = Match == SetMatch.Within ? "are in nothing that was read" : "were not read";
+
             parts.Add(Missing.Count == 1
-                ? $"{Traced(Missing)} is declared and was not read"
-                : $"{Traced(Missing)} are declared and were not read");
+                ? $"{Traced(Missing)} is declared and {absent}"
+                : $"{Traced(Missing)} are declared and {absents}");
         }
 
         if (Unexpected.Count > 0)
@@ -509,16 +547,37 @@ public sealed record DerivedSet
     /// the expectation from being derived from the thing it is asserting.
     /// </summary>
     /// <param name="read">What the tree actually held.</param>
-    /// <param name="exactly">
-    /// Whether a value read here that this set does not declare fails the claim. WW275: true is what
-    /// `covers` means and the default; false is the completeness-only claim, and the strangers are
-    /// still counted and still said — allowed is not the same as unrecorded.
+    /// <param name="match">
+    /// Which of the three claims to make. WW275 and WW292: the strangers are counted and said under
+    /// every one of them — allowed is not the same as unrecorded.
     /// </param>
-    public SetComparison Against(IEnumerable<string> read, bool exactly = true)
+    public SetComparison Against(IEnumerable<string> read, SetMatch match = SetMatch.Exactly)
     {
         ArgumentNullException.ThrowIfNull(read);
 
         var seen = read.Where(value => value is not null).ToList();
+
+        // WW292. Containment is its own arithmetic and not a looser equality: a declared value is
+        // accounted for where some name holds it, and a name is a stranger where it holds none of
+        // them. Ordinal, like every other comparison here — a case-insensitive match would pass an
+        // application that renders the wrong capitalisation of somebody's account name.
+        if (match == SetMatch.Within)
+        {
+            var inside = Expected
+                .Where(value => seen.Exists(one => one.Contains(value, StringComparison.Ordinal)))
+                .ToList();
+
+            return new SetComparison(
+                this,
+                new ReadOnlyCollection<string>(inside),
+                new ReadOnlyCollection<string>(Expected.Where(one => !inside.Contains(one, StringComparer.Ordinal)).ToList()),
+                new ReadOnlyCollection<string>(
+                    seen.Where(one => !Expected.Any(value => one.Contains(value, StringComparison.Ordinal)))
+                        .Distinct(StringComparer.Ordinal)
+                        .ToList()),
+                match);
+        }
+
         var wanted = new HashSet<string>(Expected, StringComparer.Ordinal);
         var found = new HashSet<string>(seen, StringComparer.Ordinal);
 
@@ -527,7 +586,7 @@ public sealed record DerivedSet
             new ReadOnlyCollection<string>(Expected.Where(found.Contains).ToList()),
             new ReadOnlyCollection<string>(Expected.Where(value => !found.Contains(value)).ToList()),
             new ReadOnlyCollection<string>(seen.Where(value => !wanted.Contains(value)).Distinct(StringComparer.Ordinal).ToList()),
-            exactly);
+            match);
     }
 
     /// <summary>

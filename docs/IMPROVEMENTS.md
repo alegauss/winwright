@@ -130,9 +130,9 @@ becomes the last one sent, length for length*. The eighth substituted two:
 
         typed WW246-5     delivered W5245-5
 
-Both became `5`, the last character sent; seven for seven, over 35 packets for five
-rounds. So it is not one character but one **or more**, each taking the value of the
-last element written.
+Both became `5`, the last character sent, seven for seven. So it is one **or more**,
+each taking the last element's value — and the ninth, `2W246-2`, put it at index 0, so
+no slot is fixed either.
 
 `Keyboard.Send` builds one input pair per UTF-16 code unit, each a fresh struct, into a
 single `SendInput`, the union written so its size is right on x64. That path has no
@@ -220,32 +220,6 @@ is about — the application cooperating with the harness rather than the harnes
 guessing.
 
 Not measured against a second adopter. This is the only one with such a read-out at all.
-
-### §WW292 A set whose members are inside the names, not equal to them
-
-Reading `Invoke-MenuCase` to migrate it turned up the reason it counts rather than
-compares. The Profile submenu renders one entry per profile and decorates each:
-`Pessoal` becomes `Pessoal  active now`, or carries `pinned`, `sign-in needed`, `set in
-Windows`. The account name is the same string in every language and the decorations are
-not.
-
-So no claim the engine has fits. `covers` compares a matched element's name with a
-declared value for equality, and equality is false of every one of these.
-`coversAtLeast` relaxes the other direction — strangers allowed — and still needs each
-declared value to *equal* something read. What WW82 needs is containment: every declared
-value appears somewhere in the name of some element the locator matched.
-
-The script's answer was to count, and counting is what it settled for rather than what
-it wanted. A count passes when the right number of wrong entries is present, which is
-the same shape as the hardcoded list one axis over — it stops being about what it was
-written for and says nothing when it does.
-
-Two things this must not become. Not a regex per step, which is the typed expectation
-with an extra step. And not a substring match on `covers` itself, which would quietly
-weaken every exact claim in every adopting project to catch this one.
-
-So it is a third way of comparing a derived set, named where the two that exist are
-named.
 
 ## Block G — The scenario — a case is a data file
 
