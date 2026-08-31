@@ -52,6 +52,56 @@ public sealed class CaptureRouteTests
         Assert.Contains("is a window of the application", route.Sentence());
     }
 
+    /// <summary>
+    /// WW320. An application showing only a menu has no main window to measure it against, and the
+    /// two ways round it were both wrong: the menu as its own main answers Render, and
+    /// <c>Forced</c> records Renderable — that a render would have worked and somebody chose not to.
+    /// </summary>
+    [Fact]
+    public void A_menu_routes_with_no_main_window_to_compare_it_against()
+    {
+        var route = CaptureRoute.For(Window(0x3000, "#32768", owner: 0x1000, title: ""));
+
+        Assert.False(route.Renders);
+        Assert.Equal(OutOfReach.Menu, route.Reach);
+        Assert.Contains("is a menu", route.Sentence());
+    }
+
+    /// <summary>
+    /// WW320. And the answer the main window is actually for is the one it keeps: without it,
+    /// nothing here can say a window is <em>the</em> window, so a renderable one routes to a render
+    /// on its own tree rather than on the application's first.
+    /// </summary>
+    [Fact]
+    public void A_renderable_window_with_no_main_beside_it_is_still_rendered()
+    {
+        var route = CaptureRoute.For(Window(0x1000));
+
+        Assert.True(route.Renders);
+        Assert.Contains("is a window of the application", route.Sentence());
+    }
+
+    /// <summary>
+    /// WW320. The overload is what the two-argument one answers with once the main window has said
+    /// no, so a class it routes cannot route differently depending on which was called.
+    /// </summary>
+    [Theory]
+    [InlineData("#32768", 0x1000)]
+    [InlineData("tooltips_class32", 0x1000)]
+    [InlineData("Window", 0x1000)]
+    [InlineData("Window", 0)]
+    public void The_two_agree_about_every_window_that_is_not_the_main_one(string className, int owner)
+    {
+        var window = Window(0x3000, className, owner, title: "");
+
+        var alone = CaptureRoute.For(window);
+        var against = CaptureRoute.For(window, Window(0x1000));
+
+        Assert.Equal(against.Taken, alone.Taken);
+        Assert.Equal(against.Reach, alone.Reach);
+        Assert.Equal(against.Because, alone.Because);
+    }
+
     [Fact]
     public void A_menu_is_the_case_a_render_cannot_reach()
     {

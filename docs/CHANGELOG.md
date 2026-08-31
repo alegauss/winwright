@@ -288,6 +288,7 @@
 - ✅ **WW305** **the runner waits on vmrun start, which prints nothing and in some states never returns** — The start is launched and never waited on, and the poll says its time: a cold guest printed '11s waited; vmrun start has not returned yet' and ran on to 1819 green.
 - ✅ **WW82** **the menu case reads the notification area and nothing else does** — A tray icon is found again by its runtime id, so an application rewriting its own tooltip no longer reads as an icon that vanished: with the match off, one case of 1820 fails, and it is this one.
 - ✅ **WW319** **a hidden element reserves its rectangle, so the layout check reads space nobody can see as drawn on** — Whether anybody can see it is decided before what it measures, so a hidden panel no longer fills the covering box nor overlaps the control drawn where it sits.
+- ✅ **WW320** **routing a capture needs a main window to compare against, so an application showing only a menu cannot be routed** — A one-argument overload answers from the window's own class and ownership, so a menu with nothing behind it routes as the screen copy it is.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

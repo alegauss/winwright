@@ -83,8 +83,31 @@ public sealed record CaptureRoute
         ArgumentNullException.ThrowIfNull(window);
         ArgumentNullException.ThrowIfNull(main);
 
-        if (window.Handle == main.Handle)
-            return Render("it is the application's own window, and its visual tree is renderable");
+        return window.Handle == main.Handle
+            ? Render("it is the application's own window, and its visual tree is renderable")
+            : For(window);
+    }
+
+    /// <summary>
+    /// Route a capture of <paramref name="window"/> in an application that has no main window to
+    /// measure it against.
+    /// <para>
+    /// WW320. The main window answers one question — is this it — and every other answer is read
+    /// off the window's own class and ownership. An application showing only a menu has nothing to
+    /// pass as the second argument, and both ways round it are wrong: the menu as its own main
+    /// answers Render, which is the one thing a menu is not, and <see cref="Forced" /> records
+    /// Renderable, claiming a render would have worked and somebody chose otherwise.
+    /// </para>
+    /// <para>
+    /// Measured in freewilly, whose menu verb draws a menu with no icon and no window behind it on
+    /// purpose — which is the surface the screen copy exists for and the one thing that had no
+    /// route to it.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The window to photograph.</param>
+    public static CaptureRoute For(TopLevelWindow window)
+    {
+        ArgumentNullException.ThrowIfNull(window);
 
         // Before the ownership test, because a menu and a balloon are both owned and neither is a
         // popup anybody put in a tree: naming them as popups would send a reader looking for one.
@@ -97,8 +120,8 @@ public sealed record CaptureRoute
         if (window.IsOwned)
             return Copy(OutOfReach.OwnedPopup, window);
 
-        // A second window of the application, which has a visual tree of its own. The render
-        // reaches it by being pointed at that tree rather than at the first one.
+        // A window of the application, which has a visual tree of its own. The render reaches it by
+        // being pointed at that tree rather than at the first one.
         return Render($"{window} is a window of the application, so its own visual tree is renderable");
     }
 
