@@ -6,6 +6,8 @@ using System.Windows.Media;
 using Winwright.Asserting;
 using Winwright.Capturing;
 using Winwright.InApp;
+using Winwright.Verdicts;
+using Winwright.Windowing;
 
 using Xunit;
 
@@ -114,6 +116,85 @@ public sealed class ConcealedLayoutTests : IDisposable
         Assert.Contains("the application is not showing left alone", said);
         Assert.Contains("loadingNote", said);
     }
+
+    /// <summary>
+    /// WW319. The other half of not showing something, and the one the fixture already had: a Hidden
+    /// element reserves its rectangle and lays out at full size, so it is <em>drawn</em> by every
+    /// measurement and seen by nobody. It was read as an ordinary element for exactly that reason.
+    /// </summary>
+    [Fact]
+    public void An_element_the_application_hid_is_left_alone_even_though_it_lays_out_at_full_size()
+    {
+        var reading = Layout.Of(Dumped());
+
+        Assert.Contains(reading.Concealed, one => one.Name == "reserved");
+        Assert.DoesNotContain(reading.Faults, one => one.What.Name == "reserved");
+    }
+
+    /// <summary>
+    /// WW319. What the covering box is for: a page above a screenful of blank space is correct in
+    /// every relation and wrong about the thing anybody looking would see first. A hidden panel
+    /// filling that space measures as filled, so the one reading the four faults cannot make was the
+    /// one a hidden element could turn off.
+    /// </summary>
+    [Fact]
+    public void Space_a_hidden_element_reserves_is_blank_because_nobody_can_see_what_reserved_it()
+    {
+        var dump = new[]
+        {
+            Element(0, "Grid", "page", At(0, 0, 200, 100)),
+            Element(1, "Border", "header", At(0, 0, 200, 30)),
+            Element(1, "StackPanel", "reserved", At(0, 30, 200, 100), Shown.Hidden),
+        };
+
+        var reading = Layout.Of(new ReadGeometry(dump, 0, 0));
+
+        Assert.Equal(70, reading.BlankBelow);
+        Assert.Equal(AssertionOutcome.Failed, reading.FillsAtLeast(0.9).Outcome);
+    }
+
+    /// <summary>
+    /// WW319. Two controls over the same pixels are a defect when both are drawn there and nothing at
+    /// all when one of them is not being shown — which is the ordinary shape of a page that swaps one
+    /// control for another in the same place.
+    /// </summary>
+    [Fact]
+    public void An_element_the_application_hid_cannot_overlap_the_one_drawn_where_it_sits()
+    {
+        var dump = new[]
+        {
+            Element(0, "Page", "page", At(0, 0, 200, 100)),
+            Element(1, "Button", "turnon", At(10, 10, 110, 40)),
+            Element(1, "Button", "again", At(10, 10, 110, 40), Shown.Hidden),
+        };
+
+        Assert.Empty(Layout.Of(new ReadGeometry(dump, 0, 0)).Faults);
+    }
+
+    /// <summary>
+    /// And the half that must not be lost with it: two the application <em>is</em> showing over the
+    /// same pixels are still the fault they always were.
+    /// </summary>
+    [Fact]
+    public void Two_the_application_is_showing_over_the_same_pixels_are_still_a_fault()
+    {
+        var dump = new[]
+        {
+            Element(0, "Page", "page", At(0, 0, 200, 100)),
+            Element(1, "Button", "turnon", At(10, 10, 110, 40)),
+            Element(1, "Button", "again", At(10, 10, 110, 40)),
+        };
+
+        Assert.Equal(Fault.Overlaps, Assert.Single(Layout.Of(new ReadGeometry(dump, 0, 0)).Faults).Kind);
+    }
+
+    /// <summary>One line of a dump, spelled the way the format does: edges, and never a size.</summary>
+    private static Winwright.Capturing.DrawnElement Element(
+        int depth, string kind, string name, WindowBounds bounds, Shown shown = Shown.Visible) =>
+        new(depth, kind, name, bounds, shown);
+
+    /// <summary>The four edges, so a case above reads as a rectangle rather than as four numbers.</summary>
+    private static WindowBounds At(int left, int top, int right, int bottom) => new(left, top, right, bottom);
 
     [Fact]
     public void A_visible_element_that_still_measures_nothing_is_the_finding_it_always_was()

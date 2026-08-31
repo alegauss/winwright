@@ -260,21 +260,35 @@ public static class Layout
         var concealed = new List<DrawnElement>();
         var covered = Nothing;
 
+        // Which ones nobody can see, decided before anything is measured against anything. It is an
+        // array rather than a test at each site because the answer walks the ancestry, and the three
+        // readings that need it — the covering box, containment and overlap — would each walk it again.
+        var unseen = new bool[elements.Count];
+
+        for (var at = 1; at < elements.Count; at++)
+            unseen[at] = Concealing(elements, at) is not null;
+
         for (var at = 0; at < elements.Count; at++)
         {
             var element = elements[at];
 
-            // The root is left out of the covering box on purpose: it is the surface, not
-            // something drawn on it, and including it makes every page read as entirely filled.
-            if (element.Drawn && at > 0)
+            // WW130: the application is not showing it, or is not showing something above it. That is
+            // the page working, not the fault this check is for.
+            //
+            // Asked before the size and not after, which is WW319. A Hidden element reserves its
+            // rectangle and lays out at full size, so the older order read it as drawn: it went into
+            // the covering box, so a screenful of blank space behind a hidden panel measured as
+            // filled — the exact defect FillsAtLeast exists to catch — and it was checked for overlap
+            // against the siblings drawn where a person can actually see them.
+            if (at > 0 && unseen[at])
             {
-                covered = Union(covered, element.Bounds);
-            }
-            else if (at > 0 && Concealing(elements, at) is not null)
-            {
-                // WW130: not laid out because the application is not showing it, or is not showing
-                // something above it. That is the page working, not the fault this check is for.
                 concealed.Add(element);
+            }
+            else if (element.Drawn && at > 0)
+            {
+                // The root is left out of the covering box on purpose: it is the surface, not
+                // something drawn on it, and including it makes every page read as entirely filled.
+                covered = Union(covered, element.Bounds);
             }
             else if (at > 0)
             {
@@ -282,7 +296,7 @@ public static class Layout
                     Fault.MeasuresNothing, element, null, $"{element} was laid out and occupies nothing"));
             }
 
-            if (at == 0)
+            if (at == 0 || unseen[at])
                 continue;
 
             var parent = ParentOf(elements, at);
@@ -292,7 +306,7 @@ public static class Layout
 
         // Siblings after parents, so a report reads containment first and then the two things that
         // are only wrong about each other. Both are found on the same walk.
-        Overlapping(elements, faults);
+        Overlapping(elements, unseen, faults);
 
         // WW131: sorted at the end rather than at each site, so the four ways a fault is found stay
         // one rule each and the question of whose element it is stays one rule too.
@@ -398,12 +412,16 @@ public static class Layout
         }
     }
 
-    private static void Overlapping(IReadOnlyList<DrawnElement> elements, List<LayoutFault> faults)
+    /// <summary>Two children of one parent over the same pixels, where a person can see both.</summary>
+    /// <param name="elements">The dump, root first.</param>
+    /// <param name="unseen">Which of them the application is not showing, by index.</param>
+    /// <param name="faults">Where a finding is added.</param>
+    private static void Overlapping(IReadOnlyList<DrawnElement> elements, bool[] unseen, List<LayoutFault> faults)
     {
         for (var at = 1; at < elements.Count; at++)
         {
             var parent = ParentOf(elements, at);
-            if (parent is null || !elements[at].Drawn)
+            if (parent is null || !elements[at].Drawn || unseen[at])
                 continue;
 
             for (var other = at + 1; other < elements.Count; other++)
@@ -411,7 +429,7 @@ public static class Layout
                 if (elements[other].Depth < elements[at].Depth)
                     break;
 
-                if (elements[other].Depth != elements[at].Depth || !elements[other].Drawn)
+                if (elements[other].Depth != elements[at].Depth || !elements[other].Drawn || unseen[other])
                     continue;
 
                 if (!ReferenceEquals(ParentOf(elements, other), parent))
