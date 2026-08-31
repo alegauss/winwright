@@ -57,6 +57,34 @@ same mistake WW168 was filed against, pointed the other way.
 Measure first, then decide. What shuts it is the question, and the excuse ledger across
 runs is where the rate is.
 
+### §WW317 The chord press cannot spell
+
+Found adopting this in quickshell, whose window is deliberately almost empty: a title
+bar, a terminal, and nothing else. It has no menu and no toolbar on purpose, so every
+command is on a chord — `Ctrl+Shift+F1` writes a diagnostic bundle, `Ctrl+Shift+I`
+imports the incumbent's sessions. Both open a dialog with real text, which is what a
+case wants to read.
+
+`press` cannot reach either. `TraversalKey` is Tab, Shift+Tab and the arrows, which is
+the right vocabulary for moving focus and the wrong one for invoking a command. There is
+no `with` that spells a modifier plus a key.
+
+What makes this more than one adopter's inconvenience: an application with no menu is
+the shape this engine is best placed to test, because there is nothing to click and a
+screenshot shows an empty window. The commands are the application. Reaching them
+through the keyboard is the only route, and `click` needs a target that does not exist.
+
+The shape, if it fits: `"act": "press", "with": "Ctrl+Shift+I"` — modifiers named, the
+key last, parsed once rather than per case. The engine already presses with a modifier
+held; `WithShift` in `Keys.cs` does it for Shift+Tab, so what is missing is the spelling
+and not the mechanism.
+
+Worth knowing before anyone starts: `Acting/Keyboard.cs` and
+`Scenarios/StepDeclaration.cs` were both uncommitted in this checkout when this was
+filed, so somebody may already be here.
+
+Falsified when a command that only a chord reaches cannot be driven by a case.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
@@ -88,105 +116,59 @@ What separates them is not visible in one run: an excuse that arrives every time
 structural, and one run cannot say *every time*. That needs a history the suite does not
 keep.
 
-### §WW249 The proof that WPF takes input is itself intermittent
+### §WW312 Why that band
 
-**Which side it is on, answered.** `Arrivals` records every `WM_CHAR` the fixture's
-window is delivered, read off the message pump below WPF. On the sixth red it said:
+WW310 measured the curve and stopped where measuring stops. Between 48 and 64
+milliseconds the substitution runs at five times the engine's own rate, and by 80 it is
+back under it. The fault itself never changes: one code unit out of place, the last one
+sent standing in it, 130 times out of 130.
 
-        typed WW246-1     the control read WW146-1
-        Windows delivered WW146-1
+The tick was the obvious guess and the shape refuses it. Four ticks of the platform's
+15.625ms timer is 62.5ms, which would put a spike on one value; what is there is a
+plateau across forty milliseconds with a cliff on one side of it. Whatever this is, it
+is not a beat against that clock.
 
-So the characters **arrived at the window already substituted**. Not a text box that
-lost one under load — the window was handed the wrong text — which rules out WPF, the
-control and everything above the queue. It is the send.
+What has not been looked at is the other end. Everything measured so far is on the
+sending side — how many calls, how far apart — and the fault is a character arriving
+where a different one was sent. The window has a message queue, the control has an input
+scope, and neither has been observed while this happens. The fixture already carries a
+recorder that showed the characters arriving substituted, which is how WW302 ruled WPF
+out; what it has never been asked is what the queue looked like at that moment.
 
-**The rule, over ten reds.** One character or more becomes the last one sent, length for
-length, at no fixed position: `WW246-5` delivered `W5245-5`, `WW302-88` read `8W302-88`.
+A guess worth pricing before adopting it: the band may be where a send is slow enough to
+overlap the read-back the engine does after it, and fast enough that both are in flight.
 
-**It is the spacing and not the batch.** WW302 typed 400 rounds each way: one `Type`
-substituted 14 times and the same text as one `Type` per code unit substituted none.
-That looked like the array, so the send was changed to one `SendInput` per code unit —
-and the rate did not move, 11 in 400 against 0. Same call count, same result. What the
-quiet arm also does is a whole `Type` between characters, resolving the element and
-reading back, so what separates them is the time between code units rather than how many
-calls carry them.
+### §WW318 Absence as a reading rather than a timeout
 
-`VK_PACKET` before `TranslateMessage` stays measured out: every lParam is `00000001`,
-the scan code having eight bits where a code unit needs sixteen.
+Found adopting this in quickshell, whose window makes its argument by what is not in it:
+no toolbar, no status bar, no sidebar — and not hidden ones waiting to be switched on,
+but no elements at all. That claim is the design, and the repository has an in-process
+test walking the visual tree to assert it.
 
-What divides it next is a delay and nothing else changed — same call, same batch,
-spaced.
+Through a case it cannot be said. A step reads a subject, and a locator matching nothing
+has no subject to read, so `"expect": "absent"` fails as "nothing answered to it in 109
+polls" — which is the same sentence a genuinely broken read produces. The two are
+indistinguishable in a report, and one of them is the pass.
 
-### §WW304 Spacing, separated from the work
+Why it is worth having rather than left to in-process tests. Absence from the
+accessibility tree is the strongest form of the claim — what a screen reader would find
+— and it catches what a tree walk cannot: chrome a theme, a style or a host puts on
+screen without the window's own tree containing it.
 
-WW302 measured 14 in 400 against 0, and the first reading of that was the array. It was
-wrong: sending one `SendInput` per code unit instead of one carrying the string left the
-rate where it was, 11 in 400. Same call count, same result, so the number of calls is
-not what the quiet arm was buying.
+What it needs from a reader: a locator resolving nothing must be a *result* rather than
+a timeout, and only where absence is what was asked. Everywhere else it must stay the
+failure it is now — an expectation of absence that quietly passed because the window had
+not opened yet would be the worst of both.
 
-What that arm also does is a whole `Type` per character — resolve the element, check the
-foreground and the focus, erase, send, read back. Tens of milliseconds between code
-units. So the remaining candidate is the time itself, never varied on its own.
-
-The third arm is that and nothing else: the same call, the same batch, a delay between
-the pairs. If a few milliseconds takes it to zero, the cause is temporal and the repair
-is a delay somebody can price. If it does not, the time is not what mattered either, and
-what remains is the rest of what a `Type` does — one of which is doing this by accident.
-
-Priced before it is chosen. A delay per code unit is paid by every keystroke this engine
-sends, so the number comes from the measurement rather than from taste: the smallest
-spacing that takes 400 rounds to zero, with its cost said in the same sentence.
-
-The method already worked once. A hypothesis went into the engine, the experiment
-refused it, and it came straight back out — which is what makes the next one cheap.
+Falsified when a case cannot say that something is not there.
 
 ## Block G — The scenario — a case is a data file
-
-### §WW296 Six fields for two ideas
-
-`covers`, `coversAtLeast` and `coversWithin` are one set compared three ways. `sameAs`,
-`unlike` and `sameCountdownAs` are one earlier step compared three ways. Inside, each is
-already a target and a mode — `Sweeps` with `Matching`, and one pointer with a flag
-beside it — and the format publishes the modes as six keys.
-
-All six landed in one session, each from a real migration and each justified where it
-sits. That is how a grammar grows sideways: no single field is wrong, and the sixth is
-not obviously worse than the fifth.
-
-The argument for keeping them is this project's own. WW267 refused a second meaning for
-`with` because a step whose argument means different things depending on what the
-application contains is one nobody can read, and a mode key brings that back — `covers`
-plus `covering: within` is two things to hold to know what one step claims, and a file
-omitting the mode reads as the exact claim whether or not the author meant it.
-
-The argument against is the count. Six keys where a reader looks for one idea is a
-format that teaches itself badly, and the families are already spelled as families: the
-prefix says which idea and the suffix which mode, in the name rather than in a value.
-
-Not a refactor to reach for. What it wants first is a reader who did not write them
-saying which costs more, because the author of the sixth is the worst judge of that.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
-
-### §WW78 The keyboard case, first
-
-It is the shortest path through the whole framework - launch under a named host,
-navigate by clicking a control with no automation peer, resolve by id, type, read back
-through a pattern, traverse, and drive a range - and it is the case whose absence let a
-window ship with no keyboard input at all. Migrating it first means the engine is
-exercised end to end before anything else about it is claimed.
-
-### §WW82 The menu case reads the notification area
-
-Nothing else in any of these repositories opens a tray menu, and everything hard about
-it is Windows-specific: an icon with no clickable point, an overflow flyout that has to
-be opened before the icon is in the tree at all, a right-click the current shell does
-not deliver, and a submenu that expands only by keyboard. It is also where the
-expectations are derived from the application's own read-out instead of typed by hand.
 
 ### §WW83 The switch case rewrites a real setting
 
@@ -227,4 +209,105 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
+### §WW311 The prompt that waiting does not clear
+
+WW305 made a cold start work, and the first run through it excused twenty-six checks
+where the four before it excused eight each. WW298 caught that: the count is read as a
+series, so a run three times its predecessors could not pass as ordinary.
+
+What it cost was measured later. The same prompt — OneDrive's *Habilitar o Backup do
+Windows*, two buttons, the same process id hours apart — held the foreground while the
+adoption's keyboard case ran, and that case came back unchecked with three steps
+unwalked. Not noise in a count. A blocker.
+
+That kills the remedy this task was opened with. Waiting for the shell to go quiet
+cannot work against a question that stays until answered.
+
+Nor is killing something the lever. OneDrive was not the owner — the window is
+`ShellExperienceHost`'s. Killing that did clear it and cost the tray: the next full run
+went red with *this desk was called placing and holds no icon anywhere*. A reboot fixed
+the tray and brought the prompt back.
+
+So this wants to see the desk before spending twenty minutes on it, and to say which it
+is: busy, asking, or broken.
+
+One thing to know first: the bench is gone. The guest now carries `ToastEnabled = 0`,
+set to unblock WW78 after that prompt held the desk across three runs. Nothing there
+raises a toast, so a remedy cannot be tried until that key goes back.
+
+### §WW314 The check that runs too late
+
+The runner refuses a locked guest, says so plainly, and points at the remedy. That part
+is right and WW42 is why: a suite synthesising input into a lock screen is not a suite
+that ran.
+
+What is wrong is where it finds out. The check is `runProgramInGuest` failing with
+*logged in interactively*, which happens after the tree is zipped, carried, extracted
+and the SDK probed — so a guest nobody logged into costs a full sync before it says the
+one thing it knew all along.
+
+That was tolerable while the guest was almost always up and unlocked, because a stopped
+guest meant a run that hung. WW305 fixed the hang, cold starts became cheap, and a
+freshly booted guest is precisely the one most likely to be sitting at a lock screen.
+The first cold start of the day reached a desktop; the second did not, and paid the
+carry to learn it.
+
+The probe is cheap and already written: the same `runProgramInGuest` call with something
+harmless, before the sync rather than after it. What it must not become is a second
+spelling of the rule — the refusal, its sentence and its remedy stay where they are, and
+this only asks the question earlier.
+
+Worth pricing against the other thing it could be: making the guest log itself in. That
+is a change to somebody's machine to suit this runner, and it is theirs to make, not
+this repository's to assume.
+
+### §WW315 A guest that is not the machine under test
+
+The first adoption run reached the guest, restored the published engine, built and ran
+eleven cases. Five of them answered. Six had nothing to answer with, and said so
+precisely: `--profiles reports 0, and the profile card is Collapsed below two`, and `no
+*.jsonl under C:\Users\oobe\.claude\projects, so no report can render`.
+
+That is the engine behaving. Not one of the six went green on absent data, and each
+names the file it wanted rather than reporting a control that failed. WW42's rule
+holding in a place nobody had put it yet.
+
+What it blocks is the rest of the migration. WW83 moves the case that rewrites a real
+setting — a profile switch — and WW85 the sweep that walks a submenu per sampled mode.
+Both need two profiles to exist before there is a switch to make or a submenu to walk.
+Written against a guest with none, they would migrate as cases that are correct,
+refused, and never once observed to work.
+
+So the guest needs to become the machine these cases are about: profiles it can switch
+between, and a transcript to report on. What that costs is the question — fabricated
+data is a fixture and has to be as disposable as the rest of the tree, and profiles that
+a run repoints are the one thing here that writes outside it.
+
+Until then WW83 and WW85 are waiting rather than ready, which is what this line says.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW316 The instrument that moves what it measures
+
+`Arrivals` is the recorder WW249 was narrowed with: it takes every `WM_CHAR` the window
+under test receives and shows it, which is how the substitution was proved to arrive
+already wrong rather than to be made by WPF.
+
+It appends to a `StringBuilder` that is never cleared, and per keystroke it writes the
+whole of it to a `TextBlock`'s `Text` and again to its `AutomationProperties.Name`. A
+run of 400 rounds across five arms sends some eighteen thousand code units, so the last
+keystroke rewrites an eighteen-kilobyte string and raises a name change over it, and the
+one before it rewrote nearly as much.
+
+Measured, and this is the number that matters: across one run the average round went
+4600ms, 6968ms, 9135ms, 11325ms by quarter — two and a half times slower at the end than
+the start — and the failures in those quarters went 6, 6, 11, 22. WW313 shipped on
+exactly this reading.
+
+So the instrument moves what it measures, and it moves it in the direction the
+measurement is most sensitive to. WW310 found the fault five times likelier in a band of
+spacings forty to seventy milliseconds wide; a fixture that slows every send as the run
+goes on is walking the experiment through that band without saying so.
+
+Arm against arm survives it — all of them meet the same window in the same round. Every
+absolute rate in this repository's typing measurements does not.

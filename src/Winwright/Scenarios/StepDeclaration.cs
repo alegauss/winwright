@@ -3,6 +3,32 @@
 namespace Winwright.Scenarios;
 
 /// <summary>
+/// Which of the three ways a step compares its reading with an earlier step's.
+/// <para>
+/// WW308. Three and not two booleans, for the reason <see cref="Asserting.SetMatch"/> gives about
+/// itself: they are one choice. The three fields a case writes — `sameAs`, `unlike` and
+/// `sameCountdownAs` — stay three, because WW296 read them and kept them: the suffix carries the
+/// mode in the name, so no step can omit one and fall into a claim it never made. What changes here
+/// is underneath, where the engine had them as three loose strings and rebuilt this choice out of
+/// them at five call sites.
+/// </para>
+/// </summary>
+public enum Pointing
+{
+    /// <summary>The reading is claimed to be back to what the earlier step read. `sameAs`.</summary>
+    Same,
+
+    /// <summary>The reading is claimed to differ from it. `unlike`.</summary>
+    Unlike,
+
+    /// <summary>
+    /// The same claim as <see cref="Same"/> for a reading that counts down while the case runs: the
+    /// numbers must match except the last, which may have ticked by one. `sameCountdownAs`.
+    /// </summary>
+    Countdown,
+}
+
+/// <summary>
 /// One step of a case, as fields: what to act on, what to do to it, what to say alongside, and what
 /// the control should read afterwards.
 /// <para>
@@ -36,19 +62,19 @@ public sealed record StepDeclaration
         bool answers,
         System.Text.RegularExpressions.Regex? matches,
         bool discloses,
-        string? sameAs,
+        string? pointsAt,
         string? never,
         bool spoken,
         string? label,
         string? notLabel,
-        string? unlike,
-        string? sameCountdownAs,
         string? expectReported,
         bool eachSpoken,
         bool ownHeader,
-        Asserting.SetMatch matching = Asserting.SetMatch.Exactly)
+        Asserting.SetMatch matching = Asserting.SetMatch.Exactly,
+        Pointing pointing = Pointing.Same)
     {
         Matching = matching;
+        Pointing = pointing;
         Name = name;
         Claimed = name;
         Locator = locator;
@@ -63,13 +89,11 @@ public sealed record StepDeclaration
         Answers = answers;
         Matches = matches;
         Discloses = discloses;
-        SameAs = sameAs;
+        PointsAt = pointsAt;
         Never = never;
         Spoken = spoken;
         Label = label;
         NotLabel = notLabel;
-        Unlike = unlike;
-        SameCountdownAs = sameCountdownAs;
         ExpectReported = expectReported;
         EachSpoken = eachSpoken;
         OwnHeader = ownHeader;
@@ -167,7 +191,7 @@ public sealed record StepDeclaration
     /// figures while every reading, taken on its own, looked perfectly healthy.
     /// </para>
     /// </summary>
-    public string? SameAs { get; }
+    public string? SameAs => PointsAt is { } step && Pointing == Pointing.Same ? step : null;
 
     /// <summary>
     /// The key whose strings must never be showing while this step waits for its locator, or null
@@ -310,7 +334,7 @@ public sealed record StepDeclaration
     /// number somewhere else on the page.
     /// </para>
     /// </summary>
-    public string? Unlike { get; }
+    public string? Unlike => PointsAt is { } step && Pointing == Pointing.Unlike ? step : null;
 
     /// <summary>
     /// The earlier step this one claims its reading is back to, for a reading that counts down while
@@ -336,7 +360,27 @@ public sealed record StepDeclaration
     /// for, so nobody reaches for it to quiet a comparison that ought to be exact.
     /// </para>
     /// </summary>
-    public string? SameCountdownAs { get; }
+    public string? SameCountdownAs =>
+        PointsAt is { } step && Pointing == Pointing.Countdown ? step : null;
+
+    /// <summary>
+    /// The earlier step this one compares its reading with, however it claims it. Null where it
+    /// points at none.
+    /// <para>
+    /// WW308. The three properties above are a view of this and <see cref="Pointing"/>, so they
+    /// cannot disagree with each other — and the run asks this rather than rebuilding it. Before, the
+    /// shape was reassembled at five sites by a chain of <c>??</c>, with the field's own name worked
+    /// out again by ternary at the last of them. Each was right; together they were one idea spelled
+    /// five times, and the sixth was the one that would have spelled it differently.
+    /// </para>
+    /// </summary>
+    public string? PointsAt { get; }
+
+    /// <summary>
+    /// Which of the three ways this step compares with the step <see cref="PointsAt"/> names. WW308:
+    /// meaningless where that is null, in the same way <see cref="Matching"/> is where nothing sweeps.
+    /// </summary>
+    public Pointing Pointing { get; }
 
     /// <summary>
     /// The name whose value the application reports and this step's reading should be, or null where
@@ -836,6 +880,9 @@ public sealed record StepDeclaration
 
         if ((back ?? apart ?? ticking) is { } pointed)
         {
+            // The field the case wrote, and this is the one place that still has to know: a refusal
+            // names what to go and delete, so it says the spelling the file used and never the mode
+            // the engine folded it into.
             var field = back is not null ? "sameAs" : apart is not null ? "unlike" : "sameCountdownAs";
             var claim = apart is not null ? "differs from" : "is back to";
 
@@ -1081,6 +1128,17 @@ public sealed record StepDeclaration
             }
         }
 
+        // WW308. Folded here and not sooner, because every refusal above names the field the case
+        // actually wrote — a fold done before them would have them saying 'sameAs' to a file that
+        // said 'unlike'. The three are mutually exclusive by the rules above, so this cannot pick
+        // wrongly: `back` and `apart` together were refused, and `ticking` beside either was too.
+        var pointing = (apart is not null, ticking is not null) switch
+        {
+            (true, _) => Pointing.Unlike,
+            (_, true) => Pointing.Countdown,
+            _ => Pointing.Same,
+        };
+
         return new StepDeclaration(
             called ?? Describing(act.Name, parsed.Text),
             parsed,
@@ -1095,17 +1153,16 @@ public sealed record StepDeclaration
             answers,
             pattern,
             discloses,
-            back,
+            back ?? apart ?? ticking,
             forbidden,
             spoken,
             declared,
             undeclared,
-            apart,
-            ticking,
             reportedly,
             eachSpoken,
             ownHeader,
-            matching);
+            matching,
+            pointing);
     }
 
     /// <summary>
@@ -1199,7 +1256,7 @@ public sealed record StepDeclaration
 
         return new StepDeclaration(
             subject, null, tray, act, null, null, ReadBack.Named(null), false, false, null, false, null,
-            false, null, null, false, null, null, null, null, null, false, false);
+            false, null, null, false, null, null, null, false, false);
     }
 
     /// <summary>

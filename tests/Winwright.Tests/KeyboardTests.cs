@@ -97,6 +97,42 @@ public sealed class KeyboardTests : IDisposable
         Assert.Contains("the control says it is read-only", typed.ToString());
     }
 
+    /// <summary>
+    /// WW249. The condition the repair was allowed on, made a case rather than an argument.
+    /// <para>
+    /// <c>Type</c> repeats a send whose reading is this engine's own substitution, and the danger in
+    /// that is the whole reason the interaction loop exists: a repair that fired on any wrong reading
+    /// would turn a window swallowing keys green, which is the defect WW26 was written for.
+    /// </para>
+    /// <para>
+    /// What separates them is that the substitution keeps the length and puts the last code unit sent
+    /// where an earlier one belongs. The case above already types four characters at a box holding
+    /// six, so it never reaches the length test at all — it passes on an accident of what the fixture
+    /// happens to say. This types six, so the lengths agree and the character test is the only thing
+    /// left standing between a swallowed key and a green step.
+    /// </para>
+    /// </summary>
+    [Fact]
+    public void A_swallowed_key_is_not_resent_into_a_pass_when_the_lengths_agree()
+    {
+        var locked = On("Edit[order=bottom]");
+
+        // Six, against the six the read-only box holds. Nothing in it is the last code unit sent.
+        var typed = Keyboard.Type(locked, "abcdef");
+
+        if (BusyDesk.Excused(typed.AsAssertion("the locked box keeps its value")))
+        {
+            Assert.Equal("locked", locked.ReadOnce().Values.Value);
+            return;
+        }
+
+        Assert.True(typed.Sent);
+        Assert.Equal("locked", typed.ReadBack);
+        Assert.Equal(typed.Expected().Length, typed.ReadBack!.Length);
+        Assert.Equal(0, typed.Resends);
+        Assert.False(typed.Arrived);
+    }
+
     [Fact]
     public void The_pattern_and_the_keyboard_are_two_different_questions()
     {

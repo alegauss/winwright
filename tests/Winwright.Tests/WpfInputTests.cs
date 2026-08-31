@@ -166,7 +166,17 @@ public sealed class WpfInputTests : IDisposable
             // and a round that typed correctly recorded seven of them all reading zero — so what
             // this asserts is the count: one injected key per character sent, which is what would
             // change if the send lost or repeated one before the window ever saw it.
-            Assert.True(typing.Length == Packets() - beforePackets, said);
+            //
+            // A whole multiple of it rather than exactly it, because `Type` now sends the string
+            // again where the reading carries the substitution — up to three times, and each of
+            // those is the same string and so the same count. What the multiple still refuses is
+            // the fault this reading was built for: a send that lost or repeated one code unit
+            // lands off a multiple, and no number of whole resends can put it back on one.
+            var injected = Packets() - beforePackets;
+            Assert.True(
+                injected > 0 && injected % typing.Length == 0 && injected <= typing.Length * 4,
+                $"{said}. It injected {injected} keys for {typing.Length} characters, which is not"
+                    + " the string sent between one and four whole times");
         }
     }
 
@@ -203,11 +213,22 @@ public sealed class WpfInputTests : IDisposable
         On("Text#injected").Read().Facts?.Name ?? "<the recorder could not be read>";
 
     /// <summary>
-    /// How many keys this run has injected so far, counted off the same record. One token per key,
-    /// so an unreadable recorder counts none rather than throwing — and the round then fails on a
-    /// difference of zero, which is the honest reading of an instrument that said nothing.
+    /// How many keys this run has injected so far, read off the front of the same record.
+    /// <para>
+    /// WW316. Counted off the tokens until the record was bounded, which it had to be: the recorder
+    /// rewrote its whole transcript per keystroke and the round more than doubled across a run. A
+    /// bounded record forgets its own beginning, so a token count would stop rising at the first
+    /// trim and every difference taken across a round after that would read zero — a green over an
+    /// instrument that had quietly stopped counting. The fixture keeps the number instead and writes
+    /// it in front, where trimming cannot reach it.
+    /// </para>
+    /// <para>
+    /// An unreadable recorder answers none rather than throwing, as before: the round then fails on
+    /// a difference of zero, which is the honest reading of an instrument that said nothing.
+    /// </para>
     /// </summary>
-    private int Packets() => Injected().Count(one => one == '[');
+    private int Packets() =>
+        int.TryParse(Injected().Split(' ')[0], out var counted) ? counted : 0;
 
     [Fact]
     public void A_click_reaches_a_wpf_checkbox()

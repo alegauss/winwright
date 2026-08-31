@@ -212,7 +212,7 @@ public static class CaseRun
         // are read again after they run: remembering every step's reading would pay for a resolve per
         // step on every case in the suite to serve the two or three that ever point backwards.
         var pointedAt = declared.Steps
-            .Select(one => one.SameAs ?? one.Unlike ?? one.SameCountdownAs)
+            .Select(one => one.PointsAt)
             .OfType<string>()
             .ToHashSet(StringComparer.Ordinal);
         var recalled = new Dictionary<string, string?>(StringComparer.Ordinal);
@@ -590,7 +590,7 @@ public static class CaseRun
         // WW255. Looked up once, before the attempts: the value a round trip is about was read when
         // the earlier step ran, and a lookup inside the retry would be the same answer fetched three
         // times. Absent only where that step stopped the case, which is a state this never reaches.
-        var backTo = (step.SameAs ?? step.Unlike ?? step.SameCountdownAs) is { } back && recalled.TryGetValue(back, out var read)
+        var backTo = step.PointsAt is { } back && recalled.TryGetValue(back, out var read)
             ? read
             : null;
 
@@ -1474,7 +1474,7 @@ public static class CaseRun
         if (step.Discloses)
             return Disclosed(step, subject, acted, under);
 
-        if (step.SameAs is not null || step.Unlike is not null || step.SameCountdownAs is not null)
+        if (step.PointsAt is not null)
             return Returned(step, subject, acted, backTo);
 
         // WW261 and WW270. Both are about one declared string, so both are answered in one place: the
@@ -1662,9 +1662,9 @@ public static class CaseRun
     private static Landed Returned(StepDeclaration step, Subject subject, ActResult? acted, string? backTo)
     {
         var saw = acted?.Element;
-        var pointed = step.SameAs ?? step.Unlike ?? step.SameCountdownAs;
-        var same = step.SameAs is not null;
-        var ticking = step.SameCountdownAs is not null;
+        var pointed = step.PointsAt;
+        var same = step.Pointing == Pointing.Same;
+        var ticking = step.Pointing == Pointing.Countdown;
 
         if (string.IsNullOrEmpty(backTo))
         {

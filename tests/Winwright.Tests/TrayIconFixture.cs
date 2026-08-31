@@ -19,6 +19,7 @@ internal sealed class TrayIconFixture : IDisposable
     private const uint WsPopup = 0x80000000;
     private const uint WmQuit = 0x0012;
     private const uint NimAdd = 0;
+    private const uint NimModify = 1;
     private const uint NimDelete = 2;
     private const uint NifMessage = 0x01;
     private const uint NifIcon = 0x02;
@@ -235,8 +236,8 @@ internal sealed class TrayIconFixture : IDisposable
         }
     }
 
-    /// <summary>What the shell will call it.</summary>
-    internal string Tip { get; }
+    /// <summary>What the shell calls it now, which <see cref="Rename"/> moves. WW82.</summary>
+    internal string Tip { get; private set; }
 
     /// <summary>
     /// Add one, blocking until a reading can find it — not until the shell took the message, which
@@ -249,6 +250,32 @@ internal sealed class TrayIconFixture : IDisposable
     /// rather than a case that did.
     /// </exception>
     internal static TrayIconFixture Add(string tip) => new(tip);
+
+    /// <summary>
+    /// Rename the icon in place, the way an application with a live tooltip does.
+    /// <para>
+    /// WW82. The icon is not replaced and not re-added: this is <c>NIM_MODIFY</c>, the same call a
+    /// tray makes when its own state changes, so the element in the tree is the one that was there a
+    /// moment ago wearing a different name. That is the condition claude-tray produced on every run
+    /// and that no case here could reach — its tooltip says <c>connecting…</c> until data arrives.
+    /// </para>
+    /// <para>
+    /// Waits for the shell to publish it, for the reason <see cref="Placed"/> gives about the add:
+    /// the call returning means the shell took the message, not that the tree has it yet.
+    /// </para>
+    /// </summary>
+    /// <param name="tip">The new tooltip, which this run's process id is appended to as before.</param>
+    /// <exception cref="InvalidOperationException">Where the shell refused it, or never published it.</exception>
+    internal void Rename(string tip)
+    {
+        Tip = $"{tip} #{Environment.ProcessId}";
+
+        var data = Describe();
+        if (!Shell_NotifyIconW(NimModify, ref data))
+            throw new InvalidOperationException("the shell refused to rename the tray icon");
+
+        Placed();
+    }
 
     /// <summary>Take it away, and the window that owned it.</summary>
     public void Dispose()

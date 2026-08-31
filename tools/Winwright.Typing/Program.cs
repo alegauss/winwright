@@ -9,19 +9,19 @@ using Winwright.Windowing;
 namespace Winwright.Typing;
 
 /// <summary>
-/// WW302. Which side of the send WW249's substitution is on, measured rather than reasoned about.
+/// WW249. What the repair costs and what it leaves behind, measured rather than reasoned about.
 /// <para>
-/// Ten reds narrowed it to one boundary and stopped. WPF, the control and the message pump are out —
-/// the recorder in the fixture's own window shows the characters arriving already substituted. The
-/// send is out by reading: <c>Keyboard</c> builds one input pair per UTF-16 code unit into a single
-/// array, and <c>SendInput</c> queues them before returning. What is left is between insertion and
-/// <c>WM_CHAR</c>, and reading cannot divide it further.
+/// The question this tool was built for is answered. WW302 divided the batch from the spacing, WW304
+/// swept the spacing and priced it out of reach, and WW310 read the fault's shape off 130 failures
+/// and found one shape. The engine now sends as it always did and repeats the send where the reading
+/// carries that shape, which is the repair the arms were being compared to choose between.
 /// </para>
 /// <para>
-/// So this compares the two shapes. One call carrying every code unit is what the engine does; one
-/// call per code unit is the other side of the same boundary. If the substitution follows the batch,
-/// the array is implicated despite the argument that rules it out, and the argument is what is
-/// wrong. If it follows both alike, the queue survives having been tested rather than assumed.
+/// So the arms are gone and what is left is one path measured against itself. A <c>Type</c> reports
+/// how many times it had to send again, which is the raw fault rate this tool used to have to
+/// construct an arm to see, and whether the text arrived in the end, which is what the repair fails
+/// to fix. Those two numbers are the whole reading: the first says the fault is still there, and the
+/// second says whether anything survives three sends of it.
 /// </para>
 /// <para>
 /// It counts and never fails. A diagnostic that goes red is one somebody turns off, and the number
@@ -34,14 +34,27 @@ public static class Program
     private const int Unrunnable = 3;
 
     /// <summary>
-    /// How many rounds each arm types, unless a caller says otherwise.
+    /// How many rounds this types, unless a caller says otherwise.
     /// <para>
-    /// WW249 fails about one guest run in four at five rounds a run, so a substitution is somewhere
-    /// near one round in twenty. Four hundred each way is twenty or so events per arm — enough that
-    /// a difference between the arms is a difference, and not so many that the run outlasts patience.
+    /// WW249 fails about one send in fifty, so four hundred rounds is a handful of events — enough
+    /// that the repair is seen firing and not so many that the run outlasts patience. What it cannot
+    /// do at this length is put a bound on the survivors: three resends puts those past one in a
+    /// million, and no run anybody sits through reaches that. A run that reads zero survivors has
+    /// failed to refute the repair rather than confirmed it, and the report below says so.
     /// </para>
     /// </summary>
     private const int Rounds = 400;
+
+    /// <summary>
+    /// How many rounds in a row may arrive wrong before this stops calling them rounds.
+    /// <para>
+    /// Four, and the number barely matters: what it is guarding against is not a rare event repeating
+    /// but a desk that went away, and one of those never comes back on its own. A run that types into
+    /// nothing still reads the box, and what it reads is the last thing that landed there — which is
+    /// how a host run once reported 251 substitutions in a row and looked like data.
+    /// </para>
+    /// </summary>
+    private const int Void = 4;
 
     public static int Main(string[] args)
     {
@@ -98,77 +111,126 @@ public static class Program
         }
 
         var box = On(root, "Edit#profile");
+        var tally = new Tally();
 
-        // Alternated round by round rather than run in two halves. The desk drifts — a background
-        // task starts, a toast arrives — and two halves would hand the whole of that drift to
-        // whichever arm was running at the time.
-        var batch = new Tally("one call carrying every code unit");
-        var split = new Tally("one call per code unit");
+        // WW313. Kept per round, because this rate moves within a run: the fixture appends every
+        // value it is sent to a read-out under the box, so the window grows all run, and one measured
+        // run slowed from 4600 to 11325ms a round while its failures rose 6, 6, 11, 22 by quarter. A
+        // total taken across that is an average of two different machines.
+        var faulted = new List<bool>(rounds);
+        var spent = new List<double>(rounds);
 
+        var lost = 0;
+        var ran = 0;
         for (var round = 1; round <= rounds; round++)
         {
-            Round(box, $"WW302-{round}", batch, Whole);
-            Round(box, $"WW302-{round}", split, OneAtATime);
+            var typed = Round(box, $"WW249-{round}", tally, out var took);
+            faulted.Add(typed.Resends > 0);
+            spent.Add(took.TotalMilliseconds);
+            ran = round;
+
+            lost = typed.Arrived ? 0 : lost + 1;
+            if (lost >= Void)
+            {
+                Console.Error.WriteLine(
+                    $"the desk stopped taking input at round {round - lost + 1}: the box has read back"
+                        + $" wrong for {lost} rounds running, which is a lost foreground and not a rate.");
+                Console.Error.WriteLine(
+                    "Nothing above it is a measurement either, because a run that loses the desk cannot"
+                        + " say when it started losing it. Run it on a desk nobody is using.");
+                return Unrunnable;
+            }
         }
 
-        Console.WriteLine($"{rounds} round(s) each way, typing at the fixture's WPF text box.");
-        Console.WriteLine(batch.ToString());
-        Console.WriteLine(split.ToString());
-        Console.WriteLine(Verdict(batch, split));
+        Console.WriteLine($"{ran} round(s), typing at the fixture's WPF text box.");
+        Console.WriteLine(tally.ToString());
+        Console.Write(Drift(faulted, spent));
+        Console.WriteLine(Verdict(tally));
         return 0;
     }
 
     /// <summary>
-    /// One round: type it, read it back, and record what came out where it differs.
+    /// One round: type it, and record what the engine says it had to do to get it there.
     /// </summary>
     /// <param name="box">The text box under test.</param>
     /// <param name="typing">What this round sends, different each round so a box that kept the last round's text shows up.</param>
     /// <param name="tally">Where the outcome is counted.</param>
-    /// <param name="how">Which shape of send to use.</param>
-    private static void Round(Subject box, string typing, Tally tally, Action<Subject, string> how)
+    /// <param name="took">How long the whole act took, for the drift reading beside the counts.</param>
+    /// <returns>What the engine reported about the act.</returns>
+    private static TypedResult Round(Subject box, string typing, Tally tally, out TimeSpan took)
     {
-        how(box, typing);
+        var clock = Stopwatch.StartNew();
+        var typed = Keyboard.Type(box, typing);
+        clock.Stop();
 
-        var read = box.Read().Values.Value;
-        tally.Saw(typing, read);
-    }
-
-    /// <summary>The engine's own path: one <c>Type</c>, so one array and one call.</summary>
-    private static void Whole(Subject box, string typing) => Keyboard.Type(box, typing);
-
-    /// <summary>
-    /// The same text as one <c>Type</c> per code unit, so one <c>SendInput</c> each.
-    /// <para>
-    /// The first replaces what is there and the rest append, which is what makes the two arms end at
-    /// the same text. They differ in more than the batching — each call re-reads focus — and that is
-    /// worth saying rather than hiding: what this divides is whether a batch is necessary for the
-    /// substitution, not whether batching alone is sufficient for it.
-    /// </para>
-    /// </summary>
-    /// <param name="box">The text box under test.</param>
-    /// <param name="typing">What this round sends.</param>
-    private static void OneAtATime(Subject box, string typing)
-    {
-        for (var at = 0; at < typing.Length; at++)
-            Keyboard.Type(box, typing[at].ToString(), replacingWhatIsThere: at == 0);
+        took = clock.Elapsed;
+        tally.Saw(typed, took);
+        return typed;
     }
 
     /// <summary>
-    /// What the two arms together say, in the one sentence somebody reads.
+    /// WW313. Whether the rate held still while the run ran, said in quarters.
     /// <para>
-    /// Stated as what was counted and never as a conclusion. Whether twenty against two is a
-    /// difference is a judgement, and a tool that ran the experiment once is the worst thing to make
-    /// it — the point of the numbers is that a reader can weigh them.
+    /// The reason it is here rather than in a footnote: the fault's rate is a property of the desk at
+    /// a moment, not of the engine, and a run whose quarters disagree cannot have its total compared
+    /// against another run's. A repair read as "2% before, 0.4% after" across two evenings that
+    /// differed by that much internally would be reading the evening.
     /// </para>
     /// </summary>
-    /// <param name="batch">The arm sending one call for the whole string.</param>
-    /// <param name="split">The arm sending one call per code unit.</param>
-    private static string Verdict(Tally batch, Tally split) =>
-        batch.Wrong == 0 && split.Wrong == 0
-            ? "Neither arm substituted anything, so this run divides nothing: WW249 is rare, and a"
-                + " run that saw none of it is a run with nothing to say rather than an acquittal."
-            : $"Substituted {batch.Wrong} against {split.Wrong}. What that is worth is a reading,"
-                + " and both arms ran under the same desk in the same minutes.";
+    /// <param name="faulted">Whether the repair fired each round, in the order they ran.</param>
+    /// <param name="spent">Each round's elapsed time, in that same order.</param>
+    private static string Drift(IReadOnlyList<bool> faulted, IReadOnlyList<double> spent)
+    {
+        const int Quarters = 4;
+        if (faulted.Count < Quarters * 2)
+            return "";
+
+        var said = new List<string>();
+        var size = faulted.Count / Quarters;
+        for (var quarter = 0; quarter < Quarters; quarter++)
+        {
+            // The last quarter takes the remainder, so no round is left out of the reading — a
+            // division that dropped three rounds would be a drift measurement with a hole in it.
+            var from = quarter * size;
+            var upto = quarter == Quarters - 1 ? faulted.Count : from + size;
+
+            var hit = faulted.Skip(from).Take(upto - from).Count(one => one);
+            var took = spent.Skip(from).Take(upto - from).DefaultIfEmpty(0).Average();
+            said.Add($"{from + 1}-{upto}: {hit} faulted, {took:F0}ms a round");
+        }
+
+        return $"WW313: by quarter — {string.Join("; ", said)}. The time is beside the count because"
+            + " the fixture appends every value it is sent to a read-out under the box, so a rate that"
+            + " climbs while the round slows is a window getting heavier rather than a phenomenon"
+            + " getting likelier.\n";
+    }
+
+    /// <summary>
+    /// What the run says, in the one sentence somebody reads.
+    /// <para>
+    /// Stated as what was counted, and explicit about which way a zero reads. At four hundred rounds
+    /// a survivor is not expected, so finding none is the run failing to refute the repair — and a
+    /// tool that called that a confirmation would call it one on every run it ever made.
+    /// </para>
+    /// </summary>
+    private static string Verdict(Tally tally)
+    {
+        if (tally.Faulted == 0)
+        {
+            return "The fault never appeared, so this run says nothing about the repair: it exercised"
+                + " a path that had nothing to repair. WW249 is rare, and a run that saw none of it is"
+                + " a run with nothing to say rather than an acquittal.";
+        }
+
+        return tally.Survived == 0
+            ? $"The fault appeared {tally.Faulted} times and was repaired every time. That refutes"
+                + " nothing on its own — three resends put a survivor past one act in a million, which"
+                + " is far beyond what this many rounds could see — so what it shows is the repair"
+                + " firing on the real fault and the reading landing right afterwards."
+            : $"{tally.Survived} of {tally.Faulted} substitutions outlived {tally.Resends} resends,"
+                + " which at this fault's measured rate should not happen in a run this length. Either"
+                + " the desk was doing something else or the fault has a second shape.";
+    }
 
     /// <summary>
     /// The fixture's executable, in the configuration this tool was itself built in.
@@ -197,46 +259,73 @@ public static class Program
 }
 
 /// <summary>
-/// One arm's count, and where the substitutions landed.
+/// What the run counted, and what the survivors looked like.
 /// <para>
-/// The positions are kept because WW249's rule is about them: the substituted character is always
-/// the last one sent, at no fixed position. An arm that broke that rule would be the finding, and a
-/// count alone could not show it.
+/// The examples are kept for the survivors alone. A repaired round is one the engine already
+/// classified — it repeated the send because the reading matched WW249's shape — and printing those
+/// would be printing the rule back. A survivor is the round that shape did not explain, and there is
+/// nothing else in this run worth a person's eyes.
 /// </para>
 /// </summary>
-/// <param name="named">Which shape of send this arm used.</param>
-public sealed class Tally(string named)
+public sealed class Tally
 {
     private readonly List<string> examples = [];
+    private TimeSpan spent;
 
-    /// <summary>How many rounds this arm ran.</summary>
+    /// <summary>How many rounds ran.</summary>
     public int Rounds { get; private set; }
 
-    /// <summary>How many of them read back as something other than what was sent.</summary>
-    public int Wrong { get; private set; }
+    /// <summary>How many of them hit the substitution at least once — the fault's own rate.</summary>
+    public int Faulted { get; private set; }
+
+    /// <summary>How many sends were repeated in total, across every round that needed one.</summary>
+    public int Resends { get; private set; }
+
+    /// <summary>How many rounds read back wrong even so.</summary>
+    public int Survived { get; private set; }
+
+    /// <summary>What one round's whole act took, averaged.</summary>
+    public double MeanMs => Rounds == 0 ? 0 : spent.TotalMilliseconds / Rounds;
 
     /// <summary>Record one round.</summary>
-    /// <param name="sent">What was typed.</param>
-    /// <param name="read">What the box read back.</param>
-    public void Saw(string sent, string? read)
+    /// <param name="typed">What the engine reported about the act.</param>
+    /// <param name="took">How long the act took.</param>
+    public void Saw(TypedResult typed, TimeSpan took)
     {
+        ArgumentNullException.ThrowIfNull(typed);
+
         Rounds++;
-        if (string.Equals(sent, read, StringComparison.Ordinal))
+        spent += took;
+
+        if (typed.Resends > 0)
+        {
+            Faulted++;
+            Resends += typed.Resends;
+        }
+
+        if (typed.Arrived)
             return;
 
-        Wrong++;
+        Survived++;
 
-        // Bounded, because an arm that goes wrong every round would otherwise print a page per
-        // round and bury the counts the run is for.
+        // Bounded, because a desk that went away would otherwise print a page a round and bury the
+        // counts the run is for.
         if (examples.Count < 20)
-            examples.Add($"sent {sent}, read {read ?? "<nothing>"}");
+            examples.Add($"sent {typed.Expected()}, read {typed.ReadBack ?? "<nothing>"}");
     }
 
-    /// <summary>The arm's line in the report.</summary>
+    /// <summary>The run's lines in the report.</summary>
     public override string ToString()
     {
-        var rate = Rounds == 0 ? "" : $" ({(double)Wrong / Rounds:P1})";
+        var rate = Rounds == 0 ? "" : $" ({(double)Faulted / Rounds:P1})";
+        var took = Rounds == 0 ? "" : $", {MeanMs:F1}ms a round";
+
+        var repaired = Faulted == 0
+            ? ""
+            : $"\n  repaired by {Resends} resend(s) in total, {(double)Resends / Faulted:F2} a fault";
+
         var listed = examples.Count == 0 ? "" : $"\n    {string.Join("\n    ", examples)}";
-        return $"  {named}: {Wrong} of {Rounds} substituted{rate}{listed}";
+        return $"  the send substituted a code unit in {Faulted} of {Rounds} rounds{rate}{took}"
+            + $"{repaired}\n  {Survived} of them read back wrong anyway{listed}";
     }
 }

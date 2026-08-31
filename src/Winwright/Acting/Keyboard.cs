@@ -60,6 +60,21 @@ public sealed record TypedResult
     /// <summary>Whether the control says it is read-only, which is one reason typing lands nowhere.</summary>
     public bool ReadOnly { get; }
 
+    /// <summary>
+    /// How many times the send had to be repeated because WW249's substitution landed on it.
+    /// <para>
+    /// Reported and never swallowed, which is the whole condition on the repair below existing. A
+    /// resend that nobody could see would make this engine say a control took input cleanly when it
+    /// did not, and the one thing <c>Type</c> is for is being the observable that separates those.
+    /// Non-zero here is the engine's own fault rate, measurable by anyone running a suite.
+    /// </para>
+    /// <para>
+    /// Set beside the constructor rather than through it: the readings above are what an act is and
+    /// arrive together, and this is a count of what it took to get them.
+    /// </para>
+    /// </summary>
+    public int Resends { get; internal init; }
+
     /// <summary>Whether keys were sent at all.</summary>
     public bool Sent => Foreground.Satisfied && Focus.Satisfied;
 
@@ -79,8 +94,15 @@ public sealed record TypedResult
             return $"{Act}: nothing was sent, {Foreground.Absence}.";
         if (!Focus.Satisfied)
             return $"{Act}: nothing was sent, {Focus.Absence}.";
-        if (Arrived)
+        if (Arrived && Resends == 0)
             return $"{Act}: the control reads \"{ReadBack}\".";
+
+        if (Arrived)
+        {
+            var again = Resends == 1 ? "resend" : "resends";
+            return $"{Act}: the control reads \"{ReadBack}\", after {Resends} {again} — the send"
+                + " substituted a code unit and it was sent again, WW249.";
+        }
 
         var because = ReadOnly ? ", and the control says it is read-only" : "";
         return $"{Act}: the control reads \"{ReadBack}\" and not \"{Expected()}\"{because}.";
@@ -122,8 +144,27 @@ public sealed record TypedResult
         Pattern = "synthesized keyboard",
         ReadBack = ReadBack,
         Verdict = !Sent ? StepVerdict.Unchecked : Arrived ? StepVerdict.Ok : StepVerdict.Failed,
-        Detail = Sent ? Arrived ? null : ToString() : Foreground.Satisfied ? Focus.Absence : Foreground.Absence,
+        Detail = TraceDetail(),
     };
+
+    /// <summary>
+    /// The sentence a trace carries beside the verdict, or null where the verdict is the whole of it.
+    /// <para>
+    /// A repaired send says so even though it arrived, which is the difference between a rate that
+    /// can be read off the runs and one that has to be measured on purpose. Green with a sentence is
+    /// how a fault this engine compensates for stays countable.
+    /// </para>
+    /// </summary>
+    private string? TraceDetail()
+    {
+        if (!Foreground.Satisfied)
+            return Foreground.Absence;
+
+        if (!Focus.Satisfied)
+            return Focus.Absence;
+
+        return Arrived && Resends == 0 ? null : ToString();
+    }
 }
 
 /// <summary>
@@ -193,16 +234,129 @@ public static class Keyboard
 
         Send(act.Text);
 
-        // Wait for it to show up rather than reading the instant after sending: keys go into a
-        // queue another thread drains, so an immediate read is a race whichever way it lands.
-        // A deadline on a condition, and the failing case costs the whole of it and says what it
-        // found — which is the honest price of not reporting a value from before the act.
         var expected = act.ReplacingWhatIsThere ? act.Text : (before ?? "") + act.Text;
-        var settled = Attempt.Until(
-            () => Reading(subject) == expected ? expected : null, subject.ActMs, subject.PollMs);
+        var readBack = Settled(subject, expected, act.Text);
 
-        return new TypedResult(
-            act, facts, foreground, focus, before, settled.Found ? expected : Reading(subject), readOnly);
+        // WW249. Send it again where the reading carries this engine's own substitution, and never
+        // where it carries anything else.
+        //
+        // The fault is measured and narrow: the send puts the last code unit of the string where an
+        // earlier one belongs, leaving the length intact. WW310 counted 130 of 130 failures with that
+        // shape, unchanged across every spacing it swept. Everything the interaction loop exists to
+        // catch reads differently — a control that takes no keyboard input at all reads back what was
+        // there before, and one that drops keys reads short. Neither can reach the test below, so
+        // neither is repaired into a pass.
+        //
+        // This is what the alternatives cost. A blanket retry would turn a window accepting one key
+        // in four green, which is the exact defect this loop was built for and the reason a pattern
+        // act is not enough. A spacing between code units was measured instead and refused twice
+        // over: 128ms a code unit is paid by every keystroke this engine ever sends, and WW310 then
+        // found the rate is a band and not a slope — 64ms apart is five to nine times worse than 32
+        // or 96 — so there is no delay to choose on the evidence.
+        var resends = 0;
+        while (resends < Resends && TookTheLastSent(readBack, expected, act.Text))
+        {
+            // Erased by what the control says it holds, not by what was expected: the two are the
+            // same length while the rule holds, and this is the one place that must not assume it.
+            MoveToTheEnd();
+            Erase(readBack!.Length);
+
+            // The whole expected string and not just the act's text, because the erase above took
+            // what was already there with it — an append whose repair sent only its own half would
+            // read back short and be reported as the failure it is.
+            Send(expected);
+            resends++;
+            readBack = Settled(subject, expected, act.Text);
+        }
+
+        return new TypedResult(act, facts, foreground, focus, before, readBack, readOnly)
+        {
+            Resends = resends,
+        };
+    }
+
+    /// <summary>
+    /// How many times one act's send may be repeated before what it reads back is the answer.
+    /// <para>
+    /// The fault runs near 2% a send and reached 3.5% on the worst evening measured, so three
+    /// repeats put a surviving substitution somewhere past one act in a million — below the rate of
+    /// every other thing that makes a guest run lie. It is bounded rather than deadlined because a
+    /// count is what a reader can price: nothing is paid on the 97% of sends that arrive, and a send
+    /// that is going to fail costs at most three more of itself.
+    /// </para>
+    /// </summary>
+    private const int Resends = 3;
+
+    /// <summary>
+    /// Wait for the control to reach a reading that will not change, and report it.
+    /// <para>
+    /// Waited on rather than read the instant after sending: keys go into a queue another thread
+    /// drains, so an immediate read is a race whichever way it lands. A deadline on a condition, and
+    /// anything that never settles costs the whole of it and says what it found — which is the
+    /// honest price of not reporting a value from before the act.
+    /// </para>
+    /// <para>
+    /// Two readings end the wait and not one. A substitution is not a reading on its way to being
+    /// right: the text arrived and one code unit of it is wrong, and it will still be wrong at the
+    /// deadline. Waiting it out bought nothing when the act was reported straight away, and would
+    /// cost four deadlines on the acts <c>Run</c> now repeats. What is genuinely still arriving
+    /// reads short, and a short reading answers neither test — so the early exit cannot take one.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">The control to read.</param>
+    /// <param name="expected">What it should say.</param>
+    /// <param name="sent">The text the keyboard was given, which decides what a substitution is.</param>
+    private static string? Settled(Subject subject, string expected, string sent)
+    {
+        var settled = Attempt.Until(
+            () =>
+            {
+                var reading = Reading(subject);
+                return reading == expected || TookTheLastSent(reading, expected, sent) ? reading : null;
+            },
+            subject.ActMs,
+            subject.PollMs);
+
+        return settled.Found ? settled.Value : Reading(subject);
+    }
+
+    /// <summary>
+    /// Whether a reading is WW249's substitution and not some other way of being wrong.
+    /// <para>
+    /// Length for length, with every character that differs being the last code unit sent. Not
+    /// <em>exactly one</em> character, though that is how most of them arrive: §WW249 records
+    /// <c>WW246-5</c> read back as <c>W5245-5</c>, which is two positions taking the same intruder,
+    /// and a test written to the common case would have refused to repair the example the task is
+    /// filed under.
+    /// </para>
+    /// <para>
+    /// The last code unit sent is the last of <paramref name="sent"/> and not of
+    /// <paramref name="expected"/> — the same character while an act replaces, and different from an
+    /// append's point of view, where what was already there was never sent at all.
+    /// </para>
+    /// </summary>
+    /// <param name="readBack">What the control says it holds.</param>
+    /// <param name="expected">What it should say.</param>
+    /// <param name="sent">The text the keyboard was given, whose last code unit is the intruder.</param>
+    private static bool TookTheLastSent(string? readBack, string expected, string sent)
+    {
+        if (sent.Length == 0 || readBack is null || readBack.Length != expected.Length)
+            return false;
+
+        var last = sent[^1];
+        var substituted = false;
+        for (var at = 0; at < expected.Length; at++)
+        {
+            if (readBack[at] == expected[at])
+                continue;
+
+            if (readBack[at] != last)
+                return false;
+
+            substituted = true;
+        }
+
+        return substituted;
     }
 
     private static string? Reading(Subject subject)
@@ -296,6 +450,23 @@ public static class Keyboard
         },
     };
 
+    /// <summary>
+    /// Put the text into the queue, one call carrying every code unit.
+    /// <para>
+    /// This shape was measured against its alternatives and kept. WW302 read 14 substitutions in 400
+    /// batched against 0 sent one <c>Type</c> at a time, which looked like the array — and the next
+    /// measurement refused that reading: one <c>SendInput</c> per code unit left the rate where it
+    /// was, 11 in 400. Same call count, same fault. What the quiet arm also did was a whole
+    /// <c>Type</c> between characters, so what separated them was time and not batching.
+    /// </para>
+    /// <para>
+    /// Time was then swept and refused on its own terms. It works at a price nothing can pay —
+    /// 128ms a code unit, on every keystroke this engine ever sends — and WW310 found the rate is a
+    /// band rather than a slope, 64ms apart running five to nine times worse than 32 or 96. A repair
+    /// with no monotone direction is not a number to choose. So the send stays as it was, and
+    /// <c>Run</c> above repairs the fault by its signature instead.
+    /// </para>
+    /// </summary>
     private static void Send(string text)
     {
         // One input pair per UTF-16 code unit, as Unicode rather than as a virtual key: a scan

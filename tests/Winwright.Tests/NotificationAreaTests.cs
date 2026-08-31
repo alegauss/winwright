@@ -79,6 +79,49 @@ public sealed class NotificationAreaTests : IDisposable
     }
 
     [Fact]
+    public void An_icon_that_renamed_itself_is_still_the_icon_that_was_found()
+    {
+        if (!Placed)
+            return;
+
+        // WW82. The condition claude-tray produced on every run of its menu case and that nothing
+        // here could reach: a tray icon's name is its tooltip, and an application with anything live
+        // in one rewrites it between a run finding the icon and asking it for its menu. claude-tray's
+        // reads `connecting…` until the first reading lands, and the act reported the icon gone —
+        // a hole naming the shell, for an icon that had not moved.
+        var found = NotificationArea.Find(Tip);
+        if (BusyDesk.Excused(found.AsAssertion("this run's icon is in the notification area")))
+            return;
+
+        Assert.True(found.Found, found.Sentence());
+        var addressed = found.Icon!;
+
+        icon!.Rename("winwright under test, renamed");
+
+        // The name really did move, or this case would pass on a rename that never happened.
+        Assert.NotEqual(addressed.Name, Tip);
+        Assert.DoesNotContain("renamed", addressed.Name, StringComparison.Ordinal);
+
+        // Looked up again under the new name, for two reasons and neither of them the claim. It says
+        // the icon is still placed, so a null below is about addressing rather than about a shell
+        // that took it away — and it leaves the overflow open, which `Live` needs to see a hidden
+        // icon at all. Without this the case cannot tell a stale name from a shut flyout, and the
+        // first run of it did not: it went red on a fixture whose flyout had closed behind it.
+        var renamed = NotificationArea.Find(Tip);
+        if (BusyDesk.Excused(renamed.AsAssertion("this run's renamed icon is in the notification area")))
+            return;
+
+        Assert.True(renamed.Found, renamed.Sentence());
+
+        // The claim. The icon found under the old name still addresses the element, because what it
+        // is matched by outlives what it is called.
+        var element = NotificationArea.ElementFor(addressed);
+
+        Assert.NotNull(element);
+        Assert.Contains("renamed", element.Current.Name, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void An_icon_added_now_hides_in_the_overflow_and_is_not_in_the_tree_until_it_is_opened()
     {
         if (!Placed)

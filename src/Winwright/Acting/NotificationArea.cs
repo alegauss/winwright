@@ -21,6 +21,22 @@ public sealed record TrayIcon(ElementFacts Facts, bool Hidden)
     /// <summary>What the shell calls it — a tooltip, so often several lines of it.</summary>
     public string Name => Facts.Name;
 
+    /// <summary>
+    /// What UI Automation calls this element for as long as it exists, which is how it is found again.
+    /// <para>
+    /// WW82. The name cannot do that job. A tray icon's name is its tooltip, and an application with
+    /// anything live in one rewrites it while a run is looking: claude-tray's reads
+    /// <c>connecting…</c> until the first reading arrives and something else from then on. A re-find
+    /// by name then matches nothing and the act reports the icon gone — a hole naming the shell, for
+    /// an icon that never moved.
+    /// </para>
+    /// <para>
+    /// Null where the search could not read one, which is not a failure: the match falls back to the
+    /// name, which is what every run before this used and what still holds for a still tooltip.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<int>? Runtime { get; init; }
+
     /// <summary>The one line a report names it by.</summary>
     public override string ToString()
     {
@@ -765,17 +781,55 @@ public static class NotificationArea
         return Live(icon);
     }
 
+    /// <summary>
+    /// The runtime id of an element, or null where it would not give one.
+    /// <para>
+    /// WW82. Read at the moment the icon is found, because that is the only moment it is certainly
+    /// there. An element that goes away between the find and this call throws, and a null then is the
+    /// right answer: the match falls back to the name, and the act after it reports the vanishing.
+    /// </para>
+    /// </summary>
+    /// <param name="element">The element to read.</param>
+    private static IReadOnlyList<int>? RuntimeOf(AutomationElement element)
+    {
+        try
+        {
+            return element.GetRuntimeId();
+        }
+        catch (Exception gone) when (gone is ElementNotAvailableException or InvalidOperationException)
+        {
+            return null;
+        }
+    }
+
     private static AutomationElement? Live(TrayIcon icon)
     {
         var root = icon.Hidden ? Overflow() : Tray();
         if (root is null)
             return null;
 
-        return root.FindAll(
+        var candidates = root.FindAll(
                 TreeScope.Descendants,
                 new PropertyCondition(AutomationElement.AutomationIdProperty, IconAutomationId))
             .Cast<AutomationElement>()
-            .FirstOrDefault(candidate => (candidate.Current.Name ?? "") == icon.Name);
+            .ToList();
+
+        // WW82. By runtime id first, which is what UI Automation promises for the life of an element.
+        // The name is a tooltip and an application rewrites its own: claude-tray's menu case reported
+        // the icon gone on every run, and the icon had only stopped saying `connecting…`.
+        if (icon.Runtime is { Count: > 0 } runtime)
+        {
+            var same = candidates.FirstOrDefault(
+                candidate => RuntimeOf(candidate) is { } its && its.SequenceEqual(runtime));
+
+            if (same is not null)
+                return same;
+        }
+
+        // And by name after it, which is every run before this one and is still right for an icon
+        // whose tooltip holds still. A shell that rebuilt the tray gives new runtime ids to the same
+        // icons, and falling through to the name is what survives that.
+        return candidates.FirstOrDefault(candidate => (candidate.Current.Name ?? "") == icon.Name);
     }
 
     private static IReadOnlyList<TrayIcon> Under(AutomationElement? root, bool hidden)
@@ -791,7 +845,7 @@ public static class NotificationArea
                 new PropertyCondition(AutomationElement.AutomationIdProperty, IconAutomationId)))
             {
                 if (ElementFacts.Of(icon) is { } facts)
-                    found.Add(new TrayIcon(facts, hidden));
+                    found.Add(new TrayIcon(facts, hidden) { Runtime = RuntimeOf(icon) });
             }
         }
         catch (ElementNotAvailableException)

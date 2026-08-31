@@ -208,6 +208,12 @@
 - ✅ **WW295** **a locator can be built out of a declared string but never out of a value the application reports** — A locator brace spelled `{report:name}` is answered by asking the application, once per run, so a case can select the element only the machine's own state can name.
 - ✅ **WW300** **which excuses recur across runs is unreadable, so this suite's own structure and a busy desk read alike** — The four earlier ledgers are intersected by case: a guest run of 1816 said 8 excused, and none of them is new — one clause, because all eight recurring made a per-line mark useless.
 - ✅ **WW302** **WW249 gains a red every fourth run and no experiment, so each one observes what nine already did** — 400 rounds each way, alternated under one desk: 14 substitutions batched against 0 sent one code unit at a time, which is the division ten sightings could not make.
+- ✅ **WW304** **nothing separates the delay between code units from the work the quiet arm does between them** — A delay alone reproduces the quiet arm — 0 in 1100 at 128ms and above, against 2% below it — so time was sufficient and its own price, 128ms a code unit, is what refuses it.
+- ✅ **WW306** **the typing experiment counts rounds it never typed as substitutions, and they read as a rate** — A OneDrive prompt held the guest desk and the run refused at round 1, naming it a lost foreground and exiting 3, where it would have reported 200 substitutions as a rate.
+- ✅ **WW309** **the same arm measured three times gave 14, 9 and 2 of 400, so arm-to-arm readings are drawn off a rate that moves** — Failures are independent — 0 and 1 collisions against 1.2 expected — so the reading is the discordant rounds, where the split reads 9 against 8 that a total had called worse.
+- ✅ **WW310** **spacing the code units 64ms apart is five to nine times worse than spacing them 32 or 96, three runs over** — A band and not a tick: 7.2, 7.6 and 9.6% across 48 to 64ms, back under 2% by 80 — and 130 of 130 failures are the one fault, unchanged at every spacing.
+- ✅ **WW313** **collisions across four runs total 21 where independence predicts 14, and the ledger says they are independent** — By quarter the round slows 4600 to 11325ms while failures rise 6, 6, 11, 22 — so the excess is a rate climbing within the run, not a cause shared between arms.
+- ✅ **WW249** **the case proving that typing reaches a WPF box fails about one guest run in four** — Type repeats the send on WW310's signature and nothing else: 13 of 400 faulted on the guest and all 13 were repaired by one resend, none surviving, each reported rather than swallowed.
 
 ## Block G — The scenario — a case is a data file
 
@@ -226,6 +232,9 @@
 - ✅ **WW263** **a case has a fixed list of steps, and the panels it must visit are derived from the strings** — A case names `forEach` and runs its steps once per string the key declares, with the member reaching a locator through `{}` and an empty derivation refused.
 - ✅ **WW259** **`expand` goes through the pattern, and the submenu the menu case is about only opens to a key** — A step names `open submenu` and reaches the keyboard walk, handing back the entry the menu landed on so `reads: name` compares against the submenu rather than the window.
 - ✅ **WW258** **a case cannot name a tray icon or open its menu, and the engine has done both since block D** — A tray step also names `open tray menu`, reaching the focus-and-application-key route, and puts the overflow back the way it found it.
+- 🗑 **WW296** **one concept is spelled as three step fields, twice over, and a reader meets six** — abandoned: Kept as it stands, read by somebody who did not write the sixth: the suffix carries the mode in the name, so no step can omit one and fall into a claim it never made.
+- ✅ **WW307** **three of the six comparison keys are never read from a JSON document by any test** — The three keys are read from a document and checked for value and mode: with two of them swapped in the loader's positional call, 29 tests pass and only this one fails.
+- ✅ **WW308** **the pointer family is three loose strings, and its target-and-mode shape is rebuilt at five call sites** — Stored as one target and one mode with the three fields derived from them, so the five rebuilt copies are gone and no key, schema or case file moved — 1819 green.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
@@ -260,7 +269,7 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ✅ **WW154** **nothing at the root tells an adopter what this is, what it refuses, or how to take it** — A README at the root says what winwright is, what it needs, how an adopter takes it and what each exit code means, and a case holds it to the engine's own codes, verb families and non-goals.
-- ✅ **WW78 (the adoption is wired and the case loads)** **the keyboard case is the only observable of a live input path and it lives in a script** — claude-tray drives the engine by one package reference, and its keyboard case loads with four checks and four synthesised acts.
+- ✅ **WW78** **the keyboard case is the only observable of a live input path and it lives in a script** — The case is a data file and ran green in the guest — 3 of 3 checks, click to read-back — so the engine is exercised end to end outside the 3004-line script that held it.
 - ✅ **WW227** **an adopting project can only run its cases on the desk somebody is using** — The runner takes a tree, a name, a command and what to bring back, so an adopting repository runs its cases in the guest instead of on somebody's desk.
 - ✅ **WW228** **an app project at the repository root compiles the driving project into itself** — The adoption section names the one line an app at a repository root needs, and samples/Adopter carries a driving project underneath it so deleting the line goes red.
 - ✅ **WW230** **the only place the engine's package exists is a folder inside this repository** — Published, and the bootstrap deleted: claude-tray restores 0.1.0-alpha.3 from the feed alone, with no path into this repository, and its eight case-loading tests pass.
@@ -276,6 +285,8 @@
 - ✅ **WW278** **the sessions note stays open after the click that should close it, so the case leaves the window changed** — The case restores the window by clicking away, which is how the application says the note closes — measured green, so the dot's second click reopens what it dismissed and the clicks were landing.
 - ✅ **WW303** **the raise refuses the second copy in a file that holds two, so the publish stops before publishing** — A file already reading the new version is this having worked, not a disagreement; only a file reading neither refuses, and two cases now cover a raise nothing covered.
 - 🗑 **WW301** **the engine's package never reaches the guest, so no adoption case can run there** — abandoned: The choice it filed is settled by the publish: the package is on nuget.org, so carrying a local folder into the guest buys nothing and there is no eviction machinery to own.
+- ✅ **WW305** **the runner waits on vmrun start, which prints nothing and in some states never returns** — The start is launched and never waited on, and the poll says its time: a cold guest printed '11s waited; vmrun start has not returned yet' and ran on to 1819 green.
+- ✅ **WW82** **the menu case reads the notification area and nothing else does** — A tray icon is found again by its runtime id, so an application rewriting its own tooltip no longer reads as an icon that vanished: with the match off, one case of 1820 fails, and it is this one.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

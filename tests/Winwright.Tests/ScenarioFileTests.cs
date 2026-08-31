@@ -264,4 +264,56 @@ public class ScenarioFileTests
             ReadBack.All.Select(one => one.Name),
             ScenarioSchema.Step.Single(field => field.Name == "reads").OneOf);
     }
+
+    [Fact]
+    public void The_three_comparison_keys_no_case_file_ever_used_arrive_on_the_step()
+    {
+        // WW307. The list above pins the schema against a written-out list, which is the schema
+        // agreeing with itself. What nothing pinned is the loader's own read. 'coversAtLeast',
+        // 'coversWithin' and 'sameCountdownAs' are each read by name at one line of ScenarioFile,
+        // and a typo in any of those three strings fails nothing: the document's keys are checked
+        // against the schema and pass, the loader's read returns null, and the step loads carrying
+        // one claim fewer than it was written to carry. Green, over an assertion that did not run.
+        //
+        // Their three siblings were already read from a document somewhere in this suite. These
+        // three were reached only through StepDeclaration.Of, which is the layer underneath the one
+        // where that defect would live.
+        var cases = ScenarioFile.Read("three.cases.json", """
+            {
+              "cases": [
+                {
+                  "name": "the three keys nothing else reads",
+                  "steps": [
+                    { "locator": "Text", "act": "read", "coversAtLeast": "settings.panels" },
+                    { "locator": "MenuItem", "act": "read", "coversWithin": "profiles" },
+                    {
+                      "locator": "Text", "act": "read", "reads": "text",
+                      "expect": "10:00", "named": "the first stop"
+                    },
+                    {
+                      "locator": "Text", "act": "read", "reads": "text",
+                      "sameCountdownAs": "the first stop", "named": "the second stop"
+                    }
+                  ]
+                }
+              ]
+            }
+            """);
+
+        var steps = Assert.Single(cases).Steps;
+
+        // The value and the mode, because the three properties are views over one target and one
+        // mode: asserting the value alone would pass on a step that had landed in the wrong mode.
+        Assert.Equal("settings.panels", steps[0].CoversAtLeast);
+        Assert.Null(steps[0].Covers);
+        Assert.Null(steps[0].CoversWithin);
+
+        Assert.Equal("profiles", steps[1].CoversWithin);
+        Assert.Null(steps[1].Covers);
+        Assert.Null(steps[1].CoversAtLeast);
+
+        Assert.Equal("the first stop", steps[3].SameCountdownAs);
+        Assert.Null(steps[3].SameAs);
+        Assert.Null(steps[3].Unlike);
+    }
 }

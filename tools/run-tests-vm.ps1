@@ -174,12 +174,15 @@ function Find-VmRun {
     return $null
 }
 
-function Invoke-VmRun {
+function Get-VmRunArguments {
     <#
       Authentication flags are assembled here and nowhere else, so no call site can put one in a log
       line. They still reach vmrun's own command line, where the host's process list can read them,
       and vmrun offers no spelling that avoids it - which is a reason for the guest to be one that
       can be thrown away, not a reason to pretend otherwise.
+
+      Separate from the call that waits for one, because one caller does not wait. Splitting it is
+      what lets `Start-Guest` launch vmrun without a second spelling of the credentials.
     #>
     param([Parameter(Mandatory)] [string[]] $Arguments, [switch] $Guest)
 
@@ -191,13 +194,107 @@ function Invoke-VmRun {
         $null = $argv.Add('-gp'); $null = $argv.Add($env:WINWRIGHT_GUEST_PASSWORD)
     }
     foreach ($argument in $Arguments) { $null = $argv.Add($argument) }
+    return $argv.ToArray()
+}
 
+function Invoke-VmRun {
+    param([Parameter(Mandatory)] [string[]] $Arguments, [switch] $Guest)
+
+    $argv = Get-VmRunArguments -Arguments $Arguments -Guest:$Guest
     $output = & $script:VmRun @argv 2>&1
     return [pscustomobject]@{
         ExitCode = $LASTEXITCODE
         Output   = ($output | Out-String).Trim()
         Ok       = ($LASTEXITCODE -eq 0)
     }
+}
+
+function Invoke-OnTheDesk {
+    <#
+      Run something in the guest's own desktop session, and refuse in one voice where there is none.
+
+      WW314. Two calls need a session — a probe before anything is carried, and the run itself — and
+      the sentence they share is WW42's: a suite synthesising input into a lock screen is not a suite
+      that ran. Written once here because a rule spelled twice is a rule where the second copy goes
+      on saying the old thing after the first one moves.
+
+      -interactive, which freewilly's harness deliberately never uses: it needs a logged-in desktop
+      session and refuses without one, and that refusal is the right answer.
+
+      And -activeWindow deliberately not, which cost a run to learn. It brings the program's console
+      to the foreground in the guest, and the suite then synthesises input at whatever holds it: a run
+      died with 0xC000013A, STATUS_CONTROL_C_EXIT, which is a keystroke of the suite's own reaching
+      the console hosting it. The fixtures take the foreground themselves; nothing else may compete.
+    #>
+    param([Parameter(Mandatory)] [string] $Vmx, [Parameter(Mandatory)] [string[]] $Arguments)
+
+    $ran = Invoke-VmRun -Guest -Arguments (@('runProgramInGuest', $Vmx, '-interactive') + $Arguments)
+    if (-not $ran.Ok -and $ran.Output -match 'logged in interactively') {
+        Refuse 'the guest has no interactive desktop session' 'Log in at the guest console once, and leave it unlocked. A locked desk renders nothing, which is the session WW42 was measured on.'
+    }
+
+    return $ran
+}
+
+function Start-Guest {
+    <#
+      Power the guest on without letting `vmrun start` decide how long this run lasts.
+
+      That call blocks until VMware is satisfied, and there are states in which it never is: a .lck
+      a killed Workstation left behind, a console sitting on the encryption prompt with nobody at
+      it. Waited on directly it is unbounded, and a run that cannot end is worse than one that
+      refuses - it gets killed by hand, which is the thing that leaves a tree the next sync cannot
+      delete.
+
+      So the start is launched and never waited on. What this run needs is not that call returning,
+      it is VMware Tools answering inside the guest, and a guest that comes up while `start` is
+      still thinking has come up. The poll below is the verdict; the start is only how it was asked.
+
+      It also says the time out loud, every poll. Ten silent minutes and a wedge read identically
+      from outside, and reading them apart is the whole reason this waits rather than blocks.
+    #>
+    param([Parameter(Mandatory)] [string] $Vmx)
+
+    # gui and never nogui: this run needs a desk that draws, and a headless guest is the session
+    # WW42 was measured on - everything present, nothing rendering.
+    $argv = Get-VmRunArguments -Arguments @('start', $Vmx, 'gui')
+    $starting = Start-Job -ScriptBlock {
+        param($Exe, $Argv)
+        $said = & $Exe @Argv 2>&1
+        [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = ($said | Out-String).Trim() }
+    } -ArgumentList $script:VmRun, $argv
+
+    # Ten minutes, not five. freewilly measured an agent taking longer than five to come up after a
+    # component install, and gave up on a machine that was fine.
+    $deadline = (Get-Date).AddMinutes(10)
+    $began = Get-Date
+    while ((Get-Date) -lt $deadline) {
+        Start-Sleep -Seconds 10
+
+        $tools = Invoke-VmRun -Arguments @('checkToolsState', $Vmx)
+        if ($tools.Output -match 'running') {
+            Remove-Job -Job $starting -Force -ErrorAction SilentlyContinue
+            return
+        }
+
+        # A start that came back non-zero is an answer, and waiting out the rest of the deadline for
+        # a guest nobody is powering on is ten minutes spent on a question already settled. Read as
+        # the last thing the job produced and only when it is the record the job promises, because
+        # an error written on the way there arrives on the same pipe and is not an exit code.
+        if ($starting.State -ne 'Running') {
+            $said = @(Receive-Job -Job $starting -ErrorAction SilentlyContinue) | Select-Object -Last 1
+            if ($said -and $said.PSObject.Properties['ExitCode'] -and $said.ExitCode -ne 0) {
+                Refuse "the guest would not start: $($said.Output)"
+            }
+        }
+
+        $waited = [int]((Get-Date) - $began).TotalSeconds
+        $asked = if ($starting.State -eq 'Running') { 'vmrun start has not returned yet' } else { 'vmrun start returned' }
+        $state = if ($tools.Output) { $tools.Output.Trim() } else { 'no answer' }
+        Write-Host "  starting    ${waited}s waited; $asked, tools: $state"
+    }
+
+    Refuse 'VMware Tools never answered in the guest within ten minutes' 'Look at the VM console. A guest stopped at the encryption prompt or the boot menu is waiting for a person, not for this script.'
 }
 
 function Read-ConsoleText {
@@ -265,19 +362,7 @@ if (-not $snapshots.Ok) {
 $running = Invoke-VmRun -Arguments @('list')
 if ($running.Output -notmatch [regex]::Escape([IO.Path]::GetFileName($vmxPath))) {
     Write-Host '  the guest is not running; starting it with its console visible' -ForegroundColor Yellow
-    # gui and never nogui: this run needs a desk that draws, and a headless guest is the session
-    # WW42 was measured on - everything present, nothing rendering.
-    $start = Invoke-VmRun -Arguments @('start', $vmxPath, 'gui')
-    if (-not $start.Ok) { Refuse "the guest would not start: $($start.Output)" }
-
-    # Ten minutes, not five. freewilly measured an agent taking longer than five to come up after a
-    # component install, and gave up on a machine that was fine.
-    $deadline = (Get-Date).AddMinutes(10)
-    do {
-        Start-Sleep -Seconds 10
-        $tools = Invoke-VmRun -Arguments @('checkToolsState', $vmxPath)
-    } while ($tools.Output -notmatch 'running' -and (Get-Date) -lt $deadline)
-    if ($tools.Output -notmatch 'running') { Refuse 'VMware Tools never answered in the guest within ten minutes' }
+    Start-Guest -Vmx $vmxPath
 }
 
 $tools = Invoke-VmRun -Arguments @('checkToolsState', $vmxPath)
@@ -285,6 +370,17 @@ if ($tools.Output -notmatch 'running') {
     Refuse "VMware Tools is '$($tools.Output.Trim())' in the guest" 'Install VMware Tools there. Without it vmrun can run nothing.'
 }
 Write-Host '  guest       running, tools answering'
+
+# WW314. Asked here and not where the suite starts, which is a zip, a copy, an extract and an SDK
+# probe later. Tools answering is not a desk: the service side of the guest replies while the login
+# screen is still up, and a guest that nobody has logged into is the likeliest state of one that
+# just cold-booted — which WW305 made the ordinary way to reach it. The first cold start of a day
+# found a desktop and the second did not, and paid the whole carry to say so.
+#
+# `cmd /c exit` and nothing else: the cheapest program that cannot run without a session, so the
+# probe costs one process start and answers the one question it asks.
+$null = Invoke-OnTheDesk -Vmx $vmxPath -Arguments @('C:\Windows\System32\cmd.exe', '/c', 'exit')
+Write-Host '  desk        a session is logged in'
 
 # --- the tree the guest will test ---------------------------------------------------------------
 
@@ -423,20 +519,10 @@ Write-Host "  guest tree  $syncSaid"
 Write-Host ''
 Write-Host "  running the suite in the guest ($Configuration). The host is yours." -ForegroundColor Cyan
 
-# -interactive, which freewilly's harness deliberately never uses: it needs a logged-in desktop
-# session and refuses without one, and that refusal is the right answer here, because a suite
-# synthesising input into a lock screen is not a suite that ran.
-#
-# And -activeWindow deliberately not, which cost a run to learn. It brings this batch's console to
-# the foreground in the guest, and the suite then synthesises input at whatever holds it: a run died
-# with 0xC000013A, STATUS_CONTROL_C_EXIT, which is a keystroke of the suite's own reaching the
-# console hosting it. The fixtures take the foreground themselves; the console must never compete
-# for it.
-$ran = Invoke-VmRun -Guest -Arguments @('runProgramInGuest', $vmxPath, '-interactive', "$script:GuestSync\run.cmd")
+# Through the same door the probe used, so a desk that locked itself between the two is refused with
+# the sentence the probe would have given it rather than with "the guest never finished the run".
+$ran = Invoke-OnTheDesk -Vmx $vmxPath -Arguments @("$script:GuestSync\run.cmd")
 if (-not $ran.Ok) {
-    if ($ran.Output -match 'logged in interactively') {
-        Refuse 'the guest has no interactive desktop session' 'Log in at the guest console once, and leave it unlocked. A locked desk renders nothing, which is the session WW42 was measured on.'
-    }
     Refuse "the guest never finished the run: $($ran.Output)"
 }
 

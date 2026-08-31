@@ -209,6 +209,12 @@ internal static class Criteria
         new("WW158", "Proven on a desk that draws nothing, not on a mock", "", Unshown.NotYet,
             "the condition is asserted against an ordinary desk by DeskGateTests, and the desk that "
                 + "reports everything present and renders nothing has never been driven here"),
+
+        // --- WW315, which is about a machine rather than about this suite ------------------------------------
+        new("WW315", "two profiles and a transcript exist on the guest, as disposable fixture", "",
+            Unshown.NotBuilt, "the guest holds neither, which is what the task is: six of the eleven "
+                + "adopted cases answer that the file they wanted is absent, and nothing here can "
+                + "fabricate one until it is decided what a disposable profile costs"),
     ]);
 
     /// <summary>
