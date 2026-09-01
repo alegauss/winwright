@@ -196,4 +196,55 @@ a case needing a real account is a case no guest can run.
 Diagnosing it needs WW321 in a published package: until then the second failure breaks
 the run instead of failing it.
 
+### §WW330 The flyout nobody closed
+
+Measured, and it stopped a session. The adopting repository's tray cases ran in the
+guest and failed inside the overflow flyout. The next run there — a different
+repository's suite, minutes later — was refused before it started, with the desk probe
+reporting that the taskbar had held the foreground for every look.
+
+A picture of the guest says what no exit code did: no dialog, no prompt, an ordinary
+desktop. The overflow chevron carries the keyboard focus and its tooltip is drawn beside
+it. That is what the shell looks like after somebody focused the chevron and never took
+the focus back.
+
+Opening the flyout is the engine's own act. `OpenMenu` opens the overflow, focuses the
+icon and presses the application key, and puts nothing back. Where a menu appears,
+dismissing it is the case's business; where none does, there is nothing to dismiss and
+the focus stays where the act left it.
+
+So the cost lands on the run after, which is the shape this block's criterion names: a
+run leaves the machine as it found it. A failing act left the shell selected, and every
+later run inherits it.
+
+Where the restore belongs is the question rather than whether. Putting the focus back
+unconditionally would close a menu a case meant to read. Restoring only where nothing
+opened leaves the successful path leaking — and it is the failing path that was
+measured, and the one with no menu to lose.
+
+### §WW331 A shell surface is not a prompt
+
+The probe refused a run: `the guest's desk is waiting for an answer: explorer (pid 1008,
+Shell_TrayWnd) '' held the foreground for every look`. A capture taken seconds later
+shows an ordinary desktop — no dialog, nothing to answer — with the overflow chevron
+holding the focus and its tooltip drawn. WW330's leak, one layer down.
+
+The reading is right and the sentence is not. Something did hold the foreground for
+every look. That it is a question somebody must answer is an inference, and it does not
+follow: the shell holds the foreground whenever the last thing to touch the desk was the
+shell.
+
+What separates them is already in the reading and thrown away. `Shell_TrayWnd` is the
+taskbar's own class and an empty title is what it has. A prompt is a window of some
+application, with a caption, that a person could read. The probe names the class in its
+own refusal and then does not use it.
+
+The remedy is what makes this expensive rather than untidy. It tells a reader to answer
+a prompt that does not exist, and warns against killing the owner because doing so once
+cost the tray — so the honest response to this message is to go looking at a console for
+something that was never there.
+
+A refusal that named the shell and said the desk was left focused rather than asked
+would point at WW330, which is the actual repair, and cost nobody the trip.
+
 ## Block K — The proving ground — a fixture app built to be hard to test

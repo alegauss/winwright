@@ -297,7 +297,20 @@ public static class Fg {
 
 # The desktop is not a window holding the foreground: an idle logged-in desk has one of these, and
 # reporting it would make every clear desk read as busy.
-$desktop = @('Progman', 'WorkerW')
+#
+# WW331. The shell's own surfaces are the same kind of thing and were not on this list, which cost a
+# session. A run whose tray cases failed inside the overflow left the chevron focused (WW330), the
+# taskbar then held the foreground for all twelve looks, and this refused every later run with "the
+# desk is waiting for an answer" - sending a reader to a guest console to answer a prompt that a
+# screen capture showed was not there.
+#
+# Narrow on purpose, and it has to be: the prompt this probe exists to catch belongs to
+# ShellExperienceHost and is a different class from any of these, so naming the taskbar and the
+# overflow flyout hides no question anybody has to answer. A focused taskbar is a desk somebody left
+# the shell selected on, which is what WW330 is filed to stop leaving behind.
+$desktop = @(
+    'Progman', 'WorkerW',
+    'Shell_TrayWnd', 'Shell_SecondaryTrayWnd', 'TopLevelWindowForOverflowXamlIsland')
 
 $looks = @()
 for ($at = 0; $at -lt 12; $at++) {

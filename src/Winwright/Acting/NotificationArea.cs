@@ -785,13 +785,54 @@ public static class NotificationArea
         }
 
         var before = OnTheDesk();
+
+        // WW322. Read where the key is about to go, before it goes. The application key is
+        // synthesised at the desk and lands on whatever holds the foreground, so a refusal that says
+        // only "nothing was highlighted" leaves a reader unable to tell a shell that declined to
+        // open a menu from a key that was never delivered to the icon at all. Taken before the press
+        // rather than after, because a menu that did open moves both of these.
+        var aimedAt = Foreground.Now();
+        var holding = Traversal.WhoHasFocus()?.Name;
+
         Keys.SendApplicationKey();
         var came = Attempt.UntilTrue(
             () => OnTheDesk() is { } now && now != before && now != icon.Name, settleMs, pollMs);
 
         return came.Happened
             ? new TrayMenu(icon, true, OnTheDesk(), null)
-            : new TrayMenu(icon, false, null, $"nothing was highlighted within {came.WaitedMs} ms of the application key");
+            : new TrayMenu(icon, false, null, Undelivered(icon, came.WaitedMs, aimedAt, holding));
+    }
+
+    /// <summary>
+    /// Why no menu came, said with what the key had to work with. WW322.
+    /// <para>
+    /// Three facts and not one, because they separate three different failures that read identically
+    /// without them. A foreground belonging to somebody else means the key went to that window and
+    /// the icon was never asked. A focus that is not the icon means it went to the right desktop and
+    /// the wrong control — which is what an overflow flyout does when the automation focus lands on
+    /// an element the shell does not treat as its selected item. Both of those right and still no
+    /// menu is the application declining to open one, which is the only reading of the three that is
+    /// about the program under test.
+    /// </para>
+    /// </summary>
+    /// <param name="icon">The icon the menu was asked of.</param>
+    /// <param name="waitedMs">How long the wait for a highlight lasted.</param>
+    /// <param name="aimedAt">Who held the foreground as the key was sent.</param>
+    /// <param name="holding">What the desk said held the focus then, or null where it said nothing.</param>
+    private static string Undelivered(TrayIcon icon, int waitedMs, WindowOwner aimedAt, string? holding)
+    {
+        var focus = holding is { Length: > 0 }
+            ? $"the focus was on '{holding}'"
+            : "the desk named nothing as focused";
+
+        // The icon's own name is what the focus should read as, so the comparison is stated rather
+        // than left to a reader holding two quoted strings side by side.
+        var reached = holding is { Length: > 0 } && icon.Name.Contains(holding, StringComparison.OrdinalIgnoreCase)
+            ? ", which is the icon"
+            : ", which is not the icon";
+
+        return $"nothing was highlighted within {waitedMs} ms of the application key;"
+            + $" the foreground was {aimedAt} and {focus}{reached}";
     }
 
     /// <summary>
