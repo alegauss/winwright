@@ -32,31 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW288 The flyout that shuts, and whether a search should open it again
-
-WW223 built the distinction and then waited for the occurrence to say which of its two
-arms it was. The occurrence arrived on a guest run of 1735:
-`TrayPlacementTests.Adding_one_and_finding_it_holds_every_time_rather_than_most_times`
-was excused — *the overflow shut while this search was looking in it, so the flyout was
-not read to the end*. So it is the flyout, not an absent icon, and the two earlier runs
-of the same tree passed the same case. Do not go looking for a placement bug.
-
-What that leaves is coverage. The case now reports a hole instead of a red, which is
-right and is not the same as answering: on the runs the shell shuts the flyout, nothing
-checks that an added icon can be found, and nothing outside the excuse ledger says how
-often that is.
-
-The shape is open. `Find` has deadline left when it gives up — it opened the overflow,
-polled `Hidden()`, and read the desk once after the poll — so reopening and carrying on
-inside the same budget is available and would turn most of these holes into answers.
-
-Against it: whatever shut the flyout is unexplained, and if an application can close it
-then reopening is the search papering over a fact about the application. That is the
-same mistake WW168 was filed against, pointed the other way.
-
-Measure first, then decide. What shuts it is the question, and the excuse ledger across
-runs is where the rate is.
-
 ### §WW317 The chord press cannot spell
 
 Found adopting this in quickshell, whose window is deliberately almost empty: a title
@@ -184,28 +159,6 @@ names out of.
 The second is the answer the pairs keep pointing at. Each new claim has added itself to
 five or six lists, and the one it forgets is a hole exactly this shape. What it costs is
 a way to say which claims a step is making without every rule enumerating them.
-
-### §WW324 A red once in four runs, about the shell rather than about the code
-
-Measured across four guest runs of one tree during WW83: three green, and one where
-`NotificationAreaTests.The_overflow_opens_through_the_pattern_and_shuts_again` failed at
-`Assert.NotNull(NotificationArea.Overflow())` — the line after the one that asserts the
-open held.
-
-So the open was reported held and the flyout was not in the tree when the next call
-looked. Nothing between them waits: `OpenOverflow` answers a reading about the pattern
-it invoked, and `Overflow()` is a search taken at whatever instant follows. Every other
-wait in this engine polls to a deadline, and this one does not.
-
-The excuse beside it does not reach this. `BusyDesk.Excused` is asked of the open, which
-held, so a shell that worked its own flyout and then had not drawn it yet is neither
-excused nor waited for — it is a red naming a null.
-
-Two candidates and one is cheap to rule out. Either the flyout is genuinely absent for a
-moment after the pattern returns, which a poll to the resolve deadline fixes and is what
-the rest of the engine already does; or the shell answered the pattern without opening
-anything, which is the desk and belongs in the excuse rather than in a wait. The reading
-to take is how long it is absent for, which the poll produces for free.
 
 ## Block G — The scenario — a case is a data file
 

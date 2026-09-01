@@ -127,7 +127,7 @@
 - ✅ **WW217** **the tray cases go red about the shell on a guest that placed no icon and shut its own flyout** — A desk placing no icon anywhere is a hole naming it, asked by a new reading after the search fails, and the second call of a pair is excused like the first.
 - ✅ **WW220** **a search misses an icon in a flyout that opened and had laid out somebody else's** — A search that opened the flyout polls for the name it was given, so a stranger laid out first is no longer answered as this icon being absent from everywhere.
 - ✅ **WW265** **the picker walk reads the items of a shut picker, and a WPF ComboBox has none until it opens** — The walk opens a picker that holds nothing, reads what appeared and puts it back only where it opened it — driven by a WPF picker the fixture had never carried.
-- ✅ **WW288 (the gate on a flyout already standing)** **a search whose flyout shut mid-look gives up, so the icon case is a hole on the runs the shell decides** — `OpenOverflow` puts a flyout somebody else opened through the same gate as one it opened itself, so a poll is no longer handed a window on its way out.
+- ✅ **WW288** **a search whose flyout shut mid-look gives up, so the icon case is a hole on the runs the shell decides** — Nothing shuts it: three candidates were ruled out and the search now looks again before concluding, which is how the rest of the engine reads.
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -214,6 +214,7 @@
 - ✅ **WW310** **spacing the code units 64ms apart is five to nine times worse than spacing them 32 or 96, three runs over** — A band and not a tick: 7.2, 7.6 and 9.6% across 48 to 64ms, back under 2% by 80 — and 130 of 130 failures are the one fault, unchanged at every spacing.
 - ✅ **WW313** **collisions across four runs total 21 where independence predicts 14, and the ledger says they are independent** — By quarter the round slows 4600 to 11325ms while failures rise 6, 6, 11, 22 — so the excess is a rate climbing within the run, not a cause shared between arms.
 - ✅ **WW249** **the case proving that typing reaches a WPF box fails about one guest run in four** — Type repeats the send on WW310's signature and nothing else: 13 of 400 faulted on the guest and all 13 were repaired by one resend, none surviving, each reported rather than swallowed.
+- ✅ **WW324** **the overflow flyout is read back as absent once in four runs, after the open reported that it held** — The same read, one call earlier: the case polls for the flyout it had just been told was usable, so a genuine absence still fails and one unlucky look does not.
 
 ## Block G — The scenario — a case is a data file
 

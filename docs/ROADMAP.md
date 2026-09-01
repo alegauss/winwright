@@ -10,7 +10,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- ⏳ **WW288** (deps: —) **a search whose flyout shut mid-look gives up, so the icon case is a hole on the runs the shell decides** — Measured over 11 guest rolls: the flyout shut mid-look once, so the rate has a denominator at last; whether a search should reopen it is still undecided. → §WW288
 - 📋 **WW317** (deps: —) **A command that only a keyboard chord reaches cannot be driven by a case** — press spells Tab and the arrows, so an application whose every command is on Ctrl+Shift+something is one no case can invoke. → §WW317
 
 ## Block E — Capture — the picture that proves what it photographed
@@ -21,7 +20,6 @@
 - 📋 **WW312** (deps: WW310 ✅) **a band of spacings from forty to seventy milliseconds makes the fault five times likelier and nothing says why** — The curve is measured and its shape rules out a timer tick, so what is left is what the send and the window are doing to each other in that window. → §WW312
 - 📋 **WW318** (deps: —) **A case cannot claim that something is not in the tree** — A locator matching nothing has no subject, so an expectation of absence reads as a timeout and is indistinguishable from a broken read. → §WW318
 - 📋 **WW323** (deps: —) **a step naming label and expectReported loads, and the report then prints the key against the other well's value** — Every other pair of claims on a step is refused where it is written, and this one is honoured as whichever the code reads first. → §WW323
-- 📋 **WW324** (deps: —) **the overflow flyout is read back as absent once in four runs, after the open reported that it held** — An intermittent red is worse than a hole: it teaches a reader to run the suite again, which is the habit every excuse in this project exists to stop. → §WW324
 
 ## Block G — The scenario — a case is a data file
 
@@ -32,7 +30,7 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, a publish carrying the three fields) **the switch case drives the one path that rewrites a real setting** — The case and the store bracket are written and wait on it: the adopter's engine comes from nuget.org. → §WW83
-- 📋 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
+- 📋 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, a publish carrying the three fields) **the environment sweep walks a submenu per sampled mode** — Its own claims need the same three fields, and the submenu it walks is the one WW322 says will not open. → §WW85
 - 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - 📋 **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅, a publish carrying both) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G ✅, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88

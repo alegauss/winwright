@@ -1,6 +1,8 @@
 using System.Windows.Automation;
 
 using Winwright.Acting;
+using Winwright.Locating;
+using Winwright.Windowing;
 
 using Xunit;
 
@@ -220,7 +222,19 @@ public sealed class NotificationAreaTests : IDisposable
         // WW165: the reading and not a bool, so a red on a shell that would not work the flyout
         // names what it was rather than saying only that something was expected to be true.
         Assert.True(opened.Held, opened.ToString());
-        Assert.NotNull(NotificationArea.Overflow());
+
+        // WW324, and WW288's measurement is why it reads this way. `OpenOverflow` answered Held,
+        // which means it had already seen the flyout standing with an icon laid out in it — and
+        // this line still went red once in five guest runs, on the very next call. Nothing shuts a
+        // flyout in that gap: `Overflow()` is one `FindAll` against the desktop root, and a
+        // cross-process tree under load answers null for a window that is there.
+        //
+        // So it is looked at the way everything else in this engine looks: to a deadline. A flyout
+        // that is genuinely absent still fails, and one unlucky read no longer does.
+        Assert.True(
+            Attempt.UntilTrue(() => NotificationArea.Overflow() is not null, 2000, 25).Happened,
+            $"the flyout was not readable after {opened}");
+
         Assert.NotEmpty(NotificationArea.Hidden());
 
         var shut = NotificationArea.CloseOverflow();
@@ -516,6 +530,65 @@ public sealed class NotificationAreaTests : IDisposable
         Assert.Equal(typeof(Winwright.Verdicts.AssertionResult), answering.ReturnType);
         Assert.NotNull(recording);
         Assert.Equal(typeof(Winwright.Tracing.TraceStep), recording.ReturnType);
+    }
+
+    [Fact]
+    public void A_window_taking_the_foreground_shuts_the_flyout_under_whoever_was_looking_in_it()
+    {
+        // WW288's own question, asked as an experiment rather than waited for. Its design says
+        // "measure first, then decide", and the reading it was waiting on was a rate in the excuse
+        // ledger — which says how often and never what. This says what.
+        //
+        // Two candidates were ruled out by reading before this was written. It is not this suite
+        // running two classes at once: every class that works the flyout is in the serial
+        // collection, and the others name `OpenOverflow` in source they scan rather than call. And
+        // it is not an application closing it, because there is no application here at all.
+        var opened = NotificationArea.OpenOverflow();
+        if (BusyDesk.Excused(opened.AsAssertion("the overflow opens")))
+            return;
+
+        Assert.True(opened.Held, opened.ToString());
+        Assert.NotNull(NotificationArea.Overflow());
+
+        // A window of this process, shown and therefore activated — the same event an adopting
+        // application produces every time it raises a dialog, and the same one WW248 measured this
+        // suite producing against its own launched fixtures.
+        var before = Foreground.Now();
+
+        using (PumpedDialog.Open("winwright dismisses the flyout"))
+        {
+            // The premise, read rather than assumed, and it is the whole reason this is a case and
+            // not a paragraph: the first draft measured the flyout without ever checking that the
+            // desktop had moved, which is a reading about an event that may not have happened —
+            // the shape of green this project exists to refuse. A dialog that did not take the
+            // foreground provokes nothing, so it settles nothing either way.
+            var took = Foreground.Now();
+            if (took == before)
+            {
+                Console.WriteLine(
+                    $"the dialog did not take the foreground from {before}, so nothing was provoked "
+                        + "and this measured nothing");
+
+                return;
+            }
+
+            // Read once and not polled, deliberately: what is being measured is whether the flyout
+            // survives the activation, and a poll would answer about the moment it chose.
+            var survived = NotificationArea.Overflow() is not null;
+
+            // Whichever way this desk answers, the reading is the finding — so it is printed rather
+            // than asserted one way. A shell that dismisses its flyout on activation makes every
+            // search in this engine racy against anything that raises a window; one that does not
+            // leaves WW288 still looking for what shuts it.
+            Console.WriteLine(
+                survived
+                    ? $"the flyout survived the foreground moving to {took}"
+                    : $"the foreground moving to {took} shut the flyout");
+
+            Assert.False(
+                survived && NotificationArea.Hidden().Count == 0,
+                "the flyout is standing and holds nothing, which is neither of the two states this measures");
+        }
     }
 
     [Fact]

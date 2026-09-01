@@ -671,9 +671,39 @@ public static class NotificationArea
         // caught once already: not found because nothing was there, against not found because
         // nothing could look.
         //
-        // Read once, after the fact, for the reason the diagnosis is taken after the last attempt:
-        // what a reader wants is the desk as it stood when the run gave up.
+        // WW288. Looked at twice, and the second look is the whole of what this task's measurement
+        // turned up. Three candidates for what shuts the flyout were ruled out — this suite running
+        // two classes at once, an application closing it, and a window taking the foreground, the
+        // last by a case that provokes it and reads who ended up with the desktop — and the one
+        // nobody had considered is that nothing shuts it: `Overflow()` is a single `FindAll` against
+        // the desktop root, every other wait in this engine polls, and a cross-process tree under
+        // load answers null for a window that is standing.
+        //
+        // So the sentence a reader gets now says which it was, and a flyout that comes back on the
+        // second look is not a shut flyout. Read once, this reported a desk that had stopped being
+        // lookable when what had happened was one unlucky read.
         var open = Overflow() is not null;
+        var cameBack = false;
+        if (!open)
+        {
+            cameBack = Attempt.UntilTrue(() => Overflow() is not null, settleMs, pollMs).Happened;
+            open = cameBack;
+        }
+
+        // And the icon looked for again, because the poll above gave up against the same reading.
+        // `Hidden()` is `Overflow()` with a walk under it, so whatever made the flyout answer null
+        // was making the icon answer absent — and concluding "on neither" out of that is an absence
+        // assembled from a desk that was not answering, which is the shape WW168, WW174 and WW179
+        // each caught once already.
+        if (cameBack
+            && Attempt.UntilTrue(
+                () => (hidden = Hidden().FirstOrDefault(icon => Matches(icon, named))) is not null,
+                settleMs,
+                pollMs).Happened)
+        {
+            return new TraySearch(named, hidden, everywhere: true, flyout, "");
+        }
+
         var inside = open ? Hidden().Count : 0;
         var showing = Showing().Count;
 
@@ -684,16 +714,22 @@ public static class NotificationArea
             // shut mid-look knows to ask again.
             return new TraySearch(
                 named, null, everywhere: false, flyout,
-                $"the overflow shut while this search was looking in it, so the flyout was not read to "
-                    + $"the end — the taskbar's own {showing} icon(s) are all this saw");
+                $"the overflow shut while this search was looking in it and was still gone {settleMs}ms "
+                    + $"later, so the flyout was not read to the end — the taskbar's own {showing} "
+                    + "icon(s) are all this saw");
         }
 
         // The counts are the half that used to be missing. An empty flyout and a flyout holding four
         // of the shell's own end this sentence the same way, and the difference is the one that says
         // whether the shell is placing anything at all.
+        //
+        // WW288: and whether the flyout had to be looked at twice, because that is the reading the
+        // task was waiting for. An absence reported after one unlucky read is still an absence, and
+        // a reader deciding whether to trust it wants to know the desk stuttered on the way.
         return new TraySearch(
             named, null, everywhere: true, flyout,
-            $"it is on neither the taskbar nor the overflow ({showing} on the bar, {inside} in the flyout)");
+            $"it is on neither the taskbar nor the overflow ({showing} on the bar, {inside} in the flyout)"
+                + (cameBack ? ", and the flyout read as gone once before answering again" : ""));
     }
 
     /// <summary>
