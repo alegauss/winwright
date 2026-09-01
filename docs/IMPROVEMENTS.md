@@ -150,6 +150,49 @@ is one more cross-process call on a path that has just proved a menu exists. The
 is honest and cheap; the second keeps every existing reading meaning what it did, which
 matters to nobody yet and would matter to an adopter asserting on it.
 
+### §WW341 the same look, four more times
+
+WW329 measured one act. `SendInput` returns once the events are queued rather than
+processed, and `Settled` polled from the instant `Send` returned - which put a
+cross-process read into the window's thread while its packets were still being
+translated. 31 substitutions in 1200 rounds with no pause, none with one.
+
+Nothing about that is peculiar to typing. `Act.Through` reads back through the subject
+the moment the act returns, and four verbs reach it after synthesising input: click,
+press, nudge and the two picker walks. Each queues events and each is read while the
+queue drains.
+
+What differs is the observable. A typed string arrives wrong in a way a case can see,
+character for character, which is why this fault was found at all and why it took ten
+sightings to find. A click that lands late is a step that reads the value from before
+it, which the engine reports as a read-back that did not arrive and a retry then covers
+- so the same provocation would show up as a rate of retries rather than as a wrong
+answer, and nothing has ever counted those against a machine that waited.
+
+The measurement is the task and not the pause. The typing arm exists and takes rounds, a
+pause and a rate; what a click needs is an observable that separates late from wrong,
+and that is what has to be built first.
+
+### §WW342 what the fifty milliseconds are paying for
+
+WW329 measured the repair and not the mechanism. A cross-process read against the window
+under test is two things at once: a call into another process, and a message pump run on
+that process's own thread to answer it. Either could be what disturbs the queue while
+its packets are being translated, and delaying the read removes both.
+
+Two things rest on the difference. The interval is fifty milliseconds because that is
+where the fault stopped and 150 was no better - it is a floor found by sweeping, not a
+duration anything derived, so nothing says whether five would do. And any other reader
+of that window inherits the same question: a case that watches a caption while a send is
+in flight is doing whatever the first look was doing, and there is no rule to tell it
+apart from one that is not.
+
+What would separate them is a reader that does not pump. UI Automation's cached reads
+and a raw property fetch take different routes through the target, and an arm that pumps
+the thread without reading anything - a posted message answered and dropped - would
+provoke it with no read at all. Both are cheap in the arm WW329 already built: the round
+is the same, and what changes is what happens during the drain.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW334 the shadow behind a popup is not a picture of it
@@ -183,30 +226,6 @@ third style bit: WS_EX_TOOLWINDOW was tried and is clear on the menu this exists
 set on the shadow behind it.
 
 ## Block F — Assert — the expectation is derived, never typed
-
-### §WW329 Waiting out the drain instead of repairing it
-
-WW312 swept the same send quiet and watched: identical rounds, identical wall time,
-differing only in whether anything read the box while the queue drained. Six hundred
-quiet rounds faulted nowhere. Watched, three of a hundred and fifty — the rate the
-engine has measured on itself all along.
-
-So the engine is provoking the fault it repairs. `SendInput` returns once the events are
-queued rather than processed, and `Settled` begins polling the instant `Send` returns,
-which puts a cross-process read into the window's thread while its packets are still
-being translated.
-
-That makes a repair available that the resend is not. Three resends cost a failing send
-three more of itself and leave the fault at its rate; waiting out a nine-character drain
-before the first read costs every send a fixed interval and may leave no fault to
-repair. Neither number is known: the drain was measured at 2 to 5ms a character after a
-long pause, and what a first read owes is that pause plus the drain, which nothing has
-measured.
-
-The sweep is already shaped for that measurement. What is not known is whether the
-provocation is the read or the pumping it forces — anything else pumping that thread
-would do as well. Delaying the read fixes it either way; changing how the read is taken
-needs to know which.
 
 ## Block G — The scenario — a case is a data file
 

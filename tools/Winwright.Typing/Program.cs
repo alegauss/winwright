@@ -17,6 +17,12 @@ namespace Winwright.Typing;
 /// carries that shape, which is the repair the arms were being compared to choose between.
 /// </para>
 /// <para>
+/// WW329 then found the engine provoking the fault it repairs, and took it away: the first look is
+/// now taken 50ms after the send rather than the instant it returns, and this arm reads zero where
+/// it used to read one send in fifty. The resend is still there behind it, so what a run reports is
+/// whether the pause is holding on the machine it is running on.
+/// </para>
+/// <para>
 /// So the arms are gone and what is left is one path measured against itself. A <c>Type</c> reports
 /// how many times it had to send again, which is the raw fault rate this tool used to have to
 /// construct an arm to see, and whether the text arrived in the end, which is what the repair fails
@@ -70,10 +76,13 @@ public static class Program
             ? many
             : Rounds;
 
-        // WW312. The second word and not a flag, because there are two experiments here and not one
-        // experiment with an option: the default measures the repair against the engine's own send,
-        // and the sweep drives a send the engine does not have. A run says which it is.
-        var sweeping = args.Length > 1 && string.Equals(args[1], "sweep", StringComparison.OrdinalIgnoreCase);
+        // WW312 and WW329. The second word and not a flag, because these are separate experiments
+        // and not one experiment with options: the default measures the repair against the engine's
+        // own send, `sweep` drives a send the engine does not have, and `delay` drives the send it
+        // does have with the pause the engine does not take. A run says which it is.
+        var experiment = args.Length > 1 ? args[1] : "";
+        var sweeping = string.Equals(experiment, "sweep", StringComparison.OrdinalIgnoreCase);
+        var delaying = string.Equals(experiment, "delay", StringComparison.OrdinalIgnoreCase);
 
         var executable = Fixture();
         if (executable is null)
@@ -91,7 +100,7 @@ public static class Program
 
         try
         {
-            return Measured(fixture, rounds, sweeping);
+            return Measured(fixture, rounds, sweeping, delaying);
         }
         finally
         {
@@ -100,7 +109,7 @@ public static class Program
         }
     }
 
-    private static int Measured(Process fixture, int rounds, bool sweeping)
+    private static int Measured(Process fixture, int rounds, bool sweeping, bool delaying)
     {
         var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(fixture.Id) is not null, 20000, 25);
         if (!drawn.Happened)
@@ -146,6 +155,16 @@ public static class Program
         if (sweeping)
         {
             Sweep.Run(box, arrived, packets, rounds);
+            return 0;
+        }
+
+        // WW329, and it answers on its own for the sweep's reason: the counts and the repair's
+        // verdict below are about the engine's own act, and this arm takes the act apart to put a
+        // pause inside it. Printing those under a run that never called `Type` would attribute this
+        // arm's numbers to the thing it exists to differ from.
+        if (delaying)
+        {
+            FirstRead.Run(box, arrived, packets, rounds);
             return 0;
         }
 
@@ -333,6 +352,14 @@ public static class Program
     private const int TwoRounds = 22;
 
     /// <summary>
+    /// The rate the fault ran at before WW329's pause, measured on the guest over 1200 rounds of the
+    /// engine's own act shape with nothing waited: 31 substitutions, 2.58%. WW329's <c>delay</c> arm
+    /// is what re-measures it, and this is what turns a clean run here into a reading rather than a
+    /// shrug.
+    /// </summary>
+    private const double WithoutThePause = 0.0258;
+
+    /// <summary>
     /// WW313. Whether the rate held still while the run ran, said in quarters.
     /// <para>
     /// The reason it is here rather than in a footnote: the fault's rate is a property of the desk at
@@ -381,9 +408,22 @@ public static class Program
     {
         if (tally.Faulted == 0)
         {
-            return "The fault never appeared, so this run says nothing about the repair: it exercised"
-                + " a path that had nothing to repair. WW249 is rare, and a run that saw none of it is"
-                + " a run with nothing to say rather than an acquittal.";
+            // WW329 turned this arm round. It used to be a run with nothing to say — the fault was
+            // rare and seeing none of it acquitted nothing — and the pause before the first look
+            // made a null the reading the run is for. What decides whether it says anything is the
+            // length: at the rate measured with no pause, this many rounds carries a number.
+            var predicted = tally.Rounds * WithoutThePause;
+
+            return predicted < 5
+                ? $"The fault never appeared, and {tally.Rounds} rounds is too few to make that a"
+                    + $" reading: with no pause before the first look this length would carry about"
+                    + $" {predicted:F1} substitutions, which is a number a clean run can be by luck."
+                : $"The fault never appeared, and at this length that is the reading: with no pause"
+                    + $" before the first look the same shape carried 2.58% — about {predicted:F0}"
+                    + $" substitutions over {tally.Rounds} rounds — and WW329 put one in front of the"
+                    + " engine's first look. What this says is that the pause is still working on"
+                    + " this machine, and that the resend behind it had nothing to repair. The number"
+                    + " it is being read against is the delay arm's, which is where it is re-measured.";
         }
 
         return tally.Survived == 0

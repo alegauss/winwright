@@ -183,7 +183,7 @@ internal static class Sweep
     /// </summary>
     /// <param name="box">The box being typed into.</param>
     /// <param name="expected">What it should read once the queue has drained.</param>
-    private static void Drain(Subject box, string expected)
+    internal static void Drain(Subject box, string expected)
     {
         var until = Stopwatch.StartNew();
         while (until.ElapsedMilliseconds < SettleMs)
@@ -386,7 +386,7 @@ internal static class Sweep
     /// </summary>
     /// <param name="caption">The caption to read.</param>
     /// <param name="most">How many code units of the tail are wanted.</param>
-    private static string? Tail(Subject caption, int most)
+    internal static string? Tail(Subject caption, int most)
     {
         var read = caption.Read();
         if (read.Facts?.Says is not { } said)
@@ -420,6 +420,8 @@ internal static class Spaced
     /// <param name="spacingMs">How long to wait between one code unit and the next.</param>
     public static void Send(string text, int spacingMs)
     {
+        ArgumentNullException.ThrowIfNull(text);
+
         for (var at = 0; at < text.Length; at++)
         {
             Win32.Input[] pair = [Typed(text[at], 0), Typed(text[at], KeyUp)];
@@ -431,6 +433,34 @@ internal static class Spaced
             if (spacingMs > 0)
                 Thread.Sleep(spacingMs);
         }
+    }
+
+    /// <summary>
+    /// One <c>SendInput</c> carrying every code unit, which is the engine's own send. WW329.
+    /// <para>
+    /// <see cref="Send"/> with no spacing is one call per code unit and measured the same rate —
+    /// WW302 read 11 in 400 against 14 batched — but the same rate is not the same shape, and the
+    /// question WW329 asks is about the drain a batch produces. So the arm that sweeps the pause
+    /// before the first read sends what the engine sends rather than something measured to match it.
+    /// </para>
+    /// </summary>
+    /// <param name="text">What to send.</param>
+    public static void Batch(string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+
+        var inputs = new List<Win32.Input>(text.Length * 2);
+        foreach (var character in text)
+        {
+            inputs.Add(Typed(character, 0));
+            inputs.Add(Typed(character, KeyUp));
+        }
+
+        if (inputs.Count == 0)
+            return;
+
+        var array = inputs.ToArray();
+        SendInput((uint)array.Length, array, Marshal.SizeOf<Win32.Input>());
     }
 
     /// <summary>

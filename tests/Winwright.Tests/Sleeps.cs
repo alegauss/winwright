@@ -29,6 +29,14 @@ internal enum Sleeping
     /// and then say which is which — an unseen one cannot be called right.
     /// </summary>
     OnASignal,
+
+    /// <summary>
+    /// The looking is what disturbs the thing being looked at, so the interval is not a wait for a
+    /// condition — it is the condition's own precondition. WW329, and it is the arm this catalogue
+    /// did not have: a deadline that polled from the first millisecond would be the defect rather
+    /// than the way of avoiding one.
+    /// </summary>
+    Undisturbed,
 }
 
 /// <summary>
@@ -110,6 +118,13 @@ internal static class Sleeps
             "the fixture parks a thread without pumping, which is the whole of what --pump=none "
                 + "reproduces: a single-threaded apartment that blocks any other way keeps answering "
                 + "messages and is not dead at all"),
+        new("Keyboard.cs", 1, Sleeping.Undisturbed,
+            "WW329, and the one entry here where the sleeping is the repair. The engine's own poll "
+                + "was provoking the substitution it then resent: SendInput returns once the events "
+                + "are queued rather than processed, so the first look landed in the window's thread "
+                + "while its packets were still being translated. Measured on the guest over 1200 "
+                + "rounds each — 31 substitutions with no pause, none at 50ms, none at 150ms — and "
+                + "there is nothing to wait on instead, because what would end the wait is the look"),
         new("Finished.cs", 1, Sleeping.Machinery,
             "WW218's move into place needs delete access to the destination, and a harness polling "
                 + "that file has it open — so this is the interval between one attempt and the next, "

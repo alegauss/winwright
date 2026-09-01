@@ -238,7 +238,9 @@ public static class Keyboard
         var readBack = Settled(subject, expected, act.Text);
 
         // WW249. Send it again where the reading carries this engine's own substitution, and never
-        // where it carries anything else.
+        // where it carries anything else. WW329 made this the backstop rather than the repair: the
+        // pause before the first look takes the fault away, and a resend is what is left for a
+        // machine where it does not.
         //
         // The fault is measured and narrow: the send puts the last code unit of the string where an
         // earlier one belongs, leaving the length intact. WW310 counted 130 of 130 failures with that
@@ -292,6 +294,31 @@ public static class Keyboard
     private const int Resends = 3;
 
     /// <summary>
+    /// How long a send is left alone before anything reads the control. WW329.
+    /// <para>
+    /// The engine was provoking the fault it repairs. <c>SendInput</c> returns once the events are
+    /// queued rather than processed, and <see cref="Settled"/> began polling the instant
+    /// <see cref="Send"/> returned — which puts a cross-process read into the window's thread while
+    /// its packets are still being translated. WW312 measured that from the other side: six hundred
+    /// rounds nobody read faulted nowhere, and the same send watched faulted at the engine's own rate.
+    /// </para>
+    /// <para>
+    /// Measured on the guest, 1200 rounds at each of three pauses, in the engine's own act shape:
+    /// <b>31 substitutions with no pause (2.58%), none at 50ms, none at 150ms.</b> So the pause is
+    /// the repair and the resend below is the backstop, which is the right way round — a resend is
+    /// paid by the sends that fault and leaves the rate where it is.
+    /// </para>
+    /// <para>
+    /// Fifty and not the safer hundred and fifty, and the reason is what the same run priced: the
+    /// pause costs 7ms a round against 89ms at 150. It is nearly free because the reads it replaces
+    /// were themselves slowing the drain — 146ms a round with no pause, 153ms with this one — so
+    /// what looks like a fixed tax on every keystroke is very nearly the tax that was already being
+    /// paid to provoke a fault.
+    /// </para>
+    /// </summary>
+    private const int FirstLookMs = 50;
+
+    /// <summary>
     /// Wait for the control to reach a reading that will not change, and report it.
     /// <para>
     /// Waited on rather than read the instant after sending: keys go into a queue another thread
@@ -312,6 +339,10 @@ public static class Keyboard
     /// <param name="sent">The text the keyboard was given, which decides what a substitution is.</param>
     private static string? Settled(Subject subject, string expected, string sent)
     {
+        // WW329. The send is left alone before anything looks at it, and this is the repair rather
+        // than a politeness: the look is what provokes the fault the resends below exist to fix.
+        Thread.Sleep(FirstLookMs);
+
         var settled = Attempt.Until(
             () =>
             {

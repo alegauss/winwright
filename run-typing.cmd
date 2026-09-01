@@ -21,8 +21,15 @@ rem
 rem Three arms at every spacing, so it is eighteen cells and long: at 150 rounds it takes the better
 rem part of an hour. `quiet` and `watched` differ only in whether anything reads the box while the
 rem queue drains; `whole` is the engine's own shape, erasing and sending in one act so the backspaces
-rem are still draining when the text goes in. The configuration moved to the third argument when this
-rem gained the second; `run-typing.cmd 400` and `run-typing.cmd 150 sweep` are the two a person types.
+rem are still draining when the text goes in.
+rem
+rem `delay` is WW329's, and it drives the send the engine does have with the pause the engine does
+rem not take: erase and send in one act, then wait 0, 50 or 150ms before looking at the box at all.
+rem What it prices is the alternative to the resend - a pause paid by every send against three
+rem resends paid by the 1% that fault - so it reports the milliseconds a round beside the rate.
+rem
+rem The configuration moved to the third argument when this gained the second. `run-typing.cmd 400`,
+rem `run-typing.cmd 150 sweep` and `run-typing.cmd 1200 delay` are the three a person types.
 setlocal
 
 set CONFIG=Debug

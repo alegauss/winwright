@@ -223,6 +223,7 @@
 - ✅ **WW326** **a case can claim one reading equals an earlier one and never that it holds it inside** — contains is the fourth way a step points at an earlier one, and asking PointsAt for it found the sixth call site WW308 said would spell the fold differently.
 - ✅ **WW312** **a band of spacings from forty to seventy milliseconds makes the fault five times likelier and nothing says why** — 2700 rounds over three send shapes and six spacings faulted twice, both at no spacing at all, where 48-64ms alone predicted 35 (design recorded in `tools/Winwright.Typing/Sweep.cs`).
 - ✅ **WW323** **a step naming label and expectReported loads, and the report then prints the key against the other well's value** — The eleven lists are one set a step declares itself into, so a pair nobody enumerated is refused by the same rule as every other and the refusal names both fields.
+- ✅ **WW329** **the engine's own read-back poll is what provokes the substitution it then repairs** — The first look waits 50ms: 31 substitutions of 1200 became none, at 7ms a round, and the engine's own path then read 0 of 600 where 15 were due.
 
 ## Block G — The scenario — a case is a data file
 

@@ -139,6 +139,28 @@ public sealed class SleepTests
     }
 
     [Fact]
+    public void A_sleep_that_exists_because_looking_disturbs_it_is_called_that_and_not_a_wait()
+    {
+        // WW329. The arm this catalogue did not have, and the reason it needed one: the entry is a
+        // sleep in the engine's own typing path, and every word already here would have been wrong
+        // about it. It is not the interval between looks, it is not the resolution of a measurement,
+        // it is not the thing under test — and calling it a wait that stays one would say there is
+        // nothing to observe, when what is true is that observing is what breaks it.
+        var undisturbed = Sleeps.Known.Where(one => one.Kind == Sleeping.Undisturbed).ToList();
+
+        Assert.Contains(undisturbed, one => one.File == "Keyboard.cs");
+
+        // The measurement, in the entry. A pause with no number beside it is the guess this project
+        // refuses everywhere else, and this one replaced a repair that had numbers of its own.
+        Assert.All(undisturbed, one => Assert.Contains("rounds", one.Because, StringComparison.Ordinal));
+
+        // And none of them counted among the ones that are still waits, which is the number Block C's
+        // criterion is about: a new arm that inflated it would be the criterion loosened rather than
+        // a distinction drawn.
+        Assert.DoesNotContain(Sleeps.Waiting(), one => one.Kind == Sleeping.Undisturbed);
+    }
+
+    [Fact]
     public void The_deadline_machinery_is_where_the_sleeping_belongs()
     {
         // The positive half of the criterion. A deadline that did not sleep would be a spin, so the
