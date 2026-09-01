@@ -124,6 +124,14 @@ public static class Program
         // many calls, how far apart — and the fault is a character ARRIVING where a different one
         // was sent.
         var waited = On(root, "Text#waited");
+
+        // WW312. The two halves of the same round, so a fault can be attributed. `arrived` is what
+        // the window's thread pulled off the queue as WM_CHAR; `injected` is the VK_PACKET keydown
+        // each of them was made from. If the packets already carry the substitution it entered at
+        // the injection, and if they do not it entered at the translation — and nothing has ever
+        // put the two side by side at the moment one went wrong.
+        var arrived = On(root, "Text#arrived");
+        var packets = On(root, "Text#injected");
         var tally = new Tally();
 
         // Read only where the repair fired, and never per round. A read is a cross-process call and
@@ -148,7 +156,13 @@ public static class Program
             ran = round;
 
             if (typed.Resends > 0 && arrivals.Count < MostArrivals)
-                arrivals.Add($"round {round}: {Gaps(waited)}");
+            {
+                arrivals.Add(
+                    $"round {round}"
+                        + $"{Environment.NewLine}    gaps     {Gaps(waited)}"
+                        + $"{Environment.NewLine}    chars    {Tailed(arrived, TwoRounds)}"
+                        + $"{Environment.NewLine}    packets  {Decoded(packets, TwoRounds)}");
+            }
 
             lost = typed.Arrived ? 0 : lost + 1;
             if (lost >= Void)
@@ -213,9 +227,16 @@ public static class Program
     /// </para>
     /// </summary>
     /// <param name="waited">The caption the gaps are written to.</param>
-    private static string Gaps(Subject waited)
+    private static string Gaps(Subject waited) => Says(waited, Tail);
+
+    /// <summary>
+    /// The tail of one of the fixture's read-outs, as its automation name carries it. WW312.
+    /// </summary>
+    /// <param name="caption">The caption to read.</param>
+    /// <param name="most">How many space-separated values of the tail to keep.</param>
+    private static string Says(Subject caption, int most)
     {
-        var read = waited.Read();
+        var read = caption.Read();
         if (!read.Found)
             return "<no caption to read>";
 
@@ -232,7 +253,69 @@ public static class Program
         // it is the send that went wrong. Reading the last group as the faulty one turns the
         // repair's own latency into a finding about the fault.
         var all = said.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return all.Length <= Tail ? said : string.Join(' ', all[^Tail..]);
+        return all.Length <= most ? said : string.Join(' ', all[^most..]);
+    }
+
+    /// <summary>The last <paramref name="most"/> code units of a read-out that carries no separator.</summary>
+    /// <param name="caption">The caption to read.</param>
+    /// <param name="most">How many code units of the tail to keep.</param>
+    private static string Tailed(Subject caption, int most)
+    {
+        var read = caption.Read();
+        if (read.Facts?.Says is not { } said)
+            return read.Found ? "<the caption says nothing>" : "<no caption to read>";
+
+        return said.Length <= most ? said : said[^most..];
+    }
+
+    /// <summary>
+    /// The injected packets, decoded to the code units they carry. WW312, and the whole point of the
+    /// pairing: this beside the characters that arrived says whether a substitution was already in
+    /// what was injected, or was made of a correct packet by the translation.
+    /// <para>
+    /// The high word of the wParam is where a <c>KEYEVENTF_UNICODE</c> injection puts the code unit.
+    /// WW249 looked in the lParam's scan byte and found zero — which settled that it is not there
+    /// and left the question of where it is. A word that decodes to nothing printable is shown as
+    /// its hex rather than dropped: an unreadable packet is a finding and a silent one is not.
+    /// </para>
+    /// </summary>
+    /// <param name="caption">The caption the packets are written to.</param>
+    /// <param name="most">How many packets of the tail to decode.</param>
+    private static string Decoded(Subject caption, int most)
+    {
+        var read = caption.Read();
+        if (read.Facts?.Says is not { } said)
+            return read.Found ? "<the caption says nothing>" : "<no caption to read>";
+
+        var entries = said.Split('[', StringSplitOptions.RemoveEmptyEntries)
+            .Select(one => one.TrimEnd(']'))
+            .Where(one => one.Contains('/', StringComparison.Ordinal))
+            .ToList();
+
+        if (entries.Count == 0)
+            return said;
+
+        var decoded = entries
+            .Skip(Math.Max(0, entries.Count - most))
+            .Select(one =>
+            {
+                var word = one.Split('/')[0];
+                if (!uint.TryParse(word, System.Globalization.NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var value))
+                    return "?";
+
+                var unit = (char)(value >> 16);
+                return char.IsControl(unit) || unit == 0 ? "." : unit.ToString();
+            })
+            .ToList();
+
+        // WW312. Said once rather than printed per packet, which is what the first reading did: a
+        // row of twenty-one identical hex words is a finding spelled at twenty-one times its length.
+        // The finding is that the keydown carries no code unit at all — the lParam's scan byte is
+        // zero, measured by WW249, and the wParam's high word is zero too — so this record cannot be
+        // paired against the characters and nothing between the two sides is observable from here.
+        return decoded.All(one => one == ".")
+            ? $"{decoded.Count} packet(s), none carrying a code unit in either word"
+            : string.Concat(decoded);
     }
 
     /// <summary>
@@ -240,6 +323,9 @@ public static class Program
     /// pauses before each. WW312.
     /// </summary>
     private const int Tail = 20;
+
+    /// <summary>How many code units of the character and packet records are printed: two rounds.</summary>
+    private const int TwoRounds = 22;
 
     /// <summary>
     /// WW313. Whether the rate held still while the run ran, said in quarters.

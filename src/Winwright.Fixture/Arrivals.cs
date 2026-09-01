@@ -182,7 +182,15 @@ internal sealed class Arrivals
         if (message.message == WmKeyDown && (message.wParam & 0xFFFF) == VkPacket)
         {
             keys++;
-            injected.Append($"[{(uint)message.lParam:X8}]");
+
+            // WW312. Both words and not the lParam alone, which is the question this record was one
+            // field short of answering. WW249 read the scan code at bits 16-23 of the lParam and got
+            // zero for all seven of a round that typed correctly, so the code unit is not there —
+            // and the record then had nothing in it that could be compared against what arrived as
+            // WM_CHAR. The high word of the wParam is the other place it can be, and until it is
+            // written down there is no way to tell a packet that was already wrong from a
+            // translation that made it wrong.
+            injected.Append($"[{(uint)message.wParam:X8}/{(uint)message.lParam:X8}]");
             Trim(injected);
             Say(packets, Counted());
         }
