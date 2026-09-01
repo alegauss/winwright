@@ -136,6 +136,52 @@ The second is the answer the pairs keep pointing at. Each new claim has added it
 five or six lists, and the one it forgets is a hole exactly this shape. What it costs is
 a way to say which claims a step is making without every rule enumerating them.
 
+### §WW325 The state a form is in before it is filled in
+
+Found migrating pportal's interaction harness. Its third case is one line —
+`Assert.False(update.Current.IsEnabled)` — and it is the whole of PP223's claim: Update
+follows the alteration and nothing else, asserted on the real control rather than on the
+view model that decides it.
+
+No reading in the vocabulary answers it. `toggle` is a pattern and a Button offers none;
+`focused` is about the desk; `anything` walks the patterns and a disabled Button answers
+through none of them. So the one property that says *this control will not take input*
+is invisible to a case, while `ElementFacts` has read it on every look since block A.
+
+It is worth its own reading rather than a `[pattern=…]` in a locator, which is the near
+miss: a locator selecting only enabled controls would make the disabled case match
+nothing, and "not there" and "there and greyed" are opposite findings about a form.
+WW318 just drew that line in the other direction.
+
+What it must not become is an always-answering reading. `focused` says *not focused* for
+everything that resolved, which makes `answers` an unearned green, and enabled has the
+same shape — every element that resolved is enabled or is not. So it declares itself the
+way `focused` does, and a step claiming it answers is refused where it is written.
+
+### §WW326 The sentence that quotes what it is about
+
+`sameAs` and `unlike` compare two readings and both compare them whole. That is right
+for a percentage read at two stops of a round trip, and it is false of the commonest
+thing a dialog does: it names the thing it opened for.
+
+Found migrating pportal's capture case. It reads the pad's name off the mapping screen,
+presses a row, and asserts the prompt that comes up quotes it —
+`Assert.Contains(title.Current.Name, prompt.Current.Name)`. Neither string can be typed
+in a case: one is whatever controller is plugged into this desk and the other is built
+from it. So the claim is exactly *the reading of this step holds the reading of that
+one*, and there is nowhere to write it.
+
+Every near miss answers a different question. `sameAs` is equality. `coversWithin` is
+WW292's and compares a *derived set* against many elements, not one reading against one
+earlier reading. `matches` takes a pattern the case types, which is the value no case
+can know. And `beginsWithLabel` is containment at the front of a string against the
+project's own strings rather than against another step.
+
+The shape follows the three that exist: a field naming an earlier step, judged where the
+case knows all its steps, refused for pointing at itself, at a later step or at a step
+reading something else — and it has to say which reading, like the others, or the
+default compares whichever answered first.
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
