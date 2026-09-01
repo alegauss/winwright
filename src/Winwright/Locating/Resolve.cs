@@ -299,9 +299,21 @@ public static class Resolve
                     doors.Add(new ClosedDoor(facts.ToString(), how));
             }
         }
-        catch (ElementNotAvailableException)
+        catch (Exception went) when (went is ElementNotAvailableException or System.Runtime.InteropServices.COMException)
         {
             // The window went while it was being searched; what was found stands.
+            //
+            // WW328. Both, because UI Automation reports one fact two ways: an element that left
+            // during the walk comes back as ElementNotAvailable, and a provider that could not answer
+            // at all comes back as a bare COM failure — measured on a guest as
+            // `Catastrophic failure (0x8000FFFF)` out of a descendants walk of the whole desktop,
+            // which is the most expensive question this engine ever asks.
+            //
+            // Caught here rather than left to the caller, and this is the rule `Diagnose` states in
+            // as many words: a diagnosis is a page about a failure and never a second thing that can
+            // fail. It went out through Diagnose, through Until, through Subject.Read and out of the
+            // act being traced, so a case whose locator was correctly found to match nothing failed
+            // with a COM error from the code explaining why.
         }
 
         return doors;

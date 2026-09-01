@@ -252,7 +252,7 @@ public class ScenarioFileTests
         Assert.Equal(
             [
                 "locator", "tray", "act", "with", "expect", "reads", "moves", "answers", "matches", "discloses",
-                "sameAs", "unlike", "sameCountdownAs", "label", "expectReported", "notLabel", "beginsWithLabel", "absent",
+                "sameAs", "unlike", "sameCountdownAs", "contains", "label", "expectReported", "notLabel", "beginsWithLabel", "absent",
                 "ownHeader", "eachSpoken", "spoken", "never", "covers",
                 "coversAtLeast", "coversWithin", "meansIt", "named",
             ],

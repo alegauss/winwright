@@ -97,6 +97,7 @@
 - ✅ **WW202** **three source sweeps still match raw text, and one of them is the twin of the catalogue just repaired for it** — Four raw sweeps, not three — the fourth was found by the check this built, which is now what makes the fifth red rather than a repeat.
 - ✅ **WW207** **four sweeps carry their own copy of the member walk and two of them get a tuple-returning member wrong** — One walk beside the file walk, with the tuple fix the two older copies lacked — and it turned out all four read a field initialised by a call as a member.
 - ✅ **WW206** **the sweep rule is checked per file, so a file holding two sweeps passes on the strength of the one that reads code** — The unit is the sweep, so a file holding two is two: thirteen are found where eight files were, and the excuse list is empty rather than hand-written.
+- ✅ **WW328** **the diagnosis of a locator that matched nothing walks the whole desktop and throws where that walk fails** — The door walk catches the COM failure beside the one it already caught, so a locator correctly found to match nothing no longer fails from the code explaining why.
 
 ## Block D — Act — patterns before pointers
 
@@ -219,6 +220,7 @@
 - ✅ **WW318** **A case cannot claim that something is not in the tree** — absent polls until the locator matches nothing, and refuses to hold where the region the last step looks under is not there to be absent from.
 - ✅ **WW325** **no reading answers whether a control will take input, so a case cannot check that a button is greyed** — A reading off the property ElementFacts has read since block A, declared always-answering so a step claiming it answers is refused where it is written.
 - ✅ **WW327** **the instance check's own case asserts about a process it never waited for, and reads nothing on a loaded desk** — The three launches go through the wait that was already there, so the case establishes the premise WW180 and WW283 had each tried to read around.
+- ✅ **WW326** **a case can claim one reading equals an earlier one and never that it holds it inside** — contains is the fourth way a step points at an earlier one, and asking PointsAt for it found the sixth call site WW308 said would spell the fold differently.
 
 ## Block G — The scenario — a case is a data file
 

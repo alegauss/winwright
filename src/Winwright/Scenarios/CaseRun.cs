@@ -1733,6 +1733,7 @@ public static class CaseRun
         var pointed = step.PointsAt;
         var same = step.Pointing == Pointing.Same;
         var ticking = step.Pointing == Pointing.Countdown;
+        var holding = step.Pointing == Pointing.Contains;
 
         if (string.IsNullOrEmpty(backTo))
         {
@@ -1749,10 +1750,11 @@ public static class CaseRun
             return new Landed(acted, never, saw);
         }
 
-        var wanted = (same, ticking) switch
+        var wanted = (same, ticking, holding) switch
         {
-            (_, true) => $"the '{step.Reads.Name}' that '{pointed}' read, give or take a tick — {backTo}",
-            (true, _) => $"the '{step.Reads.Name}' that '{pointed}' read — {backTo}",
+            (_, true, _) => $"the '{step.Reads.Name}' that '{pointed}' read, give or take a tick — {backTo}",
+            (_, _, true) => $"a '{step.Reads.Name}' holding the {backTo} that '{pointed}' read",
+            (true, _, _) => $"the '{step.Reads.Name}' that '{pointed}' read — {backTo}",
             _ => $"a '{step.Reads.Name}' other than the {backTo} that '{pointed}' read",
         };
 
@@ -1773,6 +1775,14 @@ public static class CaseRun
 
                 if (ticking)
                     return Ticked(backTo, now) ? wanted : now;
+
+                // WW326. Containment and never equality, and the earlier reading is what is looked
+                // for rather than the other way round: the dialog quotes the thing it opened for, so
+                // the longer string is this step's. A step whose reading is exactly the earlier one
+                // holds it too, which is right — `sameAs` is the stronger claim and is there to be
+                // made where it is the one meant.
+                if (holding)
+                    return now.Contains(backTo, StringComparison.Ordinal) ? wanted : now;
 
                 return string.Equals(now, backTo, StringComparison.Ordinal) == same ? wanted : now;
             },

@@ -81,30 +81,6 @@ The second is the answer the pairs keep pointing at. Each new claim has added it
 five or six lists, and the one it forgets is a hole exactly this shape. What it costs is
 a way to say which claims a step is making without every rule enumerating them.
 
-### §WW326 The sentence that quotes what it is about
-
-`sameAs` and `unlike` compare two readings and both compare them whole. That is right
-for a percentage read at two stops of a round trip, and it is false of the commonest
-thing a dialog does: it names the thing it opened for.
-
-Found migrating pportal's capture case. It reads the pad's name off the mapping screen,
-presses a row, and asserts the prompt that comes up quotes it —
-`Assert.Contains(title.Current.Name, prompt.Current.Name)`. Neither string can be typed
-in a case: one is whatever controller is plugged into this desk and the other is built
-from it. So the claim is exactly *the reading of this step holds the reading of that
-one*, and there is nowhere to write it.
-
-Every near miss answers a different question. `sameAs` is equality. `coversWithin` is
-WW292's and compares a *derived set* against many elements, not one reading against one
-earlier reading. `matches` takes a pattern the case types, which is the value no case
-can know. And `beginsWithLabel` is containment at the front of a string against the
-project's own strings rather than against another step.
-
-The shape follows the three that exist: a field naming an earlier step, judged where the
-case knows all its steps, refused for pointing at itself, at a later step or at a step
-reading something else — and it has to say which reading, like the others, or the
-default compares whichever answered first.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

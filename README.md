@@ -408,6 +408,12 @@ than about what it ended on: it names a key whose string must not be showing any
 at any moment while this step waits for its locator. And `covers` is the fourteenth, which is one claim
 over many elements — see below.
 
+`contains` is the fourth of that family and the one a dialog needs: this step's reading **holds**
+what an earlier step read, rather than equalling it. A capture prompt quotes the pad it opened for,
+and neither string can be typed — one is whatever device is plugged into the desk and the other is
+built out of it. `coversWithin` is the near miss and answers a different question: it compares a
+*derived set* against many elements, where this compares one reading with one earlier reading.
+
 `sameAs` and `unlike` are judged where the case knows all its steps, so a pointer at a name nobody
 wrote, at a step further down, at a name two steps share, or at a step reading something else is
 refused before the run. Both have to say which reading they are about: comparing a value to a name

@@ -356,6 +356,7 @@ public sealed class ScenarioFile
         var coversAtLeast = Text(at, step, ScenarioSchema.Step, "coversAtLeast");
         var coversWithin = Text(at, step, ScenarioSchema.Step, "coversWithin");
         var sameCountdownAs = Text(at, step, ScenarioSchema.Step, "sameCountdownAs");
+        var contains = Text(at, step, ScenarioSchema.Step, "contains");
         var expectReported = Text(at, step, ScenarioSchema.Step, "expectReported");
         var meansIt = Truth(at, step, ScenarioSchema.Step, "meansIt");
         var named = Text(at, step, ScenarioSchema.Step, "named");
@@ -377,7 +378,7 @@ public sealed class ScenarioFile
             at,
             () => StepDeclaration.Of(
                 locator, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches, discloses,
-                sameAs, never, spoken, label, notLabel, beginsWithLabel, absent, unlike, sameCountdownAs, expectReported,
+                sameAs, never, spoken, label, notLabel, beginsWithLabel, absent, unlike, sameCountdownAs, contains, expectReported,
                 eachSpoken, ownHeader, tray, coversAtLeast, coversWithin));
     }
 

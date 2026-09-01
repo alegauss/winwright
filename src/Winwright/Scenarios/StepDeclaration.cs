@@ -26,6 +26,18 @@ public enum Pointing
     /// numbers must match except the last, which may have ticked by one. `sameCountdownAs`.
     /// </summary>
     Countdown,
+
+    /// <summary>
+    /// The reading is claimed to hold the earlier step's inside it. `contains`.
+    /// <para>
+    /// WW326. The other three compare two readings whole, which is right for a percentage read at two
+    /// stops of a round trip and false of the commonest thing a dialog does: it names the thing it
+    /// opened for. Measured on pportal's capture prompt — it quotes the pad's name, and neither
+    /// string can be typed in a case, because one is whatever controller is plugged into this desk
+    /// and the other is built out of it.
+    /// </para>
+    /// </summary>
+    Contains,
 }
 
 /// <summary>
@@ -407,6 +419,24 @@ public sealed record StepDeclaration
         PointsAt is { } step && Pointing == Pointing.Countdown ? step : null;
 
     /// <summary>
+    /// The earlier step whose reading this one claims to hold inside its own, or null where it makes
+    /// another claim.
+    /// <para>
+    /// WW326. The fourth of the family and the one a dialog needs: it quotes the thing it opened for,
+    /// so equality is false of it and neither string can be typed — one is what this desk happens to
+    /// have and the other is built out of it.
+    /// </para>
+    /// <para>
+    /// Every near miss answers a different question. <see cref="SameAs"/> is equality.
+    /// <see cref="Matches"/> takes a pattern the case types, which is the value no case can know.
+    /// <c>coversWithin</c> is WW292's and compares a <em>derived set</em> against many elements
+    /// rather than one reading against one earlier reading. And <see cref="BeginsWithLabel"/> is
+    /// containment at the front of a string against the project's own strings, not against a step.
+    /// </para>
+    /// </summary>
+    public string? Contains => PointsAt is { } step && Pointing == Pointing.Contains ? step : null;
+
+    /// <summary>
     /// The earlier step this one compares its reading with, however it claims it. Null where it
     /// points at none.
     /// <para>
@@ -570,7 +600,7 @@ public sealed record StepDeclaration
         || SameAs is not null || Never is not null || Spoken
         || Absent
         || Label is not null || NotLabel is not null || BeginsWithLabel is not null
-        || Unlike is not null || SameCountdownAs is not null
+        || Unlike is not null || SameCountdownAs is not null || Contains is not null
         || ExpectReported is not null
         || EachSpoken || OwnHeader;
 
@@ -617,6 +647,10 @@ public sealed record StepDeclaration
     /// ticked down by one. WW269, and at most one of this, <paramref name="sameAs"/> and
     /// <paramref name="unlike"/>.
     /// </param>
+    /// <param name="contains">
+    /// The earlier step whose reading this one claims to hold inside its own. WW326, and at most one
+    /// of this and the three beside it.
+    /// </param>
     /// <param name="eachSpoken">That every element the locator matches announces a name.</param>
     /// <param name="ownHeader">That no control in a row announces another row's header.</param>
     /// <exception cref="ScenarioRefusedException">Where any field could not run on any machine.</exception>
@@ -655,6 +689,7 @@ public sealed record StepDeclaration
         bool absent = false,
         string? unlike = null,
         string? sameCountdownAs = null,
+        string? contains = null,
         string? expectReported = null,
         bool eachSpoken = false,
         bool ownHeader = false,
@@ -708,7 +743,7 @@ public sealed record StepDeclaration
         }
 
         if (named_tray is not null)
-            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, beginsWithLabel, absent, unlike, sameCountdownAs, expectReported, eachSpoken, ownHeader);
+            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, beginsWithLabel, absent, unlike, sameCountdownAs, contains, expectReported, eachSpoken, ownHeader);
 
         // WW263 and WW273. A locator with a brace in it has to parse with something in it as well as
         // with the placeholder, and both are facts about the file rather than about a run. Probed here
@@ -760,6 +795,10 @@ public sealed record StepDeclaration
         // every rule below that names one of the three has to know about it or it names the wrong one.
         var ticking = string.IsNullOrWhiteSpace(sameCountdownAs) ? null : sameCountdownAs.Trim();
 
+        // WW326, the fourth, and folded in with the three above for their reason: a rule that does
+        // not know about a claim names the wrong field when it refuses one.
+        var holding = string.IsNullOrWhiteSpace(contains) ? null : contains.Trim();
+
         // WW294, computed with the others for the reason all of them are: a step whose only claim is
         // this one must not be refused as a step that claims nothing.
         var reportedly = string.IsNullOrWhiteSpace(expectReported) ? null : expectReported.Trim();
@@ -772,6 +811,14 @@ public sealed record StepDeclaration
                 string.IsNullOrWhiteSpace(named) ? "<a step>" : named.Trim(),
                 $"it expects '{expected}' and also the value the application reports under "
                     + $"'{reportedly}'; a step answers one thing, and these are two");
+        }
+
+        if (holding is not null && (back ?? apart ?? ticking) is { } alsoHolding)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims its reading holds what '{holding}' read and also compares it with "
+                    + $"'{alsoHolding}'; a step answers one thing, and these are two");
         }
 
         if (ticking is not null && (back ?? apart) is { } alsoPointing)
@@ -836,7 +883,7 @@ public sealed record StepDeclaration
         var claims = absent || wanted is not null || moves || answers || sweeping is not null || pattern is not null
             || discloses || back is not null || apart is not null || forbidden is not null || spoken
             || declared is not null || undeclared is not null || opening is not null
-            || ticking is not null || reportedly is not null
+            || ticking is not null || holding is not null || reportedly is not null
             || eachSpoken || ownHeader;
 
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
@@ -970,13 +1017,17 @@ public sealed record StepDeclaration
                     + "a step answers one thing, and these are two");
         }
 
-        if ((back ?? apart ?? ticking) is { } pointed)
+        if ((back ?? apart ?? ticking ?? holding) is { } pointed)
         {
             // The field the case wrote, and this is the one place that still has to know: a refusal
             // names what to go and delete, so it says the spelling the file used and never the mode
             // the engine folded it into.
-            var field = back is not null ? "sameAs" : apart is not null ? "unlike" : "sameCountdownAs";
-            var claim = apart is not null ? "differs from" : "is back to";
+            var field = back is not null ? "sameAs"
+                : apart is not null ? "unlike"
+                : ticking is not null ? "sameCountdownAs" : "contains";
+
+            var claim = apart is not null ? "differs from"
+                : holding is not null ? "holds what" : "is back to";
 
             // One claim per step, as everywhere else. 'expect' names the value and this is the claim
             // for a value the case cannot name — it only knows which earlier step to compare with.
@@ -1234,10 +1285,11 @@ public sealed record StepDeclaration
         // actually wrote — a fold done before them would have them saying 'sameAs' to a file that
         // said 'unlike'. The three are mutually exclusive by the rules above, so this cannot pick
         // wrongly: `back` and `apart` together were refused, and `ticking` beside either was too.
-        var pointing = (apart is not null, ticking is not null) switch
+        var pointing = (apart is not null, ticking is not null, holding is not null) switch
         {
-            (true, _) => Pointing.Unlike,
-            (_, true) => Pointing.Countdown,
+            (true, _, _) => Pointing.Unlike,
+            (_, true, _) => Pointing.Countdown,
+            (_, _, true) => Pointing.Contains,
             _ => Pointing.Same,
         };
 
@@ -1255,7 +1307,7 @@ public sealed record StepDeclaration
             answers,
             pattern,
             discloses,
-            back ?? apart ?? ticking,
+            back ?? apart ?? ticking ?? holding,
             forbidden,
             spoken,
             declared,
@@ -1308,6 +1360,7 @@ public sealed record StepDeclaration
         bool absent,
         string? unlike,
         string? sameCountdownAs,
+        string? contains,
         string? expectReported,
         bool eachSpoken,
         bool ownHeader)
@@ -1338,6 +1391,7 @@ public sealed record StepDeclaration
             ("sameAs", sameAs is not null),
             ("unlike", unlike is not null),
             ("sameCountdownAs", sameCountdownAs is not null),
+            ("contains", contains is not null),
             ("expectReported", expectReported is not null),
             ("label", label is not null),
             ("notLabel", notLabel is not null),

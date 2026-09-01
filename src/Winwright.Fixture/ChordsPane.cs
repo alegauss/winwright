@@ -43,6 +43,13 @@ public static class ChordsPane
         System.Windows.Automation.AutomationProperties.SetName(ran, Nothing);
         rows.Children.Add(ran);
 
+        // WW326. The caption that quotes the other one, which is the shape a dialog has: it names the
+        // thing it is about, so what a case can say is that this reading HOLDS that one — neither
+        // string being one the case could type, because both are built by the application.
+        var echo = new TextBlock { Name = "chordEcho", Text = Nothing, Margin = new Thickness(0, 4, 0, 0) };
+        System.Windows.Automation.AutomationProperties.SetName(echo, Nothing);
+        rows.Children.Add(echo);
+
         // Said in the window as well, because a person driving this by hand has no other way to know
         // what it can do — there is nothing on screen that suggests a chord exists.
         rows.Children.Add(new TextBlock
@@ -73,8 +80,8 @@ public static class ChordsPane
         var window = Window.GetWindow(panes) ?? throw new InvalidOperationException(
             "the chords pane is added before its window exists, so there is nothing to bind on");
 
-        Bind(window, ran, Key.I, ModifierKeys.Control | ModifierKeys.Shift, "imported");
-        Bind(window, ran, Key.F1, ModifierKeys.Control | ModifierKeys.Alt, "wrote a bundle");
+        Bind(window, ran, echo, Key.I, ModifierKeys.Control | ModifierKeys.Shift, "imported");
+        Bind(window, ran, echo, Key.F1, ModifierKeys.Control | ModifierKeys.Alt, "wrote a bundle");
 
         return pane;
     }
@@ -89,10 +96,11 @@ public static class ChordsPane
     /// </summary>
     /// <param name="where">The window the binding lives on.</param>
     /// <param name="ran">The read-out the command writes to.</param>
+    /// <param name="echo">The caption that quotes it, for the claim one reading holds another.</param>
     /// <param name="key">The key.</param>
     /// <param name="held">The modifiers held with it.</param>
     /// <param name="said">What the read-out says once it has run.</param>
-    private static void Bind(Window where, TextBlock ran, Key key, ModifierKeys held, string said)
+    private static void Bind(Window where, TextBlock ran, TextBlock echo, Key key, ModifierKeys held, string said)
     {
         var command = new RoutedCommand();
         where.CommandBindings.Add(new CommandBinding(command, (_, _) =>
@@ -103,6 +111,13 @@ public static class ChordsPane
             // reading a case can make is the name — and a command that wrote only the text would be
             // invisible to the check that matters.
             System.Windows.Automation.AutomationProperties.SetName(ran, said);
+
+            // Built out of what the other caption says rather than written twice, so the two cannot
+            // disagree — which is what makes the containment claim about the application and not
+            // about two constants that happen to overlap.
+            var quoted = $"{said} — press it again to repeat";
+            echo.Text = quoted;
+            System.Windows.Automation.AutomationProperties.SetName(echo, quoted);
         }));
 
         where.InputBindings.Add(new KeyBinding(command, key, held));

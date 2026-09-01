@@ -283,9 +283,18 @@ public sealed record CaseDeclaration
     {
         for (var index = 0; index < steps.Count; index++)
         {
-            // WW268. Either field, judged the same way: both name an earlier step and both are wrong
-            // in the same four ways, so one loop answers for both.
-            if ((steps[index].SameAs ?? steps[index].Unlike) is not { } back)
+            // WW268. Every field that points, judged the same way: they all name an earlier step and
+            // are all wrong in the same four ways, so one loop answers for all of them.
+            //
+            // WW326 asked it of `PointsAt` rather than of the fields, and found the site WW308
+            // predicted. That task folded three loose strings into one pointer and one mode because
+            // the shape was being reassembled by a chain of `??` at five call sites — "each was
+            // right; together they were one idea spelled five times, and the sixth was the one that
+            // would have spelled it differently". This was the sixth. It read `SameAs ?? Unlike`, so
+            // a `sameCountdownAs` naming a step that does not exist, or a later one, or a name two
+            // steps share, was refused by nothing and reached the run as a comparison against
+            // nothing at all.
+            if (steps[index].PointsAt is not { } back)
                 continue;
 
             var earlier = new List<StepDeclaration>();
