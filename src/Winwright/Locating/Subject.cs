@@ -110,6 +110,23 @@ public sealed class Subject
     public Locator Locator { get; }
 
     /// <summary>
+    /// Whether the region this subject's last step is looked for under is there at all.
+    /// <para>
+    /// WW318. It is what keeps a claim of absence from being the easiest unearned green in the
+    /// format. <c>Pane#capture &gt; Button#close</c> matching nothing means one of two opposite
+    /// things — the pane is up and holds no such button, which is the claim, or the pane never
+    /// opened, which answers nothing about the button. A step that could not tell them apart would
+    /// pass hardest on a window that never rendered.
+    /// </para>
+    /// <para>
+    /// True for a one-step locator, and that is not an exception: the region is then the root the
+    /// case was launched against, which a fixture waits for before any step runs. So the claim is
+    /// <em>not in this window</em>, and the window is there to be absent from.
+    /// </para>
+    /// </summary>
+    public bool RegionIsThere => Locator.Steps.Count == 1 || Locating.Resolve.Beneath(root, Locator).Count > 0;
+
+    /// <summary>
     /// The entries this project says end the run. Empty for a subject built without a declaration,
     /// and then nothing about this subject is refused.
     /// </summary>

@@ -337,6 +337,30 @@ public sealed record StepDeclaration
     public string? BeginsWithLabel { get; private init; }
 
     /// <summary>
+    /// Whether this step claims its locator matches nothing.
+    /// <para>
+    /// WW318. Every other claim reads a subject, and a locator matching nothing has no subject to
+    /// read — so <c>"expect": "absent"</c> came out as <em>nothing answered to it in 109 polls</em>,
+    /// which is word for word what a genuinely broken read produces. The two were indistinguishable
+    /// in a report, and one of them was the pass.
+    /// </para>
+    /// <para>
+    /// Found adopting this in an application whose window makes its argument by what is not in it —
+    /// no toolbar, no status bar, no sidebar, and not hidden ones waiting to be switched on. Absence
+    /// from the accessibility tree is the strongest form of that claim, because it is what a screen
+    /// reader would find, and it catches what a tree walk cannot: chrome a theme or a host draws
+    /// without the window's own tree holding it.
+    /// </para>
+    /// <para>
+    /// The unearned green it would otherwise be is refused two ways. <see cref="Subject.RegionIsThere"/>
+    /// keeps the claim from holding because the region was never there, and the wait runs the other
+    /// way round: it polls until the locator matches nothing rather than until it matches, so a
+    /// control on its way out is waited for and one that never leaves fails naming what it found.
+    /// </para>
+    /// </summary>
+    public bool Absent { get; private init; }
+
+    /// <summary>
     /// The earlier step this one claims its reading differs from, or null where it makes another
     /// claim.
     /// <para>
@@ -544,6 +568,7 @@ public sealed record StepDeclaration
         Tray is not null
         || Expected is not null || Moves || Answers || Sweeps is not null || Matches is not null || Discloses
         || SameAs is not null || Never is not null || Spoken
+        || Absent
         || Label is not null || NotLabel is not null || BeginsWithLabel is not null
         || Unlike is not null || SameCountdownAs is not null
         || ExpectReported is not null
@@ -581,6 +606,7 @@ public sealed record StepDeclaration
     /// <param name="label">The key whose declared string the reading should be.</param>
     /// <param name="notLabel">The key whose declared string the reading should not be.</param>
     /// <param name="beginsWithLabel">The key whose declared string the reading should begin with.</param>
+    /// <param name="absent">That the locator matches nothing, in a region that is there to be looked in.</param>
     /// <param name="unlike">The earlier step this one claims its reading differs from.</param>
     /// <param name="expectReported">
     /// The name whose value the application reports and the reading should be, declared in the
@@ -626,6 +652,7 @@ public sealed record StepDeclaration
         string? label = null,
         string? notLabel = null,
         string? beginsWithLabel = null,
+        bool absent = false,
         string? unlike = null,
         string? sameCountdownAs = null,
         string? expectReported = null,
@@ -681,7 +708,7 @@ public sealed record StepDeclaration
         }
 
         if (named_tray is not null)
-            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, beginsWithLabel, unlike, sameCountdownAs, expectReported, eachSpoken, ownHeader);
+            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, beginsWithLabel, absent, unlike, sameCountdownAs, expectReported, eachSpoken, ownHeader);
 
         // WW263 and WW273. A locator with a brace in it has to parse with something in it as well as
         // with the placeholder, and both are facts about the file rather than about a run. Probed here
@@ -768,7 +795,45 @@ public sealed record StepDeclaration
         // that asks whether a step claims anything has to know about it, or it names the wrong field.
         var opening = string.IsNullOrWhiteSpace(beginsWithLabel) ? null : beginsWithLabel.Trim();
 
-        var claims = wanted is not null || moves || answers || sweeping is not null || pattern is not null
+        // WW318. One claim per step, as everywhere else, and here the sharpest case of it: every
+        // other claim reads a subject and this one says there is none, so a second claim beside it
+        // would be a reading of the element the step is asserting is not there.
+        if (absent)
+        {
+            if (expected is not null || moves || answers || sweeping is not null || matches is not null
+                || discloses || sameAs is not null || unlike is not null || sameCountdownAs is not null
+                || never is not null || spoken || eachSpoken || ownHeader
+                || label is not null || notLabel is not null || beginsWithLabel is not null
+                || expectReported is not null)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    "it claims its locator matches nothing and also makes a claim about what it "
+                        + "matched; there is no reading of an element that is not there");
+            }
+
+            if (!string.IsNullOrWhiteSpace(reads))
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims its locator matches nothing and names the '{reads.Trim()}' reading; "
+                        + "an element that is not there answers no reading, and naming one would "
+                        + "look like it narrowed the claim");
+            }
+
+            // An act on a thing the step says is not there is a step that cannot run: the act
+            // resolves the subject first, so it would fail on the absence this is asserting.
+            if (!ActVerb.Named(verb).Reads)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims its locator matches nothing and acts with '{ActVerb.Named(verb).Name}'; "
+                        + "an act resolves what it acts on, so this would fail on the very absence "
+                        + "it is asserting");
+            }
+        }
+
+        var claims = absent || wanted is not null || moves || answers || sweeping is not null || pattern is not null
             || discloses || back is not null || apart is not null || forbidden is not null || spoken
             || declared is not null || undeclared is not null || opening is not null
             || ticking is not null || reportedly is not null
@@ -1202,6 +1267,7 @@ public sealed record StepDeclaration
             pointing)
         {
             BeginsWithLabel = opening,
+            Absent = absent,
         };
     }
 
@@ -1239,6 +1305,7 @@ public sealed record StepDeclaration
         string? label,
         string? notLabel,
         string? beginsWithLabel,
+        bool absent,
         string? unlike,
         string? sameCountdownAs,
         string? expectReported,
@@ -1275,6 +1342,7 @@ public sealed record StepDeclaration
             ("label", label is not null),
             ("notLabel", notLabel is not null),
             ("beginsWithLabel", beginsWithLabel is not null),
+            ("absent", absent),
             ("never", never is not null),
             ("covers", covers is not null),
             ("spoken", spoken),

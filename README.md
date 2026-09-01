@@ -381,6 +381,16 @@ eleventh and is the same predicate over a different set: every element the locat
 announces a name. `ownHeader` is the twelfth and is the half neither of those can see: of the rows
 the locator matches, no control inside one announces a **different** row's header.
 
+`absent` is the claim a locator makes by matching **nothing** — for the window that argues by what
+it does not hold: no toolbar, no status bar, no sidebar, and not hidden ones waiting to be switched
+on. Every other claim reads a subject and this one says there is none, so it is the only claim on the
+step and no `reads` may sit beside it. Two things keep it from being the easiest unearned green in
+the format: the wait runs the other way round, polling until the locator matches nothing rather than
+until it matches, so a control on its way out is waited for and one that never leaves fails naming
+what it found; and the **region** the last step is looked for under has to be there, so
+`Pane#capture > Button#close` matching nothing because the pane never opened is reported as a claim
+that could not be evaluated rather than as a pass.
+
 `never` is the thirteenth and is the only claim about the **wait** rather
 than about what it ended on: it names a key whose string must not be showing anywhere in the window
 at any moment while this step waits for its locator. And `covers` is the fourteenth, which is one claim

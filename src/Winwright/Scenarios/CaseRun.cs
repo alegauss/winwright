@@ -1468,6 +1468,9 @@ public static class CaseRun
         if (step.Answers)
             return Answered(step, subject, acted);
 
+        if (step.Absent)
+            return Missing(step, subject, acted);
+
         if (step.Matches is not null)
             return Matched(step, subject, acted);
 
@@ -1501,6 +1504,51 @@ public static class CaseRun
                 var look = subject.ReadOnce();
                 saw = look.Facts ?? saw;
                 return look.Found ? step.Reads.Of(look) : null;
+            },
+            subject.ActMs,
+            subject.PollMs);
+
+        return new Landed(acted, expectation, saw);
+    }
+
+    /// <summary>
+    /// A step that claims its locator matches nothing.
+    /// <para>
+    /// WW318. The wait runs the other way round from every other one here: it polls until the
+    /// locator matches <em>nothing</em> rather than until it matches, so a control on its way out is
+    /// waited for and one that never leaves fails naming what it found. A single look would have made
+    /// the claim a race against whatever the act had just done.
+    /// </para>
+    /// <para>
+    /// The region is read first, and it is what keeps this from being the easiest unearned green in
+    /// the format. <c>Pane#capture &gt; Button#close</c> matching nothing means the pane is up and
+    /// holds no such button — the claim — or that the pane never opened, which answers nothing about
+    /// the button. The second is reported as what it is: a claim that could not be evaluated, naming
+    /// the region rather than passing.
+    /// </para>
+    /// </summary>
+    private static Landed Missing(StepDeclaration step, Subject subject, ActResult? acted)
+    {
+        const string wanted = "nothing here";
+        var saw = acted?.Element;
+
+        var expectation = Expect.That(
+            step.Name,
+            wanted,
+            () =>
+            {
+                // Read every time rather than once before the poll: a region that is arriving is the
+                // ordinary case after an act, and answering about the first instant would report a
+                // window that had not finished opening.
+                if (!subject.RegionIsThere)
+                    return $"nothing to look in — {subject.Locator} has no region to be absent from";
+
+                var look = subject.ReadOnce();
+                saw = look.Facts ?? saw;
+
+                // Its own words where something is there, so the failure says what it found rather
+                // than that the claim did not hold.
+                return look.Found ? look.Facts?.ToString() ?? "something the tree would not describe" : wanted;
             },
             subject.ActMs,
             subject.PollMs);

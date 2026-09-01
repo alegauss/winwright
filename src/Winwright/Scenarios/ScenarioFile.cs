@@ -348,6 +348,7 @@ public sealed class ScenarioFile
         var label = Text(at, step, ScenarioSchema.Step, "label");
         var notLabel = Text(at, step, ScenarioSchema.Step, "notLabel");
         var beginsWithLabel = Text(at, step, ScenarioSchema.Step, "beginsWithLabel");
+        var absent = Truth(at, step, ScenarioSchema.Step, "absent");
         var unlike = Text(at, step, ScenarioSchema.Step, "unlike");
         var eachSpoken = Truth(at, step, ScenarioSchema.Step, "eachSpoken");
         var ownHeader = Truth(at, step, ScenarioSchema.Step, "ownHeader");
@@ -376,7 +377,7 @@ public sealed class ScenarioFile
             at,
             () => StepDeclaration.Of(
                 locator, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches, discloses,
-                sameAs, never, spoken, label, notLabel, beginsWithLabel, unlike, sameCountdownAs, expectReported,
+                sameAs, never, spoken, label, notLabel, beginsWithLabel, absent, unlike, sameCountdownAs, expectReported,
                 eachSpoken, ownHeader, tray, coversAtLeast, coversWithin));
     }
 

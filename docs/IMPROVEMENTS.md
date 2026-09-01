@@ -113,30 +113,6 @@ out; what it has never been asked is what the queue looked like at that moment.
 A guess worth pricing before adopting it: the band may be where a send is slow enough to
 overlap the read-back the engine does after it, and fast enough that both are in flight.
 
-### §WW318 Absence as a reading rather than a timeout
-
-Found adopting this in quickshell, whose window makes its argument by what is not in it:
-no toolbar, no status bar, no sidebar — and not hidden ones waiting to be switched on,
-but no elements at all. That claim is the design, and the repository has an in-process
-test walking the visual tree to assert it.
-
-Through a case it cannot be said. A step reads a subject, and a locator matching nothing
-has no subject to read, so `"expect": "absent"` fails as "nothing answered to it in 109
-polls" — which is the same sentence a genuinely broken read produces. The two are
-indistinguishable in a report, and one of them is the pass.
-
-Why it is worth having rather than left to in-process tests. Absence from the
-accessibility tree is the strongest form of the claim — what a screen reader would find
-— and it catches what a tree walk cannot: chrome a theme, a style or a host puts on
-screen without the window's own tree containing it.
-
-What it needs from a reader: a locator resolving nothing must be a *result* rather than
-a timeout, and only where absence is what was asked. Everywhere else it must stay the
-failure it is now — an expectation of absence that quietly passed because the window had
-not opened yet would be the worst of both.
-
-Falsified when a case cannot say that something is not there.
-
 ### §WW323 A key from one well priced against the other well's value
 
 One claim per step is this format's rule, and it is enforced by a list of fields per
