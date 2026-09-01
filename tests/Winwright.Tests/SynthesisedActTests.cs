@@ -69,6 +69,48 @@ public sealed class SynthesisedActTests : IDisposable
     private Subject On(string locator) =>
         Subject.Unguarded(dialog.Root, Locator.Parse(locator), deadlineMs: 4000, pollMs: 25);
 
+    /// <summary>
+    /// WW321. A subject that resolves to nothing and sits in no window, which is what every step
+    /// after a failed one is handed: claude-tray's tray menu did not open, so <c>Menu &gt; MenuItem</c>
+    /// matched nothing against the desktop and the step that asked it to open a submenu threw out of
+    /// the engine's own frames. The whole run came back <c>Broken</c> — the harness threw — over a
+    /// case that had already failed correctly, with a diagnosis.
+    /// <para>
+    /// Against the desktop root and not this class's dialog, because the dialog is a window and the
+    /// branch this is about is the one for an element in none. A locator nothing on any desk matches,
+    /// and a short deadline: what is being built is the absence, so there is nothing to wait for.
+    /// </para>
+    /// </summary>
+    private static Subject OnNothing() => Subject.Unguarded(
+        AutomationElement.RootElement,
+        Locator.Parse("Menu[name=\"winwright no such menu 8f3a\"] > MenuItem"),
+        deadlineMs: 250,
+        pollMs: 25);
+
+    [Fact]
+    public void An_act_whose_locator_matched_nothing_reports_it_rather_than_throwing()
+    {
+        var expanded = Synthesised.ExpandMenu(OnNothing());
+
+        // No element, because there was none. That is the fact the result used to assert away.
+        Assert.Null(expanded.Element);
+        Assert.False(expanded.Attempted);
+        Assert.NotNull(expanded.Needed);
+    }
+
+    [Fact]
+    public void The_trace_line_for_an_act_against_nothing_says_so_instead_of_throwing()
+    {
+        // Where the throw actually came from: the result composed fine, and reporting it was what
+        // could not be done.
+        var step = Synthesised.ExpandMenu(OnNothing()).AsTraceStep();
+
+        // Resolved is what it resolved to, and nothing is the honest answer rather than a blank.
+        Assert.Null(step.Resolved);
+        Assert.Equal(StepVerdict.Unchecked, step.Verdict);
+        Assert.Contains("nothing matching", Synthesised.ExpandMenu(OnNothing()).ToString(), StringComparison.Ordinal);
+    }
+
     [Fact]
     public void Typing_reaches_the_control_with_real_keys_and_reads_back()
     {

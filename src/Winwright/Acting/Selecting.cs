@@ -21,7 +21,7 @@ public enum SelectRoute
 public sealed record Selected
 {
     internal Selected(
-        ElementFacts item, SelectRoute route, bool landed, bool pointerTried, string? because, Precondition foreground)
+        ElementFacts? item, SelectRoute route, bool landed, bool pointerTried, string? because, Precondition foreground)
     {
         Item = item;
         Route = route;
@@ -32,7 +32,12 @@ public sealed record Selected
     }
 
     /// <summary>What was selected.</summary>
-    public ElementFacts Item { get; }
+    /// <summary>
+    /// The item, and null where the locator matched nothing — WW321, for the reason
+    /// <see cref="ActResult.Element" /> is: a selection against nothing has no item, and asserting
+    /// one turns a case that failed honestly into a harness that threw.
+    /// </summary>
+    public ElementFacts? Item { get; }
 
     /// <summary>Which route took, or that neither did.</summary>
     public SelectRoute Route { get; }
@@ -52,10 +57,13 @@ public sealed record Selected
     /// <summary>What happened, with the route in it.</summary>
     public override string ToString() => Route switch
     {
-        SelectRoute.Pattern => $"{Item} was selected through the pattern and confirmed.",
-        SelectRoute.Pointer => $"{Item} was selected by clicking it, the pattern having not confirmed.",
-        _ => $"{Item} was not selected: {Because}.",
+        SelectRoute.Pattern => $"{Named} was selected through the pattern and confirmed.",
+        SelectRoute.Pointer => $"{Named} was selected by clicking it, the pattern having not confirmed.",
+        _ => $"{Named} was not selected: {Because}.",
     };
+
+    /// <summary>The item as a sentence names it, and the word for having matched nothing.</summary>
+    private string Named => Item?.ToString() ?? "nothing the locator matched";
 
     /// <summary>
     /// The result a verdict counts. A desk that refused the foreground is a <em>hole</em> and never
@@ -76,8 +84,8 @@ public sealed record Selected
     public TraceStep AsTraceStep() => new()
     {
         Verb = "select",
-        Locator = Item.ToString(),
-        Resolved = Item.ToString(),
+        Locator = Named,
+        Resolved = Item?.ToString(),
         Pattern = Route == SelectRoute.Pointer ? "synthesized input" : "SelectionItem",
         ReadBack = Landed ? "selected" : "not selected",
         Verdict = Landed ? StepVerdict.Ok : StepVerdict.Failed,

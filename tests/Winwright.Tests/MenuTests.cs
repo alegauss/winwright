@@ -124,8 +124,13 @@ public sealed class MenuTests : IDisposable
         // The element handed back is what the menu landed on and not what the locator matched, which
         // is the whole of how a case states this claim: `reads: name` answers `Facts.Says`, so it is
         // the submenu entry the expectation compares against and not the window the locator found.
-        Assert.Equal("one.txt", acted.Element.Says);
-        Assert.NotEqual(acted.Element.Says, On().Read().Facts?.Says);
+        //
+        // WW321 made the field nullable, so this asserts there is one before reading it — which is
+        // the claim this case was always making and used to make by dereferencing.
+        Assert.NotNull(acted.Element);
+        var landed = acted.Element;
+        Assert.Equal("one.txt", landed.Says);
+        Assert.NotEqual(landed.Says, On().Read().Facts?.Says);
         Assert.Equal(Synthesised.ByKeyboard, acted.Pattern);
         Assert.Equal(Synthesised.ExpandsMenu, acted.Verb);
     }

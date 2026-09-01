@@ -291,6 +291,7 @@
 - ✅ **WW320** **routing a capture needs a main window to compare against, so an application showing only a menu cannot be routed** — A one-argument overload answers from the window's own class and ownership, so a menu with nothing behind it routes as the screen copy it is.
 - ✅ **WW314** **a guest sitting at its lock screen is found only after the tree is carried, so the refusal costs a full sync** — A `cmd /c exit` on the desk runs before anything is staged, so a locked guest refuses for one process start where it used to cost the whole carry.
 - ✅ **WW311** **a run that just booted the guest is measured on a desk still putting up its startup notifications** — The foreground is polled before the carry and the desk is named — clear, busy, asking or broken — and the last two refuse, naming the window, before the twenty minutes are spent.
+- ✅ **WW321** **a synthesised act whose locator matched nothing throws out of its own trace step, so a red case reports Broken** — An act against nothing has no element, so the type says so: the trace line reports the locator that matched nothing and the case fails as itself instead of breaking.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

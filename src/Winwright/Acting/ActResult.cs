@@ -15,7 +15,7 @@ public sealed record ActResult
         string verb,
         Locator locator,
         string pattern,
-        ElementFacts element,
+        ElementFacts? element,
         PatternValues before,
         PatternValues after,
         int waitedMs,
@@ -42,8 +42,23 @@ public sealed record ActResult
     /// <summary>The UI Automation pattern it went through.</summary>
     public string Pattern { get; }
 
-    /// <summary>What the element was, read at the moment the act ran.</summary>
-    public ElementFacts Element { get; }
+    /// <summary>
+    /// What the element was, read at the moment the act ran — and null where the locator matched
+    /// nothing at all.
+    /// <para>
+    /// WW321. It used to assert one, and that assertion was the whole of a run that came back
+    /// <c>Broken</c> over a menu that did not open: the case before it had already failed, so the
+    /// locator this act named matched nothing, and building the trace line threw out of the engine's
+    /// own frames. Broken outranks Failed and means the harness threw, which is the one verdict that
+    /// sends a reader to the wrong repository.
+    /// </para>
+    /// <para>
+    /// An act against nothing is a real thing to report and not an error: what was needed of the
+    /// machine, what the locator was and that nothing answered to it are all still here. Only the
+    /// element is missing, because there was none.
+    /// </para>
+    /// </summary>
+    public ElementFacts? Element { get; }
 
     /// <summary>What its patterns read before.</summary>
     public PatternValues Before { get; }
@@ -97,7 +112,7 @@ public sealed record ActResult
     {
         Verb = Verb,
         Locator = Locator.Text,
-        Resolved = Element.ToString(),
+        Resolved = Element?.ToString(),
         Pattern = Pattern,
         ReadBack = After.Reading(),
         WaitedMs = WaitedMs,
@@ -112,12 +127,19 @@ public sealed record ActResult
         // Said before the reading and not after it: "nothing it reports moved" about an act that was
         // never performed is a sentence a reader acts on, and it would be describing the desk.
         if (!Attempted)
-            return $"{Verb} {Element} was not attempted: {Needed!.Absence}";
+            return $"{Verb} {Named} was not attempted: {Needed!.Absence}";
 
         var moved = Changed
             ? $"{Before.Reading() ?? "nothing"} -> {After.Reading() ?? "nothing"}"
             : "nothing it reports moved";
 
-        return $"{Verb} {Element} via {Pattern}: {moved}";
+        return $"{Verb} {Named} via {Pattern}: {moved}";
     }
+
+    /// <summary>
+    /// The element as a sentence names it, and the word for having matched nothing. Never the empty
+    /// string an interpolated null would leave: "click  was not attempted" reads as a formatting
+    /// slip, and what happened is that the locator found no element to click.
+    /// </summary>
+    private string Named => Element?.ToString() ?? $"nothing matching {Locator.Text}";
 }
