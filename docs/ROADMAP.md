@@ -29,12 +29,12 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- 📋 **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
-- 📋 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
+- 📋 **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
+- 📋 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
 - 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - 📋 **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅, a publish carrying both) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G ✅, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
-- ⏳ **WW315** (deps: —) **six of the eleven adopted cases have nothing to check on the guest, which holds no profiles and no transcripts** — Each is a hole naming the file it wanted, which is right — but the cases WW83 and WW85 still have to migrate could then be proven nowhere. → §WW315
+- 📋 **WW322** (deps: —) **the tray menu will not open on the guest: the icon is found in the overflow and the application key highlights nothing** — Two adopted cases fail on it, and WW85 migrates a third that walks the same submenu, so the sweep would arrive at a menu nothing has opened. → §WW322
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
@@ -172,14 +172,6 @@
   against a real session that reports everything present and renders nothing - the WW42
   desk - and stays met on an ordinary one. A rendering check verified only against a
   substitute has been verified against the one desk that was never the problem.
-
-## Done when — WW315
-
-- **two profiles and a transcript exist on the guest, as disposable fixture** The six
-  holed cases answer instead of naming an absent file, and everything the fixture wrote
-  is deleted with the rest of the tree — no profile a run repointed surviving outside
-  it. That is what lets WW83 and WW85 migrate as cases observed to work, rather than
-  correct and refused.
 
 ## Non-goals
 

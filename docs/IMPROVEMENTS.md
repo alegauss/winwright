@@ -209,29 +209,30 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW315 A guest that is not the machine under test
+### §WW322 the icon that answers and the menu that does not
 
-The first adoption run reached the guest, restored the published engine, built and ran
-eleven cases. Five of them answered. Six had nothing to answer with, and said so
-precisely: `--profiles reports 0, and the profile card is Collapsed below two`, and `no
-*.jsonl under C:\Users\oobe\.claude\projects, so no report can render`.
+WW315's bench closed six holes and the run underneath them became readable for the first
+time. Seven cases pass. Two fail on one thing: `hidden tray icon 'Claude Code -
+connecting. [check] Claude Code - not signed in' [80x80 at 3259,1711] showed no menu:
+nothing was highlighted within 6003 ms of the application key`.
 
-That is the engine behaving. Not one of the six went green on absent data, and each
-names the file it wanted rather than reporting a control that failed. WW42's rule
-holding in a place nobody had put it yet.
+Every part of that except the last clause is the engine working. The icon was found, in
+the overflow, with its rectangle — the surface WW258 and WW259 were built for. What did
+not happen is the menu.
 
-What it blocks is the rest of the migration. WW83 moves the case that rewrites a real
-setting — a profile switch — and WW85 the sweep that walks a submenu per sampled mode.
-Both need two profiles to exist before there is a switch to make or a submenu to walk.
-Written against a guest with none, they would migrate as cases that are correct,
-refused, and never once observed to work.
+Three candidates and no measurement yet. The tooltip says *connecting* and *not signed
+in*, which is the bench's own doing: a fabricated profile has a config and no
+credentials, and a tray still resolving one may not build its menu. It may be the
+overflow flyout, where the application key reaches a shell window rather than the icon's
+owner. Or it may be the guest, which is the desk WW311 reads and did not refuse.
 
-So the guest needs to become the machine these cases are about: profiles it can switch
-between, and a transcript to report on. What that costs is the question — fabricated
-data is a fixture and has to be as disposable as the rest of the tree, and profiles that
-a run repoints are the one thing here that writes outside it.
+The first is cheapest to falsify: run the case against a profile with credentials and
+see whether the menu appears. If it does, either the bench fabricates a signed-in
+profile or the cases declare they need one — and which is right is the question, because
+a case needing a real account is a case no guest can run.
 
-Until then WW83 and WW85 are waiting rather than ready, which is what this line says.
+Diagnosing it needs WW321 in a published package: until then the second failure breaks
+the run instead of failing it.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
