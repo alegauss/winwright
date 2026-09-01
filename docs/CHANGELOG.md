@@ -216,6 +216,7 @@
 - ✅ **WW249** **the case proving that typing reaches a WPF box fails about one guest run in four** — Type repeats the send on WW310's signature and nothing else: 13 of 400 faulted on the guest and all 13 were repaired by one resend, none surviving, each reported rather than swallowed.
 - ✅ **WW324** **the overflow flyout is read back as absent once in four runs, after the open reported that it held** — The same read, one call earlier: the case polls for the flyout it had just been told was usable, so a genuine absence still fails and one unlucky look does not.
 - ✅ **WW318** **A case cannot claim that something is not in the tree** — absent polls until the locator matches nothing, and refuses to hold where the region the last step looks under is not there to be absent from.
+- ✅ **WW325** **no reading answers whether a control will take input, so a case cannot check that a button is greyed** — A reading off the property ElementFacts has read since block A, declared always-answering so a step claiming it answers is refused where it is written.
 
 ## Block G — The scenario — a case is a data file
 

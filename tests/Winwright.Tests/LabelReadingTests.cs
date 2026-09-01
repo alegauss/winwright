@@ -56,8 +56,17 @@ public sealed class LabelReadingTests : IDisposable
 
         Assert.Contains("could never be false", refused.Because, StringComparison.Ordinal);
 
-        // And it is the only one, which is what keeps the refusal narrow.
-        Assert.Equal(["focused"], ReadBack.All.Where(one => one.Always).Select(one => one.Name));
+        // And which readings are under it, which is what keeps the refusal narrow. Two, and they are
+        // the two that are about the element rather than about a pattern it offers: WW325 added
+        // 'enabled' and it has exactly this shape — every element that resolved is enabled or is
+        // not. A reading joining them without declaring itself is the hole above arriving again, so
+        // the list is written out here rather than counted.
+        Assert.Equal(["enabled", "focused"], ReadBack.All.Where(one => one.Always).Select(one => one.Name));
+
+        var refusedToo = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of("Text#profileLabel", "read", reads: "enabled", answers: true));
+
+        Assert.Contains("could never be false", refusedToo.Because, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -83,9 +92,14 @@ public sealed class LabelReadingTests : IDisposable
         //
         // The measurement, and it is not what was expected. No pattern reading reads a WPF label's
         // words: the content is in the name, exactly as with a Win32 Static, which is why WW238 added
-        // 'name'. And 'focused' answers with "not focused" — about the element and not about what it
-        // says, which is why a step may no longer claim that reading answers.
-        Assert.Equal(["name", "focused"], answered);
+        // 'name'. The other two answer about the element rather than about what it says — 'focused'
+        // with "not focused" and, since WW325, 'enabled' with "enabled" — which is why a step may
+        // claim neither of them answers.
+        //
+        // Named and not counted for that reason too: a reading added tomorrow that answers here
+        // without declaring itself Always is the unearned green arriving again, and this list is
+        // where it shows up.
+        Assert.Equal(["name", "enabled", "focused"], answered);
         Assert.Equal("Profile", ReadBack.Named("name").Of(label));
         Assert.Null(ReadBack.Named("text").Of(label));
         Assert.Null(ReadBack.Named("anything").Of(label));

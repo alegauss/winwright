@@ -72,6 +72,33 @@ public sealed record ReadBack
         // stays a claim that can be false.
         new("description", read => read.Facts?.Explains),
 
+        // WW325. Whether the control will take input at all, which is the state a half-finished form
+        // is supposed to be in — and the one an application gets wrong by leaving a command enabled
+        // before its precondition is met.
+        //
+        // Measured missing on pportal's mapping screen, whose whole third case is that Update stays
+        // off until something is bound. No reading answered it: `toggle` is a pattern a Button does
+        // not offer, `focused` is about the desk, and `anything` walks the patterns a disabled Button
+        // answers through none of. Meanwhile `ElementFacts` had read the property on every look since
+        // block A.
+        //
+        // Not a locator predicate, which is the near miss: a locator selecting only enabled controls
+        // makes the disabled case match nothing, and "not there" and "there and greyed" are opposite
+        // findings about a form — the line WW318 had just drawn in the other direction.
+        //
+        // Always, like 'focused' and for its reason: every element that resolved is enabled or is
+        // not, so a step claiming this reading *answers* could never be false. Declared here, so the
+        // refusal follows the reading rather than being a rule written somewhere else.
+        new(
+            "enabled",
+            read => read.Facts?.IsEnabled switch
+            {
+                true => "enabled",
+                false => "not enabled",
+                null => null,
+            },
+            always: true),
+
         // WW225. The one reading that is not about a pattern. It is here because "Tab moved the focus
         // off this box" is a claim a case has to be able to make, and it was the one assertion of the
         // keyboard case that could not be written at all — the other two could be written and would

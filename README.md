@@ -323,7 +323,7 @@ is the only route that reaches one on this shell. Every other act asks a control
 and a step naming one against a `tray` is refused where it was written. `act` is one of `read`, `invoke`, `toggle`,
 `set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`. `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
-`toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `description`, `focused`, defaulting to `anything`, the one value the element
+`toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `description`, `enabled`, `focused`, defaulting to `anything`, the one value the element
 reports, in the order a reader looks at them. `selected` asks whether *this* element is chosen and
 `picked` asks which one a container chose — the reading every claim about a picker is about, and the
 only one that answers on a ComboBox offering no value. `name` is what a label says: a caption's words are in its
@@ -331,7 +331,12 @@ name and in no pattern, so it is the only reading that answers for one — and a
 where its own locator matched on the name or on the front of it, because then the reading is fixed
 before the act runs. `description` is the sentence an element says *beside* its name, which is where
 an application puts what will not fit in a label — and, where a framework's own accessible object had
-to be replaced to carry that sentence, the state it stopped exposing as a pattern. `with` is required exactly where the act takes something and
+to be replaced to carry that sentence, the state it stopped exposing as a pattern. `enabled` is
+whether the control will take input at all — the state a half-finished form is supposed to be in,
+and not a locator predicate, because a locator selecting only enabled controls makes the greyed case
+match nothing and *not there* and *there and refusing* are opposite findings about a form. Like
+`focused`, it answers for every element that resolved, so a step claiming it **answers** is refused
+where it is written. `with` is required exactly where the act takes something and
 refused where it does not. `named` renames a step in the report; `meansIt` is the sentence a step
 needs before it may touch an entry the project declared destructive. `moves` is the other kind of
 expectation: that the reading ended up different, for the claim a case cannot name a value for. `answers`

@@ -136,28 +136,6 @@ The second is the answer the pairs keep pointing at. Each new claim has added it
 five or six lists, and the one it forgets is a hole exactly this shape. What it costs is
 a way to say which claims a step is making without every rule enumerating them.
 
-### §WW325 The state a form is in before it is filled in
-
-Found migrating pportal's interaction harness. Its third case is one line —
-`Assert.False(update.Current.IsEnabled)` — and it is the whole of PP223's claim: Update
-follows the alteration and nothing else, asserted on the real control rather than on the
-view model that decides it.
-
-No reading in the vocabulary answers it. `toggle` is a pattern and a Button offers none;
-`focused` is about the desk; `anything` walks the patterns and a disabled Button answers
-through none of them. So the one property that says *this control will not take input*
-is invisible to a case, while `ElementFacts` has read it on every look since block A.
-
-It is worth its own reading rather than a `[pattern=…]` in a locator, which is the near
-miss: a locator selecting only enabled controls would make the disabled case match
-nothing, and "not there" and "there and greyed" are opposite findings about a form.
-WW318 just drew that line in the other direction.
-
-What it must not become is an always-answering reading. `focused` says *not focused* for
-everything that resolved, which makes `answers` an unearned green, and enabled has the
-same shape — every element that resolved is enabled or is not. So it declares itself the
-way `focused` does, and a step claiming it answers is refused where it is written.
-
 ### §WW326 The sentence that quotes what it is about
 
 `sameAs` and `unlike` compare two readings and both compare them whole. That is right
@@ -181,6 +159,29 @@ The shape follows the three that exist: a field naming an earlier step, judged w
 case knows all its steps, refused for pointing at itself, at a later step or at a step
 reading something else — and it has to say which reading, like the others, or the
 default compares whichever answered first.
+
+### §WW327 A case that asks who is running before anybody is
+
+`A_different_executable_of_the_same_name_is_not_this_application` copies `cmd.exe`
+twice, launches one of them windowless, and asks `InstanceCheck.Of` about the other. The
+claim is good — a process carrying the name and running a different binary is a
+candidate rather than an instance — and the setup underneath it is a race.
+
+Measured on a guest run: the reading came back *nothing else is running this
+application*, so the launched copy was not there to be counted. It passed on the four
+runs before it and on four the day before, which is what an intermittent looks like
+rather than a defect in the check.
+
+Nothing waits. `Launch` starts the process and the next line reads the process table; a
+windowless `cmd.exe` with no input to read is entitled to exit whenever it likes, and a
+loaded desk is enough to put the read on the wrong side of that. Every other wait in
+this engine polls to a deadline, and this one is a straight line — the same shape WW288
+had, one layer up.
+
+What it needs is for the case to establish its own premise before asserting on it: the
+launched process is alive and carries the name, polled the way the engine polls
+everything else. A case whose subject was never there does not fail about the subject,
+it fails about the case.
 
 ## Block G — The scenario — a case is a data file
 

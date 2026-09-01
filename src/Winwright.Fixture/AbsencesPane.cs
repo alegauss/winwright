@@ -46,6 +46,22 @@ public static class AbsencesPane
             HorizontalAlignment = HorizontalAlignment.Left,
         });
 
+        // WW325. There, and refusing. It is the state this page's three absences are most likely to
+        // be confused with and the one none of them is: a control that is in the tree, that a
+        // locator matches, that a screen reader announces — and that will not take input. WW318 drew
+        // the same line from the other side, and a case that could not tell "not there" from "there
+        // and greyed" would report a form as broken for the state it is supposed to be in.
+        rows.Children.Add(new Button
+        {
+            Name = "refusing",
+            Content = "Update",
+            IsEnabled = false,
+            Width = 160,
+            Height = 30,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(0, 4, 0, 0),
+        });
+
         // One: a pane that is collapsed. It is shut, it says so through ExpandCollapse, and what
         // is under it is absent by design until somebody opens it.
         var expander = new Expander
