@@ -74,7 +74,13 @@ public sealed class MovesTests : IDisposable
         var refused = Assert.Throws<ScenarioRefusedException>(
             () => StepDeclaration.Of("Slider#roomEitherWay", "nudge", expected: "10", reads: "range", moves: true));
 
-        Assert.Contains("naming the value says both", refused.Because, StringComparison.Ordinal);
+        // WW323. This pair had a rule of its own and now goes through the one rule every pair goes
+        // through, which names both fields rather than arguing about these two in particular. What
+        // is asserted is the refusal and the two names in it: a message that said only "two claims"
+        // would leave an author looking for which two.
+        Assert.Contains("a step answers one thing", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("'expect'", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("'moves'", refused.Because, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -132,11 +132,14 @@ public sealed class CoversTests : IDisposable
             () => StepDeclaration.Of("Text", "read", expected: "Overview", covers: "stats.tab"));
 
         Assert.Contains("a step answers one", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("'covers'", refused.Because, StringComparison.Ordinal);
 
-        // And a sweep claiming movement is caught by the rule above it, which is why the sweep's own
-        // check does not name 'moves': a read never moved anything, whatever else it says.
+        // WW323. A sweep claiming movement used to fall through to "a read never moved anything",
+        // which was true and was answering a smaller question. It is two claims first, and that is
+        // the answer whatever verb the step carries — the read rule still has the step that claims
+        // movement and nothing else.
         Assert.Contains(
-            "reads and never acts",
+            "a step answers one thing",
             Assert.Throws<ScenarioRefusedException>(
                 () => StepDeclaration.Of("Text", "read", covers: "stats.tab", moves: true)).Because,
             StringComparison.Ordinal);
@@ -186,12 +189,16 @@ public sealed class CoversTests : IDisposable
                 () => StepDeclaration.Of("Edit", "type", argument: "x", answers: true, moves: true)),
         })
         {
-            Assert.Contains("cannot name a value", refused.Because, StringComparison.Ordinal);
+            // WW323. One rule for every pair, so the sentence names the fields rather than arguing
+            // about 'answers' in particular — and both of these are still refused, which is the
+            // claim this case makes.
+            Assert.Contains("a step answers one thing", refused.Because, StringComparison.Ordinal);
+            Assert.Contains("'answers'", refused.Because, StringComparison.Ordinal);
         }
 
         // And beside a sweep it is refused too: the set is already the claim that every string read.
         Assert.Contains(
-            "every string under the key was read",
+            "a step answers one thing",
             Assert.Throws<ScenarioRefusedException>(
                 () => StepDeclaration.Of("Text", "read", covers: "stats.tab", answers: true)).Because,
             StringComparison.Ordinal);

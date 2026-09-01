@@ -23,12 +23,12 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW323** (deps: —) **a step naming label and expectReported loads, and the report then prints the key against the other well's value** — Every other pair of claims on a step is refused where it is written, and this one is honoured as whichever the code reads first. → §WW323
 - 📋 **WW329** (deps: WW312 ✅) **the engine's own read-back poll is what provokes the substitution it then repairs** — Six hundred rounds nobody read faulted never, and the same send watched faults at the engine's rate, so waiting out the drain before the first read may cost less than three resends. → §WW329
 
 ## Block G — The scenario — a case is a data file
 
 - 📋 **WW336** (deps: —) **no act names a capture, so a migrated capture is C# beside the cases rather than one of them** — WW87's own line calls the capture a scenario, and three adopters each hand-write the test the data file cannot say. → §WW336
+- 📋 **WW340** (deps: —) **the claim set is built inside the refusal and thrown away, so Checkable and the schema keep lists of their own** — WW323 closed one of the four places a claim has to be added; a twelfth still declares itself in a parameter, a field, a schema row and a boolean chain. → §WW340
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

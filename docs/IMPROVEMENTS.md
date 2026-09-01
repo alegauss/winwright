@@ -184,29 +184,6 @@ set on the shadow behind it.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW323 A key from one well priced against the other well's value
-
-One claim per step is this format's rule, and it is enforced by a list of fields per
-claim rather than by a set. `expectReported` is checked against `expect` and against
-nothing else, so a step carrying `label` and `expectReported` together passes every
-guard.
-
-What happens then is worse than either claim alone. `CaseRun` resolves the declared
-string out of the project's strings, and the branch below it overwrites that with the
-value the application reported — so the comparison is against the reported value while
-the sentence a failure carries names the strings key. A reader of that red goes to a
-strings file to correct a label that was never what the run compared.
-
-WW83 met it while adding a third member to the family and left it alone deliberately:
-closing it means deciding whether `expectReported` joins the label group — `label`,
-`notLabel`, `beginsWithLabel` and it are all one reading against one derived value — or
-whether the whole rule stops being a list of fields and becomes one set the refusal
-names out of.
-
-The second is the answer the pairs keep pointing at. Each new claim has added itself to
-five or six lists, and the one it forgets is a hole exactly this shape. What it costs is
-a way to say which claims a step is making without every rule enumerating them.
-
 ### §WW329 Waiting out the drain instead of repairing it
 
 WW312 swept the same send quiet and watched: identical rounds, identical wall time,
@@ -249,6 +226,31 @@ The destination is what makes this worth its own task rather than a fourth line 
 ActVerb: it would be the first verb in this vocabulary that writes a file, and a case
 that names a path is a case that means something different on the next machine. The
 other fields a case carries are derived for exactly that reason.
+
+### §WW340 the claim that is declared four times
+
+WW323 replaced eleven per-claim lists with one set, and the set lives inside
+`StepDeclaration.Of` as a local that is used for the refusal and then dropped. So the
+same enumeration is still written three more times.
+
+`Checkable` is the nearest: a chain of nineteen ORs over the same fields, answering the
+same question the set answers by being non-empty. A claim missing from it is a step that
+reads as unfalsifiable, and `CaseDeclaration` then refuses the case that carries it - a
+refusal about the wrong thing, which is the shape WW323 was filed for one layer up.
+
+`ScenarioSchema.Step` is the second, and it has to stay a list of fields because it
+publishes types and prose. What it does not have to be is a list nothing relates to the
+claims: nothing says that `label` and `expectReported` are two claims and `reads` is
+not, so the schema a tool carries cannot tell an author what it is about to be refused
+for.
+
+And the third is the arity. `Of` takes 28 parameters and the constructor 23, one per
+field, so a claim arrives by being threaded through both - which is why every claim so
+far has also arrived in a list it forgot.
+
+What would close it is a claim being a thing rather than a spelling: named once, with
+its field, what it says, and whether it is checkable, and every one of the four reading
+that.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

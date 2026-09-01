@@ -803,16 +803,9 @@ public sealed record StepDeclaration
         // this one must not be refused as a step that claims nothing.
         var reportedly = string.IsNullOrWhiteSpace(expectReported) ? null : expectReported.Trim();
 
-        // It is `expect` with the value read from the application, so the two together are one claim
-        // written twice — and which of them the run would honour is whichever the code reads first.
-        if (reportedly is not null && !string.IsNullOrWhiteSpace(expected))
-        {
-            throw new ScenarioRefusedException(
-                string.IsNullOrWhiteSpace(named) ? "<a step>" : named.Trim(),
-                $"it expects '{expected}' and also the value the application reports under "
-                    + $"'{reportedly}'; a step answers one thing, and these are two");
-        }
-
+        // WW323. `expectReported` beside `expect` was refused here and beside nothing else, which is
+        // the hole that task was filed for. Both are now claims in one set below, so this pair is
+        // refused by the same rule as every other pair rather than by a line of its own.
         if (holding is not null && (back ?? apart ?? ticking) is { } alsoHolding)
         {
             throw new ScenarioRefusedException(
@@ -880,21 +873,83 @@ public sealed record StepDeclaration
             }
         }
 
-        var claims = absent || wanted is not null || moves || answers || sweeping is not null || pattern is not null
-            || discloses || back is not null || apart is not null || forbidden is not null || spoken
-            || declared is not null || undeclared is not null || opening is not null
-            || ticking is not null || holding is not null || reportedly is not null
-            || eachSpoken || ownHeader;
+        // WW323. Every claim this step makes, in one list, said the way a refusal has to say it: the
+        // field the case wrote, and what that field claims.
+        //
+        // This was eleven lists before, one inside each claim's own rule, each naming the claims
+        // that existed on the day it was written. The hole is always the same shape and WW323 is the
+        // one that was found: `expectReported` was checked against `expect` and against nothing
+        // else, so a step carrying it beside `label` loaded — and then `CaseRun` resolved the
+        // declared string and the branch under it overwrote that with the reported value, so the
+        // comparison was against one well while the red named the other's key. A reader of that
+        // sent to a strings file is correcting a label the run never compared.
+        //
+        // A twelfth claim now joins the rule by adding one line here rather than by remembering
+        // eleven places. What stays beside this are the rules that are not collisions at all — a
+        // verb that only reads, a reading named beside a claim that is not about one, a pattern
+        // that matches everything — and the two families below, where several spellings are one
+        // claim rather than several.
+        var claiming = new List<string>();
 
-        // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
-        // says it moved where it was something else. A step asserting both would owe two assertion
-        // results, and a trace line that stands for two things is one a reader has to take apart.
-        if (wanted is not null && moves)
+        void Claiming(bool made, string field, string says)
+        {
+            if (made)
+                claiming.Add($"'{field}' ({says})");
+        }
+
+        // The field the case actually wrote, for each family whose several spellings the engine has
+        // already folded into one. A refusal names what to go and delete, so it says the spelling
+        // the file used and never the mode the fold produced.
+        var sweptAs = matching switch
+        {
+            Asserting.SetMatch.AtLeast => "coversAtLeast",
+            Asserting.SetMatch.Within => "coversWithin",
+            _ => "covers",
+        };
+
+        var pointedAs = back is not null ? "sameAs"
+            : apart is not null ? "unlike"
+            : ticking is not null ? "sameCountdownAs" : "contains";
+
+        var stringedAs = declared is not null ? "label"
+            : undeclared is not null ? "notLabel" : "beginsWithLabel";
+
+        Claiming(absent, "absent", "its locator matches nothing");
+        Claiming(wanted is not null, "expect", $"the reading is '{wanted}'");
+        Claiming(moves, "moves", "the reading ended up different");
+        Claiming(answers, "answers", "the reading says something rather than nothing");
+        Claiming(sweeping is not null, sweptAs, $"the '{sweeping}' set is read here");
+        Claiming(pattern is not null, "matches", $"the reading matches {pattern}");
+        Claiming(discloses, "discloses", "the act put something under the locator");
+        Claiming(
+            (back ?? apart ?? ticking ?? holding) is not null,
+            pointedAs,
+            $"the reading is compared with '{back ?? apart ?? ticking ?? holding}'");
+        Claiming(forbidden is not null, "never", $"'{forbidden}' is never shown while this waits");
+        Claiming(spoken, "spoken", "everything under the locator that speaks is named");
+        Claiming(
+            (declared ?? undeclared ?? opening) is not null,
+            stringedAs,
+            $"the reading is the '{declared ?? undeclared ?? opening}' string");
+        Claiming(
+            reportedly is not null,
+            "expectReported",
+            $"the reading is the value reported under '{reportedly}'");
+        Claiming(eachSpoken, "eachSpoken", "every element it matches announces a name");
+        Claiming(ownHeader, "ownHeader", "each row's controls announce that row");
+
+        var claims = claiming.Count > 0;
+
+        // Both idioms the older refusals used, because they are what a reader recognises and what
+        // this suite matches on — and because they are both true of the finding: the step made
+        // another claim, and a step answers one thing.
+        if (claiming.Count > 1)
         {
             throw new ScenarioRefusedException(
                 subject,
-                $"it expects '{wanted}' and also that the reading moved; naming the value says both, "
-                    + "so 'moves' is for the claim that cannot name one");
+                $"it claims {claiming[0]} and also makes another claim, {string.Join(", ", claiming.Skip(1))}; "
+                    + $"a step answers one thing and this one makes {claiming.Count} — name the one it "
+                    + "means and delete the rest");
         }
 
         if (!claims && !string.IsNullOrWhiteSpace(reads))
@@ -945,16 +1000,6 @@ public sealed record StepDeclaration
 
         if (pattern is not null)
         {
-            // One claim per step, like the other three. 'expect' names the value and this names the
-            // shape of it, and a step holding both owes two assertion results.
-            if (wanted is not null || moves || answers || sweeping is not null)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it matches '{pattern}' and also makes another claim; 'matches' is for the reading "
-                        + "whose value a case cannot name");
-            }
-
             // The unearned green this field is easiest to write. A pattern that matches the empty
             // string matches every answer there is, so the step holds wherever the reading answered at
             // all — which is what 'answers' says, in a field that reads as though it checked more.
@@ -975,15 +1020,6 @@ public sealed record StepDeclaration
 
         if (discloses)
         {
-            // One claim per step, as everywhere else.
-            if (wanted is not null || moves || answers || sweeping is not null || pattern is not null)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    "it claims a disclosure and also makes another claim; 'discloses' is about the tree "
-                        + "under the locator rather than about a reading of it");
-            }
-
             // A read discloses nothing. The claim is that an act put something there, so a step whose
             // verb only looks would be asserting that a window changed while nobody touched it — which
             // is either a race or a lie, and green either way.
@@ -1029,16 +1065,6 @@ public sealed record StepDeclaration
             var claim = apart is not null ? "differs from"
                 : holding is not null ? "holds what" : "is back to";
 
-            // One claim per step, as everywhere else. 'expect' names the value and this is the claim
-            // for a value the case cannot name — it only knows which earlier step to compare with.
-            if (wanted is not null || moves || answers || sweeping is not null || pattern is not null || discloses)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it claims its reading {claim} '{pointed}' and also makes another claim; '{field}' "
-                        + "is for the value a case cannot name and can only point at");
-            }
-
             // A step comparing itself to itself is answered before the window is: `sameAs` holds
             // whatever it did and `unlike` fails whatever it did, and neither is a reading. It is also
             // the easy typo — a round trip's stops read the same element under the same verb, so a
@@ -1082,31 +1108,8 @@ public sealed record StepDeclaration
                     + "different ways, so name the one this step means");
         }
 
-        // One claim per step, as everywhere else. 'expect' names the value and this names the key the
-        // value comes from, and a step holding both owes two assertion results.
-        if (strings.Count == 1
-            && (wanted is not null || moves || answers || sweeping is not null || pattern is not null
-                || discloses || back is not null || forbidden is not null || spoken))
-        {
-            throw new ScenarioRefusedException(
-                subject,
-                $"it names the '{declared ?? undeclared ?? opening}' string and also makes another "
-                    + "claim; the key is where the value comes from rather than a second thing to check");
-        }
-
         if (ownHeader)
         {
-            // One claim per step, as everywhere else.
-            if (wanted is not null || moves || answers || sweeping is not null || pattern is not null
-                || discloses || back is not null || apart is not null || forbidden is not null || spoken
-                || declared is not null || undeclared is not null || eachSpoken)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    "it claims each row's controls announce that row and also makes another claim; the "
-                        + "pairing is one claim over the rows the locator matched");
-            }
-
             // The same rule a sweep is under: this reads every row the locator matches and everything
             // inside them, and one act over all of that is not a claim about any of it.
             if (!act.Reads)
@@ -1129,17 +1132,6 @@ public sealed record StepDeclaration
 
         if (eachSpoken)
         {
-            // One claim per step, as everywhere else.
-            if (wanted is not null || moves || answers || sweeping is not null || pattern is not null
-                || discloses || back is not null || apart is not null || forbidden is not null || spoken
-                || declared is not null || undeclared is not null)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    "it claims every element it matches is named and also makes another claim; a sweep "
-                        + "is one claim over many elements, and every other field on a step is about one");
-            }
-
             // The same rule `covers` is under, and for its reason: a sweep reads every element its
             // locator matches, and one act over many of them is not a claim about any of them.
             if (!act.Reads)
@@ -1164,17 +1156,6 @@ public sealed record StepDeclaration
 
         if (spoken)
         {
-            // One claim per step, as everywhere else. This one is about the subtree, and the others
-            // are about a reading of the element the locator matched.
-            if (wanted is not null || moves || answers || sweeping is not null || pattern is not null
-                || discloses || back is not null || forbidden is not null)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    "it claims everything under the locator is named and also makes another claim; "
-                        + "'spoken' is about the tree under it rather than about what it says");
-            }
-
             // And no reading beside it, for the reason a disclosure takes none: the subject is the
             // subtree, and a 'reads' here would look like it narrowed the claim and would narrow
             // nothing. What the elements under it announce is their name, always.
@@ -1189,20 +1170,6 @@ public sealed record StepDeclaration
 
         if (forbidden is not null)
         {
-            // One claim per step, as everywhere else — and here for a reason of its own. What ends the
-            // wait this claim is about is the locator resolving, so a second claim beside it would be
-            // read at a moment this one chose, and a reader could not tell which of the two the step
-            // is reporting.
-            if (wanted is not null || moves || answers || sweeping is not null
-                || pattern is not null || discloses || back is not null)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it claims '{forbidden}' never shows and also makes another claim; what ends the "
-                        + "wait a 'never' is about is the locator arriving, so the two would be read "
-                        + "at one moment and reported as one line");
-            }
-
             // A reading beside it narrows nothing. The claim is about the window, not about this
             // element: the string may show anywhere, and the locator is what says when to stop
             // looking rather than what to look at.
@@ -1232,16 +1199,6 @@ public sealed record StepDeclaration
                     + "anything about it");
         }
 
-        // WW237. One claim per step, for the reason the other two are: a trace line standing for two
-        // things is one a reader has to take apart, and naming the value already says it answered.
-        if (answers && (wanted is not null || moves))
-        {
-            throw new ScenarioRefusedException(
-                subject,
-                "it claims the reading answers something and also says what it is or that it moved; "
-                    + "'answers' is for the claim that cannot name a value");
-        }
-
         // One claim over many elements, and every other field on a step is about one.
         if (sweeping is not null)
         {
@@ -1253,31 +1210,12 @@ public sealed record StepDeclaration
                         + "locator matches, and one act over many of them is not a claim");
             }
 
-            // 'moves' is not tested for here and that is not an omission: a sweep needs a verb that
-            // reads, and a read claiming movement is already refused above. Naming it twice would be
-            // a branch no file can reach.
-            if (wanted is not null)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it covers '{sweeping}' and also expects '{wanted}' of one reading; a set and a "
-                        + "value are two claims, and a step answers one");
-            }
-
             if (!string.IsNullOrWhiteSpace(reads))
             {
                 throw new ScenarioRefusedException(
                     subject,
                     $"it covers '{sweeping}' and reads '{reading.Name}'; a sweep compares the names the "
                         + "locator matched against the strings, and a pattern reading is not one of them");
-            }
-
-            if (answers)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it covers '{sweeping}' and claims one reading answers; a set is already the claim "
-                        + "that every string under the key was read");
             }
         }
 

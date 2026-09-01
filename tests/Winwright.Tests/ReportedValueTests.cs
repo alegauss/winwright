@@ -115,6 +115,44 @@ public sealed class ReportedValueTests : IDisposable
     }
 
     [Fact]
+    public void It_is_refused_beside_the_other_well_as_well_as_beside_a_typed_value()
+    {
+        // WW323, and the defect that task was filed for. `expectReported` was checked against
+        // `expect` and against nothing else, so this loaded — and then `CaseRun` resolved the
+        // declared string and the branch under it overwrote that with the reported value. The
+        // comparison was against one well while the red named the other's key, and a reader of it
+        // went to a strings file to correct a label the run had never compared.
+        //
+        // All three of the label family, because the hole was one field's list and the point of
+        // closing it is that no list decides any more.
+        foreach (var refused in new[]
+        {
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of(
+                    "Text#profile", "read", reads: "name", label: "menu.open", expectReported: "inUse")),
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of(
+                    "Text#profile", "read", reads: "name", notLabel: "menu.open", expectReported: "inUse")),
+            Assert.Throws<ScenarioRefusedException>(
+                () => StepDeclaration.Of(
+                    "Text#profile", "read", reads: "name", beginsWithLabel: "menu.open", expectReported: "inUse")),
+        })
+        {
+            Assert.Contains("a step answers one thing", refused.Because, StringComparison.Ordinal);
+            Assert.Contains("'expectReported'", refused.Because, StringComparison.Ordinal);
+        }
+
+        // And the field the case actually wrote is what the refusal names, so an author is told
+        // which line to delete rather than which family it belongs to.
+        var beside = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of(
+                "Text#profile", "read", reads: "name", beginsWithLabel: "menu.open", expectReported: "inUse"));
+
+        Assert.Contains("'beginsWithLabel'", beside.Because, StringComparison.Ordinal);
+        Assert.DoesNotContain("'label'", beside.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void The_declaration_refuses_a_value_with_no_arguments_where_it_was_written()
     {
         var path = Path.Combine(root, ProjectDeclaration.FileName);
