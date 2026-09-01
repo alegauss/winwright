@@ -289,6 +289,8 @@
 - ✅ **WW82** **the menu case reads the notification area and nothing else does** — A tray icon is found again by its runtime id, so an application rewriting its own tooltip no longer reads as an icon that vanished: with the match off, one case of 1820 fails, and it is this one.
 - ✅ **WW319** **a hidden element reserves its rectangle, so the layout check reads space nobody can see as drawn on** — Whether anybody can see it is decided before what it measures, so a hidden panel no longer fills the covering box nor overlaps the control drawn where it sits.
 - ✅ **WW320** **routing a capture needs a main window to compare against, so an application showing only a menu cannot be routed** — A one-argument overload answers from the window's own class and ownership, so a menu with nothing behind it routes as the screen copy it is.
+- ✅ **WW314** **a guest sitting at its lock screen is found only after the tree is carried, so the refusal costs a full sync** — A `cmd /c exit` on the desk runs before anything is staged, so a locked guest refuses for one process start where it used to cost the whole carry.
+- ✅ **WW311** **a run that just booted the guest is measured on a desk still putting up its startup notifications** — The foreground is polled before the carry and the desk is named — clear, busy, asking or broken — and the last two refuse, naming the window, before the twenty minutes are spent.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

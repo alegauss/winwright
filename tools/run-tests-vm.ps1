@@ -21,8 +21,14 @@
   back as exit 1.
 
   One thing is deliberately different from freewilly. It runs everything without -interactive, since
-  a console preflight needs no desk. This needs one, so -interactive -activeWindow is on every run
-  and a guest sitting at the lock screen is a refusal rather than a red suite.
+  a console preflight needs no desk. This needs one, so -interactive is on every run and a guest
+  sitting at the lock screen is a refusal rather than a red suite.
+
+  -activeWindow is deliberately NOT, and this sentence used to say it was. It brings the program's
+  console to the foreground in the guest, and the suite then synthesises input at whatever holds it:
+  a run died with 0xC000013A, STATUS_CONTROL_C_EXIT, which is a keystroke of the suite's own reaching
+  the console hosting it. WW311 needs the same thing for the opposite reason - a probe that took the
+  foreground would find itself holding it and report the desk as waiting for an answer.
 
 .PARAMETER Configuration
   Debug or Release, handed to run-tests.cmd inside the guest.
@@ -236,6 +242,153 @@ function Invoke-OnTheDesk {
     return $ran
 }
 
+function Read-GuestDesk {
+    <#
+      WW311. Which desk this is, before twenty minutes are spent on it.
+
+      WW305 made a cold start ordinary, and a cold desk is one still putting its startup
+      notifications up. The first run through it excused twenty-six checks where the four before it
+      excused eight each; what that cost was measured later, when the same prompt - OneDrive's
+      *Habilitar o Backup do Windows*, two buttons, the same process id hours apart - held the
+      foreground while the adoption's keyboard case ran, and that case came back unchecked with
+      three steps unwalked. Not noise in a count. A blocker.
+
+      Neither remedy this was opened with survives. Waiting for the shell to go quiet cannot work
+      against a question that stays until answered. Killing the owner is worse: the window is
+      `ShellExperienceHost`'s, killing that cleared the prompt and cost the tray, and the next full
+      run went red with *this desk was called placing and holds no icon anywhere*.
+
+      So this reads rather than fixes, and the reading is the whole point: a toast goes and a
+      question does not, and nothing but time tells them apart. The foreground is polled, and what
+      separates the three answers is whether one window held it for every look.
+
+        clear    nothing but the desktop ever had it.
+        busy     something had it and let go. The suite's own foreground handling is for this.
+        asking   one window held it for every look, so it is waiting for an answer and no amount
+                 of waiting is the answer. Named with its process and its title, because a person
+                 has to go and click it.
+        broken   nothing holds the foreground at all, which on a logged-in desk means no shell.
+
+      The looks are the measurement and the deadline is the argument: a toast this guest could
+      raise lives for seconds, and the prompt that cost a run had been up for hours.
+    #>
+    param([Parameter(Mandatory)] [string] $Vmx, [Parameter(Mandatory)] [string] $Stage)
+
+    $probe = Join-Path $Stage 'desk.ps1'
+    Set-Content -LiteralPath $probe -Encoding utf8 -Value @'
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+
+public static class Fg {
+    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowTextW(IntPtr h, StringBuilder s, int n);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassNameW(IntPtr h, StringBuilder s, int n);
+
+    public static string TextOf(IntPtr h) { var s = new StringBuilder(512); GetWindowTextW(h, s, s.Capacity); return s.ToString(); }
+    public static string ClassOf(IntPtr h) { var s = new StringBuilder(256); GetClassNameW(h, s, s.Capacity); return s.ToString(); }
+}
+"@
+
+# The desktop is not a window holding the foreground: an idle logged-in desk has one of these, and
+# reporting it would make every clear desk read as busy.
+$desktop = @('Progman', 'WorkerW')
+
+$looks = @()
+for ($at = 0; $at -lt 12; $at++) {
+    if ($at -gt 0) { Start-Sleep -Milliseconds 500 }
+
+    $handle = [Fg]::GetForegroundWindow()
+    if ($handle -eq [IntPtr]::Zero) { $looks += $null; continue }
+
+    $owner = 0
+    [void][Fg]::GetWindowThreadProcessId($handle, [ref] $owner)
+    $class = [Fg]::ClassOf($handle)
+    if ($desktop -contains $class) { $looks += $null; continue }
+
+    $named = (Get-Process -Id $owner -ErrorAction SilentlyContinue)
+    $looks += [pscustomobject]@{
+        Handle  = [int64] $handle
+        Pid     = $owner
+        Process = if ($named) { $named.ProcessName } else { "pid $owner" }
+        Class   = $class
+        Title   = [Fg]::TextOf($handle)
+    }
+}
+
+$held = @($looks | Where-Object { $null -ne $_ })
+
+# Nothing at all, at any look. A logged-in desk with no shell answers this, and it is the one state
+# the other two readings would describe as quiet.
+if ($held.Count -eq 0) {
+    $answer = if ([Fg]::GetForegroundWindow() -eq [IntPtr]::Zero) {
+        "broken||||nothing held the foreground across $($looks.Count) look(s), so this desk has no shell"
+    } else {
+        'clear||||nothing but the desktop held the foreground'
+    }
+} elseif ($held.Count -eq $looks.Count -and
+          @($held | Where-Object { $_.Handle -ne $held[0].Handle }).Count -eq 0) {
+    # One window for every look is the answer that does not clear.
+    $one = $held[0]
+    $answer = "asking|$($one.Process)|$($one.Pid)|$($one.Class)|$($one.Title)"
+} else {
+    # Anything else moved, whatever it was.
+    $moved = ($held | ForEach-Object { "$($_.Process) '$($_.Title)'" } | Select-Object -Unique) -join '; '
+    $answer = "busy||||held for $($held.Count) of $($looks.Count) look(s): $moved"
+}
+
+# Into a file beside this script and never to stdout: vmrun runs the program and does not carry
+# what it printed, so an answer written to the console is an answer nobody reads.
+Set-Content -LiteralPath (Join-Path $PSScriptRoot 'desk.txt') -Value $answer -Encoding utf8
+'@
+
+    $null = Invoke-VmRun -Guest -Arguments @('createDirectoryInGuest', $Vmx, $script:GuestSync)
+    $null = Invoke-VmRun -Guest -Arguments @('deleteFileInGuest', $Vmx, "$script:GuestSync\desk.txt")
+
+    $sent = Invoke-VmRun -Guest -Arguments @(
+        'copyFileFromHostToGuest', $Vmx, $probe, "$script:GuestSync\desk.ps1")
+    if (-not $sent.Ok) { Refuse "could not copy the desk probe into the guest: $($sent.Output)" }
+
+    # On the desk and not beside it: the foreground is the thing being read, and a program run
+    # outside the session has none to read. WW314's helper is the one voice for a guest with no
+    # session, and this is its second caller rather than a second copy of the refusal.
+    $null = Invoke-OnTheDesk -Vmx $Vmx -Arguments @(
+        'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe',
+        '-NoProfile', '-ExecutionPolicy', 'Bypass',
+        '-File', "$script:GuestSync\desk.ps1")
+
+    $answerFile = Join-Path $Stage 'desk.txt'
+    $null = Invoke-VmRun -Guest -Arguments @(
+        'copyFileFromGuestToHost', $Vmx, "$script:GuestSync\desk.txt", $answerFile)
+
+    # A probe that wrote nothing is not a quiet desk. It is a probe that did not run, and calling
+    # that clear is the shape of green this whole project refuses.
+    if (-not (Test-Path -LiteralPath $answerFile)) {
+        return [pscustomobject]@{
+            State = 'unread'; Process = ''; Pid = ''; Class = ''
+            Detail = 'the desk probe wrote no answer in the guest'
+        }
+    }
+
+    $said = (Read-ConsoleText $answerFile).Trim()
+    $fields = $said -split '\|', 5
+    if ($fields.Count -lt 5) {
+        return [pscustomobject]@{
+            State = 'unread'; Process = ''; Pid = ''; Class = ''
+            Detail = "the desk probe answered something this cannot read: $said"
+        }
+    }
+
+    return [pscustomobject]@{
+        State = $fields[0]; Process = $fields[1]; Pid = $fields[2]; Class = $fields[3]; Detail = $fields[4]
+    }
+}
+
 function Start-Guest {
     <#
       Power the guest on without letting `vmrun start` decide how long this run lasts.
@@ -302,6 +455,13 @@ function Read-ConsoleText {
       Decodes guest output by what is in it rather than by what wrote it. dotnet writes UTF-8 and
       several Windows tools write UTF-16LE, and reading either with the wrong one is not a crash: it
       is a NUL after every character, which reads as data and reaches a report.
+
+      WW311. A byte order mark is the same defect one character long, and it was left in: Windows
+      PowerShell's `Set-Content -Encoding utf8` writes one, `Trim()` does not remove it because it
+      is not whitespace, and the first field of the first line comes back a character longer than
+      it looks. It cost a run, which read `?clear` where the guest had written `clear` and refused
+      an answer it had in hand. Stripped here rather than at the one caller that noticed, because
+      every guest tool that writes UTF-8 from PowerShell writes it.
     #>
     param([Parameter(Mandatory)] [string] $Path)
 
@@ -312,8 +472,13 @@ function Read-ConsoleText {
     }
     $zeroes = 0
     for ($i = 1; $i -lt $bytes.Length; $i += 2) { if ($bytes[$i] -eq 0) { $zeroes++ } }
-    if (($zeroes * 4) -gt $bytes.Length) { return [Text.Encoding]::Unicode.GetString($bytes) }
-    return [Text.Encoding]::UTF8.GetString($bytes)
+    $text = if (($zeroes * 4) -gt $bytes.Length) {
+        [Text.Encoding]::Unicode.GetString($bytes)
+    } else {
+        [Text.Encoding]::UTF8.GetString($bytes)
+    }
+
+    return $text.TrimStart([char]0xFEFF)
 }
 
 # --- what this needs, named before anything is started ------------------------------------------
@@ -387,6 +552,40 @@ Write-Host '  desk        a session is logged in'
 $stage = Join-Path ([IO.Path]::GetTempPath()) "$($script:Name)-vm"
 if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
 $null = New-Item -ItemType Directory -Path $stage
+
+# WW311. Before the carry and after the session, because those are the two things this costs: it
+# needs a desk to have a foreground at all, and it is worth nothing once the twenty minutes are
+# already spent. The stage exists by here and the sync directory does not, so the probe makes it.
+$desk = Read-GuestDesk -Vmx $vmxPath -Stage $stage
+switch ($desk.State) {
+    'clear' {
+        Write-Host '  foreground  clear'
+    }
+    'busy' {
+        # Not a refusal. Something had the foreground and let go of it, which is the desk the
+        # suite's own foreground handling exists for - and every excuse it produces is named in
+        # the roll call rather than swallowed.
+        Write-Host "  foreground  busy: $($desk.Detail)" -ForegroundColor Yellow
+    }
+    'asking' {
+        Refuse (
+            "the guest's desk is waiting for an answer: $($desk.Process) (pid $($desk.Pid), " +
+            "$($desk.Class)) '$($desk.Detail)' held the foreground for every look"
+        ) (
+            'Answer it at the guest console and run again. Waiting does not clear a question, and ' +
+            'killing its owner cost the tray the last time it was tried: the window belongs to ' +
+            'ShellExperienceHost, and the run after that went red with no icon anywhere. This is ' +
+            'the prompt that took three steps off the adoption keyboard case and reported them ' +
+            'unchecked twenty minutes after the carry.'
+        )
+    }
+    'broken' {
+        Refuse "the guest is logged in and has no shell: $($desk.Detail)" 'Sign out and back in at the guest console. A desk with no foreground renders nothing for a capture and takes no input.'
+    }
+    default {
+        Refuse "the desk could not be read: $($desk.Detail)" 'The probe runs in the guest session and writes one line beside itself. Check the guest console is reachable.'
+    }
+}
 
 Push-Location $script:Tree
 try {

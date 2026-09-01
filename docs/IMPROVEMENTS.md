@@ -209,58 +209,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW311 The prompt that waiting does not clear
-
-WW305 made a cold start work, and the first run through it excused twenty-six checks
-where the four before it excused eight each. WW298 caught that: the count is read as a
-series, so a run three times its predecessors could not pass as ordinary.
-
-What it cost was measured later. The same prompt — OneDrive's *Habilitar o Backup do
-Windows*, two buttons, the same process id hours apart — held the foreground while the
-adoption's keyboard case ran, and that case came back unchecked with three steps
-unwalked. Not noise in a count. A blocker.
-
-That kills the remedy this task was opened with. Waiting for the shell to go quiet
-cannot work against a question that stays until answered.
-
-Nor is killing something the lever. OneDrive was not the owner — the window is
-`ShellExperienceHost`'s. Killing that did clear it and cost the tray: the next full run
-went red with *this desk was called placing and holds no icon anywhere*. A reboot fixed
-the tray and brought the prompt back.
-
-So this wants to see the desk before spending twenty minutes on it, and to say which it
-is: busy, asking, or broken.
-
-One thing to know first: the bench is gone. The guest now carries `ToastEnabled = 0`,
-set to unblock WW78 after that prompt held the desk across three runs. Nothing there
-raises a toast, so a remedy cannot be tried until that key goes back.
-
-### §WW314 The check that runs too late
-
-The runner refuses a locked guest, says so plainly, and points at the remedy. That part
-is right and WW42 is why: a suite synthesising input into a lock screen is not a suite
-that ran.
-
-What is wrong is where it finds out. The check is `runProgramInGuest` failing with
-*logged in interactively*, which happens after the tree is zipped, carried, extracted
-and the SDK probed — so a guest nobody logged into costs a full sync before it says the
-one thing it knew all along.
-
-That was tolerable while the guest was almost always up and unlocked, because a stopped
-guest meant a run that hung. WW305 fixed the hang, cold starts became cheap, and a
-freshly booted guest is precisely the one most likely to be sitting at a lock screen.
-The first cold start of the day reached a desktop; the second did not, and paid the
-carry to learn it.
-
-The probe is cheap and already written: the same `runProgramInGuest` call with something
-harmless, before the sync rather than after it. What it must not become is a second
-spelling of the rule — the refusal, its sentence and its remedy stay where they are, and
-this only asks the question earlier.
-
-Worth pricing against the other thing it could be: making the guest log itself in. That
-is a change to somebody's machine to suit this runner, and it is theirs to make, not
-this repository's to assume.
-
 ### §WW315 A guest that is not the machine under test
 
 The first adoption run reached the guest, restored the published engine, built and ran
