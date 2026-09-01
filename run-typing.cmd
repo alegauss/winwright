@@ -8,17 +8,21 @@ rem there - `tools\run-tests-vm.ps1 -Run "run-typing.cmd 400"` - because a run o
 rem foreground from whoever is using it.
 rem
 rem The first argument is how many rounds it types; the tool's own default stands without one. The
-rem second is the build configuration.
+rem second is which experiment to run, and the third is the build configuration.
 rem
-rem The spacing sweep that used to be the third argument is gone with the experiment it served. WW304
-rem swept it and WW310 read the result: the rate is a band and not a slope, so there was never a
-rem number to adopt, and the engine repairs the fault by its signature instead. What this reports now
-rem is how often that repair fired and whether anything outlived it.
+rem Bare, this reports how often the engine's repair fired and whether anything outlived it, against
+rem the send the engine actually makes - one SendInput for the whole string.
+rem
+rem `sweep` is WW312's, and it drives a send the engine does not have: one call per code unit, 32,
+rem 64 and 96ms apart, which is the shape WW310's band was measured in. It reads what was injected
+rem beside what arrived at each spacing, so a fault inside the band can be attributed to the send or
+rem to what happens after it. The configuration moved to the third argument when this gained the
+rem second; `run-typing.cmd 400` and `run-typing.cmd 150 sweep` are the two a person types.
 setlocal
 
 set CONFIG=Debug
-if not "%2"=="" set CONFIG=%2
+if not "%3"=="" set CONFIG=%3
 
 dotnet build "%~dp0Winwright.slnx" --configuration %CONFIG% --nologo || exit /b 1
-dotnet "%~dp0tools\Winwright.Typing\bin\%CONFIG%\net10.0-windows\Winwright.Typing.dll" %1
+dotnet "%~dp0tools\Winwright.Typing\bin\%CONFIG%\net10.0-windows\Winwright.Typing.dll" %1 %2
 exit /b %ERRORLEVEL%

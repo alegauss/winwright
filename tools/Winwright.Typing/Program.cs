@@ -70,6 +70,11 @@ public static class Program
             ? many
             : Rounds;
 
+        // WW312. The second word and not a flag, because there are two experiments here and not one
+        // experiment with an option: the default measures the repair against the engine's own send,
+        // and the sweep drives a send the engine does not have. A run says which it is.
+        var sweeping = args.Length > 1 && string.Equals(args[1], "sweep", StringComparison.OrdinalIgnoreCase);
+
         var executable = Fixture();
         if (executable is null)
         {
@@ -86,7 +91,7 @@ public static class Program
 
         try
         {
-            return Measured(fixture, rounds);
+            return Measured(fixture, rounds, sweeping);
         }
         finally
         {
@@ -95,7 +100,7 @@ public static class Program
         }
     }
 
-    private static int Measured(Process fixture, int rounds)
+    private static int Measured(Process fixture, int rounds, bool sweeping)
     {
         var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(fixture.Id) is not null, 20000, 25);
         if (!drawn.Happened)
@@ -134,6 +139,16 @@ public static class Program
         // and found the code unit in neither of them, which is why the reading moved upstream.
         var arrived = On(root, "Text#arrived");
         var packets = On(root, "Text#injected");
+
+        // WW312. The sweep answers on its own and shares nothing below it: the counts, the drift and
+        // the repair's verdict are all about the engine's send, and printing them under a run that
+        // never called it would attribute this arm's numbers to the thing it exists to differ from.
+        if (sweeping)
+        {
+            Sweep.Run(box, arrived, packets, rounds);
+            return 0;
+        }
+
         var tally = new Tally();
 
         // Read only where the repair fired, and never per round. A read is a cross-process call and

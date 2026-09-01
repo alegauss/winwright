@@ -41,26 +41,27 @@ it.
 WW310 measured the curve. Between 48 and 64 milliseconds the substitution runs at five
 times the engine's own rate, and by 80 it is back under it.
 
-Three candidates fall to one shape: the band is **bracketed**, 64ms being five to nine
-times worse than 32 *and* than 96, and anything monotone in the spacing makes the last
-worst rather than the middle. The platform tick puts a spike on one value, not a plateau
-forty wide. WW316's recorder drift is monotone in time, and so is the read-back
-overlapping the send.
+Three candidates fall to one shape: the band is **bracketed**, and the platform tick,
+WW316's recorder drift and the read-back overlapping the send are each monotone in the
+spacing, which makes the last spacing worst rather than the middle one.
 
-The arrival side reads out: the queue drains **evenly** on a faulted round — a long
-pause, then 2 to 5ms a character — so the substitution is timely and already wrong.
+The pairing is made one observation point above the queue, where `KBDLLHOOKSTRUCT` still
+carries the code unit `WM_KEYDOWN` gives eight bits and truncates. Every injection of
+every faulted round is exactly what was sent, so the substitution is made after
+`SendInput`.
 
-The pairing is made, one observation point above where it was first sought. The keydown
-carries the code unit in neither word and cannot, since `WM_KEYDOWN` gives the scan code
-eight bits where `KBDLLHOOKSTRUCT` gives it a full word. So a hook reads what
-`SendInput` was handed, before the queue has it.
+A sweep then drove that send directly, quiet and watched — the same rounds, the same
+wall time, differing only in whether anything reads the box while the queue drains.
 
-Across six faulted rounds of four hundred, every injection is **exactly what was sent**
-— `WW249-251` injected, `WW249-151` arrived — with the hook's count matching the
-window's packet for packet. So the substitution is made after `SendInput`, in the
-translation, from a unit no message carries.
+**Six hundred quiet rounds faulted nowhere.** Watched, with no spacing, 3 of 150, which
+is the engine's own rate. So the reader provokes it: `SendInput` returns once the events
+are queued rather than processed, and `Settled` polls straight into the drain.
 
-The band is next, at spacings this send shape never uses.
+And every spacing suppressed it, the band's own included. Spaced packets are translated
+one at a time, so there is no burst for a read to land inside.
+
+This arm reproduces the fault and not the band. Whether the band survives an arm shaped
+like WW310's is what is left.
 
 ### §WW323 A key from one well priced against the other well's value
 
@@ -84,6 +85,30 @@ names out of.
 The second is the answer the pairs keep pointing at. Each new claim has added itself to
 five or six lists, and the one it forgets is a hole exactly this shape. What it costs is
 a way to say which claims a step is making without every rule enumerating them.
+
+### §WW329 Waiting out the drain instead of repairing it
+
+WW312 swept the same send quiet and watched: identical rounds, identical wall time,
+differing only in whether anything read the box while the queue drained. Six hundred
+quiet rounds faulted nowhere. Watched, three of a hundred and fifty — the rate the
+engine has measured on itself all along.
+
+So the engine is provoking the fault it repairs. `SendInput` returns once the events are
+queued rather than processed, and `Settled` begins polling the instant `Send` returns,
+which puts a cross-process read into the window's thread while its packets are still
+being translated.
+
+That makes a repair available that the resend is not. Three resends cost a failing send
+three more of itself and leave the fault at its rate; waiting out a nine-character drain
+before the first read costs every send a fixed interval and may leave no fault to
+repair. Neither number is known: the drain was measured at 2 to 5ms a character after a
+long pause, and what a first read owes is that pause plus the drain, which nothing has
+measured.
+
+The sweep is already shaped for that measurement. What is not known is whether the
+provocation is the read or the pumping it forces — anything else pumping that thread
+would do as well. Delaying the read fixes it either way; changing how the read is taken
+needs to know which.
 
 ## Block G — The scenario — a case is a data file
 
