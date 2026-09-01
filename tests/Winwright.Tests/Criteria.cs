@@ -210,6 +210,12 @@ internal static class Criteria
             "the condition is asserted against an ordinary desk by DeskGateTests, and the desk that "
                 + "reports everything present and renders nothing has never been driven here"),
 
+        // --- WW88, the same shape and a different adopter ----------------------------------------------------
+        new("WW88", "The interaction harness is cases, and its desk reasons are holes not reds", "",
+            Unshown.NotBuilt, "the runner half landed and the harness half has not, so there are no "
+                + "cases to read this back off yet — and when there are they will be in pportal, "
+                + "which nothing in this suite can drive"),
+
         // --- WW83, whose remaining half is an adopting project's rather than this suite's -------------------
         new("WW83", "The switch runs in the adopter, and the store beside it does not move", "",
             Unshown.NotBuilt, "the engine carries the three fields the case is written out of and the "

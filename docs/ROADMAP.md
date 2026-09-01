@@ -33,7 +33,7 @@
 - 📋 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, a publish carrying the three fields) **the environment sweep walks a submenu per sampled mode** — Its own claims need the same three fields, and the submenu it walks is the one WW322 says will not open. → §WW85
 - 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - 📋 **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅, a publish carrying both) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
-- 📋 **WW88** (deps: Block G ✅, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
+- ⏳ **WW88** (deps: Block G ✅, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Interaction.cs is still a harness, and its two cases fail on this desk for reasons about the desk — which is the verdict the migration is for. → §WW88
 - 📋 **WW322** (deps: —) **the tray menu will not open on the guest: the icon is found in the overflow and the application key highlights nothing** — Two adopted cases fail on it, and WW85 migrates a third that walks the same submenu, so the sweep would arrive at a menu nothing has opened. → §WW322
 
 ## Block K — The proving ground — a fixture app built to be hard to test
@@ -180,6 +180,14 @@
   inside the fingerprint bracket around the suite. What says it landed is the pair: the
   mark on the entry that was picked and off the one it came from, with every file under
   the declared store unchanged and named where one is not.
+
+## Done when — WW88
+
+- **The interaction harness is cases, and its desk reasons are holes not reds**
+  Interaction.cs is deleted and MappingInteractionTests runs as scenarios through the
+  engine. What says it landed is the two that fail on this desk today: a controller
+  nobody plugged in and a window that would not come are absences the run names, not
+  failures it reports.
 
 ## Non-goals
 
