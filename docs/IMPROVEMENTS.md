@@ -220,28 +220,3 @@ Diagnosing it needs WW321 in a published package: until then the second failure 
 the run instead of failing it.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW316 The instrument that moves what it measures
-
-`Arrivals` is the recorder WW249 was narrowed with: it takes every `WM_CHAR` the window
-under test receives and shows it, which is how the substitution was proved to arrive
-already wrong rather than to be made by WPF.
-
-It appends to a `StringBuilder` that is never cleared, and per keystroke it writes the
-whole of it to a `TextBlock`'s `Text` and again to its `AutomationProperties.Name`. A
-run of 400 rounds across five arms sends some eighteen thousand code units, so the last
-keystroke rewrites an eighteen-kilobyte string and raises a name change over it, and the
-one before it rewrote nearly as much.
-
-Measured, and this is the number that matters: across one run the average round went
-4600ms, 6968ms, 9135ms, 11325ms by quarter — two and a half times slower at the end than
-the start — and the failures in those quarters went 6, 6, 11, 22. WW313 shipped on
-exactly this reading.
-
-So the instrument moves what it measures, and it moves it in the direction the
-measurement is most sensitive to. WW310 found the fault five times likelier in a band of
-spacings forty to seventy milliseconds wide; a fixture that slows every send as the run
-goes on is walking the experiment through that band without saying so.
-
-Arm against arm survives it — all of them meet the same window in the same round. Every
-absolute rate in this repository's typing measurements does not.

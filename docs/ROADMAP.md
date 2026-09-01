@@ -37,8 +37,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW316** (deps: —) **the recorder that exists to diagnose the fault rewrites a caption holding every character it ever saw** — It re-sets the text and the automation name once per keystroke over a string that grows all run, and the round slows two and a half times as it does. → §WW316
-
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine
