@@ -40,24 +40,27 @@ it.
 
 WW310 measured the curve and stopped where measuring stops. Between 48 and 64
 milliseconds the substitution runs at five times the engine's own rate, and by 80 it is
-back under it. The fault itself never changes: one code unit out of place, the last one
-sent standing in it, 130 times out of 130.
+back under it. The fault never changes: one code unit out of place, the last one sent
+standing in it, 130 of 130.
 
-The tick was the obvious guess and the shape refuses it. Four ticks of the platform's
-15.625ms timer is 62.5ms, which would put a spike on one value; what is there is a
-plateau across forty milliseconds with a cliff on one side of it.
+Three candidates are gone and all three fall to one shape. The band is **bracketed** —
+64ms is five to nine times worse than 32 *and* than 96 — and anything monotone in the
+spacing makes the last one worst rather than the middle one.
 
-WW316 raised the second and the same shape refuses it. The recorder rewrote an eighteen-kilobyte
-caption per keystroke, so every run slowed as it went — 4600ms a round to 11325 — and a fixture
-that slows every send walks the experiment through a band of spacings without saying so. But that
-drift is monotone and this band is bracketed: 64ms is five to nine times worse than 32 *and* than
-96. Steady slowing makes the last spacing the worst, not the middle one. The instrument moved the
-absolute rates; it did not put the peak where it is.
+The platform tick is not it: four ticks of 15.625ms is 62.5ms, a spike on one value,
+where what is there is a plateau forty milliseconds wide.
 
-What has not been looked at is still the other end. Everything measured is on the
-sending side, and the fault is a character arriving where a different one was sent. The
-window has a message queue and the control an input scope, and neither has been observed
-while this happens.
+The recorder is not it. WW316 found it rewriting an eighteen-kilobyte caption per
+keystroke, so runs slowed from 4600ms a round to 11325 — but that drift is monotone in
+time, and a sweep under it would make the last spacing worst.
+
+Nor is the read-back overlapping the send, the guess worth pricing. `Send` issues one
+`SendInput` for the whole string and `Settled` polls straight after, and `SendInput`
+returns once the events are queued — so the reader is always looking while the queue
+drains. That overlap grows with the spacing; it does not peak inside it.
+
+What is left is the other end, unobserved: the window has a message queue and the
+control an input scope, and nothing has read either while this happens.
 
 ### §WW323 A key from one well priced against the other well's value
 
