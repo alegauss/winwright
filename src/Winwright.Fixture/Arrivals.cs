@@ -71,6 +71,26 @@ internal sealed class Arrivals
     private readonly StringBuilder injected = new();
 
     /// <summary>
+    /// WW312. How long each character waited behind the one before it, in milliseconds.
+    /// <para>
+    /// The other end, which nothing had ever read. Everything measured about this fault is on the
+    /// sending side — how many calls, how far apart — and the fault is a character arriving where a
+    /// different one was sent. This is the arrival side of the same round: the gap before each
+    /// <c>WM_CHAR</c> as the window's own thread pulled it off the queue.
+    /// </para>
+    /// <para>
+    /// A stopwatch read and an append, which is the whole cost. WW316 is why that matters enough to
+    /// say: the recorder this sits in was the heaviest thing in the run until it was bounded, and an
+    /// instrument that moves what it measures moved it in the direction this measurement is most
+    /// sensitive to. This one is bounded the same way and does no formatting per keystroke.
+    /// </para>
+    /// </summary>
+    private readonly StringBuilder gaps = new();
+
+    /// <summary>When the last character arrived, so the next one can say how long it waited.</summary>
+    private readonly System.Diagnostics.Stopwatch since = System.Diagnostics.Stopwatch.StartNew();
+
+    /// <summary>
     /// How many keys have been injected since this recorder started, counted rather than left to be
     /// counted off the caption.
     /// <para>
@@ -83,12 +103,14 @@ internal sealed class Arrivals
     private long keys;
     private readonly TextBlock into;
     private readonly TextBlock packets;
+    private readonly TextBlock waits;
     private readonly nint window;
 
-    private Arrivals(TextBlock into, TextBlock packets, nint window)
+    private Arrivals(TextBlock into, TextBlock packets, TextBlock waits, nint window)
     {
         this.into = into;
         this.packets = packets;
+        this.waits = waits;
         this.window = window;
     }
 
@@ -99,11 +121,12 @@ internal sealed class Arrivals
     /// <param name="window">The window whose messages are read.</param>
     /// <param name="into">The caption the characters are written to, as its own text.</param>
     /// <param name="packets">The caption the injected keys are written to.</param>
+    /// <param name="waits">The caption the gaps between arrivals are written to. WW312.</param>
     /// <returns>The recorder, held by the caller so it is not collected while it is still reading.</returns>
-    public static Arrivals On(Window window, TextBlock into, TextBlock packets)
+    public static Arrivals On(Window window, TextBlock into, TextBlock packets, TextBlock waits)
     {
         var handle = new WindowInteropHelper(window).Handle;
-        var recorder = new Arrivals(into, packets, handle);
+        var recorder = new Arrivals(into, packets, waits, handle);
 
         // Said and not skipped. The first guest run of this recorder read the caption's original text
         // back, which reads exactly like a window that was sent nothing — because a recorder that
@@ -136,6 +159,13 @@ internal sealed class Arrivals
             said.Append(Readable((char)(message.wParam & 0xFFFF)));
             Trim(said);
             Say(into, said.ToString());
+
+            // WW312. Read before the append, so the gap is the wait and not the wait plus this
+            // recorder's own work on the character that preceded it.
+            gaps.Append(since.ElapsedMilliseconds).Append(' ');
+            since.Restart();
+            Trim(gaps);
+            Say(waits, gaps.ToString());
             return;
         }
 
@@ -202,13 +232,16 @@ internal sealed class Arrivals
     {
         said.Append(reading);
         injected.Append(reading);
+        gaps.Append(reading);
         Say(into, said.ToString());
         Say(packets, Counted());
+        Say(waits, gaps.ToString());
 
         // Cleared so the first arrival is the first thing in the record rather than the second: the
         // caption's opening words say the recorder is running, and a transcript that kept them would
         // read as a window that was sent them.
         said.Clear();
         injected.Clear();
+        gaps.Clear();
     }
 }

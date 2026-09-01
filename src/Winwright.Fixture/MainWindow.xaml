@@ -74,6 +74,12 @@
                given, and what TranslateMessage made of what arrived. These two captions are what
                tell those apart. -->
           <TextBlock x:Name="injected" Margin="0,8,0,0" TextWrapping="Wrap" Text="nothing yet" />
+
+          <!-- WW312. How long each character waited behind the one before it, as the window's own
+               thread pulled it off the queue. Everything measured about WW249 so far is on the
+               sending side, and the fault is a character ARRIVING where a different one was sent -
+               so this is the end nothing had read. -->
+          <TextBlock x:Name="waited" Margin="0,8,0,0" TextWrapping="Wrap" Text="nothing yet" />
         </StackPanel>
       </TabItem>
     </TabControl>

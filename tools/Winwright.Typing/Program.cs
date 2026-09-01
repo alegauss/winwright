@@ -56,6 +56,12 @@ public static class Program
     /// </summary>
     private const int Void = 4;
 
+    /// <summary>
+    /// How many faulted rounds have their arrivals printed. WW312: a reading nobody reads to the end
+    /// is a reading nobody reads, and the shape of the row is the question rather than the census.
+    /// </summary>
+    private const int MostArrivals = 12;
+
     public static int Main(string[] args)
     {
         ArgumentNullException.ThrowIfNull(args);
@@ -111,7 +117,19 @@ public static class Program
         }
 
         var box = On(root, "Edit#profile");
+
+        // WW312. The arrival side, which nothing had ever read: the fixture records how long each
+        // character waited behind the one before it as its own thread pulled it off the queue.
+        // Every reading this fault has been measured with until now is on the sending side — how
+        // many calls, how far apart — and the fault is a character ARRIVING where a different one
+        // was sent.
+        var waited = On(root, "Text#waited");
         var tally = new Tally();
+
+        // Read only where the repair fired, and never per round. A read is a cross-process call and
+        // this one is against the window under test, so taking it every round would put the reader
+        // inside the thing it is measuring — which is exactly what WW316 had to take out of here.
+        var arrivals = new List<string>();
 
         // WW313. Kept per round, because this rate moves within a run: the fixture appends every
         // value it is sent to a read-out under the box, so the window grows all run, and one measured
@@ -129,6 +147,9 @@ public static class Program
             spent.Add(took.TotalMilliseconds);
             ran = round;
 
+            if (typed.Resends > 0 && arrivals.Count < MostArrivals)
+                arrivals.Add($"round {round}: {Gaps(waited)}");
+
             lost = typed.Arrived ? 0 : lost + 1;
             if (lost >= Void)
             {
@@ -145,6 +166,21 @@ public static class Program
         Console.WriteLine($"{ran} round(s), typing at the fixture's WPF text box.");
         Console.WriteLine(tally.ToString());
         Console.Write(Drift(faulted, spent));
+
+        if (arrivals.Count > 0)
+        {
+            Console.WriteLine(
+                $"WW312: what the window's own thread saw on {arrivals.Count} of the faulted round(s), "
+                    + "in milliseconds between arrivals, most recent last. Each row is the tail of "
+                    + "the record: the SECOND group is the resend the repair made, and the FIRST is "
+                    + "the send that went wrong — a long gap, then one send's queue draining. The "
+                    + "send is one SendInput for the whole string, so an even group is a queue "
+                    + "drained in one go and an uneven one is not.");
+
+            foreach (var one in arrivals)
+                Console.WriteLine($"  {one}");
+        }
+
         Console.WriteLine(Verdict(tally));
         return 0;
     }
@@ -167,6 +203,43 @@ public static class Program
         tally.Saw(typed, took);
         return typed;
     }
+
+    /// <summary>
+    /// What the window's own thread saw, as the fixture recorded it. WW312.
+    /// <para>
+    /// Read through the automation name rather than the text, for WW238's reason: a caption's words
+    /// are in its name and in no pattern. Answered as a sentence where the caption could not be read
+    /// at all, because a row of nothing and a caption that was not there are different facts.
+    /// </para>
+    /// </summary>
+    /// <param name="waited">The caption the gaps are written to.</param>
+    private static string Gaps(Subject waited)
+    {
+        var read = waited.Read();
+        if (!read.Found)
+            return "<no caption to read>";
+
+        if (read.Facts?.Says is not { } said)
+            return "<the caption says nothing>";
+
+        // The tail and never the whole record, which is the correction the first reading forced.
+        // The caption holds the last four hundred code units — about twenty rounds — and printing
+        // all of it put the round this fault happened on somewhere in the middle of a wall of
+        // numbers, with nothing saying which part was which.
+        //
+        // Two sends are what a reader needs and the order is the point: this is read after
+        // Keyboard.Type returns, so the LAST group is the resend the repair made and the one before
+        // it is the send that went wrong. Reading the last group as the faulty one turns the
+        // repair's own latency into a finding about the fault.
+        var all = said.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return all.Length <= Tail ? said : string.Join(' ', all[^Tail..]);
+    }
+
+    /// <summary>
+    /// How many gaps are printed for a faulted round: two sends of a nine-character round and the
+    /// pauses before each. WW312.
+    /// </summary>
+    private const int Tail = 20;
 
     /// <summary>
     /// WW313. Whether the rate held still while the run ran, said in quarters.

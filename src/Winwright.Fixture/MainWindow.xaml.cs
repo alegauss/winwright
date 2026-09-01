@@ -177,7 +177,7 @@ public partial class MainWindow : Window
         // WW249. On every surface and behind no flag, because what it reads is a property of the
         // window rather than of anything a run asked to be drawn — and a flake nobody can provoke on
         // purpose is one the recording has to be running for already.
-        arrivals = Arrivals.On(this, arrived, injected);
+        arrivals = Arrivals.On(this, arrived, injected, waited);
     }
 
     /// <summary>What this run was asked to be.</summary>

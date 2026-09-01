@@ -43,24 +43,23 @@ milliseconds the substitution runs at five times the engine's own rate, and by 8
 back under it. The fault never changes: one code unit out of place, the last one sent
 standing in it, 130 of 130.
 
-Three candidates are gone and all three fall to one shape. The band is **bracketed** —
-64ms is five to nine times worse than 32 *and* than 96 — and anything monotone in the
-spacing makes the last one worst rather than the middle one.
+Three candidates fall to one shape. The band is **bracketed** — 64ms is five to nine
+times worse than 32 *and* than 96 — and anything monotone in the spacing makes the last
+one worst rather than the middle. The platform tick puts a spike on one value, not a
+plateau forty wide. WW316's recorder drift is monotone in time. And the read-back
+overlapping the send is monotone too: `Send` issues one `SendInput` and `Settled` polls
+straight after it.
 
-The platform tick is not it: four ticks of 15.625ms is 62.5ms, a spike on one value,
-where what is there is a plateau forty milliseconds wide.
+The other end has now been read. The fixture records how long each character waited
+behind the one before it, and the tool prints it where the repair fired. Across nine
+faulted rounds the queue drained **evenly** — a long pause, then 2 to 5ms a character,
+no stall and no burst — and the send that went wrong is indistinguishable from one that
+did not.
 
-The recorder is not it. WW316 found it rewriting an eighteen-kilobyte caption per
-keystroke, so runs slowed from 4600ms a round to 11325 — but that drift is monotone in
-time, and a sweep under it would make the last spacing worst.
-
-Nor is the read-back overlapping the send, the guess worth pricing. `Send` issues one
-`SendInput` for the whole string and `Settled` polls straight after, and `SendInput`
-returns once the events are queued — so the reader is always looking while the queue
-drains. That overlap grows with the spacing; it does not peak inside it.
-
-What is left is the other end, unobserved: the window has a message queue and the
-control an input scope, and nothing has read either while this happens.
+So the substitution is timely and already wrong, which agrees with WW249 proving the
+characters arrive substituted rather than made so by WPF. What is left is narrower than
+a queue: the translation from the injected packet to `WM_CHAR`, and the input scope it
+happens in.
 
 ### §WW323 A key from one well priced against the other well's value
 
