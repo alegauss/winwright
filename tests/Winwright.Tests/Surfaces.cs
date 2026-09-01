@@ -109,6 +109,10 @@ internal static class Surfaces
             Because: "what Windows delivers to the window, recorded on every run and behind no flag "
                 + "— WW249's flake cannot be provoked on purpose, so the reading has to be running "
                 + "already, and what it reads is a property of the window rather than of any shape"),
+        new("Injections", Carrying.ThePlumbing,
+            Because: "the other end of what Arrivals reads, and behind no flag for the same reason "
+                + "— what SendInput was handed, taken by a low-level hook before the queue has it, "
+                + "because the code unit exists there and in no message the window can be shown"),
         new("Protocol", Carrying.ThePlumbing,
             Because: "what the fixture and a harness agree on: the channels a run is asked to write "
                 + "to and the background a capture is drawn against, read on every run"),

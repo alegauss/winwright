@@ -68,7 +68,19 @@ internal sealed class Arrivals
     private const int Kept = 400;
 
     private readonly StringBuilder said = new();
-    private readonly StringBuilder injected = new();
+
+    /// <summary>
+    /// What <c>SendInput</c> handed the system, read where the code unit still exists. WW312.
+    /// <para>
+    /// This used to be a record of the keydown's own words, and that reading is finished: every
+    /// packet answered <c>000000E7/…</c> with the scan byte zero and the wParam's high word zero, so
+    /// the message carries no code unit in either of them and nothing taken off this queue can be
+    /// paired against what arrives. <see cref="Injections" /> reads the one place upstream where the
+    /// unit is still whole, and this caption now carries that instead — the same words, one
+    /// observation point earlier, which is the difference between a record and a pairing.
+    /// </para>
+    /// </summary>
+    private readonly Injections injected = Injections.Start();
 
     /// <summary>
     /// WW312. How long each character waited behind the one before it, in milliseconds.
@@ -174,25 +186,22 @@ internal sealed class Arrivals
         // one sent, which put the defect in the send rather than in WPF — and the send is still two
         // things: what SendInput was given, and what TranslateMessage makes of what arrived.
         //
-        // The whole word and not a field of it, which is measured rather than chosen. Reading the
-        // scan code at bits 16-23 answered zero for all seven of a round that typed correctly, so
-        // the character is not there: `WM_KEYDOWN` gives the scan code eight bits and a UTF-16 code
-        // unit does not fit in eight bits. What is recorded is therefore the message as it arrived,
-        // and the first thing it settles is whether the character is anywhere in it at all.
+        // Counted here and read upstream, which is where that reading went. The message was searched
+        // for the code unit twice and has it in neither word — the lParam's scan byte is zero, and so
+        // is the wParam's high word — because `WM_KEYDOWN` gives the scan code eight bits and a
+        // UTF-16 code unit does not fit in eight bits. So this end of the path can say how many
+        // packets the thread dequeued and never which ones, and the pairing is taken where the unit
+        // is still whole.
         if (message.message == WmKeyDown && (message.wParam & 0xFFFF) == VkPacket)
         {
             keys++;
 
-            // WW312. Both words and not the lParam alone, which is the question this record was one
-            // field short of answering. WW249 read the scan code at bits 16-23 of the lParam and got
-            // zero for all seven of a round that typed correctly, so the code unit is not there —
-            // and the record then had nothing in it that could be compared against what arrived as
-            // WM_CHAR. The high word of the wParam is the other place it can be, and until it is
-            // written down there is no way to tell a packet that was already wrong from a
-            // translation that made it wrong.
-            injected.Append($"[{(uint)message.wParam:X8}/{(uint)message.lParam:X8}]");
-            Trim(injected);
-            Say(packets, Counted());
+            // WW312. Published here and read upstream, so the caption is rewritten exactly as often
+            // as it was before: the units are appended on the hook's own thread as they are injected,
+            // and this branch — which fires once per packet either way — is where the UI thread picks
+            // them up. An instrument that cost a caption write per keystroke yesterday and two today
+            // would be measuring its own arrival.
+            Say(packets, injected.Counted(keys));
         }
     }
 
@@ -228,28 +237,20 @@ internal sealed class Arrivals
             record.Remove(0, record.Length - Kept);
     }
 
-    /// <summary>
-    /// The packet record as its caption carries it: the count first, then as much of the tail as is
-    /// kept. WW316 — the count is the claim and the tail is the evidence, and only the tail is bounded.
-    /// </summary>
-    private string Counted() => $"{keys} keys: {injected}";
-
     /// <summary>Both captions, before either has anything to say.</summary>
     /// <param name="reading">What each says until something arrives.</param>
     private void Start(string reading)
     {
         said.Append(reading);
-        injected.Append(reading);
         gaps.Append(reading);
         Say(into, said.ToString());
-        Say(packets, Counted());
+        Say(packets, injected.Counted(keys));
         Say(waits, gaps.ToString());
 
         // Cleared so the first arrival is the first thing in the record rather than the second: the
         // caption's opening words say the recorder is running, and a transcript that kept them would
         // read as a window that was sent them.
         said.Clear();
-        injected.Clear();
         gaps.Clear();
     }
 }

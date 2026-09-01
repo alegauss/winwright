@@ -126,10 +126,12 @@ public static class Program
         var waited = On(root, "Text#waited");
 
         // WW312. The two halves of the same round, so a fault can be attributed. `arrived` is what
-        // the window's thread pulled off the queue as WM_CHAR; `injected` is the VK_PACKET keydown
-        // each of them was made from. If the packets already carry the substitution it entered at
-        // the injection, and if they do not it entered at the translation — and nothing has ever
-        // put the two side by side at the moment one went wrong.
+        // the window's thread pulled off the queue as WM_CHAR; `injected` is the code unit each of
+        // those was injected as, read by the fixture's low-level hook before the queue ever had it.
+        // If the injected units already carry the substitution it entered at SendInput, and if they
+        // do not it entered at the translation — and nothing has ever put the two side by side at
+        // the moment one went wrong. The first attempt at this pairing read the keydown's own words
+        // and found the code unit in neither of them, which is why the reading moved upstream.
         var arrived = On(root, "Text#arrived");
         var packets = On(root, "Text#injected");
         var tally = new Tally();
@@ -150,7 +152,12 @@ public static class Program
         var ran = 0;
         for (var round = 1; round <= rounds; round++)
         {
-            var typed = Round(box, $"WW249-{round}", tally, out var took);
+            // Named rather than built at the call, because it is now part of the reading: a faulted
+            // round prints what was sent above what was injected and what arrived, and a report that
+            // left the sent string to be reconstructed from the round number would be asking its
+            // reader to do the comparison the tool exists to make.
+            var typing = $"WW249-{round}";
+            var typed = Round(box, typing, tally, out var took);
             faulted.Add(typed.Resends > 0);
             spent.Add(took.TotalMilliseconds);
             ran = round;
@@ -160,8 +167,9 @@ public static class Program
                 arrivals.Add(
                     $"round {round}"
                         + $"{Environment.NewLine}    gaps     {Gaps(waited)}"
-                        + $"{Environment.NewLine}    chars    {Tailed(arrived, TwoRounds)}"
-                        + $"{Environment.NewLine}    packets  {Decoded(packets, TwoRounds)}");
+                        + $"{Environment.NewLine}    sent     {typing}"
+                        + $"{Environment.NewLine}    injected {Injected(packets, TwoRounds)}"
+                        + $"{Environment.NewLine}    arrived  {Tailed(arrived, TwoRounds)}");
             }
 
             lost = typed.Arrived ? 0 : lost + 1;
@@ -184,12 +192,15 @@ public static class Program
         if (arrivals.Count > 0)
         {
             Console.WriteLine(
-                $"WW312: what the window's own thread saw on {arrivals.Count} of the faulted round(s), "
-                    + "in milliseconds between arrivals, most recent last. Each row is the tail of "
-                    + "the record: the SECOND group is the resend the repair made, and the FIRST is "
-                    + "the send that went wrong — a long gap, then one send's queue draining. The "
-                    + "send is one SendInput for the whole string, so an even group is a queue "
-                    + "drained in one go and an uneven one is not.");
+                $"WW312: the two ends of {arrivals.Count} of the faulted round(s), most recent last. "
+                    + "`injected` is what SendInput was handed, read by the fixture's low-level hook "
+                    + "before the queue had it; `arrived` is what the window's thread pulled off the "
+                    + "queue as WM_CHAR. Where `injected` ends in the sent string and `arrived` does "
+                    + "not, the substitution was made between them and not by the send. `gaps` is "
+                    + "milliseconds between arrivals, and each row is the tail of the record: the "
+                    + "SECOND group is the resend the repair made and the FIRST is the send that "
+                    + "went wrong. Two counts head `injected` — packets dequeued and injections "
+                    + "seen — and a run where they disagree is a run whose hook missed part of it.");
 
             foreach (var one in arrivals)
                 Console.WriteLine($"  {one}");
@@ -269,53 +280,32 @@ public static class Program
     }
 
     /// <summary>
-    /// The injected packets, decoded to the code units they carry. WW312, and the whole point of the
-    /// pairing: this beside the characters that arrived says whether a substitution was already in
-    /// what was injected, or was made of a correct packet by the translation.
+    /// The code units <c>SendInput</c> was given, as the fixture's hook read them. WW312, and the
+    /// whole point of the pairing: this beside the characters that arrived says whether a
+    /// substitution was already in what was injected, or was made of a correct injection by the
+    /// translation.
     /// <para>
-    /// The high word of the wParam is where a <c>KEYEVENTF_UNICODE</c> injection puts the code unit.
-    /// WW249 looked in the lParam's scan byte and found zero — which settled that it is not there
-    /// and left the question of where it is. A word that decodes to nothing printable is shown as
-    /// its hex rather than dropped: an unreadable packet is a finding and a silent one is not.
+    /// The counts are kept and only the units are shortened. They are taken at opposite ends of the
+    /// same path — one counted as the hook saw the injection, one as the window's thread dequeued the
+    /// packet — so a run where they disagree is a run whose instrument missed part of what it was
+    /// reading, and the tail of the units would say nothing about a round it did not see.
     /// </para>
     /// </summary>
-    /// <param name="caption">The caption the packets are written to.</param>
-    /// <param name="most">How many packets of the tail to decode.</param>
-    private static string Decoded(Subject caption, int most)
+    /// <param name="caption">The caption the injected units are written to.</param>
+    /// <param name="most">How many code units of the tail to keep.</param>
+    private static string Injected(Subject caption, int most)
     {
         var read = caption.Read();
         if (read.Facts?.Says is not { } said)
             return read.Found ? "<the caption says nothing>" : "<no caption to read>";
 
-        var entries = said.Split('[', StringSplitOptions.RemoveEmptyEntries)
-            .Select(one => one.TrimEnd(']'))
-            .Where(one => one.Contains('/', StringComparison.Ordinal))
-            .ToList();
-
-        if (entries.Count == 0)
+        var at = said.LastIndexOf(": ", StringComparison.Ordinal);
+        if (at < 0)
             return said;
 
-        var decoded = entries
-            .Skip(Math.Max(0, entries.Count - most))
-            .Select(one =>
-            {
-                var word = one.Split('/')[0];
-                if (!uint.TryParse(word, System.Globalization.NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var value))
-                    return "?";
-
-                var unit = (char)(value >> 16);
-                return char.IsControl(unit) || unit == 0 ? "." : unit.ToString();
-            })
-            .ToList();
-
-        // WW312. Said once rather than printed per packet, which is what the first reading did: a
-        // row of twenty-one identical hex words is a finding spelled at twenty-one times its length.
-        // The finding is that the keydown carries no code unit at all — the lParam's scan byte is
-        // zero, measured by WW249, and the wParam's high word is zero too — so this record cannot be
-        // paired against the characters and nothing between the two sides is observable from here.
-        return decoded.All(one => one == ".")
-            ? $"{decoded.Count} packet(s), none carrying a code unit in either word"
-            : string.Concat(decoded);
+        var counts = said[..(at + 2)];
+        var units = said[(at + 2)..];
+        return units.Length <= most ? said : counts + units[^most..];
     }
 
     /// <summary>

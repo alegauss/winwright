@@ -137,6 +137,11 @@ internal static class Sleeps
                 + "and parks until it is told to let go, so the case knows the file really is open "
                 + "rather than about to be — and the letting go is delayed rather than triggered by "
                 + "the move, because a collision that had already cleared would not be one"),
+        new("Injections.cs", 1, Sleeping.OnASignal,
+            "the hook's own thread signals once SetWindowsHookEx has answered, either way, so the "
+                + "window is never typed at by a run whose recorder is still being installed — with "
+                + "a five-second deadline, because a thread that never starts has to be reported "
+                + "rather than hang the fixture on the failure this parking exists to catch"),
         new("TrayIconFixture.cs", 1, Sleeping.OnASignal,
             "the same shape for the icon: the shell is asked and the add is signalled, which is what "
                 + "lets every case look straight after Add rather than waiting a guessed interval"),

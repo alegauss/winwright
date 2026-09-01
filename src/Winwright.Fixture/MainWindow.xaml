@@ -69,10 +69,11 @@
                under load, and those are opposite repairs in opposite repositories. -->
           <TextBlock x:Name="arrived" Margin="0,12,0,0" TextWrapping="Wrap" Text="nothing yet" />
 
-          <!-- WW249. The key each character was injected as, beside the character it became. Six
-               reds put the defect in the send, and the send is still two things: what SendInput was
-               given, and what TranslateMessage made of what arrived. These two captions are what
-               tell those apart. -->
+          <!-- WW249. The code unit each character was injected as, beside the character it became.
+               Six reds put the defect in the send, and the send is still two things: what SendInput
+               was given, and what TranslateMessage made of what arrived. These two captions are what
+               tell those apart. WW312: read by a low-level hook and not off the keydown, which
+               carries the code unit in neither of its words. -->
           <TextBlock x:Name="injected" Margin="0,8,0,0" TextWrapping="Wrap" Text="nothing yet" />
 
           <!-- WW312. How long each character waited behind the one before it, as the window's own

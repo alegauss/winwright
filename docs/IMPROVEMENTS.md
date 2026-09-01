@@ -38,29 +38,29 @@ it.
 
 ### §WW312 Why that band
 
-WW310 measured the curve and stopped where measuring stops. Between 48 and 64
-milliseconds the substitution runs at five times the engine's own rate, and by 80 it is
-back under it.
+WW310 measured the curve. Between 48 and 64 milliseconds the substitution runs at five
+times the engine's own rate, and by 80 it is back under it.
 
 Three candidates fall to one shape: the band is **bracketed**, 64ms being five to nine
 times worse than 32 *and* than 96, and anything monotone in the spacing makes the last
 worst rather than the middle. The platform tick puts a spike on one value, not a plateau
-forty wide. WW316's recorder drift is monotone in time. So is the read-back overlapping
-the send, since `Send` issues one `SendInput` and `Settled` polls straight after.
+forty wide. WW316's recorder drift is monotone in time, and so is the read-back
+overlapping the send.
 
-The other end has now been read, and it is read out. The fixture records the wait before
-each character and both words of the `VK_PACKET` keydown it came from.
+The arrival side reads out: the queue drains **evenly** on a faulted round — a long
+pause, then 2 to 5ms a character — so the substitution is timely and already wrong.
 
-The queue drains **evenly** on a faulted round — a long pause, then 2 to 5ms a character
-— and the send that went wrong is indistinguishable from one that did not.
+The pairing is made, one observation point above where it was first sought. The keydown
+carries the code unit in neither word and cannot, since `WM_KEYDOWN` gives the scan code
+eight bits where `KBDLLHOOKSTRUCT` gives it a full word. So a hook reads what
+`SendInput` was handed, before the queue has it.
 
-The signature is confirmed at arrival rather than inferred from a read-back: a round
-typing a label ending in 4 arrives with its third character replaced by that 4, in the
-right position and at ordinary timing.
+Across six faulted rounds of four hundred, every injection is **exactly what was sent**
+— `WW249-251` injected, `WW249-151` arrived — with the hook's count matching the
+window's packet for packet. So the substitution is made after `SendInput`, in the
+translation, from a unit no message carries.
 
-And the keydown carries **no code unit in either word** — the scan byte is zero, and so
-is the wParam's high word. So the two sides cannot be paired: there is no observation
-point between what `SendInput` was given and what arrives.
+The band is next, at spacings this send shape never uses.
 
 ### §WW323 A key from one well priced against the other well's value
 
