@@ -11,9 +11,12 @@
 ## Block D — Act — patterns before pointers
 
 - 📋 **WW332** (deps: —) **the tray menu verb has no case that opens a menu, only one that fails to find an icon** — The fixture icon answers no tray callback, so the success path is observed by adopters alone and WW322 is being diagnosed through a publish. → §WW332
-- 📋 **WW333** (deps: WW332, WW322) **the tray menu case proves the verb against a Win32 popup and never against a WinForms one** — The kind it uses answers the focus, so the fallback WW322 had to add is never reached and the case reads as though it covered the verb. → §WW333
+- 📋 **WW333** (deps: WW322, WW332) **the tray menu case proves the verb against a Win32 popup and never against a WinForms one** — The kind it uses answers the focus, so the fallback WW322 had to add is never reached and the case reads as though it covered the verb. → §WW333
 
 ## Block E — Capture — the picture that proves what it photographed
+
+- 📋 **WW334** (deps: —) **a layered window's rectangle is a rectangle of the desktop, and nothing refuses a copy of one** — Glass answers the backdrop and nothing answers WS_EX_LAYERED, so an adopter keeps a class name away from the copy by hand. → §WW334
+- 📋 **WW335** (deps: —) **a borderless window sets WS_POPUP, so the route alone would copy an application's own frame** — The one-argument overload has no main window to rule it out, and a render is the one capture that frame can safely take. → §WW335
 
 ## Block F — Assert — the expectation is derived, never typed
 
@@ -23,17 +26,19 @@
 
 ## Block G — The scenario — a case is a data file
 
+- 📋 **WW336** (deps: —) **no act names a capture, so a migrated capture is C# beside the cases rather than one of them** — WW87's own line calls the capture a scenario, and three adopters each hand-write the test the data file cannot say. → §WW336
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
 
-- ⏳ **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322) **the switch case drives the one path that rewrites a real setting** — The case and the store bracket are written and wait on it: the adopter's engine comes from nuget.org. → §WW83
-- 📋 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322) **the environment sweep walks a submenu per sampled mode** — Its own claims need the same three fields, and the submenu it walks is the one WW322 says will not open. → §WW85
-- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
-- ⏳ **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
-- ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
+- ⏳ **WW83** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322) **the switch case drives the one path that rewrites a real setting** — The case and the store bracket are written and wait on it: the adopter's engine comes from nuget.org. → §WW83
+- 📋 **WW85** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322) **the environment sweep walks a submenu per sampled mode** — Its own claims need the same three fields, and the submenu it walks is the one WW322 says will not open. → §WW85
+- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
+- ⏳ **WW87** (deps: Block G, Block E, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
+- ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - 📋 **WW322** (deps: —) **the tray menu will not open on the guest: the icon is found in the overflow and the application key highlights nothing** — Two adopted cases fail on it, and WW85 migrates a third that walks the same submenu, so the sweep would arrive at a menu nothing has opened. → §WW322
 - 📋 **WW330** (deps: —) **a run whose tray cases fail inside the overflow leaves the chevron focused and the taskbar holding the foreground** — The next run is refused before it starts, and the criterion this breaks is the block's own: a run leaves the machine as it found it. → §WW330
 - 📋 **WW331** (deps: WW330) **the desk probe calls a focused taskbar a question waiting to be answered** — It names Shell_TrayWnd in its own refusal and then sends a reader to a guest console to answer a prompt that is not there. → §WW331
@@ -188,6 +193,13 @@
   engine. What says it landed is the two that fail on this desk today: a controller
   nobody plugged in and a window that would not come are absences the run names, not
   failures it reports.
+
+## Done when — WW87
+
+- **The capture script goes the way the probe did** scripts\Capture-Window.ps1 is
+  deleted and its five assertions are readings CaptureReceipt.Taking takes, driven from
+  freewilly's own case project against the engine as nuget.org publishes it. Until then
+  the count is one script of two, and the line says which.
 
 ## Non-goals
 

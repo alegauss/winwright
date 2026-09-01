@@ -84,6 +84,36 @@ fixed.
 
 ## Block E — Capture — the picture that proves what it photographed
 
+### §WW334 the shadow behind a popup is not a picture of it
+
+Measured beside freewilly's menu. The SysShadow window Windows draws behind a
+drop-shadowed popup is WS_POPUP with no caption, owned by nothing, and two pixels larger
+on every side - so it is a popup by every test the route has, and it is also
+WS_EX_LAYERED. A copy of its rectangle is a copy of whatever the menu is standing in
+front of.
+
+Glass asks the compositor about the system backdrop and answers None for it, truthfully:
+it never asked for one. The transmission is the layering instead, and nothing reads
+that. So the adopter photographing a popup has to know a class name to keep away from,
+which is exactly the kind of knowledge this framework exists to take off them.
+
+### §WW335 a frame with no chrome reads as a popup
+
+WW87 taught the route to read the style bits, because a drop-down that nothing owns had
+to be recognised by something, and its class name carries a per-thread number. A WPF
+window with WindowStyle None sets the same two bits - WS_POPUP, no caption - and it is
+an ordinary frame with a visual tree the application can render.
+
+The two-argument overload is unaffected: a window that is the main one short-circuits
+before any of this. What is exposed is CaptureRoute.For(window) alone, which WW320 added
+for an application showing only a menu, and which would send a borderless main window to
+a screen copy.
+
+Nothing measured has met one yet, which is why this is filed rather than guessed at. The
+discriminator would have to be something the window says about itself rather than a
+third style bit: WS_EX_TOOLWINDOW was tried and is clear on the menu this exists for and
+set on the shadow behind it.
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ### §WW312 Why that band
@@ -161,6 +191,23 @@ would do as well. Delaying the read fixes it either way; changing how the read i
 needs to know which.
 
 ## Block G — The scenario — a case is a data file
+
+### §WW336 the one thing an adopter still writes in C#
+
+Every verb the vocabulary has acts on a control or on a tray icon. A capture acts on a
+window and needs three things a step cannot say: which window, which route, and where
+the file goes. So freewilly's menu capture, claude-tray's and pportal's are each a
+hand-written test beside the data files - which is the shape block G exists to remove.
+
+Most of it is already somewhere a step could reach. CaptureReceipt.Taking composes every
+reading without a caller remembering one, and CaptureRoute answers which way the picture
+is got off the window itself. What is left for the author to say is the subject and the
+destination.
+
+The destination is what makes this worth its own task rather than a fourth line in
+ActVerb: it would be the first verb in this vocabulary that writes a file, and a case
+that names a path is a case that means something different on the next machine. The
+other fields a case carries are derived for exactly that reason.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
