@@ -5,7 +5,23 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+
+    <!-- WW322. The tray fixture puts up a WinForms drop-down beside its Win32 popup, because those
+         are the two kinds of menu a real tray has and the verb under test only ever met the first.
+         In-box for a windows target, so it costs no package — and it is here rather than in the
+         engine, which needs neither: the engine reads menus and does not draw them.
+         Its implicit usings are taken back out below. -->
+    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
+
+  <!-- WW322. The two namespaces the WinForms SDK imports into every file, removed. Left in, they
+       make `Color` and `Brush` ambiguous against the presentation stack's — measured, five errors
+       across four files that name colours the engine reads. The fixture spells both of its WinForms
+       types in full instead, which is one file paying for what would otherwise be every file's. -->
+  <ItemGroup>
+    <Using Remove="System.Drawing" />
+    <Using Remove="System.Windows.Forms" />
+  </ItemGroup>
 
   <!-- xUnit lives here and never in the engine: the non-goal is about what an adopting project
        inherits, and nobody inherits a test project. That it has no vocabulary for the third

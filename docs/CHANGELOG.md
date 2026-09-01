@@ -304,6 +304,7 @@
 - ✅ **WW83 (the engine half)** **the switch case drives the one path that rewrites a real setting** — The engine learned what an entry carrying its own state needs: a locator matching the front of a name, a reading of the sentence beside it, and a claim about the front of that.
 - ✅ **WW88 (the runner half)** **pportal carries an interaction harness and twenty-seven copies of one runner** — Twenty-six copies of the STA runner became one package reference: 589 lines out, 178 in, and pportal's gate green at 5,038.
 - ✅ **WW87 (the probe, and the route it needs)** **freewilly carries its own copy of the capture script and a layout probe** — freewilly's page probe is 354 lines lighter and runs in 4s where the script took 152.3s: the four checks it hand-rolled are the four faults a layout reading names.
+- ✅ **WW322** **the tray menu will not open on the guest: the icon is found in the overflow and the application key highlights nothing** — The suite puts up the kind of menu that never takes the focus, and the reading asks for a standing menu first — which is what three adopted cases failed on.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

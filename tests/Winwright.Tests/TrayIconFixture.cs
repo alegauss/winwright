@@ -8,6 +8,33 @@ using Winwright.Verdicts;
 namespace Winwright.Tests;
 
 /// <summary>
+/// Which kind of menu a tray icon puts up. WW322, and the two arms are the whole of that task.
+/// <para>
+/// A real application's tray menu is one of these two, and until now this fixture could only be the
+/// first. WW332 proved the verb against a <c>TrackPopupMenu</c>, which the desk reports as holding
+/// the focus — so the reading the verb takes answered, the case passed, and three adopted cases went
+/// on failing against the other kind.
+/// </para>
+/// </summary>
+internal enum TrayMenuKind
+{
+    /// <summary>
+    /// None. The icon is asked and shows nothing, which is what proves the verb reports the truth
+    /// rather than claiming a menu it never saw.
+    /// </summary>
+    None,
+
+    /// <summary>A Win32 popup through <c>TrackPopupMenu</c>, which the desk reports as focused.</summary>
+    Win32,
+
+    /// <summary>
+    /// A WinForms <c>ToolStripDropDown</c>, which is a top-level menu window the desk does not
+    /// report as focused. This is the kind freewilly and claude-tray both put up.
+    /// </summary>
+    DropDown,
+}
+
+/// <summary>
 /// A real notification-area icon, owned by this run and taken away again.
 /// <para>
 /// Measured: an icon added now goes into the overflow rather than onto the taskbar, which is
@@ -178,8 +205,18 @@ internal sealed class TrayIconFixture : IDisposable
     /// <summary>Held for the life of the window it was given to. WW332.</summary>
     private Subclassed? answering;
 
-    /// <summary>Whether this icon shows a menu when the shell asks it for one. WW332.</summary>
-    private readonly bool answers;
+    /// <summary>What this icon shows when the shell asks it for a menu. WW332, and WW322's arms.</summary>
+    private readonly TrayMenuKind answers;
+
+    /// <summary>
+    /// The drop-down, once one has been put up. WW322.
+    /// <para>
+    /// Kept rather than built per request, because it is a window with a lifetime: a
+    /// <c>ToolStripDropDown</c> shown and left standing is what a tray application's menu is, and a
+    /// second one built on the next request would leave the first on the desk with nothing holding it.
+    /// </para>
+    /// </summary>
+    private System.Windows.Forms.ToolStripDropDown? standing;
 
     private nint wasAnswering;
 
@@ -196,7 +233,7 @@ internal sealed class TrayIconFixture : IDisposable
     /// <summary>Whether this icon has shown its menu, and how often. WW332.</summary>
     public int MenusShown => Volatile.Read(ref shown);
 
-    private TrayIconFixture(string tip, bool withMenu)
+    private TrayIconFixture(string tip, TrayMenuKind withMenu)
     {
         answers = withMenu;
 
@@ -343,17 +380,18 @@ internal sealed class TrayIconFixture : IDisposable
     /// </summary>
     /// <param name="tip">What the shell should call it, before this run's own mark is added.</param>
     /// <param name="withMenu">
-    /// Whether it answers the shell's request for a context menu by showing one. WW332, and it is a
-    /// parameter rather than the new default because both shapes assert something. An icon with no
-    /// menu is what proves the verb reports the truth instead of claiming a menu it never saw — the
-    /// false green this project is against — and an icon with one is what proves the route works at
-    /// all. Making every icon answer would have deleted the first claim to gain the second.
+    /// What it answers the shell's request for a context menu with. WW332, and a parameter rather
+    /// than a default because all three shapes assert something. An icon with no menu is what proves
+    /// the verb reports the truth instead of claiming a menu it never saw — the false green this
+    /// project is against. A Win32 popup is what proves the route works at all. And a drop-down is
+    /// WW322: the kind a real tray puts up, which the desk does not report as focused.
     /// </param>
     /// <exception cref="InvalidOperationException">
     /// Where the shell accepted the icon and never placed it, which is a fixture that failed
     /// rather than a case that did.
     /// </exception>
-    internal static TrayIconFixture Add(string tip, bool withMenu = false) => new(tip, withMenu);
+    internal static TrayIconFixture Add(string tip, TrayMenuKind withMenu = TrayMenuKind.None) =>
+        new(tip, withMenu);
 
     /// <summary>
     /// Rename the icon in place, the way an application with a live tooltip does.
@@ -400,10 +438,44 @@ internal sealed class TrayIconFixture : IDisposable
             return CallWindowProcW(wasAnswering, window, message, wParam, lParam);
 
         var asked = (uint)(lParam & 0xFFFF);
-        if (answers && asked is WmContextMenu or WmRButtonUp or NinKeySelect or NinSelect)
-            Show();
+        if (asked is WmContextMenu or WmRButtonUp or NinKeySelect or NinSelect)
+        {
+            if (answers == TrayMenuKind.Win32)
+                Show();
+            else if (answers == TrayMenuKind.DropDown)
+                Drop();
+        }
 
         return 0;
+    }
+
+    /// <summary>
+    /// The other kind: a WinForms drop-down, shown and left standing. WW322.
+    /// <para>
+    /// Modeless, which is the difference that matters as much as the framework. <see cref="Show" />
+    /// blocks inside <c>TrackPopupMenu</c> until the menu goes; this returns with the menu up, which
+    /// is what a real tray does — the drop-down is a window of its own and the application's pump
+    /// carries on. <c>AutoClose</c> is off for the same reason a capture of one needs it off: a
+    /// drop-down dismisses itself the moment anything else takes the focus, and the verb under test
+    /// is about a menu that stands while a reading is taken.
+    /// </para>
+    /// </summary>
+    private void Drop()
+    {
+        _ = GetCursorPos(out var where);
+
+        standing ??= Built();
+        Volatile.Write(ref shown, Volatile.Read(ref shown) + 1);
+        standing.Show(new System.Drawing.Point(where.X, where.Y));
+    }
+
+    /// <summary>Two real entries, the same two the Win32 menu has. WW322.</summary>
+    private static System.Windows.Forms.ToolStripDropDown Built()
+    {
+        var strip = new System.Windows.Forms.ToolStripDropDown { AutoClose = false };
+        strip.Items.Add("winwright open");
+        strip.Items.Add("winwright quit");
+        return strip;
     }
 
     /// <summary>The menu itself: two real entries, tracked the way the shell expects. WW332.</summary>
@@ -444,6 +516,33 @@ internal sealed class TrayIconFixture : IDisposable
     {
         if (owner != 0)
             PostMessageW(owner, WmCancelMode, 0, 0);
+
+        // WW322. A drop-down is a control and not a tracked popup, so WM_CANCELMODE at the owner
+        // does not reach it: it has to be closed on the thread that made it, and with AutoClose put
+        // back or the close is a request the control declines.
+        Close(standing);
+    }
+
+    /// <summary>Shut a drop-down from the thread that owns it, where there is one. WW322.</summary>
+    /// <param name="drop">The drop-down, or null where none was ever put up.</param>
+    private static void Close(System.Windows.Forms.ToolStripDropDown? drop)
+    {
+        if (drop is null || drop.IsDisposed || !drop.IsHandleCreated)
+            return;
+
+        try
+        {
+            drop.Invoke(() =>
+            {
+                drop.AutoClose = true;
+                drop.Close();
+            });
+        }
+        catch (Exception gone) when (gone is InvalidOperationException or ObjectDisposedException)
+        {
+            // The thread that owns it has already gone, which is Dispose racing itself and is the
+            // one case where a menu left standing takes its whole desktop with it anyway.
+        }
     }
 
     /// <summary>Take it away, and the window that owned it.</summary>
@@ -455,6 +554,7 @@ internal sealed class TrayIconFixture : IDisposable
             PostThreadMessageW(threadId, WmQuit, 0, 0);
 
         thread.Join(TimeSpan.FromSeconds(5));
+        standing?.Dispose();
     }
 
     private NotifyIconData Describe() => new()

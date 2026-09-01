@@ -11,8 +11,10 @@
 ## Block D — Act — patterns before pointers
 
 - 📋 **WW332** (deps: —) **the tray menu verb has no case that opens a menu, only one that fails to find an icon** — The fixture icon answers no tray callback, so the success path is observed by adopters alone and WW322 is being diagnosed through a publish. → §WW332
-- 📋 **WW333** (deps: WW322, WW332) **the tray menu case proves the verb against a Win32 popup and never against a WinForms one** — The kind it uses answers the focus, so the fallback WW322 had to add is never reached and the case reads as though it covered the verb. → §WW333
+- 📋 **WW333** (deps: WW322 ✅, WW332) **the tray menu case proves the verb against a Win32 popup and never against a WinForms one** — The kind it uses answers the focus, so the fallback WW322 had to add is never reached and the case reads as though it covered the verb. → §WW333
 - 📋 **WW337** (deps: —) **a spacing of 32ms silenced the fault across 750 rounds, and the repair was chosen when only 128ms had** — WW310's band was the other reason and it did not reproduce, so the cheapest measured suppression is a quarter of the price that refused one. → §WW337
+- 📋 **WW338** (deps: —) **a tray menu is told from the one before it by name, so two unnamed menus read as one menu standing** — The reading that answers whether a menu came up compares two strings, and 'a menu with no name' is what an unnamed one is called both times. → §WW338
+- 📋 **WW339** (deps: —) **a tray menu's reading is called Highlighted and now often holds the menu's own name instead** — WW322 put the standing menu ahead of the focus, so what a trace records moved from the entry a menu highlights to the menu. → §WW339
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -34,12 +36,11 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- ⏳ **WW83** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322) **the switch case drives the one path that rewrites a real setting** — The case and the store bracket are written and wait on it: the adopter's engine comes from nuget.org. → §WW83
-- 📋 **WW85** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322) **the environment sweep walks a submenu per sampled mode** — Its own claims need the same three fields, and the submenu it walks is the one WW322 says will not open. → §WW85
+- ⏳ **WW83** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅) **the switch case drives the one path that rewrites a real setting** — The case and the store bracket are written and wait on it: the adopter's engine comes from nuget.org. → §WW83
+- 📋 **WW85** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅) **the environment sweep walks a submenu per sampled mode** — Its own claims need the same three fields, and the submenu it walks is the one WW322 says will not open. → §WW85
 - 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - ⏳ **WW87** (deps: Block G, Block E, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
-- 📋 **WW322** (deps: —) **the tray menu will not open on the guest: the icon is found in the overflow and the application key highlights nothing** — Two adopted cases fail on it, and WW85 migrates a third that walks the same submenu, so the sweep would arrive at a menu nothing has opened. → §WW322
 - 📋 **WW330** (deps: —) **a run whose tray cases fail inside the overflow leaves the chevron focused and the taskbar holding the foreground** — The next run is refused before it starts, and the criterion this breaks is the block's own: a run leaves the machine as it found it. → §WW330
 - 📋 **WW331** (deps: WW330) **the desk probe calls a focused taskbar a question waiting to be answered** — It names Shell_TrayWnd in its own refusal and then sends a reader to a guest console to answer a prompt that is not there. → §WW331
 

@@ -104,6 +104,52 @@ no spacing to say the two differ, on a desk whose rate has been read the same ev
 The repair the engine ships stays whatever this answers: a resend costs nothing on the
 99% that arrive.
 
+### §WW338 two menus with the same nothing for a name
+
+WW322 gave the tray verb a second reading: a top-level menu standing on the desktop,
+compared against whatever was standing before the key. The comparison is `menu !=
+standingBefore`, and both sides are what `Standing` calls a menu - its automation name,
+or the phrase `a menu with no name` where it has none.
+
+So two menus that are called the same thing are one menu to this reading. An application
+that had a menu up when the verb started and put a second one up in answer reports
+nothing came; two unnamed menus do the same, and unnamed is what a `ToolStripDropDown`
+with no accessible name is.
+
+Neither has been seen. The verb takes the focus first, which dismisses most menus that
+were standing, and the case that provokes the drop-down puts up one menu on a desk with
+none. What makes it worth filing rather than leaving is that the failure is silent and
+reads as the application declining to show a menu - the exact confusion WW322 spent
+itself on.
+
+What would settle it is the element rather than the name: a runtime id is what UI
+Automation promises for the life of an element, and the tray search already matches an
+icon that way for the same reason - a tooltip an application rewrites. Two menus are
+then two elements whatever either is called.
+
+### §WW339 the field that stopped meaning what it is called
+
+`TrayMenu.Highlighted` was the focused element's name, which for a Win32 popup is the
+entry the menu has highlighted - and that is what the field is called and what a trace's
+read-back carries.
+
+WW322 asked a second question first: is a menu standing on the desktop, which is the
+only reading a drop-down answers. Where it answers, the value is the menu's own name and
+not an entry's. So a trace of the same act against the same application now records the
+menu where it recorded the entry, and the field's name is right about one of the two
+paths.
+
+Nothing is wrong with what it reports. What is wrong is that one word covers two
+readings, and this project's rule about the third verdict is the same rule: two facts
+under one name is a reader unable to tell which they have.
+
+Two ways out, and the choice is the task. Either the field says which reading answered,
+so a trace carries `the menu 'Context'` against `the entry 'Open'` and a case can ask
+for either - or the standing route goes on to read what its menu is highlighting, which
+is one more cross-process call on a path that has just proved a menu exists. The first
+is honest and cheap; the second keeps every existing reading meaning what it did, which
+matters to nobody yet and would matter to an adopter asserting on it.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW334 the shadow behind a popup is not a picture of it
@@ -262,33 +308,6 @@ single-threaded runner become one package reference, which is the largest single
 deletion the whole adoption produces. It is also the hardest, because a thousand other
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
-
-### §WW322 the icon that answers and the menu that does not
-
-Three adopted cases failed on one line: `hidden tray icon '…' showed no menu: nothing
-was highlighted within 6009 ms of the application key`. The last clause was wrong, and
-everything else in it was the engine working.
-
-Three candidates fell before the answer. A tray still resolving a profile does not
-explain it — `BuildMenu` runs in the constructor, unconditionally. Nor the guest: WW332
-gave the fixture icon a real popup and the verb opens it. Nor the delivery, once
-`OpenMenu` named what it pressed into — the overflow flyout, with the adopter's own icon
-focused.
-
-So the application was asked, and it answered. Logged from inside it: the menu opened 22
-milliseconds after the key, stood visible for 6.05 seconds, and closed when this verb's
-own wait expired. It was up the whole time the engine reported nothing highlighted.
-
-The defect is here. `OnTheDesk` asked what holds the focus and nothing else. A Win32
-popup answers that; a WinForms `ToolStripDropDown` does not, and a tray menu is as often
-one as the other.
-
-WW332's case passed throughout and hid it, which is the part worth keeping. That fixture
-puts up a `TrackPopupMenu` — one of the two real kinds — so the verb was proved against
-the kind that answers and never against the kind that does not.
-
-The reading now falls back to a top-level menu standing on the desktop, which is the
-same fact by the route the focus does not cover.
 
 ### §WW330 The flyout nobody closed
 

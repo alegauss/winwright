@@ -449,7 +449,8 @@ public sealed class NotificationAreaTests : IDisposable
         // Its own icon and not the class's, because the class's answers no menu on purpose: the case
         // below it asserts that the verb says so rather than claiming one appeared, and an icon that
         // served both would have to be two things at once.
-        using var answering = BusyDesk.Built(() => TrayIconFixture.Add("winwright menu", withMenu: true));
+        using var answering = BusyDesk.Built(
+            () => TrayIconFixture.Add("winwright menu", TrayMenuKind.Win32));
         if (answering is null)
             return;
 
@@ -476,6 +477,49 @@ public sealed class NotificationAreaTests : IDisposable
         {
             // WW330's rule where the leak would be this suite's own: a menu left up owns the
             // foreground, and the next case in this class reads the desk.
+            answering.DismissMenu();
+        }
+    }
+
+    [Fact]
+    public void A_menu_that_stands_without_taking_the_focus_is_seen_too()
+    {
+        // WW322, and it is the case that could not be written before. The verb reads what the desk
+        // says holds the focus; a Win32 popup answers that and a WinForms drop-down does not, and a
+        // real tray is as often one as the other. So the case above passed on every run while three
+        // adopted cases failed on this route — the fixture put up the kind that answers, and the
+        // reading was never taken against the kind that does not.
+        //
+        // Measured in the adopter before it was measured here: the tray was told, opened its menu 22
+        // milliseconds after the key, held it for the whole six seconds the verb waits, and closed it
+        // when the wait expired — logged from inside the application, while the engine reported that
+        // nothing had been highlighted.
+        using var answering = BusyDesk.Built(
+            () => TrayIconFixture.Add("winwright dropdown", TrayMenuKind.DropDown));
+
+        if (answering is null)
+            return;
+
+        var menu = NotificationArea.OpenMenu(answering.Tip, settleMs: 4000, pollMs: 40);
+
+        try
+        {
+            if (BusyDesk.Excused(menu.AsAssertion("the icon shows its menu")))
+                return;
+
+            // The application was asked and drew one, which is the half that was never in doubt: the
+            // adopter's own log said so while the engine said nothing was highlighted. Asserted
+            // first, so a run where the shell never delivered the request is reported as that rather
+            // than as the reading below failing.
+            Assert.True(
+                answering.MenusShown > 0,
+                $"the icon was never asked for its menu: {menu.Because}");
+
+            Assert.True(menu.Opened, menu.Because);
+            Assert.Equal(Winwright.Tracing.StepVerdict.Ok, menu.AsTraceStep().Verdict);
+        }
+        finally
+        {
             answering.DismissMenu();
         }
     }

@@ -786,6 +786,11 @@ public static class NotificationArea
 
         var before = OnTheDesk();
 
+        // WW322. Both readings taken before the key, because both are compared against themselves
+        // afterwards. A menu already standing when this started is somebody else's, and one that is
+        // still the only menu on the desk a moment later is not an answer to this act.
+        var standingBefore = Standing();
+
         // WW322. Read where the key is about to go, before it goes. The application key is
         // synthesised at the desk and lands on whatever holds the foreground, so a refusal that says
         // only "nothing was highlighted" leaves a reader unable to tell a shell that declined to
@@ -795,12 +800,53 @@ public static class NotificationArea
         var holding = Traversal.WhoHasFocus()?.Name;
 
         Keys.SendApplicationKey();
-        var came = Attempt.UntilTrue(
-            () => OnTheDesk() is { } now && now != before && now != icon.Name, settleMs, pollMs);
+
+        string? showing = null;
+        var came = Attempt.UntilTrue(() => Showed(icon, before, standingBefore, out showing), settleMs, pollMs);
 
         return came.Happened
-            ? new TrayMenu(icon, true, OnTheDesk(), null)
+            ? new TrayMenu(icon, true, showing, null)
             : new TrayMenu(icon, false, null, Undelivered(icon, came.WaitedMs, aimedAt, holding));
+    }
+
+    /// <summary>
+    /// Whether a menu has come up, asked two ways because there are two kinds of menu. WW322.
+    /// <para>
+    /// The focus was the only question until this, and it is the weaker of the two: it is a proxy
+    /// for a menu rather than a reading of one, and it is the proxy that fails on exactly the kind
+    /// of menu a real tray puts up. Measured against a WinForms drop-down in this suite's own
+    /// fixture — <c>the foreground was explorer 'System tray overflow window' and the focus was on
+    /// 'winwright dropdown', which is the icon</c> — with the menu up the whole time and the
+    /// application's own count saying it had drawn one. The focus never moves, so a reading that
+    /// waits for it to move waits out its deadline against a menu standing in front of it.
+    /// </para>
+    /// <para>
+    /// So the menu itself is asked first and the focus second, and neither is dropped: a
+    /// <c>TrackPopupMenu</c> answers both, and the day one of them stops answering the other still
+    /// does. Each is compared against its own reading from before the key, which is what keeps a
+    /// menu somebody else left standing from being this act's answer.
+    /// </para>
+    /// </summary>
+    /// <param name="icon">The icon the menu was asked of, whose own name is not a menu.</param>
+    /// <param name="before">What the desk was showing before the key.</param>
+    /// <param name="standingBefore">What menu was standing before it, where one was.</param>
+    /// <param name="showing">What answered, where anything did.</param>
+    private static bool Showed(TrayIcon icon, string? before, string? standingBefore, out string? showing)
+    {
+        if (Standing() is { } menu && menu != standingBefore)
+        {
+            showing = menu;
+            return true;
+        }
+
+        if (OnTheDesk() is { } now && now != before && now != icon.Name)
+        {
+            showing = now;
+            return true;
+        }
+
+        showing = null;
+        return false;
     }
 
     /// <summary>
@@ -860,9 +906,10 @@ public static class NotificationArea
     /// nothing had been highlighted.
     /// </para>
     /// <para>
-    /// So the focus is the first question and no longer the only one. A top-level menu on the
-    /// desktop is the same fact by another route, and the two together cover both kinds of menu a
-    /// real application puts up.
+    /// It was a fallback first — asked only where nothing answered the focus — and that was not
+    /// enough, which this suite then measured for itself. With a drop-down up, the desk goes on
+    /// reporting the tray icon as focused, so the focus answers and the fallback is never reached.
+    /// <see cref="Showed" /> asks this one first instead, and the focus after it.
     /// </para>
     /// </summary>
     private static string? Standing()
