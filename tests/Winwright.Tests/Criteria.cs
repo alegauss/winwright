@@ -184,10 +184,19 @@ internal static class Criteria
             null, "every verb needing no cooperation is driven against an application referencing nothing"),
 
         // --- J, adoption ---------------------------------------------------------------------------------
-        new("J", "The proof is a deletion", "", Unshown.NotBuilt, "no project has adopted it yet"),
-        new("J", "Nothing was lost in the move", "", Unshown.NotBuilt, "there has been no move"),
-        new("J", "The migrated suite is not slower than what it replaced", "", Unshown.NotBuilt,
-            "there is nothing migrated to time against"),
+        // WW87 moved all three of these out of "not built" and into a debt this suite cannot pay. A
+        // migration has happened and every number the block asks for was measured; all of them are
+        // in freewilly, and nothing here can read a file this checkout does not have.
+        new("J", "The proof is a deletion", "", Unshown.NotYet,
+            "WW87 removed freewilly's 354-line page probe, and claude-tray and pportal still carry "
+                + "theirs — so the count exists for one adopter of three and lives in its repository"),
+        new("J", "Nothing was lost in the move", "", Unshown.NotYet,
+            "WW87 names both halves — the four hand-rolled geometry checks became the four faults a "
+                + "layout reading has, and the claims about what the page says stayed beside them — "
+                + "but the pairing is in freewilly's own harness and cannot be read from here"),
+        new("J", "The migrated suite is not slower than what it replaced", "", Unshown.NotYet,
+            "WW87 timed both on one machine over the same five states, 152.3s against 4s, and wrote "
+                + "them beside each other where the migration is rather than where this suite is"),
 
         // --- K, the proving ground -----------------------------------------------------------------------
         new("K", "Every refusal has something that provokes it",
@@ -221,6 +230,12 @@ internal static class Criteria
             Unshown.NotBuilt, "the engine carries the three fields the case is written out of and the "
                 + "published package does not, so the case that would read this back refuses to load "
                 + "in the repository it lives in — and nothing here can drive claude-tray's menu"),
+
+        // --- WW87, the same shape a third time ---------------------------------------------------------------
+        new("WW87", "The capture script goes the way the probe did", "",
+            Unshown.NotBuilt, "the route that reaches a drop-down nothing owns shipped here and the "
+                + "published package does not carry it, so the case that would read this back cannot "
+                + "be written in the repository it belongs in — and nothing here can open freewilly's menu"),
 
         // WW315's own criterion stood here — that two profiles and a transcript exist on the guest as
         // a disposable fixture — and it went with the task: the bench fabricates both, so the roadmap

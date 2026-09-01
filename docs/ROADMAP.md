@@ -12,6 +12,7 @@
 
 - 📋 **WW332** (deps: —) **the tray menu verb has no case that opens a menu, only one that fails to find an icon** — The fixture icon answers no tray callback, so the success path is observed by adopters alone and WW322 is being diagnosed through a publish. → §WW332
 - 📋 **WW333** (deps: WW322, WW332) **the tray menu case proves the verb against a Win32 popup and never against a WinForms one** — The kind it uses answers the focus, so the fallback WW322 had to add is never reached and the case reads as though it covered the verb. → §WW333
+- 📋 **WW337** (deps: —) **a spacing of 32ms silenced the fault across 750 rounds, and the repair was chosen when only 128ms had** — WW310's band was the other reason and it did not reproduce, so the cheapest measured suppression is a quarter of the price that refused one. → §WW337
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -20,9 +21,8 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW312** (deps: WW310 ✅) **a band of spacings from forty to seventy milliseconds makes the fault five times likelier and nothing says why** — The curve is measured and its shape rules out a timer tick, so what is left is what the send and the window are doing to each other in that window. → §WW312
 - 📋 **WW323** (deps: —) **a step naming label and expectReported loads, and the report then prints the key against the other well's value** — Every other pair of claims on a step is refused where it is written, and this one is honoured as whichever the code reads first. → §WW323
-- 📋 **WW329** (deps: WW312) **the engine's own read-back poll is what provokes the substitution it then repairs** — Six hundred rounds nobody read faulted never, and the same send watched faults at the engine's rate, so waiting out the drain before the first read may cost less than three resends. → §WW329
+- 📋 **WW329** (deps: WW312 ✅) **the engine's own read-back poll is what provokes the substitution it then repairs** — Six hundred rounds nobody read faulted never, and the same send watched faults at the engine's rate, so waiting out the drain before the first read may cost less than three resends. → §WW329
 
 ## Block G — The scenario — a case is a data file
 

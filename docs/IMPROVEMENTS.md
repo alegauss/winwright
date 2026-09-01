@@ -82,6 +82,28 @@ Win32 one, and the case that drives it is the case that would have failed before
 and passes after — which is the only kind of case worth adding to a defect already
 fixed.
 
+### §WW337 the delay may be affordable after all
+
+WW304 swept the spacing and found 0 in 1100 at 128ms and above against 2% below it, and
+128ms a code unit is a price no keystroke can pay. WW310 then read a band across 48 to
+64ms, and between them there was no delay to choose: too dear where it worked, and no
+monotone direction anywhere else.
+
+WW312 swept it again over three send shapes, the engine's own among them. 2700 rounds,
+two substitutions, both at no spacing at all - and every one of the fifteen spaced
+cells, from 32ms up, read zero. So the region WW304 called 2% is empty here, and the
+band that made the curve unusable is not there either.
+
+What that would buy is 32ms a code unit, which is 288ms on a nine-character send: a
+quarter of what was refused, and paid only where a case types.
+
+It is not a measurement yet and that is the task. The baseline this is against is 0.7%,
+so 750 clean rounds are about five events short of where they were expected -
+suggestive, and not a rate. What it needs is the spacing swept against enough rounds at
+no spacing to say the two differ, on a desk whose rate has been read the same evening.
+The repair the engine ships stays whatever this answers: a resend costs nothing on the
+99% that arrive.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW334 the shadow behind a popup is not a picture of it
@@ -115,33 +137,6 @@ third style bit: WS_EX_TOOLWINDOW was tried and is clear on the menu this exists
 set on the shadow behind it.
 
 ## Block F — Assert — the expectation is derived, never typed
-
-### §WW312 Why that band
-
-WW310 measured the curve. Between 48 and 64 milliseconds the substitution runs at five
-times the engine's own rate, and by 80 it is back under it.
-
-Three candidates fall to one shape: the band is **bracketed**, and the platform tick,
-WW316's recorder drift and the read-back overlapping the send are each monotone in the
-spacing, which makes the last spacing worst rather than the middle one.
-
-The pairing is made one observation point above the queue, where `KBDLLHOOKSTRUCT` still
-carries the code unit `WM_KEYDOWN` gives eight bits and truncates. Every injection of
-every faulted round is exactly what was sent, so the substitution is made after
-`SendInput`.
-
-A sweep then drove that send directly, quiet and watched — the same rounds, the same
-wall time, differing only in whether anything reads the box while the queue drains.
-
-**Six hundred quiet rounds faulted nowhere.** Watched, with no spacing, 3 of 150, which
-is the engine's own rate. So the reader provokes it: `SendInput` returns once the events
-are queued rather than processed, and `Settled` polls straight into the drain.
-
-And every spacing suppressed it, the band's own included. Spaced packets are translated
-one at a time, so there is no burst for a read to land inside.
-
-This arm reproduces the fault and not the band. Whether the band survives an arm shaped
-like WW310's is what is left.
 
 ### §WW323 A key from one well priced against the other well's value
 

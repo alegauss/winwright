@@ -249,10 +249,14 @@ public static class Keyboard
         //
         // This is what the alternatives cost. A blanket retry would turn a window accepting one key
         // in four green, which is the exact defect this loop was built for and the reason a pattern
-        // act is not enough. A spacing between code units was measured instead and refused twice
-        // over: 128ms a code unit is paid by every keystroke this engine ever sends, and WW310 then
-        // found the rate is a band and not a slope — 64ms apart is five to nine times worse than 32
-        // or 96 — so there is no delay to choose on the evidence.
+        // act is not enough. A spacing between code units was measured instead and refused on its
+        // price: 128ms a code unit is paid by every keystroke this engine ever sends.
+        //
+        // WW310's band was the second reason and WW312 withdrew it. Swept again over three send
+        // shapes and six spacings — 2700 rounds, the engine's own shape among them — the fault
+        // appeared twice and both times at no spacing at all, where the band would have put about
+        // 35 substitutions in the 48-to-64ms cells alone. What that leaves is a suppression with no
+        // shape rather than one with a hole in it, which is WW337's question and not this one's.
         var resends = 0;
         while (resends < Resends && TookTheLastSent(readBack, expected, act.Text))
         {
@@ -460,11 +464,12 @@ public static class Keyboard
     /// <c>Type</c> between characters, so what separated them was time and not batching.
     /// </para>
     /// <para>
-    /// Time was then swept and refused on its own terms. It works at a price nothing can pay —
-    /// 128ms a code unit, on every keystroke this engine ever sends — and WW310 found the rate is a
-    /// band rather than a slope, 64ms apart running five to nine times worse than 32 or 96. A repair
-    /// with no monotone direction is not a number to choose. So the send stays as it was, and
-    /// <c>Run</c> above repairs the fault by its signature instead.
+    /// Time was then swept and refused on its price: it works at 128ms a code unit, on every
+    /// keystroke this engine ever sends. WW310's band was the second reason and WW312 could not
+    /// reproduce it — 2700 rounds over three send shapes and six spacings faulted twice, both at no
+    /// spacing at all. So what refuses the delay today is the price alone, and WW337 is whether that
+    /// price is really 128ms. Until it answers, the send stays as it was and <c>Run</c> above repairs
+    /// the fault by its signature instead.
     /// </para>
     /// </summary>
     private static void Send(string text)

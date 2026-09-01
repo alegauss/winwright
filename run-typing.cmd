@@ -13,11 +13,16 @@ rem
 rem Bare, this reports how often the engine's repair fired and whether anything outlived it, against
 rem the send the engine actually makes - one SendInput for the whole string.
 rem
-rem `sweep` is WW312's, and it drives a send the engine does not have: one call per code unit, 32,
-rem 64 and 96ms apart, which is the shape WW310's band was measured in. It reads what was injected
-rem beside what arrived at each spacing, so a fault inside the band can be attributed to the send or
-rem to what happens after it. The configuration moved to the third argument when this gained the
-rem second; `run-typing.cmd 400` and `run-typing.cmd 150 sweep` are the two a person types.
+rem `sweep` is WW312's, and it drives a send the engine does not have: one call per code unit, at 0,
+rem 32, 48, 64, 80 and 96ms apart, which are the spacings WW310's band was measured across. It reads
+rem what was injected beside what arrived at each one, so a fault inside the band can be attributed
+rem to the send or to what happens after it.
+rem
+rem Three arms at every spacing, so it is eighteen cells and long: at 150 rounds it takes the better
+rem part of an hour. `quiet` and `watched` differ only in whether anything reads the box while the
+rem queue drains; `whole` is the engine's own shape, erasing and sending in one act so the backspaces
+rem are still draining when the text goes in. The configuration moved to the third argument when this
+rem gained the second; `run-typing.cmd 400` and `run-typing.cmd 150 sweep` are the two a person types.
 setlocal
 
 set CONFIG=Debug

@@ -221,6 +221,7 @@
 - ✅ **WW325** **no reading answers whether a control will take input, so a case cannot check that a button is greyed** — A reading off the property ElementFacts has read since block A, declared always-answering so a step claiming it answers is refused where it is written.
 - ✅ **WW327** **the instance check's own case asserts about a process it never waited for, and reads nothing on a loaded desk** — The three launches go through the wait that was already there, so the case establishes the premise WW180 and WW283 had each tried to read around.
 - ✅ **WW326** **a case can claim one reading equals an earlier one and never that it holds it inside** — contains is the fourth way a step points at an earlier one, and asking PointsAt for it found the sixth call site WW308 said would spell the fold differently.
+- ✅ **WW312** **a band of spacings from forty to seventy milliseconds makes the fault five times likelier and nothing says why** — 2700 rounds over three send shapes and six spacings faulted twice, both at no spacing at all, where 48-64ms alone predicted 35 (design recorded in `tools/Winwright.Typing/Sweep.cs`).
 
 ## Block G — The scenario — a case is a data file
 

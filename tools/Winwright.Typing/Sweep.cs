@@ -30,27 +30,89 @@ namespace Winwright.Typing;
 /// named for, arriving here through the door the design had already priced out for the batched send.
 /// So a round sends, sleeps once, and reads afterwards.
 /// </para>
+/// <para>
+/// Three arms, and the third is what the first two could not say. Both of them erased the box in an
+/// act of the engine's own before the spaced send, so the queue was empty when it started — and both
+/// then faulted nowhere at any spacing, which is a null about two differences at once. The engine
+/// does not do that: it sends the backspaces and the text back to back, so the second batch is
+/// injected while the first is still being translated. That is the shape WW310 read the band in.
+/// </para>
+/// <para>
+/// <b>What it answered, on the guest, 150 rounds in each of eighteen cells (2026-09-01).</b> Two
+/// substitutions in 2700 rounds, and both at no spacing at all — one on the watched arm and one on
+/// the whole arm, neither with a dirty injection. Every one of the fifteen spaced cells read zero.
+/// </para>
+/// <para>
+/// So the whole arm is not a null about two differences: it reproduces WW249 at the same rate the
+/// other arms do, which is the engine's own, and then it is silenced by 32ms exactly as they are.
+/// <b>The band does not reproduce.</b> WW310 read 7.2, 7.6 and 9.6% across 48 to 64ms; those three
+/// cells here are 450 rounds that would have carried about 35 substitutions between them, and they
+/// carried none. Nothing this sweep can vary produces a rate with a shape.
+/// </para>
+/// <para>
+/// The other half of that reading is the one worth acting on and it is not this task's to act on: a
+/// spacing of 32ms suppressed the fault across 750 rounds of the engine's own shape, and 32ms is a
+/// quarter of the 128ms WW304 priced and refused. Filed rather than taken, because a suppression
+/// measured against a 0.7% baseline is about five events short of being a measurement.
+/// </para>
 /// </summary>
 internal static class Sweep
 {
     /// <summary>
-    /// The spacings, which are the three the curve is quoted at — and zero, which is the control the
-    /// first version of this did not have.
+    /// The spacings WW310 read the curve at, and zero, which is the control the first version of
+    /// this did not have.
     /// <para>
-    /// WW310 read 64ms as five to nine times worse than 32 and than 96, so those three are what make
-    /// the band a bracket rather than a slope. Swept alone they answered zero substitutions in 450
-    /// rounds, which is not a reading about the band: this arm differs from the engine's path in two
-    /// ways at once — the interval, and a read-back this deliberately does not overlap the drain with
-    /// — so a null says only that the pair of them together does not fault.
+    /// WW310 read 48 to 64ms as five to nine times worse than 32 and than 96, so the band is a
+    /// bracket rather than a slope, and the two shoulders are as much of the reading as the middle.
+    /// Swept over the quiet and watched arms alone they answered zero substitutions in 450 rounds,
+    /// which is not a reading about the band: those arms differ from the engine's path in more than
+    /// the interval, so a null says only that the differences together do not fault.
     /// </para>
     /// <para>
     /// Zero separates them. One call per code unit with no interval is WW302's arm, which measured 11
     /// in 400, so a null here cannot be the call count and cannot be the interval: what would be left
-    /// is the reader this arm removed. An experiment whose every arm can come back null is one that
+    /// is the reader those arms removed. An experiment whose every arm can come back null is one that
     /// cannot say which of its differences did it.
     /// </para>
     /// </summary>
-    private static readonly int[] Spacings = [0, 32, 64, 96];
+    private static readonly int[] Spacings = [0, 32, 48, 64, 80, 96];
+
+    /// <summary>
+    /// What differs between one round and the next, which is the whole of what this sweep varies
+    /// besides the interval.
+    /// </summary>
+    private enum Arm
+    {
+        /// <summary>Nothing reads the window between the last code unit and the record.</summary>
+        Quiet,
+
+        /// <summary>The box is read on the engine's own poll interval while the queue drains.</summary>
+        Watched,
+
+        /// <summary>
+        /// WW310's shape, which is the engine's: the erase and the send are one act, so the
+        /// backspaces are still being translated when the first code unit of the text goes in.
+        /// </summary>
+        Whole,
+    }
+
+    /// <summary>
+    /// The arms, in the order they run at each spacing. WW312, and the third one is the task.
+    /// <para>
+    /// The first two are the sweep as it stood, kept rather than replaced: they are what said the
+    /// reader provokes the fault — 600 quiet rounds faulted nowhere and the watched arm at no
+    /// spacing faulted 3 of 150, which is the engine's own rate — and a new arm with nothing beside
+    /// it would be a second null with nothing to be null against.
+    /// </para>
+    /// <para>
+    /// What the third adds is the one difference nobody had removed on purpose. Both of the others
+    /// erase in an act of their own, so the queue is empty before the spaced send starts. The engine
+    /// does not: <c>Erase</c> puts two backspace events per character into one call and <c>Send</c>
+    /// follows immediately, so the text is injected while the erase is still draining. That is the
+    /// shape WW310 swept the band in, and it is what these two took out without saying so.
+    /// </para>
+    /// </summary>
+    private static readonly Arm[] Arms = [Arm.Quiet, Arm.Watched, Arm.Whole];
 
     /// <summary>
     /// How long a round waits for the queue after its last code unit, before anything is read.
@@ -106,6 +168,35 @@ internal static class Sweep
     }
 
     /// <summary>
+    /// The engine's own wait, which is what the whole arm needs beside the engine's own send.
+    /// <para>
+    /// <c>Settled</c> polls the control on this interval and stops the moment the reading is what
+    /// was expected, so a clean round reads two or three times and a faulted one reads until the
+    /// deadline. That asymmetry is the engine's and is kept: an arm that read for a fixed 300ms
+    /// would differ from the path it is meant to resemble in the one dimension this sweep is about.
+    /// </para>
+    /// <para>
+    /// The engine's second exit — the reading carries WW249's signature — is deliberately not here.
+    /// It exists so <c>Run</c> can resend, and this arm resends nothing: what is being counted is
+    /// the raw rate, which is the number the repair hides.
+    /// </para>
+    /// </summary>
+    /// <param name="box">The box being typed into.</param>
+    /// <param name="expected">What it should read once the queue has drained.</param>
+    private static void Drain(Subject box, string expected)
+    {
+        var until = Stopwatch.StartNew();
+        while (until.ElapsedMilliseconds < SettleMs)
+        {
+            var values = box.ReadOnce().Values;
+            if (string.Equals(values.Value ?? values.Text, expected, StringComparison.Ordinal))
+                return;
+
+            Thread.Sleep(PollMs);
+        }
+    }
+
+    /// <summary>
     /// Run the sweep and print what each spacing did.
     /// </summary>
     /// <param name="box">The text box under test.</param>
@@ -115,72 +206,104 @@ internal static class Sweep
     public static void Run(Subject box, Subject arrived, Subject packets, int rounds)
     {
         Console.WriteLine(
-            $"WW312: the band at both ends, {rounds} round(s) at each of {string.Join("ms, ", Spacings)}ms."
-                + " Each round takes the focus through the engine, sends one SendInput per code unit"
-                + " that far apart, waits once and only then reads. `substituted` is what the window"
-                + " received differing from what was sent; `dirty` is how many of those had an"
-                + " injection that already differed — which is where the fault would be the send's.");
+            $"WW312: the band at both ends, {rounds} round(s) on each of {Arms.Length} arms at each of"
+                + $" {string.Join("ms, ", Spacings)}ms. Every round sends one SendInput per code unit"
+                + " that far apart. `quiet` erases in an act of its own and reads nothing until the"
+                + " queue has drained; `watched` erases the same way and reads the box on the engine's"
+                + " poll interval while it drains; `whole` is the engine's shape — the erase and the"
+                + " send are one act, so the backspaces are still being translated when the text goes"
+                + " in. `substituted` is what the window received differing from what was sent;"
+                + " `dirty` is how many of those had an injection that already differed — which is"
+                + " where the fault would be the send's.");
 
-        var faults = new Dictionary<int, int>();
-        foreach (var (spacing, watched) in Spacings.SelectMany(one => new[] { (one, false), (one, true) }))
+        var faults = new Dictionary<(Arm Arm, int Spacing), int>();
+        foreach (var spacing in Spacings)
         {
-            var substituted = 0;
-            var dirty = 0;
-            var unread = 0;
-            var examples = new List<string>();
-
-            var clock = Stopwatch.StartNew();
-            for (var round = 1; round <= rounds; round++)
-            {
-                var typing = $"WW249-{round}";
-
-                // The engine, for the two things it is for here. Typing nothing erases what is there
-                // and leaves the focus where the spaced send needs it, and both happen before the
-                // send rather than during it.
-                Keyboard.Type(box, "");
-
-                Spaced.Send(typing, spacing);
-                Settle(box, watched);
-
-                var got = Tail(arrived, typing.Length);
-                var sent = Tail(packets, typing.Length);
-
-                if (got is null || sent is null)
-                {
-                    unread++;
-                    continue;
-                }
-
-                if (string.Equals(got, typing, StringComparison.Ordinal))
-                    continue;
-
-                substituted++;
-                var clean = string.Equals(sent, typing, StringComparison.Ordinal);
-                if (!clean)
-                    dirty++;
-
-                if (examples.Count < 6)
-                    examples.Add($"sent {typing}, injected {sent}, arrived {got}");
-            }
-
-            clock.Stop();
-
-            // The watched arm is the one the engine's own path resembles, so it is the one the
-            // verdict reads. The quiet arm is kept beside it as the difference being measured.
-            if (watched)
-                faults[spacing] = substituted;
-
-            var rate = rounds == 0 ? 0 : (double)substituted / rounds;
-            Console.WriteLine(
-                $"  {spacing,3}ms {(watched ? "watched" : "quiet  ")}  {substituted,3} substituted of {rounds} ({rate:P1}),"
-                    + $" {dirty} with a dirty injection, {unread} unread,"
-                    + $" {clock.Elapsed.TotalSeconds:F0}s");
-
-            foreach (var one in examples)
-                Console.WriteLine($"           {one}");
+            foreach (var arm in Arms)
+                faults[(arm, spacing)] = Measure(box, arrived, packets, rounds, arm, spacing);
         }
 
         Console.WriteLine(Verdict(faults));
+    }
+
+    /// <summary>
+    /// Run one arm at one spacing, print its row, and answer how many rounds were substituted.
+    /// </summary>
+    /// <param name="box">The text box under test.</param>
+    /// <param name="arrived">The caption the arriving characters are written to.</param>
+    /// <param name="packets">The caption the injected code units are written to.</param>
+    /// <param name="rounds">How many rounds to type.</param>
+    /// <param name="arm">Which shape of round.</param>
+    /// <param name="spacing">How far apart the code units go.</param>
+    private static int Measure(
+        Subject box, Subject arrived, Subject packets, int rounds, Arm arm, int spacing)
+    {
+        var substituted = 0;
+        var dirty = 0;
+        var unread = 0;
+        var examples = new List<string>();
+
+        // The whole arm erases what the round before it left, which is the engine's own act and the
+        // reason the focus is taken once here rather than per round: the engine takes it inside the
+        // act, and an act of its own between rounds is exactly the drained queue this arm exists to
+        // stop arranging. Nothing else touches the desk while a run is going, so it stays taken.
+        Keyboard.Type(box, "");
+        var standing = 0;
+
+        var clock = Stopwatch.StartNew();
+        for (var round = 1; round <= rounds; round++)
+        {
+            var typing = $"WW249-{round}";
+
+            if (arm == Arm.Whole)
+            {
+                Spaced.Clear(standing);
+                standing = typing.Length;
+                Spaced.Send(typing, spacing);
+                Drain(box, typing);
+            }
+            else
+            {
+                // The engine, for the two things it is for here. Typing nothing erases what is there
+                // and leaves the focus where the spaced send needs it, and both happen before the
+                // send rather than during it — which is the difference the whole arm removes.
+                Keyboard.Type(box, "");
+                Spaced.Send(typing, spacing);
+                Settle(box, arm == Arm.Watched);
+            }
+
+            var got = Tail(arrived, typing.Length);
+            var sent = Tail(packets, typing.Length);
+
+            if (got is null || sent is null)
+            {
+                unread++;
+                continue;
+            }
+
+            if (string.Equals(got, typing, StringComparison.Ordinal))
+                continue;
+
+            substituted++;
+            if (!string.Equals(sent, typing, StringComparison.Ordinal))
+                dirty++;
+
+            if (examples.Count < 4)
+                examples.Add($"sent {typing}, injected {sent}, arrived {got}");
+        }
+
+        clock.Stop();
+
+        var rate = rounds == 0 ? 0 : (double)substituted / rounds;
+        Console.WriteLine(
+            $"  {spacing,3}ms {arm.ToString().ToLowerInvariant(),-7}  {substituted,3} substituted of {rounds} ({rate:P1}),"
+                + $" {dirty} with a dirty injection, {unread} unread,"
+                + $" {clock.Elapsed.TotalSeconds:F0}s");
+
+        foreach (var one in examples)
+            Console.WriteLine($"           {one}");
+
+        return substituted;
     }
 
     /// <summary>
@@ -192,27 +315,69 @@ internal static class Sweep
     /// injections, and the run printed a conclusion off an empty set.
     /// </para>
     /// </summary>
-    /// <param name="faults">How many rounds substituted at each spacing, in the swept order.</param>
-    private static string Verdict(IReadOnlyDictionary<int, int> faults)
+    /// <param name="faults">How many rounds substituted, by arm and spacing.</param>
+    private static string Verdict(IReadOnlyDictionary<(Arm Arm, int Spacing), int> faults)
     {
         if (faults.Values.All(one => one == 0))
         {
-            return "No watched arm faulted either, so the reader is not what the quiet run left out"
-                + " and this send shape does not reproduce WW249 for some third reason. Nothing here"
-                + " is a reading about the band: an arm that never faults has no rate to have a shape.";
+            return "No arm faulted anywhere, so this run says nothing at all: an arm that never"
+                + " faults has no rate to have a shape, and three of them that never fault do not"
+                + " tell each other apart either. It is a reading about the desk and not about WW249.";
         }
 
-        var quietWasNull = "The quiet arms faulted nowhere and the watched ones do, which puts WW249"
-            + " behind something reading the window while its queue drains — the engine's own"
-            + " Settled polls on this interval the instant Send returns, and SendInput returns when"
-            + " the events are queued rather than processed.";
+        var said = new List<string> { Ranked(faults) };
 
-        return faults.TryGetValue(0, out var control) && control > 0 && faults.Any(one => one.Key > 0 && one.Value > control * 2)
-            ? quietWasNull + " And the rate is not flat across the spacings, which is the band with a"
-                + " mechanism under it for the first time: a reader on a fixed interval against a send"
-                + " on another is two cadences, and two cadences beat."
-            : quietWasNull + " The spacings do not separate here, so the band is not read by this run"
-                + " even though the reader is.";
+        // The band first, because it is the question. Read on the whole arm alone: the other two are
+        // here to say what the whole arm added, and a band read across all three would be a shape
+        // taken over rounds that differ in something other than the interval.
+        var whole = faults.Where(one => one.Key.Arm == Arm.Whole).ToDictionary(one => one.Key.Spacing, one => one.Value);
+        var control = whole.GetValueOrDefault(0);
+        var band = whole.Where(one => one.Key is >= 48 and <= 64).Sum(one => one.Value);
+        var shoulders = whole.Where(one => one.Key is 32 or 80 or 96).Sum(one => one.Value);
+
+        if (whole.Values.All(one => one == 0))
+        {
+            said.Add("The whole arm — the engine's own shape, erasing and sending in one act —"
+                + " faulted nowhere, so WW310's band does not survive being reconstructed this way."
+                + " Either the shape is not what WW310 swept, or the fault has moved since.");
+        }
+        else if (band > shoulders * 2)
+        {
+            said.Add($"The band survives the reconstruction: {band} substitution(s) across 48-64ms"
+                + $" against {shoulders} across 32, 80 and 96 together. What the whole arm has and"
+                + " the other two do not is an erase still draining when the text is injected, so"
+                + " that is where the band lives — two batches in the queue at once, and the"
+                + " interval deciding how far into the first the second lands.");
+        }
+        else
+        {
+            said.Add($"The whole arm faults ({whole.Values.Sum()} in total) and does not band:"
+                + $" {band} across 48-64ms against {shoulders} across 32, 80 and 96. So the engine's"
+                + " shape reproduces WW249 and the spacing is not what shapes its rate here, which"
+                + " leaves WW310's curve unexplained by anything this sweep varies.");
+        }
+
+        if (control > 0 && band == 0 && shoulders == 0)
+            said.Add("Every fault on that arm is at no spacing at all, which is WW302's arm again.");
+
+        var quiet = faults.Where(one => one.Key.Arm == Arm.Quiet).Sum(one => one.Value);
+        var watched = faults.Where(one => one.Key.Arm == Arm.Watched).Sum(one => one.Value);
+        said.Add($"Beside it the quiet arms total {quiet} and the watched ones {watched}, which is the"
+            + " earlier reading either confirmed or withdrawn: those two erase in an act of their own,"
+            + " so their queue is empty before the spaced send starts.");
+
+        return string.Join(Environment.NewLine, said);
+    }
+
+    /// <summary>Every cell that faulted, worst first, so the shape is readable without the table.</summary>
+    /// <param name="faults">How many rounds substituted, by arm and spacing.</param>
+    private static string Ranked(IReadOnlyDictionary<(Arm Arm, int Spacing), int> faults)
+    {
+        var worst = faults.Where(one => one.Value > 0)
+            .OrderByDescending(one => one.Value)
+            .Select(one => $"{one.Key.Arm.ToString().ToLowerInvariant()} at {one.Key.Spacing}ms: {one.Value}");
+
+        return $"Faulted: {string.Join(", ", worst)}.";
     }
 
     /// <summary>
@@ -268,9 +433,70 @@ internal static class Spaced
         }
     }
 
+    /// <summary>
+    /// Put the caret after what is there and erase it, in one call. WW312, and the whole of what the
+    /// third arm adds.
+    /// <para>
+    /// This is <c>Keyboard.Erase</c> with <c>MoveToTheEnd</c> in front of it, and it is here for the
+    /// reason the send is: the engine's copy is internal, and what matters is not the keystrokes but
+    /// that nothing waits between them and the text. The engine sends this array and calls
+    /// <c>Send</c> on the next line, so the backspaces are still being translated when the first code
+    /// unit of the text is injected — which is the one thing both other arms take out by erasing in
+    /// an act of their own.
+    /// </para>
+    /// <para>
+    /// The scan code is not optional and not a nicety: a virtual key sent with a scan code of zero
+    /// does nothing at all, measured — End did not move the caret and Backspace erased nothing, so
+    /// text meant to replace was inserted in front of what was there.
+    /// </para>
+    /// </summary>
+    /// <param name="characters">How many characters are standing in the box.</param>
+    public static void Clear(int characters)
+    {
+        var inputs = new List<Win32.Input>((characters + 1) * 2)
+        {
+            Pressed(VkEnd, 0),
+            Pressed(VkEnd, KeyUp),
+        };
+
+        for (var each = 0; each < characters; each++)
+        {
+            inputs.Add(Pressed(VkBack, 0));
+            inputs.Add(Pressed(VkBack, KeyUp));
+        }
+
+        var array = inputs.ToArray();
+        SendInput((uint)array.Length, array, Marshal.SizeOf<Win32.Input>());
+    }
+
     private const uint KeyUp = 0x0002;
     private const uint KeyUnicode = 0x0004;
     private const uint InputKeyboard = 1;
+    private const ushort VkBack = 0x08;
+    private const ushort VkEnd = 0x23;
+
+    /// <summary>MAPVK_VK_TO_VSC: the scan code a virtual key has on the layout in force.</summary>
+    private const uint VirtualKeyToScan = 0;
+
+    /// <summary>One virtual key, carrying the scan code the layout in force gives it.</summary>
+    /// <param name="virtualKey">The key.</param>
+    /// <param name="flags">What else the event carries — nothing, or the key going up.</param>
+    private static Win32.Input Pressed(ushort virtualKey, uint flags) => new()
+    {
+        Type = InputKeyboard,
+        Payload = new Win32.InputPayload
+        {
+            Key = new Win32.KeyInput
+            {
+                VirtualKey = virtualKey,
+                Scan = (ushort)MapVirtualKeyW(virtualKey, VirtualKeyToScan),
+                Flags = flags,
+            },
+        },
+    };
+
+    [DllImport("user32.dll")]
+    private static extern uint MapVirtualKeyW(uint code, uint mapping);
 
     /// <summary>
     /// One code unit as Unicode rather than as a virtual key, which is the shape WW249 is about: the
