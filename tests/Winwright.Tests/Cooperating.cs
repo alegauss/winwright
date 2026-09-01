@@ -189,7 +189,18 @@ internal static class Cooperating
         new("Synthesised.Type", Cooperation.None, true, "typing, as a step's own result"),
         new("Synthesised.Click", Cooperation.None, true, "a click a case had to say the reason for"),
         new("Synthesised.Nudge", Cooperation.None, true, "an arrow key at a range control, as a step"),
-        new("Synthesised.Press", Cooperation.None, true, "a traversal key at the window, as a step"),
+        // WW317. The chord's own two, and neither is a verb: one parses text a case wrote and the
+        // other says what that text may be. They are in this half because the chord is what an act
+        // takes, and they are listed here because this catalogue is derived rather than curated —
+        // a public member that reaches nothing still has to say so.
+        new("Chord.TryParse", Cooperation.None, false,
+            "whether text a case wrote is a chord, answered before anything is driven"),
+        new("Chord.Spelled", Cooperation.None, false,
+            "what a chord may be, which is what a refusal lists when one is not"),
+
+        new("Synthesised.Press", Cooperation.None, true,
+            "a traversal key at the window, or WW317's chord — one verb, and neither needs anything "
+                + "of the application beyond the desktop the keys go to"),
         new("Pick.Value", Cooperation.None, true, "reach a value, by keyboard where the pattern will not"),
 
         // WW267. Told a position rather than a value, for a picker holding the machine's own data.

@@ -32,6 +32,9 @@ public partial class MainWindow : Window
         if (Shapes.Has("names"))
             NamesPane.AddTo(panes);
 
+        if (Shapes.Has("chords"))
+            ChordsPane.AddTo(panes);
+
         if (Shapes.Has("announces"))
             AnnouncesPane.AddTo(panes);
 

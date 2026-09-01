@@ -85,6 +85,10 @@ public sealed class RecordedResultTests
     private static readonly Dictionary<string, string> MayAnswerYesOrNo = new(StringComparer.Ordinal)
     {
         ["MayGetAPeer"] = "a question about a declared reason, which presses nothing and cannot fail",
+        ["TryParse"] = "WW317: a question about text a case wrote, answered before anything is driven. "
+            + "The rule is about an act losing its reason in a bool, and this one loses none — the "
+            + "sentence comes back beside the answer, which is what a refusal at the point of "
+            + "insertion is made of",
     };
 
     [Fact]

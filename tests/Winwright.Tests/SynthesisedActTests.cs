@@ -259,7 +259,7 @@ public sealed class SynthesisedActTests : IDisposable
                     {
                       "locator": "Edit#profileBox",
                       "act": "press",
-                      "with": "Enter",
+                      "with": "Wiggle",
                       "expect": "not focused",
                       "reads": "focused"
                     }
@@ -269,9 +269,45 @@ public sealed class SynthesisedActTests : IDisposable
             }
             """));
 
-        Assert.Contains("'press' does not take 'Enter'", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("'press' does not take 'Wiggle'", refused.Because, StringComparison.Ordinal);
         Assert.Contains("Tab", refused.Because, StringComparison.Ordinal);
         Assert.Contains("ShiftTab", refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_key_that_is_no_traversal_and_is_a_key_now_loads_as_a_chord()
+    {
+        // WW317 widened this, and the widening is worth its own case rather than a quieter
+        // assertion above: `Enter` used to be refused here, listing the traversal names — which was
+        // right while `press` was Tab, Shift+Tab and the arrows, and is wrong now that a chord with
+        // no modifiers is a plain key. What must still be refused is a word that is no key at all,
+        // which is what the case above now writes.
+        var loaded = ScenarioFile.Read("one.cases.json", """
+            {
+              "cases": [
+                {
+                  "name": "a",
+                  "steps": [
+                    {
+                      "locator": "Edit#profileBox",
+                      "act": "press",
+                      "with": "Enter",
+                      "named": "the key that is not a traversal"
+                    },
+                    {
+                      "locator": "Edit#profileBox",
+                      "act": "read",
+                      "reads": "name",
+                      "answers": true,
+                      "named": "the box still says something"
+                    }
+                  ]
+                }
+              ]
+            }
+            """);
+
+        Assert.Equal("Enter", Assert.Single(loaded).Steps[0].Argument);
     }
 
     [Fact]

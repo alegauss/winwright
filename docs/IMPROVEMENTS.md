@@ -32,34 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW317 The chord press cannot spell
-
-Found adopting this in quickshell, whose window is deliberately almost empty: a title
-bar, a terminal, and nothing else. It has no menu and no toolbar on purpose, so every
-command is on a chord — `Ctrl+Shift+F1` writes a diagnostic bundle, `Ctrl+Shift+I`
-imports the incumbent's sessions. Both open a dialog with real text, which is what a
-case wants to read.
-
-`press` cannot reach either. `TraversalKey` is Tab, Shift+Tab and the arrows, which is
-the right vocabulary for moving focus and the wrong one for invoking a command. There is
-no `with` that spells a modifier plus a key.
-
-What makes this more than one adopter's inconvenience: an application with no menu is
-the shape this engine is best placed to test, because there is nothing to click and a
-screenshot shows an empty window. The commands are the application. Reaching them
-through the keyboard is the only route, and `click` needs a target that does not exist.
-
-The shape, if it fits: `"act": "press", "with": "Ctrl+Shift+I"` — modifiers named, the
-key last, parsed once rather than per case. The engine already presses with a modifier
-held; `WithShift` in `Keys.cs` does it for Shift+Tab, so what is missing is the spelling
-and not the mechanism.
-
-Worth knowing before anyone starts: `Acting/Keyboard.cs` and
-`Scenarios/StepDeclaration.cs` were both uncommitted in this checkout when this was
-filed, so somebody may already be here.
-
-Falsified when a command that only a chord reaches cannot be driven by a case.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

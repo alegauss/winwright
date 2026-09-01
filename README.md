@@ -195,6 +195,7 @@ directions — a verb added without an entry is a red.
 | `Surface` | record controls as a case found them and put them back |
 | `Pointer` | synthesised mouse input, and the declared readings about why an act needs it |
 | `Keyboard` / `Traversal` | synthesised keys, traversal keys at a window, and what holds the focus |
+| `Chord` | a key with modifiers, parsed where the case wrote it and sent as one batch — the only route to an application whose commands have no button |
 | `Focus` | what holds the focus, read against the application under test rather than the whole desk |
 | `Menu` | enter a menu bar the way a keyboard user does, walk to an entry, open a submenu, dismiss |
 | `NotificationArea` | the tray, the overflow flyout, the icons on either, and an icon's context menu |
@@ -336,7 +337,13 @@ whether the control will take input at all — the state a half-finished form is
 and not a locator predicate, because a locator selecting only enabled controls makes the greyed case
 match nothing and *not there* and *there and refusing* are opposite findings about a form. Like
 `focused`, it answers for every element that resolved, so a step claiming it **answers** is refused
-where it is written. `with` is required exactly where the act takes something and
+where it is written. `press` takes either a traversal key or a **chord** — `Ctrl+Shift+I`, modifiers then the key, held
+and released in one `SendInput` so nothing can arrive between them. The two are one verb because a
+case means one thing either way, *send this key at the window*; what differs is the claim underneath,
+since a traversal key moves the focus and is read for it, and a chord invokes a command whose
+consequence the next step is the check for. It is what an application with no menu and no toolbar
+needs: the commands **are** the application, the keyboard is the only route to them, and `click`
+needs a target that does not exist. `with` is required exactly where the act takes something and
 refused where it does not. `named` renames a step in the report; `meansIt` is the sentence a step
 needs before it may touch an entry the project declared destructive. `moves` is the other kind of
 expectation: that the reading ended up different, for the claim a case cannot name a value for. `answers`

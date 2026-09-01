@@ -151,6 +151,58 @@ public static class Synthesised
     }
 
     /// <summary>
+    /// Press a key with modifiers held, at whatever holds the focus in this element's window.
+    /// <para>
+    /// WW317. The traversal half of <c>press</c> claims the focus moved, because that is what Tab
+    /// and the arrows are for. A chord is the other kind of keystroke: it invokes a command, and a
+    /// command that opened a dialog or wrote a file has moved no focus this act can read. So this
+    /// makes no claim of its own — it is a navigation, and the step after it is the check, which is
+    /// the same shape <c>click</c> has and for the same reason.
+    /// </para>
+    /// <para>
+    /// The foreground is read before the keys are sent and reported either way, so a chord that went
+    /// nowhere is a hole naming the desk rather than a command that did not run.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">Any element of the window the keys are sent to.</param>
+    /// <param name="chord">The chord, parsed when the case was declared.</param>
+    public static ActResult Press(Subject subject, Chord chord)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        ArgumentNullException.ThrowIfNull(chord);
+
+        var before = subject.Read();
+        var named = $"press {chord}";
+
+        // The window and not the element, exactly as the traversal half: a chord is a keystroke at
+        // whatever holds the focus, and sending it at an element would say this act is about that
+        // element's own input.
+        if (subject.Window == 0)
+        {
+            return Landed(
+                subject,
+                named,
+                ByKeyboard,
+                before.Facts,
+                before,
+                Precondition.Absent(
+                    Windowing.Desk.ForegroundToTake, "this element is in no window a key could be sent to"));
+        }
+
+        var top = Windowing.Win32.GetAncestor(subject.Window, Windowing.Win32.GaRoot);
+        var foreground = Windowing.Foreground.Check(top).AsPrecondition();
+        if (!foreground.Satisfied)
+            return Landed(subject, named, ByKeyboard, before.Facts, before, foreground);
+
+        Keys.Send(chord);
+
+        // Read afterwards rather than not at all, so the trace carries what the window looked like
+        // when the command had been sent — the step that checks the consequence is the next one, and
+        // a reader of its red wants to know this one landed.
+        return Landed(subject, named, ByKeyboard, subject.Read().Facts ?? before.Facts, before, foreground);
+    }
+
+    /// <summary>
     /// Open the submenu of whatever is highlighted in this window's menu, by pressing Right — the
     /// keyboard half of the pair <c>expand</c> is the pattern half of.
     /// <para>

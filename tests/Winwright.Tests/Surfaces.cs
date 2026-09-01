@@ -75,6 +75,7 @@ internal static class Surfaces
         new("AnnouncesPane", Carrying.AShape, "announces"),
         new("Backdrop", Carrying.AShape, "backdrop"),
         new("BlankPane", Carrying.AShape, "blank"),
+        new("ChordsPane", Carrying.AShape, "chords"),
         new("Cloak", Carrying.AShape, "cloak"),
         new("Intruder", Carrying.AShape, "intrude"),
         new("NamesPane", Carrying.AShape, "names"),

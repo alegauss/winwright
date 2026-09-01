@@ -54,6 +54,37 @@ internal static class Keys
         _ => Tap(VkDown),
     });
 
+    /// <summary>
+    /// A key with modifiers held, sent as one batch.
+    /// <para>
+    /// WW317. One <c>SendInput</c> and not several, which is the reason this is here rather than
+    /// spelled by the caller: modifiers held across separate calls are a window of time in which
+    /// another process's key can arrive between them, and a chord half-delivered presses something
+    /// nobody asked for. The mechanism is <see cref="WithShift"/>'s, widened — that has held a
+    /// modifier for Shift+Tab since block D.
+    /// </para>
+    /// <para>
+    /// Released in reverse, which is what a keyboard does and what applications watching for a
+    /// modifier release expect: holding Ctrl then Shift and releasing Ctrl first leaves Shift held
+    /// over a keyboard state nobody was in.
+    /// </para>
+    /// </summary>
+    /// <param name="chord">The chord, already parsed.</param>
+    internal static void Send(Chord chord)
+    {
+        ArgumentNullException.ThrowIfNull(chord);
+
+        var holding = chord.Holding();
+        var inputs = new List<Win32.Input>(holding.Count * 2 + 2);
+
+        inputs.AddRange(holding.Select(Down));
+        inputs.Add(Down(chord.Pressing()));
+        inputs.Add(Up(chord.Pressing()));
+        inputs.AddRange(holding.Reverse().Select(Up));
+
+        Press([.. inputs]);
+    }
+
     private static void Press(Win32.Input[] inputs) =>
         Win32.SendInput((uint)inputs.Length, inputs, System.Runtime.InteropServices.Marshal.SizeOf<Win32.Input>());
 

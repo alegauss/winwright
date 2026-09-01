@@ -83,13 +83,27 @@ public sealed record ActVerb
             synthesises: true,
             accepts: Enum.GetValues<PointerReason>().Select(one => one.ToString()).ToList()),
         new("nudge", Takes.Nothing, repeatable: false, (subject, _) => Synthesised.Nudge(subject), synthesises: true),
+        // WW317. Two kinds of keystroke through one verb, because a case writing it means one thing
+        // either way: send this key at the window. What differs is the claim underneath — a
+        // traversal key moves the focus and is read for that, and a chord invokes a command whose
+        // consequence the next step is the check for.
+        //
+        // Not a second verb, which is where WW267 drew the line for `pick at`: that one exists
+        // because a picker may hold a value spelled '1', so one argument would mean two different
+        // things depending on what the application happened to contain. Nothing about the
+        // application decides this — 'Tab' is a traversal key on every machine and 'Ctrl+Shift+I' is
+        // a chord on every machine, and the two vocabularies cannot collide because a chord's key is
+        // always its last part and no traversal name holds a '+'.
         new(
             "press",
             Takes.Text,
             repeatable: false,
-            (subject, argument) => Synthesised.Press(subject, Traversing(argument!)),
+            (subject, argument) => Chorded(argument!) is { } chord
+                ? Synthesised.Press(subject, chord)
+                : Synthesised.Press(subject, Traversing(argument!)),
             synthesises: true,
-            accepts: Enum.GetValues<TraversalKey>().Select(one => one.ToString()).ToList()),
+            accepts: Enum.GetValues<TraversalKey>().Select(one => one.ToString()).ToList(),
+            alsoTakes: Chord.Spelled()),
 
         // WW254. The picker walk, which the engine has done since WW28 and no case could name — so
         // the one case in claude-tray that drives a picker had no first step to write. 'select' is
@@ -161,8 +175,10 @@ public sealed record ActVerb
         bool synthesises = false,
         IReadOnlyList<string>? accepts = null,
         bool reaches = false,
-        bool onATray = false)
+        bool onATray = false,
+        string alsoTakes = "")
     {
+        AlsoTakes = alsoTakes;
         Name = name;
         Wants = takes;
         Repeatable = repeatable;
@@ -208,6 +224,18 @@ public sealed record ActVerb
     /// </para>
     /// </summary>
     public IReadOnlyList<string> Accepts { get; }
+
+    /// <summary>
+    /// What this verb takes besides <see cref="Accepts"/>, in the words a refusal lists it with, and
+    /// empty where the closed list is the whole vocabulary.
+    /// <para>
+    /// WW317. <c>press</c> takes a traversal name or a chord, and a chord is not a closed list — so
+    /// a refusal that printed only the names would tell an author their chord is no key, having just
+    /// been given one. Data, like <see cref="Accepts"/>, so the sentence a refusal builds and the
+    /// vocabulary the act runs cannot drift.
+    /// </para>
+    /// </summary>
+    public string AlsoTakes { get; } = "";
 
     /// <summary>
     /// Whether doing it twice means the same as doing it once. False for the acts whose second
@@ -289,8 +317,17 @@ public sealed record ActVerb
             // the author is: a word nobody recognises has to cost a corrected field and never a run
             // that gets halfway and stops. Worded off the verb rather than per verb, so a third one
             // with a closed list gets the sentence without anybody writing it.
+            // WW317. The closed list first, then whatever else the verb takes — and where it takes
+            // something else, the refusal has to say why the argument is neither. A chord that does
+            // not parse carries its own sentence, which is more use than the list of traversal names
+            // it is not one of.
             (Takes.Text, _) when Accepts.Count > 0 && !Accepts.Contains(written, StringComparer.OrdinalIgnoreCase) =>
-                $"'{Name}' does not take '{written}'; it takes {string.Join(", ", Accepts)}",
+                AlsoTakes.Length == 0
+                    ? $"'{Name}' does not take '{written}'; it takes {string.Join(", ", Accepts)}"
+                    : Chord.TryParse(written, out _, out var wrong)
+                        ? null
+                        : $"'{Name}' does not take '{written}': {wrong}. It takes "
+                            + $"{string.Join(", ", Accepts)}, or {AlsoTakes}",
 
             (Takes.Text, _) => null,
             (Takes.Number, _) => Numeric(written) ? null : $"'{Name}' acts on a number, and '{written}' is not one",
@@ -389,4 +426,17 @@ public sealed record ActVerb
         double.Parse(argument, NumberStyles.Float, CultureInfo.InvariantCulture);
 
     private static string Spelled() => string.Join(", ", Vocabulary.Select(verb => verb.Name));
+
+    /// <summary>
+    /// The chord an argument spells, or null where it spells a traversal key instead.
+    /// <para>
+    /// WW317. Asked of the argument rather than decided by a flag, because the two vocabularies do
+    /// not overlap: <see cref="Refuses"/> has already turned away everything that is neither, so what
+    /// reaches here is one or the other and this says which.
+    /// </para>
+    /// </summary>
+    private static Chord? Chorded(string argument) =>
+        Enum.TryParse<TraversalKey>(argument.Trim(), ignoreCase: true, out _)
+            ? null
+            : Chord.TryParse(argument, out var chord, out _) ? chord : null;
 }

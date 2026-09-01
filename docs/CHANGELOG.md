@@ -128,6 +128,7 @@
 - ✅ **WW220** **a search misses an icon in a flyout that opened and had laid out somebody else's** — A search that opened the flyout polls for the name it was given, so a stranger laid out first is no longer answered as this icon being absent from everywhere.
 - ✅ **WW265** **the picker walk reads the items of a shut picker, and a WPF ComboBox has none until it opens** — The walk opens a picker that holds nothing, reads what appeared and puts it back only where it opened it — driven by a WPF picker the fixture had never carried.
 - ✅ **WW288** **a search whose flyout shut mid-look gives up, so the icon case is a hole on the runs the shell decides** — Nothing shuts it: three candidates were ruled out and the search now looks again before concluding, which is how the rest of the engine reads.
+- ✅ **WW317** **A command that only a keyboard chord reaches cannot be driven by a case** — press takes a chord beside a traversal key, parsed where the case wrote it and sent as one batch, so an application whose commands have no button is reachable.
 
 ## Block E — Capture — the picture that proves what it photographed
 

@@ -10,8 +10,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW317** (deps: —) **A command that only a keyboard chord reaches cannot be driven by a case** — press spells Tab and the arrows, so an application whose every command is on Ctrl+Shift+something is one no case can invoke. → §WW317
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
