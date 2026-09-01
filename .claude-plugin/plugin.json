@@ -1,7 +1,7 @@
 {
   "name": "winwright",
   "description": "Drives a Windows desktop application through UI Automation and reports what it observed: a case is a data file, an act asks the control rather than the desktop, and a check that could not run is a third verdict instead of a green.",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
 
   "author": {
     "name": "Alexandre Oliveira"

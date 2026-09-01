@@ -10,7 +10,7 @@
          WW230 made it a prerelease rather than a bump: the first published version is the one an
          adopter's restore reaches, and 0.1.0 plain would say this is settled. The publish workflow
          compares a tag against this line, so the two cannot drift. -->
-    <Version>0.1.0-alpha.3</Version>
+    <Version>0.1.0-alpha.4</Version>
     <TargetFramework>net10.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>

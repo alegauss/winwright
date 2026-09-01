@@ -24,7 +24,7 @@
   <!-- The version is the tree's own, which is what makes the agreement check able to say the
        adopter and the build are the same thing rather than two versions that happen to be near. -->
   <ItemGroup>
-    <PackageReference Include="Winwright.InApp" Version="0.1.0-alpha.3" />
+    <PackageReference Include="Winwright.InApp" Version="0.1.0-alpha.4" />
   </ItemGroup>
 
 </Project>
