@@ -335,4 +335,67 @@ public sealed class RunHistoryTests : IDisposable
         Assert.DoesNotContain("the run before", roll.Sentence(), StringComparison.Ordinal);
         Assert.DoesNotContain("no earlier run", roll.Sentence(), StringComparison.Ordinal);
     }
+    [Fact]
+    public void A_recurring_excuse_that_has_not_said_it_means_it_makes_the_run_red()
+    {
+        // WW248, and the whole of it. The excuse arrives every run — so it is not the machine having
+        // a bad afternoon, it is this suite's own structure holding a check permanently shut — and
+        // nothing has written down that it is meant.
+        var roll = Roll.Of(
+            ["Winwright.Tests.A.One"],
+            [new Recorded("Winwright.Tests.A.One", "Passed", true)],
+            ["the foreground belongs to the window under test	NudgeTests.A_nudge	another window	Desk	"],
+            new Earlier([8, 8], [], ["NudgeTests.A_nudge"]));
+
+        Assert.False(roll.Whole);
+        Assert.Equal(["NudgeTests.A_nudge"], roll.Unaccounted);
+
+        // And the red says what to do rather than only what happened.
+        var said = string.Join(Environment.NewLine, roll.Render());
+        Assert.Contains("has not said it means to be", said, StringComparison.Ordinal);
+        Assert.Contains("MeantExcuses.Known", said, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_same_excuse_accounted_for_leaves_the_run_whole()
+    {
+        var roll = Roll.Of(
+            ["Winwright.Tests.A.One"],
+            [new Recorded("Winwright.Tests.A.One", "Passed", true)],
+            ["the foreground belongs to the window under test	MenuTests.A_key	another window	Desk	Meant"],
+            new Earlier([8, 8], [], ["MenuTests.A_key"]));
+
+        Assert.True(roll.Whole);
+        Assert.Empty(roll.Unaccounted);
+    }
+
+    [Fact]
+    public void An_excuse_that_does_not_recur_is_circumstance_and_never_refused()
+    {
+        // The other half of the rule. A desk somebody else was using is a hole, and a hole is not a
+        // failure — which is what this tool has said about every excuse since WW231.
+        var roll = Roll.Of(
+            ["Winwright.Tests.A.One"],
+            [new Recorded("Winwright.Tests.A.One", "Passed", true)],
+            ["the foreground belongs to the window under test	OnceTests.A_case	another window	Desk	"],
+            new Earlier([8, 8], [], ["SomebodyElse.A_case"]));
+
+        Assert.True(roll.Whole);
+        Assert.Empty(roll.Unaccounted);
+    }
+
+    [Fact]
+    public void A_ledger_from_a_build_without_the_column_refuses_nothing()
+    {
+        // What keeps the first run after this change from refusing the history it compares against.
+        var roll = Roll.Of(
+            ["Winwright.Tests.A.One"],
+            [new Recorded("Winwright.Tests.A.One", "Passed", true)],
+            ["the foreground belongs to the window under test	NudgeTests.A_nudge	another window	Desk"],
+            new Earlier([8, 8], [], ["NudgeTests.A_nudge"]));
+
+        Assert.True(roll.Whole);
+        Assert.Empty(roll.Unaccounted);
+    }
+
 }

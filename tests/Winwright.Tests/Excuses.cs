@@ -90,9 +90,13 @@ internal static class Excuses
         {
             try
             {
-                File.AppendAllText(
-                    Ledger,
-                    $"{named}\t{Whose(gate)}\t{OneLine(absence)}\t{kind}{Environment.NewLine}");
+                // WW248. A fifth column, appended for the reason the third and fourth were: this
+                // file is read positionally by a reader written to tolerate a row an older build
+                // wrote, so a column added is one a reader without it still parses. What it says is
+                // whether the case has written down that it means the excuse — and a recurring
+                // excuse with nothing here is what the roll refuses, because a hole this suite built
+                // for itself is a check it has permanently switched off.
+                File.AppendAllText(Ledger, Row(kind, named, Whose(gate), absence) + Environment.NewLine);
             }
             catch (Exception unwritable) when (unwritable is IOException or UnauthorizedAccessException)
             {
@@ -101,6 +105,23 @@ internal static class Excuses
             }
         }
     }
+
+    /// <summary>
+    /// One row of the ledger, as text.
+    /// <para>
+    /// WW248. Its own method so the join can be checked without writing to the ledger. The first
+    /// version of that check appended a real row, which put a fabricated hole into this run's own
+    /// arithmetic — <c>1 for a fact nobody measured</c> — and into the count every later run compares
+    /// itself against. A check that has to dirty the reading it is about is checking the wrong thing.
+    /// </para>
+    /// </summary>
+    /// <param name="kind">Which kind of thing was not met.</param>
+    /// <param name="named">What was not met.</param>
+    /// <param name="whose">The case being excused, as the ledger spells it.</param>
+    /// <param name="absence">What the reading said.</param>
+    internal static string Row(ExcusedBy kind, string named, string whose, string absence) =>
+        $"{named}\t{whose}\t{OneLine(absence)}\t{kind}"
+            + $"\t{(whose.Length > 0 && MeantExcuses.Accounted(whose) ? "Meant" : "")}";
 
     /// <summary>
     /// One line of it, because the ledger is tab-separated and a newline in a field is a second row

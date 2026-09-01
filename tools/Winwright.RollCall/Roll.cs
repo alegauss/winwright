@@ -177,7 +177,39 @@ public sealed record Roll
 
     /// <summary>Whether this is a run that may be called a pass at all.</summary>
     public bool Whole =>
-        Complete && Skipping.Count == 0 && Unexpected.Count == 0 && Discovered.Count > 0;
+        Complete && Skipping.Count == 0 && Unexpected.Count == 0 && Discovered.Count > 0
+        && Unaccounted.Count == 0;
+
+    /// <summary>
+    /// The cases excused in every run before this one that have not said why they mean it.
+    /// <para>
+    /// WW248. A hole is not a failure, which is why the excuses have never made a run red — and this
+    /// is the one shape that is not a hole. An excuse the machine handed this run says come back when
+    /// the desk is quiet. An excuse that arrives every single time says the suite's own structure is
+    /// preventing a check from ever running, and that is a check switched off rather than a check
+    /// that did not get a turn. The defect it was filed for is exactly that: a dialog and a launched
+    /// fixture in one class, the dialog taking the foreground, every synthesised act against the
+    /// fixture a hole — for a reason nobody had written down.
+    /// </para>
+    /// <para>
+    /// Recurrence alone is not the rule, and measuring said so: every excuse this suite makes recurs,
+    /// because the cases that make them open a decoy or declare a budget on purpose. So what is
+    /// refused is a recurring excuse whose case has <em>not</em> said it means it — intent, which no
+    /// rule derives and a person writes down once.
+    /// </para>
+    /// <para>
+    /// Empty where the ledger predates the column, which is what keeps this from refusing the whole
+    /// history the first time it runs: a row that does not carry the answer is unknown and never no.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Unaccounted =>
+        new ReadOnlyCollection<string>((Excused ?? [])
+            .Where(one => Readers.Accounted(one) == false)
+            .Select(one => Readers.Excuse(one).Case)
+            .Where(named => named is not null && Earlier.Always.Contains(named, StringComparer.Ordinal))
+            .Select(named => named!)
+            .Distinct(StringComparer.Ordinal)
+            .ToList());
 
     /// <summary>
     /// Take the roll.
@@ -435,6 +467,15 @@ public sealed record Roll
         lines.AddRange(Listed(Skipping, most));
         lines.AddRange(Listed(Unexpected, most));
         lines.AddRange(Excusing(most));
+
+        // WW248. First of the lists a reader acts on would be wrong — the sentence and the excuses
+        // are what puts this in context — but it is the one that made the run red, so it says what
+        // to do rather than only what happened.
+        lines.AddRange(Unaccounted.Take(most).Select(one =>
+            $"  every run  {one} has been excused in all {Earlier.Excused.Count} runs before this "
+                + "one and has not said it means to be — a hole this suite builds for itself is a "
+                + "check switched off; say why in MeantExcuses.Known, or take the excuse away"));
+
         return new ReadOnlyCollection<string>(lines);
     }
 

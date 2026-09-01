@@ -155,14 +155,20 @@ public sealed class ExcusedTests : IDisposable
             Readers.Budget,
             Readers.Excuse("wrote\tFixtureTests.A_dump\tnothing after 5000ms\tBudget").Kind);
 
-        // The kind is last, so anything past the fourth tab lands inside it — and a kind this reader
-        // does not recognise reads as the desk's rather than as a category of its own. That is the
-        // rule one level down: the safe reading of a row nobody understands keeps the tool reporting
-        // rather than excusing.
+        // WW248 moved this rule along by one. The kind used to be last, so anything past the fourth
+        // tab landed inside it and read as the desk's; there is now a fifth column, so a row with
+        // five fields is a row this reader understands and the kind parses on its own.
         Assert.Equal(
-            Readers.Desk,
+            Readers.Budget,
             Readers.Excuse("wrote\tA.Case\tnothing after 5000ms\tBudget\tand more").Kind);
 
+        // The rule itself has not changed, only which column is last: everything past the fifth tab
+        // lands inside the account, and an account this reader does not recognise is not "Meant".
+        Assert.False(Readers.Accounted("wrote\tA.Case\tnothing\tBudget\tand\tmore"));
+
+        // And a kind this reader does not recognise still reads as the desk's rather than as a
+        // category of its own — the safe reading of a row nobody understands keeps the tool
+        // reporting rather than excusing.
         Assert.Equal(Readers.Desk, Readers.Excuse("wrote\tA.Case\tnothing\tSomethingElse").Kind);
     }
 

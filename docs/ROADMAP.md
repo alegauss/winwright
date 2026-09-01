@@ -16,7 +16,6 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- ⏳ **WW248** (deps: WW300 ✅) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — WW300 reads which excuses recur, so what is left is making a structural one red; both obvious rules misfire on cases that take the desk on purpose. → §WW248
 - 📋 **WW312** (deps: WW310 ✅) **a band of spacings from forty to seventy milliseconds makes the fault five times likelier and nothing says why** — The curve is measured and its shape rules out a timer tick, so what is left is what the send and the window are doing to each other in that window. → §WW312
 - 📋 **WW323** (deps: —) **a step naming label and expectReported loads, and the report then prints the key against the other well's value** — Every other pair of claims on a step is refused where it is written, and this one is honoured as whichever the code reads first. → §WW323
 - 📋 **WW326** (deps: —) **a case can claim one reading equals an earlier one and never that it holds it inside** — A dialog that quotes the thing it is about is the ordinary shape, and equality is false of every one of them. → §WW326

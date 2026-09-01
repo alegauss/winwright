@@ -291,12 +291,39 @@ public static class Readers
         // or a budget this suite chose. It is last because this reader was written to tolerate a row
         // an older build wrote, and every one of those is a desk row: a missing kind is not unknown
         // here, it is the answer.
-        var apart = line.Split('\t', 4);
+        // WW248: five, and the fifth says whether the case has written down that it means the excuse
+        // it makes. Last, like the two before it, and absent on every row an older build wrote —
+        // where a missing kind was the answer, a missing account is genuinely unknown, so a run with
+        // no fifth column anywhere refuses nothing rather than refusing everything.
+        var apart = line.Split('\t', 5);
         return (
             apart[0].Trim(),
             apart.Length > 1 && apart[1].Trim().Length > 0 ? apart[1].Trim() : null,
             apart.Length > 2 && apart[2].Trim().Length > 0 ? apart[2].Trim() : null,
             apart.Length > 3 ? Kind(apart[3]) : Desk);
+    }
+
+    /// <summary>What the account column says for a case that has written down why it means it.</summary>
+    public const string Meant = "Meant";
+
+    /// <summary>
+    /// Whether this row says the case means the excuse it made.
+    /// <para>
+    /// WW248. Read as its own question rather than folded into <see cref="Excuse" />, because the
+    /// answer has three values and that tuple has room for two: accounted, not accounted, and a
+    /// ledger that does not carry the column at all. The third is what every run before this change
+    /// wrote, and reporting it as <em>not accounted</em> would make the first run after it refuse
+    /// every excuse in the history it is comparing against.
+    /// </para>
+    /// </summary>
+    /// <param name="line">One row of the ledger.</param>
+    /// <returns>True or false where the row says, and null where it does not carry the column.</returns>
+    public static bool? Accounted(string line)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+
+        var apart = line.Split('\t', 5);
+        return apart.Length > 4 ? string.Equals(apart[4].Trim(), Meant, StringComparison.Ordinal) : null;
     }
 
     /// <summary>What the kind column says for a check the desk excused, and for every row without one.</summary>

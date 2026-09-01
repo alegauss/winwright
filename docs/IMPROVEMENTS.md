@@ -64,33 +64,6 @@ Falsified when a command that only a chord reaches cannot be driven by a case.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW248 A dialog beside a fixture takes the desk from it
-
-`PumpedDialog` shows a window on this thread, and a window this process shows takes the
-foreground. So a launched fixture in the same class is left without it, and every
-synthesised act against that fixture is a hole — correctly reported, and for a reason
-nobody wrote down.
-
-Measured in one guest run. `NudgeTests` — a dialog and a launched fixture together —
-excused a nudge on the launched slider. `WpfInputTests` — a launched WPF fixture and no
-dialog — typed and clicked in the same run, neither excused. Two classes, one
-difference.
-
-The roll now carries the engine's own absence beside each excuse, so the difference is
-readable rather than inferred. This run's five all say `another window of the same
-process owns it: testhost 'winwright decoy'` — the decoy those cases open on purpose —
-which a reader can see at a glance instead of trusting.
-
-What is left is making a structural excuse a red, and asking the question turned up why
-it is hard. Both obvious checks misfire on honest cases here. At run time, *the holder
-is this process* marks `RefusedForegroundTests`, which takes the desk deliberately. Over
-the sources, *a dialog and a launch and a synthesised act* marks `NudgeTests`, whose act
-is against the dialog.
-
-What separates them is not visible in one run: an excuse that arrives every time is
-structural, and one run cannot say *every time*. That needs a history the suite does not
-keep.
-
 ### §WW312 Why that band
 
 WW310 measured the curve and stopped where measuring stops. Between 48 and 64
