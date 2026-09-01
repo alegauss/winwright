@@ -45,18 +45,19 @@ sent standing in it, 130 times out of 130.
 
 The tick was the obvious guess and the shape refuses it. Four ticks of the platform's
 15.625ms timer is 62.5ms, which would put a spike on one value; what is there is a
-plateau across forty milliseconds with a cliff on one side of it. Whatever this is, it
-is not a beat against that clock.
+plateau across forty milliseconds with a cliff on one side of it.
 
-What has not been looked at is the other end. Everything measured so far is on the
-sending side — how many calls, how far apart — and the fault is a character arriving
-where a different one was sent. The window has a message queue, the control has an input
-scope, and neither has been observed while this happens. The fixture already carries a
-recorder that showed the characters arriving substituted, which is how WW302 ruled WPF
-out; what it has never been asked is what the queue looked like at that moment.
+WW316 raised the second and the same shape refuses it. The recorder rewrote an eighteen-kilobyte
+caption per keystroke, so every run slowed as it went — 4600ms a round to 11325 — and a fixture
+that slows every send walks the experiment through a band of spacings without saying so. But that
+drift is monotone and this band is bracketed: 64ms is five to nine times worse than 32 *and* than
+96. Steady slowing makes the last spacing the worst, not the middle one. The instrument moved the
+absolute rates; it did not put the peak where it is.
 
-A guess worth pricing before adopting it: the band may be where a send is slow enough to
-overlap the read-back the engine does after it, and fast enough that both are in flight.
+What has not been looked at is still the other end. Everything measured is on the
+sending side, and the fault is a character arriving where a different one was sent. The
+window has a message queue and the control an input scope, and neither has been observed
+while this happens.
 
 ### §WW323 A key from one well priced against the other well's value
 
