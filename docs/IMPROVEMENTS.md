@@ -57,6 +57,31 @@ The menu has to be the shell's own kind — a popup tracked from the icon's wind
 tray callback — because a menu drawn any other way would prove the verb against a thing
 no application does.
 
+### §WW333 One kind of menu is not the verb
+
+WW332 gave the fixture icon a menu so the verb's success path would be observed here
+instead of by adopters. It works, and it proved the wrong half.
+
+The fixture puts up a `TrackPopupMenu` — a Win32 popup, tracked from the icon's own
+window on the tray callback. That kind announces itself as the focused element, which is
+what `OnTheDesk` asked for, so the case went green on the first run and stayed green
+while three adopted cases failed on the same verb.
+
+The other kind is a WinForms `ToolStripDropDown`, which is what a `NotifyIcon` with a
+`ContextMenuStrip` puts up and what a great many tray applications therefore show. It
+does not answer the focus, and WW322 is the whole cost of nobody having noticed: the
+engine reported no menu while the application's own log had one standing for six
+seconds.
+
+So the case covers one of two kinds and reads as though it covers the verb. The fix in
+WW322 is a fallback the Win32 arm never exercises — it is reached only when the focus
+answers nothing, and against this fixture the focus always answers.
+
+What is owed is a second shape. The fixture can host a WinForms menu as readily as a
+Win32 one, and the case that drives it is the case that would have failed before WW322
+and passes after — which is the only kind of case worth adding to a defect already
+fixed.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
@@ -198,31 +223,30 @@ runner config exists to hold in place.
 
 ### §WW322 the icon that answers and the menu that does not
 
-Three adopted cases fail on one line: `hidden tray icon '…' showed no menu: nothing was
-highlighted within 6009 ms of the application key`. Every part of that but the last
-clause is the engine working — the icon was found, in the overflow, with its rectangle.
+Three adopted cases failed on one line: `hidden tray icon '…' showed no menu: nothing
+was highlighted within 6009 ms of the application key`. The last clause was wrong, and
+everything else in it was the engine working.
 
-All three candidates are settled, and only the last one cost a run.
+Three candidates fell before the answer. A tray still resolving a profile does not
+explain it — `BuildMenu` runs in the constructor, unconditionally. Nor the guest: WW332
+gave the fixture icon a real popup and the verb opens it. Nor the delivery, once
+`OpenMenu` named what it pressed into — the overflow flyout, with the adopter's own icon
+focused.
 
-A tray still resolving a profile does not explain it. `BuildMenu` runs in the
-constructor, unconditionally, with ten entries, before any sign-in state is known, and
-nothing cancels `Opening`.
+So the application was asked, and it answered. Logged from inside it: the menu opened 22
+milliseconds after the key, stood visible for 6.05 seconds, and closed when this verb's
+own wait expired. It was up the whole time the engine reported nothing highlighted.
 
-Nor does the guest. WW332 gave the fixture icon a real popup — the shell's own kind,
-tracked from the icon's window on the tray callback — and the verb opens it. The route
-is sound on this desk.
+The defect is here. `OnTheDesk` asked what holds the focus and nothing else. A Win32
+popup answers that; a WinForms `ToolStripDropDown` does not, and a tray menu is as often
+one as the other.
 
-Nor is it the delivery, which was the reading nobody had. `OpenMenu` now names what it
-pressed into, and it pressed into the right place: the foreground was the overflow
-flyout, `Janela de estouro da bandeja do sistema`, and the focus was the adopter's own
-icon by its full name. The key arrived and no menu came.
+WW332's case passed throughout and hid it, which is the part worth keeping. That fixture
+puts up a `TrackPopupMenu` — one of the two real kinds — so the verb was proved against
+the kind that answers and never against the kind that does not.
 
-So the application did not draw one. Its icon is a WinForms `NotifyIcon` carrying a
-`ContextMenuStrip` and one `MouseClick` handler filtered to the left button — nothing
-there answers a request arriving from the keyboard rather than the mouse.
-
-The repair is the adopter's. Which notification it has to answer is the one thing still
-unread.
+The reading now falls back to a top-level menu standing on the desktop, which is the
+same fact by the route the focus does not cover.
 
 ### §WW330 The flyout nobody closed
 

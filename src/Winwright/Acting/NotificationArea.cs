@@ -846,7 +846,49 @@ public static class NotificationArea
     /// </para>
     /// </summary>
     private static string? OnTheDesk() =>
-        Traversal.WhoHasFocus()?.Name is { Length: > 0 } name ? name : null;
+        Traversal.WhoHasFocus()?.Name is { Length: > 0 } name ? name : Standing();
+
+    /// <summary>
+    /// A menu standing on the desktop that nothing reports as focused. WW322.
+    /// <para>
+    /// Measured, and it is the whole of that task. The reading above asks what holds the focus, and
+    /// a Win32 popup answers it — which is what the fixture in WW332 puts up, and why the verb's own
+    /// case passed while three adopted ones failed on the same route. A WinForms
+    /// <c>ToolStripDropDown</c> does not answer it. The adopter's tray was told, opened its menu 22
+    /// milliseconds after the key, held it up for the whole six seconds this verb waits, and closed
+    /// it when the wait expired — logged from inside the application, while the engine reported that
+    /// nothing had been highlighted.
+    /// </para>
+    /// <para>
+    /// So the focus is the first question and no longer the only one. A top-level menu on the
+    /// desktop is the same fact by another route, and the two together cover both kinds of menu a
+    /// real application puts up.
+    /// </para>
+    /// </summary>
+    private static string? Standing()
+    {
+        try
+        {
+            // Children of the root, because a menu of either kind is a window of its own rather
+            // than something inside the window that opened it.
+            var menus = AutomationElement.RootElement.FindAll(
+                TreeScope.Children,
+                new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Menu));
+
+            for (var at = 0; at < menus.Count; at++)
+            {
+                if (ElementFacts.Of(menus[at])?.Name is { Length: > 0 } named)
+                    return named;
+            }
+
+            return menus.Count > 0 ? "a menu with no name" : null;
+        }
+        catch (ElementNotAvailableException)
+        {
+            // The desktop rearranged itself while this looked, which is not a menu and not an error.
+            return null;
+        }
+    }
 
     private static bool Matches(TrayIcon icon, string named) =>
         icon.Name.Contains(named, StringComparison.OrdinalIgnoreCase);

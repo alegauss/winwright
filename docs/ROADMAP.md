@@ -11,6 +11,7 @@
 ## Block D — Act — patterns before pointers
 
 - 📋 **WW332** (deps: —) **the tray menu verb has no case that opens a menu, only one that fails to find an icon** — The fixture icon answers no tray callback, so the success path is observed by adopters alone and WW322 is being diagnosed through a publish. → §WW332
+- 📋 **WW333** (deps: WW332, WW322) **the tray menu case proves the verb against a Win32 popup and never against a WinForms one** — The kind it uses answers the focus, so the fallback WW322 had to add is never reached and the case reads as though it covered the verb. → §WW333
 
 ## Block E — Capture — the picture that proves what it photographed
 
