@@ -20,7 +20,6 @@
 - 📋 **WW312** (deps: WW310 ✅) **a band of spacings from forty to seventy milliseconds makes the fault five times likelier and nothing says why** — The curve is measured and its shape rules out a timer tick, so what is left is what the send and the window are doing to each other in that window. → §WW312
 - 📋 **WW323** (deps: —) **a step naming label and expectReported loads, and the report then prints the key against the other well's value** — Every other pair of claims on a step is refused where it is written, and this one is honoured as whichever the code reads first. → §WW323
 - 📋 **WW326** (deps: —) **a case can claim one reading equals an earlier one and never that it holds it inside** — A dialog that quotes the thing it is about is the ordinary shape, and equality is false of every one of them. → §WW326
-- 📋 **WW327** (deps: —) **the instance check's own case asserts about a process it never waited for, and reads nothing on a loaded desk** — It launches a windowless copy of cmd.exe and asks who is running a moment later, so the answer depends on whether that process is still up. → §WW327
 
 ## Block G — The scenario — a case is a data file
 

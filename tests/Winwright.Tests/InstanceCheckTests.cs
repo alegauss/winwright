@@ -150,8 +150,8 @@ public sealed class InstanceCheckTests : IDisposable
 
             using var running = Attachable.Settling();
             var register = running.Register;
-            register.Launch(Windowless(app));
-            register.Launch(Windowless(app));
+            Attachable.Launch(register, Windowless(app));
+            Attachable.Launch(register, Windowless(app));
 
             var check = InstanceCheck.Of(app);
 
@@ -164,6 +164,12 @@ public sealed class InstanceCheckTests : IDisposable
             // and this recurred through the other — the count read one again, in four guest runs of
             // five, with the missing process in neither list. The sentence is the message so a red
             // says which of the three it landed in and what it claimed to be running.
+            //
+            // WW327 stopped hardening the reading and fixed the setup instead. Both of those went
+            // at the question — how a count survives a process that has not mapped its image — when
+            // what was wrong is that this case asserted about processes it never waited for.
+            // `Attachable.Launch` waits until Windows will say what a pid is running, which is the
+            // premise every assertion below depends on, and it has been available the whole time.
             Assert.True(check.Candidates == 2, $"{check.Candidates} of 2 accounted for: {check.Sentence()}");
             Assert.Empty(check.Windowed);
             Assert.False(check.Refuses);
@@ -210,11 +216,16 @@ public sealed class InstanceCheckTests : IDisposable
 
             using var running = Attachable.Settling();
             var register = running.Register;
-            register.Launch(Windowless(there));
+            Attachable.Launch(register, Windowless(there));
 
             // WW283. The one running `there` is not an instance of `here`, and it is now said so
             // rather than skipped: asked about `here`, the reading names it as a candidate running a
             // different binary, which is the claim this case is actually about.
+            //
+            // WW327. Launched through the wait rather than started and asked about on the next line.
+            // Measured on a guest run: this read `nothing else is running this application` — the
+            // copy was not in the table yet — and the assertion below then reported the absence of a
+            // premise as a failure of the claim.
             var asked = InstanceCheck.Of(here);
 
             Assert.Empty(asked.Others);

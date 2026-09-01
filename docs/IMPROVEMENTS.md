@@ -160,29 +160,6 @@ case knows all its steps, refused for pointing at itself, at a later step or at 
 reading something else — and it has to say which reading, like the others, or the
 default compares whichever answered first.
 
-### §WW327 A case that asks who is running before anybody is
-
-`A_different_executable_of_the_same_name_is_not_this_application` copies `cmd.exe`
-twice, launches one of them windowless, and asks `InstanceCheck.Of` about the other. The
-claim is good — a process carrying the name and running a different binary is a
-candidate rather than an instance — and the setup underneath it is a race.
-
-Measured on a guest run: the reading came back *nothing else is running this
-application*, so the launched copy was not there to be counted. It passed on the four
-runs before it and on four the day before, which is what an intermittent looks like
-rather than a defect in the check.
-
-Nothing waits. `Launch` starts the process and the next line reads the process table; a
-windowless `cmd.exe` with no input to read is entitled to exit whenever it likes, and a
-loaded desk is enough to put the read on the wrong side of that. Every other wait in
-this engine polls to a deadline, and this one is a straight line — the same shape WW288
-had, one layer up.
-
-What it needs is for the case to establish its own premise before asserting on it: the
-launched process is alive and carries the name, polled the way the engine polls
-everything else. A case whose subject was never there does not fail about the subject,
-it fails about the case.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
