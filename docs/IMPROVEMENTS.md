@@ -32,6 +32,31 @@ it.
 
 ## Block D — Act — patterns before pointers
 
+### §WW332 The menu the fixture never had
+
+`OpenMenu` is the hardest verb here and the only one whose success nothing observes. The
+suite drives it once, at an icon that is not on the desk, and asserts the sentence a
+search refuses with. Every case around it stops short of the menu: the overflow opens
+and shuts, an icon is found hidden.
+
+The reason is the fixture rather than an oversight. `TrayIconFixture` places a real icon
+with `Shell_NotifyIconW` over a popup window whose whole procedure is `GetMessageW`, and
+it answers no tray callback — so there is no menu for the verb to open, and a case that
+called it would be asserting that nothing happened.
+
+What that costs is being paid now. Three adopted cases fail on `showed no menu`, and the
+question they raise — does this route open a menu on this shell — cannot be asked here.
+It is asked through a publish and an adopting repository: a round trip per attempt,
+against a defect nobody has reproduced.
+
+A fixture icon that shows a real popup menu answers it in one run. If the verb opens
+that and not the adopter's, the difference is the application; if it opens neither, the
+route is wrong on this shell and WW322 is about the engine.
+
+The menu has to be the shell's own kind — a popup tracked from the icon's window on the
+tray callback — because a menu drawn any other way would prove the verb against a thing
+no application does.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
@@ -173,28 +198,30 @@ runner config exists to hold in place.
 
 ### §WW322 the icon that answers and the menu that does not
 
-WW315's bench closed six holes and the run underneath them became readable for the first
-time. Seven cases pass. Two fail on one thing: `hidden tray icon 'Claude Code -
-connecting. [check] Claude Code - not signed in' [80x80 at 3259,1711] showed no menu:
-nothing was highlighted within 6003 ms of the application key`.
+Three adopted cases fail on one line: `hidden tray icon '…' showed no menu: nothing was
+highlighted within 6005 ms of the application key`. Every part of that but the last
+clause is the engine working — the icon was found, in the overflow, with its rectangle.
 
-Every part of that except the last clause is the engine working. The icon was found, in
-the overflow, with its rectangle — the surface WW258 and WW259 were built for. What did
-not happen is the menu.
+Two of the three candidates are refuted, and neither cost a run at the desk.
 
-Three candidates and no measurement yet. The tooltip says *connecting* and *not signed
-in*, which is the bench's own doing: a fabricated profile has a config and no
-credentials, and a tray still resolving one may not build its menu. It may be the
-overflow flyout, where the application key reaches a shell window rather than the icon's
-owner. Or it may be the guest, which is the desk WW311 reads and did not refuse.
+A tray still resolving a profile does not explain it. `BuildMenu` runs in the
+constructor, unconditionally, with ten entries, before any sign-in state is known, and
+nothing cancels `Opening`. The tooltip reading *connecting* is true and beside the
+point.
 
-The first is cheapest to falsify: run the case against a profile with credentials and
-see whether the menu appears. If it does, either the bench fabricates a signed-in
-profile or the cases declare they need one — and which is right is the question, because
-a case needing a real account is a case no guest can run.
+Nor does the guest. WW332 gave the fixture icon a real popup — the shell's own kind,
+tracked from the icon's window on the tray callback — and the verb opens it. The route
+is sound on this desk, so an icon whose menu will not open is not a statement about the
+shell.
 
-Diagnosing it needs WW321 in a published package: until then the second failure breaks
-the run instead of failing it.
+What is left is the adopter's icon. Its owner is a WinForms `NotifyIcon`, and what a
+`ContextMenuStrip` does with the keyboard request is not what a tracked popup does — the
+framework decides which notification it acts on, and the case never sees the difference.
+
+The reading that separates them is written and not taken. `OpenMenu` now names the
+foreground and the focused element as it presses, so the next adopted run says whether
+the key reached the icon. It needs the engine carrying it, which the adopter has not
+restored.
 
 ### §WW330 The flyout nobody closed
 

@@ -26,6 +26,31 @@ internal sealed class TrayIconFixture : IDisposable
     private const uint NifTip = 0x04;
     private const nint IdiApplication = 32512;
 
+    /// <summary>
+    /// The callback the shell sends this icon's messages as, and the ones that mean "show your
+    /// menu". WW332.
+    /// <para>
+    /// Four and not one, deliberately. This icon registers no version, so the shell speaks the
+    /// legacy protocol and puts a mouse message in the lParam — but the keyboard route is
+    /// <c>NIN_KEYSELECT</c>, and a shell that has decided this icon is version 4 sends
+    /// <c>WM_CONTEXTMENU</c> instead. A fixture that answered only one of them would fail to show a
+    /// menu for a reason that has nothing to do with the verb under test, and the case would read
+    /// that as the verb being broken.
+    /// </para>
+    /// </summary>
+    private const uint TrayCallback = 0x0400 + 1;
+
+    private const uint WmContextMenu = 0x007B;
+    private const uint WmRButtonUp = 0x0205;
+    private const uint NinSelect = 0x0400;
+    private const uint NinKeySelect = 0x0403;
+    private const uint WmCancelMode = 0x001F;
+    private const int GwlpWndProc = -4;
+
+    /// <summary>Track the popup and hand back what was picked, rather than posting a command.</summary>
+    private const uint TpmReturnCmd = 0x0100;
+    private const uint TpmNonNotify = 0x0080;
+
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern nint CreateWindowExW(
         uint exStyle, string className, string? windowName, uint style,
@@ -100,6 +125,46 @@ internal sealed class TrayIconFixture : IDisposable
     [DllImport("kernel32.dll")]
     private static extern uint GetCurrentThreadId();
 
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint SetWindowLongPtrW(nint window, int index, Subclassed replacement);
+
+    [DllImport("user32.dll")]
+    private static extern nint CallWindowProcW(nint previous, nint window, uint message, nint wParam, nint lParam);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint CreatePopupMenu();
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool AppendMenuW(nint menu, uint flags, nuint item, string text);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool DestroyMenu(nint menu);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern int TrackPopupMenu(nint menu, uint flags, int x, int y, int reserved, nint window, nint rect);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(nint window);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint PostMessageW(nint window, uint message, nint wParam, nint lParam);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetCursorPos(out Point where);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Point
+    {
+        public int X;
+        public int Y;
+    }
+
+    private delegate nint Subclassed(nint window, uint message, nint wParam, nint lParam);
+
     /// <summary>
     /// How long the shell gets to place an icon it has already accepted. The engine's own resolve
     /// deadline, because that is what this is: waiting for something to turn up in a tree.
@@ -110,8 +175,31 @@ internal sealed class TrayIconFixture : IDisposable
     private uint threadId;
     private nint owner;
 
-    private TrayIconFixture(string tip)
+    /// <summary>Held for the life of the window it was given to. WW332.</summary>
+    private Subclassed? answering;
+
+    /// <summary>Whether this icon shows a menu when the shell asks it for one. WW332.</summary>
+    private readonly bool answers;
+
+    private nint wasAnswering;
+
+    /// <summary>
+    /// How many times this icon has been asked for its menu and shown one. WW332.
+    /// <para>
+    /// Counted rather than flagged, because the claim a case makes is that the verb asked once and
+    /// got one menu. A flag would read the same whether the shell delivered the request once or
+    /// four times, and this icon answers four different messages on purpose.
+    /// </para>
+    /// </summary>
+    private int shown;
+
+    /// <summary>Whether this icon has shown its menu, and how often. WW332.</summary>
+    public int MenusShown => Volatile.Read(ref shown);
+
+    private TrayIconFixture(string tip, bool withMenu)
     {
+        answers = withMenu;
+
         // WW126: the tip carries this process, because a run that was killed leaves its icon
         // registered with the shell and nothing in this process can delete somebody else's. A
         // ghost from a previous run is then found by tip and read as this run's own, which is why
@@ -124,6 +212,15 @@ internal sealed class TrayIconFixture : IDisposable
         {
             threadId = GetCurrentThreadId();
             owner = CreateWindowExW(0, "Static", "winwright tray owner", WsPopup, 0, 0, 10, 10, 0, 0, 0, 0);
+
+            // WW332. Subclassed rather than given a class of its own, which is the smaller change to
+            // a fixture that already works: the window exists to own an icon, and what it now also
+            // does is answer the one message an icon's owner has to answer to have a menu at all.
+            // Held in a field for the life of the thread — a delegate handed to the window and then
+            // collected is a callback into freed memory.
+            answering = Answer;
+            wasAnswering = SetWindowLongPtrW(owner, GwlpWndProc, answering);
+
             var data = Describe();
             added = Shell_NotifyIconW(NimAdd, ref data);
             ready.Set();
@@ -245,11 +342,18 @@ internal sealed class TrayIconFixture : IDisposable
     /// process, so ask this object rather than passing the same string to a reading.
     /// </summary>
     /// <param name="tip">What the shell should call it, before this run's own mark is added.</param>
+    /// <param name="withMenu">
+    /// Whether it answers the shell's request for a context menu by showing one. WW332, and it is a
+    /// parameter rather than the new default because both shapes assert something. An icon with no
+    /// menu is what proves the verb reports the truth instead of claiming a menu it never saw — the
+    /// false green this project is against — and an icon with one is what proves the route works at
+    /// all. Making every icon answer would have deleted the first claim to gain the second.
+    /// </param>
     /// <exception cref="InvalidOperationException">
     /// Where the shell accepted the icon and never placed it, which is a fixture that failed
     /// rather than a case that did.
     /// </exception>
-    internal static TrayIconFixture Add(string tip) => new(tip);
+    internal static TrayIconFixture Add(string tip, bool withMenu = false) => new(tip, withMenu);
 
     /// <summary>
     /// Rename the icon in place, the way an application with a live tooltip does.
@@ -277,9 +381,76 @@ internal sealed class TrayIconFixture : IDisposable
         Placed();
     }
 
+    /// <summary>
+    /// One message to the icon's owner, answered where it is the shell asking for a menu. WW332.
+    /// <para>
+    /// <c>SetForegroundWindow</c> before tracking and a cancel posted after, which is the sequence
+    /// every tray application has to use and is not decoration here: a popup tracked from a window
+    /// that does not hold the foreground is dismissed the moment the mouse moves, and one tracked
+    /// without the cancel outlives the click that opened it.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The icon's owner.</param>
+    /// <param name="message">What arrived.</param>
+    /// <param name="wParam">The icon's id, where this is the tray callback.</param>
+    /// <param name="lParam">Which request it is, where this is the tray callback.</param>
+    private nint Answer(nint window, uint message, nint wParam, nint lParam)
+    {
+        if (message != TrayCallback)
+            return CallWindowProcW(wasAnswering, window, message, wParam, lParam);
+
+        var asked = (uint)(lParam & 0xFFFF);
+        if (answers && asked is WmContextMenu or WmRButtonUp or NinKeySelect or NinSelect)
+            Show();
+
+        return 0;
+    }
+
+    /// <summary>The menu itself: two real entries, tracked the way the shell expects. WW332.</summary>
+    private void Show()
+    {
+        var menu = CreatePopupMenu();
+        if (menu == 0)
+            return;
+
+        try
+        {
+            AppendMenuW(menu, 0, 1, "winwright open");
+            AppendMenuW(menu, 0, 2, "winwright quit");
+
+            // Where the cursor is, which is where a tray menu goes. The keyboard route puts no
+            // position in the message, so there is nothing better to use and nothing that needs to
+            // be: what a case reads is that a menu exists, not where it was drawn.
+            _ = GetCursorPos(out var where);
+
+            SetForegroundWindow(owner);
+            Volatile.Write(ref shown, Volatile.Read(ref shown) + 1);
+
+            // TPM_RETURNCMD, so this blocks here until the menu is dismissed and nothing is posted
+            // back to a window that would have to answer it. The case dismisses it.
+            _ = TrackPopupMenu(menu, TpmReturnCmd | TpmNonNotify, where.X, where.Y, 0, owner, 0);
+        }
+        finally
+        {
+            DestroyMenu(menu);
+        }
+    }
+
+    /// <summary>
+    /// Shut a menu this icon is showing, so a case that opened one does not leave it up. WW332,
+    /// and it is WW330's rule applied where the leak would be this suite's own.
+    /// </summary>
+    public void DismissMenu()
+    {
+        if (owner != 0)
+            PostMessageW(owner, WmCancelMode, 0, 0);
+    }
+
     /// <summary>Take it away, and the window that owned it.</summary>
     public void Dispose()
     {
+        DismissMenu();
+
         if (threadId != 0)
             PostThreadMessageW(threadId, WmQuit, 0, 0);
 

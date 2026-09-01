@@ -440,6 +440,47 @@ public sealed class NotificationAreaTests : IDisposable
     }
 
     [Fact]
+    public void An_icon_that_has_a_menu_shows_it_to_focus_and_the_application_key()
+    {
+        // WW332. The verb's success path, which nothing here observed until now: every other case
+        // around it stops at the flyout, and the only OpenMenu case asks an icon that is not there.
+        // What that left unproven is the whole of the verb — three adopted cases fail on this route
+        // and the question they raise could not be asked in this repository at all.
+        // Its own icon and not the class's, because the class's answers no menu on purpose: the case
+        // below it asserts that the verb says so rather than claiming one appeared, and an icon that
+        // served both would have to be two things at once.
+        using var answering = BusyDesk.Built(() => TrayIconFixture.Add("winwright menu", withMenu: true));
+        if (answering is null)
+            return;
+
+        var menu = NotificationArea.OpenMenu(answering.Tip, settleMs: 4000, pollMs: 40);
+
+        try
+        {
+            if (BusyDesk.Excused(menu.AsAssertion("the icon shows its menu")))
+                return;
+
+            // The icon's own count first, because the two answer different questions. This one says
+            // the shell delivered the request and the application drew a menu; the verb's Opened
+            // says the desk then highlighted something a reading could find. A run where the first
+            // holds and the second does not is the interesting failure, and reading only the verb
+            // would report it as the application never being asked.
+            Assert.True(
+                answering.MenusShown > 0,
+                $"the icon was never asked for its menu: {menu.Because}");
+
+            Assert.True(menu.Opened, menu.Because);
+            Assert.Equal(Winwright.Tracing.StepVerdict.Ok, menu.AsTraceStep().Verdict);
+        }
+        finally
+        {
+            // WW330's rule where the leak would be this suite's own: a menu left up owns the
+            // foreground, and the next case in this class reads the desk.
+            answering.DismissMenu();
+        }
+    }
+
+    [Fact]
     public void An_absence_says_how_much_was_there_to_look_through()
     {
         // WW223. An empty flyout and a flyout holding four of the shell's own ended this sentence
