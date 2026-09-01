@@ -92,6 +92,16 @@ public static class Resolve
         {
             foreach (AutomationElement candidate in root.FindAll(TreeScope.Descendants, ConditionFor(step)))
             {
+                // WW83. The prefix is filtered here rather than asked of UI Automation, because a
+                // PropertyCondition compares the whole value and there is no other kind. One extra
+                // read per candidate, and only where a step asked for one — the pattern beside it has
+                // been paying the same price since the grammar had a pattern.
+                if (step.NameStarts is { } beginning
+                    && !(ElementFacts.Of(candidate)?.Name.StartsWith(beginning, StringComparison.Ordinal) ?? false))
+                {
+                    continue;
+                }
+
                 if (step.Pattern is null || (ElementFacts.Of(candidate)?.Supports(step.Pattern) ?? false))
                     found.Add(candidate);
             }

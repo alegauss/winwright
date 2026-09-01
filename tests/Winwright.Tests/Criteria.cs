@@ -210,11 +210,16 @@ internal static class Criteria
             "the condition is asserted against an ordinary desk by DeskGateTests, and the desk that "
                 + "reports everything present and renders nothing has never been driven here"),
 
-        // --- WW315, which is about a machine rather than about this suite ------------------------------------
-        new("WW315", "two profiles and a transcript exist on the guest, as disposable fixture", "",
-            Unshown.NotBuilt, "the guest holds neither, which is what the task is: six of the eleven "
-                + "adopted cases answer that the file they wanted is absent, and nothing here can "
-                + "fabricate one until it is decided what a disposable profile costs"),
+        // --- WW83, whose remaining half is an adopting project's rather than this suite's -------------------
+        new("WW83", "The switch runs in the adopter, and the store beside it does not move", "",
+            Unshown.NotBuilt, "the engine carries the three fields the case is written out of and the "
+                + "published package does not, so the case that would read this back refuses to load "
+                + "in the repository it lives in — and nothing here can drive claude-tray's menu"),
+
+        // WW315's own criterion stood here — that two profiles and a transcript exist on the guest as
+        // a disposable fixture — and it went with the task: the bench fabricates both, so the roadmap
+        // no longer declares the lead and a catalogue entry for one is a lead pointing nowhere. It is
+        // deleted rather than restated, which is what this pair of checks is for.
     ]);
 
     /// <summary>

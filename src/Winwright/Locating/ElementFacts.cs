@@ -42,6 +42,30 @@ public sealed record ElementFacts(
     public bool HasKeyboardFocus { get; init; }
 
     /// <summary>
+    /// The sentence an element says beside its name, and empty where it says none.
+    /// <para>
+    /// WW83. It is UI Automation's <c>HelpText</c>, which is the one property that carries prose
+    /// alongside a control and reaches a client. Read in the same pass as the rest for the reason
+    /// <see cref="HasKeyboardFocus"/> is: a case comparing what an entry announces against what it is
+    /// named would otherwise be comparing two moments.
+    /// </para>
+    /// <para>
+    /// Measured on claude-tray's tray menu, which is why it is here at all. A <c>ToolStripItem</c>'s
+    /// tooltip reaches no accessibility property, so that application mirrors it into a custom
+    /// accessible object's <c>Help</c> — and everything the Profile submenu says about what picking an
+    /// entry <em>reaches</em> lives there, along with the check mark, which the custom object costs the
+    /// toggle pattern and announces as a word in front instead.
+    /// </para>
+    /// </summary>
+    public string Announces { get; init; } = "";
+
+    /// <summary>
+    /// What this element says beside its name, or nothing where it says none. The counterpart of
+    /// <see cref="Says"/>, and blank rather than merely empty for its reason.
+    /// </summary>
+    public string? Explains => string.IsNullOrWhiteSpace(Announces) ? null : Announces;
+
+    /// <summary>
     /// What this element says, which is its <see cref="Name"/> where it has one and nothing where it
     /// does not.
     /// <para>
@@ -113,6 +137,7 @@ public sealed record ElementFacts(
                     .ToHashSet(StringComparer.Ordinal))
             {
                 HasKeyboardFocus = current.HasKeyboardFocus,
+                Announces = current.HelpText ?? "",
             };
         }
         catch (ElementNotAvailableException)

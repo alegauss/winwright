@@ -70,6 +70,21 @@ internal static class Fixture
     }
 
     /// <summary>
+    /// The word <c>--announces</c> writes in front of a marked row's sentence.
+    /// <para>
+    /// WW83. Spelled here as well as in <c>AnnouncesPane</c>, which is a duplication and the only
+    /// shape available: the suite references the fixture without its assembly on purpose, so a
+    /// constant over there is one this file cannot name. It is the safe direction to drift in — the
+    /// two disagreeing makes the claim about the front of a sentence fail, which is the claim under
+    /// test, rather than passing against a state nobody is in.
+    /// </para>
+    /// </summary>
+    public const string AnnouncedChecked = "Checked";
+
+    /// <summary>And the word it writes in front of an unmarked one. Duplicated for the same reason.</summary>
+    public const string AnnouncedUnchecked = "Not checked";
+
+    /// <summary>
     /// What a run asking for that shape exits with, read off the catalogue.
     /// <para>
     /// WW161. The suite used to carry the number as a private constant copied out of the fixture,

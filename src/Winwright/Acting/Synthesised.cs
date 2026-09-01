@@ -169,9 +169,14 @@ public static class Synthesised
     /// </para>
     /// <para>
     /// Not repeatable, for the reason <see cref="Menu" /> gives about its own retries: Right again
-    /// walks deeper rather than arriving again, so a second attempt is a different gesture. And the
-    /// locator is the element the step is about rather than the menu — a menu popup is its own window
-    /// and its entries are not reliably addressable, which is why the walk is window-scoped.
+    /// walks deeper rather than arriving again, so a second attempt is a different gesture.
+    /// </para>
+    /// <para>
+    /// WW83. The locator names <em>which</em> entry, and the walk goes there before Right is pressed.
+    /// It did not, and the sentence here said so: the walk was window-scoped, on the ground that a
+    /// menu popup's entries are not reliably addressable. They are — a popup is a top-level Menu
+    /// window of its own — and what the old shape actually meant was that a step naming the fourth
+    /// entry expanded the first, because that is the one a menu opens highlighting.
     /// </para>
     /// </summary>
     /// <param name="subject">Any element of the window whose menu is open.</param>
@@ -193,6 +198,21 @@ public static class Synthesised
                 before,
                 Precondition.Absent(
                     Windowing.Desk.ForegroundToTake, "this element is in no window a menu key could be sent to"));
+        }
+
+        // WW83. Walked to first, where the locator named an entry that is not the one the menu opened
+        // on. Right expands whatever is highlighted, and a menu opens highlighting its first entry —
+        // so a step naming the fourth entry used to expand the first, and the submenu that arrived
+        // was somebody else's. The harness this replaces walked with Down for exactly this reason.
+        //
+        // A menu entry and nothing else, which keeps the sentence above true rather than replacing
+        // it: the old contract took any element of the window the menu belongs to, and a walk looking
+        // for a name no entry has would press Down at every entry there is and then expand whichever
+        // one it stopped on. Skipped too where the locator named what is already highlighted.
+        if (before.Facts is { ControlType: "MenuItem", Says: { } wanted }
+            && Menu.Highlighted(subject.Window) != wanted)
+        {
+            Menu.To(subject.Window, wanted, subject.ActMs, subject.PollMs);
         }
 
         var walk = Menu.Expand(subject.Window, subject.ActMs, subject.PollMs);

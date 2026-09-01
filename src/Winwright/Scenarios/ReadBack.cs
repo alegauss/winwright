@@ -54,7 +54,23 @@ public sealed record ReadBack
         // Not a pattern reading, like 'focused' below, and null where nothing resolved for the same
         // reason. Not Always either: an element whose name is blank answers nothing, so 'this label
         // says something' stays a claim that can be false.
-        new("name", read => read.Facts?.Says, pinned: step => step.Name),
+        // WW83: `nameStarts` pins it too. The decoration behind the prefix is the part a locator did
+        // not choose, and no claim on this vocabulary is about a suffix — `answers` holds because a
+        // prefix is not empty, and `expect` writes the whole label the locator half-named.
+        new("name", read => read.Facts?.Says, pinned: step => step.Name ?? step.NameStarts),
+
+        // WW83. What an element says beside its name, which is where an application puts what it
+        // cannot fit in a label — and, where a framework's own accessible object had to be replaced to
+        // carry it, the state it stopped exposing as a pattern.
+        //
+        // Measured missing on claude-tray's tray menu. A checked entry there announces the word for
+        // "checked" in front of its own sentence and offers no TogglePattern at all, so 'toggle'
+        // answered nothing, 'name' answered the entry's decorated text, and the one check in that
+        // application about which profile the icon follows had no reading to make.
+        //
+        // Not Always: an element with nothing to add says nothing, so "this entry announces something"
+        // stays a claim that can be false.
+        new("description", read => read.Facts?.Explains),
 
         // WW225. The one reading that is not about a pattern. It is here because "Tab moved the focus
         // off this box" is a claim a case has to be able to make, and it was the one assertion of the

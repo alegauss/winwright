@@ -162,6 +162,51 @@ not opened yet would be the worst of both.
 
 Falsified when a case cannot say that something is not there.
 
+### §WW323 A key from one well priced against the other well's value
+
+One claim per step is this format's rule, and it is enforced by a list of fields per
+claim rather than by a set. `expectReported` is checked against `expect` and against
+nothing else, so a step carrying `label` and `expectReported` together passes every
+guard.
+
+What happens then is worse than either claim alone. `CaseRun` resolves the declared
+string out of the project's strings, and the branch below it overwrites that with the
+value the application reported — so the comparison is against the reported value while
+the sentence a failure carries names the strings key. A reader of that red goes to a
+strings file to correct a label that was never what the run compared.
+
+WW83 met it while adding a third member to the family and left it alone deliberately:
+closing it means deciding whether `expectReported` joins the label group — `label`,
+`notLabel`, `beginsWithLabel` and it are all one reading against one derived value — or
+whether the whole rule stops being a list of fields and becomes one set the refusal
+names out of.
+
+The second is the answer the pairs keep pointing at. Each new claim has added itself to
+five or six lists, and the one it forgets is a hole exactly this shape. What it costs is
+a way to say which claims a step is making without every rule enumerating them.
+
+### §WW324 A red once in four runs, about the shell rather than about the code
+
+Measured across four guest runs of one tree during WW83: three green, and one where
+`NotificationAreaTests.The_overflow_opens_through_the_pattern_and_shuts_again` failed at
+`Assert.NotNull(NotificationArea.Overflow())` — the line after the one that asserts the
+open held.
+
+So the open was reported held and the flyout was not in the tree when the next call
+looked. Nothing between them waits: `OpenOverflow` answers a reading about the pattern
+it invoked, and `Overflow()` is a search taken at whatever instant follows. Every other
+wait in this engine polls to a deadline, and this one does not.
+
+The excuse beside it does not reach this. `BusyDesk.Excused` is asked of the open, which
+held, so a shell that worked its own flyout and then had not drawn it yet is neither
+excused nor waited for — it is a red naming a null.
+
+Two candidates and one is cheap to rule out. Either the flyout is genuinely absent for a
+moment after the pattern returns, which a poll to the resolve deadline fixes and is what
+the rest of the engine already does; or the shell answered the pattern without opening
+anything, which is the desk and belongs in the excuse rather than in a wait. The reading
+to take is how long it is absent for, which the poll produces for free.
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
@@ -172,11 +217,25 @@ Falsified when a case cannot say that something is not there.
 
 ### §WW83 The switch case rewrites a real setting
 
-Until that case existed, the path that rewrites the setting, re-keys the stores and
-takes the other account's token ran under no check at all. It is refused against a
-resident process, because a pick there would repoint the real icon for real. Migrating
-it inside the store comparison asserts the promise that a run touches nothing at the one
-place most likely to break it.
+Until that case exists, the path that rewrites the setting, re-keys the stores and takes
+the other account's token runs under no check at all. It is refused against a resident
+process, because a pick there would repoint the real icon for real. Running it inside
+the store comparison asserts the promise that a run touches nothing at the one place
+most likely to break it.
+
+The engine half has landed. Three things had to exist first, and each was measured
+missing on this menu: a locator matching the front of a name, because an entry reads
+`Pessoal — used 41%  · active now` and equality addresses it on no machine; a reading of
+the sentence an element says beside its name, because the accessible object carrying
+that sentence at all costs the entry its toggle pattern; and a claim about the front of
+that sentence, because the state is announced as a word in front of free text that may
+contain the word again. `open submenu` learned which entry it is about at the same time
+— it pressed Right at whatever the menu opened on, which is never the fourth entry.
+
+What is left is the adopter's, and waits on a publish rather than on a decision. The
+case, the `other-profile` read-out that names an end no case may type, and the store
+bracket around the suite are written; the cases project restores the engine from
+nuget.org, and the three fields are not in the published version.
 
 ### §WW85 The environment sweep, last
 

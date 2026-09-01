@@ -69,6 +69,29 @@ public sealed record LocatorStep
     /// <summary>The name, which is what a person sees and therefore what a language changes.</summary>
     public string? Name { get; }
 
+    /// <summary>
+    /// What the name must begin with, where the rest of it is decoration the case cannot know.
+    /// <para>
+    /// WW83. <see cref="Name"/> matches by equality, which is right for a control whose whole label a
+    /// case can name and useless for one that carries its own state in its text. claude-tray's Profile
+    /// submenu renders an entry as <c>Pessoal — used 41%  · active now</c>: the label is this machine's
+    /// account, the reading is what it happens to have consumed, and the suffix appears and goes. So
+    /// equality is false of every entry on every machine, and the harness this replaces matched
+    /// <c>-like "$label *"</c> for exactly that reason.
+    /// </para>
+    /// <para>
+    /// A prefix and not a containment, which is the difference between this and
+    /// <see cref="Asserting.SetMatch.Within"/>. The decoration is written behind the label and never in
+    /// front, so a prefix addresses the entry for <em>one</em> account; a containment would let a
+    /// profile called <c>one</c> address the entry for <c>twenty-one</c>.
+    /// </para>
+    /// <para>
+    /// Its own key rather than an operator on <c>name</c>, because a step naming both is two claims
+    /// about one string and the grammar reads <c>[key=value]</c> everywhere else.
+    /// </para>
+    /// </summary>
+    public string? NameStarts { get; init; }
+
     /// <summary>The window class, which is what tells one framework's chrome from another's.</summary>
     public string? ClassName { get; }
 
@@ -102,6 +125,7 @@ public sealed record LocatorStep
     /// <param name="what">The text to look for, such as the member placeholder.</param>
     public bool Mentions(string what) =>
         (Name?.Contains(what, StringComparison.Ordinal) ?? false)
+        || (NameStarts?.Contains(what, StringComparison.Ordinal) ?? false)
         || (AutomationId?.Contains(what, StringComparison.Ordinal) ?? false)
         || (ClassName?.Contains(what, StringComparison.Ordinal) ?? false);
 
@@ -117,6 +141,7 @@ public sealed record LocatorStep
         && ControlTypes.SequenceEqual(other.ControlTypes, StringComparer.Ordinal)
         && string.Equals(AutomationId, other.AutomationId, StringComparison.Ordinal)
         && string.Equals(Name, other.Name, StringComparison.Ordinal)
+        && string.Equals(NameStarts, other.NameStarts, StringComparison.Ordinal)
         && string.Equals(ClassName, other.ClassName, StringComparison.Ordinal)
         && string.Equals(Pattern, other.Pattern, StringComparison.Ordinal)
         && Index == other.Index
@@ -131,6 +156,7 @@ public sealed record LocatorStep
 
         hash.Add(AutomationId, StringComparer.Ordinal);
         hash.Add(Name, StringComparer.Ordinal);
+        hash.Add(NameStarts, StringComparer.Ordinal);
         hash.Add(ClassName, StringComparer.Ordinal);
         hash.Add(Pattern, StringComparer.Ordinal);
         hash.Add(Index);
@@ -148,6 +174,8 @@ public sealed record LocatorStep
             text.Append('#').Append(Quoted(AutomationId, bare: Bare(AutomationId)));
         if (Name is not null)
             text.Append("[name=").Append(Quoted(Name, bare: false)).Append(']');
+        if (NameStarts is not null)
+            text.Append("[nameStarts=").Append(Quoted(NameStarts, bare: false)).Append(']');
         if (ClassName is not null)
             text.Append("[class=").Append(Quoted(ClassName, bare: false)).Append(']');
         if (Pattern is not null)

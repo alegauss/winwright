@@ -230,6 +230,11 @@ public sealed record Flags
             "a pane carrying the whole naming rule at once - nothing, a glyph, an echoed id, a neighbouring label, and a button that keeps its text",
             "claude-tray shipped two controls carrying empty names while every neighbouring button read fine, because a control takes its name from its own content and both had none"),
         new Flag(
+            "announces",
+            "",
+            "a pane of rows that carry their own state in their text and say which state in a sentence beside their name - one marked, one not, one whose explanation contains the word for marked, and one that says nothing",
+            "claude-tray's tray entries lose the toggle pattern to the custom accessible object that carries their sentence, so the check for which profile the icon follows had to read a word in front of free text and no case could address a row whose name ends in a reading"),
+        new Flag(
             "absences",
             "",
             "a pane carrying the three kinds of absence at once - a collapsed pane, a closed popup and an unopened submenu",

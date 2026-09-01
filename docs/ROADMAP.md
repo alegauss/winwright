@@ -20,6 +20,8 @@
 - ⏳ **WW248** (deps: WW300 ✅) **a test class holding an in-process dialog cannot also drive a launched window, and nothing says so** — WW300 reads which excuses recur, so what is left is making a structural one red; both obvious rules misfire on cases that take the desk on purpose. → §WW248
 - 📋 **WW312** (deps: WW310 ✅) **a band of spacings from forty to seventy milliseconds makes the fault five times likelier and nothing says why** — The curve is measured and its shape rules out a timer tick, so what is left is what the send and the window are doing to each other in that window. → §WW312
 - 📋 **WW318** (deps: —) **A case cannot claim that something is not in the tree** — A locator matching nothing has no subject, so an expectation of absence reads as a timeout and is indistinguishable from a broken read. → §WW318
+- 📋 **WW323** (deps: —) **a step naming label and expectReported loads, and the report then prints the key against the other well's value** — Every other pair of claims on a step is refused where it is written, and this one is honoured as whichever the code reads first. → §WW323
+- 📋 **WW324** (deps: —) **the overflow flyout is read back as absent once in four runs, after the open reported that it held** — An intermittent red is worse than a hole: it teaches a reader to run the suite again, which is the habit every excuse in this project exists to stop. → §WW324
 
 ## Block G — The scenario — a case is a data file
 
@@ -29,9 +31,9 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- 📋 **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅) **the switch case drives the one path that rewrites a real setting** — Migrated inside the store comparison, so the promise that a run touches nothing is asserted where it is most likely to be broken. → §WW83
+- ⏳ **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, a publish carrying the three fields) **the switch case drives the one path that rewrites a real setting** — The case and the store bracket are written and wait on it: the adopter's engine comes from nuget.org. → §WW83
 - 📋 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅) **the environment sweep walks a submenu per sampled mode** — Migrated last, because it is the case that proves a fixture reaches every launch a case makes rather than only the first. → §WW85
-- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
+- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - 📋 **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅, a publish carrying both) **freewilly carries its own copy of the capture script and a layout probe** — Both migrate: the capture as a scenario, the probe as the geometry dump this framework already owns. → §WW87
 - 📋 **WW88** (deps: Block G ✅, WW76 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — The harness becomes scenarios and the runner becomes a package reference, which is the largest single deletion the adoption produces. → §WW88
 - 📋 **WW322** (deps: —) **the tray menu will not open on the guest: the icon is found in the overflow and the application key highlights nothing** — Two adopted cases fail on it, and WW85 migrates a third that walks the same submenu, so the sweep would arrive at a menu nothing has opened. → §WW322
@@ -172,6 +174,14 @@
   against a real session that reports everything present and renders nothing - the WW42
   desk - and stays met on an ordinary one. A rendering check verified only against a
   substitute has been verified against the one desk that was never the problem.
+
+## Done when — WW83
+
+- **The switch runs in the adopter, and the store beside it does not move**
+  claude-tray's run drives the profile entry and reads the mark back off the menu,
+  inside the fingerprint bracket around the suite. What says it landed is the pair: the
+  mark on the entry that was picked and off the one it came from, with every file under
+  the declared store unchanged and named where one is not.
 
 ## Non-goals
 

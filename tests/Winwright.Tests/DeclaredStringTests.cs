@@ -106,7 +106,11 @@ public sealed class DeclaredStringTests : IDisposable
         var refusal = Assert.Throws<ScenarioRefusedException>(
             () => StepDeclaration.Of("Text", "read", label: "a.key", notLabel: "another.key"));
 
-        Assert.Contains("a step answers one thing", refusal.Because, StringComparison.Ordinal);
+        // WW83 made it three ways rather than two, so the refusal names the fields to choose between
+        // rather than saying "these are two" of a family that now has a third member.
+        Assert.Contains("one declared string claimed different ways", refusal.Because, StringComparison.Ordinal);
+        Assert.Contains("'label'", refusal.Because, StringComparison.Ordinal);
+        Assert.Contains("'notLabel'", refusal.Because, StringComparison.Ordinal);
     }
 
     [Fact]

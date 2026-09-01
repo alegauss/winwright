@@ -293,6 +293,7 @@
 - ✅ **WW311** **a run that just booted the guest is measured on a desk still putting up its startup notifications** — The foreground is polled before the carry and the desk is named — clear, busy, asking or broken — and the last two refuse, naming the window, before the twenty minutes are spent.
 - ✅ **WW321** **a synthesised act whose locator matched nothing throws out of its own trace step, so a red case reports Broken** — An act against nothing has no element, so the type says so: the trace line reports the locator that matched nothing and the case fails as itself instead of breaking.
 - ✅ **WW315** **six of the eleven adopted cases have nothing to check on the guest, which holds no profiles and no transcripts** — A bench inside the tree gives the run two profiles and a transcript through the application's own discovery, and the six that had nothing to check now answer.
+- ✅ **WW83 (the engine half)** **the switch case drives the one path that rewrites a real setting** — The engine learned what an entry carrying its own state needs: a locator matching the front of a name, a reading of the sentence beside it, and a claim about the front of that.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

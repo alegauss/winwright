@@ -16,6 +16,7 @@ namespace Winwright.Locating;
 /// Button                                        the control type
 /// Button#saveButton                             both
 /// Button[name="Save as..."]                     the name
+/// MenuItem[nameStarts="Pessoal "]               the name, where the rest of it is decoration
 /// Pane[class=Chrome_WidgetWin_1]                the window class
 /// Button[pattern=Invoke]                        it must carry that pattern
 /// ComboBox|Slider|Edit                          any one of several control types
@@ -42,7 +43,7 @@ namespace Winwright.Locating;
 /// </remarks>
 public sealed record Locator
 {
-    private const string Keys = "name, class, pattern, order, index";
+    private const string Keys = "name, nameStarts, class, pattern, order, index";
 
     private Locator(string text, IReadOnlyList<LocatorStep> steps)
     {
@@ -108,6 +109,7 @@ public sealed record Locator
         var controlTypes = new List<string>();
         string? automationId = null;
         string? name = null;
+        string? nameStarts = null;
         string? className = null;
         string? pattern = null;
         int? index = null;
@@ -163,6 +165,21 @@ public sealed record Locator
                     Once(text, opened, name, "name");
                     name = value;
                     break;
+
+                // WW83. Refused empty, and here rather than at the match: a prefix of nothing is a
+                // prefix of every name there is, so the step would address everything while reading
+                // as though it had narrowed something — and the file says so on every machine.
+                case "nameStarts":
+                    Once(text, opened, nameStarts, "nameStarts");
+                    if (value.Length == 0)
+                        throw new LocatorSyntaxException(
+                            LocatorFault.PredicateMalformed,
+                            text,
+                            opened,
+                            "'nameStarts' is empty, and every name begins with nothing");
+
+                    nameStarts = value;
+                    break;
                 case "class":
                     Once(text, opened, className, "class");
                     className = value;
@@ -206,14 +223,29 @@ public sealed record Locator
             }
         }
 
-        if (controlTypes.Count == 0 && automationId is null && name is null && className is null
-            && pattern is null && index is null && order is null)
+        if (controlTypes.Count == 0 && automationId is null && name is null && nameStarts is null
+            && className is null && pattern is null && index is null && order is null)
         {
             throw new LocatorSyntaxException(
                 LocatorFault.StepConstrainsNothing, text, began, "a step that constrains nothing addresses everything, so it is refused");
         }
 
-        return new LocatorStep(controlTypes, automationId, name, className, pattern, index, order);
+        // WW83. Two claims about one string, and whichever the match applied first would be the one
+        // that meant anything: a name equal to the whole label is already a name beginning with it.
+        if (name is not null && nameStarts is not null)
+        {
+            throw new LocatorSyntaxException(
+                LocatorFault.KeyClaimedTwice,
+                text,
+                began,
+                "this step names 'name' and 'nameStarts', which are two claims about one string; "
+                + "a name equal to something already begins with it");
+        }
+
+        return new LocatorStep(controlTypes, automationId, name, className, pattern, index, order)
+        {
+            NameStarts = nameStarts,
+        };
     }
 
     /// <summary>

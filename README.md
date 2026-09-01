@@ -123,6 +123,7 @@ One grammar, written once, read the same way by every verb.
 Button                                   the control type
 Button#saveButton                        both
 Button[name="Save as..."]                the name
+MenuItem[nameStarts="Pessoal "]          the name, where the rest of it is decoration
 Pane[class=Chrome_WidgetWin_1]           the window class
 Button[pattern=Invoke]                   it must carry that pattern
 ComboBox|Slider|Edit                     any one of several control types
@@ -142,8 +143,15 @@ the moment it is written. claude-tray's settings sidebar is six bare `Border`s w
 peer, so the words are the only thing that addresses one — and the case that had to type them said
 so in a comment, that the label happens to be the same in all four languages.
 
-Both are refused at declaration where the locator will not parse with something in it, and a key
-that declares nothing is refused before the first act, naming the key and the file. What the trace
+`nameStarts` matches the **front** of a name, for the control that carries its own state in its text:
+a tray entry reading `Pessoal — used 41%  · active now` is a label, a reading and a suffix that comes
+and goes, so equality addresses it on no machine. A prefix and never a containment, so a profile
+called `one` cannot address the entry for `twenty-one`; a step naming `name` and `nameStarts` both is
+refused, because a name equal to something already begins with it, and an empty prefix is refused
+because every name begins with nothing.
+
+Both braces are refused at declaration where the locator will not parse with something in it, and a
+key that declares nothing is refused before the first act, naming the key and the file. What the trace
 records is the substituted locator: the words the run actually looked for are what a red is about,
 and the key is one line away in the case file.
 
@@ -315,12 +323,15 @@ is the only route that reaches one on this shell. Every other act asks a control
 and a step naming one against a `tray` is refused where it was written. `act` is one of `read`, `invoke`, `toggle`,
 `set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`. `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
-`toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `focused`, defaulting to `anything`, the one value the element
+`toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `description`, `focused`, defaulting to `anything`, the one value the element
 reports, in the order a reader looks at them. `selected` asks whether *this* element is chosen and
 `picked` asks which one a container chose — the reading every claim about a picker is about, and the
 only one that answers on a ComboBox offering no value. `name` is what a label says: a caption's words are in its
 name and in no pattern, so it is the only reading that answers for one — and a step may not read it
-where its own locator matched on the name, because then the reading is fixed before the act runs. `with` is required exactly where the act takes something and
+where its own locator matched on the name or on the front of it, because then the reading is fixed
+before the act runs. `description` is the sentence an element says *beside* its name, which is where
+an application puts what will not fit in a label — and, where a framework's own accessible object had
+to be replaced to carry that sentence, the state it stopped exposing as a pattern. `with` is required exactly where the act takes something and
 refused where it does not. `named` renames a step in the report; `meansIt` is the sentence a step
 needs before it may touch an entry the project declared destructive. `moves` is the other kind of
 expectation: that the reading ended up different, for the claim a case cannot name a value for. `answers`
@@ -356,7 +367,12 @@ to be kept in step with, which is what the derived expectation refuses everywher
 `label` is the eighth and is `expect` with the value derived rather than typed: it names the key
 whose declared string the reading should be, read out of the language the fixture says its window is
 in. `notLabel` is the ninth and is its mirror — the reading must **not** be that string, for the
-states an application has a word for and must not be showing.
+states an application has a word for and must not be showing. `beginsWithLabel` is the third of that
+family: the reading must **begin** with the declared string, for a state announced as a word in front
+of a sentence. A prefix and never a containment, and that is the announcing application's own rule
+rather than a convenience — the word goes in front precisely because the sentence behind it is free
+text that may contain either word, so a containment would report a switch as on because its
+explanation says what turning it on would do.
 
 `spoken` is the tenth and is about the tree under the locator rather than about any one reading: that
 everything under it which announces anything announces a **name** — never a font glyph, a template

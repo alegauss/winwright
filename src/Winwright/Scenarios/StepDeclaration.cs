@@ -318,6 +318,25 @@ public sealed record StepDeclaration
     public string? NotLabel { get; }
 
     /// <summary>
+    /// The key whose declared string this step's reading must begin with, or null where it makes
+    /// another claim.
+    /// <para>
+    /// WW83. The third of the same family, and the one an announcement needs. <see cref="Label"/>
+    /// compares the whole reading, which is right for a control that announces a label and nothing
+    /// else. An application that has to say a <em>state</em> as words writes the word in front of a
+    /// sentence — claude-tray's tray entries read <c>Checked · C:\Users\…\.claude · the tray only</c>
+    /// — so equality is false of a state that is correctly announced.
+    /// </para>
+    /// <para>
+    /// A prefix and never a containment, and that is the application's own rule rather than a
+    /// convenience: the state is written in front precisely because the sentence behind it is free
+    /// text that can hold either word — <em>turning it off puts the variable back</em> — so a
+    /// containment would report a switch as on because its explanation says the word "on".
+    /// </para>
+    /// </summary>
+    public string? BeginsWithLabel { get; private init; }
+
+    /// <summary>
     /// The earlier step this one claims its reading differs from, or null where it makes another
     /// claim.
     /// <para>
@@ -525,7 +544,8 @@ public sealed record StepDeclaration
         Tray is not null
         || Expected is not null || Moves || Answers || Sweeps is not null || Matches is not null || Discloses
         || SameAs is not null || Never is not null || Spoken
-        || Label is not null || NotLabel is not null || Unlike is not null || SameCountdownAs is not null
+        || Label is not null || NotLabel is not null || BeginsWithLabel is not null
+        || Unlike is not null || SameCountdownAs is not null
         || ExpectReported is not null
         || EachSpoken || OwnHeader;
 
@@ -560,6 +580,7 @@ public sealed record StepDeclaration
     /// <param name="spoken">That everything under the locator which says anything says a name.</param>
     /// <param name="label">The key whose declared string the reading should be.</param>
     /// <param name="notLabel">The key whose declared string the reading should not be.</param>
+    /// <param name="beginsWithLabel">The key whose declared string the reading should begin with.</param>
     /// <param name="unlike">The earlier step this one claims its reading differs from.</param>
     /// <param name="expectReported">
     /// The name whose value the application reports and the reading should be, declared in the
@@ -604,6 +625,7 @@ public sealed record StepDeclaration
         bool spoken = false,
         string? label = null,
         string? notLabel = null,
+        string? beginsWithLabel = null,
         string? unlike = null,
         string? sameCountdownAs = null,
         string? expectReported = null,
@@ -659,7 +681,7 @@ public sealed record StepDeclaration
         }
 
         if (named_tray is not null)
-            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, unlike, sameCountdownAs, expectReported, eachSpoken, ownHeader);
+            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, beginsWithLabel, unlike, sameCountdownAs, expectReported, eachSpoken, ownHeader);
 
         // WW263 and WW273. A locator with a brace in it has to parse with something in it as well as
         // with the placeholder, and both are facts about the file rather than about a run. Probed here
@@ -742,9 +764,14 @@ public sealed record StepDeclaration
         var declared = string.IsNullOrWhiteSpace(label) ? null : label.Trim();
         var undeclared = string.IsNullOrWhiteSpace(notLabel) ? null : notLabel.Trim();
 
+        // WW83, the third of the same family and folded in with the two above it: every rule below
+        // that asks whether a step claims anything has to know about it, or it names the wrong field.
+        var opening = string.IsNullOrWhiteSpace(beginsWithLabel) ? null : beginsWithLabel.Trim();
+
         var claims = wanted is not null || moves || answers || sweeping is not null || pattern is not null
             || discloses || back is not null || apart is not null || forbidden is not null || spoken
-            || declared is not null || undeclared is not null || ticking is not null || reportedly is not null
+            || declared is not null || undeclared is not null || opening is not null
+            || ticking is not null || reportedly is not null
             || eachSpoken || ownHeader;
 
         // WW229. Two claims and never both: 'expect' names what the reading becomes, which already
@@ -921,24 +948,34 @@ public sealed record StepDeclaration
             }
         }
 
-        if (declared is not null && undeclared is not null)
+        // WW83. Three ways of claiming one declared string — is it, is it not, does it begin with it —
+        // and at most one of them, named one by one so the refusal says which field to delete.
+        var strings = new List<string>();
+        if (declared is not null)
+            strings.Add("'label'");
+        if (undeclared is not null)
+            strings.Add("'notLabel'");
+        if (opening is not null)
+            strings.Add("'beginsWithLabel'");
+
+        if (strings.Count > 1)
         {
             throw new ScenarioRefusedException(
                 subject,
-                $"it claims the reading is '{declared}' and also that it is not '{undeclared}'; a step "
-                    + "answers one thing, and these are two");
+                $"it carries {string.Join(" and ", strings)}; those are one declared string claimed "
+                    + "different ways, so name the one this step means");
         }
 
         // One claim per step, as everywhere else. 'expect' names the value and this names the key the
         // value comes from, and a step holding both owes two assertion results.
-        if ((declared is not null || undeclared is not null)
+        if (strings.Count == 1
             && (wanted is not null || moves || answers || sweeping is not null || pattern is not null
                 || discloses || back is not null || forbidden is not null || spoken))
         {
             throw new ScenarioRefusedException(
                 subject,
-                $"it names the '{declared ?? undeclared}' string and also makes another claim; the "
-                    + "key is where the value comes from rather than a second thing to check");
+                $"it names the '{declared ?? undeclared ?? opening}' string and also makes another "
+                    + "claim; the key is where the value comes from rather than a second thing to check");
         }
 
         if (ownHeader)
@@ -1162,7 +1199,10 @@ public sealed record StepDeclaration
             eachSpoken,
             ownHeader,
             matching,
-            pointing);
+            pointing)
+        {
+            BeginsWithLabel = opening,
+        };
     }
 
     /// <summary>
@@ -1198,6 +1238,7 @@ public sealed record StepDeclaration
         bool spoken,
         string? label,
         string? notLabel,
+        string? beginsWithLabel,
         string? unlike,
         string? sameCountdownAs,
         string? expectReported,
@@ -1233,6 +1274,7 @@ public sealed record StepDeclaration
             ("expectReported", expectReported is not null),
             ("label", label is not null),
             ("notLabel", notLabel is not null),
+            ("beginsWithLabel", beginsWithLabel is not null),
             ("never", never is not null),
             ("covers", covers is not null),
             ("spoken", spoken),

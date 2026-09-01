@@ -213,9 +213,19 @@ public sealed class ProjectDeclaration
     /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
     public string SourceRoot => Require(sourceRoot, "sourceRoot", "checking whether the binary is stale");
 
-    /// <summary>Where image fingerprints are kept between runs.</summary>
+    /// <summary>
+    /// The region of the machine a run must leave exactly as it found it — where an application keeps
+    /// the settings and caches it owns.
+    /// <para>
+    /// WW83 corrected the sentence this used to carry, which said image fingerprints and a capture:
+    /// nothing has ever read it for that. <see cref="Verdicts.Preamble" /> is its one reader, and what
+    /// it does with it is take a fingerprint before the run and again after, so a run that drove a
+    /// path which writes a real setting says so instead of finishing quietly.
+    /// </para>
+    /// </summary>
     /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
-    public string FingerprintStore => Require(fingerprintStore, "fingerprintStore", "comparing a capture with the last one");
+    public string FingerprintStore =>
+        Require(fingerprintStore, "fingerprintStore", "reading whether a run left the machine as it found it");
 
     /// <summary>Whether the project declared a value for that key at all, without refusing.</summary>
     public bool Declares(string key) => key switch

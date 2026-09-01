@@ -72,6 +72,7 @@ internal static class Surfaces
     [
         new("AbsencesPane", Carrying.AShape, "absences"),
         new("Animation", Carrying.AShape, "animate"),
+        new("AnnouncesPane", Carrying.AShape, "announces"),
         new("Backdrop", Carrying.AShape, "backdrop"),
         new("BlankPane", Carrying.AShape, "blank"),
         new("Cloak", Carrying.AShape, "cloak"),
