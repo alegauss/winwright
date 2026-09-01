@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Winwright" Version="0.1.0-alpha.4" />
+    <PackageReference Include="Winwright" Version="0.1.0-alpha.5" />
   </ItemGroup>
 
 </Project>

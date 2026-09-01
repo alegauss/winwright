@@ -17,10 +17,10 @@ the output rather than left out of it.
 
 ```xml
 <!-- In the test project that drives the application. -->
-<PackageReference Include="Winwright" Version="0.1.0-alpha.4" />
+<PackageReference Include="Winwright" Version="0.1.0-alpha.5" />
 
 <!-- In the application under test, only if you want the readings it can only take from inside. -->
-<PackageReference Include="Winwright.InApp" Version="0.1.0-alpha.4" />
+<PackageReference Include="Winwright.InApp" Version="0.1.0-alpha.5" />
 ```
 
 `Winwright.InApp` is optional, and deliberately so: every reading and every pattern act runs against
