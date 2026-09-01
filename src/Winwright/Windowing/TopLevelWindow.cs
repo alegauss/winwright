@@ -35,6 +35,12 @@ public readonly record struct WindowBounds(int Left, int Top, int Right, int Bot
 /// <param name="Cloak">Who took it off the screen, if anybody. Carried separately from
 /// <paramref name="Visible"/> because the two disagree: a cloaked window keeps every style bit
 /// that says it is visible.</param>
+/// <param name="Popup">
+/// Whether a framework drew it as a popup — WS_POPUP with no caption. WW87: <paramref name="Owner"/>
+/// answers a toast and a menu and does not answer a drop-down that nothing owns, which is what a
+/// context menu shown with no window behind it is. False where nobody read the style bits, which is
+/// every window composed by hand in a test.
+/// </param>
 public sealed record TopLevelWindow(
     nint Handle,
     int Pid,
@@ -43,7 +49,8 @@ public sealed record TopLevelWindow(
     WindowBounds Bounds,
     bool Visible,
     nint Owner,
-    Cloak Cloak = Cloak.NotCloaked)
+    Cloak Cloak = Cloak.NotCloaked,
+    bool Popup = false)
 {
     /// <summary>Whether something else owns it, which is exactly what the launcher's handle skips.</summary>
     public bool IsOwned => Owner != 0;

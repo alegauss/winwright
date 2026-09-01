@@ -67,7 +67,8 @@ public static class TopLevelWindows
                     bounds,
                     visible,
                     Win32.GetWindow(window, Win32.GwOwner),
-                    cloak));
+                    cloak,
+                    Win32.IsPopup(window)));
 
                 return true;
             },

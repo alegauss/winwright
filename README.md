@@ -795,7 +795,7 @@ A window's own glass is the other way a copy stops being a picture of it. `Glass
 compositor which system backdrop the window opted into — mica, acrylic and tabbed all composite what
 is behind the window into it — and a receipt handed that reading refuses too. Z-order reasoning
 cannot answer for this: the intruder is not in front of the window, it is showing through it. A
-menu, a balloon or an owned popup is exempt, because those carry a backdrop by design and the copy
+menu, a balloon or a popup is exempt, because those carry a backdrop by design and the copy
 route exists for them — and so is an off-screen render, which draws the visual tree with the
 compositor not involved and so carries nothing from behind the window at all. It is the screen copy
 that a backdrop reaches.

@@ -31,7 +31,11 @@ public enum OutOfReach
     /// <summary>A tooltip or a notification balloon, the same way.</summary>
     Balloon,
 
-    /// <summary>A popup owned by another window: a flyout, a combo box drop-down, a context surface.</summary>
+    /// <summary>
+    /// A popup: a flyout, a combo box drop-down, a context surface. Its own top-level window,
+    /// drawn by a framework rather than laid out in a tree the application can hand over — whether
+    /// or not another window owns it (WW87).
+    /// </summary>
     OwnedPopup,
 }
 
@@ -46,9 +50,9 @@ public enum OutOfReach
 /// </para>
 /// <para>
 /// The one case a render cannot reach is a surface that is its own top-level window and in no
-/// tree the application can hand over — a context menu, a balloon, an owned popup. A second window
-/// of the application is <em>not</em> one of those: it has a visual tree of its own, so it is
-/// rendered like the first one and not photographed.
+/// tree the application can hand over — a context menu, a balloon, a popup a framework drew. A
+/// second window of the application is <em>not</em> one of those: it has a visual tree of its own,
+/// so it is rendered like the first one and not photographed.
 /// </para>
 /// </summary>
 public sealed record CaptureRoute
@@ -117,7 +121,12 @@ public sealed record CaptureRoute
         if (IsBalloon(window.ClassName))
             return Copy(OutOfReach.Balloon, window);
 
-        if (window.IsOwned)
+        // WW87. Owned, or drawn as a popup and owned by nothing. The second half is what freewilly's
+        // menu is: a WinForms drop-down shown with no form behind it, so GW_OWNER answers zero and
+        // the ownership test alone called it a window of the application and routed it to a render
+        // that has no tree to draw. Both arms are the same surface — a framework put it up, and
+        // nothing the application can hand over holds it.
+        if (window.IsOwned || window.Popup)
             return Copy(OutOfReach.OwnedPopup, window);
 
         // A window of the application, which has a visual tree of its own. The render reaches it by
@@ -155,7 +164,7 @@ public sealed record CaptureRoute
         {
             OutOfReach.Menu => "a menu",
             OutOfReach.Balloon => "a tooltip or balloon",
-            _ => "a popup owned by another window",
+            _ => window.IsOwned ? "a popup owned by another window" : "a popup a framework drew",
         };
 
         return new CaptureRoute(

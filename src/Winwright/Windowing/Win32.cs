@@ -259,6 +259,52 @@ internal static class Win32
     /// <summary>GW_OWNER: the window that owns this one, which is what a toast or a menu has.</summary>
     internal const uint GwOwner = 4;
 
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "GetWindowLongPtrW")]
+    internal static extern nint GetWindowLongPtrW(nint window, int index);
+
+    /// <summary>GWL_STYLE: the style bits, which is where WS_POPUP and WS_CAPTION are.</summary>
+    internal const int WindowStyle = -16;
+
+    /// <summary>WS_POPUP: the window is a popup rather than something with a frame of its own.</summary>
+    internal const long StylePopup = 0x8000_0000L;
+
+    /// <summary>
+    /// WS_CAPTION: it has a title bar, which is the thing a popup does not have. Two bits and not
+    /// one — WS_BORDER and WS_DLGFRAME together — which is why the test below is against the whole
+    /// mask rather than against any bit of it.
+    /// </summary>
+    internal const long StyleCaption = 0x00C0_0000L;
+
+    /// <summary>
+    /// Whether a window is drawn as a popup: WS_POPUP, and not a title bar.
+    /// <para>
+    /// WW87. The ownership question answers a menu and a toast and does not answer a drop-down that
+    /// nothing owns. Measured in freewilly, whose menu verb shows a context menu with no window
+    /// behind it: the menu came back <c>WindowsForms10.Window.20808.app.0.5c39d4_r3_ad1</c>, owner 0,
+    /// style 0x96000000 — WS_POPUP and no WS_CAPTION. The class name carries a per-thread number in
+    /// it, so it is not something a rule can match on; the style bits are what the framework actually
+    /// set.
+    /// </para>
+    /// <para>
+    /// WS_EX_TOOLWINDOW would have been the tighter rule and is not one: measured on the same menu it
+    /// is clear, and set on the SysShadow window drawn behind it. So the caption is the discriminator
+    /// — a window with a title bar is a window somebody sized and moved, and a window without one
+    /// that also declares itself a popup is a surface a framework put up.
+    /// </para>
+    /// <para>
+    /// The test is <c>!= StyleCaption</c> and not <c>== 0</c>, which is a measurement rather than a
+    /// nicety: the first draft asked whether any caption bit was set, and a real <c>#32768</c> menu
+    /// on the guest carries WS_BORDER without WS_DLGFRAME. So the one window the whole route exists
+    /// for read as a window with a title bar, and the suite said so.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The window to ask about.</param>
+    internal static bool IsPopup(nint window)
+    {
+        var style = (long)GetWindowLongPtrW(window, WindowStyle);
+        return (style & StylePopup) != 0 && (style & StyleCaption) != StyleCaption;
+    }
+
     internal static string TextOf(nint window)
     {
         var text = new StringBuilder(512);

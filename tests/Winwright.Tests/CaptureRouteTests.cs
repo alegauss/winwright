@@ -131,6 +131,55 @@ public sealed class CaptureRouteTests
         Assert.Contains("is a popup owned by another window", route.Sentence());
     }
 
+    /// <summary>
+    /// WW87. The fourth, and the one ownership could not answer. freewilly's menu verb shows a
+    /// WinForms drop-down with no form behind it, so GW_OWNER answers zero — and the class name it
+    /// carries has a per-thread number in it, so nothing can match on that either. Before this it
+    /// routed to a render, and a render of a drop-down has no tree to draw.
+    /// </summary>
+    [Fact]
+    public void A_drop_down_that_nothing_owns_is_a_popup_too()
+    {
+        var menu = Window(0x3000, "WindowsForms10.Window.20808.app.0.5c39d4_r3_ad1", owner: 0, title: "")
+            with { Popup = true };
+
+        var route = CaptureRoute.For(menu);
+
+        Assert.False(route.Renders, route.Sentence());
+        Assert.Equal(OutOfReach.OwnedPopup, route.Reach);
+
+        // Not "owned by another window", which is the half of the arm this one is not: a reader sent
+        // looking for the window that owns it would find nothing and conclude the reading was wrong.
+        Assert.Contains("is a popup a framework drew", route.Sentence());
+        Assert.DoesNotContain("owned by", route.Sentence());
+    }
+
+    /// <summary>WW87, and the same agreement the two overloads owe every other class.</summary>
+    [Fact]
+    public void The_two_agree_about_a_drop_down_as_well()
+    {
+        var menu = Window(0x3000, "WindowsForms10.Window.20808.app.0", owner: 0, title: "") with { Popup = true };
+
+        var alone = CaptureRoute.For(menu);
+        var against = CaptureRoute.For(menu, Window(0x1000));
+
+        Assert.Equal(against.Taken, alone.Taken);
+        Assert.Equal(against.Reach, alone.Reach);
+        Assert.Equal(against.Because, alone.Because);
+    }
+
+    /// <summary>
+    /// WW87. A window with a title bar is a window somebody sized and moved, whatever else its style
+    /// bits say — so the caption is what keeps the popup rule off the application's own frames.
+    /// </summary>
+    [Fact]
+    public void A_window_nobody_read_the_style_bits_of_is_not_a_popup()
+    {
+        var route = CaptureRoute.For(Window(0x2000, title: "Settings"));
+
+        Assert.True(route.Renders, route.Sentence());
+    }
+
     [Fact]
     public void A_menu_is_named_a_menu_and_never_a_popup_although_it_is_owned()
     {
@@ -222,6 +271,12 @@ public sealed class CaptureRouteTests
 
             Assert.False(route.Renders, route.Sentence());
             Assert.Equal(OutOfReach.Menu, route.Reach);
+
+            // WW87, and measured here rather than composed: the style bits an enumeration reads are
+            // what routes a drop-down that nothing owns, and the pair is what says the rule discriminates
+            // — the menu on this desk is a popup and the frame under it is not.
+            Assert.True(menu.Popup, menu.ToString());
+            Assert.False(main.Popup, main.ToString());
         }
         finally
         {
