@@ -199,29 +199,30 @@ runner config exists to hold in place.
 ### §WW322 the icon that answers and the menu that does not
 
 Three adopted cases fail on one line: `hidden tray icon '…' showed no menu: nothing was
-highlighted within 6005 ms of the application key`. Every part of that but the last
+highlighted within 6009 ms of the application key`. Every part of that but the last
 clause is the engine working — the icon was found, in the overflow, with its rectangle.
 
-Two of the three candidates are refuted, and neither cost a run at the desk.
+All three candidates are settled, and only the last one cost a run.
 
 A tray still resolving a profile does not explain it. `BuildMenu` runs in the
 constructor, unconditionally, with ten entries, before any sign-in state is known, and
-nothing cancels `Opening`. The tooltip reading *connecting* is true and beside the
-point.
+nothing cancels `Opening`.
 
 Nor does the guest. WW332 gave the fixture icon a real popup — the shell's own kind,
 tracked from the icon's window on the tray callback — and the verb opens it. The route
-is sound on this desk, so an icon whose menu will not open is not a statement about the
-shell.
+is sound on this desk.
 
-What is left is the adopter's icon. Its owner is a WinForms `NotifyIcon`, and what a
-`ContextMenuStrip` does with the keyboard request is not what a tracked popup does — the
-framework decides which notification it acts on, and the case never sees the difference.
+Nor is it the delivery, which was the reading nobody had. `OpenMenu` now names what it
+pressed into, and it pressed into the right place: the foreground was the overflow
+flyout, `Janela de estouro da bandeja do sistema`, and the focus was the adopter's own
+icon by its full name. The key arrived and no menu came.
 
-The reading that separates them is written and not taken. `OpenMenu` now names the
-foreground and the focused element as it presses, so the next adopted run says whether
-the key reached the icon. It needs the engine carrying it, which the adopter has not
-restored.
+So the application did not draw one. Its icon is a WinForms `NotifyIcon` carrying a
+`ContextMenuStrip` and one `MouseClick` handler filtered to the left button — nothing
+there answers a request arriving from the keyboard rather than the mouse.
+
+The repair is the adopter's. Which notification it has to answer is the one thing still
+unread.
 
 ### §WW330 The flyout nobody closed
 
