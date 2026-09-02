@@ -259,6 +259,126 @@ public static class CaseRun
             ? System.IO.Path.Combine(project.Captures, Filed(declared.Name))
             : null;
 
+        // WW343. Every tray menu this case opened, so the desk can be given back where the case ends
+        // rather than where the step does. A menu is opened by one step and read by the next, and a
+        // restore at the step would set the foreground back while the menu was standing — which
+        // closes a drop-down, so the tidying would dismiss the answer the case came for.
+        var opened = new List<TrayMenu>();
+
+        try
+        {
+            Stepping(
+                running, root, project, budget, pictures, trace, results, broke, claims,
+                pointedAt, recalled, speaking, opened, out stopped);
+        }
+        finally
+        {
+            // In a finally for the reason the step's own flyout close is in one: the promise is
+            // about the desk and not about how the case ended. A case that threw took the same
+            // foreground as one that passed.
+            HandedBack(opened, project, trace);
+        }
+
+        var notReached = new List<StepDeclaration>();
+        if (stopped >= 0)
+            for (var index = stopped + 1; index < running.Count; index++)
+                notReached.Add(running[index]);
+
+        return new CaseResult(
+            declared,
+            RunVerdict.Over(Walked(results, claims, members.Count), broke),
+            new ReadOnlyCollection<TraceStep>(trace),
+            new ReadOnlyCollection<StepDeclaration>(notReached),
+            lent,
+            members.Count);
+    }
+
+    /// <summary>
+    /// Give back what the case took from the desk. WW343.
+    /// <para>
+    /// In reverse, because each menu recorded who held the foreground before <em>it</em> ran: putting
+    /// the first one back last is what leaves the desk where the case found it rather than where its
+    /// second-to-last act did.
+    /// </para>
+    /// <para>
+    /// Best effort, and the failure is not silent. WW330's rule is that a desk this run could not
+    /// work is not worth failing a case that has already read what it came for — and the session that
+    /// rule came out of was lost to a leak nobody could see, so a restore that did not hold is
+    /// recorded as a hole in the trace. A restore that held is not: a tidy that worked is not news.
+    /// </para>
+    /// </summary>
+    /// <param name="opened">The menus this case opened, in the order it opened them.</param>
+    /// <param name="project">The declaration, for how long shutting the flyout may take.</param>
+    /// <param name="trace">Where a restore that did not hold is recorded.</param>
+    private static void HandedBack(
+        List<TrayMenu> opened, ProjectDeclaration project, List<TraceStep> trace)
+    {
+        if (opened.Count == 0)
+            return;
+
+        var settleMs = project.Timeouts.For("resolve");
+        var pollMs = project.Timeouts.For("poll");
+
+        for (var index = opened.Count - 1; index >= 0; index--)
+        {
+            var state = opened[index].PutBack(settleMs, pollMs);
+            if (state.Held)
+                continue;
+
+            trace.Add(new TraceStep
+            {
+                Step = trace.Count + 1,
+                Verb = "put the desk back",
+
+                // The taskbar and not a locator, because that is what was acted on and this step
+                // had none: a trace row with an empty subject reads as a step whose locator was
+                // lost rather than as one that never had one.
+                Locator = "the taskbar",
+                Verdict = StepVerdict.Unchecked,
+                Detail = state.Because ?? "the desk would not take it back and did not say why",
+            });
+        }
+    }
+
+    /// <summary>
+    /// Run the case's steps, stopping at the first one whose act was never sent or which threw.
+    /// <para>
+    /// Its own method since WW343, which put the loop inside a <c>finally</c>: a body this long
+    /// under a <c>try</c> is one where the reader has to hold both the stepping and the tidying at
+    /// once, and the tidying is four lines that must not be read past.
+    /// </para>
+    /// </summary>
+    /// <param name="running">The steps as they will actually be run.</param>
+    /// <param name="root">The case's own window.</param>
+    /// <param name="project">The declaration.</param>
+    /// <param name="budget">How much of a diagnosis a failure may print.</param>
+    /// <param name="pictures">This case's own folder for pictures, or null.</param>
+    /// <param name="trace">Where each step is recorded.</param>
+    /// <param name="results">Where each claim's result is added.</param>
+    /// <param name="broke">Where a step that threw is recorded.</param>
+    /// <param name="claims">Which claim each result belongs to.</param>
+    /// <param name="pointedAt">Which steps a later one reads again.</param>
+    /// <param name="recalled">What those steps read.</param>
+    /// <param name="speaking">What language the window is in.</param>
+    /// <param name="opened">Where a tray menu this case opened is kept, for the restore.</param>
+    /// <param name="stopped">The index of the step that stopped the case, or -1.</param>
+    private static void Stepping(
+        List<StepDeclaration> running,
+        AutomationElement root,
+        ProjectDeclaration project,
+        int budget,
+        string? pictures,
+        List<TraceStep> trace,
+        List<AssertionResult> results,
+        List<HarnessError> broke,
+        List<string> claims,
+        HashSet<string> pointedAt,
+        Dictionary<string, string?> recalled,
+        System.Globalization.CultureInfo? speaking,
+        List<TrayMenu> opened,
+        out int stopped)
+    {
+        stopped = -1;
         for (var index = 0; index < running.Count; index++)
         {
             var step = running[index];
@@ -270,7 +390,9 @@ public static class CaseRun
             // every one of them may still assume a locator.
             if (step.Tray is { } icon)
             {
-                Trayed(step, icon, project, trace, results);
+                if (Trayed(step, icon, project, trace, results) is { } menu)
+                    opened.Add(menu);
+
                 while (claims.Count < results.Count)
                     claims.Add(step.Claimed);
 
@@ -318,19 +440,6 @@ public static class CaseRun
                 break;
             }
         }
-
-        var notReached = new List<StepDeclaration>();
-        if (stopped >= 0)
-            for (var index = stopped + 1; index < running.Count; index++)
-                notReached.Add(running[index]);
-
-        return new CaseResult(
-            declared,
-            RunVerdict.Over(Walked(results, claims, members.Count), broke),
-            new ReadOnlyCollection<TraceStep>(trace),
-            new ReadOnlyCollection<StepDeclaration>(notReached),
-            lent,
-            members.Count);
     }
 
     /// <summary>
@@ -551,7 +660,11 @@ public static class CaseRun
     /// it here is exactly how it would come back.
     /// </para>
     /// </summary>
-    private static void Trayed(
+    /// <returns>
+    /// The menu this step opened, for the case to give the desk back with once every step that reads
+    /// it has run, or null where it opened none. WW343.
+    /// </returns>
+    private static TrayMenu? Trayed(
         StepDeclaration step,
         string icon,
         ProjectDeclaration project,
@@ -580,13 +693,18 @@ public static class CaseRun
 
                 trace.Add(menu.AsTraceStep() with { Step = trace.Count + 1, Asserted = step.Name });
                 results.Add(menu.AsAssertion(step.Name).At(trace.Count));
-                return;
+
+                // WW343. Handed up only where a menu is actually standing. Every arm that opened
+                // none has already put the desk back itself — the act can, there, because there is
+                // nothing left to lose — and handing those up would put it back twice.
+                return menu.Opened ? menu : null;
             }
 
             var search = NotificationArea.Find(icon, openingTheOverflow: true, settleMs, pollMs);
 
             trace.Add(search.AsTraceStep(step.Name) with { Step = trace.Count + 1 });
             results.Add(search.AsAssertion(step.Name).At(trace.Count));
+            return null;
         }
         finally
         {
@@ -594,6 +712,12 @@ public static class CaseRun
             // a flyout that was already standing belongs to whoever opened it, and shutting that one
             // would answer their next look with a closed desk. In a finally because the promise is
             // about the desk and not about how the step ended.
+            //
+            // WW343 asked whether this dismisses a menu the step just opened — the chevron takes an
+            // invoke, the shell shuts the flyout, and a drop-down standing over it might well go
+            // with it. Measured, by taking the line out and watching: the case below reads both
+            // entries of the menu on the step after this one either way. So the flyout close stays
+            // here where it belongs, and it is only the foreground that had nowhere to go.
             if (!stood && NotificationArea.Overflow() is not null)
                 NotificationArea.CloseOverflow(settleMs, pollMs);
         }

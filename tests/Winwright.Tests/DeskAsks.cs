@@ -366,6 +366,14 @@ internal static class DeskAsks
             "the intruder is placed well clear, and the case returns where the reading came back "
                 + "covered anyway — a desk holding a window over the fixture has nothing clear to "
                 + "carry, and the receipt would refuse rather than answer"),
+        new("NotificationAreaTests.A_case_reads_the_menu_a_step_opened_and_the_case_hands_the_desk_back",
+            Unaffected.Guarded,
+            "WW343. The same guard as the case below and for the same reason: the foreground is read "
+                + "to say the case did not leave the taskbar holding it, and the case returns before "
+                + "that assertion where the taskbar was already holding it before the run began. "
+                + "What the engine could not reach is excused a floor up — a case whose verdict "
+                + "carries any hole stands down rather than asserting about a shell that would not "
+                + "put the menu up"),
         new("NotificationAreaTests.A_menu_that_never_came_leaves_the_taskbar_as_it_found_it",
             Unaffected.Guarded,
             "WW330. The foreground is read to say the act did not leave the taskbar holding it, and "

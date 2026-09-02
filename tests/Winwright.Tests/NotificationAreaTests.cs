@@ -659,6 +659,120 @@ public sealed class NotificationAreaTests : IDisposable
     }
 
     [Fact]
+    public void A_case_reads_the_menu_a_step_opened_and_the_case_hands_the_desk_back()
+    {
+        // WW343, and it is the shape of every adopter's tray case: one step opens the menu and the
+        // next reads it. Both halves are asserted here because they pull against each other — a
+        // restore at the step would put the foreground back while the menu stood, and a drop-down
+        // goes the moment anything else takes the focus, so the tidying would dismiss the answer the
+        // case came for. So: the second step still finds the menu, and the desk is given back after.
+        //
+        // The drop-down and not the Win32 kind, for WW322's reason: it is what freewilly and
+        // claude-tray both put up, and it is the one that leaves the desk dirty because it does not
+        // block the shell's thread while it stands.
+        using var answering = BusyDesk.Built(
+            () => TrayIconFixture.Add("winwright scenario menu", TrayMenuKind.DropDown));
+
+        if (answering is null || BusyDesk.Excused(NotificationArea.Reachable()))
+            return;
+
+        // Shut first for the reason the case above shuts first: what the run leaves has to be the
+        // run's, and a flyout somebody else left standing belongs to them.
+        if (BusyDesk.Excused(NotificationArea.CloseOverflow().AsAssertion("the overflow starts shut")))
+            return;
+
+        var before = Foreground.Now();
+        var taskbar = NotificationArea.Tray()?.Current.NativeWindowHandle ?? 0;
+
+        var declared = Winwright.Scenarios.CaseDeclaration.Of(
+            "the tray menu is opened and read",
+            Winwright.Scenarios.StepDeclaration.Of(
+                null, "open tray menu", tray: answering.Tip, named: "the icon shows its menu"),
+            // Button and not MenuItem, which was measured rather than read off the fixture's source.
+            // `ToolStripDropDown.Items.Add(string)` builds a ToolStripButton — `ToolStripDropDownMenu`
+            // is the subclass that builds menu items — and the tree an automation client sees is
+            // "[] ControlType.Button 'winwright open', ControlType.Button 'winwright quit'" under a
+            // Menu with no name. A locator naming MenuItem here matched nothing for three runs, and
+            // said only that nothing answered.
+            //
+            // Named the way the engine allows, too: a locator that matched on the name fixes the
+            // reading before the act runs, so claiming that name back is a step that cannot fail.
+            // What is claimed instead is that the entry announces something — which is false in the
+            // one way this case is about, a menu that went away between the step that opened it and
+            // the step that reads it.
+            // Ordered, because the menu has two entries and the engine refuses to guess between
+            // them — which is the right refusal and is how this case learned the menu was standing
+            // with both of them in it.
+            Winwright.Scenarios.StepDeclaration.Of(
+                "Menu > Button[order=top]", "read", reads: "name", answers: true, named: "the first entry"));
+
+        Winwright.Scenarios.CaseResult run;
+        try
+        {
+            run = Winwright.Scenarios.CaseRun.Of(
+                declared, AutomationElement.RootElement, TrayProject());
+        }
+        finally
+        {
+            // The menu is the case's to dismiss and the engine's restore does not close it: this
+            // drop-down has AutoClose off, so nothing but this line takes it away.
+            answering.DismissMenu();
+        }
+
+        // A desk that would not put up the menu at all is a hole and not a red, which is what the
+        // engine already answers — so the case stands down rather than asserting about the shell.
+        if (run.Verdict.Unchecked.Count > 0)
+            return;
+
+        // The step after the one that opened it read it. Before WW343 there was nowhere for the
+        // restore to go that did not break this line.
+        // The whole reading and not the failures alone. A case can end unpassed with nothing in that
+        // list — a step that threw is a harness error and not an assertion — and a red carrying only
+        // an empty string sends its reader to a debugger to find out what happened, which is a run
+        // of this suite spent twice.
+        Assert.True(
+            run.Verdict.Outcome == Winwright.Verdicts.RunOutcome.Passed,
+            string.Join(
+                Environment.NewLine,
+                run.Verdict.Failures.Select(one => $"  failed    {one}")
+                    .Concat(run.Verdict.Broke.Select(one => $"  threw     {one}"))
+                    .Concat(run.Verdict.Results.Select(one => $"  result    {one}"))
+                    .Prepend($"  outcome   {run.Verdict.Outcome}")));
+
+        // And the desk is not the taskbar's. Asserted this way round for WW330's reason: putting a
+        // foreground back is best effort, and what was measured is not that one window lost the
+        // desk but that the shell kept it for every run afterwards.
+        if (taskbar == 0 || before.Window == taskbar)
+            return;
+
+        Assert.True(
+            Foreground.Now().Window != taskbar,
+            $"the case left the taskbar holding the foreground: {Foreground.Now()}");
+    }
+
+    /// <summary>
+    /// A project for the case above: this run's own executable, and waits short enough that a menu
+    /// that never came does not cost the class a minute. WW343.
+    /// </summary>
+    private static Winwright.Projects.ProjectDeclaration TrayProject()
+    {
+        var into = Path.Combine(Path.GetTempPath(), $"winwright-ww343-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(into);
+
+        var path = Path.Combine(into, Winwright.Projects.ProjectDeclaration.FileName);
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Environment.ProcessPath)}},
+              "timeouts": { "resolve": 4000, "act": 4000, "poll": 40 }
+            }
+            """);
+
+        return Winwright.Projects.ProjectDeclaration.Load(path);
+    }
+
+    [Fact]
     public void An_absence_says_how_much_was_there_to_look_through()
     {
         // WW223. An empty flyout and a flyout holding four of the shell's own ended this sentence
@@ -839,3 +953,4 @@ public sealed class NotificationAreaTests : IDisposable
         Assert.Contains(" at ", found.ToString());
     }
 }
+

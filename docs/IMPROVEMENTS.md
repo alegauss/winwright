@@ -344,27 +344,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW343 the desk a scenario cannot hand back yet
-
-WW330 closed the arm it was filed for: where no menu opened, the act shuts the flyout it
-opened and gives the desktop back, and a caller that did get a menu calls `PutBack` once
-it has read one. The suite's two menu cases do exactly that.
-
-A scenario cannot. `CaseRun.Trayed` already shuts the flyout in a finally - WW258 put it
-there, and it is right - but the focus is the other half and it has no such place to go.
-Calling `PutBack` in that finally would set the foreground back while the menu is
-standing, and a drop-down closes the moment anything else takes the focus. So the step
-that opens a menu would dismiss it before the step that reads it ran, which is the case
-failing rather than the desk being tidied.
-
-The reading has to live longer than the step. What opens a tray menu is one step and
-what reads it is the next, so the restore belongs where the case ends - beside the
-fixture teardown, which is already the place a case gives back what it took.
-
-This is the adopters' own path. claude-tray's menu case is `open tray menu` and then two
-reads of `Menu > MenuItem`, and it is a run of exactly that shape whose leftover chevron
-refused the next run in the guest.
-
 ### §WW345 the probe nothing can run
 
 `Read-GuestDesk` writes a here-string into the guest, runs it there, and reads one line
@@ -387,5 +366,29 @@ against a desk this suite arranged on the host.
 
 The first is smaller and answers less; the second is what the four states are actually
 about.
+
+### §WW356 the menu that is not made of menu items
+
+`TrayIconFixture.Built` makes a `ToolStripDropDown` and calls `Items.Add(string)` twice.
+That builds a `ToolStripButton`, because `CreateDefaultItem` is `ToolStrip`'s -
+`ToolStripDropDownMenu` is the subclass that builds menu items - and an automation
+client sees `ControlType.Button 'winwright open'` under a Menu with no name.
+
+Every case in this suite that reads the drop-down therefore names Button. The adopters
+name MenuItem: the design of WW343 quotes claude-tray's own case as `open tray menu` and
+then two reads of `Menu > MenuItem`, and freewilly's is the same. So the fixture
+reproduces the container and not the entries, and a locator proven here is a locator
+that would find nothing there.
+
+It cost four guest runs to learn, which is the argument. A locator naming a control type
+the tree does not carry fails as "nothing answered in 19 polls" - indistinguishable from
+the menu having gone away, which is what WW343 was about and what three runs were spent
+blaming.
+
+`ToolStripDropDownMenu` is a one-word change and it is not obviously free: WW322's and
+WW338's cases read this menu as "a menu with no name", WW339's split turns on which
+reading answers, and a different window class may answer differently. So the change is
+small and what has to be measured after it is the four cases that already read this
+fixture.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
