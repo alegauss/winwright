@@ -334,6 +334,7 @@
 - ✅ **WW343** **a case that opens a tray menu leaves the desktop on the shell, because the step cannot give it back** — the case gives the desk back where it ends: the menu step hands its reading up, and a restore that did not hold is a hole rather than a silent leak.
 - ✅ **WW345** **the probe that refuses a guest run is guest-side PowerShell and nothing runs any of its four answers** — the probe is a file with the classification as a function, and every answer is run against looks a case made up rather than read as text.
 - ✅ **WW356** **the fixture's tray menu is built of buttons, so the locator an adopter writes against a real menu finds nothing here** — The entries are menu items now, so a case here names MenuItem as the adopters do and the container still reads unnamed (design recorded in `tests/Winwright.Tests/TrayIconFixture.cs`).
+- ✅ **WW357** **the probe's twelve looks at a live foreground are run by nothing, so a look built wrong classifies perfectly** — The polling is a function taking its count and pause, and two cases run it against a desk this suite arranged (design recorded in `tools/desk-probe.ps1`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

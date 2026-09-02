@@ -334,29 +334,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW357 the looks nothing arranges
-
-WW345 split the probe in two. `Read-DeskState` decides what a desk is called and six
-cases now call it with looks they made up. The loop above it - twelve looks half a
-second apart, skipping the desktop's own classes, naming the owning process - is
-untouched and still run by nothing but a real guest.
-
-Both defects so far were in the classification, which is the argument for having stopped
-there. But the loop is where a look is built, and a look built wrong classifies
-perfectly: a window whose class is read as empty is not the desktop and not a shell
-surface, so a quiet desk reads as a question and refuses the run. That is the exact
-failure this probe has already caused once, arrived at from the other end.
-
-What would run it is a desk this suite arranges. `PumpedDialog` puts up a window and
-takes the foreground, which is the `asking` arm; letting it go is `busy`; the taskbar is
-addressable by class, which is `shell`. The probe would have to take its deadline as a
-parameter, because twelve looks over six seconds is a case nobody wants in a suite that
-runs in eight minutes.
-
-The awkward half is honest: the suite runs in the guest, so a case arranging the
-foreground is competing with every other case that needs it. It belongs in the serial
-collection, and it is one more class in there for a reading taken once a run.
-
 ### §WW369 the tree nothing reads back
 
 WW356 changed the fixture's tray entries from buttons to menu items, and one case

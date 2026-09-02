@@ -105,9 +105,15 @@ function Read-DeskState {
     return "busy||||held for $($held.Count) of $($Looks.Count) look(s): $moved"
 }
 
-if ($DefineOnly) { return }
-
-Add-Type -TypeDefinition @"
+# WW357. Above the -DefineOnly return, so the polling can be reached by something other than a real
+# guest. It used to be below it, which meant the loop had exactly one caller and a look built wrong
+# classified perfectly: a window whose class read empty is not the desktop and not a shell surface,
+# so a quiet desk would read as a question and refuse the run.
+#
+# Guarded, because dot-sourcing twice in one session is what a suite does and Add-Type refuses a
+# type it already has.
+if (-not ('Fg' -as [type])) {
+    Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -122,28 +128,55 @@ public static class Fg {
     public static string ClassOf(IntPtr h) { var s = new StringBuilder(256); GetClassNameW(h, s, s.Capacity); return s.ToString(); }
 }
 "@
-
-$looks = @()
-for ($at = 0; $at -lt 12; $at++) {
-    if ($at -gt 0) { Start-Sleep -Milliseconds 500 }
-
-    $handle = [Fg]::GetForegroundWindow()
-    if ($handle -eq [IntPtr]::Zero) { $looks += $null; continue }
-
-    $owner = 0
-    [void][Fg]::GetWindowThreadProcessId($handle, [ref] $owner)
-    $class = [Fg]::ClassOf($handle)
-    if ($script:Desktop -contains $class) { $looks += $null; continue }
-
-    $named = (Get-Process -Id $owner -ErrorAction SilentlyContinue)
-    $looks += [pscustomobject]@{
-        Handle  = [int64] $handle
-        Pid     = $owner
-        Process = if ($named) { $named.ProcessName } else { "pid $owner" }
-        Class   = $class
-        Title   = [Fg]::TextOf($handle)
-    }
 }
+
+function Get-DeskLooks {
+    <#
+      Poll the live foreground and build the looks Read-DeskState judges. WW357.
+
+      One entry per look, $null where the look found the desktop or nothing at all - which is the
+      shape that function documents and the shape its cases make up by hand. A look that is built
+      here is a look nobody made up, which is the whole reason this is reachable: both defects this
+      probe has had were in the classification, and the classification is a pure function of what
+      this returns.
+
+      The count and the pause are parameters because the guest's twelve looks over six seconds are a
+      measurement and a case is not. A case arranges a desk it already owns and asks for two looks
+      with no pause, which runs every line of this and takes no time.
+    #>
+    param([int] $Count = 12, [int] $PauseMs = 500)
+
+    $looks = @()
+    for ($at = 0; $at -lt $Count; $at++) {
+        if ($at -gt 0 -and $PauseMs -gt 0) { Start-Sleep -Milliseconds $PauseMs }
+
+        $handle = [Fg]::GetForegroundWindow()
+        if ($handle -eq [IntPtr]::Zero) { $looks += $null; continue }
+
+        $owner = 0
+        [void][Fg]::GetWindowThreadProcessId($handle, [ref] $owner)
+        $class = [Fg]::ClassOf($handle)
+        if ($script:Desktop -contains $class) { $looks += $null; continue }
+
+        $named = (Get-Process -Id $owner -ErrorAction SilentlyContinue)
+        $looks += [pscustomobject]@{
+            Handle  = [int64] $handle
+            Pid     = $owner
+            Process = if ($named) { $named.ProcessName } else { "pid $owner" }
+            Class   = $class
+            Title   = [Fg]::TextOf($handle)
+        }
+    }
+
+    # Comma, because a one-look array unrolls to the look itself on the way out and the caller counts
+    # what it was given. A probe that asked for one look and was handed an object would classify it
+    # as no looks at all.
+    return ,$looks
+}
+
+if ($DefineOnly) { return }
+
+$looks = Get-DeskLooks -Count 12 -PauseMs 500
 
 $answer = Read-DeskState -Looks $looks -StillNothing ([Fg]::GetForegroundWindow() -eq [IntPtr]::Zero)
 

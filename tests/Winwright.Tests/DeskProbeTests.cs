@@ -28,10 +28,18 @@ namespace Winwright.Tests;
 /// here and what refuses a run are one file rather than two copies.
 /// </para>
 /// <para>
-/// What is still not run here is the polling. Twelve looks half a second apart at the live
-/// foreground of a session this process is not sitting in is not something a case can arrange, and
-/// the arm that matters — one window for every look — is a desk rather than a case. What these do
-/// is take that array as given and check what it is called, which is where both defects were.
+/// WW357 reached the other half. The polling was still run by nothing but a real guest, and a look
+/// built wrong classifies perfectly — a window whose class comes back empty is not the desktop and
+/// not a shell surface, so a quiet desk reads as a question and refuses the run, which is the
+/// failure this probe has already caused once arrived at from the other end. The loop is a function
+/// taking its count and its pause, so a case that owns the foreground asks for two looks with no
+/// pause and every line of it runs.
+/// </para>
+/// <para>
+/// The twelve looks over six seconds stay the guest's, and they are a measurement rather than a
+/// shape: what they are for is that a toast lives for seconds and the prompt that cost a run had
+/// been up for hours. A case that waited them out would be paying six seconds to learn what two
+/// looks already say about how a look is built.
 /// </para>
 /// <para>
 /// Serial since WW345, and WW125's rule is why: running the classification means starting a real
@@ -51,6 +59,9 @@ public sealed class DeskProbeTests
 
     /// <summary>Every answer the probe can write, and the runner has an arm for each.</summary>
     private static readonly string[] States = ["clear", "busy", "asking", "shell", "broken"];
+
+    /// <summary>What <see cref="Looked" /> prints for a look the probe skipped. WW357.</summary>
+    private const string Desktop = "the desktop";
 
     [Fact]
     public void The_probe_answers_the_states_the_runner_switches_on()
@@ -189,6 +200,26 @@ public sealed class DeskProbeTests
     /// <param name="looks">One PowerShell expression per set, each an array of looks or nulls.</param>
     private static IReadOnlyList<string> Classified(params string[] looks)
     {
+        var lines = Ran(string.Join(Environment.NewLine, looks.Select(one => $"Read-DeskState -Looks {one}")));
+
+        // The count and not only the content: a probe that threw halfway answers fewer lines than it
+        // was asked for, and comparing the ones that arrived against the first few expectations would
+        // report the wrong state as the wrong answer.
+        Assert.True(
+            lines.Count == looks.Length,
+            $"asked for {looks.Length} classification(s) and got {lines.Count}: {string.Join(" / ", lines)}");
+
+        return lines;
+    }
+
+    /// <summary>
+    /// Run <paramref name="body"/> against the real probe, dot-sourced with <c>-DefineOnly</c> so
+    /// nothing reads a desk it was not asked to. WW357 pulled this out of <see cref="Classified" />,
+    /// because the polling needs the same launch and none of the counting.
+    /// </summary>
+    /// <param name="body">The PowerShell to run once the probe is defined.</param>
+    private static IReadOnlyList<string> Ran(string body)
+    {
         var script = Path.Combine(Path.GetTempPath(), $"winwright-ww345-{Guid.NewGuid():N}.ps1");
         var probe = Checkout.At("tools", "desk-probe.ps1");
 
@@ -204,7 +235,7 @@ public sealed class DeskProbeTests
             function Look($handle, $class, $title) {
                 [pscustomobject]@{ Handle = $handle; Pid = 42; Process = 'prompt'; Class = $class; Title = $title }
             }
-            {{string.Join(Environment.NewLine, looks.Select(one => $"Read-DeskState -Looks {one}"))}}
+            {{body}}
             """);
 
         try
@@ -225,22 +256,104 @@ public sealed class DeskProbeTests
             var wrong = ran.StandardError.ReadToEnd();
             ran.WaitForExit(30000);
 
-            var lines = said.Split('\n').Select(one => one.Trim('\r', ' ')).Where(one => one.Length > 0).ToList();
+            Assert.True(wrong.Trim().Length == 0, $"the probe wrote to standard error: {wrong}");
 
-            // The count and not only the content: a probe that threw halfway answers fewer lines
-            // than it was asked for, and comparing the ones that arrived against the first few
-            // expectations would report the wrong state as the wrong answer.
-            Assert.True(
-                lines.Count == looks.Length,
-                $"asked for {looks.Length} classification(s) and got {lines.Count}: {said}{wrong}");
-
-            return lines;
+            return said.Split('\n').Select(one => one.Trim('\r', ' ')).Where(one => one.Length > 0).ToList();
         }
         finally
         {
             File.Delete(script);
         }
     }
+
+    [Fact]
+    public void The_polling_builds_a_look_out_of_the_window_that_actually_holds_the_desk()
+    {
+        // WW357. The half WW345 left: the classification was made runnable and the loop that feeds
+        // it was not, so a look built wrong classified perfectly. A window whose class came back
+        // empty is not the desktop and not a shell surface, which makes a quiet desk read as a
+        // question and refuse the run — the exact failure this probe has already caused once,
+        // arrived at from the other end.
+        //
+        // Two looks and no pause, which is why this can be a case at all. The guest's twelve over
+        // six seconds are a measurement about how long a prompt outlives a toast; the shape of a
+        // look is not, and every line of the loop runs either way.
+        using var dialog = PumpedDialog.Open("winwright desk probe");
+        dialog.BringToFront();
+
+        if (BusyDesk.Excused(Winwright.Windowing.Foreground.Check(dialog.Frame).AsPrecondition()))
+            return;
+
+        var look = Looked("-Count 2 -PauseMs 0").FirstOrDefault();
+
+        Assert.True(look is not null, "the polling built no look at all");
+
+        // The probe calling it the desktop is the desk and not the loop: something took the
+        // foreground between the check above and the poll below. Excused rather than split, because
+        // splitting it fails as an index out of range and says nothing about either.
+        if (look == Desktop
+            && BusyDesk.Excused(
+                Winwright.Verdicts.Precondition.Absent(
+                    "the foreground belongs to the window under test",
+                    "the probe's look found the desktop rather than the dialog this case put up")))
+        {
+            return;
+        }
+
+        // Field for field, because each is a way for a look to be built wrong and every one of them
+        // reaches Read-DeskState as a fact it has no way to doubt. The class is the one the shell
+        // surfaces are matched against; the handle is what "one window for every look" compares.
+        var fields = look!.Split('|');
+
+        Assert.Equal(dialog.Frame.ToString(System.Globalization.CultureInfo.InvariantCulture), fields[0]);
+        Assert.Equal(
+            Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture), fields[1]);
+
+        Assert.Equal("testhost", fields[2]);
+        Assert.Equal("Static", fields[3]);
+        Assert.Equal("winwright desk probe", fields[4]);
+    }
+
+    [Fact]
+    public void A_desk_this_process_is_holding_is_read_as_a_question_end_to_end()
+    {
+        // WW357, and the two halves joined: the loop builds the looks and the classification names
+        // them, in one run, against a desk this suite arranged. Every case before this one handed
+        // Read-DeskState looks somebody typed — which is what made a loop that built them wrong
+        // invisible.
+        //
+        // 'asking' is the right answer here and reads oddly: this dialog is not waiting for anybody.
+        // What the word means is one window held the foreground for every look, and that is exactly
+        // true — which is the reading the probe is for, and the reason the runner names the process
+        // and the title rather than refusing on the state alone.
+        using var dialog = PumpedDialog.Open("winwright desk held");
+        dialog.BringToFront();
+
+        if (BusyDesk.Excused(Winwright.Windowing.Foreground.Check(dialog.Frame).AsPrecondition()))
+            return;
+
+        var answer = Classified("(Get-DeskLooks -Count 2 -PauseMs 0)").Single();
+
+        Assert.StartsWith("asking|testhost|", answer, StringComparison.Ordinal);
+        Assert.Contains("|Static|winwright desk held", answer, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Run the probe's own polling and hand back one line per look. WW357.
+    /// <para>
+    /// Pipe-separated for the reason the probe's own answer is: the fields carry spaces and a reader
+    /// splitting on those would find five where a title had two words. A null look prints nothing,
+    /// which is how a case tells "the desktop was there" from "a window was".
+    /// </para>
+    /// </summary>
+    /// <param name="arguments">What to pass Get-DeskLooks, as PowerShell spells it.</param>
+    private static IReadOnlyList<string> Looked(string arguments) => Ran($$"""
+        $looks = Get-DeskLooks {{arguments}}
+        foreach ($one in $looks) {
+            if ($null -eq $one) { 'the desktop' }
+            else { "$($one.Handle)|$($one.Pid)|$($one.Process)|$($one.Class)|$($one.Title)" }
+        }
+        """);
 
     /// <summary>The text between two markers, or empty where either is missing.</summary>
     /// <param name="text">The whole file.</param>
