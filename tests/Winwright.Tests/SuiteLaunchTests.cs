@@ -299,12 +299,65 @@ public sealed class SuiteLaunchTests : IDisposable
         Assert.Empty(register.Launched);
     }
 
+    [Fact]
+    public void A_capture_of_an_ordinary_window_is_a_picture_the_application_drew_for_the_run()
+    {
+        // WW349, end to end and through the door every capture goes through. The route is the
+        // off-screen render, which is this block's default and the one the engine cannot take — so
+        // the run asks the application, the application draws its own tree into the file the launch
+        // told it it may write, and the receipt is composed over what came back.
+        var pictures = Path.Combine(root, "pictures");
+        var capturing = CaseDeclaration.Declared(
+            "the names pane is photographed",
+            [StepDeclaration.Of("TabItem#namesPane", "capture", "the names pane")],
+            fixture: Names(),
+            catches: "a pane that stops drawing what a capture was taken to prove it draws");
+
+        var verdict = Suite.Launch([capturing], Selection.All, register, Capturing(pictures));
+
+        var ran = Assert.Single(verdict.Ran);
+        var written = Path.Combine(pictures, "the names pane is photographed", "the names pane.png");
+
+        // The claim, and the reason it is stated as the file rather than as the verdict: a hole is a
+        // perfectly good verdict and it is what this answered before. What changed is that there is
+        // a picture.
+        Assert.True(
+            File.Exists(written),
+            $"nothing was drawn: {string.Join(" | ", ran.Verdict.Results.Select(one => one.Detail))}");
+
+        Assert.Equal(RunOutcome.Passed, ran.Verdict.Outcome);
+        Assert.False(Winwright.Capturing.Colours.In(written).IsFlat);
+    }
+
     private static CaseDeclaration Borrowing(string name, FixtureDeclaration fixture) => CaseDeclaration.Declared(
         name,
         [Reading()],
         fixture: fixture,
         onlyReads: true,
         catches: "a pane whose header stops reporting that it is the selected one");
+
+    /// <summary>
+    /// The same project, saying where pictures go. WW349: that directory is also the one the launch
+    /// tells the application it may write into, so declaring it is the whole of what an adopter does
+    /// to make the default capture route work.
+    /// </summary>
+    /// <param name="pictures">Where captures are written.</param>
+    private ProjectDeclaration Capturing(string pictures)
+    {
+        var path = Path.Combine(root, "capturing", ProjectDeclaration.FileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "captures": {{System.Text.Json.JsonSerializer.Serialize(pictures)}},
+              "timeouts": { "resolve": 4000, "act": 4000, "poll": 25, "launch": 20000 }
+            }
+            """);
+
+        return ProjectDeclaration.Load(path);
+    }
 
     /// <summary>A project whose executable is the built fixture, which is the application under test.</summary>
     private ProjectDeclaration Project()

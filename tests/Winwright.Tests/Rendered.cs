@@ -73,6 +73,11 @@ internal static class Rendered
             null, "how a layered window's pixels reach the screen, and whether a copy of it is "
                 + "partly the desktop — the case named is the one that reads the sentence on the arm "
                 + "that does not refuse, which is the half a refusal's own message never shows"),
+        new("RenderAsked.Sentence", "OwnRenderTests.An_answer_a_verdict_can_count_is_a_hole_and_never_a_red",
+            null, "whether the application drew the tree behind one of its windows when this run "
+                + "asked, and why it did not where it did not — the case named is the one that reads "
+                + "the sentence through the reading a verdict counts, which is where it is actually "
+                + "shown to anybody"),
         new("Inspect.Render", "InspectTests.A_walk_that_stops_at_the_depth_says_how_many_it_did_not_walk",
             null, "the control tree as lines, with what the walk did not reach counted"),
         new("Preamble.Render", "PreambleTests.The_preamble_renders_one_line_per_measurement_with_the_reading_first",

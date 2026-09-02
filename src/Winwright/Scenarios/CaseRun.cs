@@ -538,21 +538,18 @@ public static class CaseRun
             ? CaptureRoute.For(found)
             : CaptureRoute.For(found, found with { Handle = mine });
 
+        var into = System.IO.Path.Combine(pictures, $"{Filed(step.Argument!)}.png");
+
         if (route.Renders)
         {
-            Hole(
-                trace,
-                results,
-                named,
-                Precondition.Absent(
-                    "a surface the screen is the only way to",
-                    $"{route.Sentence()} A render is the application's own to take — Winwright.InApp "
-                        + "does it — and this engine cannot draw another process's tree"));
-
+            // WW349. The default route, taken by asking rather than by drawing: a render needs the
+            // application's own tree and nothing outside that process has one. This used to be a
+            // hole naming the in-app half, which was honest and was not a picture — and it was the
+            // answer for every ordinary window, which is most of them.
+            Rendered(step, found, target, into, route, named, trace, results);
             return;
         }
 
-        var into = System.IO.Path.Combine(pictures, $"{Filed(step.Argument!)}.png");
         var frame = PaintedFrame.Of(handle);
         var region = frame?.Painted ?? found.Bounds;
 
@@ -602,6 +599,70 @@ public static class CaseRun
                     ? AssertionResult.Fail(named, wrong.Message)
                     : AssertionResult.Unchecked(named, Precondition.Absent(absent, wrong.Message)))
                 .At(trace.Count));
+        }
+    }
+
+    /// <summary>
+    /// Ask the application to draw its own tree, and compose the receipt over what came back. WW349.
+    /// <para>
+    /// The asking is the only part that is new. Everything after it is the same door every capture
+    /// goes through, and the route says it renders — so the readings a render cannot be hurt by are
+    /// not taken, and the colour count still is, because a flat rectangle is not a picture of a
+    /// window however it was got.
+    /// </para>
+    /// <para>
+    /// An application that does not answer is a hole and never a red. It is a fact about how the
+    /// application was built rather than about what it drew: a product that has not called
+    /// <c>Renders.Answer</c>, or one started without the variable that lets it write, has told this
+    /// run nothing about the window — and a failure there would be a red about the harness's own
+    /// wiring reported against the application under test.
+    /// </para>
+    /// </summary>
+    private static void Rendered(
+        StepDeclaration step,
+        Winwright.Windowing.TopLevelWindow found,
+        AppTarget target,
+        string into,
+        CaptureRoute route,
+        string named,
+        List<TraceStep> trace,
+        List<AssertionResult> results)
+    {
+        var asked = OwnRender.Into(found.Handle, into);
+        if (!asked.Answered)
+        {
+            Hole(trace, results, named, Precondition.Absent(RenderAsked.PreconditionName, asked.Sentence()));
+            return;
+        }
+
+        try
+        {
+            // The file is already written, so the take writes nothing: what the door is being asked
+            // for here are the readings, which is the whole reason a capture goes through it at all.
+            var receipt = CaptureReceipt.Taking(into, found, target, _ => { }, frame: null, route);
+
+            trace.Add(receipt.AsTraceStep() with { Step = trace.Count + 1, Asserted = named });
+            results.Add(AssertionResult.Pass(named, receipt.Sentence()).At(trace.Count));
+        }
+        catch (WrongCaptureException wrong)
+        {
+            // A render reaches two of the arms and no more: it is drawn with the compositor not
+            // involved, so nothing about the desk can be wrong with it — what is left is a picture
+            // of another process's window, of something nothing is drawing, or of one flat colour,
+            // and all three are the capture being wrong about the application.
+            trace.Add(new TraceStep
+            {
+                Step = trace.Count + 1,
+                Verb = $"capture ({route})",
+                Locator = step.Addressed,
+                Resolved = found.ToString(),
+                ReadBack = into,
+                Verdict = StepVerdict.Failed,
+                Detail = wrong.Message,
+                Asserted = named,
+            });
+
+            results.Add(AssertionResult.Fail(named, wrong.Message).At(trace.Count));
         }
     }
 

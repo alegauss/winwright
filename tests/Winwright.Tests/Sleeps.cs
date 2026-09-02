@@ -151,6 +151,10 @@ internal static class Sleeps
             "WW347: the same shape for a WPF popup, and set in a finally so a flyout that would not "
                 + "open is reported as the refusal it is rather than parking the case for the whole "
                 + "deadline — which is the difference between a red naming what WPF said and a hang"),
+        new("AnsweringWindow.cs", 1, Sleeping.OnASignal,
+            "WW349: the same shape again, for the window that answers a render. The thread has to be "
+                + "pumping before the send goes out, so what this parks on is the hook being on — a "
+                + "send to a window that is not yet answering would spend the whole ask being declined"),
         new("FinishedTests.cs", 3, Sleeping.OnASignal,
             "two signals and one delay, and the shape is the point: a reader takes the destination "
                 + "and parks until it is told to let go, so the case knows the file really is open "

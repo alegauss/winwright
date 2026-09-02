@@ -271,7 +271,20 @@ public static class Suite
     private static (AutomationElement Window, LaunchedProcess Process) Opened(
         ProcessRegister register, ProjectDeclaration project, FixtureDeclaration fixture, string named)
     {
-        var launched = register.Launch(fixture.Starting(project.Executable));
+        var start = fixture.Starting(project.Executable);
+
+        // WW349. Where pictures go is the project's, and it is also the one directory this run may
+        // ask the application to write into — so the launch says so rather than an operator setting
+        // it by hand. The application still decides whether to answer at all, and a build that never
+        // called Renders.Answer answers nothing however this is set.
+        //
+        // After the fixture's own variables and not before: a fixture that names this deliberately
+        // is a fixture saying something about where its renders go, and a run overwriting that would
+        // be the launch quietly disagreeing with the declaration it was started from.
+        if (project.Declares("captures") && !start.Environment.ContainsKey(Capturing.OwnRender.RendersInto))
+            start.Environment[Capturing.OwnRender.RendersInto] = project.Captures;
+
+        var launched = register.Launch(start);
         var deadline = project.Timeouts.For(WindowTimeout);
 
         // WW257. A tray draws no window, and the window in that case is what a click on the icon is

@@ -109,6 +109,12 @@ public partial class MainWindow : Window
     /// <summary>Held for the window's life, because letting go puts every popup back.</summary>
     private Winwright.InApp.PopupsHeld? popups;
 
+    /// <summary>
+    /// Held for the window's life too, and for the mirror of that reason: letting go takes the hook
+    /// back off, and a harness asking after that would be told the application does not answer. WW349.
+    /// </summary>
+    private Winwright.InApp.RendersAnswered? renders;
+
     /// <inheritdoc />
     protected override void OnContentRendered(EventArgs e)
     {
@@ -134,6 +140,11 @@ public partial class MainWindow : Window
             Cloak.Set(new System.Windows.Interop.WindowInteropHelper(this).Handle);
 
         popups ??= Protocol.Hold(this);
+
+        // WW349. Here for the reason the surface is reported here: the window has a handle to hook
+        // by now, and a harness that asked before this would be asking a window that was not up.
+        renders ??= Protocol.Renders(this);
+
         Protocol.Report(this, panes, panes.SelectedContent as FrameworkElement);
     }
 

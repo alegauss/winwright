@@ -101,29 +101,6 @@ goes. If all three provoke, the pause is the repair and this is what says so.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW349 the default nobody outside the process can take
-
-WW336 gave the engine `ScreenCopy`, which is the route that exists for a surface no tree
-holds. The other route is the default and is the safer picture, and this engine cannot
-take it: a render draws an application's own visual tree, and nothing outside that
-process has one.
-
-So a capture step against an ordinary window answers a hole naming `Winwright.InApp`,
-which is honest and is not a picture. The verb serves the surface it was asked for - a
-tray menu, a balloon, a popup a framework drew - and answers nothing for the window an
-adopter is most likely to point it at first.
-
-The half that can take it already exists and already talks to a harness.
-`Winwright.InApp.Render` renders a tree and `Geometry` dumps one into a file the engine
-reads back, through a variable the harness names - so there is a shape for this that
-neither side has to invent: the run asks, the application renders into the file it was
-given, and the receipt is composed over what came back.
-
-What it needs deciding is who asks. A capture step cannot call into another process, so
-either the in-app half watches a directory the way it watches WINWRIGHT_GEOMETRY, or the
-application exposes a verb the run starts it with - which is what every adopter's own
-capture flag already is.
-
 ### §WW359 the picture a harness cannot ask for
 
 WW347 opened the way through and left it needing a hand at each end. `Popups.Picture`

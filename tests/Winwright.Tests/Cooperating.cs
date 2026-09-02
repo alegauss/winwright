@@ -11,9 +11,15 @@ internal enum Cooperation
     None,
 
     /// <summary>
-    /// An artefact the in-app half produced — a geometry dump, a reported surface. The engine
-    /// cannot call the in-app half at all, so this is never an API call: it is the application
-    /// having written something down before the harness came looking.
+    /// The in-app half, on the other end. The engine cannot call it at all — the assembly carries
+    /// no reference to it — so this is never an API call.
+    /// <para>
+    /// It was one shape until WW349 and is two now. The first is an artefact the application wrote
+    /// down before the harness came looking: a geometry dump, a reported surface. The second is the
+    /// application answering while the harness waits, which is a window message and still not a
+    /// call — the engine names a window and a file, and what draws the picture is code inside the
+    /// application that this engine has never seen.
+    /// </para>
     /// </summary>
     TheInAppHalf,
 }
@@ -312,6 +318,19 @@ internal static class Cooperating
         new("Suite.Launch", Cooperation.None, false,
             "the same, launching the application under test per fixture — and lending one window to "
                 + "the cases that only read it where the invocation asked for that"),
+
+        // --- WW349, and the first entry in this catalogue that needs the half ------------------------
+        // Every verb above it either reads what any Windows application already offers or drives one
+        // through its own accessibility peer, which is why the count here read zero for as long as it
+        // did. This one asks the application to do something no outside process can do for it: draw
+        // its own visual tree. So it is the answer this catalogue exists to record honestly — an
+        // adopter deciding what the package buys them can see that the default capture route is the
+        // one thing on the list that goes dark without the in-app half.
+        new("OwnRender.Into", Cooperation.TheInAppHalf, false,
+            "ask the application to render the tree behind one of its windows into a named file, and "
+                + "read back whether it did — the route this block calls its default, which the "
+                + "engine cannot take because a render needs a visual tree and nothing outside that "
+                + "process has one"),
     ]);
 
     /// <summary>The verbs a bare window is enough for, which is what the run drives.</summary>

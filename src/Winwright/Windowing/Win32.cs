@@ -59,6 +59,38 @@ internal static class Win32
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     internal static extern nint FindWindowW(string? className, string? title);
 
+    /// <summary>
+    /// What <c>WM_COPYDATA</c> carries: a tag, a length and a buffer. WW349.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct CopyData
+    {
+        public nint Data;
+        public int Size;
+        public nint Buffer;
+    }
+
+    /// <summary>WM_COPYDATA, which is how a string crosses to another process with Windows marshalling it.</summary>
+    internal const uint WmCopyData = 0x004A;
+
+    /// <summary>SMTO_ABORTIFHUNG, so a wedged application is a reading rather than a run that stopped.</summary>
+    internal const uint AbortIfHung = 0x0002;
+
+    /// <summary>
+    /// Sent rather than posted, and with a budget. WW349: the answer is the whole point of the ask,
+    /// so the call waits for the other window's thread to produce one.
+    /// </summary>
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern nint SendMessageTimeoutW(
+        nint window, uint message, nint wParam, ref CopyData lParam, uint flags, uint timeoutMs, out nint answer);
+
+    /// <summary>
+    /// The same number in every process for the same string, and one nobody else can collide with —
+    /// which is the promise a magic constant cannot make. WW349.
+    /// </summary>
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern uint RegisterWindowMessageW([MarshalAs(UnmanagedType.LPWStr)] string name);
+
     [DllImport("user32.dll", SetLastError = true)]
     internal static extern nint GetAncestor(nint window, uint what);
 

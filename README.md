@@ -214,6 +214,7 @@ just took can be trusted.
 | `ForeignInput` | whether anybody but this run touched the machine while a case was working |
 | `Obstruction` | what stands over a region, read off the z order |
 | `PaintedFrame` | what a window actually paints inside the rectangle it owns |
+| `OwnRender` | ask the application to draw its own tree into a named file, and read back whether it did — the one verb here that needs `Winwright.InApp` on the other end |
 | `Loading` | whether a page has finished computing, against the loading label the project declares |
 | `CaseRun` | one declared case, run: the loop, the waits, the attempts and the verdict, none of which the case carries |
 | `Suite` | the cases a selection asked for, run, with every case it left alone named rather than counted |
@@ -225,8 +226,9 @@ than discovered on a red run.
 
 ## What needs the application to cooperate
 
-Nothing in the list above needs `Winwright.InApp`. What the in-app half adds is the readings a
-harness cannot take from outside the process:
+One verb in the list above needs `Winwright.InApp` — `OwnRender`, and it is the whole reason the
+default capture route works. Everything else answers against an application that references nothing.
+What the in-app half adds is what a harness cannot take from outside the process:
 
 - `Coordinates` — whether this process's idea of the display is trustworthy, in a sentence a report
   prints. A picture drawn by a system-aware process on a scaled display has a size that does not
@@ -241,7 +243,12 @@ harness cannot take from outside the process:
   asked. An application shipped to its users reports nothing and writes no file, which is what makes
   the protocol safe to leave in a release.
 - `Popups` — every popup under a window held open for as long as a run lasts. A preview has no hand
-  to click with, and fixing that at one call site leaves the next popup to rediscover it.
+  to click with, and fixing that at one call site leaves the next popup to rediscover it. `Picture`
+  draws a popup's own tree, which is the one surface no copy of the screen may have: a framework
+  layers a popup for the drop shadow it draws itself, and the soft edge of that is the desktop.
+- `Renders` — one line that answers a harness asking for a render, over the message loop the
+  application already runs. No thread, no watched directory, and nothing at all unless the run that
+  started it set `WINWRIGHT_RENDERS` to somewhere it may write.
 - `Freezables` / `Apartment` — a brush that may cross to a capture thread, and bounded work on the
   application's own dispatcher.
 

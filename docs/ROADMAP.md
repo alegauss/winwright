@@ -16,7 +16,6 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW349** (deps: —) **the engine can now take a screen copy and still cannot take the render it calls the default** — A capture step answers a hole for every window a render could reach, which is most of them, and the half that could take one is in the application. → §WW349
 - 💭 **WW359** (deps: —) **the way through a layered popup is a verb only the application can call, and no protocol lets a harness ask for it** — WW347's refusal names Popups.Picture, and an adopter reaching it has to invent the channel: the two the protocol has are startup announcements, not asks. → §WW359
 
 ## Block F — Assert — the expectation is derived, never typed

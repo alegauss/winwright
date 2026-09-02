@@ -355,10 +355,14 @@ public sealed class CaseRunTests : IDisposable
     [Fact]
     public void A_capture_of_a_window_that_wants_a_render_is_a_hole_naming_the_half_that_can()
     {
-        // WW336. The copy is what this engine can perform; a render draws the application's own
-        // visual tree and nothing outside that process can do it. So the case is not failed — the
-        // picture was never taken and nothing about the application was observed — and the absence
-        // names the half that could take it rather than leaving a reader to work that out.
+        // WW336, and WW349 changed what the hole says without changing that it is one. The engine
+        // used to answer that a render is the application's own to take and it could not take one;
+        // now it asks, and this window is a bare Win32 frame with no in-app half behind it — so what
+        // a reader is told is that the application did not answer, and what to add so it would.
+        //
+        // Still a hole and never a red, which is the half that did not move: the picture was never
+        // taken, nothing about the application was observed, and how the product was built is not
+        // something to fail it for.
         var frame = Create("Static", "winwright main", WsVisible | 0x00C00000, 480, 320);
         Create("Edit", "alpha", WsChild | WsVisible, 200, 24, frame);
 
@@ -372,7 +376,8 @@ public sealed class CaseRunTests : IDisposable
 
         var hole = Assert.Single(run.Verdict.Unchecked);
         Assert.Contains("Winwright.InApp", hole.Detail, StringComparison.Ordinal);
-        Assert.Contains("renderable", hole.Detail, StringComparison.Ordinal);
+        Assert.Contains("Renders.Answer", hole.Detail, StringComparison.Ordinal);
+        Assert.Equal(Winwright.Capturing.RenderAsked.PreconditionName, hole.Missing?.Name);
     }
 
     [Fact]

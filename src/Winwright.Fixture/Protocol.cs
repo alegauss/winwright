@@ -68,4 +68,21 @@ public static class Protocol
     /// <summary>What a capture of this application should be drawn on, as the application says.</summary>
     /// <param name="element">The element about to be rendered.</param>
     public static ChosenBackground Background(FrameworkElement element) => Backgrounds.Insist(element);
+
+    /// <summary>
+    /// Answer a harness asking for a render of this window. WW349.
+    /// <para>
+    /// The off-screen render is the harness's default route and the one route it cannot take by
+    /// itself: a render draws a visual tree and nothing outside this process has one. One line in the
+    /// application is the whole of what an adopter adds, and it does nothing at all unless the run
+    /// that started the application named somewhere it may write — which is the same promise every
+    /// other part of this protocol makes about a build shipped to its users.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The window to answer for, once it has been shown.</param>
+    public static RendersAnswered Renders(Window window)
+    {
+        ArgumentNullException.ThrowIfNull(window);
+        return InApp.Renders.Answer(window);
+    }
 }

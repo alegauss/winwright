@@ -160,10 +160,25 @@ public sealed class NoCooperationTests : IDisposable
     public void No_reading_or_pattern_act_needs_the_in_app_half()
     {
         // True by construction and worth stating: the engine assembly carries no reference to the
-        // in-app half at all, so no verb here can call it. What a verb could need is an artefact
-        // the application wrote down first, and none of these reads one.
-        Assert.Empty(Cooperating.NeedingTheHalf());
-        Assert.Contains("0 need the in-app half", Cooperating.Render()[0]);
+        // in-app half at all, so no verb here can call it. A reading reads what any Windows
+        // application already offers, and an act drives one through its own accessibility peer.
+        //
+        // WW349 made this a claim about the readings and the acts rather than about the whole
+        // catalogue, and the difference is the finding: the count was zero for as long as nothing
+        // asked the application to do something no outside process can do for it. Naming the one
+        // that does is what keeps this a measurement — a second appearing without a task behind it
+        // is what would go red here.
+        Assert.Equal(["OwnRender.Into"], Cooperating.NeedingTheHalf().Select(one => one.Named));
+        Assert.Contains("1 need the in-app half", Cooperating.Render()[0]);
+
+        // And it is none of the verbs this file is about. Every reading and every pattern act still
+        // answers against an application that references nothing, which is the claim the cases below
+        // drive against a bare Win32 window.
+        Assert.DoesNotContain(
+            Cooperating.NeedingTheHalf(),
+            one => one.Named.StartsWith("Resolve.", StringComparison.Ordinal)
+                || one.Named.StartsWith("Act.", StringComparison.Ordinal)
+                || one.Named.StartsWith("Inspect.", StringComparison.Ordinal));
     }
 
     [Fact]
