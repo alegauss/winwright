@@ -5,6 +5,7 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
+- 💭 **WW363** (deps: —) **the run report says whether an excuse is new and not whether this suite is getting harder to run on a real desk** — Five runs across WW346 to WW350 excused 8, 8, 8, 9 then 10, a different tray case each time, and every clause the report has read as ordinary. → §WW363
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
