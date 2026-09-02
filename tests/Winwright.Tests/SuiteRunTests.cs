@@ -314,7 +314,61 @@ public sealed class SuiteRunTests : IDisposable
             catches: "a read-back that never arrives, which is what this one is here to be"),
     ];
 
+    [Fact]
+    public void A_capture_with_no_captures_declared_is_refused_at_the_door_rather_than_run_into()
+    {
+        // WW348, on the other of the two doors. This one is handed a window a caller already has, so
+        // there is no launch to save — what it saves is driving the application to the step to say
+        // what the file and the declaration beside it have said all along.
+        var frame = Dialog();
+        var capturing = CaseDeclaration.Of(
+            "the dialog is photographed",
+            StepDeclaration.Of("Edit", "capture", "the field"));
+
+        var refusal = Assert.Throws<ScenarioRefusedException>(
+            () => Suite.Run([capturing], Selection.All, Root(frame), Declared()));
+
+        Assert.Contains("the dialog is photographed", refusal.Message, StringComparison.Ordinal);
+        Assert.Contains("'capture'", refusal.Message, StringComparison.Ordinal);
+        Assert.Contains("'captures'", refusal.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_project_that_declares_captures_runs_the_step_rather_than_refusing_it()
+    {
+        // The half that makes the refusal a reading rather than a ban, and the one that would catch
+        // a check written the wrong way round. The declaration is there, so the door lets the case
+        // through and whatever the step then answers is the run's business.
+        var frame = Dialog();
+        var capturing = CaseDeclaration.Of(
+            "the dialog is photographed",
+            StepDeclaration.Of("Edit", "capture", "the field"));
+
+        var verdict = Suite.Run([capturing], Selection.All, Root(frame), Declaring(Path.Combine(root, "pictures")));
+
+        Assert.Single(verdict.Ran);
+        Assert.Empty(verdict.Skipped);
+    }
+
     private static AutomationElement Root(nint frame) => AutomationElement.FromHandle(frame);
+
+    /// <summary>The same project, carrying somewhere to put pictures. WW348.</summary>
+    private ProjectDeclaration Declaring(string pictures)
+    {
+        var path = Path.Combine(root, "declaring", ProjectDeclaration.FileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Environment.ProcessPath)}},
+              "captures": {{System.Text.Json.JsonSerializer.Serialize(pictures)}},
+              "timeouts": { "resolve": 600, "act": 600, "poll": 20 }
+            }
+            """);
+
+        return ProjectDeclaration.Load(path);
+    }
 
     /// <summary>A project whose waits are short, because one of these is waiting for a red.</summary>
     private ProjectDeclaration Declared()

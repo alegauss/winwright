@@ -247,6 +247,58 @@ public sealed class SuiteLaunchTests : IDisposable
         Assert.Contains("does not say it only reads", refusal.Because);
     }
 
+    [Fact]
+    public void A_capture_with_no_captures_declared_is_refused_before_anything_is_launched()
+    {
+        // WW348. WW336 answered this as a hole on the run that reached the step, which is the right
+        // answer one step too late: a capture in a project with nowhere to put pictures is a fact
+        // about the file and the declaration beside it, and both have been read before a window
+        // exists. The launch is what the earlier refusal saves, so the launch is what this asserts.
+        var capturing = CaseDeclaration.Declared(
+            "the names pane is photographed",
+            [StepDeclaration.Of("Edit#profileBox", "capture", "the profile box")],
+            fixture: Names(),
+            catches: "a picture of the pane that stops being a picture of the pane");
+
+        var refusal = Assert.Throws<ScenarioRefusedException>(
+            () => Suite.Launch([capturing], Selection.All, register, Project()));
+
+        Assert.Contains("'captures'", refusal.Message, StringComparison.Ordinal);
+        Assert.Contains(ProjectDeclaration.FileName, refusal.Message, StringComparison.Ordinal);
+
+        // The whole of what moving it earlier buys, and the one thing a run-time hole cannot claim.
+        Assert.Empty(register.Launched);
+    }
+
+    [Fact]
+    public void A_case_nobody_selected_still_refuses_the_run_it_could_not_have_survived()
+    {
+        // WW348, and the half that says this is a rule about the file rather than about this run. A
+        // selector narrowed to the case that does not capture would otherwise pass while the
+        // declaration is still missing for the one beside it — and the next person to widen the
+        // selection pays a launch to be told what was knowable now.
+        var capturing = CaseDeclaration.Declared(
+            "the names pane is photographed",
+            [StepDeclaration.Of("Edit#profileBox", "capture", "the profile box")],
+            fixture: Names(),
+            catches: "a picture of the pane that stops being a picture of the pane");
+
+        var typing = CaseDeclaration.Declared(
+            "the profile box takes a name",
+            [Typing()],
+            fixture: Names(),
+            catches: "an editable control the pane draws and no case ever writes to");
+
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => Suite.Launch(
+            [typing, capturing],
+            Selection.Case("the profile box takes a name"),
+            register,
+            Project()));
+
+        Assert.Contains("the names pane is photographed", refusal.Message, StringComparison.Ordinal);
+        Assert.Empty(register.Launched);
+    }
+
     private static CaseDeclaration Borrowing(string name, FixtureDeclaration fixture) => CaseDeclaration.Declared(
         name,
         [Reading()],

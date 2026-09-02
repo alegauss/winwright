@@ -23,7 +23,6 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 📋 **WW348** (deps: —) **a case that captures with no captures declared is a hole at run time, and the file said so at load** — Every other thing wrong with a file is refused where it was written, and this one waits for the machine that was going to run it. → §WW348
 - 📋 **WW351** (deps: —) **the claim set is computed from Of's parameters, so a claim is still added there rather than by declaring a field** — WW340 gave the set one reader; it is still built by a hand-written Claiming call per field, and every fold it names is recoverable from the finished step. → §WW351
 - 📋 **WW352** (deps: WW351) **StepDeclaration.Of takes 28 parameters and its constructor 23, so every new field is threaded through both by hand** — The arity is the shape WW340 could not reach: the analyser reads Of at cognitive complexity 131, and a transposed pair of positional arguments still compiles. → §WW352
 - 📋 **WW354** (deps: —) **the typing tool's arms are documented in a .cmd and parsed in a switch, and nothing holds the two lists together** — WW341 added a fourth arm by editing both by hand; a word in one and not the other runs the default silently, printing one experiment's numbers under another. → §WW354

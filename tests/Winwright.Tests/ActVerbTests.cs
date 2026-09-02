@@ -112,6 +112,21 @@ public class ActVerbTests
     }
 
     [Fact]
+    public void A_verb_says_which_declaration_it_needs_so_the_runner_never_has_to_know()
+    {
+        // WW348. The suite refuses a step whose verb needs a key the project has not declared, and
+        // it does that by asking the verb rather than by knowing that 'capture' is the one which
+        // needs 'captures'. Asserted here as a fact about the vocabulary, because here is the one
+        // place a fact about a verb is allowed to live.
+        Assert.Equal("captures", ActVerb.Named("capture").Needs);
+
+        // And exactly one of them asks the project for anything, which is worth stating: a verb
+        // added with a key nobody declared would be refusing every run of every project that has
+        // not caught up, and this is the line that would go red first.
+        Assert.Equal(["capture"], ActVerb.All.Where(verb => verb.Needs.Length > 0).Select(verb => verb.Name));
+    }
+
+    [Fact]
     public void A_verb_is_named_whatever_the_trace_will_call_it()
     {
         // The names here are the strings Act stamps onto its own results, so a trace read back

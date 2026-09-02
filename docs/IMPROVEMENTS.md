@@ -152,27 +152,6 @@ made to do while a run is watching.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW348 the declaration a load could have asked for
-
-WW336 made a capture step answer a hole where the project declares no `captures`, naming
-the file to add it to. That is the right answer at run time and it is one step too late.
-
-This format's founding rule is that a case which could not run anywhere is refused
-before it runs here: an unparseable locator, a verb that does not exist, an argument
-beside a verb that takes none. A capture step in a project with nowhere to put pictures
-is the same kind of fact - it is about the file and the declaration beside it, not about
-the desk, and it is knowable the moment both are read.
-
-What stops it being refused there is only where the reading happens.
-`StepDeclaration.Of` judges a step and is handed no project; `ScenarioFile.LoadAll`
-reads files and is handed no project either. `Suite.Launch` has both and is the first
-place that does, which makes it the candidate - and it is also where a refusal would
-still arrive before a window is launched, which is the whole of what the rule buys.
-
-The cost of leaving it is a run that launches an application, drives it to the step and
-then says what the file could have said. The cost of moving it is that `Suite` starts
-knowing about one verb, which is the thing the vocabulary exists to keep it from.
-
 ### §WW351 the last place a claim is spelled by hand
 
 WW340 closed the two lists that could disagree: Checkable reads the set and the schema

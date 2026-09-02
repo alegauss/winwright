@@ -179,7 +179,8 @@ public sealed record ActVerb
             Takes.Text,
             repeatable: false,
             null,
-            captures: true),
+            captures: true,
+            needs: "captures"),
     ];
 
     private readonly Func<Subject, string?, ActResult>? doing;
@@ -195,7 +196,8 @@ public sealed record ActVerb
         bool reaches = false,
         bool onATray = false,
         string alsoTakes = "",
-        bool captures = false)
+        bool captures = false,
+        string needs = "")
     {
         AlsoTakes = alsoTakes;
         Name = name;
@@ -205,9 +207,30 @@ public sealed record ActVerb
         Accepts = accepts ?? [];
         Reaches = reaches;
         Captures = captures;
+        Needs = needs;
         this.doing = doing;
         this.onATray = onATray;
     }
+
+    /// <summary>
+    /// What the project must declare before a step naming this verb can run, and empty where the
+    /// verb asks the project for nothing. WW348.
+    /// <para>
+    /// The key rather than the verb, which is what keeps <see cref="Suite" /> out of the vocabulary.
+    /// A capture with nowhere to put pictures used to be answered as a hole on the run that reached
+    /// the step, having launched the application to learn what the file and the declaration beside it
+    /// already said between them. Refusing it earlier meant somebody had to know that <c>capture</c>
+    /// is the verb that needs <c>captures</c> — and the one place a fact about a verb is allowed to
+    /// live is here, so the suite asks whether a step needs anything and never which verb it is.
+    /// </para>
+    /// <para>
+    /// It is the same shape as <see cref="Accepts" /> one level out. That one made a closed list of
+    /// arguments the vocabulary's business rather than the act's; this makes a required declaration
+    /// the vocabulary's business rather than the runner's, and a second verb needing a second key
+    /// gets the refusal without anybody writing it.
+    /// </para>
+    /// </summary>
+    public string Needs { get; } = "";
 
     /// <summary>
     /// Whether this act writes a picture of the window its subject is in. WW336.

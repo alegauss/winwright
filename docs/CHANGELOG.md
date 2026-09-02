@@ -259,6 +259,7 @@
 - ✅ **WW308** **the pointer family is three loose strings, and its target-and-mode shape is rebuilt at five call sites** — Stored as one target and one mode with the three fields derived from them, so the five rebuilt copies are gone and no key, schema or case file moved — 1819 green.
 - ✅ **WW336** **no act names a capture, so a migrated capture is C# beside the cases rather than one of them** — A case names a capture and what to call it; the project says where pictures go, and the engine performs the copy it has always been able to judge.
 - ✅ **WW340** **the claim set is built inside the refusal and thrown away, so Checkable and the schema keep lists of their own** — a claim is a declared thing: the set the refusal builds is kept on the step, Checkable's nineteen ORs read it, and the published format marks which fields are claims.
+- ✅ **WW348** **a case that captures with no captures declared is a hole at run time, and the file said so at load** — A verb says which declaration it needs, and both of Suite's doors refuse a step the project cannot serve before a window is launched (design recorded in `src/Winwright/Scenarios/ActVerb.cs`).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

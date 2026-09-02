@@ -172,6 +172,7 @@ public static class Suite
         ArgumentNullException.ThrowIfNull(project);
 
         Something(declared);
+        Undeclared(declared, project);
         _ = asked.Over(declared);
 
         var lending = sharing ? Lendable(declared, asked) : [];
@@ -307,6 +308,49 @@ public static class Suite
     }
 
     /// <summary>
+    /// Refuse a step whose verb needs a declaration the project does not carry. WW348.
+    /// <para>
+    /// This format's founding rule is that a case which could not run anywhere is refused before it
+    /// runs here — an unparseable locator, a verb that does not exist, an argument beside a verb that
+    /// takes none. A capture step in a project with nowhere to put pictures is the same kind of fact:
+    /// it is about the file and the declaration beside it rather than about the desk, and it is
+    /// knowable the moment both have been read. What kept it at run time was only where the reading
+    /// happens — <c>StepDeclaration.Of</c> judges a step and is handed no project, and
+    /// <c>ScenarioFile.LoadAll</c> reads files and is handed no project either. This is the first
+    /// place that has both, and it is still before a window is launched, which is what the rule buys.
+    /// </para>
+    /// <para>
+    /// Over every case and not only the ones the selection takes, because that is what the rule
+    /// claims: the file is wrong whoever asked for what, and a run narrowed to one case would
+    /// otherwise pass while the same declaration is still missing for the next one. The run-time hole
+    /// WW336 wrote stays where it is — a caller reaching <c>CaseRun.Of</c> without coming through
+    /// here still gets an answer rather than a throw, and this is the earlier of two rather than a
+    /// replacement for it.
+    /// </para>
+    /// </summary>
+    /// <exception cref="ScenarioRefusedException">Where a step needs a key the project has not declared.</exception>
+    private static void Undeclared(IReadOnlyList<CaseDeclaration> declared, ProjectDeclaration project)
+    {
+        foreach (var one in declared)
+        {
+            foreach (var step in one.Steps)
+            {
+                // Asked of the verb rather than decided here, so the suite never learns which act
+                // needs which key: a second verb needing a second declaration is refused by this same
+                // loop the day it is added to the vocabulary.
+                if (step.Verb.Needs is not { Length: > 0 } key || project.Declares(key))
+                    continue;
+
+                throw new ScenarioRefusedException(
+                    one.Name,
+                    $"'{step.Name}' names '{step.Verb.Name}', which needs a '{key}' this project does not "
+                        + $"declare — add it to {project.Path}, because a run would launch the application "
+                        + "and drive it to that step to say what these two files already say together");
+            }
+        }
+    }
+
+    /// <summary>
     /// Run what <paramref name="asked"/> selects out of <paramref name="declared"/>.
     /// </summary>
     /// <param name="declared">Every case there is, in declared order.</param>
@@ -333,6 +377,7 @@ public static class Suite
         ArgumentNullException.ThrowIfNull(project);
 
         Something(declared);
+        Undeclared(declared, project);
 
         // Called for its refusal and not for its answer: a selector matching nothing has to stop the
         // run before the first case, or the run is a green about the cases the typo left out.
