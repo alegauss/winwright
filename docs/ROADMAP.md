@@ -42,6 +42,7 @@
 - ⏳ **WW87** (deps: Block G, Block E, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - 💭 **WW369** (deps: —) **a locator naming a control type the tree lacks reads as nothing answered, which is what a vanished menu reads as** — WW356 changed the fixture's entries and nothing asserts what they are, so a regression to buttons surfaces as a scenario failing in the words of a desk problem. → §WW369
+- 💭 **WW370** (deps: —) **the loop's one branch that answers nothing is the desktop skip, and no case arranges a desktop-held desk to run it** — WW357 runs the polling against a window this suite puts up, so every look it takes is a window; the skip that makes a quiet desk read clear is still run by nothing. → §WW370
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
