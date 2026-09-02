@@ -480,11 +480,15 @@ public sealed class NotificationAreaTests : IDisposable
                 menu.Standing is null ^ menu.Highlighted is null,
                 $"one reading answers and this carries {menu.Standing} and {menu.Highlighted}");
 
-            // Measured rather than assumed, and it is the answer that decides whether the focus arm
-            // is reachable at all: a TrackPopupMenu is a top-level menu on the desktop as much as a
-            // drop-down is, so the standing reading gets to it first and the focus is never asked.
-            Assert.NotNull(menu.Standing);
-
+            // WW350, and this case is where the measurement it was filed on came apart. WW339 saw
+            // the standing reading answer on both kinds and asserted it here; a later run of this
+            // same fixture had the Win32 popup answer through the highlight instead. Both are true
+            // of a TrackPopupMenu — it is a top-level menu on the desktop and it takes the focus —
+            // so which question reaches it first is a race between the shell highlighting the entry
+            // and the menu window becoming enumerable, and the suite does not get to pick.
+            //
+            // So the assertion is the invariant and not the winner: exactly one answered, asserted
+            // above, and the reading a trace carries is that one.
             Assert.Equal(menu.Standing ?? menu.Highlighted, menu.Read);
             Assert.Contains(menu.Read!, menu.AsTraceStep().ReadBack!, StringComparison.Ordinal);
         }

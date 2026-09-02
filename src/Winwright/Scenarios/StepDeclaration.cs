@@ -41,6 +41,28 @@ public enum Pointing
 }
 
 /// <summary>
+/// One thing a step claims: the field the case wrote, and what that field claims. WW340.
+/// <para>
+/// A claim was a spelling before this — a name in a boolean chain, a name in a schema row, a name
+/// in whichever refusal remembered it — and every claim added so far arrived in some of those and
+/// not all. WW323 made the refusal read one list; this is that list, kept rather than dropped, so
+/// the other readers ask it instead of writing their own.
+/// </para>
+/// <para>
+/// The field and never the mode the engine folded it into. Three ways of claiming one set are one
+/// claim and three spellings, and a refusal that named the fold would tell an author to delete a
+/// key their file does not have.
+/// </para>
+/// </summary>
+/// <param name="Field">The key, spelled as the file spells it.</param>
+/// <param name="Says">What it claims, in the words a refusal reads it in.</param>
+public sealed record Claim(string Field, string Says)
+{
+    /// <summary>The one phrase a refusal names it by.</summary>
+    public override string ToString() => $"'{Field}' ({Says})";
+}
+
+/// <summary>
 /// One step of a case, as fields: what to act on, what to do to it, what to say alongside, and what
 /// the control should read afterwards.
 /// <para>
@@ -587,8 +609,8 @@ public sealed record StepDeclaration
     /// movement and covers no set produces no assertion result, which is why a case made only of these
     /// is refused by <see cref="CaseDeclaration"/> rather than run to a green it did not earn.
     /// <para>
-    /// WW258. A tray step is checkable while carrying none of the fields below, and that is not an
-    /// exception to the rule but the rule read properly: the claim is <em>this icon can be found</em>,
+    /// WW258. A tray step is checkable while making no <see cref="Claims"/> at all, and that is not
+    /// an exception to the rule but the rule read properly: the claim is <em>this icon can be found</em>,
     /// which the search answers pass, fail or hole. The unearned-green guard is about a step that
     /// produces no assertion result, and this one always produces exactly one — so a case made of
     /// tray steps has earned whatever it reads.
@@ -596,18 +618,31 @@ public sealed record StepDeclaration
     /// </summary>
     public bool Checkable =>
         Tray is not null
-        // WW336. A capture is checkable carrying none of the fields below, for the reason a tray
-        // step is: the claim is the receipt — this picture is of this window, out of this process,
+        // WW336. A capture is checkable making no claim of its own, for the reason a tray step is:
+        // the claim is the receipt — this picture is of this window, out of this process,
         // started this way, with nothing standing over it and nothing showing through it — and the
         // receipt answers pass, fail or hole on its own.
         || Verb.Captures
-        || Expected is not null || Moves || Answers || Sweeps is not null || Matches is not null || Discloses
-        || SameAs is not null || Never is not null || Spoken
-        || Absent
-        || Label is not null || NotLabel is not null || BeginsWithLabel is not null
-        || Unlike is not null || SameCountdownAs is not null || Contains is not null
-        || ExpectReported is not null
-        || EachSpoken || OwnHeader;
+        // WW340. Nineteen ORs over the same fields the refusal already reads, and the twentieth was
+        // always the one somebody would forget: a claim missing from that chain is a step that reads
+        // as unfalsifiable, and the case carrying it is then refused for saying nothing when it said
+        // something. One list, asked twice.
+        || Claims.Count > 0;
+
+    /// <summary>
+    /// Every claim this step makes, in the order the format lists them. WW340.
+    /// <para>
+    /// The list <see cref="Of"/> builds to enforce one claim per step, kept rather than dropped. It
+    /// is what <see cref="Checkable"/> asks and what a refusal names out of, so the two cannot
+    /// disagree about what a claim is — and a twelfth joins both by being declared once.
+    /// </para>
+    /// <para>
+    /// A tray subject and a capture are not in it, and that is deliberate rather than an omission:
+    /// each is a claim the step makes by <em>being</em> one, so neither can collide with the others
+    /// the way two fields can, and both are refused beside a claim where they are written.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<Claim> Claims { get; private init; } = [];
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -894,12 +929,12 @@ public sealed record StepDeclaration
         // verb that only reads, a reading named beside a claim that is not about one, a pattern
         // that matches everything — and the two families below, where several spellings are one
         // claim rather than several.
-        var claiming = new List<string>();
+        var claiming = new List<Claim>();
 
         void Claiming(bool made, string field, string says)
         {
             if (made)
-                claiming.Add($"'{field}' ({says})");
+                claiming.Add(new Claim(field, says));
         }
 
         // The field the case actually wrote, for each family whose several spellings the engine has
@@ -1287,6 +1322,7 @@ public sealed record StepDeclaration
         {
             BeginsWithLabel = opening,
             Absent = absent,
+            Claims = claiming.AsReadOnly(),
         };
     }
 

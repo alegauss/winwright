@@ -262,7 +262,9 @@ public sealed class McpTests
         foreach (var field in fields)
         {
             var property = properties[field.Name]!;
-            Assert.Equal(field.Means, property["description"]!.GetValue<string>());
+            // WW340. Described and not Means: a claim field's description carries the rule over it,
+            // and a tool handed the schema is the reader the rule was invisible to.
+            Assert.Equal(field.Described, property["description"]!.GetValue<string>());
 
             switch (field.Holds)
             {

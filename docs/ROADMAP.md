@@ -13,7 +13,7 @@
 - 📋 **WW341** (deps: —) **every other synthesised act reads the instant SendInput returns, and only typing was measured** — WW329 found that look provoking a fault in the send it was reading, and a click, a chord and a picker walk all take it the same way. → §WW341
 - 📋 **WW342** (deps: —) **the pause repairs the fault and nothing says whether the read provokes it or the pumping it forces** — WW329 closed on a repair that works either way, so the interval is a number nobody can shorten and no other reader can be judged. → §WW342
 - 📋 **WW344** (deps: —) **putting the desk back answers for the flyout and says nothing about the foreground, the half that gets refused** — Windows grants a foreground to whoever it grants it to, so the call this project makes best-effort is the one it reports nothing about. → §WW344
-- 📋 **WW350** (deps: —) **both kinds of tray menu answer the standing reading, so the focus arm beside it is reached by nothing** — WW322 kept it as the second question and WW339 measured that the first always answers, so an arm this project would refuse anywhere else is carried here. → §WW350
+- 📋 **WW350** (deps: —) **which of a tray menu's two readings answers is a race, and the suite asserted the one that won a single run** — WW339 measured the standing reading answering on both kinds; WW340's run had the Win32 popup answer through the highlight, so both arms are live and the order is a race. → §WW350
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -25,8 +25,9 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 📋 **WW340** (deps: —) **the claim set is built inside the refusal and thrown away, so Checkable and the schema keep lists of their own** — WW323 closed one of the four places a claim has to be added; a twelfth still declares itself in a parameter, a field, a schema row and a boolean chain. → §WW340
 - 📋 **WW348** (deps: —) **a case that captures with no captures declared is a hole at run time, and the file said so at load** — Every other thing wrong with a file is refused where it was written, and this one waits for the machine that was going to run it. → §WW348
+- 📋 **WW351** (deps: —) **the claim set is computed from Of's parameters, so a claim is still added there rather than by declaring a field** — WW340 gave the set one reader; it is still built by a hand-written Claiming call per field, and every fold it names is recoverable from the finished step. → §WW351
+- 📋 **WW352** (deps: WW351) **StepDeclaration.Of takes 28 parameters and its constructor 23, so every new field is threaded through both by hand** — The arity is the shape WW340 could not reach: the analyser reads Of at cognitive complexity 131, and a transposed pair of positional arguments still compiles. → §WW352
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

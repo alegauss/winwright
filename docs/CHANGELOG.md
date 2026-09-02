@@ -253,6 +253,7 @@
 - ✅ **WW307** **three of the six comparison keys are never read from a JSON document by any test** — The three keys are read from a document and checked for value and mode: with two of them swapped in the loader's positional call, 29 tests pass and only this one fails.
 - ✅ **WW308** **the pointer family is three loose strings, and its target-and-mode shape is rebuilt at five call sites** — Stored as one target and one mode with the three fields derived from them, so the five rebuilt copies are gone and no key, schema or case file moved — 1819 green.
 - ✅ **WW336** **no act names a capture, so a migrated capture is C# beside the cases rather than one of them** — A case names a capture and what to call it; the project says where pictures go, and the engine performs the copy it has always been able to judge.
+- ✅ **WW340** **the claim set is built inside the refusal and thrown away, so Checkable and the schema keep lists of their own** — a claim is a declared thing: the set the refusal builds is kept on the step, Checkable's nineteen ORs read it, and the published format marks which fields are claims.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

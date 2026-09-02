@@ -98,26 +98,28 @@ picture of a guest, taken by hand, after a suite in another repository would not
 a line in the first run's own output saying the desktop had not gone back would have
 been the whole investigation.
 
-### §WW350 the arm the first question never leaves anything for
+### §WW350 the reading that answers is whichever one got there first
 
 WW322 asked the standing menu first and kept the focus behind it, on the argument that a
 TrackPopupMenu answers both and the day one stops answering the other still does. WW339
-split the two readings apart and then measured which answers, on both kinds this suite
-can put up.
+split the two readings apart, measured which answers on both kinds this suite can put
+up, saw the standing one answer both times, and asserted it.
 
-Both answer the standing one. A Win32 popup is a top-level menu on the desktop exactly
-as a drop-down is, so the first question reaches it and the second is never asked - and
-the suite now asserts that, which is how the arm was found rather than reasoned about.
+That assertion held for one run. On WW340's first run the same fixture, unchanged, had
+the Win32 popup answer through the highlight instead - and both are true of a
+TrackPopupMenu, which is a top-level menu on the desktop and also takes the focus. Which
+question reaches it first is a race between the shell highlighting the entry and the
+menu window becoming enumerable, and neither engine nor suite gets to pick.
 
-So `Highlighted` is a field nothing fills and the focus branch is a line nothing runs.
-This project refuses that shape everywhere else it can see it: every refusal has
-something that provokes it, and a catalogue exists per family to say so.
+Two things follow. WW322's argument is vindicated rather than dead: the focus arm is
+reached, so it is not the unprovoked branch this entry was filed about. And the suite
+now asserts the invariant - exactly one reading answers, and it is the one the trace
+carries - rather than the winner a single measurement had made it assert.
 
-Three ways out and the measurement decides none of them. It may be right to keep as a
-fallback for a menu neither kind covers, which is an argument for provoking one rather
-than for keeping an unprovoked branch. It may be right to delete, and the reading
-becomes one question. Or the order is wrong and the focus should be asked first for the
-kind that answers it, which would put the entry back in traces that used to carry it.
+What is left is whether a race decides what a trace says. A step that opened the same
+menu twice can report the entry once and the menu once, and a reader comparing two runs
+is comparing which question won. Preferring one needs a reason, which is what this entry
+now holds.
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -192,31 +194,6 @@ capture flag already is.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW340 the claim that is declared four times
-
-WW323 replaced eleven per-claim lists with one set, and the set lives inside
-`StepDeclaration.Of` as a local that is used for the refusal and then dropped. So the
-same enumeration is still written three more times.
-
-`Checkable` is the nearest: a chain of nineteen ORs over the same fields, answering the
-same question the set answers by being non-empty. A claim missing from it is a step that
-reads as unfalsifiable, and `CaseDeclaration` then refuses the case that carries it - a
-refusal about the wrong thing, which is the shape WW323 was filed for one layer up.
-
-`ScenarioSchema.Step` is the second, and it has to stay a list of fields because it
-publishes types and prose. What it does not have to be is a list nothing relates to the
-claims: nothing says that `label` and `expectReported` are two claims and `reads` is
-not, so the schema a tool carries cannot tell an author what it is about to be refused
-for.
-
-And the third is the arity. `Of` takes 28 parameters and the constructor 23, one per
-field, so a claim arrives by being threaded through both - which is why every claim so
-far has also arrived in a list it forgot.
-
-What would close it is a claim being a thing rather than a spelling: named once, with
-its field, what it says, and whether it is checkable, and every one of the four reading
-that.
-
 ### §WW348 the declaration a load could have asked for
 
 WW336 made a capture step answer a hole where the project declares no `captures`, naming
@@ -237,6 +214,52 @@ still arrive before a window is launched, which is the whole of what the rule bu
 The cost of leaving it is a run that launches an application, drives it to the step and
 then says what the file could have said. The cost of moving it is that `Suite` starts
 knowing about one verb, which is the thing the vocabulary exists to keep it from.
+
+### §WW351 the last place a claim is spelled by hand
+
+WW340 closed the two lists that could disagree: Checkable reads the set and the schema
+marks the fields it holds. What it did not close is where the set comes from. `Of`
+builds it with one `Claiming(...)` call per claim, over its own parameters, before the
+step exists - so adding a claim is still adding a field, a schema row and a line in that
+block, and forgetting the line still makes the step read as unfalsifiable.
+
+The block reads parameters for one reason: a refusal has to name the spelling the file
+used, and three claim families fold several spellings into fewer fields. That reason no
+longer holds. `covers`, `coversAtLeast` and `coversWithin` are recoverable from `Sweeps`
+with `Matching`; `sameAs`, `unlike`, `sameCountdownAs` and `contains` are four fields of
+their own; so are `label`, `notLabel` and `beginsWithLabel`. Every spelling the block
+resolves is readable off the finished record.
+
+So `Claims` could be computed over the step rather than passed into it, and the block in
+`Of` would go. A claim would then be a field plus a schema row, and the row is already
+checked against the set in both directions by `ClaimsTests`.
+
+The cost is ordering. `Of` refuses before it constructs, and this suite asserts which
+refusal wins where a step is wrong twice over. Computing the set needs the record, so
+the one-claim refusal moves after construction and every precedence a case asserts has
+to be re-established rather than assumed.
+
+### §WW352 the widest signature in the engine
+
+Every field a step can carry is a parameter of `Of` and a parameter of the constructor
+under it, and a field added reaches both by hand. That is 28 and 23 today, growing by
+one per feature, and the analyser has been reporting it for as long: S107 on both, and
+S3776 on `Of` at cognitive complexity 131 against an allowed 15.
+
+WW340 was filed partly about this and closed the other half instead - the two lists that
+could silently disagree - because the arity is a different kind of defect. Nothing here
+is wrong; the refusals are right and the suite proves them. What is wrong is that the
+signature is now the widest thing in the engine and the compiler stopped helping: three
+nullable strings in a row means a transposed pair of positional arguments builds, and
+only a case that happens to write both catches it. The suite writes them by name, which
+is what has kept this harmless so far.
+
+The tests are also the cost. Around two hundred call sites spell `Of` with named
+arguments, and that ergonomics is worth keeping - a step written as a locator, a verb
+and one named claim is why a case is readable in a test file. So a builder that replaces
+it has to read as well as that does, or it buys a smaller signature with a worse suite.
+
+Worth doing after WW351, which removes one of the two hands a field passes through.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

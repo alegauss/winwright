@@ -62,16 +62,34 @@ public enum Taking
 /// one list, and the copy that drifts is always the published one.
 /// </para>
 /// </param>
+/// <param name="Claims">
+/// Whether writing it is the step making its one claim.
+/// <para>
+/// WW340. The format published which fields exist and what each means, and said nothing about the
+/// rule over them: that <c>label</c> and <c>expectReported</c> are two claims, that <c>reads</c> is
+/// not one, and that a step makes exactly one. An author reading the format could only find that
+/// out by writing two and being refused — and the refusal's list and this one were two lists, so a
+/// claim added to the engine reached the published format only if someone remembered it here.
+/// </para>
+/// </param>
 public sealed record Field(
     string Name,
     bool Required,
     Taking Holds,
     string Means,
     IReadOnlyList<string> OneOf,
-    string Instead = "")
+    string Instead = "",
+    bool Claims = false)
 {
     /// <summary>Whether it belongs to a group exactly one of which has to be carried.</summary>
     public bool Alternative => Instead.Length > 0;
+
+    /// <summary>
+    /// What it means, with the rule over it where there is one. WW340: a tool is handed the schema
+    /// and never the prose, so the sentence saying a step makes one claim has to be in the field's
+    /// own description or it does not reach the writer that most needs it.
+    /// </summary>
+    public string Described => Claims ? $"{Means} — a claim, and a step makes exactly one" : Means;
 
     /// <summary>The one line a listing of the format shows.</summary>
     public override string ToString()
@@ -93,7 +111,9 @@ public sealed record Field(
             _ => "",
         };
 
-        return $"{Name}{required}: {Means}{of}";
+        // WW340. Described and not Means, so the line a reader is shown and the description a tool
+        // is handed say the rule in one spelling rather than two that drift.
+        return $"{Name}{required}: {Described}{of}";
     }
 }
 
@@ -196,28 +216,28 @@ public static class ScenarioSchema
             Subject),
         new("act", true, Taking.Text, "what to do to it", ActVerb.All.Select(verb => verb.Name).ToList()),
         new("with", false, Taking.Text, "what the act needs said, where it needs anything", []),
-        new("expect", false, Taking.Text, "what the reading should be once the act has landed", []),
+        new("expect", false, Taking.Text, "what the reading should be once the act has landed", [], Claims: true),
         new("reads", false, Taking.Text, "which reading the expectation is about", ReadBack.All.Select(one => one.Name).ToList()),
-        new("moves", false, Taking.Truth, "that the reading should end up different, where the case cannot know what it will be", []),
-        new("answers", false, Taking.Truth, "that the reading it names should say something rather than nothing, where the case cannot know what", []),
-        new("matches", false, Taking.Text, "the regular expression the reading should match, where the case cannot name the value but can name its shape", []),
-        new("discloses", false, Taking.Truth, "that the act put something under the locator that was not in the tree before it", []),
-        new("sameAs", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to be back to, for the round trip whose value no case can name", []),
-        new("unlike", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to differ from, for the change whose value no case can name at either end", []),
-        new("sameCountdownAs", false, Taking.Text, "the same claim as 'sameAs' for a reading that counts down while the case runs — the numbers in it must match, except the last, which may have ticked by one", []),
-        new("contains", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to hold inside its own — for the dialog that quotes the thing it opened for, where neither string is one a case can type", []),
-        new("label", false, Taking.Text, "the key whose declared string the reading should be — the label itself, derived from the project's own strings and never typed here", []),
-        new("expectReported", false, Taking.Text, "the name whose value the application reports and the reading should be — declared in the project's reportedValues, for a fact about this machine that no case may type", []),
-        new("notLabel", false, Taking.Text, "the key whose declared string the reading should not be, for the state an application has a word for and must not be showing", []),
-        new("beginsWithLabel", false, Taking.Text, "the key whose declared string the reading should begin with, for a state announced as a word in front of a sentence — a prefix and never a containment, because the sentence behind may hold the word too", []),
-        new("absent", false, Taking.Truth, "that this step's locator matches nothing — the claim an application makes by what its window does NOT hold, refused where the region the last step is looked for under is not there either", []),
-        new("ownHeader", false, Taking.Truth, "that no control inside a row this locator matches announces a different row's header — the pairing a check for whether a name exists is blind to", []),
-        new("eachSpoken", false, Taking.Truth, "that every element this step's locator matches announces a name — a sweep over elements, where 'covers' is a sweep over the strings a key declares", []),
-        new("spoken", false, Taking.Truth, "that everything under the locator which announces anything announces a name — never a glyph, a template or an id handed back — and that something does", []),
-        new("never", false, Taking.Text, "the key whose string must not be showing anywhere in the window at any moment while this step waits for its locator — a key and never the text, like the project's own loading strings", []),
-        new("covers", false, Taking.Text, "the key whose every string must be read somewhere the locator matches, and nothing else — derived from the project's own strings and never listed here", []),
-        new("coversAtLeast", false, Taking.Text, "the same set, claiming only that every declared string is read here and allowing values that are not in it — for a container the locator cannot separate from its neighbours", []),
-        new("coversWithin", false, Taking.Text, "the same set, claiming each declared string appears inside the name of something read rather than equalling it — for an entry that decorates what it is about", []),
+        new("moves", false, Taking.Truth, "that the reading should end up different, where the case cannot know what it will be", [], Claims: true),
+        new("answers", false, Taking.Truth, "that the reading it names should say something rather than nothing, where the case cannot know what", [], Claims: true),
+        new("matches", false, Taking.Text, "the regular expression the reading should match, where the case cannot name the value but can name its shape", [], Claims: true),
+        new("discloses", false, Taking.Truth, "that the act put something under the locator that was not in the tree before it", [], Claims: true),
+        new("sameAs", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to be back to, for the round trip whose value no case can name", [], Claims: true),
+        new("unlike", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to differ from, for the change whose value no case can name at either end", [], Claims: true),
+        new("sameCountdownAs", false, Taking.Text, "the same claim as 'sameAs' for a reading that counts down while the case runs — the numbers in it must match, except the last, which may have ticked by one", [], Claims: true),
+        new("contains", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to hold inside its own — for the dialog that quotes the thing it opened for, where neither string is one a case can type", [], Claims: true),
+        new("label", false, Taking.Text, "the key whose declared string the reading should be — the label itself, derived from the project's own strings and never typed here", [], Claims: true),
+        new("expectReported", false, Taking.Text, "the name whose value the application reports and the reading should be — declared in the project's reportedValues, for a fact about this machine that no case may type", [], Claims: true),
+        new("notLabel", false, Taking.Text, "the key whose declared string the reading should not be, for the state an application has a word for and must not be showing", [], Claims: true),
+        new("beginsWithLabel", false, Taking.Text, "the key whose declared string the reading should begin with, for a state announced as a word in front of a sentence — a prefix and never a containment, because the sentence behind may hold the word too", [], Claims: true),
+        new("absent", false, Taking.Truth, "that this step's locator matches nothing — the claim an application makes by what its window does NOT hold, refused where the region the last step is looked for under is not there either", [], Claims: true),
+        new("ownHeader", false, Taking.Truth, "that no control inside a row this locator matches announces a different row's header — the pairing a check for whether a name exists is blind to", [], Claims: true),
+        new("eachSpoken", false, Taking.Truth, "that every element this step's locator matches announces a name — a sweep over elements, where 'covers' is a sweep over the strings a key declares", [], Claims: true),
+        new("spoken", false, Taking.Truth, "that everything under the locator which announces anything announces a name — never a glyph, a template or an id handed back — and that something does", [], Claims: true),
+        new("never", false, Taking.Text, "the key whose string must not be showing anywhere in the window at any moment while this step waits for its locator — a key and never the text, like the project's own loading strings", [], Claims: true),
+        new("covers", false, Taking.Text, "the key whose every string must be read somewhere the locator matches, and nothing else — derived from the project's own strings and never listed here", [], Claims: true),
+        new("coversAtLeast", false, Taking.Text, "the same set, claiming only that every declared string is read here and allowing values that are not in it — for a container the locator cannot separate from its neighbours", [], Claims: true),
+        new("coversWithin", false, Taking.Text, "the same set, claiming each declared string appears inside the name of something read rather than equalling it — for an entry that decorates what it is about", [], Claims: true),
         new("meansIt", false, Taking.Truth, "that this step means a destructive entry it names", []),
         new("named", false, Taking.Text, "what a report should call it, where the act and the locator will not do", []),
     ]);
@@ -233,7 +253,10 @@ public static class ScenarioSchema
         };
 
         lines.AddRange(Case.Select(field => $"  {field}"));
-        lines.Add("A step:");
+        // WW340. The rule over the claim fields, said once above them rather than repeated into
+        // each: a reader shown twenty-one fields marked "a claim" would otherwise have to infer
+        // from the marks alone that they are alternatives.
+        lines.Add("A step, which makes exactly one of the claims marked below, or none and acts:");
         lines.AddRange(Step.Select(field => $"  {field}"));
         lines.Add("A fixture:");
         lines.AddRange(Fixture.Select(field => $"  {field}"));
@@ -413,7 +436,7 @@ public static class ScenarioSchema
             _ => new JsonObject { ["type"] = "string" },
         };
 
-        described["description"] = field.Means;
+        described["description"] = field.Described;
         if (field.OneOf.Count > 0)
         {
             var accepted = new JsonArray();
