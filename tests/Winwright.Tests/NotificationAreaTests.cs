@@ -474,23 +474,33 @@ public sealed class NotificationAreaTests : IDisposable
             Assert.Equal(Winwright.Tracing.StepVerdict.Ok, menu.AsTraceStep().Verdict);
 
             // WW339. Which of the two readings answered, said rather than left to a reader holding
-            // a string. Exactly one of them, always: a menu standing and an entry highlighted are
-            // different facts, and the field that held both was right about one of them.
+            // a string — and WW350 made that a reading each rather than one of two. A menu standing
+            // and an entry highlighted are different facts about the same act, and a
+            // TrackPopupMenu is true of both: it is a top-level menu on the desktop and it takes
+            // the focus. So what is asserted is that something answered, never which.
             Assert.True(
-                menu.Standing is null ^ menu.Highlighted is null,
-                $"one reading answers and this carries {menu.Standing} and {menu.Highlighted}");
+                menu.Standing is not null || menu.Highlighted is not null,
+                "the menu opened and neither reading says what came up");
 
             // WW350, and this case is where the measurement it was filed on came apart. WW339 saw
             // the standing reading answer on both kinds and asserted it here; a later run of this
-            // same fixture had the Win32 popup answer through the highlight instead. Both are true
-            // of a TrackPopupMenu — it is a top-level menu on the desktop and it takes the focus —
-            // so which question reaches it first is a race between the shell highlighting the entry
-            // and the menu window becoming enumerable, and the suite does not get to pick.
+            // same fixture had the Win32 popup answer through the highlight instead, because which
+            // question reaches a TrackPopupMenu first is a race between the shell highlighting an
+            // entry and the menu window becoming enumerable.
             //
-            // So the assertion is the invariant and not the winner: exactly one answered, asserted
-            // above, and the reading a trace carries is that one.
+            // The race no longer decides what a trace says. Both readings are taken at the look that
+            // answers, the menu gets one more poll where only the proxy answered, and Read prefers
+            // the menu — which is a reading of the thing, where the highlight is a proxy for it.
             Assert.Equal(menu.Standing ?? menu.Highlighted, menu.Read);
             Assert.Contains(menu.Read!, menu.AsTraceStep().ReadBack!, StringComparison.Ordinal);
+
+            // And the sentence carries whatever answered, so a reader is never shown one fact where
+            // the run had two.
+            if (menu.Standing is { } stood && menu.Highlighted is { } entry)
+            {
+                Assert.Contains(stood, menu.ToString(), StringComparison.Ordinal);
+                Assert.Contains(entry, menu.ToString(), StringComparison.Ordinal);
+            }
         }
         finally
         {
@@ -542,6 +552,12 @@ public sealed class NotificationAreaTests : IDisposable
 
             // WW339, and against the kind the focus cannot see: a drop-down never takes it, so this
             // is the arm where the answer has to be the menu standing rather than an entry.
+            //
+            // WW350 made the second line a measurement rather than a consequence. Both readings are
+            // taken now, so a null highlight is this desk having answered nothing to that question —
+            // where before it only meant the menu reading had got there first and the other was
+            // never asked. Which makes this the case that would notice a drop-down starting to take
+            // the focus, and that is worth noticing: it is the premise WW322 built the pair on.
             Assert.NotNull(menu.Standing);
             Assert.Null(menu.Highlighted);
             Assert.Contains("the menu", menu.AsTraceStep().ReadBack!, StringComparison.Ordinal);

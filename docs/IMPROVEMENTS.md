@@ -32,29 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW350 the reading that answers is whichever one got there first
-
-WW322 asked the standing menu first and kept the focus behind it, on the argument that a
-TrackPopupMenu answers both and the day one stops answering the other still does. WW339
-split the two readings apart, measured which answers on both kinds this suite can put
-up, saw the standing one answer both times, and asserted it.
-
-That assertion held for one run. On WW340's first run the same fixture, unchanged, had
-the Win32 popup answer through the highlight instead - and both are true of a
-TrackPopupMenu, which is a top-level menu on the desktop and also takes the focus. Which
-question reaches it first is a race between the shell highlighting the entry and the
-menu window becoming enumerable, and neither engine nor suite gets to pick.
-
-Two things follow. WW322's argument is vindicated rather than dead: the focus arm is
-reached, so it is not the unprovoked branch this entry was filed about. And the suite
-now asserts the invariant - exactly one reading answers, and it is the one the trace
-carries - rather than the winner a single measurement had made it assert.
-
-What is left is whether a race decides what a trace says. A step that opened the same
-menu twice can report the entry once and the menu once, and a reader comparing two runs
-is comparing which question won. Preferring one needs a reason, which is what this entry
-now holds.
-
 ### §WW353 the verb with nothing behind its reading
 
 `Pointer.Run` sends the click and then returns `subject.Read().Values` on the next line.

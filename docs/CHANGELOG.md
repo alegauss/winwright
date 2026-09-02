@@ -138,6 +138,7 @@
 - ✅ **WW341** **every other synthesised act reads the instant SendInput returns, and only typing was measured** — the observable exists and reads nothing: 1800 rounds of click, press and nudge, none late, none lost, which bounds the rate under 1% against typing's 2.58%.
 - ✅ **WW342** **the pause repairs the fault and nothing says whether the read provokes it or the pumping it forces** — it is the read and not the pumping: 4800 dispatched messages provoked nothing and the automation read provoked 8 of 400, so the pause pays for the provider.
 - ✅ **WW344** **putting the desk back answers for the flyout and says nothing about the foreground, the half that gets refused** — the reading answers for both halves, and the desktop half is a comparison rather than a return code: who was asked for, and who holds it now.
+- ✅ **WW350** **which of a tray menu's two readings answers is a race, and the suite asserted the one that won a single run** — Both readings are taken at the answering look, the menu gets one more poll where only the proxy answered, and Read prefers it (design recorded in `src/Winwright/Acting/NotificationArea.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

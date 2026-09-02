@@ -97,8 +97,7 @@ public sealed record TrayMenu
     public bool Opened { get; }
 
     /// <summary>
-    /// The entry the menu is highlighting, where the desk named one. Null where the menu was found
-    /// standing on the desktop instead — which is a different fact and now says so.
+    /// The entry the menu is highlighting, where the desk named one.
     /// <para>
     /// WW339. This held both for a while and the name was right about one of them. WW322 asked
     /// whether a menu is standing before asking what holds the focus, because a drop-down answers
@@ -106,30 +105,47 @@ public sealed record TrayMenu
     /// entry's. Two facts under one word is a reader unable to tell which they have, which is the
     /// same rule this project's third verdict exists for.
     /// </para>
+    /// <para>
+    /// WW350. Both may be filled now, and that is the correction: a <c>TrackPopupMenu</c> is true of
+    /// both readings, so a reading that carried one of them was carrying whichever question got
+    /// there first. Null here means this reading did not answer, and never that the other one did.
+    /// </para>
     /// </summary>
-    public string? Highlighted { get; }
+    public string? Highlighted { get; init; }
 
     /// <summary>
-    /// The menu that came up, where one was found standing on the desktop. Null where the desk
-    /// named a highlighted entry instead. WW339.
+    /// The menu that came up, where one was found standing on the desktop. WW339, and WW350 for why
+    /// it no longer excludes the entry beside it.
     /// </summary>
     public string? Standing { get; init; }
 
-    /// <summary>What the reading answered, whichever of the two answered it. WW339.</summary>
-    public string? Read => Highlighted ?? Standing;
+    /// <summary>
+    /// The one reading a caller wanting a single string gets, which is the menu where there is one.
+    /// <para>
+    /// WW350, and the preference is a reason rather than an order. <see cref="Standing" /> is a
+    /// reading of the menu: a window on the desktop now that was not there before the key. The
+    /// highlight is a proxy for a menu — it says the focus moved somewhere that is neither the icon
+    /// nor what was there before, and it is the proxy that answers nothing at all on the kind of
+    /// menu a real tray puts up. Where both are true, what a trace carries is the thing itself.
+    /// </para>
+    /// </summary>
+    public string? Read => Standing ?? Highlighted;
 
     /// <summary>Why nothing came up, where nothing did.</summary>
     public string? Because { get; }
 
-    /// <summary>What happened, said either way — and which reading answered. WW339.</summary>
+    /// <summary>What happened, said either way — and which readings answered. WW339, WW350.</summary>
     public override string ToString()
     {
         if (!Opened)
             return $"{Icon} showed no menu: {Because}.";
 
-        return Standing is { } menu
-            ? $"{Icon} opened the menu \"{menu}\"."
-            : $"{Icon} opened its menu on the entry \"{Highlighted}\".";
+        return (Standing, Highlighted) switch
+        {
+            ({ } menu, { } entry) => $"{Icon} opened the menu \"{menu}\", highlighting \"{entry}\".",
+            ({ } menu, null) => $"{Icon} opened the menu \"{menu}\".",
+            _ => $"{Icon} opened its menu on the entry \"{Highlighted}\".",
+        };
     }
 
     /// <summary>
@@ -977,15 +993,36 @@ public static class NotificationArea
         var came = Attempt.UntilTrue(
             () => (showing = Showed(icon, before, standingBefore)) is not null, settleMs, pollMs);
 
+        // WW350. One more look for the menu itself, where only the proxy answered. The focus moves
+        // before the menu window is enumerable often enough to have flipped this suite's own reading
+        // between two runs of the same fixture — and a highlight with no menu behind it yet is a
+        // menu on its way up rather than a different fact about the desk.
+        //
+        // One poll and never the settle budget, which is the whole of what keeps it safe: a menu
+        // that answers the proxy and never stands is a real possibility, and waiting out the budget
+        // for it would make every one of those pay four seconds to learn nothing.
+        if (came.Happened && showing is { Standing: null, Highlighted: not null } proxied)
+        {
+            CameUp? again = null;
+            Attempt.UntilTrue(
+                () => (again = Showed(icon, before, standingBefore)) is { Standing: not null },
+                pollMs,
+                pollMs);
+
+            if (again is { Standing: not null } stood)
+                showing = stood with { Highlighted = proxied.Highlighted };
+        }
+
         // WW330. What this act took, carried on the reading so it can be given back — by the caller
         // where a menu is standing, and by Refused below where none is.
         if (came.Happened && showing is { } answered)
         {
             // WW339. Into the field the reading belongs in, so a trace says which of the two
-            // answered rather than putting a menu where an entry used to be.
-            return new TrayMenu(icon, true, answered.AsAMenu ? null : answered.Said, null)
+            // answered rather than putting a menu where an entry used to be. WW350: both fields,
+            // because both may have answered and neither is the other's absence.
+            return new TrayMenu(icon, true, answered.Highlighted, null)
             {
-                Standing = answered.AsAMenu ? answered.Said : null,
+                Standing = answered.Standing,
                 Held = wasHolding,
                 OpenedTheOverflow = mine,
             };
@@ -1050,23 +1087,25 @@ public static class NotificationArea
     private static CameUp? Showed(
         TrayIcon icon, string? before, IReadOnlyList<StandingMenu> standingBefore)
     {
-        if (Standing().FirstOrDefault(one => !Among(standingBefore, one)) is { } menu)
-            return new CameUp(menu.Named, AsAMenu: true);
+        // WW350. Both, at the same look, rather than the first of the two to answer. A
+        // TrackPopupMenu is true of both readings, so returning at the first one made which of them
+        // a run recorded a race between the shell highlighting an entry and the menu window becoming
+        // enumerable — and a reader comparing two runs was comparing which question won.
+        var standing = Standing().FirstOrDefault(one => !Among(standingBefore, one))?.Named;
+        var highlighted = OnTheDesk() is { } now && now != before && now != icon.Name ? now : null;
 
-        if (OnTheDesk() is { } now && now != before && now != icon.Name)
-            return new CameUp(now, AsAMenu: false);
-
-        return null;
+        return standing is null && highlighted is null ? null : new CameUp(standing, highlighted);
     }
 
     /// <summary>
-    /// What answered that a menu came up, and which of the two readings did. WW339: kept apart,
-    /// because one is the menu and the other is an entry inside it — and a field holding both was a
-    /// field whose name was right about one of them.
+    /// What answered that a menu came up: either reading, or both. WW339 kept them apart, because
+    /// one is the menu and the other is an entry inside it and a field holding both was a field
+    /// whose name was right about one of them. WW350 let both be filled at once, because a menu that
+    /// is true of both is not a menu this run gets to describe as only one.
     /// </summary>
-    /// <param name="Said">What the reading said.</param>
-    /// <param name="AsAMenu">Whether it is a menu standing rather than a highlighted entry.</param>
-    private sealed record CameUp(string Said, bool AsAMenu);
+    /// <param name="Standing">The menu found standing on the desktop, or null where none was.</param>
+    /// <param name="Highlighted">The entry the desk named, or null where it named none.</param>
+    private sealed record CameUp(string? Standing, string? Highlighted);
 
     /// <summary>
     /// Why no menu came, said with what the key had to work with. WW322.
