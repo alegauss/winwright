@@ -105,6 +105,30 @@ and is a second value per line. What decides it is whether a reader wants what t
 saw or what the run concluded, and those are different questions rather than one asked
 twice.
 
+### §WW368 the arm that is not quite the act
+
+WW355 added four readers to WW342's arm and every one read zero: the window's title
+through USER, one cached ask, one property of a pre-resolved element, and that element's
+`ValuePattern`. Eight hundred rounds each. The engine's settle then took the last of
+those and read 1 of 1200 with the pause taken out, where the pause reads 0.
+
+Thirty-one times better than the 2.58% WW329 measured, and not the zero the arm
+predicted. So the arm is not the act — and the gap is small enough to stay invisible
+until somebody looks, and large enough to have kept fifty milliseconds on every send
+this engine makes.
+
+What differs is listable rather than known. The arm takes the focus once before all its
+rounds and the act takes it before every send. The arm disturbs for a fixed three
+hundred milliseconds whatever happens, where the act stops polling the moment the text
+matches — so the act reads fewer times and faults more, which is the part most wanting
+an explanation. And the act reads through `Admitted.Do`, which the arm reaches past to
+the element.
+
+Each is testable in the arm that already exists, one at a time, which is what makes this
+an entry rather than a shrug. The prize is the interval: a reader that provoked nothing
+in the act as the act runs it would take the pause off every send, and what stands
+between here and that is four more arms and an evening.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW359 the popup the channel does not carry
