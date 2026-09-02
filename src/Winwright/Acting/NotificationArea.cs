@@ -66,6 +66,20 @@ public sealed record TrayMenu
         Missing = missing;
     }
 
+    /// <summary>
+    /// Who held the desktop before the act took it, so <see cref="PutBack"/> knows where to give it
+    /// back. WW330.
+    /// </summary>
+    internal WindowOwner Held { get; init; }
+
+    /// <summary>
+    /// Whether this act was the one that opened the overflow flyout. WW330, and the same rule
+    /// <see cref="NotificationArea.Placing"/> already follows: a flyout that was already standing
+    /// belongs to whoever opened it, and shutting it here would answer their next look with a
+    /// closed one.
+    /// </summary>
+    internal bool OpenedTheOverflow { get; init; }
+
     /// <summary>What this condition is called wherever it is reported.</summary>
     public const string PreconditionName = "the tray icon can be reached and asked";
 
@@ -119,6 +133,44 @@ public sealed record TrayMenu
             return StepVerdict.Ok;
 
         return Missing is not null ? StepVerdict.Unchecked : StepVerdict.Failed;
+    }
+
+    /// <summary>
+    /// Put the taskbar back the way this act found it: shut the flyout this act opened, and give the
+    /// desktop back to whatever held it.
+    /// <para>
+    /// WW330, and it stopped a session. An adopting repository's tray cases failed inside the
+    /// overflow, and the next run in that guest — a different repository's suite, minutes later —
+    /// was refused before it started, with the desk probe reporting that the taskbar had held the
+    /// foreground for every look. A picture of the guest said what no exit code did: an ordinary
+    /// desktop, with the chevron carrying the keyboard focus and its tooltip drawn beside it.
+    /// </para>
+    /// <para>
+    /// Called for the caller where nothing opened, because there is nothing to lose on that path and
+    /// it is the one that was measured. Where a menu did open it is the caller's to call, once it
+    /// has read the menu and dismissed it — the act cannot know when that is, and shutting the
+    /// flyout under a menu somebody is reading would be this verb dismissing its own answer.
+    /// </para>
+    /// <para>
+    /// Best effort and it says which parts held. Windows refuses the foreground to a process that
+    /// does not own it, and a chevron that will not take the act is a shell this run cannot work —
+    /// both are facts about the desk, and neither is worth failing a case that has already read what
+    /// it came for.
+    /// </para>
+    /// </summary>
+    /// <param name="settleMs">How long shutting the flyout may take.</param>
+    /// <param name="pollMs">How often that wait looks again.</param>
+    /// <returns>What shutting the flyout did, or that there was none of this act's to shut.</returns>
+    public OverflowState PutBack(int settleMs = 2000, int pollMs = 25)
+    {
+        // The foreground first. Shutting the flyout can move it again, and what this is putting back
+        // is where it was before any of this ran.
+        if (Held.Window != 0)
+            Win32.SetForegroundWindow(Held.Window);
+
+        return OpenedTheOverflow
+            ? NotificationArea.CloseOverflow(settleMs, pollMs)
+            : new OverflowState("shut", true, already: true, null);
     }
 
     /// <summary>The step a trace records.</summary>
@@ -741,7 +793,18 @@ public static class NotificationArea
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(named);
 
+        // WW330. Before anything is opened or focused, because that is what "as it found it" means:
+        // read after the icon has taken the focus and this would be the taskbar, which is the state
+        // being put back rather than the one to put back.
+        var wasHolding = Foreground.Now();
+
         var search = Find(named, openingTheOverflow: true, settleMs, pollMs);
+
+        // WW330. Whether the flyout standing now is this act's doing, read once and carried into
+        // every reading below — the three early returns leak it as readily as the one at the end,
+        // and a search that opened it and then found nothing is the commonest of the four.
+        var mine = search.Overflow is { Held: true, Already: false };
+
         if (!search.Found)
         {
             // WW168: the search's own sentence rather than one typed here. This used to say the icon
@@ -750,12 +813,19 @@ public static class NotificationArea
             // WW174: and the search's verdict too, not only its sentence. A shell that would not
             // open the flyout never got asked whether the icon is there, so the menu it could not
             // ask for is a hole under the search's own condition rather than a menu that failed.
-            return new TrayMenu(
-                new TrayIcon(new ElementFacts(named, "", "Button", "", false, true, default, new HashSet<string>()), false),
-                false,
-                null,
-                search.Because,
-                search.Everywhere ? null : Precondition.Absent(TraySearch.PreconditionName, search.Because));
+            return Refused(
+                new TrayMenu(
+                    new TrayIcon(new ElementFacts(named, "", "Button", "", false, true, default, new HashSet<string>()), false),
+                    false,
+                    null,
+                    search.Because,
+                    search.Everywhere ? null : Precondition.Absent(TraySearch.PreconditionName, search.Because))
+                {
+                    Held = wasHolding,
+                    OpenedTheOverflow = mine,
+                },
+                settleMs,
+                pollMs);
         }
 
         var icon = search.Icon!;
@@ -767,7 +837,14 @@ public static class NotificationArea
             // its own taskbar. Nothing was asked of the application, so nothing about it was
             // observed — and a red here sends a reader looking for a menu bug that never existed.
             const string vanished = "the icon went away between finding it and asking it";
-            return new TrayMenu(icon, false, null, vanished, Precondition.Absent(TrayMenu.PreconditionName, vanished));
+            return Refused(
+                new TrayMenu(icon, false, null, vanished, Precondition.Absent(TrayMenu.PreconditionName, vanished))
+                {
+                    Held = wasHolding,
+                    OpenedTheOverflow = mine,
+                },
+                settleMs,
+                pollMs);
         }
 
         try
@@ -781,7 +858,14 @@ public static class NotificationArea
             // will not give the focus stops the act before it starts. That is the same class of
             // fact as a foreground Windows would not grant, and it is a hole for the same reason.
             var because = $"it would not take the focus: {refused.Message}";
-            return new TrayMenu(icon, false, null, because, Precondition.Absent(TrayMenu.PreconditionName, because));
+            return Refused(
+                new TrayMenu(icon, false, null, because, Precondition.Absent(TrayMenu.PreconditionName, because))
+                {
+                    Held = wasHolding,
+                    OpenedTheOverflow = mine,
+                },
+                settleMs,
+                pollMs);
         }
 
         var before = OnTheDesk();
@@ -804,9 +888,43 @@ public static class NotificationArea
         string? showing = null;
         var came = Attempt.UntilTrue(() => Showed(icon, before, standingBefore, out showing), settleMs, pollMs);
 
-        return came.Happened
-            ? new TrayMenu(icon, true, showing, null)
-            : new TrayMenu(icon, false, null, Undelivered(icon, came.WaitedMs, aimedAt, holding));
+        // WW330. What this act took, carried on the reading so it can be given back — by the caller
+        // where a menu is standing, and by Refused below where none is.
+        if (came.Happened)
+            return new TrayMenu(icon, true, showing, null) { Held = wasHolding, OpenedTheOverflow = mine };
+
+        return Refused(
+            new TrayMenu(icon, false, null, Undelivered(icon, came.WaitedMs, aimedAt, holding))
+            {
+                Held = wasHolding,
+                OpenedTheOverflow = mine,
+            },
+            settleMs,
+            pollMs);
+    }
+
+    /// <summary>
+    /// A reading with no menu in it, with the desk put back before it is handed over. WW330.
+    /// <para>
+    /// Every arm of this verb that answers no menu comes through here, which is the whole of why it
+    /// exists: the leak was measured on one of the four and the other three take exactly the same
+    /// two things. There is nothing to lose on any of them — no menu opened, so nothing is dismissed
+    /// by shutting the flyout and nothing is read after the foreground goes back.
+    /// </para>
+    /// <para>
+    /// What it does not do is report what putting it back did. A shell that would not shut its own
+    /// flyout is a fact about the desk, and the reading being handed over already says the menu did
+    /// not open — adding a second sentence about the tidying would put the run's housekeeping in
+    /// front of its finding.
+    /// </para>
+    /// </summary>
+    /// <param name="menu">The reading, already carrying what the act took.</param>
+    /// <param name="settleMs">How long shutting the flyout may take.</param>
+    /// <param name="pollMs">How often that wait looks again.</param>
+    private static TrayMenu Refused(TrayMenu menu, int settleMs, int pollMs)
+    {
+        menu.PutBack(settleMs, pollMs);
+        return menu;
     }
 
     /// <summary>

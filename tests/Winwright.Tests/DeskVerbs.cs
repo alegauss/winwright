@@ -18,6 +18,14 @@ internal enum Touching
     /// <summary>It sweeps the desk and then keeps only what the caller named, so what else happens
     /// to be open cannot change the answer.</summary>
     FilteredToWhatTheCallerNamed,
+
+    /// <summary>
+    /// It puts back what an act of this engine took and claims nothing. WW330: a case calls one
+    /// after it has read everything it came for, and a desk that refuses the tidying leaves the run
+    /// exactly where it would have been without the call — so there is no verdict for the desk to
+    /// have decided.
+    /// </summary>
+    PuttingItBack,
 }
 
 /// <summary>One engine verb that reaches the desk and is not in <see cref="DeskAsks.Calls" />.</summary>
@@ -93,6 +101,14 @@ internal static class DeskVerbs
         new("TopLevelWindows.Largest", Touching.FilteredToWhatTheCallerNamed,
             "the same walk, answering the largest of them. It reaches the desk only through "
                 + "OfProcess and inherits the whole of its argument"),
+
+        new("NotificationArea.PutBack", Touching.PuttingItBack,
+            "WW330. It shuts the flyout the act it belongs to opened and gives the desktop back to "
+                + "whatever held it, which is housekeeping and not a reading: the verb that took "
+                + "both is the one a case excuses, and this one is called after the case has "
+                + "asserted everything it came for. A shell that refuses either leaves the taskbar "
+                + "the way it already was, which is the state this exists to improve on rather than "
+                + "a verdict it could get wrong"),
     ]);
 
     /// <summary>Every public verb of the engine that reaches a desk primitive.</summary>

@@ -47,6 +47,15 @@ internal static class Win32
     [DllImport("user32.dll")]
     internal static extern nint GetForegroundWindow();
 
+    /// <summary>
+    /// WW330. Best effort and known to be: Windows refuses this to a process that does not already
+    /// own the foreground, so what it is for is putting back a desk this run itself took — where the
+    /// refusal is unlikely and the alternative is leaving the taskbar selected for the next run.
+    /// </summary>
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SetForegroundWindow(nint window);
+
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     internal static extern nint FindWindowW(string? className, string? title);
 

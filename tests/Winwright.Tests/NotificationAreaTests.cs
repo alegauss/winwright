@@ -476,8 +476,11 @@ public sealed class NotificationAreaTests : IDisposable
         finally
         {
             // WW330's rule where the leak would be this suite's own: a menu left up owns the
-            // foreground, and the next case in this class reads the desk.
+            // foreground, and the next case in this class reads the desk. The menu first, because
+            // it is the thing the act was keeping — and then the flyout and the desktop, which the
+            // act took and could not give back while a menu it had opened was still standing.
             answering.DismissMenu();
+            menu.PutBack();
         }
     }
 
@@ -520,8 +523,68 @@ public sealed class NotificationAreaTests : IDisposable
         }
         finally
         {
+            // WW330. The same pair as the case above: the menu is the case's to dismiss, and what
+            // the act took is the act's to give back once there is nothing left to lose.
             answering.DismissMenu();
+            menu.PutBack();
         }
+    }
+
+    [Fact]
+    public void A_menu_that_never_came_leaves_the_taskbar_as_it_found_it()
+    {
+        // WW330, and it stopped a session. The adopting repository's tray cases failed inside the
+        // overflow in the guest, and the next run there — a different repository's suite, minutes
+        // later — was refused before it started, with the desk probe reporting that the taskbar had
+        // held the foreground for every look. A picture of the guest said what no exit code did: an
+        // ordinary desktop, the chevron carrying the keyboard focus, its tooltip drawn beside it.
+        //
+        // The class's own icon is exactly this arm: it answers no menu on purpose, so the act opens
+        // the flyout, focuses the icon, presses the key and has nothing to keep.
+        if (!Placed || BusyDesk.Excused(NotificationArea.Reachable()))
+            return;
+
+        // Shut first, so what the act leaves is the act's. A flyout another case left standing
+        // belongs to that case and this one must not shut it — which is the rule the engine follows
+        // and therefore the rule that would make this assertion answer about the wrong opener.
+        //
+        // Excused rather than discarded: a shell that will not shut its own flyout is a desk this
+        // run cannot work, and the assertion below would then be about that rather than about the
+        // act. WW204's rule from the other end — a reading thrown away here is one whose cost lands
+        // on the line that asserts afterwards.
+        if (BusyDesk.Excused(NotificationArea.CloseOverflow().AsAssertion("the overflow starts shut")))
+            return;
+
+        var before = Foreground.Now();
+        var taskbar = NotificationArea.Tray()?.Current.NativeWindowHandle ?? 0;
+
+        var menu = NotificationArea.OpenMenu(Tip, settleMs: 1500, pollMs: 40);
+
+        if (BusyDesk.Excused(menu.AsAssertion("the icon shows its menu")))
+            return;
+
+        Assert.False(menu.Opened, menu.Because);
+
+        // The flyout the act opened is shut. This is the half the engine owns outright: the chevron
+        // takes an invoke, needs no foreground, and a shell that refuses it is a desk this run
+        // cannot work — which the excuse above has already stood the case down for.
+        Assert.True(
+            NotificationArea.Overflow() is null,
+            "the act opened the overflow, found no menu, and left the flyout standing");
+
+        // And the desktop is not the taskbar's. The guard is the honest half: where the shell
+        // already held the desk before any of this ran, this act cannot be what left it there, and
+        // asserting anyway would be reporting the desk as a defect in the code.
+        if (taskbar == 0 || before.Window == taskbar)
+            return;
+
+        // Asserted this way round rather than against the window that held it before: putting a
+        // foreground back is best effort — Windows refuses it to a process that does not own one —
+        // and what was measured is not that some particular window lost the desk, it is that the
+        // shell kept it for every run afterwards.
+        Assert.True(
+            Foreground.Now().Window != taskbar,
+            $"the act left the taskbar holding the foreground: {Foreground.Now()}");
     }
 
     [Fact]

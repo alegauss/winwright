@@ -193,6 +193,29 @@ the thread without reading anything - a posted message answered and dropped - wo
 provoke it with no read at all. Both are cheap in the arm WW329 already built: the round
 is the same, and what changes is what happens during the drain.
 
+### §WW344 the half of the tidying nobody hears about
+
+`PutBack` does two things and answers for one. It shuts the flyout and returns what
+shutting it did - a reading with a reason and a precondition on it, the way every other
+tray verb answers. Then it calls `SetForegroundWindow`, whose whole documented behaviour
+is that Windows refuses it to a process that does not own the foreground, and returns
+nothing about that at all.
+
+So a run where the shell kept the desktop looks exactly like one where it did not. That
+is the shape this project withdraws everywhere else: a reading nobody took and a reading
+that came back clear are different facts, and a caller cannot tell them apart from one
+value.
+
+What it costs to close is small and the shape already exists. `Foreground.Now` reads who
+holds it, so the call can be followed by a look and the two compared - which is also the
+only honest way to report it, since the boolean the API answers is documented to be true
+where nothing moved.
+
+What it is worth is a run that says why the next one was refused. WW330 was found by a
+picture of a guest, taken by hand, after a suite in another repository would not start;
+a line in the first run's own output saying the desktop had not gone back would have
+been the whole investigation.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW334 the shadow behind a popup is not a picture of it
@@ -330,32 +353,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW330 The flyout nobody closed
-
-Measured, and it stopped a session. The adopting repository's tray cases ran in the
-guest and failed inside the overflow flyout. The next run there — a different
-repository's suite, minutes later — was refused before it started, with the desk probe
-reporting that the taskbar had held the foreground for every look.
-
-A picture of the guest says what no exit code did: no dialog, no prompt, an ordinary
-desktop. The overflow chevron carries the keyboard focus and its tooltip is drawn beside
-it. That is what the shell looks like after somebody focused the chevron and never took
-the focus back.
-
-Opening the flyout is the engine's own act. `OpenMenu` opens the overflow, focuses the
-icon and presses the application key, and puts nothing back. Where a menu appears,
-dismissing it is the case's business; where none does, there is nothing to dismiss and
-the focus stays where the act left it.
-
-So the cost lands on the run after, which is the shape this block's criterion names: a
-run leaves the machine as it found it. A failing act left the shell selected, and every
-later run inherits it.
-
-Where the restore belongs is the question rather than whether. Putting the focus back
-unconditionally would close a menu a case meant to read. Restoring only where nothing
-opened leaves the successful path leaking — and it is the failing path that was
-measured, and the one with no menu to lose.
-
 ### §WW331 A shell surface is not a prompt
 
 The probe refused a run: `the guest's desk is waiting for an answer: explorer (pid 1008,
@@ -380,5 +377,26 @@ something that was never there.
 
 A refusal that named the shell and said the desk was left focused rather than asked
 would point at WW330, which is the actual repair, and cost nobody the trip.
+
+### §WW343 the desk a scenario cannot hand back yet
+
+WW330 closed the arm it was filed for: where no menu opened, the act shuts the flyout it
+opened and gives the desktop back, and a caller that did get a menu calls `PutBack` once
+it has read one. The suite's two menu cases do exactly that.
+
+A scenario cannot. `CaseRun.Trayed` already shuts the flyout in a finally - WW258 put it
+there, and it is right - but the focus is the other half and it has no such place to go.
+Calling `PutBack` in that finally would set the foreground back while the menu is
+standing, and a drop-down closes the moment anything else takes the focus. So the step
+that opens a menu would dismiss it before the step that reads it ran, which is the case
+failing rather than the desk being tidied.
+
+The reading has to live longer than the step. What opens a tray menu is one step and
+what reads it is the next, so the restore belongs where the case ends - beside the
+fixture teardown, which is already the place a case gives back what it took.
+
+This is the adopters' own path. claude-tray's menu case is `open tray menu` and then two
+reads of `Menu > MenuItem`, and it is a run of exactly that shape whose leftover chevron
+refused the next run in the guest.
 
 ## Block K — The proving ground — a fixture app built to be hard to test

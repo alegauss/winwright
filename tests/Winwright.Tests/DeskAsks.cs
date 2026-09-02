@@ -366,6 +366,14 @@ internal static class DeskAsks
             "the intruder is placed well clear, and the case returns where the reading came back "
                 + "covered anyway — a desk holding a window over the fixture has nothing clear to "
                 + "carry, and the receipt would refuse rather than answer"),
+        new("NotificationAreaTests.A_menu_that_never_came_leaves_the_taskbar_as_it_found_it",
+            Unaffected.Guarded,
+            "WW330. The foreground is read to say the act did not leave the taskbar holding it, and "
+                + "the case returns before that assertion where the taskbar was already holding it "
+                + "when the act began — a shell that had the desk anyway is not something this act "
+                + "took, and asserting on it would report the desk as the defect. Its other two "
+                + "facts are excused rather than reasoned about, which is the half a reader checks "
+                + "first"),
     ]);
 
     /// <summary>Every case in this suite that makes one of those calls, whether or not it excuses.</summary>
