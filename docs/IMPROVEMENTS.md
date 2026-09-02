@@ -32,26 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW342 what the fifty milliseconds are paying for
-
-WW329 measured the repair and not the mechanism. A cross-process read against the window
-under test is two things at once: a call into another process, and a message pump run on
-that process's own thread to answer it. Either could be what disturbs the queue while
-its packets are being translated, and delaying the read removes both.
-
-Two things rest on the difference. The interval is fifty milliseconds because that is
-where the fault stopped and 150 was no better - it is a floor found by sweeping, not a
-duration anything derived, so nothing says whether five would do. And any other reader
-of that window inherits the same question: a case that watches a caption while a send is
-in flight is doing whatever the first look was doing, and there is no rule to tell it
-apart from one that is not.
-
-What would separate them is a reader that does not pump. UI Automation's cached reads
-and a raw property fetch take different routes through the target, and an arm that pumps
-the thread without reading anything - a posted message answered and dropped - would
-provoke it with no read at all. Both are cheap in the arm WW329 already built: the round
-is the same, and what changes is what happens during the drain.
-
 ### §WW344 the half of the tidying nobody hears about
 
 `PutBack` does two things and answers for one. It shuts the flyout and returns what
@@ -119,6 +99,28 @@ which is the failure a person spends an afternoon on.
 The fix is small and the cost is what has to be decided: a poll until the reading moves
 adds a deadline to a verb that has none, and a click that legitimately changes nothing
 would spend all of it. WW341's arm is what would price that.
+
+### §WW355 the reader that would need no pause
+
+WW329 put a fifty-millisecond pause in front of the engine's first look and the fault
+went away. WW342 then took the read apart and found which half does it: making the
+window's thread dispatch 4800 messages provoked nothing at all, and the UI Automation
+read provoked 8 of 400. So the pause is not waiting for the queue to drain. It is
+waiting out whatever the automation provider does on that thread when it is asked.
+
+That was never the question WW329 could ask, and it changes what the interval is. Fifty
+milliseconds is a floor found by sweeping - 150 was no better and nothing says five
+would not do - and it is paid by every send this engine makes, forever, on every desk. A
+read that does not provoke would be a repair with no interval in it.
+
+Three readers are worth measuring in the arm WW342 already built, because the round is
+the same and only the disturbance changes. A cached request, which asks the provider
+once and answers from the copy. A single property rather than the whole `PatternValues`
+pass, which is several requests where one would do. And the text through `WM_GETTEXT`,
+which the window's thread answers without WPF's automation peer being built at all.
+
+If any of them reads the box without provoking, the engine reads that way and the pause
+goes. If all three provoke, the pause is the repair and this is what says so.
 
 ## Block E — Capture — the picture that proves what it photographed
 

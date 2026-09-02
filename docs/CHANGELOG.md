@@ -136,6 +136,7 @@
 - ✅ **WW338** **a tray menu is told from the one before it by name, so two unnamed menus read as one menu standing** — Every menu standing is read and told apart by its runtime id, and the case that provokes it goes red against the old comparison with the sentence WW322 spent itself on.
 - ✅ **WW339** **a tray menu's reading is called Highlighted and now often holds the menu's own name instead** — The menu standing and the entry highlighted are two fields and exactly one answers, so a trace records the menu as the menu rather than where an entry used to be.
 - ✅ **WW341** **every other synthesised act reads the instant SendInput returns, and only typing was measured** — the observable exists and reads nothing: 1800 rounds of click, press and nudge, none late, none lost, which bounds the rate under 1% against typing's 2.58%.
+- ✅ **WW342** **the pause repairs the fault and nothing says whether the read provokes it or the pumping it forces** — it is the read and not the pumping: 4800 dispatched messages provoked nothing and the automation read provoked 8 of 400, so the pause pays for the provider.
 
 ## Block E — Capture — the picture that proves what it photographed
 

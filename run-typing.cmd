@@ -35,9 +35,16 @@ rem own act produced, against a reading taken afterwards with time to settle. Th
 rem worth the run - it reads once and polls nothing, so a late arrival is a wrong answer rather than
 rem a poll - and the fixture is launched with --ranges for it, which no other arm needs.
 rem
+rem `provoke` is WW342's, and it takes the read apart rather than delaying it. A cross-process read
+rem is a call out of this process AND a message loop run on the target's own thread, and the pause
+rem removes both - so nothing says which one disturbs the queue. Four arms: `quiet` does nothing
+rem while it drains, `peek` reads the window's rectangle without waking its thread, `poke` makes that
+rem thread dispatch a WM_NULL and reads nothing back, and `read` is the engine's own first look. What
+rem the rows say is which half the fault needs, which is what the fifty milliseconds are paying for.
+rem
 rem The configuration moved to the third argument when this gained the second. `run-typing.cmd 400`,
-rem `run-typing.cmd 150 sweep`, `run-typing.cmd 1200 delay` and `run-typing.cmd 300 acts` are the
-rem four a person types.
+rem `run-typing.cmd 150 sweep`, `run-typing.cmd 1200 delay`, `run-typing.cmd 300 acts` and
+rem `run-typing.cmd 400 provoke` are the five a person types.
 setlocal
 
 set CONFIG=Debug

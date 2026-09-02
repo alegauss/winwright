@@ -80,10 +80,14 @@ public static class Program
         // and not one experiment with options: the default measures the repair against the engine's
         // own send, `sweep` drives a send the engine does not have, and `delay` drives the send it
         // does have with the pause the engine does not take. A run says which it is.
+        //
+        // WW342 carries the word down rather than a boolean per arm. Four of those was already a
+        // parameter list that said which arms exist in two places, and the fifth would have been the
+        // one somebody passed in the wrong position. What is spelled once here is what an arm is
+        // called; WW354 is the remaining half, which is that this list and run-typing.cmd's prose
+        // are still two lists.
         var experiment = args.Length > 1 ? args[1] : "";
-        var sweeping = string.Equals(experiment, "sweep", StringComparison.OrdinalIgnoreCase);
-        var delaying = string.Equals(experiment, "delay", StringComparison.OrdinalIgnoreCase);
-        var landing = string.Equals(experiment, "acts", StringComparison.OrdinalIgnoreCase);
+        var landing = Named(experiment, "acts");
 
         var executable = Fixture();
         if (executable is null)
@@ -109,7 +113,7 @@ public static class Program
 
         try
         {
-            return Measured(fixture, rounds, sweeping, delaying, landing);
+            return Measured(fixture, rounds, experiment);
         }
         finally
         {
@@ -118,7 +122,19 @@ public static class Program
         }
     }
 
-    private static int Measured(Process fixture, int rounds, bool sweeping, bool delaying, bool landing)
+    /// <summary>Whether the second word names this arm, however it was capitalised.</summary>
+    /// <param name="experiment">What the run was asked for.</param>
+    /// <param name="arm">The arm's name.</param>
+    private static bool Named(string experiment, string arm) =>
+        string.Equals(experiment, arm, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The window under test, for an arm that needs the handle rather than an element. WW342.
+    /// </summary>
+    /// <param name="fixture">The running fixture.</param>
+    private static nint Handle(Process fixture) => TopLevelWindows.Largest(fixture.Id)?.Handle ?? 0;
+
+    private static int Measured(Process fixture, int rounds, string experiment)
     {
         var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(fixture.Id) is not null, 20000, 25);
         if (!drawn.Happened)
@@ -161,7 +177,7 @@ public static class Program
         // WW312. The sweep answers on its own and shares nothing below it: the counts, the drift and
         // the repair's verdict are all about the engine's send, and printing them under a run that
         // never called it would attribute this arm's numbers to the thing it exists to differ from.
-        if (sweeping)
+        if (Named(experiment, "sweep"))
         {
             Sweep.Run(box, arrived, packets, rounds);
             return 0;
@@ -171,7 +187,7 @@ public static class Program
         // verdict below are about the engine's own act, and this arm takes the act apart to put a
         // pause inside it. Printing those under a run that never called `Type` would attribute this
         // arm's numbers to the thing it exists to differ from.
-        if (delaying)
+        if (Named(experiment, "delay"))
         {
             FirstRead.Run(box, arrived, packets, rounds);
             return 0;
@@ -180,9 +196,18 @@ public static class Program
         // WW341, and it answers on its own for the same reason as the two above: nothing below this
         // is about a click, a key or a range, and printing the typing counts under a run that never
         // typed would attribute them to the acts this arm is measuring.
-        if (landing)
+        if (Named(experiment, "acts"))
         {
             Landing.Run(root, rounds);
+            return 0;
+        }
+
+        // WW342, and the window and not the control: two of its four arms deliberately never go
+        // through automation, and the one that touches the window without waking its thread has no
+        // element to touch. It answers on its own for the reason the three above do.
+        if (Named(experiment, "provoke"))
+        {
+            Disturbance.Run(box, arrived, packets, Handle(fixture), rounds);
             return 0;
         }
 
