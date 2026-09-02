@@ -102,6 +102,31 @@ which the window's thread answers without WPF's automation peer being built at a
 If any of them reads the box without provoking, the engine reads that way and the pause
 goes. If all three provoke, the pause is the repair and this is what says so.
 
+### §WW366 the two instants on one line
+
+WW353 went looking for a click that fails a case and found it cannot.
+`CaseRun.Attempting` puts both `expect` and `moves` through `Expect.That` with the act
+budget, so the reading a verdict turns on is polled for after the act — and the act's
+own single reading decides nothing about pass or fail.
+
+What it does decide is the trace. `ActResult.AsTraceStep` sets `ReadBack` from `After`,
+the reading `Synthesised.Landed` took the moment the act returned; the expectation then
+polls and may settle on something else. So a run can print a step whose read-back is
+from before the act landed, beside a verdict that passed on the value after it. Both are
+true, they are about different instants, and nothing in the line says which.
+
+It is the shape this project refuses everywhere else, moved one surface along. A trace
+is what a reader opens when a verdict surprises them, and one that disagrees with the
+verdict sends them to the control rather than to the timing — which is the afternoon
+WW353's own entry described, relocated from the verdict to the page a person actually
+reads.
+
+Two candidates and both are small. The trace step could be composed after the
+expectation, out of the reading it settled on; or it could carry both, which is honest
+and is a second value per line. What decides it is whether a reader wants what the act
+saw or what the run concluded, and those are different questions rather than one asked
+twice.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW359 the popup the channel does not carry
