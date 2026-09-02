@@ -322,7 +322,18 @@ A tray step takes two acts and no others, because an icon is not an element: `re
 shell is showing it, and `open tray menu` asks for its menu — by focus and the application key, which
 is the only route that reaches one on this shell. Every other act asks a control through its patterns,
 and a step naming one against a `tray` is refused where it was written. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`. `expect` is what the element should read
+`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `capture`.
+
+`capture` is the one act that produces a file, and the one that acts on a window rather than on a
+control: it photographs the window its locator is inside, and its argument is what to **call** the
+picture rather than where to put it. Where pictures go is `captures` in the project's own
+declaration, and the folder inside it is the case's name — so no case carries a path, which is the
+same rule every other field here follows. Its claim is the receipt and it takes no `expect` and no
+`reads`. A window a render could reach is a **hole** rather than a picture: a render draws the
+application's own visual tree and only the application can take one, so the answer names
+`Winwright.InApp` instead of reaching for the screen.
+
+`expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
 `toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `description`, `enabled`, `focused`, defaulting to `anything`, the one value the element
 reports, in the order a reader looks at them. `selected` asks whether *this* element is chosen and

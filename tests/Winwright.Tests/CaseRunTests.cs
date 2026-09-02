@@ -303,19 +303,149 @@ public sealed class CaseRunTests : IDisposable
         Assert.Contains("the field takes a name: Passed over 1 of 1 check", run.ToString());
     }
 
-    private CaseResult Run(CaseDeclaration declared, nint frame) =>
-        CaseRun.Of(declared, AutomationElement.FromHandle(frame), Declared());
+    [Fact]
+    public void A_case_can_name_a_capture_and_the_picture_lands_where_the_project_says()
+    {
+        // WW336. The one act a case could not name, and the reason it could not was the file: every
+        // other field is derived so a case means the same thing on the next machine, and a path
+        // written into one is the plainest way to break that. So the case says what to call the
+        // picture and the project says where pictures go.
+        //
+        // Resolved against the desktop and not against a window of its own, which is what a resident
+        // fixture does and is the shape this verb is for: a tray draws no window, so a case that
+        // photographs its menu has no main window to be told the menu is not. Here the popup this
+        // test made stands in for that menu — WS_POPUP with no caption, which is what the route
+        // reads and what sends it to the screen rather than to a render nothing can take.
+        _ = Dialog();
+        var declared = CaseDeclaration.Of(
+            "the dialog is photographed",
+            StepDeclaration.Of("Text[name=\"winwright statistics\"]", "capture", "the field as it opens"));
+
+        var run = Run(declared, AutomationElement.RootElement, captures: true);
+
+        // A window somebody stood over the region of is a hole and not a red, which is the whole of
+        // what the arm mapping is for — so the case stands down rather than asserting about a desk.
+        // Named against the engine's own condition, because a hole this case does not recognise is
+        // one it must not stand down for.
+        if (run.Verdict.Unchecked.Any(
+                one => one.Missing?.Name == Winwright.Capturing.Obstruction.PreconditionName))
+        {
+            return;
+        }
+
+        // The whole reading and not the outcome alone: a capture has six ways of being wrong and a
+        // red saying only "Degraded" sends a reader to a debugger to find out which.
+        Assert.True(
+            run.Verdict.Outcome == RunOutcome.Passed,
+            string.Join(
+                Environment.NewLine,
+                run.Verdict.Unchecked.Select(one => $"  unchecked {one}")
+                    .Concat(run.Verdict.Failures.Select(one => $"  failed    {one}"))));
+
+        // The picture is where the project said, in a folder named for the case and a file named
+        // for what the case called it — neither of which the case spelled as a path.
+        var into = Path.Combine(root, "pictures", "the dialog is photographed", "the field as it opens.png");
+        Assert.True(File.Exists(into), $"nothing was written to {into}");
+
+        // And it is a picture rather than a file: the receipt counts the colours of whatever was
+        // written, so a flat rectangle would have refused before this line.
+        Assert.True(new FileInfo(into).Length > 0);
+    }
+
+    [Fact]
+    public void A_capture_of_a_window_that_wants_a_render_is_a_hole_naming_the_half_that_can()
+    {
+        // WW336. The copy is what this engine can perform; a render draws the application's own
+        // visual tree and nothing outside that process can do it. So the case is not failed — the
+        // picture was never taken and nothing about the application was observed — and the absence
+        // names the half that could take it rather than leaving a reader to work that out.
+        var frame = Create("Static", "winwright main", WsVisible | 0x00C00000, 480, 320);
+        Create("Edit", "alpha", WsChild | WsVisible, 200, 24, frame);
+
+        var declared = CaseDeclaration.Of(
+            "the main window is photographed",
+            StepDeclaration.Of("Edit", "capture", "the whole window"));
+
+        var run = Run(declared, frame, captures: true);
+
+        Assert.Equal(RunOutcome.Degraded, run.Verdict.Outcome);
+
+        var hole = Assert.Single(run.Verdict.Unchecked);
+        Assert.Contains("Winwright.InApp", hole.Detail, StringComparison.Ordinal);
+        Assert.Contains("renderable", hole.Detail, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_capture_with_nowhere_declared_to_put_it_is_a_hole_and_not_a_path_invented_here()
+    {
+        // WW336. A run that guessed a directory would be a run whose pictures land somewhere nobody
+        // asked for, and a case that named one would be a case that means something else on the next
+        // machine. Neither, so it says what is missing and which file to add it to.
+        var frame = Dialog();
+        var declared = CaseDeclaration.Of(
+            "the dialog is photographed",
+            StepDeclaration.Of("Edit", "capture", "the field"));
+
+        var run = Run(declared, frame);
+
+        Assert.Equal(RunOutcome.Degraded, run.Verdict.Outcome);
+
+        var hole = Assert.Single(run.Verdict.Unchecked);
+        Assert.Contains("declares no 'captures'", hole.Detail, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_capture_step_claims_the_picture_and_may_not_claim_a_reading_beside_it()
+    {
+        // WW336, and it is WW323's rule reaching the newest act: a capture's claim is the receipt —
+        // that the picture is of this window, out of this process, with nothing showing through it —
+        // and a reading of the element the locator matched is a second thing to check.
+        var refused = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of("Edit", "capture", "the field", expected: "beta", reads: "value"));
+
+        Assert.Contains("a capture's claim is the picture", refused.Because, StringComparison.Ordinal);
+
+        // And naming a reading alone is refused too, because a capture is about the window the
+        // locator is inside rather than about what that element says.
+        var named = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of("Edit", "capture", "the field", reads: "value"));
+
+        Assert.Contains("about the window the locator is inside", named.Because, StringComparison.Ordinal);
+
+        // A capture with nothing to call it is refused by the verb's own arity, which is where every
+        // other missing argument is caught.
+        Assert.Throws<ScenarioRefusedException>(() => StepDeclaration.Of("Edit", "capture"));
+    }
+
+    private CaseResult Run(CaseDeclaration declared, nint frame, bool captures = false) =>
+        Run(declared, AutomationElement.FromHandle(frame), captures);
+
+    /// <summary>
+    /// The same, against a root that need not be a window. WW336: a resident fixture draws none, so
+    /// its cases resolve against the desktop — and the capture verb's own shape turns on that.
+    /// </summary>
+    /// <param name="declared">The case.</param>
+    /// <param name="root">What its locators resolve under.</param>
+    /// <param name="captures">Whether the project says where pictures go.</param>
+    private CaseResult Run(CaseDeclaration declared, AutomationElement root, bool captures = false) =>
+        CaseRun.Of(declared, root, Declared(captures));
 
     /// <summary>A project whose waits are short, because half of these are waiting for a red.</summary>
-    private ProjectDeclaration Declared()
+    /// <param name="captures">
+    /// WW336. Whether it says where pictures go. Off by default and named by the three cases that
+    /// need it, because the absence is itself a case: a run with nowhere declared answers a hole
+    /// rather than inventing a directory.
+    /// </param>
+    private ProjectDeclaration Declared(bool captures = false)
     {
+        var pictures = captures ? """, "captures": "pictures" """ : "";
         var path = Path.Combine(root, ProjectDeclaration.FileName);
         File.WriteAllText(
             path,
             $$"""
             {
               "executable": {{System.Text.Json.JsonSerializer.Serialize(Environment.ProcessPath)}},
-              "timeouts": { "resolve": 600, "act": 600, "poll": 20 }
+              "timeouts": { "resolve": 600, "act": 600, "poll": 20 }{{pictures}}
             }
             """);
 

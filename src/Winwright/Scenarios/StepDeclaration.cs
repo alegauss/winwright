@@ -596,6 +596,11 @@ public sealed record StepDeclaration
     /// </summary>
     public bool Checkable =>
         Tray is not null
+        // WW336. A capture is checkable carrying none of the fields below, for the reason a tray
+        // step is: the claim is the receipt — this picture is of this window, out of this process,
+        // started this way, with nothing standing over it and nothing showing through it — and the
+        // receipt answers pass, fail or hole on its own.
+        || Verb.Captures
         || Expected is not null || Moves || Answers || Sweeps is not null || Matches is not null || Discloses
         || SameAs is not null || Never is not null || Spoken
         || Absent
@@ -939,6 +944,30 @@ public sealed record StepDeclaration
         Claiming(ownHeader, "ownHeader", "each row's controls announce that row");
 
         var claims = claiming.Count > 0;
+
+        // WW336. A capture's claim is the receipt, and it is the whole of it. Every field in the set
+        // above is a reading of an element the locator matched; a capture is about the window that
+        // element is in, and the two are answered at different moments by different machinery — so a
+        // step carrying both would owe two results and a trace line standing for two things.
+        if (act.Captures)
+        {
+            if (claiming.Count > 0)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it captures and also claims {claiming[0]}; a capture's claim is the picture — "
+                        + "that it is of this window, out of this process and with nothing showing "
+                        + "through it — and a reading of an element is a second thing to check");
+            }
+
+            if (!string.IsNullOrWhiteSpace(reads))
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it captures and names the '{reads.Trim()}' reading; a capture is about the "
+                        + "window the locator is inside rather than about what that element says");
+            }
+        }
 
         // Both idioms the older refusals used, because they are what a reader recognises and what
         // this suite matches on — and because they are both true of the finding: the step made

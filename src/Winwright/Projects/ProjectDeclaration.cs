@@ -31,6 +31,7 @@ public sealed class ProjectDeclaration
     private readonly string? executable;
     private readonly string? sourceRoot;
     private readonly string? fingerprintStore;
+    private readonly string? captures;
 
     private ProjectDeclaration(string path, Shape shape)
     {
@@ -39,6 +40,7 @@ public sealed class ProjectDeclaration
         executable = Resolve(shape.Executable);
         sourceRoot = Resolve(shape.SourceRoot);
         fingerprintStore = Resolve(shape.FingerprintStore);
+        captures = Resolve(shape.Captures);
         LanguageFiles = new ReadOnlyCollection<string>(
             (shape.LanguageFiles ?? []).Select(Resolve).OfType<string>().ToList());
         Loading = new ReadOnlyCollection<string>(
@@ -227,9 +229,28 @@ public sealed class ProjectDeclaration
     public string FingerprintStore =>
         Require(fingerprintStore, "fingerprintStore", "reading whether a run left the machine as it found it");
 
+    /// <summary>
+    /// Where a picture a case asks for is written.
+    /// <para>
+    /// WW336. The project's and never the case's, which is the whole of why the verb waited for a
+    /// task of its own: every other field a case carries is derived precisely so a case means the
+    /// same thing on the next machine, and a path typed into one is the plainest way to break that.
+    /// A case names what to call the picture; where the pictures go is a fact about the checkout.
+    /// </para>
+    /// <para>
+    /// A directory rather than a file, because a case takes as many as it means to and the run has
+    /// to keep them apart — the case's own name is the folder inside this one, so two cases asking
+    /// for "the menu" do not answer each other.
+    /// </para>
+    /// </summary>
+    /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
+    public string Captures =>
+        Require(captures, "captures", "writing a picture a case asked for");
+
     /// <summary>Whether the project declared a value for that key at all, without refusing.</summary>
     public bool Declares(string key) => key switch
     {
+        "captures" => captures is not null,
         "executable" => executable is not null,
         "sourceRoot" => sourceRoot is not null,
         "fingerprintStore" => fingerprintStore is not null,
@@ -325,6 +346,8 @@ public sealed class ProjectDeclaration
         [JsonPropertyName("sourceRoot")] public string? SourceRoot { get; init; }
 
         [JsonPropertyName("fingerprintStore")] public string? FingerprintStore { get; init; }
+
+        [JsonPropertyName("captures")] public string? Captures { get; init; }
 
         [JsonPropertyName("languageFiles")] public IReadOnlyList<string>? LanguageFiles { get; init; }
 

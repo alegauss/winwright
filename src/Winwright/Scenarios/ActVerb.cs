@@ -162,6 +162,24 @@ public sealed record ActVerb
             null,
             synthesises: true,
             onATray: true),
+
+        // WW336. The one act that produces a file, and the reason it took a task of its own is the
+        // file rather than the act: every other field a case carries is derived so the case means
+        // the same thing on the next machine, and a path typed into one is the plainest way to break
+        // that. So the argument is what to CALL the picture and never where to put it — the project
+        // declares that, the case's own name is the folder, and the two together are a path no case
+        // had to know.
+        //
+        // No delegate, like the tray act above and for its reason: there is no control to hand one.
+        // A capture is about the window the locator resolves inside, and the engine reaches
+        // `CaptureReceipt.Taking` by name where a step's verb is this one — which is also what keeps
+        // the six readings a capture owes from being a caller's to remember.
+        new(
+            "capture",
+            Takes.Text,
+            repeatable: false,
+            null,
+            captures: true),
     ];
 
     private readonly Func<Subject, string?, ActResult>? doing;
@@ -176,7 +194,8 @@ public sealed record ActVerb
         IReadOnlyList<string>? accepts = null,
         bool reaches = false,
         bool onATray = false,
-        string alsoTakes = "")
+        string alsoTakes = "",
+        bool captures = false)
     {
         AlsoTakes = alsoTakes;
         Name = name;
@@ -185,9 +204,20 @@ public sealed record ActVerb
         Synthesises = synthesises;
         Accepts = accepts ?? [];
         Reaches = reaches;
+        Captures = captures;
         this.doing = doing;
         this.onATray = onATray;
     }
+
+    /// <summary>
+    /// Whether this act writes a picture of the window its subject is in. WW336.
+    /// <para>
+    /// Data rather than a name compared at the call, for the reason <see cref="OnATray"/> is: the
+    /// vocabulary is the one place an act is declared, and a second answer about the same word is
+    /// how the two come to disagree.
+    /// </para>
+    /// </summary>
+    public bool Captures { get; }
 
     /// <summary>
     /// Every verb there is, in the order a reader is shown them. This is what a refusal lists and
@@ -271,7 +301,13 @@ public sealed record ActVerb
     /// of the entry that ends the run does not press it.
     /// </para>
     /// </summary>
-    public bool Reads => doing is null && !onATray;
+    /// <remarks>
+    /// WW336 added the third exception. A capture carries no delegate either — there is no control
+    /// to hand one — and it is emphatically not a read: it takes the foreground's word for what the
+    /// screen holds and writes a file, so every rule that lets a read through because a read touches
+    /// nothing would be letting this through on a claim that is false of it.
+    /// </remarks>
+    public bool Reads => doing is null && !onATray && !Captures;
 
     /// <summary>
     /// Whether a step whose subject is a tray icon may name it.

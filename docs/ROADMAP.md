@@ -21,13 +21,14 @@
 
 - 📋 **WW346** (deps: —) **the largest window a tray process owns is the shadow behind its menu, so the convenience verb answers the desktop** — A drop shadow is drawn two pixels larger on every side, and the sort that answers Largest is by area. → §WW346
 - 📋 **WW347** (deps: —) **a WPF popup is layered for its own drop shadow, so the copy route now refuses the only capture that reaches one** — WW334 refuses a layered window on every route, and a context menu WPF draws is layered per pixel while being the surface a render cannot see. → §WW347
+- 📋 **WW349** (deps: —) **the engine can now take a screen copy and still cannot take the render it calls the default** — A capture step answers a hole for every window a render could reach, which is most of them, and the half that could take one is in the application. → §WW349
 
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
 
-- 📋 **WW336** (deps: —) **no act names a capture, so a migrated capture is C# beside the cases rather than one of them** — WW87's own line calls the capture a scenario, and three adopters each hand-write the test the data file cannot say. → §WW336
 - 📋 **WW340** (deps: —) **the claim set is built inside the refusal and thrown away, so Checkable and the schema keep lists of their own** — WW323 closed one of the four places a claim has to be added; a twelfth still declares itself in a parameter, a field, a schema row and a boolean chain. → §WW340
+- 📋 **WW348** (deps: —) **a case that captures with no captures declared is a hole at run time, and the file said so at load** — Every other thing wrong with a file is refused where it was written, and this one waits for the machine that was going to run it. → §WW348
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

@@ -212,26 +212,32 @@ in and needs the layer's own alpha to say where the edge is. Or the in-app half 
 render a popup's own tree, which is what it already does for a window and is the answer
 that leaves nothing composited at all.
 
+### §WW349 the default nobody outside the process can take
+
+WW336 gave the engine `ScreenCopy`, which is the route that exists for a surface no tree
+holds. The other route is the default and is the safer picture, and this engine cannot
+take it: a render draws an application's own visual tree, and nothing outside that
+process has one.
+
+So a capture step against an ordinary window answers a hole naming `Winwright.InApp`,
+which is honest and is not a picture. The verb serves the surface it was asked for - a
+tray menu, a balloon, a popup a framework drew - and answers nothing for the window an
+adopter is most likely to point it at first.
+
+The half that can take it already exists and already talks to a harness.
+`Winwright.InApp.Render` renders a tree and `Geometry` dumps one into a file the engine
+reads back, through a variable the harness names - so there is a shape for this that
+neither side has to invent: the run asks, the application renders into the file it was
+given, and the receipt is composed over what came back.
+
+What it needs deciding is who asks. A capture step cannot call into another process, so
+either the in-app half watches a directory the way it watches WINWRIGHT_GEOMETRY, or the
+application exposes a verb the run starts it with - which is what every adopter's own
+capture flag already is.
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
-
-### §WW336 the one thing an adopter still writes in C#
-
-Every verb the vocabulary has acts on a control or on a tray icon. A capture acts on a
-window and needs three things a step cannot say: which window, which route, and where
-the file goes. So freewilly's menu capture, claude-tray's and pportal's are each a
-hand-written test beside the data files - which is the shape block G exists to remove.
-
-Most of it is already somewhere a step could reach. CaptureReceipt.Taking composes every
-reading without a caller remembering one, and CaptureRoute answers which way the picture
-is got off the window itself. What is left for the author to say is the subject and the
-destination.
-
-The destination is what makes this worth its own task rather than a fourth line in
-ActVerb: it would be the first verb in this vocabulary that writes a file, and a case
-that names a path is a case that means something different on the next machine. The
-other fields a case carries are derived for exactly that reason.
 
 ### §WW340 the claim that is declared four times
 
@@ -257,6 +263,27 @@ far has also arrived in a list it forgot.
 What would close it is a claim being a thing rather than a spelling: named once, with
 its field, what it says, and whether it is checkable, and every one of the four reading
 that.
+
+### §WW348 the declaration a load could have asked for
+
+WW336 made a capture step answer a hole where the project declares no `captures`, naming
+the file to add it to. That is the right answer at run time and it is one step too late.
+
+This format's founding rule is that a case which could not run anywhere is refused
+before it runs here: an unparseable locator, a verb that does not exist, an argument
+beside a verb that takes none. A capture step in a project with nowhere to put pictures
+is the same kind of fact - it is about the file and the declaration beside it, not about
+the desk, and it is knowable the moment both are read.
+
+What stops it being refused there is only where the reading happens.
+`StepDeclaration.Of` judges a step and is handed no project; `ScenarioFile.LoadAll`
+reads files and is handed no project either. `Suite.Launch` has both and is the first
+place that does, which makes it the candidate - and it is also where a refusal would
+still arrive before a window is launched, which is the whole of what the rule buys.
+
+The cost of leaving it is a run that launches an application, drives it to the step and
+then says what the file could have said. The cost of moving it is that `Suite` starts
+knowing about one verb, which is the thing the vocabulary exists to keep it from.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

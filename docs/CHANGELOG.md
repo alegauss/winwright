@@ -249,6 +249,7 @@
 - 🗑 **WW296** **one concept is spelled as three step fields, twice over, and a reader meets six** — abandoned: Kept as it stands, read by somebody who did not write the sixth: the suffix carries the mode in the name, so no step can omit one and fall into a claim it never made.
 - ✅ **WW307** **three of the six comparison keys are never read from a JSON document by any test** — The three keys are read from a document and checked for value and mode: with two of them swapped in the loader's positional call, 29 tests pass and only this one fails.
 - ✅ **WW308** **the pointer family is three loose strings, and its target-and-mode shape is rebuilt at five call sites** — Stored as one target and one mode with the three fields derived from them, so the five rebuilt copies are gone and no key, schema or case file moved — 1819 green.
+- ✅ **WW336** **no act names a capture, so a migrated capture is C# beside the cases rather than one of them** — A case names a capture and what to call it; the project says where pictures go, and the engine performs the copy it has always been able to judge.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

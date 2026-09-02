@@ -3,6 +3,7 @@ using System.Windows.Automation;
 
 using Winwright.Acting;
 using Winwright.Asserting;
+using Winwright.Capturing;
 using Winwright.Locating;
 using Winwright.Processes;
 using Winwright.Projects;
@@ -250,6 +251,14 @@ public static class CaseRun
         // can work it out by counting.
         var claims = new List<string>();
 
+        // WW336. This case's own folder for the pictures it asks for, or null where the project says
+        // nowhere. Once for the case and not per step, because it is named for the case — and asked
+        // for even where no step captures, which costs one dictionary lookup and keeps the branch
+        // out of the step loop.
+        var pictures = project.Declares("captures")
+            ? System.IO.Path.Combine(project.Captures, Filed(declared.Name))
+            : null;
+
         for (var index = 0; index < running.Count; index++)
         {
             var step = running[index];
@@ -279,7 +288,8 @@ public static class CaseRun
                 // produces reds about a window nobody put into the state they describe. Measured in
                 // claude-tray, where a click that was never delivered left the case red about a text
                 // box on a page that had never been opened.
-                var went = Perform(step, subject, project, budget, trace, results, root, pointedAt, recalled, speaking);
+                var went = Perform(
+                step, subject, project, budget, pictures, trace, results, root, pointedAt, recalled, speaking);
                 while (claims.Count < results.Count)
                     claims.Add(step.Claimed);
 
@@ -321,6 +331,208 @@ public static class CaseRun
             new ReadOnlyCollection<StepDeclaration>(notReached),
             lent,
             members.Count);
+    }
+
+    /// <summary>
+    /// A step that photographs the window its locator is inside. WW336.
+    /// <para>
+    /// The claim is the receipt and the whole of it: this picture is of this window, out of this
+    /// process, with nothing standing over the region and nothing showing through the glass or the
+    /// layer. Six ways of being wrong, every one of which a file on disk looks exactly the same as,
+    /// and none of which a caller has to remember — <see cref="CaptureReceipt.Taking"/> asks them
+    /// all around the write.
+    /// </para>
+    /// <para>
+    /// Only the copy is performed here, and a window that wants a render is a hole rather than a
+    /// red. A render draws the application's own visual tree, which is the safer picture and the one
+    /// nothing outside that process can take; the in-app half exists for it, and saying so is more
+    /// use than reaching for the screen and refusing on what the screen turned out to hold.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step, whose argument is what to call the picture.</param>
+    /// <param name="subject">What its locator resolves, which is inside the window being captured.</param>
+    /// <param name="project">The declaration, for the sentence a missing directory names.</param>
+    /// <param name="pictures">
+    /// This case's own folder under the directory the project declared, or null where it declared
+    /// none. Computed once for the case rather than per step, because it is named for the case: a
+    /// step knows what it is called and not what case it is in, and two cases asking for "the menu"
+    /// must not answer each other.
+    /// </param>
+    /// <param name="root">The case's own window, which is what "the main one" means here.</param>
+    /// <param name="trace">Where the step is recorded.</param>
+    /// <param name="results">Where its one result is added.</param>
+    private static void Captured(
+        StepDeclaration step,
+        Subject subject,
+        ProjectDeclaration project,
+        string? pictures,
+        AutomationElement root,
+        List<TraceStep> trace,
+        List<AssertionResult> results)
+    {
+        // Named before anything is read, so every arm below reports under the same words the case
+        // wrote rather than under whichever the branch happened to build.
+        var named = step.Name;
+
+        if (pictures is null)
+        {
+            Hole(
+                trace,
+                results,
+                named,
+                Precondition.Absent(
+                    "a directory to write pictures into",
+                    $"{project.Path} declares no 'captures', and a case does not say where a picture "
+                        + "goes — a path written into one is a case that means something else on the "
+                        + "next machine"));
+
+            return;
+        }
+
+        var admitted = Admitted.To(subject);
+        var handle = admitted.Window;
+
+        // The process is the window's own and never the case root's, which is measured rather than
+        // tidied: a resident fixture draws no window, so its cases resolve against the desktop — and
+        // the desktop's process is the shell's. Reading the pid off the root would then enumerate
+        // explorer and find nothing, on exactly the shape this verb exists for.
+        var target = AppTarget.AttachToWindow(handle);
+        var found = Winwright.Windowing.TopLevelWindows
+            .OfProcess(target.Pid, smallest: 0, visibleOnly: false)
+            .FirstOrDefault(one => one.Handle == handle);
+
+        if (found is null)
+        {
+            // The element resolved and the window it is in is not in the enumeration, which is a
+            // shell rearranging itself rather than the application being wrong.
+            Hole(
+                trace,
+                results,
+                named,
+                Precondition.Absent(
+                    "the window the locator is inside",
+                    $"{step.Addressed} resolved and the window holding it was not in the enumeration "
+                        + "a moment later"));
+
+            return;
+        }
+
+        // The case's own window is what "the main one" means, and never the largest of the process:
+        // WW346 measured a tray whose largest window is the shadow behind its menu. A case resolving
+        // against the desktop has no window of its own, which is the overload WW320 added — and the
+        // one every tray case takes.
+        var mine = root.Current.NativeWindowHandle;
+        var route = mine == 0
+            ? CaptureRoute.For(found)
+            : CaptureRoute.For(found, found with { Handle = mine });
+
+        if (route.Renders)
+        {
+            Hole(
+                trace,
+                results,
+                named,
+                Precondition.Absent(
+                    "a surface the screen is the only way to",
+                    $"{route.Sentence()} A render is the application's own to take — Winwright.InApp "
+                        + "does it — and this engine cannot draw another process's tree"));
+
+            return;
+        }
+
+        var into = System.IO.Path.Combine(pictures, $"{Filed(step.Argument!)}.png");
+        var frame = PaintedFrame.Of(handle);
+        var region = frame?.Painted ?? found.Bounds;
+
+        try
+        {
+            var receipt = CaptureReceipt.Taking(
+                into, found, target, file => ScreenCopy.Into(region, file), frame, route);
+
+            trace.Add(receipt.AsTraceStep() with { Step = trace.Count + 1, Asserted = named });
+            results.Add(AssertionResult.Pass(named, receipt.Sentence()).At(trace.Count));
+        }
+        catch (WrongCaptureException wrong)
+        {
+            // The arm decides which verdict, because the engine already has an opinion about each
+            // and they are not the same opinion. A region somebody stood over and a window whose own
+            // glass or layer transmits are facts about the desk and the window; a picture of another
+            // process, of something nothing is drawing, or of one flat colour is the capture being
+            // wrong about the application. Read off the arm and never off the sentence, for the
+            // reason WW188 gave the arms in the first place.
+            // And under the reading's own name where it is a hole, never one invented here: a
+            // precondition is a thing a reader recognises across runs and a catalogue can hold, and
+            // a name composed at the throw site is in no list at all — which is WW190's finding
+            // about exactly this shape.
+            var absent = wrong.Arm switch
+            {
+                Capturing.WrongCapture.RegionCovered or Capturing.WrongCapture.DeskChanged =>
+                    Obstruction.PreconditionName,
+                Capturing.WrongCapture.GlassTransmits => Glass.PreconditionName,
+                Capturing.WrongCapture.LayerTransmits => SeeThrough.PreconditionName,
+                _ => null,
+            };
+
+            trace.Add(new TraceStep
+            {
+                Step = trace.Count + 1,
+                Verb = $"capture ({route})",
+                Locator = step.Addressed,
+                Resolved = found.ToString(),
+                ReadBack = into,
+                Verdict = absent is null ? StepVerdict.Failed : StepVerdict.Unchecked,
+                Detail = wrong.Message,
+                Asserted = named,
+            });
+
+            results.Add(
+                (absent is null
+                    ? AssertionResult.Fail(named, wrong.Message)
+                    : AssertionResult.Unchecked(named, Precondition.Absent(absent, wrong.Message)))
+                .At(trace.Count));
+        }
+    }
+
+    /// <summary>One step that could not be taken, recorded as the hole it is. WW336.</summary>
+    /// <param name="trace">Where the step is recorded.</param>
+    /// <param name="results">Where its one result is added.</param>
+    /// <param name="named">What the case calls it.</param>
+    /// <param name="absent">What was missing.</param>
+    private static void Hole(
+        List<TraceStep> trace, List<AssertionResult> results, string named, Precondition absent)
+    {
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = "capture",
+            Locator = named,
+            Verdict = StepVerdict.Unchecked,
+            Detail = absent.Absence,
+            Asserted = named,
+        });
+
+        results.Add(AssertionResult.Unchecked(named, absent).At(trace.Count));
+    }
+
+    /// <summary>
+    /// What a name is called on disk: its words, with everything a path cannot carry replaced.
+    /// <para>
+    /// WW336. A case names a picture in the words a report shows it under — "the menu as it opens" —
+    /// and those are not a file name. Replaced rather than stripped, so two names that differ only
+    /// in punctuation stay two files.
+    /// </para>
+    /// </summary>
+    /// <param name="named">The name the case wrote.</param>
+    private static string Filed(string named)
+    {
+        var safe = named.Trim().ToCharArray();
+        var bad = System.IO.Path.GetInvalidFileNameChars();
+
+        for (var at = 0; at < safe.Length; at++)
+            if (Array.IndexOf(bad, safe[at]) >= 0)
+                safe[at] = '-';
+
+        return new string(safe);
     }
 
     /// <summary>
@@ -470,6 +682,7 @@ public static class CaseRun
         Subject subject,
         ProjectDeclaration project,
         int budget,
+        string? pictures,
         List<TraceStep> trace,
         List<AssertionResult> results,
         AutomationElement root,
@@ -477,7 +690,7 @@ public static class CaseRun
         Dictionary<string, string?> recalled,
         System.Globalization.CultureInfo? speaking)
     {
-        var went = Performing(step, subject, project, budget, trace, results, root, recalled, speaking);
+        var went = Performing(step, subject, project, budget, pictures, trace, results, root, recalled, speaking);
 
         // WW255. Read after the step rather than kept from inside it, and only for a step something
         // points back at. What a later step compares against is what this one left the window reading,
@@ -495,12 +708,23 @@ public static class CaseRun
         Subject subject,
         ProjectDeclaration project,
         int budget,
+        string? pictures,
         List<TraceStep> trace,
         List<AssertionResult> results,
         AutomationElement root,
         Dictionary<string, string?> recalled,
         System.Globalization.CultureInfo? speaking)
     {
+        // WW336. A capture is an act on the window the locator is inside rather than on the element,
+        // and its claim is the receipt — so it goes the way the sweeps go and not through the attempt
+        // loop: there is no reading at the end of it to retry towards, and a picture taken twice is
+        // two pictures rather than one taken again.
+        if (step.Verb.Captures)
+        {
+            Captured(step, subject, project, pictures, root, trace, results);
+            return true;
+        }
+
         // WW236. A sweep is one claim over many elements, so it does not go through the attempt loop —
         // it has its own wait, over the resolve budget, which WW241 gave it.
         if (step.Sweeps is { } key)
