@@ -221,6 +221,29 @@ What would close it is what closed the others: the arms as data, named once with
 each drives, with the .cmd's prose and the parse both reading it, and a case asserting
 an unrecognised second word is refused rather than silently answered by the default.
 
+### §WW360 the second telling that costs a run
+
+WW348 moved the refusal from the run that reached the step to the door of the run, which
+is earlier and is still not where the author is. `winwright_check` reads a scenario and
+answers whether it loads; it is handed that scenario as its own arguments and never a
+project, so a capture step in a checkout declaring no `captures` comes back as "the
+loader accepts them" and is then refused by `Suite`.
+
+That is the shape WW58 exists to replace, one field further out. Everything else wrong
+with a step — an unparseable locator, a verb that does not exist, an argument beside a
+verb that takes none — is answered by the check tool at the moment the author writes it.
+This one is answered by the thing that was about to run it.
+
+What stops it is a decision rather than an omission. `Checking` is given a scenario as
+JSON-RPC arguments and nothing else, while `winwright_run` takes a required `project`
+beside its cases, so the shape is there to copy. Required of a check, it refuses every
+check of a file whose project is not written yet, which is the state a scenario is
+usually first checked in. Optional, the tool answers two different questions depending
+on what it was given, and the answer has to say which one it answered.
+
+The cost of leaving it is small and steady rather than sharp: an author is told twice,
+and the second telling costs a run.
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
