@@ -19,8 +19,8 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW334** (deps: —) **a layered window's rectangle is a rectangle of the desktop, and nothing refuses a copy of one** — Glass answers the backdrop and nothing answers WS_EX_LAYERED, so an adopter keeps a class name away from the copy by hand. → §WW334
 - 📋 **WW335** (deps: —) **a borderless window sets WS_POPUP, so the route alone would copy an application's own frame** — The one-argument overload has no main window to rule it out, and a render is the one capture that frame can safely take. → §WW335
+- 📋 **WW346** (deps: —) **the largest window a tray process owns is the shadow behind its menu, so the convenience verb answers the desktop** — A drop shadow is drawn two pixels larger on every side, and the sort that answers Largest is by area. → §WW346
 
 ## Block F — Assert — the expectation is derived, never typed
 

@@ -1845,6 +1845,121 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
     }
 
     [Fact]
+    public void A_capture_of_a_layered_window_is_refused_although_it_asked_for_no_backdrop()
+    {
+        // WW334. The other way a window is see-through, and the one the backdrop reading answers
+        // "auto" to — truthfully, because the window never asked the compositor for anything. It is
+        // still a window on to the desktop, and a copy of its rectangle is partly a copy of what is
+        // behind it.
+        var window = Launched("--layered=half");
+        var layers = SeeThrough.Of(window.Handle);
+
+        // A desk that would not take the style leaves nothing to refuse, which is the shape every
+        // fixture-provoked refusal here has.
+        if (!layers.Transmits)
+            return;
+
+        Assert.Equal(Layering.Translucent, layers.Layers);
+
+        // And the backdrop says nothing about it, which is the whole reason this reading exists
+        // rather than being a second field on that one.
+        Assert.False(Glass.Of(window.Handle).Transmits);
+
+        var refused = Assert.Throws<WrongCaptureException>(
+            () => CaptureReceipt.Of(
+                Path.Combine(root, "layered.png"),
+                window,
+                AppTarget.AttachTo(window.Pid),
+                layers: layers));
+
+        Assert.Equal(WrongCapture.LayerTransmits, refused.Arm);
+        Assert.Contains("carries what is behind it", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_layered_window_at_full_alpha_hides_what_is_behind_it_and_is_not_refused()
+    {
+        // WW334, and the half that makes the refusal above a reading rather than a ban. A window
+        // layered at full alpha with no colour key is composited and composites to itself, so a
+        // check that refused every layered window would refuse one that hides the desktop perfectly
+        // — which is the shape of over-refusal this project is as careful about as under-refusal.
+        var window = Launched("--layered=opaque");
+        var layers = SeeThrough.Of(window.Handle);
+
+        if (layers.Layers == Layering.None)
+            return;
+
+        Assert.Equal(Layering.Opaque, layers.Layers);
+        Assert.False(layers.Transmits, layers.Sentence());
+
+        var receipt = CaptureReceipt.Of(
+            Path.Combine(root, "opaque.png"),
+            window,
+            AppTarget.AttachTo(window.Pid),
+            layers: layers);
+
+        Assert.NotNull(receipt.Layers);
+        Assert.Equal(Layering.Opaque, receipt.Layers.Layers);
+    }
+
+    [Fact]
+    public void A_popup_is_exempt_from_the_backdrop_and_never_from_the_layer()
+    {
+        // WW334, and the difference the two readings exist apart for. A menu on this shell has
+        // acrylic by design, so the backdrop refusal lets a popup through or it would refuse every
+        // capture the copy route was built to take. The shadow Windows draws behind that same menu
+        // is a popup by every test the route has, is layered, and is nothing but a rectangle of
+        // whatever the menu is standing in front of — so exempting a popup here would exempt the one
+        // surface beside a menu that must never be photographed.
+        var window = Launched("--layered=half");
+        var layers = SeeThrough.Of(window.Handle);
+
+        if (!layers.Transmits)
+            return;
+
+        // Routed as a popup, which is what the shadow is: its own top-level window, in no tree.
+        var popup = CaptureRoute.For(window with { Owner = 0x1000 });
+        Assert.Equal(OutOfReach.OwnedPopup, popup.Reach);
+
+        var refused = Assert.Throws<WrongCaptureException>(
+            () => CaptureReceipt.Of(
+                Path.Combine(root, "shadow.png"),
+                window,
+                AppTarget.AttachTo(window.Pid),
+                route: popup,
+                glass: Glass.Of(window.Handle),
+                layers: layers));
+
+        Assert.Equal(WrongCapture.LayerTransmits, refused.Arm);
+    }
+
+    [Fact]
+    public void A_render_is_not_refused_by_a_layer_either_because_a_render_composites_nothing()
+    {
+        // WW334, the same narrowing WW194 made for the backdrop and for its reason: an off-screen
+        // render draws the visual tree with the compositor not involved, so there is no layer for it
+        // to have been composited through.
+        var window = Launched("--layered=half");
+        var layers = SeeThrough.Of(window.Handle);
+
+        if (!layers.Transmits)
+            return;
+
+        var rendered = CaptureRoute.For(window, window);
+        Assert.True(rendered.Renders, rendered.Sentence());
+
+        var receipt = CaptureReceipt.Of(
+            Path.Combine(root, "rendered-layered.png"),
+            window,
+            AppTarget.AttachTo(window.Pid),
+            route: rendered,
+            layers: layers);
+
+        Assert.NotNull(receipt.Layers);
+        Assert.True(receipt.Layers.Transmits);
+    }
+
+    [Fact]
     public void A_render_is_not_refused_by_a_backdrop_because_a_render_cannot_transmit_one()
     {
         // WW194. The default route, refused for a hazard it does not have. An off-screen render

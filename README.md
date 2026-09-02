@@ -800,6 +800,15 @@ route exists for them — and so is an off-screen render, which draws the visual
 compositor not involved and so carries nothing from behind the window at all. It is the screen copy
 that a backdrop reaches.
 
+Layering is the other way the same thing happens, and `SeeThrough` is the reading for it — `Of`
+takes a window handle and answers how its pixels reach the screen. A
+layered window answers the backdrop question with *auto* — truthfully, it never asked the compositor
+for anything — while being as much a window on to the desktop as any acrylic one. Nothing is exempt
+from this one, and that asymmetry is the point: the shadow Windows draws behind a menu is a popup by
+every test the route has, is layered with an alpha per pixel, and is nothing but a rectangle of
+whatever the menu is standing in front of. A window layered at full alpha with no colour key is
+*not* refused, because it composites to itself and hides the desktop perfectly.
+
 And a third question the picture answers about itself: `Colours.In` counts distinct colours and
 refuses a capture that is exactly one. A flat rectangle is not a picture of a window — the session
 that produced the measured one had everything present and nothing rendering, so the file was written

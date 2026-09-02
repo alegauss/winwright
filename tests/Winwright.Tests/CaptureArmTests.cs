@@ -43,10 +43,10 @@ public sealed class CaptureArmTests
 
         Assert.Equal(paired.Count, paired.Distinct().Count());
 
-        // Six. It was five when WW188 wrote this down, and WW195 added one — which is the whole
-        // point of the pairing: the sixth arrived already provoked rather than a task later. Unsaid
-        // is not among them, being what a throw that named no arm carries.
-        Assert.Equal(6, CaptureArms.Declared().Count);
+        // Seven. It was five when WW188 wrote this down, WW195 added one and WW334 the seventh —
+        // which is the whole point of the pairing: each arrived already provoked rather than a task
+        // later. Unsaid is not among them, being what a throw that named no arm carries.
+        Assert.Equal(7, CaptureArms.Declared().Count);
         Assert.Equal(CaptureArms.Declared().Count, paired.Count);
         Assert.DoesNotContain(WrongCapture.Unsaid, CaptureArms.Declared());
     }

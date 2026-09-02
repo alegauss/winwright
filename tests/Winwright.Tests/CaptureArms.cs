@@ -64,6 +64,12 @@ internal static class CaptureArms
             "a window that asked the compositor for mica, acrylic or tabbed, so the refusal and the "
                 + "pass beside it are both driven rather than reasoned about",
             "FixtureTests.A_capture_of_a_window_with_a_backdrop_is_refused_rather_than_warned_about"),
+        new(WrongCapture.LayerTransmits, "layered", null,
+            "WW334: a window made see-through by its layer rather than by its backdrop, which is the "
+                + "way that answers the backdrop reading 'auto' and is a window on to the desktop "
+                + "anyway. Both readable kinds are drawn, because the pass is as much of the shape "
+                + "as the refusal — full alpha with no colour key is layered and opaque",
+            "FixtureTests.A_capture_of_a_layered_window_is_refused_although_it_asked_for_no_backdrop"),
         new(WrongCapture.OneFlatColour, "", Without.NoShape,
             "a picture of one colour is a file, and no window has to exist for one — the session "
                 + "this was measured on is a display rendering nothing, which no fixture can be",

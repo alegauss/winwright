@@ -84,6 +84,13 @@ public enum WrongCapture
     /// <summary>The window's own glass carries what is behind it into the copy.</summary>
     GlassTransmits,
 
+    /// <summary>
+    /// The window's own pixels are composited with what is behind them, because it is layered.
+    /// WW334: the other way a window is see-through, and the one no route exempts — the shadow
+    /// behind a menu is a popup exactly as the menu is, and it is the desktop.
+    /// </summary>
+    LayerTransmits,
+
     /// <summary>The picture is one flat colour, which is not a picture of a window.</summary>
     OneFlatColour,
 }
@@ -124,6 +131,13 @@ public sealed record CaptureReceipt
         Glass = glass;
         Colours = colours;
     }
+
+    /// <summary>
+    /// How the window's own pixels reach the screen, where a caller asked. WW334, and null where
+    /// nobody did — which is not the same as a window that is not layered, for the reason every
+    /// other reading here is null rather than reassuring.
+    /// </summary>
+    public SeeThrough? Layers { get; init; }
 
     /// <summary>
     /// What counting the picture's colours said, where a caller counted. Null where nobody did,
@@ -226,6 +240,11 @@ public sealed record CaptureReceipt
         // receipt said the region was clear because it was, a moment earlier.
         var glass = copied ? Glass.Of(window.Handle) : null;
 
+        // WW334. The other way the window's own pixels are the desktop's, asked beside the first and
+        // on the same route: a render draws the visual tree with the compositor not involved, so
+        // there is no layer for it to have been composited through.
+        var layers = copied ? SeeThrough.Of(window.Handle) : null;
+
         RegionThroughout? over = null;
         if (copied)
             over = RegionThroughout.Around(window.Handle, frame?.Painted ?? window.Bounds, () => take(path));
@@ -237,7 +256,7 @@ public sealed record CaptureReceipt
         // as itself instead of as a picture of one colour.
         var colours = File.Exists(path) ? Capturing.Colours.In(path) : null;
 
-        return Of(path, window, target, frame, route, over, glass, colours);
+        return Of(path, window, target, frame, route, over, glass, colours, layers);
     }
 
     /// <summary>
@@ -281,6 +300,16 @@ public sealed record CaptureReceipt
     /// own glass is carrying what is behind it, or where the picture is one flat colour. Every one
     /// is a wrong capture that a file on disk looks exactly the same as.
     /// </exception>
+    /// <param name="layers">
+    /// How the window's own pixels reach the screen, where a caller asked.
+    /// <para>
+    /// WW334. A layered window is composited with what is behind it, and no route exempts that: the
+    /// backdrop refusal above lets a menu through because a menu on this shell has acrylic by
+    /// design, and the shadow Windows draws behind that same menu is a popup by every test the route
+    /// has and is nothing but the desktop. Left null by a caller that did not ask, for the reason
+    /// the three above are.
+    /// </para>
+    /// </param>
     public static CaptureReceipt Of(
         string path,
         TopLevelWindow window,
@@ -289,7 +318,8 @@ public sealed record CaptureReceipt
         CaptureRoute? route = null,
         RegionThroughout? over = null,
         Glass? glass = null,
-        ColourCheck? colours = null)
+        ColourCheck? colours = null,
+        SeeThrough? layers = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(window);
@@ -337,6 +367,15 @@ public sealed record CaptureReceipt
             throw new WrongCaptureException(
                 WrongCapture.GlassTransmits, $"the capture is of {window}, and {glass.Sentence()}");
 
+        // WW334, and the arm above it is the reason this one has no exemption. A menu is let through
+        // the backdrop refusal because a menu on this shell has acrylic by design; the shadow drawn
+        // behind that menu is a popup by every test the route has, is layered per pixel, and is
+        // nothing but a rectangle of whatever the menu is standing in front of. Exempting a popup
+        // here would exempt the one surface beside a menu that must never be photographed.
+        if (layers is { Transmits: true } && route?.Renders is not true)
+            throw new WrongCaptureException(
+                WrongCapture.LayerTransmits, $"the capture is of {window}, and {layers.Sentence()}");
+
         // WW42. A flat rectangle is not a picture of a window, and the session that produced one
         // had everything present and nothing rendering — so the file was written and the run exited
         // zero. Counted rather than scanned for ink: a screen copy has no alpha channel, and the
@@ -345,7 +384,7 @@ public sealed record CaptureReceipt
             throw new WrongCaptureException(
                 WrongCapture.OneFlatColour, $"the capture is of {window}, and {colours.Sentence()}");
 
-        return new CaptureReceipt(path, window, target, frame, route, over, glass, colours);
+        return new CaptureReceipt(path, window, target, frame, route, over, glass, colours) { Layers = layers };
     }
 
     /// <summary>

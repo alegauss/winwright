@@ -174,6 +174,13 @@ public partial class MainWindow : Window
         if (Shapes.Value("backdrop") is string kind)
             Backdrop.Set(window, kind);
 
+        // WW334. Beside the backdrop and for the same reason it is here: a window has no handle
+        // until its source exists, and both of these are set on a handle. The two are independent —
+        // a window can be layered without a backdrop and the other way round — so neither is an
+        // else of the other.
+        if (Shapes.Value("layered") is string layer)
+            Layered.Set(window, layer);
+
         // WW249. On every surface and behind no flag, because what it reads is a property of the
         // window rather than of anything a run asked to be drawn — and a flake nobody can provoke on
         // purpose is one the recording has to be running for already.

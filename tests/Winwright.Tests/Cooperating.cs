@@ -259,6 +259,10 @@ internal static class Cooperating
         new("ProcessRegister.For", Cooperation.None, false, "a register with the stopping budget a project declares"),
         new("Obstruction.Reading", Cooperation.None, false, "what stands over a region, read off the z order"),
         new("PaintedFrame.Of", Cooperation.None, false, "what a window actually paints inside the rectangle it owns"),
+        new("SeeThrough.Of", Cooperation.None, false,
+            "whether a window's own pixels are composited with what is behind them, read off its "
+                + "style bits and its layer attributes — an application that references nothing "
+                + "still has both"),
         // Filed as needing the in-app half on the first attempt, and the case above put it right in
         // one run: the engine assembly carries no reference to that half, so no verb here can be
         // waiting on one. What this reads is the tree, against a label resolved from the project's

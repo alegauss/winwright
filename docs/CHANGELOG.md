@@ -155,6 +155,7 @@
 - ✅ **WW188** **one refusal type has five arms now and the pairing records one, so an arm added later is provoked by nobody** — A refusal says which of its five arms it is, and each arm is paired with the fixture shape or the case that provokes it, checked against the engine both ways.
 - ✅ **WW195** **the region is read before a capture and never after, so a window that arrived while it was taken is not seen** — The region is read on both sides of the take, and a window that arrived inside it is a sixth refusal arm with its own sentence rather than a capture reported as clear.
 - ✅ **WW199** **this block promises a fixture provokes every capture refusal, and four of the six arms are provoked by a case instead** — The criterion now says what it keeps — every arm has something — and the gap narrowed first: a cloak shape closed the arm that turned out to be provokable after all.
+- ✅ **WW334** **a layered window's rectangle is a rectangle of the desktop, and nothing refuses a copy of one** — A layered window is its own reading and its own refusal, exempt on no route — the shadow behind a menu is a popup exactly as the menu is, and it is the desktop.
 
 ## Block F — Assert — the expectation is derived, never typed
 

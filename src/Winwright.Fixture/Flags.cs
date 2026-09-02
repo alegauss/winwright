@@ -267,6 +267,12 @@ public sealed record Flags
             "z-order reasoning cannot answer for a backdrop, so every check that decides a copy's contents by walking the windows above it is wrong about that one window",
             Choices: Backdrop.Names),
         new Flag(
+            "layered",
+            "how",
+            "a window made see-through by its layer rather than by its backdrop - at half alpha, at full alpha, or with a colour key",
+            "a layered window reports the auto backdrop truthfully while being as much a window on to the desktop as an acrylic one, and the shadow Windows draws behind every menu is one",
+            Choices: Layered.Names),
+        new Flag(
             "cloak",
             "",
             "a window the application has asked the compositor to stop drawing, which keeps every style bit saying it is visible",
