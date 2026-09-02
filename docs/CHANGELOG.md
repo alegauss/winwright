@@ -265,6 +265,7 @@
 - ✅ **WW348** **a case that captures with no captures declared is a hole at run time, and the file said so at load** — A verb says which declaration it needs, and both of Suite's doors refuse a step the project cannot serve before a window is launched (design recorded in `src/Winwright/Scenarios/ActVerb.cs`).
 - ✅ **WW351** **the claim set is computed from Of's parameters, so a claim is still added there rather than by declaring a field** — The set is read off the step's own fields, so a claim is a field and a schema row and no longer a line in Of (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 - ✅ **WW352** **StepDeclaration.Of takes 28 parameters and its constructor 23, so every new field is threaded through both by hand** — A field reaches a step by name now and the constructor is three; Of keeps the signature its format's keys give it (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
+- ✅ **WW354** **the typing tool's arms are documented in a .cmd and parsed in a switch, and nothing holds the two lists together** — The arms are one list the parse reads and a case holds the .cmd's prose to, and a word naming none is refused with it (design recorded in `tools/Winwright.Typing/Arms.cs`).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

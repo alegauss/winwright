@@ -202,29 +202,6 @@ turns a guess into a reading — and is the shape this project reaches for elsew
 
 ## Block G — The scenario — a case is a data file
 
-### §WW354 the arms nobody checks against each other
-
-`run-typing.cmd` is where a person reads what the measurement tool can do: four arms
-now, each with a paragraph saying what it drives and what it reports. `Program.Main` is
-where the second word is parsed, one `string.Equals` per arm, falling through to the
-default.
-
-Neither knows about the other. An arm added to the switch and not to the .cmd is a
-measurement nobody can find. An arm named in the .cmd and not in the switch is worse:
-the word is not recognised, nothing refuses it, and the tool runs its default experiment
-and prints that experiment's numbers under the run a person started for something else.
-A typo does the same thing.
-
-This project refuses that shape everywhere it can see it. The verbs have a catalogue
-checked against the engine in both directions, so do the flags the fixture takes, the
-desk facts, the capture arms and the renderings. The measurement tool is outside the
-suite by choice - it takes the desk for minutes and no guest run should pay for it - and
-the two lists inside it were never brought under the same rule.
-
-What would close it is what closed the others: the arms as data, named once with what
-each drives, with the .cmd's prose and the parse both reading it, and a case asserting
-an unrecognised second word is refused rather than silently answered by the default.
-
 ### §WW360 the second telling that costs a run
 
 WW348 moved the refusal from the run that reached the step to the door of the run, which

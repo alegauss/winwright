@@ -83,11 +83,22 @@ public static class Program
         //
         // WW342 carries the word down rather than a boolean per arm. Four of those was already a
         // parameter list that said which arms exist in two places, and the fifth would have been the
-        // one somebody passed in the wrong position. What is spelled once here is what an arm is
-        // called; WW354 is the remaining half, which is that this list and run-typing.cmd's prose
-        // are still two lists.
+        // one somebody passed in the wrong position.
+        //
+        // WW354 closed the rest of it. The words are in `Arms` now — one list, read here and read by
+        // the case that holds run-typing.cmd's prose to it — and a word naming none of them is
+        // refused rather than falling through to the default, which used to print the engine's own
+        // typing numbers under a run somebody started for something else.
         var experiment = args.Length > 1 ? args[1] : "";
-        var landing = Named(experiment, "acts");
+        if (Arms.Unrecognised(experiment))
+        {
+            foreach (var line in Arms.Refusing(experiment))
+                Console.Error.WriteLine(line);
+
+            return Unrunnable;
+        }
+
+        var arm = Arms.Named(experiment);
 
         var executable = Fixture();
         if (executable is null)
@@ -99,9 +110,10 @@ public static class Program
         // WW341. The arm needs a control offering RangeValue, and the fixture draws none unless it
         // is asked. Passed at the launch rather than switched on later, because the pane is built
         // when the window is and a run that asked for it afterwards would be measuring a window
-        // that had just been rebuilt.
+        // that had just been rebuilt. WW354: asked of the arm, so the next one needing a shape of
+        // the fixture says so where it is declared rather than in a branch here.
         var start = new ProcessStartInfo(executable);
-        if (landing)
+        if (arm is { NeedsRanges: true })
             start.ArgumentList.Add("--ranges");
 
         using var fixture = Process.Start(start);
@@ -113,7 +125,7 @@ public static class Program
 
         try
         {
-            return Measured(fixture, rounds, experiment);
+            return Measured(fixture, rounds, arm);
         }
         finally
         {
@@ -122,19 +134,13 @@ public static class Program
         }
     }
 
-    /// <summary>Whether the second word names this arm, however it was capitalised.</summary>
-    /// <param name="experiment">What the run was asked for.</param>
-    /// <param name="arm">The arm's name.</param>
-    private static bool Named(string experiment, string arm) =>
-        string.Equals(experiment, arm, StringComparison.OrdinalIgnoreCase);
-
     /// <summary>
     /// The window under test, for an arm that needs the handle rather than an element. WW342.
     /// </summary>
     /// <param name="fixture">The running fixture.</param>
     private static nint Handle(Process fixture) => TopLevelWindows.Largest(fixture.Id)?.Handle ?? 0;
 
-    private static int Measured(Process fixture, int rounds, string experiment)
+    private static int Measured(Process fixture, int rounds, TypingArm? arm)
     {
         var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(fixture.Id) is not null, 20000, 25);
         if (!drawn.Happened)
@@ -177,7 +183,7 @@ public static class Program
         // WW312. The sweep answers on its own and shares nothing below it: the counts, the drift and
         // the repair's verdict are all about the engine's send, and printing them under a run that
         // never called it would attribute this arm's numbers to the thing it exists to differ from.
-        if (Named(experiment, "sweep"))
+        if (arm?.Name == "sweep")
         {
             Sweep.Run(box, arrived, packets, rounds);
             return 0;
@@ -187,7 +193,7 @@ public static class Program
         // verdict below are about the engine's own act, and this arm takes the act apart to put a
         // pause inside it. Printing those under a run that never called `Type` would attribute this
         // arm's numbers to the thing it exists to differ from.
-        if (Named(experiment, "delay"))
+        if (arm?.Name == "delay")
         {
             FirstRead.Run(box, arrived, packets, rounds);
             return 0;
@@ -196,7 +202,7 @@ public static class Program
         // WW341, and it answers on its own for the same reason as the two above: nothing below this
         // is about a click, a key or a range, and printing the typing counts under a run that never
         // typed would attribute them to the acts this arm is measuring.
-        if (Named(experiment, "acts"))
+        if (arm?.Name == "acts")
         {
             Landing.Run(root, rounds);
             return 0;
@@ -205,7 +211,7 @@ public static class Program
         // WW342, and the window and not the control: two of its four arms deliberately never go
         // through automation, and the one that touches the window without waking its thread has no
         // element to touch. It answers on its own for the reason the three above do.
-        if (Named(experiment, "provoke"))
+        if (arm?.Name == "provoke")
         {
             Disturbance.Run(box, arrived, packets, Handle(fixture), rounds);
             return 0;

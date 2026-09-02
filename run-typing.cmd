@@ -45,6 +45,12 @@ rem
 rem The configuration moved to the third argument when this gained the second. `run-typing.cmd 400`,
 rem `run-typing.cmd 150 sweep`, `run-typing.cmd 1200 delay`, `run-typing.cmd 300 acts` and
 rem `run-typing.cmd 400 provoke` are the five a person types.
+rem
+rem WW354: the arms are a list in the tool now - Arms.All - and a second word naming none of them is
+rem refused with that list rather than falling through to the bare run, which used to print the
+rem engine's own typing numbers under an experiment somebody asked for by name. The paragraphs above
+rem are held to the same list by TypingArmTests, in both directions, so an arm described here and
+rem missing from the tool is a red rather than a run that answers with the wrong numbers.
 setlocal
 
 set CONFIG=Debug

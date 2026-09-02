@@ -26,7 +26,6 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 📋 **WW354** (deps: —) **the typing tool's arms are documented in a .cmd and parsed in a switch, and nothing holds the two lists together** — WW341 added a fourth arm by editing both by hand; a word in one and not the other runs the default silently, printing one experiment's numbers under another. → §WW354
 - 💭 **WW360** (deps: —) **winwright_check says a file loads and the run then refuses it, because the check tool is handed no project** — WW348 refuses a step whose verb needs an undeclared key, at the door of a run; the check tool reads the file alone, so it cannot ask the question. → §WW360
 - 💭 **WW365** (deps: —) **Of reads at cognitive complexity 119 because its refusals thread twenty locals, and the step they judge now exists** — WW352 left the body where it was: each refusal reads the parameters rather than the record WW351 put in front of it, so none of them can move out. → §WW365
 

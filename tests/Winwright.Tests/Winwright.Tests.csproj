@@ -53,6 +53,12 @@
          happen. What it allows is checked here as carefully as what it refuses. -->
     <ProjectReference Include="../../tools/Winwright.Guard/Winwright.Guard.csproj" />
 
+    <!-- WW354: the measurement tool stays outside the suite - it takes the desk for minutes and no
+         guest run should pay for it - but its arms are a list, and a list this project does not hold
+         to another is how a word ends up in run-typing.cmd and in no switch. The arms are checked
+         here; nothing here runs one. -->
+    <ProjectReference Include="../../tools/Winwright.Typing/Winwright.Typing.csproj" />
+
     <!-- Referenced so the suite builds the fixture, and copied nowhere: an application under
          test is launched from its own output, not from a half-copy beside the suite. Copying it
          brought the apphost without its assembly and every launch died at CLR startup. -->
