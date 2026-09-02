@@ -130,6 +130,8 @@
 - ✅ **WW265** **the picker walk reads the items of a shut picker, and a WPF ComboBox has none until it opens** — The walk opens a picker that holds nothing, reads what appeared and puts it back only where it opened it — driven by a WPF picker the fixture had never carried.
 - ✅ **WW288** **a search whose flyout shut mid-look gives up, so the icon case is a hole on the runs the shell decides** — Nothing shuts it: three candidates were ruled out and the search now looks again before concluding, which is how the rest of the engine reads.
 - ✅ **WW317** **A command that only a keyboard chord reaches cannot be driven by a case** — press takes a chord beside a traversal key, parsed where the case wrote it and sent as one batch, so an application whose commands have no button is reachable.
+- ✅ **WW332** **the tray menu verb has no case that opens a menu, only one that fails to find an icon** — The fixture answers the tray callback with a tracked popup, and the verb opening that one while a drop-down stayed invisible is what told WW322 which half was wrong.
+- ✅ **WW333** **the tray menu case proves the verb against a Win32 popup and never against a WinForms one** — The fixture hosts a drop-down as readily as a tracked popup, and the case driving it went red against the old reading and green against the new one, measured in that order.
 
 ## Block E — Capture — the picture that proves what it photographed
 

@@ -32,56 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW332 The menu the fixture never had
-
-`OpenMenu` is the hardest verb here and the only one whose success nothing observes. The
-suite drives it once, at an icon that is not on the desk, and asserts the sentence a
-search refuses with. Every case around it stops short of the menu: the overflow opens
-and shuts, an icon is found hidden.
-
-The reason is the fixture rather than an oversight. `TrayIconFixture` places a real icon
-with `Shell_NotifyIconW` over a popup window whose whole procedure is `GetMessageW`, and
-it answers no tray callback — so there is no menu for the verb to open, and a case that
-called it would be asserting that nothing happened.
-
-What that costs is being paid now. Three adopted cases fail on `showed no menu`, and the
-question they raise — does this route open a menu on this shell — cannot be asked here.
-It is asked through a publish and an adopting repository: a round trip per attempt,
-against a defect nobody has reproduced.
-
-A fixture icon that shows a real popup menu answers it in one run. If the verb opens
-that and not the adopter's, the difference is the application; if it opens neither, the
-route is wrong on this shell and WW322 is about the engine.
-
-The menu has to be the shell's own kind — a popup tracked from the icon's window on the
-tray callback — because a menu drawn any other way would prove the verb against a thing
-no application does.
-
-### §WW333 One kind of menu is not the verb
-
-WW332 gave the fixture icon a menu so the verb's success path would be observed here
-instead of by adopters. It works, and it proved the wrong half.
-
-The fixture puts up a `TrackPopupMenu` — a Win32 popup, tracked from the icon's own
-window on the tray callback. That kind announces itself as the focused element, which is
-what `OnTheDesk` asked for, so the case went green on the first run and stayed green
-while three adopted cases failed on the same verb.
-
-The other kind is a WinForms `ToolStripDropDown`, which is what a `NotifyIcon` with a
-`ContextMenuStrip` puts up and what a great many tray applications therefore show. It
-does not answer the focus, and WW322 is the whole cost of nobody having noticed: the
-engine reported no menu while the application's own log had one standing for six
-seconds.
-
-So the case covers one of two kinds and reads as though it covers the verb. The fix in
-WW322 is a fallback the Win32 arm never exercises — it is reached only when the focus
-answers nothing, and against this fixture the focus always answers.
-
-What is owed is a second shape. The fixture can host a WinForms menu as readily as a
-Win32 one, and the case that drives it is the case that would have failed before WW322
-and passes after — which is the only kind of case worth adding to a defect already
-fixed.
-
 ### §WW337 the delay may be affordable after all
 
 WW304 swept the spacing and found 0 in 1100 at 128ms and above against 2% below it, and

@@ -10,8 +10,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW332** (deps: —) **the tray menu verb has no case that opens a menu, only one that fails to find an icon** — The fixture icon answers no tray callback, so the success path is observed by adopters alone and WW322 is being diagnosed through a publish. → §WW332
-- 📋 **WW333** (deps: WW322 ✅, WW332) **the tray menu case proves the verb against a Win32 popup and never against a WinForms one** — The kind it uses answers the focus, so the fallback WW322 had to add is never reached and the case reads as though it covered the verb. → §WW333
 - 📋 **WW337** (deps: —) **a spacing of 32ms silenced the fault across 750 rounds, and the repair was chosen when only 128ms had** — WW310's band was the other reason and it did not reproduce, so the cheapest measured suppression is a quarter of the price that refused one. → §WW337
 - 📋 **WW338** (deps: —) **a tray menu is told from the one before it by name, so two unnamed menus read as one menu standing** — The reading that answers whether a menu came up compares two strings, and 'a menu with no name' is what an unnamed one is called both times. → §WW338
 - 📋 **WW339** (deps: —) **a tray menu's reading is called Highlighted and now often holds the menu's own name instead** — WW322 put the standing menu ahead of the focus, so what a trace records moved from the entry a menu highlights to the menu. → §WW339
