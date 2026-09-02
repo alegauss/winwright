@@ -9,6 +9,8 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+- 💭 **WW364** (deps: —) **Locator.TryParse is not null-annotated, so a caller that refused on false still carries a bang to use what it parsed** — Four sites in StepDeclaration spell it, and WW351 added one by moving a construction above the bang that had been narrowing the rest. → §WW364
+
 ## Block D — Act — patterns before pointers
 
 - 📋 **WW353** (deps: —) **a click sends and reads once, so its answer is whatever was there at that instant and nothing retries it** — WW341 measured the shape and found no fault on this desk; every other synthesised verb settles before it answers, and Pointer.Run is the one that does not. → §WW353
