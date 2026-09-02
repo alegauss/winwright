@@ -137,6 +137,66 @@ public class ClaimsTests
     }
 
     [Fact]
+    public void A_claim_is_a_field_and_no_longer_a_line_in_the_verb_that_builds_a_step()
+    {
+        // WW351, and the deletion is the proof. WW340 gave the set one reader and left it built by
+        // a hand-written line per claim inside `Of`, over that verb's own parameters — so a claim
+        // was a field, a schema row and a line in a block, and the line was the one somebody would
+        // forget. A miss has never been a build error: the step reads as unfalsifiable and the case
+        // carrying it is refused for saying nothing while saying something.
+        //
+        // The set is read off the step now, so every one of those lines lives in the property that
+        // answers it. Asserted as a position rather than a count: a line that came back inside `Of`
+        // would be a claim spelled twice again, whatever the total.
+        var source = File.ReadAllLines(
+            Path.Combine(Checkout.Engine, "Winwright", "Scenarios", "StepDeclaration.cs"));
+
+        var declaring = Array.FindIndex(
+            source, line => Checkout.Code(line).Contains("public static StepDeclaration Of(", StringComparison.Ordinal));
+
+        Assert.True(declaring > 0, "the verb this is about is not in that file any more");
+
+        var spelled = source
+            .Select((line, at) => (Line: Checkout.Code(line), At: at))
+            .Where(one => one.Line.Contains("Claiming(", StringComparison.Ordinal))
+            .ToList();
+
+        Assert.NotEmpty(spelled);
+        Assert.All(
+            spelled,
+            one => Assert.True(
+                one.At < declaring,
+                $"line {one.At + 1} spells a claim inside Of: {one.Line.Trim()}"));
+    }
+
+    [Fact]
+    public void A_refusal_names_the_pointing_spelling_the_file_used_and_not_the_fold()
+    {
+        // WW351's own hazard, guarded. The four pointing spellings are one field on the step plus a
+        // mode saying which, and the set is read off those two now — so the fold has to carry the
+        // precedence the refusal's naming used, or a step wrong twice over is told to delete a key
+        // it never wrote. WW308 wrote that warning about doing the fold too early, and this is the
+        // case that would catch it.
+        var unlike = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of("Text", "read", reads: "value", unlike: "the stop", moves: true));
+
+        Assert.Contains("'unlike'", unlike.Because);
+        Assert.DoesNotContain("'sameAs'", unlike.Because);
+
+        var ticking = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of("Text", "read", reads: "name", sameCountdownAs: "the first", moves: true));
+
+        Assert.Contains("'sameCountdownAs'", ticking.Because);
+        Assert.DoesNotContain("'sameAs'", ticking.Because);
+
+        var holding = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of("Text", "read", reads: "name", contains: "the opener", moves: true));
+
+        Assert.Contains("'contains'", holding.Because);
+        Assert.DoesNotContain("'sameAs'", holding.Because);
+    }
+
+    [Fact]
     public void The_format_says_the_rule_and_not_only_the_fields()
     {
         // An author reading the published format could find the one-claim rule only by writing two

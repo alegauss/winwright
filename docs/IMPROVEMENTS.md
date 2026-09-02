@@ -175,30 +175,6 @@ turns a guess into a reading — and is the shape this project reaches for elsew
 
 ## Block G — The scenario — a case is a data file
 
-### §WW351 the last place a claim is spelled by hand
-
-WW340 closed the two lists that could disagree: Checkable reads the set and the schema
-marks the fields it holds. What it did not close is where the set comes from. `Of`
-builds it with one `Claiming(...)` call per claim, over its own parameters, before the
-step exists - so adding a claim is still adding a field, a schema row and a line in that
-block, and forgetting the line still makes the step read as unfalsifiable.
-
-The block reads parameters for one reason: a refusal has to name the spelling the file
-used, and three claim families fold several spellings into fewer fields. That reason no
-longer holds. `covers`, `coversAtLeast` and `coversWithin` are recoverable from `Sweeps`
-with `Matching`; `sameAs`, `unlike`, `sameCountdownAs` and `contains` are four fields of
-their own; so are `label`, `notLabel` and `beginsWithLabel`. Every spelling the block
-resolves is readable off the finished record.
-
-So `Claims` could be computed over the step rather than passed into it, and the block in
-`Of` would go. A claim would then be a field plus a schema row, and the row is already
-checked against the set in both directions by `ClaimsTests`.
-
-The cost is ordering. `Of` refuses before it constructs, and this suite asserts which
-refusal wins where a step is wrong twice over. Computing the set needs the record, so
-the one-claim refusal moves after construction and every precedence a case asserts has
-to be re-established rather than assumed.
-
 ### §WW352 the widest signature in the engine
 
 Every field a step can carry is a parameter of `Of` and a parameter of the constructor

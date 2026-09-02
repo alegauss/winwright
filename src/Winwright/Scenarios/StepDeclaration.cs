@@ -632,17 +632,83 @@ public sealed record StepDeclaration
     /// <summary>
     /// Every claim this step makes, in the order the format lists them. WW340.
     /// <para>
-    /// The list <see cref="Of"/> builds to enforce one claim per step, kept rather than dropped. It
-    /// is what <see cref="Checkable"/> asks and what a refusal names out of, so the two cannot
-    /// disagree about what a claim is — and a twelfth joins both by being declared once.
+    /// What <see cref="Checkable"/> asks and what a refusal names out of, so the two cannot disagree
+    /// about what a claim is — and a twelfth joins both by being declared once.
     /// </para>
     /// <para>
-    /// A tray subject and a capture are not in it, and that is deliberate rather than an omission:
-    /// each is a claim the step makes by <em>being</em> one, so neither can collide with the others
-    /// the way two fields can, and both are refused beside a claim where they are written.
+    /// WW351. Read off this step's own fields rather than passed in by <see cref="Of"/>, which is
+    /// the half WW340 left open. That verb built the set with a hand-written line per claim over its
+    /// own parameters, so a claim was a field, a schema row <em>and</em> a line in a block — and the
+    /// forgotten line made the step read as unfalsifiable, which is the failure the one list was
+    /// meant to end. Every spelling the block resolved is recoverable here: the fold that turned
+    /// three <c>covers</c> spellings into one field left <see cref="Matching" /> behind to say which,
+    /// and the same is true of the pointing and label families.
+    /// </para>
+    /// <para>
+    /// Computed on each read rather than cached in a field. A record carries its fields through
+    /// <c>with</c>, and a cache would carry the answer for the step before the change — which on
+    /// <see cref="Absent" /> or <see cref="BeginsWithLabel" />, both set after construction, is a
+    /// claim set describing a step that no longer exists. Fourteen comparisons and a small list is
+    /// not a cost worth that.
     /// </para>
     /// </summary>
-    public IReadOnlyList<Claim> Claims { get; private init; } = [];
+    public IReadOnlyList<Claim> Claims
+    {
+        get
+        {
+            var claiming = new List<Claim>();
+
+            void Claiming(bool made, string wrote, string says)
+            {
+                if (made)
+                    claiming.Add(new Claim(wrote, says));
+            }
+
+            // The field the case actually wrote, for each family whose several spellings the engine
+            // has already folded into one. A refusal names what to go and delete, so it says the
+            // spelling the file used and never the mode the fold produced.
+            var sweptAs = Matching switch
+            {
+                Asserting.SetMatch.AtLeast => "coversAtLeast",
+                Asserting.SetMatch.Within => "coversWithin",
+                _ => "covers",
+            };
+
+            var pointedAs = Pointing switch
+            {
+                Pointing.Unlike => "unlike",
+                Pointing.Countdown => "sameCountdownAs",
+                Pointing.Contains => "contains",
+                _ => "sameAs",
+            };
+
+            var stringedAs = Label is not null ? "label"
+                : NotLabel is not null ? "notLabel" : "beginsWithLabel";
+
+            Claiming(Absent, "absent", "its locator matches nothing");
+            Claiming(Expected is not null, "expect", $"the reading is '{Expected}'");
+            Claiming(Moves, "moves", "the reading ended up different");
+            Claiming(Answers, "answers", "the reading says something rather than nothing");
+            Claiming(Sweeps is not null, sweptAs, $"the '{Sweeps}' set is read here");
+            Claiming(Matches is not null, "matches", $"the reading matches {Matches}");
+            Claiming(Discloses, "discloses", "the act put something under the locator");
+            Claiming(PointsAt is not null, pointedAs, $"the reading is compared with '{PointsAt}'");
+            Claiming(Never is not null, "never", $"'{Never}' is never shown while this waits");
+            Claiming(Spoken, "spoken", "everything under the locator that speaks is named");
+            Claiming(
+                (Label ?? NotLabel ?? BeginsWithLabel) is not null,
+                stringedAs,
+                $"the reading is the '{Label ?? NotLabel ?? BeginsWithLabel}' string");
+            Claiming(
+                ExpectReported is not null,
+                "expectReported",
+                $"the reading is the value reported under '{ExpectReported}'");
+            Claiming(EachSpoken, "eachSpoken", "every element it matches announces a name");
+            Claiming(OwnHeader, "ownHeader", "each row's controls announce that row");
+
+            return claiming.AsReadOnly();
+        }
+    }
 
     /// <summary>
     /// Whether the engine may attempt this step again where its read-back did not arrive.
@@ -924,60 +990,66 @@ public sealed record StepDeclaration
         // comparison was against one well while the red named the other's key. A reader of that
         // sent to a strings file is correcting a label the run never compared.
         //
-        // A twelfth claim now joins the rule by adding one line here rather than by remembering
-        // eleven places. What stays beside this are the rules that are not collisions at all — a
-        // verb that only reads, a reading named beside a claim that is not about one, a pattern
-        // that matches everything — and the two families below, where several spellings are one
-        // claim rather than several.
-        var claiming = new List<Claim>();
-
-        void Claiming(bool made, string field, string says)
+        // WW351. A twelfth claim joins the rule by being a field, and by nothing else. The block
+        // that used to stand here built the set with one hand-written line per claim over this
+        // verb's own parameters — so a claim was a field, a schema row and a line here, and it was
+        // the line somebody would forget. The step is built now and asked what it claims, which is
+        // the same question the format and the run ask it later.
+        //
+        // Built before the refusals below rather than after them, which is what keeps their order.
+        // Every one of them was written against a set that already existed at this point in the
+        // verb, and this suite asserts which refusal wins where a step is wrong twice over — so
+        // moving the construction up is the change that changes nothing, where moving the refusals
+        // down would have been a reordering nobody asked for.
+        //
+        // WW308 folded the pointing family after those refusals for a reason that survives the move:
+        // a refusal names the field the case actually wrote, and a fold that picked differently would
+        // say 'unlike' to a file that said 'sameAs'. The three are mutually exclusive by rules below
+        // this line now rather than above it, so the fold has to carry that precedence itself — hence
+        // `back` first, which is the order the refusal's own naming used. For a step that wrote one
+        // of them, which is every step that survives, this is the switch WW308 wrote.
+        var pointing = (back is not null, apart is not null, ticking is not null, holding is not null) switch
         {
-            if (made)
-                claiming.Add(new Claim(field, says));
-        }
-
-        // The field the case actually wrote, for each family whose several spellings the engine has
-        // already folded into one. A refusal names what to go and delete, so it says the spelling
-        // the file used and never the mode the fold produced.
-        var sweptAs = matching switch
-        {
-            Asserting.SetMatch.AtLeast => "coversAtLeast",
-            Asserting.SetMatch.Within => "coversWithin",
-            _ => "covers",
+            (true, _, _, _) => Pointing.Same,
+            (_, true, _, _) => Pointing.Unlike,
+            (_, _, true, _) => Pointing.Countdown,
+            (_, _, _, true) => Pointing.Contains,
+            _ => Pointing.Same,
         };
 
-        var pointedAs = back is not null ? "sameAs"
-            : apart is not null ? "unlike"
-            : ticking is not null ? "sameCountdownAs" : "contains";
+        // The bang for the reason the one below this carries it: TryParse is not annotated, so the
+        // throw above narrows nothing the compiler can see, and the locator is not null by the only
+        // route that reaches this line.
+        var step = new StepDeclaration(
+            called ?? Describing(act.Name, parsed!.Text),
+            parsed,
+            null,
+            act,
+            string.IsNullOrWhiteSpace(argument) ? null : argument.Trim(),
+            wanted,
+            reading,
+            meansIt,
+            moves,
+            sweeping,
+            answers,
+            pattern,
+            discloses,
+            back ?? apart ?? ticking ?? holding,
+            forbidden,
+            spoken,
+            declared,
+            undeclared,
+            reportedly,
+            eachSpoken,
+            ownHeader,
+            matching,
+            pointing)
+        {
+            BeginsWithLabel = opening,
+            Absent = absent,
+        };
 
-        var stringedAs = declared is not null ? "label"
-            : undeclared is not null ? "notLabel" : "beginsWithLabel";
-
-        Claiming(absent, "absent", "its locator matches nothing");
-        Claiming(wanted is not null, "expect", $"the reading is '{wanted}'");
-        Claiming(moves, "moves", "the reading ended up different");
-        Claiming(answers, "answers", "the reading says something rather than nothing");
-        Claiming(sweeping is not null, sweptAs, $"the '{sweeping}' set is read here");
-        Claiming(pattern is not null, "matches", $"the reading matches {pattern}");
-        Claiming(discloses, "discloses", "the act put something under the locator");
-        Claiming(
-            (back ?? apart ?? ticking ?? holding) is not null,
-            pointedAs,
-            $"the reading is compared with '{back ?? apart ?? ticking ?? holding}'");
-        Claiming(forbidden is not null, "never", $"'{forbidden}' is never shown while this waits");
-        Claiming(spoken, "spoken", "everything under the locator that speaks is named");
-        Claiming(
-            (declared ?? undeclared ?? opening) is not null,
-            stringedAs,
-            $"the reading is the '{declared ?? undeclared ?? opening}' string");
-        Claiming(
-            reportedly is not null,
-            "expectReported",
-            $"the reading is the value reported under '{reportedly}'");
-        Claiming(eachSpoken, "eachSpoken", "every element it matches announces a name");
-        Claiming(ownHeader, "ownHeader", "each row's controls announce that row");
-
+        var claiming = step.Claims;
         var claims = claiming.Count > 0;
 
         // WW336. A capture's claim is the receipt, and it is the whole of it. Every field in the set
@@ -1283,47 +1355,10 @@ public sealed record StepDeclaration
             }
         }
 
-        // WW308. Folded here and not sooner, because every refusal above names the field the case
-        // actually wrote — a fold done before them would have them saying 'sameAs' to a file that
-        // said 'unlike'. The three are mutually exclusive by the rules above, so this cannot pick
-        // wrongly: `back` and `apart` together were refused, and `ticking` beside either was too.
-        var pointing = (apart is not null, ticking is not null, holding is not null) switch
-        {
-            (true, _, _) => Pointing.Unlike,
-            (_, true, _) => Pointing.Countdown,
-            (_, _, true) => Pointing.Contains,
-            _ => Pointing.Same,
-        };
-
-        return new StepDeclaration(
-            called ?? Describing(act.Name, parsed.Text),
-            parsed,
-            null,
-            act,
-            string.IsNullOrWhiteSpace(argument) ? null : argument.Trim(),
-            wanted,
-            reading,
-            meansIt,
-            moves,
-            sweeping,
-            answers,
-            pattern,
-            discloses,
-            back ?? apart ?? ticking ?? holding,
-            forbidden,
-            spoken,
-            declared,
-            undeclared,
-            reportedly,
-            eachSpoken,
-            ownHeader,
-            matching,
-            pointing)
-        {
-            BeginsWithLabel = opening,
-            Absent = absent,
-            Claims = claiming.AsReadOnly(),
-        };
+        // WW351. The step every refusal above was asked about, handed back. It was built before them
+        // rather than after, because the set they read is its own — and nothing between here and
+        // there changes a field, so what is returned is what was judged.
+        return step;
     }
 
     /// <summary>
