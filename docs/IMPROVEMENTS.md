@@ -347,3 +347,29 @@ foreground is competing with every other case that needs it. It belongs in the s
 collection, and it is one more class in there for a reading taken once a run.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW358 a process whose only windows are a menu and its shadow
+
+`TopLevelWindows.OfProcess` skips the classes `ShellDrawn` names, and two cases stand
+behind that. Neither runs the arm the defect lives on.
+
+The first opens a tray menu and asserts the largest window is not the shell's shadow,
+but it runs inside testhost, which owns the suite's own windows — a decoy, a statistics
+window, whatever the run left standing. The sort has real windows to put in front of the
+shadow, so the case passes with the skip deleted. The second calls `DrawnByTheShell`
+directly, which proves the rule and not the walk that consults it.
+
+What the fault needs is a process whose only windows are a menu and the shadow behind
+it, which is what a tray application is and what freewilly was when the measurement came
+from there. The fixture cannot be one: it is a WPF application with a main window, and
+every tray icon this suite raises is added to the suite's own process rather than to a
+child.
+
+So `ShellDrawn` names one class from one measurement on one machine, and nothing here
+would notice a Windows build drawing a differently-classed shadow, or the skip being
+removed. Block E asks that every arm of a capture refusal has something that provokes
+it, and this arm has none.
+
+The candidate is a fixture mode with a tray icon and no frame, so `Largest` can be asked
+of a process with nothing else to answer with. Whether that is a flag or a second
+executable is the task.

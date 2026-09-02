@@ -44,6 +44,8 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
+- 💭 **WW358** (deps: —) **the fixture always has a frame, so no case can make a shell-drawn shadow the largest window a process owns** — WW346's cases run in a process owning the suite's own windows, so the sort has real windows to put first and the arm the defect lives on has nothing that provokes it. → §WW358
+
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine
