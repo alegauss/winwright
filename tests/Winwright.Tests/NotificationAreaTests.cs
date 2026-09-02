@@ -472,6 +472,21 @@ public sealed class NotificationAreaTests : IDisposable
 
             Assert.True(menu.Opened, menu.Because);
             Assert.Equal(Winwright.Tracing.StepVerdict.Ok, menu.AsTraceStep().Verdict);
+
+            // WW339. Which of the two readings answered, said rather than left to a reader holding
+            // a string. Exactly one of them, always: a menu standing and an entry highlighted are
+            // different facts, and the field that held both was right about one of them.
+            Assert.True(
+                menu.Standing is null ^ menu.Highlighted is null,
+                $"one reading answers and this carries {menu.Standing} and {menu.Highlighted}");
+
+            // Measured rather than assumed, and it is the answer that decides whether the focus arm
+            // is reachable at all: a TrackPopupMenu is a top-level menu on the desktop as much as a
+            // drop-down is, so the standing reading gets to it first and the focus is never asked.
+            Assert.NotNull(menu.Standing);
+
+            Assert.Equal(menu.Standing ?? menu.Highlighted, menu.Read);
+            Assert.Contains(menu.Read!, menu.AsTraceStep().ReadBack!, StringComparison.Ordinal);
         }
         finally
         {
@@ -520,6 +535,12 @@ public sealed class NotificationAreaTests : IDisposable
 
             Assert.True(menu.Opened, menu.Because);
             Assert.Equal(Winwright.Tracing.StepVerdict.Ok, menu.AsTraceStep().Verdict);
+
+            // WW339, and against the kind the focus cannot see: a drop-down never takes it, so this
+            // is the arm where the answer has to be the menu standing rather than an entry.
+            Assert.NotNull(menu.Standing);
+            Assert.Null(menu.Highlighted);
+            Assert.Contains("the menu", menu.AsTraceStep().ReadBack!, StringComparison.Ordinal);
         }
         finally
         {

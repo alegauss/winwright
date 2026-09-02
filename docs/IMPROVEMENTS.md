@@ -32,29 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW339 the field that stopped meaning what it is called
-
-`TrayMenu.Highlighted` was the focused element's name, which for a Win32 popup is the
-entry the menu has highlighted - and that is what the field is called and what a trace's
-read-back carries.
-
-WW322 asked a second question first: is a menu standing on the desktop, which is the
-only reading a drop-down answers. Where it answers, the value is the menu's own name and
-not an entry's. So a trace of the same act against the same application now records the
-menu where it recorded the entry, and the field's name is right about one of the two
-paths.
-
-Nothing is wrong with what it reports. What is wrong is that one word covers two
-readings, and this project's rule about the third verdict is the same rule: two facts
-under one name is a reader unable to tell which they have.
-
-Two ways out, and the choice is the task. Either the field says which reading answered,
-so a trace carries `the menu 'Context'` against `the entry 'Open'` and a case can ask
-for either - or the standing route goes on to read what its menu is highlighting, which
-is one more cross-process call on a path that has just proved a menu exists. The first
-is honest and cheap; the second keeps every existing reading meaning what it did, which
-matters to nobody yet and would matter to an adopter asserting on it.
-
 ### §WW341 the same look, four more times
 
 WW329 measured one act. `SendInput` returns once the events are queued rather than
@@ -120,6 +97,27 @@ What it is worth is a run that says why the next one was refused. WW330 was foun
 picture of a guest, taken by hand, after a suite in another repository would not start;
 a line in the first run's own output saying the desktop had not gone back would have
 been the whole investigation.
+
+### §WW350 the arm the first question never leaves anything for
+
+WW322 asked the standing menu first and kept the focus behind it, on the argument that a
+TrackPopupMenu answers both and the day one stops answering the other still does. WW339
+split the two readings apart and then measured which answers, on both kinds this suite
+can put up.
+
+Both answer the standing one. A Win32 popup is a top-level menu on the desktop exactly
+as a drop-down is, so the first question reaches it and the second is never asked - and
+the suite now asserts that, which is how the arm was found rather than reasoned about.
+
+So `Highlighted` is a field nothing fills and the focus branch is a line nothing runs.
+This project refuses that shape everywhere else it can see it: every refusal has
+something that provokes it, and a catalogue exists per family to say so.
+
+Three ways out and the measurement decides none of them. It may be right to keep as a
+fallback for a menu neither kind covers, which is an argument for provoking one rather
+than for keeping an unprovoked branch. It may be right to delete, and the reading
+becomes one question. Or the order is wrong and the focus should be asked first for the
+kind that answers it, which would put the entry back in traces that used to carry it.
 
 ## Block E — Capture — the picture that proves what it photographed
 

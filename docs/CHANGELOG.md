@@ -134,6 +134,7 @@
 - ✅ **WW333** **the tray menu case proves the verb against a Win32 popup and never against a WinForms one** — The fixture hosts a drop-down as readily as a tracked popup, and the case driving it went red against the old reading and green against the new one, measured in that order.
 - 🗑 **WW337** **a spacing of 32ms silenced the fault across 750 rounds, and the repair was chosen when only 128ms had** — superseded by WW329: WW329 shipped between the filing and the doing: the pause took 31 of 1200 to none at 7ms a round, so a 288ms spacing would buy a fault that no longer happens.
 - ✅ **WW338** **a tray menu is told from the one before it by name, so two unnamed menus read as one menu standing** — Every menu standing is read and told apart by its runtime id, and the case that provokes it goes red against the old comparison with the sentence WW322 spent itself on.
+- ✅ **WW339** **a tray menu's reading is called Highlighted and now often holds the menu's own name instead** — The menu standing and the entry highlighted are two fields and exactly one answers, so a trace records the menu as the menu rather than where an entry used to be.
 
 ## Block E — Capture — the picture that proves what it photographed
 

@@ -96,16 +96,41 @@ public sealed record TrayMenu
     /// <summary>Whether a menu actually came up.</summary>
     public bool Opened { get; }
 
-    /// <summary>What the menu is highlighting, where one came up.</summary>
+    /// <summary>
+    /// The entry the menu is highlighting, where the desk named one. Null where the menu was found
+    /// standing on the desktop instead — which is a different fact and now says so.
+    /// <para>
+    /// WW339. This held both for a while and the name was right about one of them. WW322 asked
+    /// whether a menu is standing before asking what holds the focus, because a drop-down answers
+    /// the first and not the second; where it answers, the value is the menu's own name and not an
+    /// entry's. Two facts under one word is a reader unable to tell which they have, which is the
+    /// same rule this project's third verdict exists for.
+    /// </para>
+    /// </summary>
     public string? Highlighted { get; }
+
+    /// <summary>
+    /// The menu that came up, where one was found standing on the desktop. Null where the desk
+    /// named a highlighted entry instead. WW339.
+    /// </summary>
+    public string? Standing { get; init; }
+
+    /// <summary>What the reading answered, whichever of the two answered it. WW339.</summary>
+    public string? Read => Highlighted ?? Standing;
 
     /// <summary>Why nothing came up, where nothing did.</summary>
     public string? Because { get; }
 
-    /// <summary>What happened, said either way.</summary>
-    public override string ToString() => Opened
-        ? $"{Icon} opened its menu on \"{Highlighted}\"."
-        : $"{Icon} showed no menu: {Because}.";
+    /// <summary>What happened, said either way — and which reading answered. WW339.</summary>
+    public override string ToString()
+    {
+        if (!Opened)
+            return $"{Icon} showed no menu: {Because}.";
+
+        return Standing is { } menu
+            ? $"{Icon} opened the menu \"{menu}\"."
+            : $"{Icon} opened its menu on the entry \"{Highlighted}\".";
+    }
 
     /// <summary>
     /// The result a verdict counts. A menu the application never showed is a failure a scenario
@@ -180,7 +205,10 @@ public sealed record TrayMenu
         Locator = Icon.Name.Split('\n')[0].Trim(),
         Resolved = Icon.ToString(),
         Pattern = "focus and the application key",
-        ReadBack = Highlighted,
+
+        // WW339. Which reading answered and not only what it said: a trace that recorded the menu
+        // where it used to record the entry looks like the same reading changing its mind.
+        ReadBack = Standing is { } menu ? $"the menu \"{menu}\"" : Highlighted is { } entry ? $"the entry \"{entry}\"" : null,
         Verdict = Verdict(),
         Detail = Opened ? null : ToString(),
     };
@@ -885,13 +913,23 @@ public static class NotificationArea
 
         Keys.SendApplicationKey();
 
-        string? showing = null;
-        var came = Attempt.UntilTrue(() => Showed(icon, before, standingBefore, out showing), settleMs, pollMs);
+        CameUp? showing = null;
+        var came = Attempt.UntilTrue(
+            () => (showing = Showed(icon, before, standingBefore)) is not null, settleMs, pollMs);
 
         // WW330. What this act took, carried on the reading so it can be given back — by the caller
         // where a menu is standing, and by Refused below where none is.
-        if (came.Happened)
-            return new TrayMenu(icon, true, showing, null) { Held = wasHolding, OpenedTheOverflow = mine };
+        if (came.Happened && showing is { } answered)
+        {
+            // WW339. Into the field the reading belongs in, so a trace says which of the two
+            // answered rather than putting a menu where an entry used to be.
+            return new TrayMenu(icon, true, answered.AsAMenu ? null : answered.Said, null)
+            {
+                Standing = answered.AsAMenu ? answered.Said : null,
+                Held = wasHolding,
+                OpenedTheOverflow = mine,
+            };
+        }
 
         return Refused(
             new TrayMenu(icon, false, null, Undelivered(icon, came.WaitedMs, aimedAt, holding))
@@ -947,26 +985,28 @@ public static class NotificationArea
     /// </summary>
     /// <param name="icon">The icon the menu was asked of, whose own name is not a menu.</param>
     /// <param name="before">What the desk was showing before the key.</param>
-    /// <param name="standingBefore">What menu was standing before it, where one was.</param>
-    /// <param name="showing">What answered, where anything did.</param>
-    private static bool Showed(
-        TrayIcon icon, string? before, IReadOnlyList<StandingMenu> standingBefore, out string? showing)
+    /// <param name="standingBefore">What menus were standing before it.</param>
+    /// <returns>What answered and which reading answered it, or null where neither did.</returns>
+    private static CameUp? Showed(
+        TrayIcon icon, string? before, IReadOnlyList<StandingMenu> standingBefore)
     {
         if (Standing().FirstOrDefault(one => !Among(standingBefore, one)) is { } menu)
-        {
-            showing = menu.Named;
-            return true;
-        }
+            return new CameUp(menu.Named, AsAMenu: true);
 
         if (OnTheDesk() is { } now && now != before && now != icon.Name)
-        {
-            showing = now;
-            return true;
-        }
+            return new CameUp(now, AsAMenu: false);
 
-        showing = null;
-        return false;
+        return null;
     }
+
+    /// <summary>
+    /// What answered that a menu came up, and which of the two readings did. WW339: kept apart,
+    /// because one is the menu and the other is an entry inside it — and a field holding both was a
+    /// field whose name was right about one of them.
+    /// </summary>
+    /// <param name="Said">What the reading said.</param>
+    /// <param name="AsAMenu">Whether it is a menu standing rather than a highlighted entry.</param>
+    private sealed record CameUp(string Said, bool AsAMenu);
 
     /// <summary>
     /// Why no menu came, said with what the key had to work with. WW322.
