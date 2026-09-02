@@ -28,8 +28,16 @@ rem not take: erase and send in one act, then wait 0, 50 or 150ms before looking
 rem What it prices is the alternative to the resend - a pause paid by every send against three
 rem resends paid by the 1% that fault - so it reports the milliseconds a round beside the rate.
 rem
+rem `acts` is WW341's, and it is the only arm that types nothing. WW329 measured one act; four more
+rem synthesise input and read back the moment the send returns. It runs a click, a traversal key and
+rem a nudge, and takes the one comparison that separates late from wrong: the reading the engine's
+rem own act produced, against a reading taken afterwards with time to settle. The click is the one
+rem worth the run - it reads once and polls nothing, so a late arrival is a wrong answer rather than
+rem a poll - and the fixture is launched with --ranges for it, which no other arm needs.
+rem
 rem The configuration moved to the third argument when this gained the second. `run-typing.cmd 400`,
-rem `run-typing.cmd 150 sweep` and `run-typing.cmd 1200 delay` are the three a person types.
+rem `run-typing.cmd 150 sweep`, `run-typing.cmd 1200 delay` and `run-typing.cmd 300 acts` are the
+rem four a person types.
 setlocal
 
 set CONFIG=Debug

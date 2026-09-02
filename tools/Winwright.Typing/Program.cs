@@ -83,6 +83,7 @@ public static class Program
         var experiment = args.Length > 1 ? args[1] : "";
         var sweeping = string.Equals(experiment, "sweep", StringComparison.OrdinalIgnoreCase);
         var delaying = string.Equals(experiment, "delay", StringComparison.OrdinalIgnoreCase);
+        var landing = string.Equals(experiment, "acts", StringComparison.OrdinalIgnoreCase);
 
         var executable = Fixture();
         if (executable is null)
@@ -91,7 +92,15 @@ public static class Program
             return Unrunnable;
         }
 
-        using var fixture = Process.Start(new ProcessStartInfo(executable));
+        // WW341. The arm needs a control offering RangeValue, and the fixture draws none unless it
+        // is asked. Passed at the launch rather than switched on later, because the pane is built
+        // when the window is and a run that asked for it afterwards would be measuring a window
+        // that had just been rebuilt.
+        var start = new ProcessStartInfo(executable);
+        if (landing)
+            start.ArgumentList.Add("--ranges");
+
+        using var fixture = Process.Start(start);
         if (fixture is null)
         {
             Console.Error.WriteLine($"the fixture would not start: {executable}");
@@ -100,7 +109,7 @@ public static class Program
 
         try
         {
-            return Measured(fixture, rounds, sweeping, delaying);
+            return Measured(fixture, rounds, sweeping, delaying, landing);
         }
         finally
         {
@@ -109,7 +118,7 @@ public static class Program
         }
     }
 
-    private static int Measured(Process fixture, int rounds, bool sweeping, bool delaying)
+    private static int Measured(Process fixture, int rounds, bool sweeping, bool delaying, bool landing)
     {
         var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(fixture.Id) is not null, 20000, 25);
         if (!drawn.Happened)
@@ -165,6 +174,15 @@ public static class Program
         if (delaying)
         {
             FirstRead.Run(box, arrived, packets, rounds);
+            return 0;
+        }
+
+        // WW341, and it answers on its own for the same reason as the two above: nothing below this
+        // is about a click, a key or a range, and printing the typing counts under a run that never
+        // typed would attribute them to the acts this arm is measuring.
+        if (landing)
+        {
+            Landing.Run(root, rounds);
             return 0;
         }
 

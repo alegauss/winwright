@@ -32,29 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW341 the same look, four more times
-
-WW329 measured one act. `SendInput` returns once the events are queued rather than
-processed, and `Settled` polled from the instant `Send` returned - which put a
-cross-process read into the window's thread while its packets were still being
-translated. 31 substitutions in 1200 rounds with no pause, none with one.
-
-Nothing about that is peculiar to typing. `Act.Through` reads back through the subject
-the moment the act returns, and four verbs reach it after synthesising input: click,
-press, nudge and the two picker walks. Each queues events and each is read while the
-queue drains.
-
-What differs is the observable. A typed string arrives wrong in a way a case can see,
-character for character, which is why this fault was found at all and why it took ten
-sightings to find. A click that lands late is a step that reads the value from before
-it, which the engine reports as a read-back that did not arrive and a retry then covers
-- so the same provocation would show up as a rate of retries rather than as a wrong
-answer, and nothing has ever counted those against a machine that waited.
-
-The measurement is the task and not the pause. The typing arm exists and takes rounds, a
-pause and a rate; what a click needs is an observable that separates late from wrong,
-and that is what has to be built first.
-
 ### §WW342 what the fifty milliseconds are paying for
 
 WW329 measured the repair and not the mechanism. A cross-process read against the window
@@ -120,6 +97,28 @@ What is left is whether a race decides what a trace says. A step that opened the
 menu twice can report the entry once and the menu once, and a reader comparing two runs
 is comparing which question won. Preferring one needs a reason, which is what this entry
 now holds.
+
+### §WW353 the verb with nothing behind its reading
+
+`Pointer.Run` sends the click and then returns `subject.Read().Values` on the next line.
+No poll, no deadline, no second look. Every other verb that synthesises input settles
+first: typing polls and now waits before its first look, press polls until the focus
+moves, nudge polls until the range moves, and both picker walks poll per hop.
+
+WW341 built the observable that tells a late reading from a wrong one and ran it: 1800
+rounds of click, press and nudge on the guest, none late and none lost. So this is not a
+fault that was measured - it is a shape that disagrees with every neighbour, bounded
+under about 1% on one desk rather than shown to be absent.
+
+What makes it worth an entry is what a stale click costs. The others pay a poll and
+answer right; this one has no poll to pay, so a reading taken before the click lands is
+returned as the click's answer. A case that clicks and expects the state to have changed
+then fails on a busy desk, and the failure names the control rather than the timing -
+which is the failure a person spends an afternoon on.
+
+The fix is small and the cost is what has to be decided: a poll until the reading moves
+adds a deadline to a verb that has none, and a click that legitimately changes nothing
+would spend all of it. WW341's arm is what would price that.
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -260,6 +259,29 @@ and one named claim is why a case is readable in a test file. So a builder that 
 it has to read as well as that does, or it buys a smaller signature with a worse suite.
 
 Worth doing after WW351, which removes one of the two hands a field passes through.
+
+### §WW354 the arms nobody checks against each other
+
+`run-typing.cmd` is where a person reads what the measurement tool can do: four arms
+now, each with a paragraph saying what it drives and what it reports. `Program.Main` is
+where the second word is parsed, one `string.Equals` per arm, falling through to the
+default.
+
+Neither knows about the other. An arm added to the switch and not to the .cmd is a
+measurement nobody can find. An arm named in the .cmd and not in the switch is worse:
+the word is not recognised, nothing refuses it, and the tool runs its default experiment
+and prints that experiment's numbers under the run a person started for something else.
+A typo does the same thing.
+
+This project refuses that shape everywhere it can see it. The verbs have a catalogue
+checked against the engine in both directions, so do the flags the fixture takes, the
+desk facts, the capture arms and the renderings. The measurement tool is outside the
+suite by choice - it takes the desk for minutes and no guest run should pay for it - and
+the two lists inside it were never brought under the same rule.
+
+What would close it is what closed the others: the arms as data, named once with what
+each drives, with the .cmd's prose and the parse both reading it, and a case asserting
+an unrecognised second word is refused rather than silently answered by the default.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

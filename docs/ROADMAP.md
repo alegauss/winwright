@@ -10,10 +10,10 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW341** (deps: —) **every other synthesised act reads the instant SendInput returns, and only typing was measured** — WW329 found that look provoking a fault in the send it was reading, and a click, a chord and a picker walk all take it the same way. → §WW341
 - 📋 **WW342** (deps: —) **the pause repairs the fault and nothing says whether the read provokes it or the pumping it forces** — WW329 closed on a repair that works either way, so the interval is a number nobody can shorten and no other reader can be judged. → §WW342
 - 📋 **WW344** (deps: —) **putting the desk back answers for the flyout and says nothing about the foreground, the half that gets refused** — Windows grants a foreground to whoever it grants it to, so the call this project makes best-effort is the one it reports nothing about. → §WW344
 - 📋 **WW350** (deps: —) **which of a tray menu's two readings answers is a race, and the suite asserted the one that won a single run** — WW339 measured the standing reading answering on both kinds; WW340's run had the Win32 popup answer through the highlight, so both arms are live and the order is a race. → §WW350
+- 📋 **WW353** (deps: —) **a click sends and reads once, so its answer is whatever was there at that instant and nothing retries it** — WW341 measured the shape and found no fault on this desk; every other synthesised verb settles before it answers, and Pointer.Run is the one that does not. → §WW353
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -28,6 +28,7 @@
 - 📋 **WW348** (deps: —) **a case that captures with no captures declared is a hole at run time, and the file said so at load** — Every other thing wrong with a file is refused where it was written, and this one waits for the machine that was going to run it. → §WW348
 - 📋 **WW351** (deps: —) **the claim set is computed from Of's parameters, so a claim is still added there rather than by declaring a field** — WW340 gave the set one reader; it is still built by a hand-written Claiming call per field, and every fold it names is recoverable from the finished step. → §WW351
 - 📋 **WW352** (deps: WW351) **StepDeclaration.Of takes 28 parameters and its constructor 23, so every new field is threaded through both by hand** — The arity is the shape WW340 could not reach: the analyser reads Of at cognitive complexity 131, and a transposed pair of positional arguments still compiles. → §WW352
+- 📋 **WW354** (deps: —) **the typing tool's arms are documented in a .cmd and parsed in a switch, and nothing holds the two lists together** — WW341 added a fourth arm by editing both by hand; a word in one and not the other runs the default silently, printing one experiment's numbers under another. → §WW354
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
