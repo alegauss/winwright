@@ -357,6 +357,29 @@ The awkward half is honest: the suite runs in the guest, so a case arranging the
 foreground is competing with every other case that needs it. It belongs in the serial
 collection, and it is one more class in there for a reading taken once a run.
 
+### §WW369 the tree nothing reads back
+
+WW356 changed the fixture's tray entries from buttons to menu items, and one case
+noticed: the scenario reading `Menu > MenuItem[order=top]`. What it said while the
+entries were still wrong is "nothing answered to it in 30 polls over 4080ms" — which is
+what a menu that closed says, what a menu that never opened says, and what a locator
+naming a control type the tree does not carry says. Three faults, one sentence.
+
+That is the confusion WW343 spent four guest runs inside and WW356 spent two more. The
+entries are right now and nothing here holds them right: a container swapped, or an
+`Items.Add(string)` written the short way, and the first sign would be a scenario
+failing in the words of a desk problem.
+
+What the fixture lacks is a case that reads its own tree and says what is in it.
+`Inspect.Under` and `Inspect.Render` already produce exactly that — the probe WW356
+threw away was fifteen lines of them — and asserting the control types under the
+drop-down, a Menu and two MenuItems, is a red that names the fault in its own sentence.
+
+Worth doing for the Win32 kind at the same time. Nothing here has ever read that one's
+tree either: it is asserted through the reading verbs and never as a shape, so what an
+adopter's locator would find in it is unmeasured rather than known — which is the state
+the drop-down was in until somebody spent six runs.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW358 a process whose only windows are a menu and its shadow
