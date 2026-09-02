@@ -353,31 +353,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW331 A shell surface is not a prompt
-
-The probe refused a run: `the guest's desk is waiting for an answer: explorer (pid 1008,
-Shell_TrayWnd) '' held the foreground for every look`. A capture taken seconds later
-shows an ordinary desktop — no dialog, nothing to answer — with the overflow chevron
-holding the focus and its tooltip drawn. WW330's leak, one layer down.
-
-The reading is right and the sentence is not. Something did hold the foreground for
-every look. That it is a question somebody must answer is an inference, and it does not
-follow: the shell holds the foreground whenever the last thing to touch the desk was the
-shell.
-
-What separates them is already in the reading and thrown away. `Shell_TrayWnd` is the
-taskbar's own class and an empty title is what it has. A prompt is a window of some
-application, with a caption, that a person could read. The probe names the class in its
-own refusal and then does not use it.
-
-The remedy is what makes this expensive rather than untidy. It tells a reader to answer
-a prompt that does not exist, and warns against killing the owner because doing so once
-cost the tray — so the honest response to this message is to go looking at a console for
-something that was never there.
-
-A refusal that named the shell and said the desk was left focused rather than asked
-would point at WW330, which is the actual repair, and cost nobody the trip.
-
 ### §WW343 the desk a scenario cannot hand back yet
 
 WW330 closed the arm it was filed for: where no menu opened, the act shuts the flyout it
@@ -398,5 +373,28 @@ fixture teardown, which is already the place a case gives back what it took.
 This is the adopters' own path. claude-tray's menu case is `open tray menu` and then two
 reads of `Menu > MenuItem`, and it is a run of exactly that shape whose leftover chevron
 refused the next run in the guest.
+
+### §WW345 the probe nothing can run
+
+`Read-GuestDesk` writes a here-string into the guest, runs it there, and reads one line
+back. What it answers decides whether twenty minutes are spent: `asking` refuses the run
+outright, and the state it names is the one this project has been wrong about twice -
+once by calling a focused taskbar a question, and once by repairing that in a way that
+made the reading say nothing.
+
+Nothing runs it. WW331 gave it source-level checks - the states the probe writes are the
+arms the runner switches on, the shell's classes are not the desktop's, the question
+refuses and the selected shell does not - and every one of those is a claim about the
+file. A classification that answered `busy` where it means `shell` would pass all three.
+
+What it needs is the reading taken against a desk somebody arranged. The engine has the
+pieces: a window put up and given the foreground is what `PumpedDialog` already does,
+and the shell surfaces are addressable by class. The awkward half is that the probe
+polls the live foreground for six seconds in another machine's session, so what would be
+under test is either the classification lifted out of the here-string, or the probe run
+against a desk this suite arranged on the host.
+
+The first is smaller and answers less; the second is what the four states are actually
+about.
 
 ## Block K — The proving ground — a fixture app built to be hard to test

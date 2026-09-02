@@ -42,8 +42,8 @@
 - 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - ⏳ **WW87** (deps: Block G, Block E, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
-- 📋 **WW331** (deps: WW330 ✅) **the desk probe calls a focused taskbar a question waiting to be answered** — It names Shell_TrayWnd in its own refusal and then sends a reader to a guest console to answer a prompt that is not there. → §WW331
 - 📋 **WW343** (deps: —) **a case that opens a tray menu leaves the desktop on the shell, because the step cannot give it back** — WW330 gave the act a way to put the desk back and the scenario runner has nowhere to call it: at the step it would dismiss the menu the next step reads. → §WW343
+- 📋 **WW345** (deps: —) **the probe that refuses a guest run is guest-side PowerShell and nothing runs any of its four answers** — It stopped a session on a reading nobody could reproduce, and the checks it now has are about the text rather than about what it answers. → §WW345
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

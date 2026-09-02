@@ -308,6 +308,7 @@
 - ✅ **WW87 (the probe, and the route it needs)** **freewilly carries its own copy of the capture script and a layout probe** — freewilly's page probe is 354 lines lighter and runs in 4s where the script took 152.3s: the four checks it hand-rolled are the four faults a layout reading names.
 - ✅ **WW322** **the tray menu will not open on the guest: the icon is found in the overflow and the application key highlights nothing** — The suite puts up the kind of menu that never takes the focus, and the reading asks for a standing menu first — which is what three adopted cases failed on.
 - ✅ **WW330** **a run whose tray cases fail inside the overflow leaves the chevron focused and the taskbar holding the foreground** — The act shuts the flyout it opened and gives the desktop back where nothing opened, and hands a caller that got a menu the same call for after it has read one.
+- ✅ **WW331** **the desk probe calls a focused taskbar a question waiting to be answered** — A shell holding the desk is its own reading and says so instead of refusing, and the classes that name it are asserted apart from the desktop's.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

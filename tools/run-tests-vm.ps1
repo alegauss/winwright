@@ -267,6 +267,10 @@ function Read-GuestDesk {
         asking   one window held it for every look, so it is waiting for an answer and no amount
                  of waiting is the answer. Named with its process and its title, because a person
                  has to go and click it.
+        shell    the same, and the window is the taskbar or the overflow flyout. WW331: not a
+                 question, because the shell has none to ask - a desk somebody left selected, which
+                 the next thing touched clears. Said and not refused, and it names WW330, which is
+                 what stops a run leaving one behind.
         broken   nothing holds the foreground at all, which on a logged-in desk means no shell.
 
       The looks are the measurement and the deadline is the argument: a toast this guest could
@@ -297,20 +301,22 @@ public static class Fg {
 
 # The desktop is not a window holding the foreground: an idle logged-in desk has one of these, and
 # reporting it would make every clear desk read as busy.
+$desktop = @('Progman', 'WorkerW')
+
+# WW331. The shell's own surfaces, which are neither. A run whose tray cases failed inside the
+# overflow left the chevron focused (WW330), the taskbar then held the foreground for all twelve
+# looks, and this refused every later run with "the desk is waiting for an answer" - sending a reader
+# to a guest console to answer a prompt that a screen capture showed was not there.
 #
-# WW331. The shell's own surfaces are the same kind of thing and were not on this list, which cost a
-# session. A run whose tray cases failed inside the overflow left the chevron focused (WW330), the
-# taskbar then held the foreground for all twelve looks, and this refused every later run with "the
-# desk is waiting for an answer" - sending a reader to a guest console to answer a prompt that a
-# screen capture showed was not there.
+# They are not the desktop either, and folding them in there was the first repair and the wrong one:
+# it made the refusal go away by making the reading say nothing, so a desk somebody had genuinely
+# left the shell selected on read as "nothing but the desktop held the foreground". The reading was
+# always right. What was wrong is the word for it.
 #
 # Narrow on purpose, and it has to be: the prompt this probe exists to catch belongs to
 # ShellExperienceHost and is a different class from any of these, so naming the taskbar and the
-# overflow flyout hides no question anybody has to answer. A focused taskbar is a desk somebody left
-# the shell selected on, which is what WW330 is filed to stop leaving behind.
-$desktop = @(
-    'Progman', 'WorkerW',
-    'Shell_TrayWnd', 'Shell_SecondaryTrayWnd', 'TopLevelWindowForOverflowXamlIsland')
+# overflow flyout hides no question anybody has to answer.
+$shellSurfaces = @('Shell_TrayWnd', 'Shell_SecondaryTrayWnd', 'TopLevelWindowForOverflowXamlIsland')
 
 $looks = @()
 for ($at = 0; $at -lt 12; $at++) {
@@ -346,9 +352,13 @@ if ($held.Count -eq 0) {
     }
 } elseif ($held.Count -eq $looks.Count -and
           @($held | Where-Object { $_.Handle -ne $held[0].Handle }).Count -eq 0) {
-    # One window for every look is the answer that does not clear.
+    # One window for every look is the answer that does not clear. WW331: and which of the two it is
+    # turns on whose window it is. A question is some application's, with a caption, and no amount of
+    # waiting answers it; the shell holding the desk is a desk somebody left selected, which clears
+    # the moment anything else is touched and is what WW330 stops a run leaving behind.
     $one = $held[0]
-    $answer = "asking|$($one.Process)|$($one.Pid)|$($one.Class)|$($one.Title)"
+    $state = if ($shellSurfaces -contains $one.Class) { 'shell' } else { 'asking' }
+    $answer = "$state|$($one.Process)|$($one.Pid)|$($one.Class)|$($one.Title)"
 } else {
     # Anything else moved, whatever it was.
     $moved = ($held | ForEach-Object { "$($_.Process) '$($_.Title)'" } | Select-Object -Unique) -join '; '
@@ -579,6 +589,17 @@ switch ($desk.State) {
         # suite's own foreground handling exists for - and every excuse it produces is named in
         # the roll call rather than swallowed.
         Write-Host "  foreground  busy: $($desk.Detail)" -ForegroundColor Yellow
+    }
+    'shell' {
+        # WW331. Not a refusal, and the difference is the whole task: the shell asks nothing, so
+        # there is nothing at the guest console for a reader to go and answer. Said out loud anyway,
+        # because a desk left with the taskbar selected is a run that did not put back what it took
+        # — and the run that has just been refused for it is the wrong place to find that out.
+        Write-Host (
+            "  foreground  the shell is selected, not asking: $($desk.Process) " +
+            "(pid $($desk.Pid), $($desk.Class)). Something left the desk on the taskbar; WW330 is " +
+            'what stops a tray act doing it. The run goes on — the first case to take the ' +
+            'foreground clears it.') -ForegroundColor Yellow
     }
     'asking' {
         Refuse (
