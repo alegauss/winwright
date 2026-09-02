@@ -41,7 +41,6 @@
 - 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - ⏳ **WW87** (deps: Block G, Block E, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
-- 📋 **WW356** (deps: —) **the fixture's tray menu is built of buttons, so the locator an adopter writes against a real menu finds nothing here** — WW343 cost four guest runs learning that ToolStripDropDown builds ToolStripButton; claude-tray and freewilly both read MenuItem, which no case in this suite can. → §WW356
 - 📋 **WW357** (deps: —) **the probe's twelve looks at a live foreground are run by nothing, so a look built wrong classifies perfectly** — WW345 made the classification runnable and left the loop that feeds it untouched; a window whose class read empty would refuse a quiet desk as a question. → §WW357
 
 ## Block K — The proving ground — a fixture app built to be hard to test

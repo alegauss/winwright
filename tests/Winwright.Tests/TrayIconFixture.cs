@@ -28,8 +28,9 @@ internal enum TrayMenuKind
     Win32,
 
     /// <summary>
-    /// A WinForms <c>ToolStripDropDown</c>, which is a top-level menu window the desk does not
-    /// report as focused. This is the kind freewilly and claude-tray both put up.
+    /// A WinForms <c>ToolStripDropDownMenu</c> of <c>ToolStripMenuItem</c>s, which is a top-level
+    /// menu window the desk does not report as focused. This is the kind freewilly and claude-tray
+    /// both put up, and WW356 is why the entries are menu items rather than buttons.
     /// </summary>
     DropDown,
 }
@@ -469,12 +470,41 @@ internal sealed class TrayIconFixture : IDisposable
         standing.Show(new System.Drawing.Point(where.X, where.Y));
     }
 
-    /// <summary>Two real entries, the same two the Win32 menu has. WW322.</summary>
+    /// <summary>
+    /// Two real entries, the same two the Win32 menu has. WW322.
+    /// <para>
+    /// WW356. A <c>ToolStripDropDownMenu</c> holding <c>ToolStripMenuItem</c>s, and both halves are
+    /// the fix. <c>Items.Add(string)</c> asks the container what a default item is, and on
+    /// <c>ToolStripDropDown</c> that is <c>ToolStrip</c>'s answer — a <c>ToolStripButton</c>. So an
+    /// automation client read <c>ControlType.Button 'winwright open'</c> under a Menu with no name,
+    /// measured on the guest, and every case here named Button while claude-tray and freewilly both
+    /// name MenuItem. A locator proven here was one that would find nothing there.
+    /// </para>
+    /// <para>
+    /// The item is named outright rather than left to the container, which is the half worth keeping
+    /// even though the subclass would answer correctly. What builds a default item is a protected
+    /// method on a base class two levels up, and this fixture exists to reproduce what an adopter's
+    /// menu looks like — a line that says <c>ToolStripMenuItem</c> is one nobody has to know that to
+    /// read, and it cannot quietly change under a container somebody swaps later.
+    /// </para>
+    /// <para>
+    /// What an automation client sees, measured on the guest rather than reasoned about, which is
+    /// the whole lesson of the four runs WW343 spent:
+    /// <code>
+    /// Menu (unnamed)  255x80
+    ///   MenuItem[name="winwright open"]  Invoke
+    ///   MenuItem[name="winwright quit"]  Invoke
+    /// </code>
+    /// The container still reads as a menu with no name, which is what WW322's and WW338's cases
+    /// assert about it and what WW339's split turns on — so the entries changed and the thing
+    /// holding them did not.
+    /// </para>
+    /// </summary>
     private static System.Windows.Forms.ToolStripDropDown Built()
     {
-        var strip = new System.Windows.Forms.ToolStripDropDown { AutoClose = false };
-        strip.Items.Add("winwright open");
-        strip.Items.Add("winwright quit");
+        var strip = new System.Windows.Forms.ToolStripDropDownMenu { AutoClose = false };
+        strip.Items.Add(new System.Windows.Forms.ToolStripMenuItem("winwright open"));
+        strip.Items.Add(new System.Windows.Forms.ToolStripMenuItem("winwright quit"));
         return strip;
     }
 

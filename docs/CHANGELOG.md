@@ -333,6 +333,7 @@
 - ✅ **WW331** **the desk probe calls a focused taskbar a question waiting to be answered** — A shell holding the desk is its own reading and says so instead of refusing, and the classes that name it are asserted apart from the desktop's.
 - ✅ **WW343** **a case that opens a tray menu leaves the desktop on the shell, because the step cannot give it back** — the case gives the desk back where it ends: the menu step hands its reading up, and a restore that did not hold is a hole rather than a silent leak.
 - ✅ **WW345** **the probe that refuses a guest run is guest-side PowerShell and nothing runs any of its four answers** — the probe is a file with the classification as a function, and every answer is run against looks a case made up rather than read as text.
+- ✅ **WW356** **the fixture's tray menu is built of buttons, so the locator an adopter writes against a real menu finds nothing here** — The entries are menu items now, so a case here names MenuItem as the adopters do and the container still reads unnamed (design recorded in `tests/Winwright.Tests/TrayIconFixture.cs`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

@@ -823,12 +823,15 @@ public sealed class NotificationAreaTests : IDisposable
             "the tray menu is opened and read",
             Winwright.Scenarios.StepDeclaration.Of(
                 null, "open tray menu", tray: answering.Tip, named: "the icon shows its menu"),
-            // Button and not MenuItem, which was measured rather than read off the fixture's source.
-            // `ToolStripDropDown.Items.Add(string)` builds a ToolStripButton — `ToolStripDropDownMenu`
-            // is the subclass that builds menu items — and the tree an automation client sees is
-            // "[] ControlType.Button 'winwright open', ControlType.Button 'winwright quit'" under a
-            // Menu with no name. A locator naming MenuItem here matched nothing for three runs, and
-            // said only that nothing answered.
+            // WW356. MenuItem, and it is the adopters' own word: claude-tray's case reads
+            // `Menu > MenuItem` and freewilly's does the same. It used to be Button here, measured
+            // rather than read off the fixture's source — `ToolStripDropDown.Items.Add(string)`
+            // builds a ToolStripButton, because CreateDefaultItem is ToolStrip's — and a locator
+            // naming MenuItem matched nothing for three runs, saying only that nothing answered.
+            //
+            // So the fixture builds `ToolStripDropDownMenu` now and this case names what an adopter
+            // names. That is the whole of the change: a locator proven here was one that would have
+            // found nothing there.
             //
             // Named the way the engine allows, too: a locator that matched on the name fixes the
             // reading before the act runs, so claiming that name back is a step that cannot fail.
@@ -839,7 +842,7 @@ public sealed class NotificationAreaTests : IDisposable
             // them — which is the right refusal and is how this case learned the menu was standing
             // with both of them in it.
             Winwright.Scenarios.StepDeclaration.Of(
-                "Menu > Button[order=top]", "read", reads: "name", answers: true, named: "the first entry"));
+                "Menu > MenuItem[order=top]", "read", reads: "name", answers: true, named: "the first entry"));
 
         Winwright.Scenarios.CaseResult run;
         try
