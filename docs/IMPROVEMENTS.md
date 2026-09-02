@@ -321,29 +321,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW345 the probe nothing can run
-
-`Read-GuestDesk` writes a here-string into the guest, runs it there, and reads one line
-back. What it answers decides whether twenty minutes are spent: `asking` refuses the run
-outright, and the state it names is the one this project has been wrong about twice -
-once by calling a focused taskbar a question, and once by repairing that in a way that
-made the reading say nothing.
-
-Nothing runs it. WW331 gave it source-level checks - the states the probe writes are the
-arms the runner switches on, the shell's classes are not the desktop's, the question
-refuses and the selected shell does not - and every one of those is a claim about the
-file. A classification that answered `busy` where it means `shell` would pass all three.
-
-What it needs is the reading taken against a desk somebody arranged. The engine has the
-pieces: a window put up and given the foreground is what `PumpedDialog` already does,
-and the shell surfaces are addressable by class. The awkward half is that the probe
-polls the live foreground for six seconds in another machine's session, so what would be
-under test is either the classification lifted out of the here-string, or the probe run
-against a desk this suite arranged on the host.
-
-The first is smaller and answers less; the second is what the four states are actually
-about.
-
 ### §WW356 the menu that is not made of menu items
 
 `TrayIconFixture.Built` makes a `ToolStripDropDown` and calls `Items.Add(string)` twice.
@@ -367,5 +344,28 @@ WW338's cases read this menu as "a menu with no name", WW339's split turns on wh
 reading answers, and a different window class may answer differently. So the change is
 small and what has to be measured after it is the four cases that already read this
 fixture.
+
+### §WW357 the looks nothing arranges
+
+WW345 split the probe in two. `Read-DeskState` decides what a desk is called and six
+cases now call it with looks they made up. The loop above it - twelve looks half a
+second apart, skipping the desktop's own classes, naming the owning process - is
+untouched and still run by nothing but a real guest.
+
+Both defects so far were in the classification, which is the argument for having stopped
+there. But the loop is where a look is built, and a look built wrong classifies
+perfectly: a window whose class is read as empty is not the desktop and not a shell
+surface, so a quiet desk reads as a question and refuses the run. That is the exact
+failure this probe has already caused once, arrived at from the other end.
+
+What would run it is a desk this suite arranges. `PumpedDialog` puts up a window and
+takes the foreground, which is the `asking` arm; letting it go is `busy`; the taskbar is
+addressable by class, which is `shell`. The probe would have to take its deadline as a
+parameter, because twelve looks over six seconds is a case nobody wants in a suite that
+runs in eight minutes.
+
+The awkward half is honest: the suite runs in the guest, so a case arranging the
+foreground is competing with every other case that needs it. It belongs in the serial
+collection, and it is one more class in there for a reading taken once a run.
 
 ## Block K — The proving ground — a fixture app built to be hard to test

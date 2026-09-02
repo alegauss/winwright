@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
   Run the suite on a desk that is not the operator's.
@@ -74,7 +74,7 @@ param(
     # WW227. The five that make this an adopter's runner rather than this repository's.
     #
     # An adopting project had exactly one place to run its migrated cases: the desk somebody is
-    # working at. That is the thing this project already knows better than — a host run of this suite
+    # working at. That is the thing this project already knows better than â€” a host run of this suite
     # produced eight failures of which two were only the desk, and reported a negative control
     # passing because the host wrote a file faster than the guest could. Every one of those lessons
     # applied to every adopter and none of them had the runner that taught it.
@@ -219,7 +219,7 @@ function Invoke-OnTheDesk {
     <#
       Run something in the guest's own desktop session, and refuse in one voice where there is none.
 
-      WW314. Two calls need a session — a probe before anything is carried, and the run itself — and
+      WW314. Two calls need a session â€” a probe before anything is carried, and the run itself â€” and
       the sentence they share is WW42's: a suite synthesising input into a lock screen is not a suite
       that ran. Written once here because a rule spelled twice is a rule where the second copy goes
       on saying the old thing after the first one moves.
@@ -244,131 +244,22 @@ function Invoke-OnTheDesk {
 
 function Read-GuestDesk {
     <#
-      WW311. Which desk this is, before twenty minutes are spent on it.
+      WW311, WW345. Carry the desk probe into the guest, run it on the desk there, and bring its
+      one line back. What the states mean and why the reading is a reading rather than a repair is
+      in the probe itself - `tools/desk-probe.ps1` - because that is the file that decides them,
+      and a second copy of that argument here is the copy that would go on saying the old thing.
 
-      WW305 made a cold start ordinary, and a cold desk is one still putting its startup
-      notifications up. The first run through it excused twenty-six checks where the four before it
-      excused eight each; what that cost was measured later, when the same prompt - OneDrive's
-      *Habilitar o Backup do Windows*, two buttons, the same process id hours apart - held the
-      foreground while the adoption's keyboard case ran, and that case came back unchecked with
-      three steps unwalked. Not noise in a count. A blocker.
-
-      Neither remedy this was opened with survives. Waiting for the shell to go quiet cannot work
-      against a question that stays until answered. Killing the owner is worse: the window is
-      `ShellExperienceHost`'s, killing that cleared the prompt and cost the tray, and the next full
-      run went red with *this desk was called placing and holds no icon anywhere*.
-
-      So this reads rather than fixes, and the reading is the whole point: a toast goes and a
-      question does not, and nothing but time tells them apart. The foreground is polled, and what
-      separates the three answers is whether one window held it for every look.
-
-        clear    nothing but the desktop ever had it.
-        busy     something had it and let go. The suite's own foreground handling is for this.
-        asking   one window held it for every look, so it is waiting for an answer and no amount
-                 of waiting is the answer. Named with its process and its title, because a person
-                 has to go and click it.
-        shell    the same, and the window is the taskbar or the overflow flyout. WW331: not a
-                 question, because the shell has none to ask - a desk somebody left selected, which
-                 the next thing touched clears. Said and not refused, and it names WW330, which is
-                 what stops a run leaving one behind.
-        broken   nothing holds the foreground at all, which on a logged-in desk means no shell.
-
-      The looks are the measurement and the deadline is the argument: a toast this guest could
-      raise lives for seconds, and the prompt that cost a run had been up for hours.
+      What is this function's own is the carrying: the guest needs the file, the run needs a
+      desktop session, and an answer that never came back is not a quiet desk.
     #>
     param([Parameter(Mandatory)] [string] $Vmx, [Parameter(Mandatory)] [string] $Stage)
 
-    $probe = Join-Path $Stage 'desk.ps1'
-    Set-Content -LiteralPath $probe -Encoding utf8 -Value @'
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
-
-Add-Type -TypeDefinition @"
-using System;
-using System.Runtime.InteropServices;
-using System.Text;
-
-public static class Fg {
-    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
-    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowTextW(IntPtr h, StringBuilder s, int n);
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassNameW(IntPtr h, StringBuilder s, int n);
-
-    public static string TextOf(IntPtr h) { var s = new StringBuilder(512); GetWindowTextW(h, s, s.Capacity); return s.ToString(); }
-    public static string ClassOf(IntPtr h) { var s = new StringBuilder(256); GetClassNameW(h, s, s.Capacity); return s.ToString(); }
-}
-"@
-
-# The desktop is not a window holding the foreground: an idle logged-in desk has one of these, and
-# reporting it would make every clear desk read as busy.
-$desktop = @('Progman', 'WorkerW')
-
-# WW331. The shell's own surfaces, which are neither. A run whose tray cases failed inside the
-# overflow left the chevron focused (WW330), the taskbar then held the foreground for all twelve
-# looks, and this refused every later run with "the desk is waiting for an answer" - sending a reader
-# to a guest console to answer a prompt that a screen capture showed was not there.
-#
-# They are not the desktop either, and folding them in there was the first repair and the wrong one:
-# it made the refusal go away by making the reading say nothing, so a desk somebody had genuinely
-# left the shell selected on read as "nothing but the desktop held the foreground". The reading was
-# always right. What was wrong is the word for it.
-#
-# Narrow on purpose, and it has to be: the prompt this probe exists to catch belongs to
-# ShellExperienceHost and is a different class from any of these, so naming the taskbar and the
-# overflow flyout hides no question anybody has to answer.
-$shellSurfaces = @('Shell_TrayWnd', 'Shell_SecondaryTrayWnd', 'TopLevelWindowForOverflowXamlIsland')
-
-$looks = @()
-for ($at = 0; $at -lt 12; $at++) {
-    if ($at -gt 0) { Start-Sleep -Milliseconds 500 }
-
-    $handle = [Fg]::GetForegroundWindow()
-    if ($handle -eq [IntPtr]::Zero) { $looks += $null; continue }
-
-    $owner = 0
-    [void][Fg]::GetWindowThreadProcessId($handle, [ref] $owner)
-    $class = [Fg]::ClassOf($handle)
-    if ($desktop -contains $class) { $looks += $null; continue }
-
-    $named = (Get-Process -Id $owner -ErrorAction SilentlyContinue)
-    $looks += [pscustomobject]@{
-        Handle  = [int64] $handle
-        Pid     = $owner
-        Process = if ($named) { $named.ProcessName } else { "pid $owner" }
-        Class   = $class
-        Title   = [Fg]::TextOf($handle)
-    }
-}
-
-$held = @($looks | Where-Object { $null -ne $_ })
-
-# Nothing at all, at any look. A logged-in desk with no shell answers this, and it is the one state
-# the other two readings would describe as quiet.
-if ($held.Count -eq 0) {
-    $answer = if ([Fg]::GetForegroundWindow() -eq [IntPtr]::Zero) {
-        "broken||||nothing held the foreground across $($looks.Count) look(s), so this desk has no shell"
-    } else {
-        'clear||||nothing but the desktop held the foreground'
-    }
-} elseif ($held.Count -eq $looks.Count -and
-          @($held | Where-Object { $_.Handle -ne $held[0].Handle }).Count -eq 0) {
-    # One window for every look is the answer that does not clear. WW331: and which of the two it is
-    # turns on whose window it is. A question is some application's, with a caption, and no amount of
-    # waiting answers it; the shell holding the desk is a desk somebody left selected, which clears
-    # the moment anything else is touched and is what WW330 stops a run leaving behind.
-    $one = $held[0]
-    $state = if ($shellSurfaces -contains $one.Class) { 'shell' } else { 'asking' }
-    $answer = "$state|$($one.Process)|$($one.Pid)|$($one.Class)|$($one.Title)"
-} else {
-    # Anything else moved, whatever it was.
-    $moved = ($held | ForEach-Object { "$($_.Process) '$($_.Title)'" } | Select-Object -Unique) -join '; '
-    $answer = "busy||||held for $($held.Count) of $($looks.Count) look(s): $moved"
-}
-
-# Into a file beside this script and never to stdout: vmrun runs the program and does not carry
-# what it printed, so an answer written to the console is an answer nobody reads.
-Set-Content -LiteralPath (Join-Path $PSScriptRoot 'desk.txt') -Value $answer -Encoding utf8
-'@
+    # WW345. The probe is a file beside this one rather than a here-string in it. It decides
+    # whether a run happens at all and had been wrong twice, and nothing could run any of its
+    # answers - a here-string has no caller but this function. Sent as it sits on disk, so the
+    # classification the suite exercises and the one that refuses a run are one file.
+    $probe = Join-Path $PSScriptRoot 'desk-probe.ps1'
+    if (-not (Test-Path -LiteralPath $probe)) { Refuse "the desk probe is missing: $probe" }
 
     $null = Invoke-VmRun -Guest -Arguments @('createDirectoryInGuest', $Vmx, $script:GuestSync)
     $null = Invoke-VmRun -Guest -Arguments @('deleteFileInGuest', $Vmx, "$script:GuestSync\desk.txt")
@@ -562,7 +453,7 @@ Write-Host '  guest       running, tools answering'
 # WW314. Asked here and not where the suite starts, which is a zip, a copy, an extract and an SDK
 # probe later. Tools answering is not a desk: the service side of the guest replies while the login
 # screen is still up, and a guest that nobody has logged into is the likeliest state of one that
-# just cold-booted — which WW305 made the ordinary way to reach it. The first cold start of a day
+# just cold-booted â€” which WW305 made the ordinary way to reach it. The first cold start of a day
 # found a desktop and the second did not, and paid the whole carry to say so.
 #
 # `cmd /c exit` and nothing else: the cheapest program that cannot run without a session, so the
@@ -594,11 +485,11 @@ switch ($desk.State) {
         # WW331. Not a refusal, and the difference is the whole task: the shell asks nothing, so
         # there is nothing at the guest console for a reader to go and answer. Said out loud anyway,
         # because a desk left with the taskbar selected is a run that did not put back what it took
-        # — and the run that has just been refused for it is the wrong place to find that out.
+        # â€” and the run that has just been refused for it is the wrong place to find that out.
         Write-Host (
             "  foreground  the shell is selected, not asking: $($desk.Process) " +
             "(pid $($desk.Pid), $($desk.Class)). Something left the desk on the taskbar; WW330 is " +
-            'what stops a tray act doing it. The run goes on — the first case to take the ' +
+            'what stops a tray act doing it. The run goes on â€” the first case to take the ' +
             'foreground clears it.') -ForegroundColor Yellow
     }
     'asking' {
