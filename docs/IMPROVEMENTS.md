@@ -124,6 +124,30 @@ either the in-app half watches a directory the way it watches WINWRIGHT_GEOMETRY
 application exposes a verb the run starts it with - which is what every adopter's own
 capture flag already is.
 
+### §WW359 the picture a harness cannot ask for
+
+WW347 opened the way through and left it needing a hand at each end. `Popups.Picture`
+draws a popup's own tree with nothing composited behind it, and only the application can
+call it — the engine references no part of the in-app half and never will, which is what
+`SeparationTests` holds in place. So the refusal names a route the harness cannot take,
+and the first adopter to meet it builds the channel.
+
+Two channels exist and neither is this shape. `WINWRIGHT_GEOMETRY` and
+`WINWRIGHT_SURFACES` are announcements: the application writes a file while it lays
+itself out, and the harness reads it afterwards. A popup picture is an ask at a moment —
+this popup, now, to that path — because a run photographs a flyout once it has one open,
+and a file written at startup is a picture of a popup nobody had opened.
+
+The fixture is the evidence that this is missing rather than merely unwritten.
+`Protocol` is the surface protocol implemented once for adopters to copy, and it has
+`Report`, `Hold` and `Background` and nothing that renders a popup. So no case here
+drives the route the refusal names end to end: the ones that exist call `Popups.Picture`
+in process, which is the verb and not the channel.
+
+What the channel is, is the task. A watched directory, a request file beside the report,
+a named pipe: each is a different promise about what an application under test may be
+made to do while a run is watching.
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
