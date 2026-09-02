@@ -659,6 +659,52 @@ public sealed class NotificationAreaTests : IDisposable
     }
 
     [Fact]
+    public void Putting_the_desk_back_answers_for_the_desktop_and_not_only_the_flyout()
+    {
+        // WW344. The verb does two things and used to answer for one. It shuts the flyout and
+        // returns a reading with a reason on it; then it calls SetForegroundWindow, whose whole
+        // documented behaviour is that Windows refuses it to a process that does not own the
+        // foreground, and said nothing about that at all — so a run where the shell kept the
+        // desktop looked exactly like one where it did not.
+        using var answering = BusyDesk.Built(
+            () => TrayIconFixture.Add("winwright put back", TrayMenuKind.DropDown));
+
+        if (answering is null || BusyDesk.Excused(NotificationArea.Reachable()))
+            return;
+
+        var menu = NotificationArea.OpenMenu(answering.Tip, settleMs: 4000, pollMs: 40);
+
+        try
+        {
+            if (BusyDesk.Excused(menu.AsAssertion("the icon shows its menu")))
+                return;
+
+            var state = menu.PutBack();
+
+            // Both halves are there, and the flyout half is the one that always was.
+            Assert.Equal("shut", state.Flyout.What);
+
+            // The desktop half is a comparison and not a return code, so it must agree with an
+            // independent look at the same desk. This is the whole claim: the reading says what
+            // happened rather than what was asked for.
+            Assert.Equal(state.Desktop, !state.Asked || Foreground.Now().Window == state.Wanted);
+
+            // And it says so either way. A sentence that only spoke when the desktop went back is
+            // the silence WW330's investigation had to work around — a picture of a guest, taken by
+            // hand, after a suite in another repository would not start.
+            Assert.Contains("desktop", state.ToString(), StringComparison.Ordinal);
+            Assert.Equal(state.Held, state.Flyout.Held && state.Desktop);
+        }
+        finally
+        {
+            // The menu alone. The flyout is what `PutBack` above shuts, and where the act opened
+            // none there is nothing here to shut — so a CloseOverflow on this line would be a desk
+            // reading thrown away for no question it could answer.
+            answering.DismissMenu();
+        }
+    }
+
+    [Fact]
     public void A_case_reads_the_menu_a_step_opened_and_the_case_hands_the_desk_back()
     {
         // WW343, and it is the shape of every adopter's tray case: one step opens the menu and the

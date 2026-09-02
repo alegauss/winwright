@@ -10,7 +10,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW344** (deps: —) **putting the desk back answers for the flyout and says nothing about the foreground, the half that gets refused** — Windows grants a foreground to whoever it grants it to, so the call this project makes best-effort is the one it reports nothing about. → §WW344
 - 📋 **WW350** (deps: —) **which of a tray menu's two readings answers is a race, and the suite asserted the one that won a single run** — WW339 measured the standing reading answering on both kinds; WW340's run had the Win32 popup answer through the highlight, so both arms are live and the order is a race. → §WW350
 - 📋 **WW353** (deps: —) **a click sends and reads once, so its answer is whatever was there at that instant and nothing retries it** — WW341 measured the shape and found no fault on this desk; every other synthesised verb settles before it answers, and Pointer.Run is the one that does not. → §WW353
 - 📋 **WW355** (deps: —) **every send waits fifty milliseconds for a provider that only one kind of read wakes, and no cheaper read was tried** — WW342 acquitted the pumping and convicted the automation call, so the interval is paying for work a different reader might not ask for at all. → §WW355

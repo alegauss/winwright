@@ -1,4 +1,4 @@
-using System.Windows.Automation;
+﻿using System.Windows.Automation;
 
 using Winwright.Locating;
 using Winwright.Tracing;
@@ -185,17 +185,27 @@ public sealed record TrayMenu
     /// </summary>
     /// <param name="settleMs">How long shutting the flyout may take.</param>
     /// <param name="pollMs">How often that wait looks again.</param>
-    /// <returns>What shutting the flyout did, or that there was none of this act's to shut.</returns>
-    public OverflowState PutBack(int settleMs = 2000, int pollMs = 25)
+    /// <returns>What both halves did: the flyout, and the desktop.</returns>
+    public DeskReturned PutBack(int settleMs = 2000, int pollMs = 25)
     {
         // The foreground first. Shutting the flyout can move it again, and what this is putting back
         // is where it was before any of this ran.
-        if (Held.Window != 0)
-            Win32.SetForegroundWindow(Held.Window);
+        //
+        // WW344. Read afterwards rather than trusted. `SetForegroundWindow` answers false where it
+        // refused and is documented to answer true where nothing moved, so its own return says the
+        // least useful of the three things that can happen — and the half this project cannot make
+        // Windows do is the half it was reporting nothing about.
+        var wanted = Held.Window;
+        if (wanted != 0)
+            Win32.SetForegroundWindow(wanted);
 
-        return OpenedTheOverflow
+        var flyout = OpenedTheOverflow
             ? NotificationArea.CloseOverflow(settleMs, pollMs)
             : new OverflowState("shut", true, already: true, null);
+
+        // After the flyout and not before it, because shutting the flyout can move the foreground
+        // again: a reading taken between the two would answer about a desk that was still changing.
+        return new DeskReturned(flyout, wanted, wanted == 0 ? WindowOwner.None : Foreground.Now());
     }
 
     /// <summary>The step a trace records.</summary>
@@ -223,6 +233,56 @@ public sealed record TrayMenu
 /// sibling one method over already answers a reading with a reason and a step on it.
 /// </para>
 /// </summary>
+/// <summary>
+/// What putting the desk back did, both halves of it. WW344.
+/// <para>
+/// <see cref="TrayMenu.PutBack"/> shuts a flyout and gives a desktop back, and it used to answer for
+/// the first alone — so a run where the shell kept the desktop looked exactly like one where it did
+/// not. That is the shape this project withdraws everywhere else: a reading nobody took and a
+/// reading that came back clear are different facts, and one value cannot be both.
+/// </para>
+/// <para>
+/// The desktop half is a comparison and not a return code. <c>SetForegroundWindow</c> answers false
+/// where Windows refused it and true where nothing needed to move, which is the one thing a caller
+/// already knows — so what is kept here is who was asked for and who holds it now, and the reader
+/// draws its own conclusion from two facts rather than from one flag's two meanings.
+/// </para>
+/// </summary>
+/// <param name="Flyout">What shutting the overflow did, or that there was none of this act's to shut.</param>
+/// <param name="Wanted">The window the desktop was being given back to, or 0 where the act took none.</param>
+/// <param name="Now">Who holds it, read after the flyout was shut. <see cref="WindowOwner.None"/> where nothing was asked for.</param>
+public sealed record DeskReturned(OverflowState Flyout, nint Wanted, WindowOwner Now)
+{
+    /// <summary>Whether the act took a desktop at all. Nothing to give back is not a failure.</summary>
+    public bool Asked => Wanted != 0;
+
+    /// <summary>Whether the desktop went back to whoever had it.</summary>
+    public bool Desktop => !Asked || Now.Window == Wanted;
+
+    /// <summary>Whether both halves ended the way they were asked to.</summary>
+    public bool Held => Flyout.Held && Desktop;
+
+    /// <summary>
+    /// What happened, said either way and for both halves.
+    /// <para>
+    /// The desktop half names who holds it instead, because that is the sentence WW330's
+    /// investigation needed and did not have: a run refused the next morning for a taskbar holding
+    /// the foreground, and the run that left it there said nothing at all.
+    /// </para>
+    /// </summary>
+    public override string ToString()
+    {
+        var desktop = (Asked, Desktop) switch
+        {
+            (false, _) => "the act took no desktop, so there was none to give back",
+            (_, true) => "the desktop went back to whoever held it",
+            _ => $"the desktop did not go back and is held by {Now.Process} (pid {Now.Pid}) '{Now.Title}'",
+        };
+
+        return $"{Flyout} {desktop}.";
+    }
+}
+
 public sealed record OverflowState
 {
     internal OverflowState(string what, bool held, bool already, string? because)

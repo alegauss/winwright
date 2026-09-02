@@ -32,29 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW344 the half of the tidying nobody hears about
-
-`PutBack` does two things and answers for one. It shuts the flyout and returns what
-shutting it did - a reading with a reason and a precondition on it, the way every other
-tray verb answers. Then it calls `SetForegroundWindow`, whose whole documented behaviour
-is that Windows refuses it to a process that does not own the foreground, and returns
-nothing about that at all.
-
-So a run where the shell kept the desktop looks exactly like one where it did not. That
-is the shape this project withdraws everywhere else: a reading nobody took and a reading
-that came back clear are different facts, and a caller cannot tell them apart from one
-value.
-
-What it costs to close is small and the shape already exists. `Foreground.Now` reads who
-holds it, so the call can be followed by a look and the two compared - which is also the
-only honest way to report it, since the boolean the API answers is documented to be true
-where nothing moved.
-
-What it is worth is a run that says why the next one was refused. WW330 was found by a
-picture of a guest, taken by hand, after a suite in another repository would not start;
-a line in the first run's own output saying the desktop had not gone back would have
-been the whole investigation.
-
 ### §WW350 the reading that answers is whichever one got there first
 
 WW322 asked the standing menu first and kept the focus behind it, on the argument that a

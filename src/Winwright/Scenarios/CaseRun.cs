@@ -321,6 +321,9 @@ public static class CaseRun
 
         for (var index = opened.Count - 1; index >= 0; index--)
         {
+            // WW344. Both halves, because the one that gets refused is the one that used to answer
+            // nothing: Windows grants a desktop to whoever it grants it to, and a case that could
+            // not give it back is exactly the case whose leftovers refuse the next run.
             var state = opened[index].PutBack(settleMs, pollMs);
             if (state.Held)
                 continue;
@@ -335,7 +338,7 @@ public static class CaseRun
                 // lost rather than as one that never had one.
                 Locator = "the taskbar",
                 Verdict = StepVerdict.Unchecked,
-                Detail = state.Because ?? "the desk would not take it back and did not say why",
+                Detail = state.ToString(),
             });
         }
     }

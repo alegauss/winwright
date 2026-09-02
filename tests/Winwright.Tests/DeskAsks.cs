@@ -302,6 +302,13 @@ internal static class DeskAsks
             "WW217. The reading itself is what this case is about, and both arms are written out: a "
                 + "desk called placing must hold an icon somewhere, and one that is not says which "
                 + "part refused. Excusing on the fact it exists to read would leave nothing asserted"),
+        new("NotificationAreaTests.Putting_the_desk_back_answers_for_the_desktop_and_not_only_the_flyout",
+            Unaffected.Shape,
+            "WW344. The foreground is read to check the verb's own reading of it against an "
+                + "independent look, so both sides move together: a desk that refused the restore "
+                + "makes the reading say it did, and the assertion is that the two agree. A desk "
+                + "that would not give the desktop back is one of the answers this case is about, "
+                + "and excusing it would leave the half nobody hears about unasserted again"),
         new("NotificationAreaTests.Asking_whether_the_desk_places_icons_leaves_the_taskbar_as_it_found_it",
             Unaffected.Shape,
             "the flyout is read either side and the two are compared, so whatever the shell was "
