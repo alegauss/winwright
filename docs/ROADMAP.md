@@ -13,7 +13,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW355** (deps: —) **every send waits fifty milliseconds for a provider that only one kind of read wakes, and no cheaper read was tried** — WW342 acquitted the pumping and convicted the automation call, so the interval is paying for work a different reader might not ask for at all. → §WW355
 - 💭 **WW366** (deps: —) **a step's trace line carries the reading the act took and the verdict beside it used one the expectation polled for** — WW353 found Expect.That polls after the act, so a settled value can decide the verdict while the line a reader opens shows the one the act read. → §WW366
 
 ## Block E — Capture — the picture that proves what it photographed

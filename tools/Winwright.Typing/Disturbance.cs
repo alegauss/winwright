@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Windows.Automation;
 
 using Winwright.Locating;
 
@@ -66,12 +67,45 @@ internal static class Disturbance
         /// <summary>Its thread made to dispatch a message that says nothing.</summary>
         Poke,
 
+        /// <summary>
+        /// Its title asked for with <c>WM_GETTEXT</c>. WW355: the thread dispatches and a string
+        /// crosses back, which is one step past <c>poke</c> and short of the provider — USER answers
+        /// it out of the window's own text and WPF's automation peer is never built.
+        /// </summary>
+        GetText,
+
+        /// <summary>
+        /// Its control asked for once through a cache. WW355: the engine's look re-resolves the
+        /// locator and then round-trips a pattern at a time, and this asks the provider one question
+        /// and reads the answers off the copy.
+        /// </summary>
+        Cached,
+
+        /// <summary>
+        /// One property of the already-resolved element. WW355, and the cheapest thing that is still
+        /// a real automation read: no walk, no patterns, one round-trip.
+        /// </summary>
+        OneProperty,
+
+        /// <summary>
+        /// The box's value through a pattern on the already-resolved element. WW355, and the arm
+        /// that matters most: <see cref="OneProperty" /> proved one round-trip is clean, and it read
+        /// a name. What typing settles on is the value, so this is the read the engine would
+        /// actually make — measuring the proxy and shipping the other would be the whole point of
+        /// this arm missed by one property.
+        /// </summary>
+        Value,
+
         /// <summary>Its control read through automation, which is the engine's own first look.</summary>
         Read,
     }
 
-    /// <summary>The arms, in the order the report reads them: nothing, then each half, then both.</summary>
-    private static readonly Arm[] Arms = [Arm.Quiet, Arm.Peek, Arm.Poke, Arm.Read];
+    /// <summary>
+    /// The arms, in the order the report reads them: nothing, the two halves WW342 took apart, then
+    /// WW355's three readers from cheapest to dearest, then the engine's own.
+    /// </summary>
+    private static readonly Arm[] Arms =
+        [Arm.Quiet, Arm.Peek, Arm.Poke, Arm.GetText, Arm.Cached, Arm.OneProperty, Arm.Value, Arm.Read];
 
     /// <summary>
     /// How long the disturbance runs for, and it is WW312's number rather than a new one. The whole
@@ -107,14 +141,33 @@ internal static class Disturbance
                 + " `peek` reads the window's rectangle, which USER answers without the window's own"
                 + " thread running. `poke` makes that thread dispatch a WM_NULL and reads nothing"
                 + " back. `read` is the engine's first look, a UI Automation read of the control."
+                + " WW355 adds three between them: `gettext` asks the window's title with WM_GETTEXT,"
+                + " so the thread dispatches and a string crosses back with no provider involved;"
+                + " `cached` asks the provider one question through a CacheRequest and reads the"
+                + " answers off the copy; `one` reads a single property of an element resolved before"
+                + " the rounds, which is the cheapest thing that is still an automation read; and"
+                + " `value` asks that same element for its value through ValuePattern, which is the"
+                + " read the engine's typing settle would actually make."
                 + " `substituted` is what the window received differing from what was sent.");
+
+        // WW355. Resolved once and before the arms, because the walk is itself most of what the
+        // engine's own look asks the provider for — an arm that re-resolved every poll would be
+        // measuring the walk again under a name that says it does not.
+        //
+        // Through raw automation rather than through the engine's own reading path, and deliberately:
+        // Resolution keeps its element internal so an act reaches one only through Admitted, and
+        // what is being measured here is what UI Automation does to a thread rather than what this
+        // engine does with the answer.
+        var element = AutomationElement.FromHandle(window).FindFirst(
+            TreeScope.Descendants,
+            new PropertyCondition(AutomationElement.AutomationIdProperty, BoxId));
 
         var faults = new Dictionary<Arm, int>();
         var ran = new Dictionary<Arm, int>();
 
         foreach (var arm in Arms)
         {
-            var measured = Measure(box, arrived, packets, window, rounds, arm);
+            var measured = Measure(box, arrived, packets, window, rounds, arm, element);
             faults[arm] = measured.Substituted;
             ran[arm] = measured.Ran;
         }
@@ -136,8 +189,10 @@ internal static class Disturbance
     /// <param name="window">The window under test.</param>
     /// <param name="rounds">How many rounds to type.</param>
     /// <param name="arm">What to do while the queue drains.</param>
+    /// <param name="element">The box, resolved once before the arms, for WW355's two cheap readers.</param>
     private static Measured Measure(
-        Subject box, Subject arrived, Subject packets, nint window, int rounds, Arm arm)
+        Subject box, Subject arrived, Subject packets, nint window, int rounds, Arm arm,
+        AutomationElement? element)
     {
         var substituted = 0;
         var dirty = 0;
@@ -161,7 +216,7 @@ internal static class Disturbance
             standing = typing.Length;
             Spaced.Batch(typing);
 
-            undispatched += Disturb(arm, box, window);
+            undispatched += Disturb(arm, box, window, element);
 
             // Read after the drain and never during it, whatever the arm was. These are captions on
             // the same window, so reading them is itself a cross-process read — and taking it while
@@ -212,7 +267,8 @@ internal static class Disturbance
     /// <param name="arm">Which disturbance.</param>
     /// <param name="box">The control, for the arm that reads it.</param>
     /// <param name="window">The window, for the two that do not.</param>
-    private static int Disturb(Arm arm, Subject box, nint window)
+    /// <param name="element">The box, resolved once, for the two readers that must not walk again.</param>
+    private static int Disturb(Arm arm, Subject box, nint window, AutomationElement? element)
     {
         if (arm == Arm.Quiet)
         {
@@ -239,6 +295,41 @@ internal static class Disturbance
 
                     break;
 
+                case Arm.GetText:
+                    // WW355. The thread dispatches and a string crosses back, which is what `poke`
+                    // does plus the marshalling and what `read` does minus the provider. The buffer
+                    // is filled and thrown away: this reads the window's own title and is not a read
+                    // of the control, for the reason `peek` is not one either.
+                    if (SendMessageTimeoutW(
+                            window, WmGetText, Title, Buffer, SmtoAbortIfHung, PokeMs, out _) == 0)
+                    {
+                        undispatched++;
+                    }
+
+                    break;
+
+                case Arm.Cached:
+                    Cached(element);
+                    break;
+
+                case Arm.OneProperty:
+                    // One round-trip and no walk. The element was resolved before the rounds, so
+                    // what this costs the provider is a single property against the whole pass the
+                    // engine's look makes.
+                    if (element is not null)
+                        _ = Quietly(() => element.Current.Name);
+
+                    break;
+
+                case Arm.Value:
+                    // WW355. What the engine's typing settle actually wants, asked the cheap way:
+                    // one pattern round-trip on an element resolved before the rounds, against the
+                    // walk and the whole pattern pass its own look makes.
+                    if (element is not null)
+                        _ = Quietly(() => Valued(element));
+
+                    break;
+
                 case Arm.Read:
                     box.ReadOnce();
                     break;
@@ -251,6 +342,60 @@ internal static class Disturbance
         }
 
         return undispatched;
+    }
+
+    /// <summary>
+    /// Ask the provider once and read the answers off the copy. WW355.
+    /// <para>
+    /// The engine's own look re-resolves the locator and then round-trips a pattern at a time; this
+    /// names what it wants, takes one answer and reads it without going out again. If the fault
+    /// needs the number of asks rather than the fact of asking, this is the arm that separates them.
+    /// </para>
+    /// </summary>
+    /// <param name="element">The element resolved before the rounds began.</param>
+    private static void Cached(AutomationElement? element)
+    {
+        if (element is null)
+            return;
+
+        var wanted = new CacheRequest();
+        wanted.Add(AutomationElement.NameProperty);
+        wanted.Add(ValuePattern.Pattern);
+
+        _ = Quietly(() =>
+        {
+            using (wanted.Activate())
+            {
+                var copy = element.GetUpdatedCache(wanted);
+                return copy.Cached.Name;
+            }
+        });
+    }
+
+    /// <summary>The box's value through its own pattern, which is what typing reads back. WW355.</summary>
+    /// <param name="element">The element resolved before the rounds began.</param>
+    private static string? Valued(AutomationElement element) =>
+        element.GetCurrentPattern(ValuePattern.Pattern) is ValuePattern pattern ? pattern.Current.Value : null;
+
+    /// <summary>
+    /// Read something, answering null where the element went. A round is about what the send did,
+    /// and an element that closed under a disturbance is the desk rather than the fault.
+    /// </summary>
+    /// <param name="reading">The read to take.</param>
+    private static string? Quietly(Func<string?> reading)
+    {
+        try
+        {
+            return reading();
+        }
+        catch (ElementNotAvailableException)
+        {
+            return null;
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     /// <summary>
@@ -301,11 +446,38 @@ internal static class Disturbance
 
         if (poke == 0 && read > 0)
         {
-            return $"The engine's read provokes it and a bare pump does not: {counted}. So the"
-                + " automation call is doing something a dispatched message is not — more work on"
-                + " that thread, or work of a different kind — and a cheaper reader is worth"
-                + " measuring, because the pause may be paying for the provider rather than for the"
-                + " queue.";
+            // WW355. The three readers are the whole reason this arm was run again, so what they
+            // read is what the sentence is about — a cheap reader that provokes nothing is a repair
+            // with no interval in it, and one that provokes is the pause earning its place.
+            var cheap = new[] { Arm.GetText, Arm.Cached, Arm.OneProperty, Arm.Value };
+            var clean = cheap.Where(one => faults.GetValueOrDefault(one) == 0).ToList();
+            var dirty = cheap.Where(one => faults.GetValueOrDefault(one) > 0).ToList();
+
+            var named = string.Join(", ", clean.Select(one => one.ToString().ToLowerInvariant()));
+            var provoking = string.Join(", ", dirty.Select(one => one.ToString().ToLowerInvariant()));
+
+            if (clean.Count == cheap.Length)
+            {
+                return $"The engine's read provokes it and nothing cheaper does: {counted}. Every"
+                    + " reader short of the whole pass left the send alone — the title through USER,"
+                    + " one cached ask, and one property of an element already resolved — so what the"
+                    + " fifty milliseconds are waiting out is the provider being asked a great deal"
+                    + " rather than being asked at all. The engine reading the cheapest of these"
+                    + " would be a repair with no interval in it.";
+            }
+
+            if (clean.Count == 0)
+            {
+                return $"The engine's read provokes it and so does every cheaper one: {counted}."
+                    + " Asking the provider at all is what does it, however little is asked, so the"
+                    + " pause is the repair and this run is what says so. A reader is not the way"
+                    + " out; what is left is asking later rather than asking less.";
+            }
+
+            return $"The engine's read provokes it, {provoking} does too and {named} does not:"
+                + $" {counted}. That is the line worth having — what separates them is what the"
+                + " fifty milliseconds are paying for, and a reader on the clean side of it is the"
+                + " candidate.";
         }
 
         if (peek > 0)
@@ -321,6 +493,23 @@ internal static class Disturbance
 
     /// <summary>The message that says nothing, so a send of it is a dispatch and no more.</summary>
     private const uint WmNull = 0x0000;
+
+    /// <summary>WM_GETTEXT, which USER answers out of the window's own title. WW355.</summary>
+    private const uint WmGetText = 0x000D;
+
+    /// <summary>How many characters the title is asked for, and where they go.</summary>
+    private static readonly nint Buffer = Marshal.AllocHGlobal(512 * sizeof(char));
+
+    /// <summary>The count that goes with it, in characters.</summary>
+    private const nuint Title = 512;
+
+    /// <summary>
+    /// The automation id of the box every arm types into, spelled here because the two cheap readers
+    /// resolve it without the engine. It is the same control <c>Program</c> addresses as
+    /// <c>Edit#profile</c>, and a run where this stops matching reports both readers as unrunnable
+    /// rather than as clean.
+    /// </summary>
+    private const string BoxId = "profile";
 
     /// <summary>Give up rather than block where the target thread is already hung.</summary>
     private const uint SmtoAbortIfHung = 0x0002;

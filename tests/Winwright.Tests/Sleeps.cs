@@ -119,8 +119,8 @@ internal static class Sleeps
                 + "reproduces: a single-threaded apartment that blocks any other way keeps answering "
                 + "messages and is not dead at all"),
         new("Pointer.cs", 1, Sleeping.Undisturbed,
-            "WW353, and the same measurement as the entry below rather than a second one: the click "
-                + "was the one synthesised verb that sent and read on the next line, where its "
+            "WW353, and WW329's measurement rather than a second one: the click was the one "
+                + "synthesised verb that sent and read on the next line, where its "
                 + "neighbours each wait for a named thing to happen. It has no such thing to wait "
                 + "for — a click is as often a navigation whose effect is elsewhere — so it takes "
                 + "the pause WW329 priced instead of a poll that would spend the act budget on "
@@ -130,12 +130,15 @@ internal static class Sleeps
                 + "between the same two runs without being touched. Both read 0 late of 150, so "
                 + "what this bought is the shape and not a fault removed"),
         new("Keyboard.cs", 1, Sleeping.Undisturbed,
-            "WW329, and the one entry here where the sleeping is the repair. The engine's own poll "
-                + "was provoking the substitution it then resent: SendInput returns once the events "
-                + "are queued rather than processed, so the first look landed in the window's thread "
-                + "while its packets were still being translated. Measured on the guest over 1200 "
-                + "rounds each — 31 substitutions with no pause, none at 50ms, none at 150ms — and "
-                + "there is nothing to wait on instead, because what would end the wait is the look"),
+            "WW329, and the one entry here where the sleeping is the repair: the engine's own poll "
+                + "was provoking the substitution it then resent. Measured on the guest over 1200 "
+                + "rounds each — 31 substitutions with no pause, none at 50ms, none at 150ms. WW355 "
+                + "asked whether a cheaper read would do instead, and the answer is most of one: "
+                + "every reader short of the whole pass provoked 0 of 400 twice over where the pass "
+                + "read 5 and 4, so the settle asks one pattern of the element the admission already "
+                + "found — but the real act still read 1 of 1200 with the pause taken out, against 0 "
+                + "of 1200 with it. So the pause stays, guarding a fault thirty times rarer, and a "
+                + "round costs 92ms where WW329 priced it at 153"),
         new("Finished.cs", 1, Sleeping.Machinery,
             "WW218's move into place needs delete access to the destination, and a harness polling "
                 + "that file has it open — so this is the interval between one attempt and the next, "

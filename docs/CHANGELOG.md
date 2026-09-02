@@ -140,6 +140,7 @@
 - ✅ **WW344** **putting the desk back answers for the flyout and says nothing about the foreground, the half that gets refused** — the reading answers for both halves, and the desktop half is a comparison rather than a return code: who was asked for, and who holds it now.
 - ✅ **WW350** **which of a tray menu's two readings answers is a race, and the suite asserted the one that won a single run** — Both readings are taken at the answering look, the menu gets one more poll where only the proxy answered, and Read prefers it (design recorded in `src/Winwright/Acting/NotificationArea.cs`).
 - ✅ **WW353** **a click sends and reads once, so its answer is whatever was there at that instant and nothing retries it** — The click takes the pause WW329 measured rather than a poll, since it has no named thing to poll toward; priced at 50ms a round (design recorded in `src/Winwright/Acting/Pointer.cs`).
+- ✅ **WW355** **every send waits fifty milliseconds for a provider that only one kind of read wakes, and no cheaper read was tried** — The settle asks one pattern of an element already resolved, at 92ms a round against 153; the pause stays, on 1 of 1200 without (design recorded in `src/Winwright/Acting/Keyboard.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

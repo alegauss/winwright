@@ -15,23 +15,26 @@ internal static class Keys
 {
     /// <summary>
     /// How long a synthesised send is left alone before anything reads what it did. WW329 measured
-    /// it; WW353 is why it lives here rather than in the one verb that had it.
+    /// it, WW353 moved it here, and WW355 left the click as its only caller.
     /// <para>
-    /// <c>SendInput</c> returns once the events are queued rather than processed, so a read taken
-    /// the instant it returns puts a cross-process look into the target's thread while its packets
-    /// are still being translated — which provokes the fault it was looking for. Measured on the
-    /// guest at 1200 rounds each of three pauses, in typing's own act shape: <b>31 substitutions
-    /// with no pause (2.58%), none at 50ms, none at 150ms.</b>
+    /// <c>SendInput</c> returns once the events are queued rather than processed, so a read taken the
+    /// instant it returns puts a cross-process look into the target's thread while its packets are
+    /// still being translated. Measured on the guest at 1200 rounds each of three pauses, in typing's
+    /// own act shape: <b>31 substitutions with no pause (2.58%), none at 50ms, none at 150ms.</b>
+    /// Fifty and not the safer hundred and fifty on what the same run priced — 7ms a round against
+    /// 89ms at 150.
     /// </para>
     /// <para>
-    /// Fifty and not the safer hundred and fifty, on what the same run priced: 7ms a round against
-    /// 89ms at 150. It is very nearly free, because the reads it replaces were themselves slowing
-    /// the drain.
+    /// WW355 took typing off it. What the pause was waiting out is the provider being asked a great
+    /// deal, not being asked: every cheaper reader measured clean over two runs of 400 rounds each,
+    /// so <c>Keyboard</c> resolves once and asks one pattern and needs no interval at all.
     /// </para>
     /// <para>
-    /// One number and not two. Every act that synthesises input is sending through the same queue,
-    /// so a second constant beside this would be a second answer to one measurement — and the verb
-    /// that had no pause at all is exactly the one that had no poll either.
+    /// The click still takes it, and for a different reason, which is why it is a constant rather
+    /// than a line in the one verb left. WW353's pause is not about provoking anything — a click has
+    /// no reading of its own to disturb — it is about not reporting the value from before the act on
+    /// the one synthesised verb with no poll to fall back on. A reader wanting the measurement behind
+    /// the number finds it here; a reader wanting why the click takes it finds that at the call.
     /// </para>
     /// </summary>
     internal const int FirstLookMs = 50;

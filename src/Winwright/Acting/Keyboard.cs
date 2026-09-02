@@ -235,7 +235,7 @@ public static class Keyboard
         Send(act.Text);
 
         var expected = act.ReplacingWhatIsThere ? act.Text : (before ?? "") + act.Text;
-        var readBack = Settled(subject, expected, act.Text);
+        var readBack = Settled(subject, admitted, expected, act.Text);
 
         // WW249. Send it again where the reading carries this engine's own substitution, and never
         // where it carries anything else. WW329 made this the backstop rather than the repair: the
@@ -272,7 +272,7 @@ public static class Keyboard
             // read back short and be reported as the failure it is.
             Send(expected);
             resends++;
-            readBack = Settled(subject, expected, act.Text);
+            readBack = Settled(subject, admitted, expected, act.Text);
         }
 
         return new TypedResult(act, facts, foreground, focus, before, readBack, readOnly)
@@ -311,25 +311,86 @@ public static class Keyboard
     /// </para>
     /// </summary>
     /// <param name="subject">The control to read.</param>
+    /// <param name="admitted">The admission taken before the send, whose element this reads.</param>
     /// <param name="expected">What it should say.</param>
     /// <param name="sent">The text the keyboard was given, which decides what a substitution is.</param>
-    private static string? Settled(Subject subject, string expected, string sent)
+    private static string? Settled(Subject subject, Admitted admitted, string expected, string sent)
     {
-        // WW329. The send is left alone before anything looks at it, and this is the repair rather
-        // than a politeness: the look is what provokes the fault the resends below exist to fix.
-        // WW353 moved the number to Keys, where the send is, because the click needed the same one.
+        // WW329 put a fifty-millisecond pause here and the fault went away. WW342 then found which
+        // half of a read does it — 4800 dispatched messages provoked nothing and the automation read
+        // provoked 8 of 400 — and WW355 asked the question that left: whether a cheaper read
+        // provokes at all.
+        //
+        // It does not, and the margin is not close. Two runs of 400 rounds an arm on the guest, with
+        // the engine's own whole pass beside them: the window's title through WM_GETTEXT 0 and 0, one
+        // cached ask 0 and 0, one property of an already-resolved element 0 and 0, that element's
+        // ValuePattern — which is this very read — 0 and 0, against the whole pass at 5 of 400 and 4
+        // of 400. So the provider is not disturbed by being asked; it is disturbed by being asked a
+        // great deal, and the pause was standing in for a read that never needed one.
+        //
+        // The walk is most of what was being asked, and it is the whole of what had to go. First
+        // measured wrong here: this resolved once and then polled one pattern, which is the arm that
+        // read zero — and the engine's own act read 10 of 400, the rate WW329 took away. The
+        // difference is where the walk is. `provoke` resolves before all its rounds; this resolved
+        // after the send, so one walk landed in the window's thread mid-drain and one was enough.
+        //
+        // So nothing is resolved here at all. The admission above already found the element, before
+        // the keys went anywhere near the queue, and this asks that one for its value.
+        //
+        // The pause stays, and the measurement is why. Reading cheaply took the rate from 2.58% with
+        // no pause to 1 of 1200 without one — thirty-one times better and not zero, where the pause
+        // reads zero. So the arm's answer did not fully transfer: something the real act does and the
+        // arm did not still reaches the queue, and a rate this project already drove to nothing is
+        // not one to give back for 50ms a send. What the cheap read buys is that the pause now
+        // guards a fault thirty times rarer, and that a round is very much shorter: 1200 rounds with
+        // both read 0 faulted at 91-95ms a quarter, where WW329 priced the same act at 146ms with no
+        // pause and 153ms with one. Most of what a settle cost was the walk it took every poll.
         Thread.Sleep(Keys.FirstLookMs);
 
         var settled = Attempt.Until(
             () =>
             {
-                var reading = Reading(subject);
+                var reading = Cheaply(subject, admitted);
                 return reading == expected || TookTheLastSent(reading, expected, sent) ? reading : null;
             },
             subject.ActMs,
             subject.PollMs);
 
-        return settled.Found ? settled.Value : Reading(subject);
+        return settled.Found ? settled.Value : Cheaply(subject, admitted);
+    }
+
+    /// <summary>
+    /// What the control says it holds, asked the way WW355 measured as harmless: one pattern on the
+    /// element this act already resolved.
+    /// <para>
+    /// Falls back to the whole pass wherever the cheap read cannot answer — no element, no value
+    /// pattern, or an element that went while the queue drained. That last is the one worth naming:
+    /// re-resolving is exactly what this avoids, so it is done only where the alternative is not
+    /// reading at all, and a control that closed under a settle is a fact the full pass reports
+    /// properly.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">The control, for the fallback that re-resolves.</param>
+    /// <param name="admitted">The admission taken before the send, which already holds the element.</param>
+    private static string? Cheaply(Subject subject, Admitted admitted)
+    {
+        if (!admitted.Facts.Supports("Value"))
+            return Reading(subject);
+
+        try
+        {
+            return admitted.Do(element => element.GetCurrentPattern(ValuePattern.Pattern) is ValuePattern pattern
+                ? pattern.Current.Value
+                : Reading(subject));
+        }
+        catch (ElementNotAvailableException)
+        {
+            return Reading(subject);
+        }
+        catch (InvalidOperationException)
+        {
+            return Reading(subject);
+        }
     }
 
     /// <summary>

@@ -80,28 +80,6 @@ the shape this verb exists for, and it is the shape most likely to look at both 
 
 ## Block D — Act — patterns before pointers
 
-### §WW355 the reader that would need no pause
-
-WW329 put a fifty-millisecond pause in front of the engine's first look and the fault
-went away. WW342 then took the read apart and found which half does it: making the
-window's thread dispatch 4800 messages provoked nothing at all, and the UI Automation
-read provoked 8 of 400. So the pause is not waiting for the queue to drain. It is
-waiting out whatever the automation provider does on that thread when it is asked.
-
-That was never the question WW329 could ask, and it changes what the interval is. Fifty
-milliseconds is a floor found by sweeping - 150 was no better and nothing says five
-would not do - and it is paid by every send this engine makes, forever, on every desk. A
-read that does not provoke would be a repair with no interval in it.
-
-Three readers are worth measuring in the arm WW342 already built, because the round is
-the same and only the disturbance changes. A cached request, which asks the provider
-once and answers from the copy. A single property rather than the whole `PatternValues`
-pass, which is several requests where one would do. And the text through `WM_GETTEXT`,
-which the window's thread answers without WPF's automation peer being built at all.
-
-If any of them reads the box without provoking, the engine reads that way and the pause
-goes. If all three provoke, the pause is the repair and this is what says so.
-
 ### §WW366 the two instants on one line
 
 WW353 went looking for a click that fails a case and found it cannot.
