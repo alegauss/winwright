@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 using Winwright.Processes;
 
 namespace Winwright.Windowing;
@@ -19,6 +21,38 @@ public static class TopLevelWindows
     /// person can see and over the 0x0 and 1x1 helpers a framework leaves lying about.
     /// </summary>
     public const int SmallestInteresting = 16;
+
+    /// <summary>
+    /// Window classes the shell draws on an application's behalf, which the application never drew
+    /// and no caller ever addresses. WW346.
+    /// <para>
+    /// <c>SysShadow</c> is the drop shadow behind a menu, and it is bigger than the menu: measured
+    /// in freewilly, whose menu is 188x108 with a 190x111 shadow behind it. The listing is sorted by
+    /// area, so a tray application showing a menu answered <see cref="Largest"/> with its shadow —
+    /// which is the one surface beside a menu that must never be photographed, and since WW334 a
+    /// capture of it is refused. So a caller that asked for the window the application drew got a
+    /// refusal it did not expect, about a window it did not know it had asked for.
+    /// </para>
+    /// <para>
+    /// A list and not a rule, and narrow on purpose. Every rule that would cover it covers something
+    /// else too: skipping what is owned skips the menu, which is the window a tray application's own
+    /// case is about, and skipping what <see cref="Capturing.SeeThrough"/> calls composited skips a
+    /// layered window an application drew deliberately — the fixture has three of those behind
+    /// <c>--layered</c>. What is true of a shadow and of nothing else is that the shell drew it, and
+    /// the only way to say that is to name it.
+    /// </para>
+    /// </summary>
+    public static IReadOnlyList<string> ShellDrawn { get; } = new ReadOnlyCollection<string>(["SysShadow"]);
+
+    /// <summary>
+    /// Whether the shell drew this window rather than the application. WW346, and separate from the
+    /// walk for the reason WW345 made the desk probe's classification separate from its polling: a
+    /// rule that can only be reached by enumerating a real process's real windows is a rule nothing
+    /// can run, and a shadow is not something a case can put on the desk.
+    /// </summary>
+    /// <param name="className">The window class, as <c>GetClassNameW</c> answers it.</param>
+    public static bool DrawnByTheShell(string className) =>
+        ShellDrawn.Contains(className, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Every top-level window that process owns, largest first.</summary>
     /// <param name="pid">The process to ask about.</param>
@@ -52,6 +86,14 @@ public static class TopLevelWindows
                 if (visibleOnly && cloak != Cloak.NotCloaked)
                     return true;
 
+                // WW346. Before the rectangle, because the rectangle is what makes it win: a shadow
+                // is drawn larger than the thing it is behind, so the sort at the bottom of this
+                // method puts it first. Skipped in the listing and not only in `Largest`, because a
+                // caller enumerating a process's windows did not ask for the shell's either.
+                var named = Win32.ClassOf(window);
+                if (DrawnByTheShell(named))
+                    return true;
+
                 if (!Win32.GetWindowRect(window, out var rectangle))
                     return true;
 
@@ -63,7 +105,7 @@ public static class TopLevelWindows
                     window,
                     pid,
                     Win32.TextOf(window),
-                    Win32.ClassOf(window),
+                    named,
                     bounds,
                     visible,
                     Win32.GetWindow(window, Win32.GwOwner),

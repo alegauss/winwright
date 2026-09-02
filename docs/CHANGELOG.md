@@ -163,6 +163,7 @@
 - ✅ **WW199** **this block promises a fixture provokes every capture refusal, and four of the six arms are provoked by a case instead** — The criterion now says what it keeps — every arm has something — and the gap narrowed first: a cloak shape closed the arm that turned out to be provokable after all.
 - ✅ **WW334** **a layered window's rectangle is a rectangle of the desktop, and nothing refuses a copy of one** — A layered window is its own reading and its own refusal, exempt on no route — the shadow behind a menu is a popup exactly as the menu is, and it is the desktop.
 - ✅ **WW335** **a borderless window sets WS_POPUP, so the route alone would copy an application's own frame** — Measured and refuted: a chromeless WPF window reads 0x160F0000 with no WS_POPUP anywhere, and the fixture now draws one so the rule is pinned rather than argued.
+- ✅ **WW346** **the largest window a tray process owns is the shadow behind its menu, so the convenience verb answers the desktop** — The shell's shadow behind a menu is named by class and skipped, so Largest answers the window the application drew (design recorded in `src/Winwright/Windowing/TopLevelWindows.cs`).
 
 ## Block F — Assert — the expectation is derived, never typed
 

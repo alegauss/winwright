@@ -244,6 +244,8 @@ internal static class Cooperating
         // could not have got from a list that stopped at two namespaces.
         new("TopLevelWindows.OfProcess", Cooperation.None, false, "every top-level window a process owns"),
         new("TopLevelWindows.Largest", Cooperation.None, false, "the largest of them, which is the frame where there is one"),
+        new("TopLevelWindows.DrawnByTheShell", Cooperation.None, false,
+            "whether a window class is one the shell draws on an application's behalf, which is how the drop shadow behind a menu stops being the largest window a tray process owns"),
         new("Foreground.Now", Cooperation.None, false, "who holds the keyboard, read straight from Windows"),
         new("Foreground.Check", Cooperation.None, false, "whether a named window holds it"),
         new("Foreground.Between", Cooperation.None, false, "the same judgement over two sightings a caller already has"),

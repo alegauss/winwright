@@ -659,6 +659,79 @@ public sealed class NotificationAreaTests : IDisposable
     }
 
     [Fact]
+    public void The_shadow_behind_a_menu_is_not_the_largest_window_the_application_drew()
+    {
+        // WW346. `Largest` answers the largest window a process owns, sorted by area, and a menu's
+        // drop shadow is drawn larger than the menu on every side: freewilly's menu is 188x108 and
+        // the shadow behind it 190x111. So a caller asking for the window the application drew got
+        // the one surface beside a menu that must never be photographed.
+        //
+        // Every caller in this tree means the same thing by it — twenty of them, all building an
+        // automation root out of the answer — so what this asserts is that the answer is a window
+        // the application drew, and the listing is printed where it is not.
+        using var answering = BusyDesk.Built(
+            () => TrayIconFixture.Add("winwright shadowed menu", TrayMenuKind.Win32));
+
+        if (answering is null || BusyDesk.Excused(NotificationArea.Reachable()))
+            return;
+
+        var menu = NotificationArea.OpenMenu(answering.Tip, settleMs: 4000, pollMs: 40);
+
+        try
+        {
+            if (BusyDesk.Excused(menu.AsAssertion("the icon shows its menu")))
+                return;
+
+            var windows = TopLevelWindows.OfProcess(Environment.ProcessId, smallest: 0);
+            var largest = TopLevelWindows.Largest(Environment.ProcessId);
+
+            var listing = string.Join(
+                Environment.NewLine,
+                windows.Select(one => $"    {one} popup={one.Popup} area={one.Bounds.Area}"));
+
+            // The claim, and the whole of it: whatever comes back is not the shell's shadow, and no
+            // listing carries one either. Named by class, because that is what the shadow is — a
+            // window this process owns only because the popup in front of it does.
+            Assert.True(
+                largest is not null && !TopLevelWindows.DrawnByTheShell(largest.ClassName),
+                $"the largest window is {largest}, which is the shadow the shell drew:{Environment.NewLine}{listing}");
+
+            Assert.DoesNotContain(windows, one => TopLevelWindows.DrawnByTheShell(one.ClassName));
+
+            // What this case cannot do is make the shadow the largest. It runs in this process, and
+            // this process owns the suite's own windows — so the sort has real windows to put in
+            // front of it, and the arm the defect lives on is a tray application whose only windows
+            // are a menu and the shadow behind it. That one is provoked by a desk rather than a
+            // case, and the rule it turns on is run one case below.
+            Assert.True(menu.Opened, menu.Because);
+        }
+        finally
+        {
+            answering.DismissMenu();
+        }
+    }
+
+    [Fact]
+    public void What_the_shell_drew_is_named_rather_than_ruled_out_by_a_property()
+    {
+        // WW346, and the half a case can run. A shadow is not something this suite can put on the
+        // desk — it is drawn by Windows behind a menu belonging to a process whose only windows are
+        // that menu and that shadow — so the rule is separate from the walk, the way WW345 made the
+        // desk probe's classification separate from its polling.
+        Assert.True(TopLevelWindows.DrawnByTheShell("SysShadow"));
+        Assert.True(TopLevelWindows.DrawnByTheShell("sysshadow"));
+
+        // And narrow, which is the whole argument for a list. Every rule that would cover a shadow
+        // covers something else: what is owned is also the menu, which is the window a tray
+        // application's case is about, and what is composited is also a window the fixture draws
+        // layered on purpose. So the one class the shell draws is named, and a menu, a window the
+        // fixture drew and a class Windows would not answer are all left alone.
+        Assert.False(TopLevelWindows.DrawnByTheShell("#32768"));
+        Assert.False(TopLevelWindows.DrawnByTheShell("HwndWrapper[Winwright.Fixture;;]"));
+        Assert.False(TopLevelWindows.DrawnByTheShell(""));
+    }
+
+    [Fact]
     public void Putting_the_desk_back_answers_for_the_desktop_and_not_only_the_flyout()
     {
         // WW344. The verb does two things and used to answer for one. It shuts the flyout and

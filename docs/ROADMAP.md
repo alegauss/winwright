@@ -16,7 +16,6 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW346** (deps: —) **the largest window a tray process owns is the shadow behind its menu, so the convenience verb answers the desktop** — A drop shadow is drawn two pixels larger on every side, and the sort that answers Largest is by area. → §WW346
 - 📋 **WW347** (deps: —) **a WPF popup is layered for its own drop shadow, so the copy route now refuses the only capture that reaches one** — WW334 refuses a layered window on every route, and a context menu WPF draws is layered per pixel while being the surface a render cannot see. → §WW347
 - 📋 **WW349** (deps: —) **the engine can now take a screen copy and still cannot take the render it calls the default** — A capture step answers a hole for every window a render could reach, which is most of them, and the half that could take one is in the application. → §WW349
 

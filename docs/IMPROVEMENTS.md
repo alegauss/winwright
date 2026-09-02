@@ -101,28 +101,6 @@ goes. If all three provoke, the pause is the repair and this is what says so.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW346 the biggest window is the one to keep away from
-
-`TopLevelWindows.Largest` answers the largest window a process owns, which is the frame
-where there is a frame and is documented as such. A tray application showing a menu has
-no frame, and what it does have is measured: freewilly's menu is 188x108 and the
-SysShadow window Windows draws behind it is 190x111. The sort is by area, so `Largest`
-answers the shadow.
-
-WW334 means a capture of it is now refused rather than written, which is the important
-half and is not the whole of it. A caller that asked for the largest window got the one
-surface beside a menu that must never be photographed, and what it gets back today is a
-refusal it did not expect about a window it did not know it had asked for.
-
-The verb is right about what it promises and the promise is the wrong one here. What a
-caller wants is the window the application drew, and a shadow is the shell's - it
-belongs to the process only because the popup does.
-
-Two candidates and neither is obviously better. Either `Largest` skips what `SeeThrough`
-calls composited, which makes a listing verb read a layer attribute per window; or the
-sort stops being the answer and callers name what they are after, which is more honest
-and more typing. Measuring which the adopters actually need is the task.
-
 ### §WW347 the popup that can now be photographed by nothing
 
 Measured while WW335 was being settled. A WPF `ContextMenu` puts up a top-level window
