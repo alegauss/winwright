@@ -16,7 +16,9 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 💭 **WW359** (deps: —) **the way through a layered popup is a verb only the application can call, and no protocol lets a harness ask for it** — WW347's refusal names Popups.Picture, and an adopter reaching it has to invent the channel: the two the protocol has are startup announcements, not asks. → §WW359
+- 💭 **WW359** (deps: —) **the render channel WW349 built carries a window's tree and there is no way to ask it for one popup's** — WW349 sends a window handle and a path; a popup's picture is a different ask, and Popups.Picture is still reachable only from inside the application. → §WW359
+- 💭 **WW361** (deps: —) **an application answers renders only for the windows it remembered to name, and a dialog it opens is none of them** — WW349's hook goes on one window at a time, so a capture of the second window an application draws is a hole until somebody adds a second line to it. → §WW361
+- 💭 **WW362** (deps: —) **a capture through the attach door depends on a variable nobody set, and the run that could set it does not** — WW349 tells a launched application where it may write; a run against a window a caller already has tells it nothing, so the same case answers a hole. → §WW362
 
 ## Block F — Assert — the expectation is derived, never typed
 

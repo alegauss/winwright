@@ -101,29 +101,74 @@ goes. If all three provoke, the pause is the repair and this is what says so.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW359 the picture a harness cannot ask for
+### §WW359 the popup the channel does not carry
 
-WW347 opened the way through and left it needing a hand at each end. `Popups.Picture`
-draws a popup's own tree with nothing composited behind it, and only the application can
-call it — the engine references no part of the in-app half and never will, which is what
-`SeparationTests` holds in place. So the refusal names a route the harness cannot take,
-and the first adopter to meet it builds the channel.
+WW347 opened the way through and WW349 built the channel — most of it. A harness now
+sends a window handle and a path, and the application draws the tree behind that window
+and says it did. What it cannot ask for is one popup's own tree, which is the surface
+WW347 exists about: `Popups.Picture` is still reachable only from inside the process.
 
-Two channels exist and neither is this shape. `WINWRIGHT_GEOMETRY` and
-`WINWRIGHT_SURFACES` are announcements: the application writes a file while it lays
-itself out, and the harness reads it afterwards. A popup picture is an ask at a moment —
-this popup, now, to that path — because a run photographs a flyout once it has one open,
-and a file written at startup is a picture of a popup nobody had opened.
+The gap is in what the message carries rather than in whether there is one. An open
+popup is its own top-level window, so a handle reaches it — but what is wanted is the
+tree it holds rather than the layered surface Windows composites. A closed popup has no
+handle at all, and that is the case worth having: its child is in a tree the process
+owns, so a preview of a flyout nobody has clicked is a picture this could take and no
+copy of the screen ever could.
 
-The fixture is the evidence that this is missing rather than merely unwritten.
-`Protocol` is the surface protocol implemented once for adopters to copy, and it has
-`Report`, `Hold` and `Background` and nothing that renders a popup. So no case here
-drives the route the refusal names end to end: the ones that exist call `Popups.Picture`
-in process, which is the verb and not the channel.
+So the ask needs a second field, and what that field is, is the task. A popup's name is
+the obvious one — `Popups.Under` already walks them and each carries the name its author
+gave it — but a name is not unique across a tree, and the failure mode of the wrong one
+is a picture of the wrong surface, which is what this block refuses everywhere else.
+What is not in doubt is that both halves of the verb exist and only the sentence between
+them is missing.
 
-What the channel is, is the task. A watched directory, a request file beside the report,
-a named pipe: each is a different promise about what an application under test may be
-made to do while a run is watching.
+### §WW361 the window nobody remembered to answer for
+
+`Renders.Answer` hooks one window, and the harness sends to the window it wants a
+picture of. Both halves of that are right and together they leave the second window an
+application draws answering nothing: a dialog, a wizard page, a tool window a run opened
+on purpose is exactly the surface somebody reaches for a capture of, and it is the one
+the application forgot.
+
+Per window rather than per application was the correct call and is not the thing to
+revisit. An application answering only for its main window would hand back a picture of
+the wrong surface with nothing in the file saying so, which is the failure this block
+refuses hardest. What is wrong is that remembering is left to the adopter, with no
+reading anywhere saying which windows are covered.
+
+The fixture is the evidence. It calls `Protocol.Renders(this)` in `OnContentRendered`,
+which is the one window it has, so nothing here has ever needed a second — and the
+README calls it one line, which is true of an application with one window and of no
+other.
+
+Two candidates. The application could hook every window as it is shown, which is
+`Application.Current.Windows` and an event, and turns one line into one line for real.
+Or the answer could carry what it is answering for, so a harness asking about a window
+nobody hooked is told that rather than told the application does not take the message —
+which is the same sentence today and two different faults.
+
+### §WW362 the door that cannot say where pictures go
+
+WW349 puts `WINWRIGHT_RENDERS` on the launch, derived from the project's `captures`, so
+an adopter declares one thing and the default capture route works. That is
+`Suite.Launch`. The other door hands every case a window a caller already has, and it
+has no launch to put anything on — the application was started by somebody else, so
+whether it may write at all depends on the environment that started it.
+
+Both doors exist because each answers a question the other cannot, and this is the first
+thing one of them can do that the other cannot. A run attached to a product already up
+is what `AppTarget.AttachTo` is for, and a capture step in one answers a hole about a
+variable, on a machine where whoever is running it never heard of the variable.
+
+Nothing here is wrong so much as unsaid. The hole names what to set, which is the right
+sentence for the launch door and an incomplete one here: what an attached run needs is
+for the application to have been started with it, and there is no moment left at which
+this run could have arranged that.
+
+So the candidates are about honesty rather than mechanism. The refusal could say which
+door it came through, since the remedy differs; or the attach door could read the
+variable out of the target process and say whether it agrees with the project, which
+turns a guess into a reading — and is the shape this project reaches for elsewhere.
 
 ## Block F — Assert — the expectation is derived, never typed
 
