@@ -80,28 +80,6 @@ the shape this verb exists for, and it is the shape most likely to look at both 
 
 ## Block D — Act — patterns before pointers
 
-### §WW353 the verb with nothing behind its reading
-
-`Pointer.Run` sends the click and then returns `subject.Read().Values` on the next line.
-No poll, no deadline, no second look. Every other verb that synthesises input settles
-first: typing polls and now waits before its first look, press polls until the focus
-moves, nudge polls until the range moves, and both picker walks poll per hop.
-
-WW341 built the observable that tells a late reading from a wrong one and ran it: 1800
-rounds of click, press and nudge on the guest, none late and none lost. So this is not a
-fault that was measured - it is a shape that disagrees with every neighbour, bounded
-under about 1% on one desk rather than shown to be absent.
-
-What makes it worth an entry is what a stale click costs. The others pay a poll and
-answer right; this one has no poll to pay, so a reading taken before the click lands is
-returned as the click's answer. A case that clicks and expects the state to have changed
-then fails on a busy desk, and the failure names the control rather than the timing -
-which is the failure a person spends an afternoon on.
-
-The fix is small and the cost is what has to be decided: a poll until the reading moves
-adds a deadline to a verb that has none, and a click that legitimately changes nothing
-would spend all of it. WW341's arm is what would price that.
-
 ### §WW355 the reader that would need no pause
 
 WW329 put a fifty-millisecond pause in front of the engine's first look and the fault

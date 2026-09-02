@@ -297,6 +297,34 @@ public static class Pointer
         var at = facts.Bounds;
         Send(at.Left + (at.Width / 2), at.Top + (at.Height / 2), act.Button, act.Clicks);
 
+        // WW353. The send is left alone before this reads what it did, which is the one thing every
+        // other synthesised verb was doing and this one was not: typing pauses, and press, nudge and
+        // both picker walks poll until the reading moves. This sent and read on the next line, so
+        // whatever was there at that instant was returned as the click's answer.
+        //
+        // A pause and not a poll, and the difference is what a click is. Its neighbours each wait
+        // for a named thing to happen — the text to arrive, the focus to move, the range to change —
+        // and a click has no such thing: it is as often a navigation whose effect is somewhere else
+        // entirely, and `ActVerb` says so, so a poll until the reading moves would spend the whole
+        // act budget on every click that correctly changes nothing.
+        //
+        // The number is the one WW329 measured for the same provocation, which is why this reaches
+        // for it rather than choosing one: SendInput returns when the events are queued, and the
+        // fault is a read arriving in the target's thread while its packets are still draining.
+        //
+        // What this does not claim is a fault removed. WW341 built the observable and read 1800
+        // rounds of click, press and nudge on the guest with nothing late and nothing lost, which
+        // bounds the click's rate under about 1% rather than showing it absent. So this is a shape
+        // brought into line with its neighbours, and the arm that would notice if it mattered is
+        // still there to be run.
+        //
+        // What it costs was measured rather than assumed, on the guest at 150 rounds each way:
+        // <b>382ms a click round without it and 455ms with</b>. The difference is not the whole 73,
+        // because press and nudge moved 234 to 268 and 196 to 235 between the same two runs without
+        // being touched at all — so about 36 of it is the guest, and the pause is the fifty it says
+        // it is, on a round that was already the longest of the three.
+        Thread.Sleep(Keys.FirstLookMs);
+
         return new PointerResult(act, facts, foreground, at, subject.Read().Values);
     }
 

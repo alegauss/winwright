@@ -13,6 +13,29 @@ namespace Winwright.Acting;
 /// </summary>
 internal static class Keys
 {
+    /// <summary>
+    /// How long a synthesised send is left alone before anything reads what it did. WW329 measured
+    /// it; WW353 is why it lives here rather than in the one verb that had it.
+    /// <para>
+    /// <c>SendInput</c> returns once the events are queued rather than processed, so a read taken
+    /// the instant it returns puts a cross-process look into the target's thread while its packets
+    /// are still being translated — which provokes the fault it was looking for. Measured on the
+    /// guest at 1200 rounds each of three pauses, in typing's own act shape: <b>31 substitutions
+    /// with no pause (2.58%), none at 50ms, none at 150ms.</b>
+    /// </para>
+    /// <para>
+    /// Fifty and not the safer hundred and fifty, on what the same run priced: 7ms a round against
+    /// 89ms at 150. It is very nearly free, because the reads it replaces were themselves slowing
+    /// the drain.
+    /// </para>
+    /// <para>
+    /// One number and not two. Every act that synthesises input is sending through the same queue,
+    /// so a second constant beside this would be a second answer to one measurement — and the verb
+    /// that had no pause at all is exactly the one that had no poll either.
+    /// </para>
+    /// </summary>
+    internal const int FirstLookMs = 50;
+
     private const ushort VkTab = 0x09;
     private const ushort VkShift = 0x10;
     private const ushort VkEnd = 0x23;

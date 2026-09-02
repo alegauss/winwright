@@ -13,7 +13,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW353** (deps: —) **a click sends and reads once, so its answer is whatever was there at that instant and nothing retries it** — WW341 measured the shape and found no fault on this desk; every other synthesised verb settles before it answers, and Pointer.Run is the one that does not. → §WW353
 - 📋 **WW355** (deps: —) **every send waits fifty milliseconds for a provider that only one kind of read wakes, and no cheaper read was tried** — WW342 acquitted the pumping and convicted the automation call, so the interval is paying for work a different reader might not ask for at all. → §WW355
 
 ## Block E — Capture — the picture that proves what it photographed

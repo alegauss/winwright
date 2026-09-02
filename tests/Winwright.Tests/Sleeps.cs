@@ -118,6 +118,17 @@ internal static class Sleeps
             "the fixture parks a thread without pumping, which is the whole of what --pump=none "
                 + "reproduces: a single-threaded apartment that blocks any other way keeps answering "
                 + "messages and is not dead at all"),
+        new("Pointer.cs", 1, Sleeping.Undisturbed,
+            "WW353, and the same measurement as the entry below rather than a second one: the click "
+                + "was the one synthesised verb that sent and read on the next line, where its "
+                + "neighbours each wait for a named thing to happen. It has no such thing to wait "
+                + "for — a click is as often a navigation whose effect is elsewhere — so it takes "
+                + "the pause WW329 priced instead of a poll that would spend the act budget on "
+                + "every click that correctly changes nothing. Priced with WW341's arm at 150 "
+                + "rounds each way on the guest: 382ms a click round without it and 455ms with, of "
+                + "which about 36 is the guest — press and nudge moved 234 to 268 and 196 to 235 "
+                + "between the same two runs without being touched. Both read 0 late of 150, so "
+                + "what this bought is the shape and not a fault removed"),
         new("Keyboard.cs", 1, Sleeping.Undisturbed,
             "WW329, and the one entry here where the sleeping is the repair. The engine's own poll "
                 + "was provoking the substitution it then resent: SendInput returns once the events "

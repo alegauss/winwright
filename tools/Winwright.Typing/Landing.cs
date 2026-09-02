@@ -28,8 +28,10 @@ namespace Winwright.Typing;
 /// What that separation shows is not the same for all four, and the difference is the finding.
 /// <c>Traversal.Press</c> and <c>Traversal.Nudge</c> poll until the reading moves, so a look taken
 /// too early costs a poll and the answer is right anyway — their late rate is what the poll is
-/// paying for. <c>Pointer.Run</c> polls nothing: it sends, reads once, and returns that. Its late
-/// rate is a rate of wrong answers, and this is the first thing to count it.
+/// paying for. <c>Pointer.Run</c> polled nothing and read on the instant the send returned, so its
+/// late rate was a rate of wrong answers, and this is the first thing to count it. WW353 gave it the
+/// pause WW329 measured — it still polls nothing, because a click has no named thing to poll toward,
+/// so this arm stays the one that would price a desk slow enough to need more.
 /// </para>
 /// <para>
 /// The picker walks are the same shape as press — <c>Keys.Send</c> then <c>Attempt.UntilTrue</c> —
@@ -40,8 +42,10 @@ namespace Winwright.Typing;
 /// What it read, on the guest on 2026-09-02: two runs of 300 rounds each at all three verbs, 1800
 /// rounds in all, with nothing late and nothing lost. That bounds the rate under about 1% and the
 /// rate WW329 took off typing was 2.58%, so the provocation does not reach these three at anything
-/// like the size it reached the send. The click's shape is not thereby acquitted — it reads once
-/// and polls nothing, and this desk was fast enough that nothing stood between them.
+/// like the size it reached the send. The click's shape was not thereby acquitted, and WW353 took
+/// the half of it that could be taken: 150 rounds each way on the guest read 382ms a click round
+/// without the pause and 455ms with, of which about 36 is the guest — press and nudge moved by that
+/// much between the same two runs without being touched.
 /// </para>
 /// </summary>
 internal static class Landing
@@ -115,7 +119,7 @@ internal static class Landing
     private static Reading Clicking(AutomationElement root, int rounds)
     {
         var box = On(root, "CheckBox#verbose");
-        var reading = new Reading("click", "Pointer.Run reads once and never polls");
+        var reading = new Reading("click", "Pointer.Run pauses before its look and polls nothing");
 
         for (var round = 1; round <= rounds; round++)
         {
@@ -304,10 +308,11 @@ internal static class Landing
                 + $" {clicking.Ran} rounds puts the rate under about {bound:P1}, and the rate WW329"
                 + $" took off typing was {Typed:P2}, which over this many rounds would have been"
                 + $" about {missed:F0} of them. So whatever the first look does to a send, it does"
-                + " not reach these three at anything like the rate it reached typing.\nThat is not"
-                + " an acquittal of the click's shape. It reads once and polls nothing, so what"
-                + " stands between it and a stale answer on a slower desk is nothing at all, and"
-                + " this run says only that this desk was not slow enough to show it.";
+                + " not reach these three at anything like the rate it reached typing.\nWW353 gave"
+                + " the click the pause WW329 measured, so it no longer reads on the instant the"
+                + " send returns — it still polls nothing, because a click has no named thing to"
+                + " poll toward, and this arm is what would notice if that mattered on a desk"
+                + " slower than the one it just ran on.";
         }
 
         var rate = (double)clicking.Late / clicking.Ran;
