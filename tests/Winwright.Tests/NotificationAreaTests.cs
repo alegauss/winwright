@@ -531,6 +531,52 @@ public sealed class NotificationAreaTests : IDisposable
     }
 
     [Fact]
+    public void A_second_menu_with_the_same_nothing_for_a_name_is_a_second_menu()
+    {
+        // WW338. The reading that answers whether a menu came up compared two names, and a
+        // drop-down with no accessible name is called "a menu with no name" both times — so an
+        // application that put a second one up in answer reported that nothing came.
+        //
+        // Two icons, because that is what it takes to have two menus standing at once: the first
+        // one's drop-down has AutoClose off and stays up, and the second icon answers with its own.
+        // Both are unnamed, so before this the only thing telling them apart was nothing.
+        using var first = BusyDesk.Built(() => TrayIconFixture.Add("winwright first menu", TrayMenuKind.DropDown));
+        using var second = BusyDesk.Built(() => TrayIconFixture.Add("winwright second menu", TrayMenuKind.DropDown));
+
+        if (first is null || second is null)
+            return;
+
+        var one = NotificationArea.OpenMenu(first.Tip, settleMs: 4000, pollMs: 40);
+
+        try
+        {
+            if (BusyDesk.Excused(one.AsAssertion("the first icon shows its menu")))
+                return;
+
+            Assert.True(one.Opened, one.Because);
+
+            // The first menu is still standing — nothing dismissed it — so the second act begins
+            // with a menu on the desk that is not its own. That is the whole provocation.
+            var two = NotificationArea.OpenMenu(second.Tip, settleMs: 4000, pollMs: 40);
+
+            if (BusyDesk.Excused(two.AsAssertion("the second icon shows its menu")))
+                return;
+
+            Assert.True(
+                second.MenusShown > 0,
+                $"the second icon was never asked for its menu: {two.Because}");
+
+            Assert.True(two.Opened, two.Because);
+        }
+        finally
+        {
+            second.DismissMenu();
+            first.DismissMenu();
+            one.PutBack();
+        }
+    }
+
+    [Fact]
     public void A_menu_that_never_came_leaves_the_taskbar_as_it_found_it()
     {
         // WW330, and it stopped a session. The adopting repository's tray cases failed inside the

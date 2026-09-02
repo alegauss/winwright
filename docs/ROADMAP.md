@@ -10,8 +10,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW337** (deps: —) **a spacing of 32ms silenced the fault across 750 rounds, and the repair was chosen when only 128ms had** — WW310's band was the other reason and it did not reproduce, so the cheapest measured suppression is a quarter of the price that refused one. → §WW337
-- 📋 **WW338** (deps: —) **a tray menu is told from the one before it by name, so two unnamed menus read as one menu standing** — The reading that answers whether a menu came up compares two strings, and 'a menu with no name' is what an unnamed one is called both times. → §WW338
 - 📋 **WW339** (deps: —) **a tray menu's reading is called Highlighted and now often holds the menu's own name instead** — WW322 put the standing menu ahead of the focus, so what a trace records moved from the entry a menu highlights to the menu. → §WW339
 - 📋 **WW341** (deps: —) **every other synthesised act reads the instant SendInput returns, and only typing was measured** — WW329 found that look provoking a fault in the send it was reading, and a click, a chord and a picker walk all take it the same way. → §WW341
 - 📋 **WW342** (deps: —) **the pause repairs the fault and nothing says whether the read provokes it or the pumping it forces** — WW329 closed on a repair that works either way, so the interval is a number nobody can shorten and no other reader can be judged. → §WW342

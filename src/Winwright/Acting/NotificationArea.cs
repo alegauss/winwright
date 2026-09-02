@@ -949,11 +949,12 @@ public static class NotificationArea
     /// <param name="before">What the desk was showing before the key.</param>
     /// <param name="standingBefore">What menu was standing before it, where one was.</param>
     /// <param name="showing">What answered, where anything did.</param>
-    private static bool Showed(TrayIcon icon, string? before, string? standingBefore, out string? showing)
+    private static bool Showed(
+        TrayIcon icon, string? before, IReadOnlyList<StandingMenu> standingBefore, out string? showing)
     {
-        if (Standing() is { } menu && menu != standingBefore)
+        if (Standing().FirstOrDefault(one => !Among(standingBefore, one)) is { } menu)
         {
-            showing = menu;
+            showing = menu.Named;
             return true;
         }
 
@@ -1010,7 +1011,42 @@ public static class NotificationArea
     /// </para>
     /// </summary>
     private static string? OnTheDesk() =>
-        Traversal.WhoHasFocus()?.Name is { Length: > 0 } name ? name : Standing();
+        Traversal.WhoHasFocus()?.Name is { Length: > 0 } name
+            ? name
+            : Standing() is [var first, ..] ? first.Named : null;
+
+    /// <summary>
+    /// One menu standing on the desktop: which element it is, and what it is called. WW338.
+    /// </summary>
+    /// <param name="Runtime">
+    /// What UI Automation promises for the life of an element, and empty where it would not give
+    /// one. This is the identity: a name is what a menu is called, and two menus are often called
+    /// the same nothing.
+    /// </param>
+    /// <param name="Named">What a reading reports it as.</param>
+    private sealed record StandingMenu(IReadOnlyList<int> Runtime, string Named);
+
+    /// <summary>
+    /// Whether a menu standing now is one that was standing before. WW338.
+    /// <para>
+    /// By the runtime id, which is the whole of the task: the comparison was two names, and
+    /// <c>a menu with no name</c> is what an unnamed one is called both times — so an application
+    /// that put a second menu up in answer reported that nothing came. The tray search already
+    /// matches an icon this way and for the same reason, a tooltip being a thing an application
+    /// rewrites.
+    /// </para>
+    /// <para>
+    /// The name is the fallback and only where an element would not give an id, which is the same
+    /// direction that search falls in: an id nobody could read is not a reason to call two menus
+    /// different, and calling them the same is the answer that was already being given.
+    /// </para>
+    /// </summary>
+    /// <param name="before">What was standing before the key.</param>
+    /// <param name="now">One of the menus standing after it.</param>
+    private static bool Among(IReadOnlyList<StandingMenu> before, StandingMenu now) => before.Any(
+        one => one.Runtime.Count > 0 && now.Runtime.Count > 0
+            ? one.Runtime.SequenceEqual(now.Runtime)
+            : string.Equals(one.Named, now.Named, StringComparison.Ordinal));
 
     /// <summary>
     /// A menu standing on the desktop that nothing reports as focused. WW322.
@@ -1030,8 +1066,10 @@ public static class NotificationArea
     /// <see cref="Showed" /> asks this one first instead, and the focus after it.
     /// </para>
     /// </summary>
-    private static string? Standing()
+    private static IReadOnlyList<StandingMenu> Standing()
     {
+        var found = new List<StandingMenu>();
+
         try
         {
             // Children of the root, because a menu of either kind is a window of its own rather
@@ -1040,19 +1078,25 @@ public static class NotificationArea
                 TreeScope.Children,
                 new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Menu));
 
+            // WW338. Every one of them and not the first. Two menus can stand at once — one an
+            // application left up and one it opened in answer — and a reading that took the first
+            // would answer the same element both times and report that nothing came.
             for (var at = 0; at < menus.Count; at++)
             {
-                if (ElementFacts.Of(menus[at])?.Name is { Length: > 0 } named)
-                    return named;
-            }
+                var named = ElementFacts.Of(menus[at])?.Name is { Length: > 0 } says
+                    ? says
+                    : "a menu with no name";
 
-            return menus.Count > 0 ? "a menu with no name" : null;
+                found.Add(new StandingMenu(RuntimeOf(menus[at]) ?? [], named));
+            }
         }
         catch (ElementNotAvailableException)
         {
             // The desktop rearranged itself while this looked, which is not a menu and not an error.
-            return null;
+            // What was collected stands, the same way the icon walk keeps what it found.
         }
+
+        return found;
     }
 
     private static bool Matches(TrayIcon icon, string named) =>

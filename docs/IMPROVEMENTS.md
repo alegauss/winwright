@@ -32,51 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW337 the delay may be affordable after all
-
-WW304 swept the spacing and found 0 in 1100 at 128ms and above against 2% below it, and
-128ms a code unit is a price no keystroke can pay. WW310 then read a band across 48 to
-64ms, and between them there was no delay to choose: too dear where it worked, and no
-monotone direction anywhere else.
-
-WW312 swept it again over three send shapes, the engine's own among them. 2700 rounds,
-two substitutions, both at no spacing at all - and every one of the fifteen spaced
-cells, from 32ms up, read zero. So the region WW304 called 2% is empty here, and the
-band that made the curve unusable is not there either.
-
-What that would buy is 32ms a code unit, which is 288ms on a nine-character send: a
-quarter of what was refused, and paid only where a case types.
-
-It is not a measurement yet and that is the task. The baseline this is against is 0.7%,
-so 750 clean rounds are about five events short of where they were expected -
-suggestive, and not a rate. What it needs is the spacing swept against enough rounds at
-no spacing to say the two differ, on a desk whose rate has been read the same evening.
-The repair the engine ships stays whatever this answers: a resend costs nothing on the
-99% that arrive.
-
-### §WW338 two menus with the same nothing for a name
-
-WW322 gave the tray verb a second reading: a top-level menu standing on the desktop,
-compared against whatever was standing before the key. The comparison is `menu !=
-standingBefore`, and both sides are what `Standing` calls a menu - its automation name,
-or the phrase `a menu with no name` where it has none.
-
-So two menus that are called the same thing are one menu to this reading. An application
-that had a menu up when the verb started and put a second one up in answer reports
-nothing came; two unnamed menus do the same, and unnamed is what a `ToolStripDropDown`
-with no accessible name is.
-
-Neither has been seen. The verb takes the focus first, which dismisses most menus that
-were standing, and the case that provokes the drop-down puts up one menu on a desk with
-none. What makes it worth filing rather than leaving is that the failure is silent and
-reads as the application declining to show a menu - the exact confusion WW322 spent
-itself on.
-
-What would settle it is the element rather than the name: a runtime id is what UI
-Automation promises for the life of an element, and the tray search already matches an
-icon that way for the same reason - a tooltip an application rewrites. Two menus are
-then two elements whatever either is called.
-
 ### §WW339 the field that stopped meaning what it is called
 
 `TrayMenu.Highlighted` was the focused element's name, which for a Win32 popup is the
