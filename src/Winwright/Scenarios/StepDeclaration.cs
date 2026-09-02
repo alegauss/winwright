@@ -1,4 +1,4 @@
-﻿using Winwright.Locating;
+using Winwright.Locating;
 
 namespace Winwright.Scenarios;
 
@@ -82,55 +82,29 @@ public sealed record Claim(string Field, string Says)
 /// </summary>
 public sealed record StepDeclaration
 {
-    private StepDeclaration(
-        string name,
-        Locator? locator,
-        string? tray,
-        ActVerb verb,
-        string? argument,
-        string? expected,
-        ReadBack reads,
-        bool meansIt,
-        bool moves,
-        string? covers,
-        bool answers,
-        System.Text.RegularExpressions.Regex? matches,
-        bool discloses,
-        string? pointsAt,
-        string? never,
-        bool spoken,
-        string? label,
-        string? notLabel,
-        string? expectReported,
-        bool eachSpoken,
-        bool ownHeader,
-        Asserting.SetMatch matching = Asserting.SetMatch.Exactly,
-        Pointing pointing = Pointing.Same)
+    /// <summary>
+    /// The three a step cannot be without, and nothing else. WW352.
+    /// <para>
+    /// This took twenty-three parameters, one per field a step can carry, and every field added
+    /// reached it by hand. Three nullable strings in a row is a signature where a transposed pair of
+    /// positional arguments compiles, and the worst example was in this file rather than in a test:
+    /// a tray step was built from twenty-one positional arguments of which eighteen were
+    /// <c>null</c> or <c>false</c>, so the one that mattered was findable only by counting commas.
+    /// </para>
+    /// <para>
+    /// Everything else is <c>private init</c> and set by name. Private rather than plain
+    /// <c>init</c>, which is the half that keeps the gate: <see cref="Of" /> is where a step faces
+    /// its refusals, and a caller outside this type that could write <c>step with { Moves = true }</c>
+    /// would have a step that never faced them. <see cref="Verb" /> and <see cref="Reads" /> stay
+    /// here because they are the two that have no sensible absence.
+    /// </para>
+    /// </summary>
+    private StepDeclaration(string name, ActVerb verb, ReadBack reads)
     {
-        Matching = matching;
-        Pointing = pointing;
         Name = name;
         Claimed = name;
-        Locator = locator;
-        Tray = tray;
         Verb = verb;
-        Argument = argument;
-        Expected = expected;
         Reads = reads;
-        MeansIt = meansIt;
-        Moves = moves;
-        Sweeps = covers;
-        Answers = answers;
-        Matches = matches;
-        Discloses = discloses;
-        PointsAt = pointsAt;
-        Never = never;
-        Spoken = spoken;
-        Label = label;
-        NotLabel = notLabel;
-        ExpectReported = expectReported;
-        EachSpoken = eachSpoken;
-        OwnHeader = ownHeader;
     }
 
     /// <summary>What a report calls this step. The verb and the locator where the case named none.</summary>
@@ -154,7 +128,7 @@ public sealed record StepDeclaration
     /// The notification-area icon this step is about, by the name the shell gives it. Null on a step
     /// addressed by <see cref="Locator"/>, and exactly one of the two is always set.
     /// </summary>
-    public string? Tray { get; }
+    public string? Tray { get; private init; }
 
     /// <summary>
     /// What this step is about, as a sentence — the locator's text, or the icon's name. WW258: what a
@@ -167,13 +141,13 @@ public sealed record StepDeclaration
     public ActVerb Verb { get; }
 
     /// <summary>What the verb was given, or null where it takes nothing.</summary>
-    public string? Argument { get; }
+    public string? Argument { get; private init; }
 
     /// <summary>
     /// What <see cref="Reads"/> should say once the act has landed, or null where this step is an
     /// act and nothing else — a navigation whose consequence a later step is the check for.
     /// </summary>
-    public string? Expected { get; }
+    public string? Expected { get; private init; }
 
     /// <summary>
     /// The pattern <see cref="Reads"/> should match once the act has landed, or null where the step
@@ -190,7 +164,7 @@ public sealed record StepDeclaration
     /// field of this format that can be made to cost a run rather than fail it.
     /// </para>
     /// </summary>
-    public System.Text.RegularExpressions.Regex? Matches { get; }
+    public System.Text.RegularExpressions.Regex? Matches { get; private init; }
 
     /// <summary>
     /// Whether this step claims the act put something under the locator that was not in the tree
@@ -207,7 +181,7 @@ public sealed record StepDeclaration
     /// itself a moment earlier, which is what <see cref="Moves"/> does for a single value.
     /// </para>
     /// </summary>
-    public bool Discloses { get; }
+    public bool Discloses { get; private init; }
 
     /// <summary>
     /// The earlier step this one claims its reading is back to, or null where it makes another claim.
@@ -245,7 +219,7 @@ public sealed record StepDeclaration
     /// anybody reads.
     /// </para>
     /// </summary>
-    public string? Never { get; }
+    public string? Never { get; private init; }
 
     /// <summary>
     /// Whether this step claims everything under the locator that announces anything announces a
@@ -271,7 +245,7 @@ public sealed record StepDeclaration
     /// field is unreadable.
     /// </para>
     /// </summary>
-    public bool Spoken { get; }
+    public bool Spoken { get; private init; }
 
     /// <summary>
     /// Whether this step claims every element its locator matches announces a name.
@@ -293,7 +267,7 @@ public sealed record StepDeclaration
     /// listed is covered by nothing — the hardcoded-list defect wearing element clothes.
     /// </para>
     /// </summary>
-    public bool EachSpoken { get; }
+    public bool EachSpoken { get; private init; }
 
     /// <summary>
     /// Whether this step claims no control inside a row its locator matches announces a different
@@ -312,7 +286,7 @@ public sealed record StepDeclaration
     /// belonging to another row is the defect.
     /// </para>
     /// </summary>
-    public bool OwnHeader { get; }
+    public bool OwnHeader { get; private init; }
 
     /// <summary>
     /// The key whose declared string this step's reading should be, or null where it makes another
@@ -330,7 +304,7 @@ public sealed record StepDeclaration
     /// a panel holding a label and a control announcing one.
     /// </para>
     /// </summary>
-    public string? Label { get; }
+    public string? Label { get; private init; }
 
     /// <summary>
     /// The key whose declared string this step's reading must not be, or null where it makes another
@@ -349,7 +323,7 @@ public sealed record StepDeclaration
     /// refused, which is what the naive spelling of <em>not this</em> becomes.
     /// </para>
     /// </summary>
-    public string? NotLabel { get; }
+    public string? NotLabel { get; private init; }
 
     /// <summary>
     /// The key whose declared string this step's reading must begin with, or null where it makes
@@ -469,13 +443,13 @@ public sealed record StepDeclaration
     /// five times, and the sixth was the one that would have spelled it differently.
     /// </para>
     /// </summary>
-    public string? PointsAt { get; }
+    public string? PointsAt { get; private init; }
 
     /// <summary>
     /// Which of the three ways this step compares with the step <see cref="PointsAt"/> names. WW308:
     /// meaningless where that is null, in the same way <see cref="Matching"/> is where nothing sweeps.
     /// </summary>
-    public Pointing Pointing { get; }
+    public Pointing Pointing { get; private init; }
 
     /// <summary>
     /// The name whose value the application reports and this step's reading should be, or null where
@@ -493,7 +467,7 @@ public sealed record StepDeclaration
     /// set — the rest are single values, and there was nowhere for them to be declared.
     /// </para>
     /// </summary>
-    public string? ExpectReported { get; }
+    public string? ExpectReported { get; private init; }
 
     /// <summary>Which reading the expectation is about. <see cref="ReadBack.Anything"/> by default.</summary>
     public ReadBack Reads { get; }
@@ -503,7 +477,7 @@ public sealed record StepDeclaration
     /// <see cref="Subject.MeaningIt"/> is looking for. False by default, and then a step whose
     /// locator matches something the project declared destructive is refused when it runs.
     /// </summary>
-    public bool MeansIt { get; }
+    public bool MeansIt { get; private init; }
 
     /// <summary>
     /// Whether this step claims the reading moved, rather than what it moved to.
@@ -521,7 +495,7 @@ public sealed record StepDeclaration
     /// the day the tick frequency changes. This is the claim the script was actually making.
     /// </para>
     /// </summary>
-    public bool Moves { get; }
+    public bool Moves { get; private init; }
 
     /// <summary>
     /// The key whose every declared string must be read somewhere this step's locator matches, or
@@ -575,13 +549,13 @@ public sealed record StepDeclaration
     public string? CoversWithin => Sweeps is { } key && Matching == Asserting.SetMatch.Within ? key : null;
 
     /// <summary>The set this step sweeps, whichever way it claims it. Null where it sweeps none.</summary>
-    public string? Sweeps { get; }
+    public string? Sweeps { get; private init; }
 
     /// <summary>
     /// Which of the three ways this step compares its set. WW275 and WW292: one choice, so the three
     /// properties above are a view of it rather than three things that could disagree.
     /// </summary>
-    public Asserting.SetMatch Matching { get; }
+    public Asserting.SetMatch Matching { get; private init; }
 
     /// <summary>Whether a value read here that the set does not declare fails this step. WW275.</summary>
     public bool SweepsExactly => Matching == Asserting.SetMatch.Exactly;
@@ -602,7 +576,7 @@ public sealed record StepDeclaration
     /// <see cref="ReadBack.Anything"/> already draws by answering null.
     /// </para>
     /// </summary>
-    public bool Answers { get; }
+    public bool Answers { get; private init; }
 
     /// <summary>
     /// Whether this step says anything a run could find false. A step that expects nothing, claims no
@@ -1020,31 +994,27 @@ public sealed record StepDeclaration
         // The bang for the reason the one below this carries it: TryParse is not annotated, so the
         // throw above narrows nothing the compiler can see, and the locator is not null by the only
         // route that reaches this line.
-        var step = new StepDeclaration(
-            called ?? Describing(act.Name, parsed!.Text),
-            parsed,
-            null,
-            act,
-            string.IsNullOrWhiteSpace(argument) ? null : argument.Trim(),
-            wanted,
-            reading,
-            meansIt,
-            moves,
-            sweeping,
-            answers,
-            pattern,
-            discloses,
-            back ?? apart ?? ticking ?? holding,
-            forbidden,
-            spoken,
-            declared,
-            undeclared,
-            reportedly,
-            eachSpoken,
-            ownHeader,
-            matching,
-            pointing)
+        var step = new StepDeclaration(called ?? Describing(act.Name, parsed!.Text), act, reading)
         {
+            Locator = parsed,
+            Argument = string.IsNullOrWhiteSpace(argument) ? null : argument.Trim(),
+            Expected = wanted,
+            MeansIt = meansIt,
+            Moves = moves,
+            Sweeps = sweeping,
+            Answers = answers,
+            Matches = pattern,
+            Discloses = discloses,
+            PointsAt = back ?? apart ?? ticking ?? holding,
+            Never = forbidden,
+            Spoken = spoken,
+            Label = declared,
+            NotLabel = undeclared,
+            ExpectReported = reportedly,
+            EachSpoken = eachSpoken,
+            OwnHeader = ownHeader,
+            Matching = matching,
+            Pointing = pointing,
             BeginsWithLabel = opening,
             Absent = absent,
         };
@@ -1456,9 +1426,10 @@ public sealed record StepDeclaration
                     + "rectangle and a tooltip, so the claim a tray step makes is that it can be found");
         }
 
-        return new StepDeclaration(
-            subject, null, tray, act, null, null, ReadBack.Named(null), false, false, null, false, null,
-            false, null, null, false, null, null, null, false, false);
+        // WW352. Three fields and eighteen absences, and the absences used to be written: twenty-one
+        // positional arguments of which most were null or false, so the three that said anything
+        // were findable by counting commas. What a tray step is, is now what this line says.
+        return new StepDeclaration(subject, act, ReadBack.Named(null)) { Tray = tray };
     }
 
     /// <summary>

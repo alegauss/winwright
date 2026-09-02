@@ -199,28 +199,6 @@ turns a guess into a reading — and is the shape this project reaches for elsew
 
 ## Block G — The scenario — a case is a data file
 
-### §WW352 the widest signature in the engine
-
-Every field a step can carry is a parameter of `Of` and a parameter of the constructor
-under it, and a field added reaches both by hand. That is 28 and 23 today, growing by
-one per feature, and the analyser has been reporting it for as long: S107 on both, and
-S3776 on `Of` at cognitive complexity 131 against an allowed 15.
-
-WW340 was filed partly about this and closed the other half instead - the two lists that
-could silently disagree - because the arity is a different kind of defect. Nothing here
-is wrong; the refusals are right and the suite proves them. What is wrong is that the
-signature is now the widest thing in the engine and the compiler stopped helping: three
-nullable strings in a row means a transposed pair of positional arguments builds, and
-only a case that happens to write both catches it. The suite writes them by name, which
-is what has kept this harmless so far.
-
-The tests are also the cost. Around two hundred call sites spell `Of` with named
-arguments, and that ergonomics is worth keeping - a step written as a locator, a verb
-and one named claim is why a case is readable in a test file. So a builder that replaces
-it has to read as well as that does, or it buys a smaller signature with a worse suite.
-
-Worth doing after WW351, which removes one of the two hands a field passes through.
-
 ### §WW354 the arms nobody checks against each other
 
 `run-typing.cmd` is where a person reads what the measurement tool can do: four arms

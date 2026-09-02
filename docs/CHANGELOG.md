@@ -263,6 +263,7 @@
 - ✅ **WW340** **the claim set is built inside the refusal and thrown away, so Checkable and the schema keep lists of their own** — a claim is a declared thing: the set the refusal builds is kept on the step, Checkable's nineteen ORs read it, and the published format marks which fields are claims.
 - ✅ **WW348** **a case that captures with no captures declared is a hole at run time, and the file said so at load** — A verb says which declaration it needs, and both of Suite's doors refuse a step the project cannot serve before a window is launched (design recorded in `src/Winwright/Scenarios/ActVerb.cs`).
 - ✅ **WW351** **the claim set is computed from Of's parameters, so a claim is still added there rather than by declaring a field** — The set is read off the step's own fields, so a claim is a field and a schema row and no longer a line in Of (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
+- ✅ **WW352** **StepDeclaration.Of takes 28 parameters and its constructor 23, so every new field is threaded through both by hand** — A field reaches a step by name now and the constructor is three; Of keeps the signature its format's keys give it (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

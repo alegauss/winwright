@@ -150,4 +150,49 @@ public class StepDeclarationTests
         Assert.Equal("""toggle CheckBox[name="Wrap lines"]""", step.Name);
         Assert.Contains("→ toggle 'On'", step.ToString());
     }
+
+    [Fact]
+    public void A_field_reaches_a_step_by_its_name_and_never_by_its_position()
+    {
+        // WW352. The constructor took one parameter per field a step can carry — twenty-three, and
+        // three nullable strings in a row means a transposed pair compiles. The worst example was in
+        // the engine rather than in a test: a tray step was built from twenty-one positional
+        // arguments of which most were null or false.
+        //
+        // Asserted as the count rather than as the absence of a defect, because that is what a
+        // reader can check: three is what a step cannot be without, and a fourth would be a field
+        // that had found its way back into the position where transposing is possible.
+        var built = typeof(StepDeclaration)
+            .GetConstructors(System.Reflection.BindingFlags.Instance
+                | System.Reflection.BindingFlags.NonPublic
+                | System.Reflection.BindingFlags.Public)
+            .Where(one => one.GetParameters() is not [{ } only] || only.ParameterType != typeof(StepDeclaration))
+            .ToList();
+
+        var declaring = Assert.Single(built);
+
+        Assert.Equal(
+            ["name", "verb", "reads"],
+            declaring.GetParameters().Select(one => one.Name));
+    }
+
+    [Fact]
+    public void What_a_field_is_set_by_is_shut_to_everyone_but_the_verb_that_judges_a_step()
+    {
+        // The half that keeps the gate, and the reason those fields are `private init` rather than
+        // `init`. Of is where a step faces its refusals, so a caller outside the engine that could
+        // write `step with { Moves = true }` would be holding a step that never faced them — which
+        // is the whole of what declaring a case is for.
+        var fields = new[] { "Moves", "Answers", "Expected", "Sweeps", "Absent", "Label", "Tray" };
+
+        Assert.All(
+            fields,
+            one =>
+            {
+                var setting = typeof(StepDeclaration).GetProperty(one)?.SetMethod;
+
+                Assert.True(setting is not null, $"{one} is not a property of a step any more");
+                Assert.True(setting.IsPrivate, $"{one} can be set from outside the engine");
+            });
+    }
 }
