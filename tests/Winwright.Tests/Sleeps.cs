@@ -147,6 +147,10 @@ internal static class Sleeps
             "the thread that owns the window sets this once the window exists, so the constructor "
                 + "hands back a dialog that is really there rather than one that will be shortly — "
                 + "with a ten-second deadline, so a thread that never starts is a refusal and not a hang"),
+        new("PumpedFlyout.cs", 1, Sleeping.OnASignal,
+            "WW347: the same shape for a WPF popup, and set in a finally so a flyout that would not "
+                + "open is reported as the refusal it is rather than parking the case for the whole "
+                + "deadline — which is the difference between a red naming what WPF said and a hang"),
         new("FinishedTests.cs", 3, Sleeping.OnASignal,
             "two signals and one delay, and the shape is the point: a reader takes the destination "
                 + "and parks until it is told to let go, so the case knows the file really is open "

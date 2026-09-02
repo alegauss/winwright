@@ -236,4 +236,72 @@ public sealed class PopupsTests
 
         Assert.Throws<ThreadBoundException>(() => Popups.Under(theirs));
     }
+
+    [Fact]
+    public void A_closed_popup_is_photographed_through_the_tree_it_holds()
+    {
+        // WW347, and the property that makes this the way through rather than a second copy: the
+        // child is a tree this process owns whether or not the popup is open, so a preview of a
+        // flyout nobody has clicked is a picture this can take and no copy of the screen ever could
+        // — there is no window on the screen to copy.
+        var root = Directory.CreateTempSubdirectory("winwright-flyout-shut-").FullName;
+        try
+        {
+            var path = Path.Combine(root, "shut.png");
+            var picture = Apartment.Run(() =>
+            {
+                var (_, flyout) = Page();
+                Assert.False(flyout.IsOpen);
+                return Popups.Picture(flyout, path);
+            });
+
+            Assert.True(File.Exists(path), picture.Sentence());
+            Assert.Equal(80, picture.Width);
+            Assert.Equal(40, picture.Height);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void A_popup_holding_nothing_is_refused_rather_than_written_as_an_empty_file()
+    {
+        // The refusal is about what the popup was given, which is a different sentence from the
+        // render's own: that one is about what an element laid out to, and an element that is not
+        // there laid out to nothing anybody can be told about.
+        var refused = Assert.Throws<UnrenderableException>(() => Apartment.Run(() =>
+            Popups.Picture(new Popup { Name = "empty" }, Path.Combine(Path.GetTempPath(), "never.png"))));
+
+        Assert.Contains("empty", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("holding nothing", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_popup_holding_something_with_no_layout_is_refused_by_what_it_is_holding()
+    {
+        // A popup's child is a UIElement, and not every UIElement has a layout of its own. Named
+        // rather than cast blindly: the failure otherwise is an invalid cast raised from inside a
+        // render, which says nothing about the popup it came from.
+        var refused = Assert.Throws<UnrenderableException>(() => Apartment.Run(() =>
+            Popups.Picture(
+                new Popup { Name = "odd", Child = new BareElement() },
+                Path.Combine(Path.GetTempPath(), "never.png"))));
+
+        Assert.Contains("BareElement", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("no layout of its own", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_popup_from_another_thread_is_refused_for_a_reason_about_threading()
+    {
+        var theirs = Apartment.Run(() => new Popup { Child = new Border { Width = 10, Height = 10 } });
+
+        Assert.Throws<ThreadBoundException>(
+            () => Popups.Picture(theirs, Path.Combine(Path.GetTempPath(), "never.png")));
+    }
+
+    /// <summary>A UIElement with no layout of its own, which is what a popup may be holding.</summary>
+    private sealed class BareElement : UIElement;
 }

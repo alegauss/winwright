@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 
 namespace Winwright.InApp;
 
@@ -144,6 +145,77 @@ public static class Popups
         return new PopupsHeld(root);
     }
 
+    /// <summary>
+    /// A picture of one popup's own tree, which is the surface nothing outside the process can
+    /// photograph. WW347.
+    /// <para>
+    /// An open popup is its own top-level window, and a framework that draws a drop shadow behind it
+    /// draws that shadow itself: WPF's is <c>style=0x96000000 ex=0x08080088</c> — WS_POPUP with no
+    /// caption, layered with an alpha per pixel. So a harness routes it to the screen copy, which is
+    /// the only capture out there that reaches a popup at all, and the copy is then refused because
+    /// the soft edge it carries is a strip of whatever the popup is standing in front of. Both
+    /// readings are right, and together they leave a real surface with no way to be photographed.
+    /// </para>
+    /// <para>
+    /// This is the way through, and it is one only the application has. The child is an ordinary
+    /// element in a tree this process owns, so it draws the way a window's does — no compositor, no z
+    /// order, no shadow and no edge that is the desktop. Whether the popup is open does not come into
+    /// it, which is the same property read from the other side: the tree is there either way, and a
+    /// preview of a flyout nobody has clicked is a picture this can take and a copy never could.
+    /// </para>
+    /// </summary>
+    /// <param name="popup">The popup to photograph.</param>
+    /// <param name="path">Where to write the PNG.</param>
+    /// <param name="background">What to compose behind it, or null to leave it transparent.</param>
+    /// <param name="dpi">The resolution to draw at.</param>
+    /// <exception cref="UnrenderableException">
+    /// Where the popup is holding nothing, or holding something that is not an element with a
+    /// layout — a picture of neither is an empty file, and an empty file is a successful render to
+    /// everything that only checks one exists.
+    /// </exception>
+    public static RenderedPicture Picture(
+        Popup popup, string path, Brush? background = null, double dpi = Render.DefaultDpi)
+    {
+        ArgumentNullException.ThrowIfNull(popup);
+        Freezables.Insist(popup, "the popup being photographed");
+
+        var element = Drawable(popup);
+        return Render.ToFile(element, path, Settled(element), background, dpi);
+    }
+
+    /// <summary>
+    /// The same, stopping at the bitmap, for a caller that has somewhere else to put it.
+    /// </summary>
+    /// <param name="popup">The popup to photograph.</param>
+    /// <param name="background">What to compose behind it, or null to leave it transparent.</param>
+    /// <param name="dpi">The resolution to draw at.</param>
+    public static System.Windows.Media.Imaging.BitmapSource Bitmap(
+        Popup popup, Brush? background = null, double dpi = Render.DefaultDpi)
+    {
+        ArgumentNullException.ThrowIfNull(popup);
+        Freezables.Insist(popup, "the popup being photographed");
+
+        var element = Drawable(popup);
+        return Render.ToBitmap(element, Settled(element), background, dpi);
+    }
+
+    /// <summary>
+    /// The size an open popup's child has already settled on, and null where it has none.
+    /// <para>
+    /// A closed popup's child is in no tree and has never been laid out, so the render takes the
+    /// size it asks for — which is what that verb is for. An open one has been laid out by the
+    /// popup's own root, and handing that size back is what keeps the picture the surface the
+    /// application is showing: a child that stretches to fill would otherwise be measured against
+    /// infinite room and refused for wanting all of it, which is a refusal about the render and not
+    /// about the popup. Measured on an open WPF popup: the root arranges its child at the origin at
+    /// exactly this size, so asking for it again changes nothing that was drawn.
+    /// </para>
+    /// </summary>
+    private static Size? Settled(FrameworkElement element) =>
+        element.IsArrangeValid && element.RenderSize is { Width: > 0, Height: > 0 }
+            ? element.RenderSize
+            : null;
+
     /// <summary>What a report calls one popup: its name, or what it is holding.</summary>
     internal static string Named(Popup popup)
     {
@@ -151,6 +223,27 @@ public static class Popups
             return popup.Name;
 
         return popup.Child is null ? "(unnamed popup)" : $"(unnamed popup holding {popup.Child.GetType().Name})";
+    }
+
+    /// <summary>
+    /// The element a popup is holding, refused where it is not one that can be drawn. Named
+    /// separately from the render because the two refusals say different things: this one is about
+    /// what the popup was given, and <see cref="UnrenderableException" /> from the render below is
+    /// about what that element laid out to.
+    /// </summary>
+    private static FrameworkElement Drawable(Popup popup)
+    {
+        if (popup.Child is null)
+            throw new UnrenderableException($"{Named(popup)} is holding nothing, so there is no tree to draw");
+
+        if (popup.Child is not FrameworkElement element)
+        {
+            throw new UnrenderableException(
+                $"{Named(popup)} is holding a {popup.Child.GetType().Name}, which has no layout of its own — "
+                    + "a popup is photographed through the element it holds, and this is not one");
+        }
+
+        return element;
     }
 
     private static void Walk(DependencyObject node, List<Popup> found, HashSet<DependencyObject> seen)

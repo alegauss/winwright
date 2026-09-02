@@ -164,6 +164,7 @@
 - ✅ **WW334** **a layered window's rectangle is a rectangle of the desktop, and nothing refuses a copy of one** — A layered window is its own reading and its own refusal, exempt on no route — the shadow behind a menu is a popup exactly as the menu is, and it is the desktop.
 - ✅ **WW335** **a borderless window sets WS_POPUP, so the route alone would copy an application's own frame** — Measured and refuted: a chromeless WPF window reads 0x160F0000 with no WS_POPUP anywhere, and the fixture now draws one so the rule is pinned rather than argued.
 - ✅ **WW346** **the largest window a tray process owns is the shadow behind its menu, so the convenience verb answers the desktop** — The shell's shadow behind a menu is named by class and skipped, so Largest answers the window the application drew (design recorded in `src/Winwright/Windowing/TopLevelWindows.cs`).
+- ✅ **WW347** **a WPF popup is layered for its own drop shadow, so the copy route now refuses the only capture that reaches one** — A popup's own tree is photographed by the in-app half, and the layer refusal names that way through (design recorded in `src/Winwright.InApp/Popups.cs`).
 
 ## Block F — Assert — the expectation is derived, never typed
 

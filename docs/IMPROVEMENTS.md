@@ -101,28 +101,6 @@ goes. If all three provoke, the pause is the repair and this is what says so.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW347 the popup that can now be photographed by nothing
-
-Measured while WW335 was being settled. A WPF `ContextMenu` puts up a top-level window
-reading style 0x96000000 and ex 0x08080088: WS_POPUP with no caption, and layered with
-an alpha per pixel, which is the drop shadow it draws for itself.
-
-So the route calls it a popup, correctly - it is in no tree the application can hand
-over - and sends it to the screen copy, which is the only capture that reaches one.
-WW334 then refuses that copy, correctly as well: the shadow at its edges is the desktop,
-and a picture of it is partly a picture of whatever it is standing in front of.
-
-Both readings are right and together they leave a real surface with no way to be
-photographed at all. That is a narrowing this project should make on purpose rather than
-discover: nothing in the suite photographs a WPF popup, so nothing went red, and the
-first adopter to try will meet a refusal with no door beside it.
-
-Two doors and they are not the same size. The copy could be trimmed to what the window
-actually painted rather than to its rectangle, which is `PaintedFrame`'s idea one layer
-in and needs the layer's own alpha to say where the edge is. Or the in-app half could
-render a popup's own tree, which is what it already does for a window and is the answer
-that leaves nothing composited at all.
-
 ### §WW349 the default nobody outside the process can take
 
 WW336 gave the engine `ScreenCopy`, which is the route that exists for a surface no tree

@@ -122,8 +122,10 @@ public sealed class ApartmentTests
     [Fact]
     public void This_suite_carries_no_copy_of_the_runner_any_more()
     {
-        // The deletion is the proof. Two fixtures still make their own threads and are meant to:
-        // both pump a message loop for the lifetime of a window, which is not what this runs.
+        // The deletion is the proof. Three fixtures still make their own threads and are meant to:
+        // each pumps a message loop for the lifetime of a window, which is not what this runs — the
+        // runner is bounded and hands its answer back, and a window has to outlive the call that
+        // made it. WW347 added the third, which holds an open WPF popup up.
         // This file is left out because it names the very string it is looking for.
         var copies = Directory
             .EnumerateFiles(Sources(), "*.cs")
@@ -136,7 +138,7 @@ public sealed class ApartmentTests
             .Order(StringComparer.Ordinal)
             .ToList();
 
-        Assert.Equal(["PumpedDialog.cs", "TrayIconFixture.cs"], copies);
+        Assert.Equal(["PumpedDialog.cs", "PumpedFlyout.cs", "TrayIconFixture.cs"], copies);
     }
 
     private static string Sources() => Checkout.At("tests", "Winwright.Tests");

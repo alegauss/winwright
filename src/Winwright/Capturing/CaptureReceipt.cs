@@ -372,9 +372,16 @@ public sealed record CaptureReceipt
         // behind that menu is a popup by every test the route has, is layered per pixel, and is
         // nothing but a rectangle of whatever the menu is standing in front of. Exempting a popup
         // here would exempt the one surface beside a menu that must never be photographed.
+        //
+        // WW347, and it is the same refusal carrying what to do instead. A popup a framework drew is
+        // layered for its own drop shadow, so this arm fires on a real surface that the render
+        // cannot reach either — and an adopter meeting that met a refusal with nothing beside it.
+        // The way out is the application's own, so the route says so rather than the reading: the
+        // layer is a fact about the window, and which half of the harness can still draw it is not.
         if (layers is { Transmits: true } && route?.Renders is not true)
             throw new WrongCaptureException(
-                WrongCapture.LayerTransmits, $"the capture is of {window}, and {layers.Sentence()}");
+                WrongCapture.LayerTransmits,
+                $"the capture is of {window}, and {layers.Sentence()}{CaptureRoute.StillReachable(window)}");
 
         // WW42. A flat rectangle is not a picture of a window, and the session that produced one
         // had everything present and nothing rendering — so the file was written and the run exited

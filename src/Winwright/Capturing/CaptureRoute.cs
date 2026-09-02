@@ -147,6 +147,35 @@ public sealed record CaptureRoute
         return new CaptureRoute(Route.ScreenCopy, OutOfReach.Renderable, because.Trim());
     }
 
+    /// <summary>
+    /// What can still photograph a surface the layer refusal turned away, where anything can. WW347.
+    /// <para>
+    /// A popup a framework drew is layered for the drop shadow it draws itself — WPF's reads
+    /// <c>ex=0x08080088</c>, an alpha per pixel — so the two readings this route composes with are
+    /// both right and together they close every way in: the render cannot reach a surface in no tree
+    /// the application can hand over, and the copy that can reach it is refused for the soft edge it
+    /// would carry.
+    /// </para>
+    /// <para>
+    /// The narrowing is real and this is where it is said out loud, because a refusal an adopter
+    /// cannot act on is the half of it that was avoidable. The way through is the application's own:
+    /// a popup's child is an ordinary element in a tree that process owns, and the in-app half draws
+    /// it with nothing composited behind it. Empty for a window that is not a popup, which is a
+    /// window the render already reaches.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The window that was refused.</param>
+    public static string StillReachable(TopLevelWindow window)
+    {
+        ArgumentNullException.ThrowIfNull(window);
+
+        return window.Popup || window.IsOwned
+            ? " It is a popup, so the way through is the application's own half: a popup's child is an "
+                + "element in a tree that process owns, and Winwright.InApp's Popups.Picture draws it "
+                + "with nothing composited behind it."
+            : "";
+    }
+
     /// <summary>The route in the sentence a receipt carries, said either way.</summary>
     public string Sentence() => Renders
         ? $"rendered off-screen: {Because}."
