@@ -1845,6 +1845,33 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
     }
 
     [Fact]
+    public void A_window_with_no_chrome_is_rendered_and_not_taken_for_a_drop_down()
+    {
+        // WW335, and it is the measurement rather than the repair: WW87 taught the route to tell a
+        // drop-down nothing owns from a window by its style bits — WS_POPUP with no caption — and
+        // the worry filed against it was that a chromeless frame sets the same two and would be
+        // sent to a screen copy it does not need.
+        //
+        // It does not. Measured here and on the desk beside it: a WPF window with WindowStyle None
+        // reads 0x160F0000, which is WS_OVERLAPPED with the frame bits — no WS_POPUP anywhere. The
+        // only WPF surface that sets it is a Popup, which is what the route should call a popup.
+        var window = Launched("--chromeless");
+
+        Assert.False(window.Popup, $"a chromeless window read as a popup: {window}");
+
+        // And the route it gets is the render, which is the whole of what the worry was about: a
+        // frame with a visual tree the application can hand over must never be photographed.
+        var route = CaptureRoute.For(window);
+
+        Assert.True(route.Renders, route.Sentence());
+        Assert.Equal(OutOfReach.Renderable, route.Reach);
+
+        // Both overloads agree, which is the property WW320 gave them and the one a narrowing of
+        // the popup rule is most likely to break.
+        Assert.Equal(route.Because, CaptureRoute.For(window, window with { Handle = 0x1000 }).Because);
+    }
+
+    [Fact]
     public void A_capture_of_a_layered_window_is_refused_although_it_asked_for_no_backdrop()
     {
         // WW334. The other way a window is see-through, and the one the backdrop reading answers

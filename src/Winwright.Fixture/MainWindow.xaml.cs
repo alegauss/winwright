@@ -29,6 +29,13 @@ public partial class MainWindow : Window
         if (Shapes.Value("title") is string named)
             Title = named;
 
+        // WW335. Before the source exists, because the style bits a chromeless window ends up with
+        // are what the window is created with. A frame with no chrome is the shape a capture route
+        // reading WS_POPUP was suspected of mistaking for a drop-down, and the fixture is where that
+        // suspicion is answered rather than argued about.
+        if (Shapes.Has("chromeless"))
+            WindowStyle = WindowStyle.None;
+
         if (Shapes.Has("names"))
             NamesPane.AddTo(panes);
 

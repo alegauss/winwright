@@ -168,23 +168,6 @@ been the whole investigation.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW335 a frame with no chrome reads as a popup
-
-WW87 taught the route to read the style bits, because a drop-down that nothing owns had
-to be recognised by something, and its class name carries a per-thread number. A WPF
-window with WindowStyle None sets the same two bits - WS_POPUP, no caption - and it is
-an ordinary frame with a visual tree the application can render.
-
-The two-argument overload is unaffected: a window that is the main one short-circuits
-before any of this. What is exposed is CaptureRoute.For(window) alone, which WW320 added
-for an application showing only a menu, and which would send a borderless main window to
-a screen copy.
-
-Nothing measured has met one yet, which is why this is filed rather than guessed at. The
-discriminator would have to be something the window says about itself rather than a
-third style bit: WS_EX_TOOLWINDOW was tried and is clear on the menu this exists for and
-set on the shadow behind it.
-
 ### §WW346 the biggest window is the one to keep away from
 
 `TopLevelWindows.Largest` answers the largest window a process owns, which is the frame
@@ -206,6 +189,28 @@ Two candidates and neither is obviously better. Either `Largest` skips what `See
 calls composited, which makes a listing verb read a layer attribute per window; or the
 sort stops being the answer and callers name what they are after, which is more honest
 and more typing. Measuring which the adopters actually need is the task.
+
+### §WW347 the popup that can now be photographed by nothing
+
+Measured while WW335 was being settled. A WPF `ContextMenu` puts up a top-level window
+reading style 0x96000000 and ex 0x08080088: WS_POPUP with no caption, and layered with
+an alpha per pixel, which is the drop shadow it draws for itself.
+
+So the route calls it a popup, correctly - it is in no tree the application can hand
+over - and sends it to the screen copy, which is the only capture that reaches one.
+WW334 then refuses that copy, correctly as well: the shadow at its edges is the desktop,
+and a picture of it is partly a picture of whatever it is standing in front of.
+
+Both readings are right and together they leave a real surface with no way to be
+photographed at all. That is a narrowing this project should make on purpose rather than
+discover: nothing in the suite photographs a WPF popup, so nothing went red, and the
+first adopter to try will meet a refusal with no door beside it.
+
+Two doors and they are not the same size. The copy could be trimmed to what the window
+actually painted rather than to its rectangle, which is `PaintedFrame`'s idea one layer
+in and needs the layer's own alpha to say where the edge is. Or the in-app half could
+render a popup's own tree, which is what it already does for a window and is the answer
+that leaves nothing composited at all.
 
 ## Block F — Assert — the expectation is derived, never typed
 

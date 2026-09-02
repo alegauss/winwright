@@ -156,6 +156,7 @@
 - ✅ **WW195** **the region is read before a capture and never after, so a window that arrived while it was taken is not seen** — The region is read on both sides of the take, and a window that arrived inside it is a sixth refusal arm with its own sentence rather than a capture reported as clear.
 - ✅ **WW199** **this block promises a fixture provokes every capture refusal, and four of the six arms are provoked by a case instead** — The criterion now says what it keeps — every arm has something — and the gap narrowed first: a cloak shape closed the arm that turned out to be provokable after all.
 - ✅ **WW334** **a layered window's rectangle is a rectangle of the desktop, and nothing refuses a copy of one** — A layered window is its own reading and its own refusal, exempt on no route — the shadow behind a menu is a popup exactly as the menu is, and it is the desktop.
+- ✅ **WW335** **a borderless window sets WS_POPUP, so the route alone would copy an application's own frame** — Measured and refuted: a chromeless WPF window reads 0x160F0000 with no WS_POPUP anywhere, and the fixture now draws one so the rule is pinned rather than argued.
 
 ## Block F — Assert — the expectation is derived, never typed
 

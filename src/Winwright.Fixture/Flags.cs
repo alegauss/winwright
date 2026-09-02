@@ -267,6 +267,11 @@ public sealed record Flags
             "z-order reasoning cannot answer for a backdrop, so every check that decides a copy's contents by walking the windows above it is wrong about that one window",
             Choices: Backdrop.Names),
         new Flag(
+            "chromeless",
+            "",
+            "a window with no title bar and no border, which is what an application draws when it means to draw its own",
+            "a route that tells a renderable window from a drop-down by its style bits was suspected of calling this one a drop-down, and a suspicion nothing drives is one nobody can settle"),
+        new Flag(
             "layered",
             "how",
             "a window made see-through by its layer rather than by its backdrop - at half alpha, at full alpha, or with a colour key",
