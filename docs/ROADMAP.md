@@ -43,10 +43,9 @@
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - 💭 **WW369** (deps: —) **a locator naming a control type the tree lacks reads as nothing answered, which is what a vanished menu reads as** — WW356 changed the fixture's entries and nothing asserts what they are, so a regression to buttons surfaces as a scenario failing in the words of a desk problem. → §WW369
 - 💭 **WW370** (deps: —) **the loop's one branch that answers nothing is the desktop skip, and no case arranges a desktop-held desk to run it** — WW357 runs the polling against a window this suite puts up, so every look it takes is a window; the skip that makes a quiet desk read clear is still run by nothing. → §WW370
+- 💭 **WW371** (deps: —) **an asking desk refuses every guest run, and the only remedy is a person at the guest console** — A browser window survived twelve SW_MINIMIZE calls here, so even the non-destructive repair fails and no unattended run can clear the desk it refuses on. → §WW371
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-- 💭 **WW358** (deps: —) **the fixture always has a frame, so no case can make a shell-drawn shadow the largest window a process owns** — WW346's cases run in a process owning the suite's own windows, so the sort has real windows to put first and the arm the defect lives on has nothing that provokes it. → §WW358
 
 ## Done when — Block A
 

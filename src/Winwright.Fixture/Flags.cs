@@ -314,6 +314,12 @@ public sealed record Flags
             "a resident tray showing nothing runs on every developer machine here, and a refusal firing on it would need an override everybody passes always",
             Draws: false),
         new Flag(
+            "shadowed",
+            "",
+            "a process with no window at all but a menu, and the shadow the shell draws behind it - which is larger than the menu on every side",
+            "the largest window a tray process owns is that shadow, so the convenience verb answered the one surface beside a menu that must never be photographed, and no fixture here could be a process whose only windows are those two",
+            Draws: false),
+        new Flag(
             "profiles",
             "",
             "print the profiles this application has, one per line, and exit - the set a case derives from what the application reports rather than from a strings file",

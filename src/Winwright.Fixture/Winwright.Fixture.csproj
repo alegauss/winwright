@@ -5,6 +5,13 @@
     <RootNamespace>Winwright.Fixture</RootNamespace>
     <AssemblyName>Winwright.Fixture</AssemblyName>
     <UseWPF>true</UseWPF>
+
+    <!-- WW358. One shape needs WinForms and nothing else here touches it: a tray application's menu
+         is a ToolStripDropDown, and the shadow Windows draws behind one is a separate SysShadow
+         window two pixels larger on every side. Measured rather than assumed: a WPF popup draws its
+         own shadow into its own layer (WW347) and produces no such window, so WPF cannot reproduce
+         the surface at all. Nothing here is loaded unless the shadowed shape is asked for. -->
+    <UseWindowsForms>true</UseWindowsForms>
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
@@ -17,6 +24,17 @@
   <PropertyGroup>
     <StartupObject>Winwright.Fixture.Program</StartupObject>
   </PropertyGroup>
+
+  <!-- WW358. The reference stays and the implicit using goes. Enabling WinForms puts its namespace
+       into every file's global usings, and this is a WPF application: the panes here name Button,
+       ComboBox, TabControl and GroupBox, all four of which exist in both toolkits, and seventeen
+       files went ambiguous on the build that found it. System.Drawing goes for the same reason and
+       was found the same way: Size is in it and in System.Windows. The one file that wants either
+       says so at its own top, which is where a reader of that file is looking anyway. -->
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
 
   <!-- The in-app half, which is what an adopting application takes. Not the engine: that is the
        harness driving this, and an application referencing it would ship a test harness to its

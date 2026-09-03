@@ -48,14 +48,94 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
     /// </summary>
     private static string Executable() => Fixture.Executable();
 
-    /// <summary>Launch it and wait for the window it draws, which is the only signal worth waiting on.</summary>
-    private TopLevelWindow Launched(params string[] flags)
+    /// <summary>One window as raw enumeration sees it, shell-drawn ones included. WW358.</summary>
+    /// <param name="Handle">The window.</param>
+    /// <param name="Class">Its class, which is what names a shadow.</param>
+    /// <param name="Area">How much it covers, which is what the sort under test compares.</param>
+    private sealed record RawWindow(nint Handle, string Class, long Area)
+    {
+        public override string ToString() => $"{Class} area={Area} 0x{Handle:X}";
+    }
+
+    /// <summary>
+    /// Every visible top-level window a process owns, without the engine's own skipping. WW358.
+    /// <para>
+    /// By hand and not through <c>TopLevelWindows</c>, because that walk drops exactly what this
+    /// case exists to look at: reading the shadow through the verb that hides it would be asking the
+    /// repair whether it repaired.
+    /// </para>
+    /// </summary>
+    /// <param name="pid">The process to enumerate.</param>
+    private static IReadOnlyList<RawWindow> Raw(int pid)
+    {
+        var found = new List<RawWindow>();
+        EnumWindows(
+            (window, _) =>
+            {
+                GetWindowThreadProcessId(window, out var owner);
+                if (owner != pid || !IsWindowVisible(window))
+                    return true;
+
+                var text = new char[256];
+                var taken = GetClassNameW(window, text, text.Length);
+                GetWindowRect(window, out var box);
+
+                found.Add(new RawWindow(
+                    window,
+                    new string(text, 0, taken),
+                    (long)Math.Max(0, box.Right - box.Left) * Math.Max(0, box.Bottom - box.Top)));
+
+                return true;
+            },
+            0);
+
+        return found;
+    }
+
+    private delegate bool EnumProc(nint window, nint parameter);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool EnumWindows(EnumProc callback, nint parameter);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(nint window, out int pid);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int GetClassNameW(nint window, char[] text, int count);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsWindowVisible(nint window);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RawRect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetWindowRect(nint window, out RawRect rect);
+
+    /// <summary>What launching the fixture with these flags looks like. WW358 named it for reuse.</summary>
+    /// <param name="flags">The shape to ask for.</param>
+    private static ProcessStartInfo Starting(params string[] flags)
     {
         var start = new ProcessStartInfo(Executable());
         foreach (var flag in flags)
             start.ArgumentList.Add(flag);
 
-        var launched = Attachable.Launch(register, start);
+        return start;
+    }
+
+    /// <summary>Launch it and wait for the window it draws, which is the only signal worth waiting on.</summary>
+    private TopLevelWindow Launched(params string[] flags)
+    {
+        var launched = Attachable.Launch(register, Starting(flags));
 
         return Waits.Until(
             "draw",
@@ -1869,6 +1949,45 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         // Both overloads agree, which is the property WW320 gave them and the one a narrowing of
         // the popup rule is most likely to break.
         Assert.Equal(route.Because, CaptureRoute.For(window, window with { Handle = 0x1000 }).Because);
+    }
+
+    [Fact]
+    public void The_largest_window_a_frameless_menu_process_owns_is_the_menu_and_not_its_shadow()
+    {
+        // WW358, and the arm WW346 shipped with nothing to provoke it. Every case for that skip runs
+        // inside this suite's own process, which owns a decoy and a statistics window and whatever
+        // the run left standing — so the sort has real windows to put in front of the shadow and
+        // those cases pass with the skip deleted. What the fault needs is a process with no frame,
+        // which is what a tray application is and what --shadowed is.
+        var launched = Attachable.Launch(register, Starting("--shadowed"));
+
+        // The shadow and not the menu is what this waits for, because it is the thing under test:
+        // a run where Windows drew none has nothing to sort wrongly and nothing for this to say.
+        var shadow = Waits.Until(
+            "draw",
+            $"the fixture drew no shadow behind its menu (pid {launched.Pid})",
+            () => Raw(launched.Pid).FirstOrDefault(one => TopLevelWindows.DrawnByTheShell(one.Class)));
+
+        // Enumerated raw, because the engine's own walk skips exactly what this case has to see.
+        // Reading the shadow through TopLevelWindows would be asking the repair whether it repaired.
+        var windows = Raw(launched.Pid);
+        var drawn = windows.Where(one => !TopLevelWindows.DrawnByTheShell(one.Class) && one.Area > 0).ToList();
+        var listing = string.Join(Environment.NewLine, windows.Select(one => $"    {one}"));
+
+        // The premise, asserted rather than assumed: the shadow is bigger than everything the
+        // application drew. Without this the case would pass on a desk where Windows drew a shadow
+        // that loses the sort, which is a green covering the arm rather than running it.
+        Assert.True(
+            drawn.Count > 0 && shadow.Area > drawn.Max(one => one.Area),
+            $"the shadow is not the largest window this process owns:{Environment.NewLine}{listing}");
+
+        // And the whole of the fix. Largest sorts by area, the shadow wins that sort, and what a
+        // caller gets is the menu — which is the window the application drew.
+        var largest = TopLevelWindows.Largest(launched.Pid, smallest: 0);
+
+        Assert.True(
+            largest is not null && !TopLevelWindows.DrawnByTheShell(largest.ClassName),
+            $"the largest window is {largest}, which is the shadow:{Environment.NewLine}{listing}");
     }
 
     [Fact]

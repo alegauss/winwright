@@ -380,30 +380,30 @@ The list itself stays checked as it is now, by a case reading it out of the file
 the shell surfaces. Those are two claims and not one, and the second is about what the
 words are rather than about what the loop does with them.
 
+### §WW371 a refusal an unattended run cannot answer
+
+`desk-probe.ps1` reads and never repairs, and WW311 argues that well: a toast goes and a
+question does not, and killing the owner cost the tray once already. What it leaves is a
+refusal with one remedy — go and click it at the guest console — and a session working
+the backlog has nobody there.
+
+Measured on WW358. The first run cold-started the guest and passed 1961 cases. The
+second refused: an Edge window held the foreground for all twelve looks. Edge restores
+its session at login, so the runner manufactured the desk that then refused it.
+
+Both non-destructive repairs failed. `Shell.Application.MinimizeAll` left it in front,
+and `ShowWindow(SW_MINIMIZE)` aimed at the window itself was called twelve times, each
+one reporting the same handle back in the foreground 600ms later. So the window is not
+merely selected — something restores it — and the probe's reading was right both times.
+
+That leaves three things unseparated that a run would treat differently: a question
+nobody can answer but a person, an ordinary window that minimises, and a window that
+refuses to. Only the first deserves the refusal it gets. `WS_MINIMIZEBOX`, the owner
+handle, and whether a minimise holds are each readable before the twenty minutes are
+spent.
+
+The candidate is a repair the probe may attempt and must then re-read, refusing only
+where the desk did not clear — and a cold start that does not restore a browser session
+at all.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW358 a process whose only windows are a menu and its shadow
-
-`TopLevelWindows.OfProcess` skips the classes `ShellDrawn` names, and two cases stand
-behind that. Neither runs the arm the defect lives on.
-
-The first opens a tray menu and asserts the largest window is not the shell's shadow,
-but it runs inside testhost, which owns the suite's own windows — a decoy, a statistics
-window, whatever the run left standing. The sort has real windows to put in front of the
-shadow, so the case passes with the skip deleted. The second calls `DrawnByTheShell`
-directly, which proves the rule and not the walk that consults it.
-
-What the fault needs is a process whose only windows are a menu and the shadow behind
-it, which is what a tray application is and what freewilly was when the measurement came
-from there. The fixture cannot be one: it is a WPF application with a main window, and
-every tray icon this suite raises is added to the suite's own process rather than to a
-child.
-
-So `ShellDrawn` names one class from one measurement on one machine, and nothing here
-would notice a Windows build drawing a differently-classed shadow, or the skip being
-removed. Block E asks that every arm of a capture refusal has something that provokes
-it, and this arm has none.
-
-The candidate is a fixture mode with a tray icon and no frame, so `Largest` can be asked
-of a process with nothing else to answer with. Whether that is a flag or a second
-executable is the task.

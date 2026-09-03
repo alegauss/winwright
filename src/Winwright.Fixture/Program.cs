@@ -111,6 +111,25 @@ public static class Program
         if (shapes.Has("resident"))
             return Resident();
 
+        // WW358. Before any window, for the reason the resident arm is: this shape is a process with
+        // no frame, and one that drew something first would put a real window in front of the shadow
+        // — which is exactly what stopped every case in the suite from provoking this.
+        //
+        // Here rather than in a verb of its own, because the catalogue asks that the code reaching a
+        // shape is the code testing its flag. A member that raised the menu without naming
+        // `shadowed` would be a shape catalogued behind a flag nothing near it tests, which is the
+        // entry this suite refuses to take on trust.
+        if (shapes.Has("shadowed"))
+        {
+            using var menu = Shadowed.Raise();
+
+            // Qualified, and WinForms' rather than WPF's: the menu is a WinForms control and its
+            // messages go to the loop that owns it. There is no window to run that loop on, so it is
+            // the application-level one and the menu is what keeps the process alive.
+            System.Windows.Forms.Application.Run();
+            return 0;
+        }
+
         return shapes.Value("pump") == "none" ? Unpumped(shapes) : Pumped(shapes);
     }
 
