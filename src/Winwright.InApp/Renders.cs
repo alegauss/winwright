@@ -10,37 +10,112 @@ namespace Winwright.InApp;
 /// </summary>
 public sealed class RendersAnswered : IDisposable
 {
-    private readonly HwndSource source;
-    private readonly HwndSourceHook hook;
+    private readonly List<(HwndSource Source, HwndSourceHook Hook)> hooked = [];
     private bool released;
 
     internal RendersAnswered(HwndSource source, HwndSourceHook hook, string into)
+        : this(into) => Also(source, hook);
+
+    /// <summary>
+    /// One that starts empty and is given windows as they arrive. WW361.
+    /// </summary>
+    /// <param name="into">The directory those windows may write into.</param>
+    internal RendersAnswered(string into) => Into = into;
+
+    /// <summary>The directory these windows may write pictures into. Empty where they answer nothing.</summary>
+    public string Into { get; }
+
+    /// <summary>Whether this is answering at all.</summary>
+    public bool Answering => !released && Into.Length > 0;
+
+    /// <summary>
+    /// How many windows are answering under this. WW361.
+    /// <para>
+    /// A reading and not a detail: an adopter who hooked one window and meant the application has
+    /// no other way to find that out, and being told the count is what turns a silent gap into a
+    /// number somebody can disagree with.
+    /// </para>
+    /// </summary>
+    public int Windows
     {
-        this.source = source;
-        this.hook = hook;
-        Into = into;
+        get
+        {
+            lock (hooked)
+                return released ? 0 : hooked.Count;
+        }
+    }
+
+    /// <summary>The one line a report prints, said either way.</summary>
+    public string Sentence()
+    {
+        if (!Answering)
+            return "answering no renders.";
+
+        lock (hooked)
+        {
+            var handles = string.Join(", ", hooked.Select(one => $"0x{one.Source.Handle:X}"));
+            return $"answering renders for {hooked.Count} window(s) — {handles} — into {Into}.";
+        }
+    }
+
+    /// <summary>
+    /// Take one more window under this answer. WW361.
+    /// <para>
+    /// Locked, because the windows arrive on their own threads: a WPF application may run more than
+    /// one dispatcher, and the class handler that finds a new window runs on whichever thread showed
+    /// it. Ignored once released, so a window shown after an application stopped answering does not
+    /// quietly start.
+    /// </para>
+    /// </summary>
+    /// <param name="source">The window's presentation source.</param>
+    /// <param name="hook">What to run for its messages.</param>
+    internal void Also(HwndSource source, HwndSourceHook hook)
+    {
+        lock (hooked)
+        {
+            if (released || hooked.Any(one => ReferenceEquals(one.Source, source)))
+                return;
+
+            hooked.Add((source, hook));
+        }
+
         source.AddHook(hook);
     }
 
-    /// <summary>The directory this window may write pictures into. Empty where it answers nothing.</summary>
-    public string Into { get; }
-
-    /// <summary>Whether this window is answering at all.</summary>
-    public bool Answering => !released && Into.Length > 0;
-
-    /// <summary>The one line a report prints, said either way.</summary>
-    public string Sentence() => Answering
-        ? $"answering renders for 0x{source.Handle:X}, into {Into}."
-        : "answering no renders.";
-
-    /// <summary>Stop answering, and leave the window as it was found.</summary>
+    /// <summary>Stop answering, and leave every window as it was found.</summary>
     public void Dispose()
     {
-        if (released)
-            return;
+        List<(HwndSource Source, HwndSourceHook Hook)> letting;
+        lock (hooked)
+        {
+            if (released)
+                return;
 
-        released = true;
-        source.RemoveHook(hook);
+            released = true;
+            letting = [.. hooked];
+            hooked.Clear();
+        }
+
+        foreach (var (source, hook) in letting)
+        {
+            // A source whose window has already gone is one where unhooking is the one thing that no
+            // longer needs doing.
+            if (source.IsDisposed)
+                continue;
+
+            // Never onto another thread. Everything under one answer belongs to one dispatcher by
+            // construction, so a caller disposing from elsewhere is a caller doing something this
+            // cannot do safely — and blocking on a dispatcher that may not be pumping is how that
+            // goes wrong: it wedges, holding the windows open, which is worse than saying so.
+            if (!source.CheckAccess())
+            {
+                throw new InvalidOperationException(
+                    $"this answer belongs to another thread, so 0x{source.Handle:X} cannot be put "
+                        + "back from here — dispose it on the thread that took it");
+            }
+
+            source.RemoveHook(hook);
+        }
     }
 }
 
@@ -163,18 +238,102 @@ public static class Renders
         ArgumentNullException.ThrowIfNull(source);
 
         var into = Where();
-        var wanted = RegisterWindowMessageW(Registered);
-        var wantedPopup = RegisterWindowMessageW(RegisteredPopup);
 
         // Hooked either way, and answering only where a directory was named. The hook that answers
         // nothing costs one comparison per message and keeps the disposal symmetrical, which is
         // worth more than the branch it saves: a caller holding an answer that never installed
         // anything would still have to put something back.
-        return new RendersAnswered(
-            source,
-            (nint window, int message, nint wParam, nint lParam, ref bool handled) =>
-                Handle(into, wanted, wantedPopup, window, message, lParam, ref handled),
-            into ?? "");
+        return new RendersAnswered(source, Hooking(into), into ?? "");
+    }
+
+    /// <summary>
+    /// Answer for every window this application shows, including the ones it has not shown yet.
+    /// WW361.
+    /// <para>
+    /// <see cref="Answer(Window)" /> hooks one window and the harness sends to the window it wants a
+    /// picture of. Both are right, and together they left the second window an application draws
+    /// answering nothing — a dialog, a wizard page, a tool window a run opened on purpose is exactly
+    /// the surface somebody reaches for a capture of, and it was the one nobody remembered.
+    /// </para>
+    /// <para>
+    /// Per window stays available and stays correct; what was wrong is that remembering was the
+    /// adopter's, with no reading anywhere saying which windows were covered. This is the other
+    /// line, and it is the one the README should have been describing: an application says it
+    /// answers, once, and every window it ever shows is covered.
+    /// </para>
+    /// <para>
+    /// The design named a second candidate — let the answer say a window is not hooked, rather than
+    /// say the application does not take the message, which are the same sentence today and two
+    /// different faults. It is not available on its own. The harness sends <c>WM_COPYDATA</c> to one
+    /// window, so where nothing is hooked on that window no code of this half runs at all and there
+    /// is nobody left to say anything. Telling the two apart needs the process-wide hook first,
+    /// which is this; with it, an unhooked window is a window this application does not own.
+    /// </para>
+    /// <para>
+    /// New windows are found by a class handler on <c>Loaded</c>, which fires after the handle
+    /// exists. A class handler cannot be unregistered, so disposal makes this one inert rather than
+    /// removing it: the answer it belongs to stops answering, and every window it had hooked is put
+    /// back.
+    /// </para>
+    /// <para>
+    /// One UI thread's windows, and that bound is deliberate. A class handler is registered for the
+    /// whole AppDomain, so without it this takes windows belonging to threads it has no business
+    /// touching — and hooking is the owning thread's call to make, which means putting them back is
+    /// a blocking <c>Invoke</c> onto a dispatcher that may not be pumping. Measured, not feared:
+    /// unbounded, this wedged a suite solid with two windows on the desk and a disposal waiting on a
+    /// thread that never answers. An application with a second UI thread calls this on each one,
+    /// which is the same rule everything else touching those windows already follows.
+    /// </para>
+    /// </summary>
+    /// <returns>What it is answering, which says nothing is where the variable is unset.</returns>
+    public static RendersAnswered Everywhere()
+    {
+        var into = Where();
+        var mine = System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        var answering = new RendersAnswered(into ?? "");
+
+        // The windows already up on this thread. The dispatcher is compared rather than trusted:
+        // CurrentSources reads as this thread's and hands back other threads' as well, which is how
+        // a suite ended up disposing an answer holding a source it could not touch.
+        foreach (var source in PresentationSource.CurrentSources.OfType<HwndSource>())
+        {
+            if (!source.IsDisposed && source.Dispatcher == mine)
+                answering.Also(source, Hooking(into));
+        }
+
+        // And every window this thread shows after it. Guarded on the answer rather than on a flag
+        // of its own, so a disposed answer takes its class handler out of service with it — which is
+        // the closest a handler that cannot be removed gets to being removed.
+        EventManager.RegisterClassHandler(
+            typeof(Window),
+            FrameworkElement.LoadedEvent,
+            new RoutedEventHandler((sender, _) =>
+            {
+                if (!answering.Answering || sender is not Window shown || shown.Dispatcher != mine)
+                    return;
+
+                if (HwndSource.FromHwnd(new WindowInteropHelper(shown).Handle) is { IsDisposed: false } source)
+                    answering.Also(source, Hooking(into));
+            }));
+
+        return answering;
+    }
+
+    /// <summary>
+    /// The hook one window answers through. WW361 made it a factory: several windows answer the same
+    /// way, and each needs its own delegate to be removed by.
+    /// </summary>
+    /// <param name="into">The directory renders may be written into, or null where none was named.</param>
+    private static HwndSourceHook Hooking(string? into)
+    {
+        // Registered once per hook rather than once per message: the numbers are the same in every
+        // process for the same string, and asking Windows for them inside a window procedure would
+        // be a call on every message an application receives.
+        var wanted = RegisterWindowMessageW(Registered);
+        var wantedPopup = RegisterWindowMessageW(RegisteredPopup);
+
+        return (nint window, int message, nint wParam, nint lParam, ref bool handled) =>
+            Handle(into, wanted, wantedPopup, window, message, lParam, ref handled);
     }
 
     /// <summary>

@@ -18,7 +18,6 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 💭 **WW361** (deps: —) **an application answers renders only for the windows it remembered to name, and a dialog it opens is none of them** — WW349's hook goes on one window at a time, so a capture of the second window an application draws is a hole until somebody adds a second line to it. → §WW361
 - 💭 **WW362** (deps: —) **a capture through the attach door depends on a variable nobody set, and the run that could set it does not** — WW349 tells a launched application where it may write; a run against a window a caller already has tells it nothing, so the same case answers a hole. → §WW362
 
 ## Block F — Assert — the expectation is derived, never typed
@@ -43,6 +42,7 @@
 - 💭 **WW369** (deps: —) **a locator naming a control type the tree lacks reads as nothing answered, which is what a vanished menu reads as** — WW356 changed the fixture's entries and nothing asserts what they are, so a regression to buttons surfaces as a scenario failing in the words of a desk problem. → §WW369
 - 💭 **WW370** (deps: —) **the loop's one branch that answers nothing is the desktop skip, and no case arranges a desktop-held desk to run it** — WW357 runs the polling against a window this suite puts up, so every look it takes is a window; the skip that makes a quiet desk read clear is still run by nothing. → §WW370
 - 💭 **WW371** (deps: —) **an asking desk refuses every guest run, and the only remedy is a person at the guest console** — A browser window survived twelve SW_MINIMIZE calls here, so even the non-destructive repair fails and no unattended run can clear the desk it refuses on. → §WW371
+- 💭 **WW373** (deps: —) **a case that deadlocks wedges the run instead of failing, and only a person watching the guest ends it** — run-tests.cmd passes no --blame-hang, so a stuck case and a slow suite read alike from outside and the honest response to both is to wait longer. → §WW373
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

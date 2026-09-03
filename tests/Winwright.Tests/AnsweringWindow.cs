@@ -32,7 +32,10 @@ internal sealed class AnsweringWindow : IDisposable
     private readonly Window window;
     private readonly RendersAnswered? answering;
 
-    private AnsweringWindow(string into, bool answers)
+    /// <summary>Every window <see cref="AlsoOpen"/> put up, so disposal closes them too. WW361.</summary>
+    private readonly List<Window> opened = [];
+
+    private AnsweringWindow(string into, bool answers, bool everywhere = false)
     {
         using var ready = new ManualResetEventSlim();
         Window? built = null;
@@ -97,7 +100,9 @@ internal sealed class AnsweringWindow : IDisposable
                     Environment.SetEnvironmentVariable(Renders.PathVariable, into);
                     try
                     {
-                        hooked = Renders.Answer(built);
+                        // WW361. The two lines an adopter can write, so a case can drive either:
+                        // one names this window, and one says the application answers.
+                        hooked = everywhere ? Renders.Everywhere() : Renders.Answer(built);
                     }
                     finally
                     {
@@ -149,6 +154,9 @@ internal sealed class AnsweringWindow : IDisposable
     /// <summary>What it says it is answering, read on its own thread.</summary>
     internal string Sentence() => answering is null ? "answering nothing at all." : dispatcher.Invoke(answering.Sentence);
 
+    /// <summary>How many windows are answering under it, which is nothing where none are. WW361.</summary>
+    internal int Windows => answering?.Windows ?? 0;
+
     /// <summary>Open one that answers renders into <paramref name="into"/>.</summary>
     /// <param name="into">The directory it may write into.</param>
     internal static AnsweringWindow Open(string into) => new(into, answers: true);
@@ -159,6 +167,55 @@ internal sealed class AnsweringWindow : IDisposable
     /// </summary>
     internal static AnsweringWindow Silent() => new("", answers: false);
 
+    /// <summary>
+    /// Open one that answers for the whole application rather than for its first window. WW361.
+    /// </summary>
+    /// <param name="into">The directory it may write into.</param>
+    internal static AnsweringWindow Everywhere(string into) => new(into, answers: true, everywhere: true);
+
+    /// <summary>
+    /// Show a second window on the same thread, after the answering was arranged. WW361.
+    /// <para>
+    /// This is the window the defect was about, and the reason it is opened here rather than in the
+    /// constructor: hooked per window it is a window nobody named, and a harness asking it for a
+    /// render is told the application does not take the message. Opened afterwards, it is also the
+    /// only thing that proves the class handler and not merely the enumeration of what was already
+    /// up — those are two different halves of the fix and a window shown first exercises one of them.
+    /// </para>
+    /// </summary>
+    /// <returns>The second window's handle, which is what a harness would send to.</returns>
+    internal nint AlsoOpen() => dispatcher.Invoke(() =>
+    {
+        var second = new Window
+        {
+            Title = "winwright answering, the second",
+            Width = 160,
+            Height = 120,
+
+            // Clear of the first, and of where this collection's other windows go.
+            Left = 900,
+            Top = 300,
+
+            // WW128's rule, and this window has no reason to break it: nothing here reads the
+            // screen, and a window that took the desk would decide the foreground for every check
+            // running after it.
+            ShowActivated = false,
+            Background = new SolidColorBrush(Colors.White),
+            Content = new Border
+            {
+                Width = 100,
+                Height = 60,
+                Background = new SolidColorBrush(Colors.SeaGreen),
+            },
+        };
+
+        second.Show();
+        second.UpdateLayout();
+        opened.Add(second);
+
+        return new WindowInteropHelper(second).Handle;
+    });
+
     /// <summary>Close it and let its thread go.</summary>
     public void Dispose()
     {
@@ -167,6 +224,9 @@ internal sealed class AnsweringWindow : IDisposable
             dispatcher.Invoke(() =>
             {
                 answering?.Dispose();
+                foreach (var also in opened)
+                    also.Close();
+
                 window.Close();
             });
         }

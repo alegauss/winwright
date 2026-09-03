@@ -85,4 +85,15 @@ public static class Protocol
         ArgumentNullException.ThrowIfNull(window);
         return InApp.Renders.Answer(window);
     }
+
+    /// <summary>
+    /// The same, for every window this application shows rather than the one named. WW361.
+    /// <para>
+    /// The line above is what an adopter with one window writes, and it was the only line there was
+    /// — so an application answered for the window somebody remembered and for no other, and the
+    /// second window it drew was a hole a harness reported as "it does not take this message". This
+    /// is the line to write instead, and it is written once wherever the application starts.
+    /// </para>
+    /// </summary>
+    public static RendersAnswered Renders() => InApp.Renders.Everywhere();
 }

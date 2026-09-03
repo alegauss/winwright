@@ -610,6 +610,44 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
     }
 
     [Fact]
+    public void The_toast_beside_the_main_window_answers_a_render_although_no_line_names_it()
+    {
+        // WW361, end to end and through the adopter's own line. The fixture calls Protocol.Renders()
+        // with no argument now; named, it answered for the main window and the toast beside it came
+        // back as an application that does not take the message — which is the sentence an
+        // application that never adopted the half at all gives, and a different fault.
+        var pictures = Directory.CreateTempSubdirectory("winwright-second-window-").FullName;
+        try
+        {
+            var start = Starting("--toast=beside");
+            start.Environment[OwnRender.RendersInto] = pictures;
+
+            var launched = Attachable.Launch(register, start);
+            var windows = Waited(launched.Pid, howMany: 2);
+            var toast = Assert.Single(windows, one => one.Title.Length == 0);
+            var frame = Assert.Single(windows, one => one.Title.Length > 0);
+
+            var path = Path.Combine(pictures, "toast.png");
+            var asked = OwnRender.Into(toast.Handle, path);
+
+            Assert.True(asked.Answered, asked.Sentence());
+            Assert.True(File.Exists(path));
+
+            // The toast's own tree and not the frame's. Its area rather than an exact size, because
+            // what this case is about is which window answered and the desk decides the scaling.
+            var picture = Pictures.Of(path);
+            Assert.True(picture.HasInk, picture.Sentence());
+            Assert.True(
+                picture.Pixels < frame.Bounds.Area,
+                $"the picture is {picture.Pixels}px, which is not smaller than the frame beside it");
+        }
+        finally
+        {
+            Directory.Delete(pictures, recursive: true);
+        }
+    }
+
+    [Fact]
     public void A_run_whose_only_window_is_a_toast_has_no_main_window_at_all()
     {
         // The whole reason the launcher enumerates. Asked which window it had, this process

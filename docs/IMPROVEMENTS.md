@@ -131,31 +131,6 @@ between here and that is four more arms and an evening.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW361 the window nobody remembered to answer for
-
-`Renders.Answer` hooks one window, and the harness sends to the window it wants a
-picture of. Both halves of that are right and together they leave the second window an
-application draws answering nothing: a dialog, a wizard page, a tool window a run opened
-on purpose is exactly the surface somebody reaches for a capture of, and it is the one
-the application forgot.
-
-Per window rather than per application was the correct call and is not the thing to
-revisit. An application answering only for its main window would hand back a picture of
-the wrong surface with nothing in the file saying so, which is the failure this block
-refuses hardest. What is wrong is that remembering is left to the adopter, with no
-reading anywhere saying which windows are covered.
-
-The fixture is the evidence. It calls `Protocol.Renders(this)` in `OnContentRendered`,
-which is the one window it has, so nothing here has ever needed a second — and the
-README calls it one line, which is true of an application with one window and of no
-other.
-
-Two candidates. The application could hook every window as it is shown, which is
-`Application.Current.Windows` and an event, and turns one line into one line for real.
-Or the answer could carry what it is answering for, so a harness asking about a window
-nobody hooked is told that rather than told the application does not take the message —
-which is the same sentence today and two different faults.
-
 ### §WW362 the door that cannot say where pictures go
 
 WW349 puts `WINWRIGHT_RENDERS` on the launch, derived from the project's `captures`, so
@@ -386,5 +361,29 @@ spent.
 The candidate is a repair the probe may attempt and must then re-read, refusing only
 where the desk did not clear — and a cold start that does not restore a browser session
 at all.
+
+### §WW373 the run nobody can tell from a slow one
+
+A case that deadlocks does not fail. `run-tests.cmd` passes no `--blame-hang`, so the
+run sits, the guest holds whatever windows the case left on the desk, and the only thing
+that ends it is a person noticing and killing `testhost` inside the guest.
+
+Measured on WW361. A hook disposed across a dispatcher that was not pumping wedged the
+run on its own thread; the host command went on waiting, the guest console showed two
+windows and nothing else, and what stopped it was the operator seeing them. The run had
+been going long enough to have finished twice.
+
+The cost is not the minutes. It is that a wedge and a slow suite read identically from
+outside, so the honest response to a run taking too long is to wait longer, and what
+separates them is a desk nobody is watching. `run-tests-vm` already argues this shape
+about `vmrun start` and refuses to block on it: ten silent minutes and a wedge look
+alike, which is why it polls. The suite it then launches has no such bound.
+
+`dotnet test` takes `--blame-hang --blame-hang-timeout`, which ends a stuck case, names
+it, and writes a sequence file saying what was running. That turns a wedge into a red
+with an address, which is what every other failure in this repository already is.
+
+The candidate is a timeout on the runner, generous enough that the slowest honest case
+never meets it, and a guest kill that no longer needs a person.
 
 ## Block K — The proving ground — a fixture app built to be hard to test

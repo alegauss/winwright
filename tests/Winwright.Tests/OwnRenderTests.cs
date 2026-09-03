@@ -206,6 +206,62 @@ public sealed class OwnRenderTests : IDisposable
     }
 
     [Fact]
+    public void A_second_window_is_answered_for_where_the_application_answers_for_itself()
+    {
+        // WW361, and the whole of it. The window is shown after the answering was arranged, so what
+        // covers it is the class handler rather than the enumeration of what was already up — the
+        // two halves of the fix, and a window opened first would exercise only one of them.
+        using var application = AnsweringWindow.Everywhere(root);
+        var second = application.AlsoOpen();
+        var path = Path.Combine(root, "second.png");
+
+        var asked = OwnRender.Into(second, path);
+
+        Assert.True(asked.Answered, $"{asked.Sentence()} — {application.Sentence()}");
+        Assert.True(File.Exists(path));
+
+        // The second window and not the first, read off the file: this one is 160x120 and the one
+        // the application opened with is 240x160.
+        Assert.Equal(160 * 120, Pictures.Of(path).Pixels);
+    }
+
+    [Fact]
+    public void A_second_window_is_not_answered_for_where_the_application_named_only_its_first()
+    {
+        // The negative control, and the defect WW361 was opened about, kept as a case rather than a
+        // memory. An adopter who writes the per-window line gets exactly this, and the sentence it
+        // comes back with is the one an application that never adopted the half at all gives — two
+        // different faults reading alike, which is why the other line had to exist.
+        using var application = AnsweringWindow.Open(root);
+        var second = application.AlsoOpen();
+        var path = Path.Combine(root, "unnamed.png");
+
+        var asked = OwnRender.Into(second, path);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(path));
+
+        // And the first window still answers, so this is about which window and never about whether
+        // the application adopted anything.
+        Assert.True(OwnRender.Into(application.Handle, Path.Combine(root, "first.png")).Answered);
+    }
+
+    [Fact]
+    public void An_application_answering_for_itself_says_how_many_windows_that_is()
+    {
+        // The reading the design asked for. An adopter who hooked one window and meant the
+        // application had no way to find that out, and a count is what turns a silent gap into a
+        // number somebody can disagree with.
+        using var application = AnsweringWindow.Everywhere(root);
+        var before = application.Windows;
+
+        application.AlsoOpen();
+
+        Assert.True(application.Windows > before, application.Sentence());
+        Assert.Contains("answering renders for", application.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Nothing_may_be_asked_for_by_passing_nothing()
     {
         Assert.Throws<ArgumentException>(() => OwnRender.Into(1, "  "));

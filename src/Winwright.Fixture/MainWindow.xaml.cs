@@ -141,9 +141,15 @@ public partial class MainWindow : Window
 
         popups ??= Protocol.Hold(this);
 
-        // WW349. Here for the reason the surface is reported here: the window has a handle to hook
-        // by now, and a harness that asked before this would be asking a window that was not up.
-        renders ??= Protocol.Renders(this);
+        // WW349, and WW361 made it the whole application rather than this window. Here for the
+        // reason the surface is reported here: the window has a handle to hook by now, and a harness
+        // that asked before this would be asking a window that was not up.
+        //
+        // No argument, which is the point. Named, it answered for this window and for nothing else,
+        // so the toast this fixture raises beside it was a window a harness was told the application
+        // did not take the message for — the same sentence as an application that never adopted the
+        // half at all, and a different fault.
+        renders ??= Protocol.Renders();
 
         Protocol.Report(this, panes, panes.SelectedContent as FrameworkElement);
     }
