@@ -171,6 +171,7 @@
 - ✅ **WW349** **the engine can now take a screen copy and still cannot take the render it calls the default** — The run asks over a window message and the application draws its own tree, so an ordinary window is a picture rather than a hole (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
 - ✅ **WW359** **the render channel WW349 built carries a window's tree and there is no way to ask it for one popup's** — A second registered message carries a popup's name, and a name matching two popups is refused rather than photographed (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
 - ✅ **WW361** **an application answers renders only for the windows it remembered to name, and a dialog it opens is none of them** — Renders.Everywhere hooks every window one UI thread shows, including ones shown later, and says how many it is answering for (design recorded in `src/Winwright.InApp/Renders.cs`).
+- ✅ **WW362** **a capture through the attach door depends on a variable nobody set, and the run that could set it does not** — A third message asks the application why it drew nothing, so a half told nowhere to write stops reading as no half at all (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
 
 ## Block F — Assert — the expectation is derived, never typed
 

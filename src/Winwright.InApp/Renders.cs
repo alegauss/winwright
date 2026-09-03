@@ -151,6 +151,45 @@ public enum PopupRendered
 }
 
 /// <summary>
+/// Why a render did not happen, asked of the application after it did not happen. WW362.
+/// <para>
+/// The render ask answers one bit, and a run that reads zero cannot tell an application without the
+/// in-app half from one that has it and was started without <c>WINWRIGHT_RENDERS</c>. Those want
+/// opposite things done: the first is a line somebody adds to the application, the second is the
+/// environment it was launched in — and at the attach door, where the run did not launch it, the
+/// second is the only one that ever applies and the harness was printing the first.
+/// </para>
+/// <para>
+/// A second ask rather than more answers on the first, and that is deliberate. Widening the render
+/// message would make a harness older than the half it is driving read a refusal code as a drawing
+/// and then report the file missing, which is a worse sentence about an already-failing step. Asked
+/// separately, and only where the render already came back zero, the wire nobody changed stays
+/// exactly what it was: an older half answers nothing to a message it has never heard of, which is
+/// the sentence that was right about it all along.
+/// </para>
+/// </summary>
+public enum RenderRefusal
+{
+    /// <summary>Nothing answered, which is an application carrying no in-app half at all.</summary>
+    NotAnswered = 0,
+
+    /// <summary>Nothing is wrong here, which after a failed render is a race and not an answer.</summary>
+    WouldDraw = 1,
+
+    /// <summary>The half is here and the process was started without a directory it may write into.</summary>
+    ToldNowhere = 2,
+
+    /// <summary>It has one, and the file asked for is not inside it.</summary>
+    PathRefused = 3,
+
+    /// <summary>The window asked about is not one this presentation stack owns.</summary>
+    NotOurWindow = 4,
+
+    /// <summary>It is, and it has laid out to nothing, so there is no picture to take.</summary>
+    NothingToDraw = 5,
+}
+
+/// <summary>
 /// Rendering this application's own tree when a harness asks for it. WW349.
 /// <para>
 /// The off-screen render is the harness's default route and the one it cannot take: a render draws a
@@ -192,6 +231,16 @@ public static class Renders
     /// </para>
     /// </summary>
     public const string RegisteredPopup = "Winwright.OwnRender.Popup";
+
+    /// <summary>
+    /// The name for the ask that answers why a render did not happen. WW362.
+    /// <para>
+    /// Its own message for the reason the popup ask is one: an application shipping a half older
+    /// than the harness driving it has never heard of this, leaves it unhandled and answers nothing
+    /// — which is exactly the reading a harness should get about a half that cannot explain itself.
+    /// </para>
+    /// </summary>
+    public const string RegisteredWhy = "Winwright.OwnRender.Why";
 
     private const uint WmCopyData = 0x004A;
 
@@ -331,9 +380,10 @@ public static class Renders
         // be a call on every message an application receives.
         var wanted = RegisterWindowMessageW(Registered);
         var wantedPopup = RegisterWindowMessageW(RegisteredPopup);
+        var wantedWhy = RegisterWindowMessageW(RegisteredWhy);
 
         return (nint window, int message, nint wParam, nint lParam, ref bool handled) =>
-            Handle(into, wanted, wantedPopup, window, message, lParam, ref handled);
+            Handle(into, wanted, wantedPopup, wantedWhy, window, message, lParam, ref handled);
     }
 
     /// <summary>
@@ -381,6 +431,41 @@ public static class Renders
             // Somewhere it may write and cannot. Same answer, same reason.
             return false;
         }
+    }
+
+    /// <summary>
+    /// Why a render of this window into this file would not happen. WW362.
+    /// <para>
+    /// The same checks <see cref="Drawn" /> makes, in the same order, reporting the first that fails
+    /// instead of going on to draw. In that order because that is what makes the answer the reason:
+    /// a process told nowhere to write would also refuse the path, and saying the path is wrong to
+    /// somebody whose real problem is the environment sends them to fix a file that is fine.
+    /// </para>
+    /// <para>
+    /// It draws nothing, which is the point — a caller asking why a picture did not happen must not
+    /// be the thing that makes one happen. So the last check is the layout rather than the render:
+    /// a tree that has laid out to nothing is what <c>Render</c> refuses, and reading its size
+    /// answers that without writing a file this ask was never asked for.
+    /// </para>
+    /// </summary>
+    /// <param name="into">The directory renders may be written into.</param>
+    /// <param name="window">The window that was asked about.</param>
+    /// <param name="path">The file that was asked for.</param>
+    /// <returns>Which check a render would have stopped at, or that none of them would.</returns>
+    public static RenderRefusal Refusing(string? into, nint window, string path)
+    {
+        if (string.IsNullOrWhiteSpace(into))
+            return RenderRefusal.ToldNowhere;
+
+        if (string.IsNullOrWhiteSpace(path) || !Beneath(Path.GetFullPath(into.Trim()), path))
+            return RenderRefusal.PathRefused;
+
+        if (HwndSource.FromHwnd(window)?.RootVisual is not FrameworkElement tree)
+            return RenderRefusal.NotOurWindow;
+
+        return tree.RenderSize is { Width: > 0, Height: > 0 }
+            ? RenderRefusal.WouldDraw
+            : RenderRefusal.NothingToDraw;
     }
 
     /// <summary>
@@ -466,14 +551,21 @@ public static class Renders
     }
 
     private static nint Handle(
-        string? into, uint wanted, uint wantedPopup, nint window, int message, nint lParam, ref bool handled)
+        string? into,
+        uint wanted,
+        uint wantedPopup,
+        uint wantedWhy,
+        nint window,
+        int message,
+        nint lParam,
+        ref bool handled)
     {
-        if (message != WmCopyData || into is null)
+        if (message != WmCopyData)
             return 0;
 
         var carried = Marshal.PtrToStructure<CopyData>(lParam);
         var id = (uint)carried.Data;
-        if (id != wanted && id != wantedPopup)
+        if (id != wanted && id != wantedPopup && id != wantedWhy)
             return 0;
 
         // Handled from here on, whatever the answer: the message was addressed to this and an
@@ -491,6 +583,16 @@ public static class Renders
         var fields = said?.Split('\0') ?? [];
         var path = fields.Length > 0 ? fields[0] : null;
         if (string.IsNullOrWhiteSpace(path))
+            return 0;
+
+        // WW362, and above the guard below on purpose: this ask exists to answer for the case where
+        // nowhere was named, so it is the one message a process told nothing still speaks about.
+        if (id == wantedWhy)
+            return (nint)Refusing(into, window, path);
+
+        // And the two that draw answer nothing at all where this process was told nowhere to write,
+        // which is the promise the protocol makes about a build shipped to its users.
+        if (into is null)
             return 0;
 
         if (id == wanted)

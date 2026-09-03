@@ -48,6 +48,16 @@ public sealed class RendersTests : IDisposable
         Assert.Equal((int)PopupRendered.PopupHoldsNothing, OwnRender.PopupHoldsNothing);
         Assert.Equal((int)PopupRendered.PathRefused, OwnRender.PathRefused);
 
+        // WW362's third message and its five answers, on the same seam and for the same reason.
+        Assert.Equal(Renders.RegisteredWhy, OwnRender.RegisteredWhy);
+        Assert.Equal(3, new[] { Renders.Registered, Renders.RegisteredPopup, Renders.RegisteredWhy }.Distinct(StringComparer.Ordinal).Count());
+
+        Assert.Equal((int)RenderRefusal.WouldDraw, OwnRender.Refusals.WouldDraw);
+        Assert.Equal((int)RenderRefusal.ToldNowhere, OwnRender.Refusals.ToldNowhere);
+        Assert.Equal((int)RenderRefusal.PathRefused, OwnRender.Refusals.PathRefused);
+        Assert.Equal((int)RenderRefusal.NotOurWindow, OwnRender.Refusals.NotOurWindow);
+        Assert.Equal((int)RenderRefusal.NothingToDraw, OwnRender.Refusals.NothingToDraw);
+
         // Zero is the answer a window that does not take the message gives, so no refusal may be it.
         Assert.DoesNotContain(
             0,
@@ -56,6 +66,49 @@ public sealed class RendersTests : IDisposable
                 OwnRender.Drawn, OwnRender.NoSuchPopup, OwnRender.MoreThanOnePopup,
                 OwnRender.PopupHoldsNothing, OwnRender.PathRefused,
             });
+    }
+
+    [Fact]
+    public void Why_a_render_did_not_happen_is_the_first_check_it_would_have_stopped_at()
+    {
+        // WW362. The same checks Drawn makes, in the same order, and the order is what makes the
+        // answer the reason: a process told nowhere to write would also refuse the path, and being
+        // told the path is wrong sends somebody to fix a file that is fine.
+        var path = Path.Combine(root, "page.png");
+        var beside = root.TrimEnd(Path.DirectorySeparatorChar) + "-elsewhere";
+
+        var answers = Apartment.Run(() =>
+        {
+            var window = Shown();
+            var handle = Handle(window);
+
+            return new[]
+            {
+                Renders.Refusing("", handle, path),
+                Renders.Refusing(root, handle, Path.Combine(beside, "page.png")),
+                Renders.Refusing(root, 0x1234, path),
+                Renders.Refusing(root, handle, path),
+            };
+        });
+
+        Assert.Equal(RenderRefusal.ToldNowhere, answers[0]);
+        Assert.Equal(RenderRefusal.PathRefused, answers[1]);
+        Assert.Equal(RenderRefusal.NotOurWindow, answers[2]);
+        Assert.Equal(RenderRefusal.WouldDraw, answers[3]);
+    }
+
+    [Fact]
+    public void Asking_why_draws_nothing()
+    {
+        // The property that makes this safe to ask. A caller wanting to know why a picture did not
+        // happen must not be the thing that makes one happen — so the last check reads the layout
+        // rather than rendering it.
+        var path = Path.Combine(root, "unwritten.png");
+
+        var answer = Apartment.Run(() => Renders.Refusing(root, Handle(Shown()), path));
+
+        Assert.Equal(RenderRefusal.WouldDraw, answer);
+        Assert.False(File.Exists(path), "asking why a render did not happen wrote one");
     }
 
     [Fact]

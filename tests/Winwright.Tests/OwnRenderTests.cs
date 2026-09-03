@@ -58,9 +58,7 @@ public sealed class OwnRenderTests : IDisposable
     [Fact]
     public void A_file_outside_what_the_run_named_is_refused_by_the_application_and_reported_here()
     {
-        // The guard is the application's, and this is the harness being told about it. It answers
-        // that it drew nothing, which is the same answer as not taking the message — and rightly:
-        // from out here both are the application declining to write that file.
+        // The guard is the application's, and this is the harness being told about it.
         using var application = AnsweringWindow.Open(root);
         var elsewhere = Path.Combine(Path.GetTempPath(), "winwright-not-asked-for.png");
 
@@ -68,6 +66,47 @@ public sealed class OwnRenderTests : IDisposable
 
         Assert.False(asked.Answered);
         Assert.False(File.Exists(elsewhere));
+
+        // WW362. It used to read as the same answer as not taking the message, and from out here
+        // that looked right — both are the application declining to write the file. It is not: one
+        // is an application nobody has adopted the half in, and this is two runs that disagree about
+        // where pictures go, which is a thing somebody can go and reconcile.
+        Assert.Contains("disagree about where pictures go", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_application_told_nowhere_to_write_says_so_rather_than_that_it_takes_no_message()
+    {
+        // WW362, and the fault the attach door always has. A run that launches the application sets
+        // the variable from the project; a run attached to one already up launched nothing and has
+        // no moment left at which it could have — so the sentence about adding Renders.Answer was
+        // advice about a line this application already has, and the real remedy was never printed.
+        using var application = AnsweringWindow.Adopted();
+
+        var asked = OwnRender.Into(application.Handle, Path.Combine(root, "never.png"));
+
+        Assert.False(asked.Answered);
+        Assert.Contains("has the in-app half", asked.Sentence(), StringComparison.Ordinal);
+        Assert.Contains(OwnRender.RendersInto, asked.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("attached to one already up", asked.Sentence(), StringComparison.Ordinal);
+
+        // And it is not the other sentence, which is the whole of what this task moved.
+        Assert.DoesNotContain("Renders.Answer", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_application_carrying_no_half_at_all_still_gets_the_sentence_about_adopting_one()
+    {
+        // The other side of the same split, kept as a case: an application that answers nothing to
+        // the why ask either is one nobody has adopted anything in, and telling it about an
+        // environment variable would be the mirror of the mistake WW362 fixed.
+        using var application = AnsweringWindow.Silent();
+
+        var asked = OwnRender.Into(application.Handle, Path.Combine(root, "never.png"));
+
+        Assert.False(asked.Answered);
+        Assert.Contains("Renders.Answer", asked.Sentence(), StringComparison.Ordinal);
+        Assert.DoesNotContain("has the in-app half", asked.Sentence(), StringComparison.Ordinal);
     }
 
     [Fact]

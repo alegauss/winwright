@@ -102,6 +102,45 @@ public static class OwnRender
     public const string RegisteredPopup = "Winwright.OwnRender.Popup";
 
     /// <summary>
+    /// The name for the ask that answers why a render did not happen. WW362.
+    /// <para>
+    /// A third message for the reason there was a second: an application older than this reads none
+    /// of it, answers nothing, and gets the sentence that was always right about it. What it buys is
+    /// that the two faults collapsed into "it does not take this message" — no half at all, and a
+    /// half told nowhere to write — stop reading alike, which matters most at the attach door, where
+    /// only one of them is ever the truth and the run had been printing the other.
+    /// </para>
+    /// </summary>
+    public const string RegisteredWhy = "Winwright.OwnRender.Why";
+
+    /// <summary>
+    /// What the why ask answers with, spelled here as numbers for the reason the popup answers are:
+    /// the engine holds no reference to the in-app half, and a case reads both lists. WW362.
+    /// <para>
+    /// Grouped rather than laid beside the popup answers, because the two messages number their own
+    /// answers and one of the words is in both lists at different values — a flat <c>PathRefused</c>
+    /// could only ever be one of them, and the one it was not would be silently wrong.
+    /// </para>
+    /// </summary>
+    public static class Refusals
+    {
+        /// <summary>Nothing is wrong, which after a failed render is a race and not an answer.</summary>
+        public const int WouldDraw = 1;
+
+        /// <summary>The half is there and the process was started with nowhere to write.</summary>
+        public const int ToldNowhere = 2;
+
+        /// <summary>It has somewhere, and the file asked for is not inside it.</summary>
+        public const int PathRefused = 3;
+
+        /// <summary>The window is not one that application's presentation stack owns.</summary>
+        public const int NotOurWindow = 4;
+
+        /// <summary>It is, and it has laid out to nothing.</summary>
+        public const int NothingToDraw = 5;
+    }
+
+    /// <summary>
     /// What the popup ask answers with. WW359.
     /// <para>
     /// Spelled here as numbers rather than shared as a type, for the reason
@@ -167,15 +206,66 @@ public static class OwnRender
             return refused;
 
         if (answer == 0)
-        {
-            return new RenderAsked(
-                false,
-                "it answered and drew nothing, so it does not take this message — an application "
-                    + "takes it by calling Winwright.InApp's Renders.Answer, and that does nothing "
-                    + $"unless {RendersInto} names a directory it may write into");
-        }
+            return Why(window, full, withinMs);
 
         return Landed(full);
+    }
+
+    /// <summary>
+    /// Ask the application why it drew nothing, and say what it answers. WW362.
+    /// <para>
+    /// A render that came back zero used to have one sentence, and it named two different faults: an
+    /// application carrying no in-app half, and one carrying it that was started without
+    /// <see cref="RendersInto" />. The remedies are opposite — a line somebody adds to the product,
+    /// against the environment it was launched in — and at the attach door only the second can ever
+    /// apply, because that door launched nothing and has no moment left at which it could have set
+    /// anything. So the run stopped guessing and asked.
+    /// </para>
+    /// <para>
+    /// Only here, on the path that already failed. An ask that ran every time would put a second
+    /// round trip on every capture in every run to answer a question almost none of them have.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The window that was asked about.</param>
+    /// <param name="full">The file that was asked for.</param>
+    /// <param name="withinMs">How long to wait for the answer.</param>
+    private static RenderAsked Why(nint window, string full, int withinMs)
+    {
+        const string Unheard =
+            "it answered and drew nothing, so it does not take this message — an application takes "
+                + "it by calling Winwright.InApp's Renders.Answer, and that does nothing unless "
+                + RendersInto + " names a directory it may write into";
+
+        // A send that fails here is not worth a sentence of its own: the render's own failure is
+        // what the caller asked about, and this is only the part that would have named it better.
+        if (Asked(window, RegisteredWhy, full + "\0", withinMs, out var answer) is not null)
+            return new RenderAsked(false, Unheard);
+
+        return (int)answer switch
+        {
+            Refusals.ToldNowhere => new RenderAsked(
+                false,
+                "it has the in-app half and was started without "
+                    + $"{RendersInto}, so it may write nowhere — a run that launches the application "
+                    + "sets that from the project's 'captures', and a run attached to one already up "
+                    + "cannot: that process has to have been started with it"),
+            Refusals.PathRefused => new RenderAsked(
+                false,
+                $"it refused to write {full}, which is not inside the directory {RendersInto} named "
+                    + "in that process — the two runs disagree about where pictures go"),
+            Refusals.NotOurWindow => new RenderAsked(
+                false,
+                "that window is not one its presentation stack owns, so the application has no tree "
+                    + "behind it to draw"),
+            Refusals.NothingToDraw => new RenderAsked(
+                false,
+                "the window has laid out to nothing, so there is no picture to take rather than an "
+                    + "empty one to write"),
+
+            // WouldDraw, and anything this engine has no name for. Both are an application saying
+            // something a run cannot act on, so what it gets is the sentence about the ask it made.
+            _ => new RenderAsked(false, Unheard),
+        };
     }
 
     /// <summary>

@@ -168,6 +168,17 @@ internal sealed class AnsweringWindow : IDisposable
     internal static AnsweringWindow Silent() => new("", answers: false);
 
     /// <summary>
+    /// Open one that hooked the message and was told nowhere to write. WW362.
+    /// <para>
+    /// The half is there and the variable is not, which is every adopting application started by
+    /// somebody other than a run — and, before WW362, the state a harness reported as an
+    /// application that does not take the message. It is the fault the attach door always has and
+    /// never the one it was told about.
+    /// </para>
+    /// </summary>
+    internal static AnsweringWindow Adopted() => new("", answers: true);
+
+    /// <summary>
     /// Open one that answers for the whole application rather than for its first window. WW361.
     /// </summary>
     /// <param name="into">The directory it may write into.</param>

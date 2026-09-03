@@ -131,29 +131,6 @@ between here and that is four more arms and an evening.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW362 the door that cannot say where pictures go
-
-WW349 puts `WINWRIGHT_RENDERS` on the launch, derived from the project's `captures`, so
-an adopter declares one thing and the default capture route works. That is
-`Suite.Launch`. The other door hands every case a window a caller already has, and it
-has no launch to put anything on — the application was started by somebody else, so
-whether it may write at all depends on the environment that started it.
-
-Both doors exist because each answers a question the other cannot, and this is the first
-thing one of them can do that the other cannot. A run attached to a product already up
-is what `AppTarget.AttachTo` is for, and a capture step in one answers a hole about a
-variable, on a machine where whoever is running it never heard of the variable.
-
-Nothing here is wrong so much as unsaid. The hole names what to set, which is the right
-sentence for the launch door and an incomplete one here: what an attached run needs is
-for the application to have been started with it, and there is no moment left at which
-this run could have arranged that.
-
-So the candidates are about honesty rather than mechanism. The refusal could say which
-door it came through, since the remedy differs; or the attach door could read the
-variable out of the target process and say whether it agrees with the project, which
-turns a guess into a reading — and is the shape this project reaches for elsewhere.
-
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file

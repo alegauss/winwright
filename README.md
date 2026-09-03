@@ -252,7 +252,10 @@ What the in-app half adds is what a harness cannot take from outside the process
   layers a popup for the drop shadow it draws itself, and the soft edge of that is the desktop.
 - `Renders` — one line that answers a harness asking for a render, over the message loop the
   application already runs. No thread, no watched directory, and nothing at all unless the run that
-  started it set `WINWRIGHT_RENDERS` to somewhere it may write. Write `Renders.Everywhere()` and
+  started it set `WINWRIGHT_RENDERS` to somewhere it may write — and where a render does not happen,
+  the run asks the application why and prints its answer, so "no in-app half" and "the half is here
+  and nobody set the variable" stop reading alike. That matters most on an attached run, which
+  launched nothing and so can only ever have the second. Write `Renders.Everywhere()` and
   every window the application ever shows is covered, including the ones it has not shown yet;
   `Renders.Answer(window)` covers exactly the window you name and nothing else, which is a second
   window — a dialog, a wizard page — coming back as an application that does not take the message.

@@ -627,6 +627,17 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
             var toast = Assert.Single(windows, one => one.Title.Length == 0);
             var frame = Assert.Single(windows, one => one.Title.Length > 0);
 
+            // Two windows is not an application that answers. The toast goes up when the frame
+            // loads and the frame starts answering when its content has rendered, which is later —
+            // so this waits on the frame first, and only then asks the toast once. The other way
+            // round, a desk slow enough to be asked in between reads a race as the defect: it
+            // passed on the machine it was written on and failed in the guest, which is the whole
+            // reason this repository runs its suite somewhere else.
+            Waits.Until(
+                "draw",
+                $"the fixture never began answering renders (pid {launched.Pid})",
+                () => OwnRender.Into(frame.Handle, Path.Combine(pictures, "frame.png")).Answered);
+
             var path = Path.Combine(pictures, "toast.png");
             var asked = OwnRender.Into(toast.Handle, path);
 
