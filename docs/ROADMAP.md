@@ -18,6 +18,8 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
+- 💭 **WW374** (deps: —) **a capture asked for before the application hooked the message is refused as a product built wrong** — Suite.Launch waits for a window and an application starts answering later, and every name WW362 gave the refusal is about how it was built or started, never "not yet". → §WW374
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file

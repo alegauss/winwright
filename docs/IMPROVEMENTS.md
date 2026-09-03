@@ -131,6 +131,28 @@ between here and that is four more arms and an evening.
 
 ## Block E — Capture — the picture that proves what it photographed
 
+### §WW374 the gap between a window and an answer
+
+An application answers renders from the moment it hooks the message and not before, and
+nothing tells a harness when that is. `Suite.Launch` waits for a window, which is
+earlier: the fixture's own line runs at `ContentRendered`, so there is a window, it is
+on screen, it is enumerable, and a capture asked for in that gap is refused.
+
+Found by a case rather than reasoned about. WW361's toast case waited for two windows
+and asked, passed on the machine it was written on, and failed in the guest, where the
+harness got in between the toast appearing and the frame finishing. It was repaired by
+waiting for the frame to answer first — a fix for that case and not for the class.
+
+What makes it worse than an ordinary race is the sentence. WW362 taught the refusal to
+name the fault, and every name it has is about how the application was built or started:
+no half, told nowhere to write, a window it does not own. "Not yet" is none of those, so
+a run asking too early is told something untrue about the product, and the reader goes
+to check a line that was right all along.
+
+The candidates are a readiness the launch door waits on — waiting for a window, one step
+later — or a sixth answer meaning the half is here and this window is not hooked yet,
+which costs nothing and turns the untrue sentence into a wait.
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
