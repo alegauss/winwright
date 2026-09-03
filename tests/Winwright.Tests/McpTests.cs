@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 
 using Winwright.Mcp;
+using Winwright.Projects;
 using Winwright.Scenarios;
 
 using Xunit;
@@ -19,8 +20,13 @@ namespace Winwright.Tests;
 /// refuses, which is the shape of a constraint that is really a suggestion.
 /// </para>
 /// </summary>
-public sealed class McpTests
+public sealed class McpTests : IDisposable
 {
+    /// <summary>Somewhere to write the project declarations WW360's cases hold a file against.</summary>
+    private readonly string root = Directory.CreateTempSubdirectory("winwright-mcp-").FullName;
+
+    public void Dispose() => Directory.Delete(root, recursive: true);
+
     [Fact]
     public void The_input_schema_is_the_format_the_loader_reads_and_not_a_second_copy_of_it()
     {
@@ -169,6 +175,117 @@ public sealed class McpTests
     }
 
     [Fact]
+    public void Checking_a_file_alone_says_it_was_the_file_alone_rather_than_implying_a_run()
+    {
+        // WW360, and the whole cost of leaving the project optional. "The loader accepts them" read
+        // as "this would run" is the second telling that costs a run, so the shorter answer has to
+        // say out loud that it is the shorter one.
+        var reply = Served.To(Message(20, "tools/call", Calling("winwright_check", Photographing)))!;
+
+        Assert.False(Answered(reply)["isError"]!.GetValue<bool>());
+        Assert.Contains("No project was named", Said(reply), StringComparison.Ordinal);
+
+        // And what it did not answer, named off the vocabulary rather than typed here — so a second
+        // act needing a second declaration reaches this sentence without anybody remembering.
+        Assert.Contains("'capture' needs 'captures'", Said(reply), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Checking_against_a_project_answers_what_the_door_of_a_run_would_refuse()
+    {
+        // The defect this task is about: the loader accepts the file, and the run then refuses it.
+        // Answered here, where the author is, instead of one round trip later.
+        var reply = Served.To(Message(21, "tools/call", Calling(
+            "winwright_check", Photographing, project: Declaring(captures: null))))!;
+
+        Assert.True(Answered(reply)["isError"]!.GetValue<bool>());
+        Assert.Contains("a run would refuse 2 steps at its door", Said(reply), StringComparison.Ordinal);
+
+        // Every one of them, which is the difference between a report and a door. The run stops at
+        // the first because it is stopping; an author told one key at a time pays a trip per key.
+        Assert.Contains("the dialog is photographed:", Said(reply), StringComparison.Ordinal);
+        Assert.Contains("the report is photographed:", Said(reply), StringComparison.Ordinal);
+
+        // And in the run's own sentence rather than a second account of it.
+        Assert.Contains("which needs a 'captures' this project does not declare", Said(reply), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_project_declaring_what_the_steps_need_is_said_to_and_not_merely_left_quiet()
+    {
+        // The other half, and the one that would catch this written the wrong way round: a check
+        // that only ever spoke up on failure would read the same on a file it never held at all.
+        var reply = Served.To(Message(22, "tools/call", Calling(
+            "winwright_check", Photographing, project: Declaring(captures: "pictures"))))!;
+
+        Assert.False(Answered(reply)["isError"]!.GetValue<bool>());
+        Assert.Contains("declares everything these steps need", Said(reply), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_project_that_is_not_there_is_answered_rather_than_thrown_across_the_pipe()
+    {
+        var reply = Served.To(Message(23, "tools/call", Calling(
+            "winwright_check", Photographing, project: Path.Combine(root, "nowhere"))))!;
+
+        Assert.True(Answered(reply)["isError"]!.GetValue<bool>());
+        Assert.Contains(ProjectDeclaration.FileName, Said(reply), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_project_is_the_tools_own_argument_and_never_a_field_of_the_file()
+    {
+        // It is stripped before the loader reads what is left, because the format has no such key
+        // and the loader refuses one it does not know. Read straight through, this call would come
+        // back as 'project: there is no such field' — which is the failure this asserts is absent.
+        var reply = Served.To(Message(24, "tools/call", Calling(
+            "winwright_check", Photographing, project: Declaring(captures: "pictures"))))!;
+
+        Assert.DoesNotContain("there is no such field", Said(reply), StringComparison.Ordinal);
+
+        // And the schema says so: beside the file's own fields, and not required — a check of a file
+        // whose project is not written yet is the state a scenario is usually first checked in.
+        var schema = Served.Tools.Single(one => one.Name == "winwright_check").Schema;
+        Assert.NotNull(schema["properties"]!["cases"]);
+        Assert.NotNull(schema["properties"]!["project"]);
+        Assert.Equal("string", schema["properties"]!["project"]!["type"]!.GetValue<string>());
+        Assert.DoesNotContain(
+            "project",
+            (schema["required"] as JsonArray ?? []).Select(one => one!.GetValue<string>()));
+    }
+
+    /// <summary>Two cases whose only act needs a declaration, which is what WW348 refuses. WW360.</summary>
+    private const string Photographing = """
+        {
+          "cases": [
+            { "name": "the dialog is photographed", "steps": [ { "locator": "Edit#name", "act": "capture", "with": "the field" } ] },
+            { "name": "the report is photographed", "steps": [ { "locator": "Text#total", "act": "capture", "with": "the total" } ] }
+          ]
+        }
+        """;
+
+    /// <summary>
+    /// A project on disk, carrying somewhere to put pictures or deliberately not. WW360.
+    /// </summary>
+    /// <param name="captures">Where pictures go, or null to leave the key out.</param>
+    private string Declaring(string? captures)
+    {
+        var path = Path.Combine(root, captures is null ? "bare" : "declaring", ProjectDeclaration.FileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{JsonSerializer.Serialize(Environment.ProcessPath)}}{{(captures is null
+                  ? ""
+                  : ",\n  \"captures\": " + JsonSerializer.Serialize(Path.Combine(root, captures)))}}
+            }
+            """);
+
+        return path;
+    }
+
+    [Fact]
     public void A_call_naming_no_tool_names_the_tools_there_are_rather_than_going_quiet()
     {
         var reply = Served.To(Message(7, "tools/call", Calling("winwright_screenshot")))!;
@@ -311,11 +428,18 @@ public sealed class McpTests
         return message;
     }
 
-    private static JsonObject Calling(string name, string? arguments = null)
+    /// <summary>A tool call, optionally with the project WW360 lets a check be held against.</summary>
+    /// <param name="name">The tool.</param>
+    /// <param name="arguments">Its arguments, as JSON.</param>
+    /// <param name="project">The project to name beside them, or null to name none.</param>
+    private static JsonObject Calling(string name, string? arguments = null, string? project = null)
     {
         var parameters = new JsonObject { ["name"] = name };
         if (arguments is not null)
             parameters["arguments"] = JsonNode.Parse(arguments);
+
+        if (project is not null)
+            parameters["arguments"]!["project"] = project;
 
         return parameters;
     }

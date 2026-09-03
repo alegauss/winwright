@@ -80,8 +80,10 @@ public static class Served
             "winwright_check",
             "Read a scenario file back before it is written. Send the file as this tool's arguments "
                 + "and it answers either the first thing wrong with it, addressed as a path into "
-                + "the file, or what the loader read — which is what a run of it would do.",
-            ScenarioSchema.AsJsonSchema(),
+                + "the file, or what the loader read — which is what a run of it would do. Name a "
+                + "'project' beside it and it also answers what the door of a run would refuse; "
+                + "without one it says so rather than implying the file would run.",
+            CheckSchema(),
             Checking),
 
         new(
@@ -141,6 +143,46 @@ public static class Served
         ["id"] = id,
         ["error"] = new JsonObject { ["code"] = code, ["message"] = message },
     };
+
+    /// <summary>
+    /// What <c>winwright_check</c> takes: the file, and beside it the project to hold it against.
+    /// WW360.
+    /// <para>
+    /// The format's own schema with one key added, rather than a hand-written copy of it. The file
+    /// half has to stay exactly what the loader reads — that is what
+    /// <c>ScenarioSchema.AsJsonSchema</c> is for, and a second spelling here is the one that would
+    /// go on describing last month's format.
+    /// </para>
+    /// <para>
+    /// Beside the file and not inside it, because it is not a field of the file: no scenario carries
+    /// a project, and the loader refuses the key. So it is stripped before the file is read, and
+    /// what a caller sends is the file plus one argument about where to judge it.
+    /// </para>
+    /// <para>
+    /// Optional, and that is the decision WW360 turned on. Required, it would refuse every check of
+    /// a file whose project is not written yet — which is the state a scenario is usually first
+    /// checked in, so the tool would be closed exactly when it is most wanted. Optional costs
+    /// something real instead: the tool answers two different questions, so the answer has to say
+    /// which one it answered, and it does.
+    /// </para>
+    /// </summary>
+    private static JsonObject CheckSchema()
+    {
+        var schema = ScenarioSchema.AsJsonSchema();
+        if (schema["properties"] is JsonObject properties)
+        {
+            properties["project"] = new JsonObject
+            {
+                ["type"] = "string",
+                ["description"] = $"optional: the {ProjectDeclaration.FileName} to hold these cases "
+                    + "against, or a directory to find it from. Given one, the answer also covers "
+                    + "what the door of a run would refuse; without one it checks the file alone "
+                    + "and says so.",
+            };
+        }
+
+        return schema;
+    }
 
     /// <summary>An input schema for a tool that takes nothing, spelled so it refuses anything.</summary>
     private static JsonObject Nothing() => new()
@@ -207,20 +249,104 @@ public static class Served
     /// </summary>
     private static Answer Checking(JsonObject arguments)
     {
+        // The project is this tool's argument and never the file's. Stripped rather than tolerated,
+        // because the loader refuses a key it does not know and the format has no such key — so the
+        // thing handed on has to be the file the caller would actually write.
+        var where = arguments["project"]?.GetValue<string>()?.Trim() is { Length: > 0 } said ? said : null;
+        var file = arguments.DeepClone().AsObject();
+        file.Remove("project");
+
         try
         {
-            var read = ScenarioFile.Read("what you sent", arguments.ToJsonString());
+            var read = ScenarioFile.Read("what you sent", file.ToJsonString());
             var lines = new List<string> { $"{read.Count} case{(read.Count == 1 ? "" : "s")}, and the loader accepts them:" };
             lines.AddRange(read.Select(one =>
                 $"  {one.Name} — {one.Steps.Count} step{(one.Steps.Count == 1 ? "" : "s")}, "
                     + $"against {Against(one.Fixture)}"));
 
-            return new Answer(string.Join('\n', lines));
+            // Read once and asked once. Loading it a second time to count what the first found would
+            // be two readings of a file that can change between them.
+            var project = where is null ? null : Loaded(where);
+            var gaps = project is null
+                ? Array.Empty<Suite.UndeclaredNeed>()
+                : Suite.Undeclared(read, project);
+
+            lines.Add("");
+            lines.AddRange(Held(project, gaps));
+
+            return new Answer(string.Join('\n', lines), Refused: gaps.Count > 0);
         }
         catch (ScenarioRefusedException refused)
         {
             return new Answer($"{refused.Subject}: {refused.Because}", Refused: true);
         }
+        catch (DeclarationMissingException missing)
+        {
+            return new Answer(missing.Message, Refused: true);
+        }
+    }
+
+    /// <summary>
+    /// What the file was held against, and what that leaves unanswered. WW360.
+    /// <para>
+    /// The whole cost of making the project optional is here. A tool that answers two questions has
+    /// to say which one it answered, or the shorter answer reads as the longer one — and "the loader
+    /// accepts them" reading as "this would run" is the second telling that costs a run, which is
+    /// the thing this task was opened about.
+    /// </para>
+    /// </summary>
+    /// <param name="project">The project the caller named, or null where it named none.</param>
+    /// <param name="gaps">What holding the file against it found.</param>
+    private static IReadOnlyList<string> Held(
+        ProjectDeclaration? project, IReadOnlyList<Suite.UndeclaredNeed> gaps)
+    {
+        if (project is null)
+        {
+            return
+            [
+                "No project was named, so this is the file alone. A step whose act needs a "
+                    + $"declaration — {Needing()} — would still be refused at the door of a run by a "
+                    + $"{ProjectDeclaration.FileName} that does not carry it. Send 'project' to have "
+                    + "that answered here.",
+            ];
+        }
+
+        if (gaps.Count == 0)
+            return [$"Held against {project.Path}, which declares everything these steps need."];
+
+        var lines = new List<string>
+        {
+            $"Held against {project.Path}, and a run would refuse "
+                + $"{gaps.Count} step{(gaps.Count == 1 ? "" : "s")} at its door:",
+        };
+
+        // Every one of them and not the first, which is the difference between a door and a report:
+        // an author told about one missing key at a time pays a round trip per key.
+        lines.AddRange(gaps.Select(one => $"  {one.Case}: {one.Because(project.Path)}"));
+        return lines;
+    }
+
+    /// <summary>
+    /// The project, found from a directory or read from a file — the same either-way the run tool
+    /// takes, because an author naming one for a check and one for a run should not have to spell
+    /// them differently.
+    /// </summary>
+    /// <param name="where">What the caller named.</param>
+    private static ProjectDeclaration Loaded(string where) =>
+        Directory.Exists(where) ? ProjectDeclaration.Find(where) : ProjectDeclaration.Load(where);
+
+    /// <summary>
+    /// The acts that need a declaration, read off the vocabulary. Named rather than listed here, so
+    /// a second one added to <c>ActVerb.All</c> reaches this sentence without anybody remembering.
+    /// </summary>
+    private static string Needing()
+    {
+        var needing = ActVerb.All
+            .Where(one => one.Needs.Length > 0)
+            .Select(one => $"'{one.Name}' needs '{one.Needs}'")
+            .ToList();
+
+        return needing.Count == 0 ? "none do today" : string.Join(", ", needing);
     }
 
     /// <summary>What a case is launched against, named the way a report would name it.</summary>

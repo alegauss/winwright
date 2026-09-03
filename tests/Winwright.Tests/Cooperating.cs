@@ -319,6 +319,16 @@ internal static class Cooperating
             "the same, launching the application under test per fixture — and lending one window to "
                 + "the cases that only read it where the invocation asked for that"),
 
+        // --- WW360, and the one entry here that runs against no application at all -------------------
+        // The two above need a window to drive; this needs neither a window nor a process, because
+        // what it reads is two files. It is catalogued anyway rather than excused as internal: it is
+        // public engine surface, an adopter can call it, and a verb nobody classified is exactly the
+        // hole this list exists to close.
+        new("Suite.Undeclared", Cooperation.None, false,
+            "which steps name an act needing a project key nothing declares — the reading behind the "
+                + "refusal a run makes at its door, split out so a tool can report every one of them "
+                + "where a run stops at the first"),
+
         // --- WW349, and the first entry in this catalogue that needs the half ------------------------
         // Every verb above it either reads what any Windows application already offers or drives one
         // through its own accessibility peer, which is why the count here read zero for as long as it

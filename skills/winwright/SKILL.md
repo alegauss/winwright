@@ -33,7 +33,9 @@ Instead:
 2. Ask **`winwright_vocabulary`** what a step may do — every act, what each needs said beside it, and
    whether the engine may repeat it.
 3. Write the `.cases.json`, then ask **`winwright_check`** whether it loads. The refusal is addressed
-   into the file (`cases[0].steps[1].act`), so you fix a field and not a file.
+   into the file (`cases[0].steps[1].act`), so you fix a field and not a file. Once the project
+   exists, name it as `project` in the same call: that also answers what the door of a run would
+   refuse, which is the class of fault that loads cleanly and then never runs.
 4. Ask **`winwright_run`** to run it. It answers the verdict, a line per case that ran and per case
    it left alone, the exit code, and what outlived the run — so *did it pass* does not go back to a
    shell. A desk that cannot observe answers a hole, which is neither a red nor a green.

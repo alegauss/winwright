@@ -172,7 +172,7 @@ public static class Suite
         ArgumentNullException.ThrowIfNull(project);
 
         Something(declared);
-        Undeclared(declared, project);
+        RefuseUndeclared(declared, project);
         _ = asked.Over(declared);
 
         var lending = sharing ? Lendable(declared, asked) : [];
@@ -314,6 +314,31 @@ public static class Suite
         return (AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle), launched);
     }
 
+    /// <summary>
+    /// One step whose verb needs a project key nothing declares. WW348 found them, WW360 made them
+    /// something a caller can read rather than only something a run throws.
+    /// </summary>
+    /// <param name="Case">The case holding the step.</param>
+    /// <param name="Step">The step, as its author named it.</param>
+    /// <param name="Verb">The act it names.</param>
+    /// <param name="Key">The declaration that act needs.</param>
+    public sealed record UndeclaredNeed(string Case, string Step, string Verb, string Key)
+    {
+        /// <summary>
+        /// Why this stops a run, in the sentence the run itself refuses with.
+        /// <para>
+        /// Written here rather than at either caller, because there are two of them now: the door of
+        /// a run throws it and <c>winwright_check</c> prints it, and an author who met one and then
+        /// the other would be reading two accounts of one fact.
+        /// </para>
+        /// </summary>
+        /// <param name="path">Where the project declaration is, which is where the fix goes.</param>
+        public string Because(string path) =>
+            $"'{Step}' names '{Verb}', which needs a '{Key}' this project does not "
+                + $"declare — add it to {path}, because a run would launch the application "
+                + "and drive it to that step to say what these two files already say together";
+    }
+
     private static void Something(IReadOnlyList<CaseDeclaration> declared)
     {
         if (declared.Count == 0)
@@ -340,10 +365,24 @@ public static class Suite
     /// here still gets an answer rather than a throw, and this is the earlier of two rather than a
     /// replacement for it.
     /// </para>
+    /// <para>
+    /// A reading rather than the refusal it was, which is WW360. The refusal below is still the door
+    /// of a run, and it is not the only caller that wants this question asked: <c>winwright_check</c>
+    /// answers an author before a run exists, and a tool that reports has to be handed every gap
+    /// rather than thrown at the first. Both come from this one walk, so the two answers cannot drift
+    /// — which is the property a second copy inside the tool would have lost.
+    /// </para>
     /// </summary>
-    /// <exception cref="ScenarioRefusedException">Where a step needs a key the project has not declared.</exception>
-    private static void Undeclared(IReadOnlyList<CaseDeclaration> declared, ProjectDeclaration project)
+    /// <param name="declared">Every case there is.</param>
+    /// <param name="project">The declaration to hold them against.</param>
+    /// <returns>Every step needing a key this project does not declare, in declared order.</returns>
+    public static IReadOnlyList<UndeclaredNeed> Undeclared(
+        IReadOnlyList<CaseDeclaration> declared, ProjectDeclaration project)
     {
+        ArgumentNullException.ThrowIfNull(declared);
+        ArgumentNullException.ThrowIfNull(project);
+
+        var found = new List<UndeclaredNeed>();
         foreach (var one in declared)
         {
             foreach (var step in one.Steps)
@@ -354,13 +393,28 @@ public static class Suite
                 if (step.Verb.Needs is not { Length: > 0 } key || project.Declares(key))
                     continue;
 
-                throw new ScenarioRefusedException(
-                    one.Name,
-                    $"'{step.Name}' names '{step.Verb.Name}', which needs a '{key}' this project does not "
-                        + $"declare — add it to {project.Path}, because a run would launch the application "
-                        + "and drive it to that step to say what these two files already say together");
+                found.Add(new UndeclaredNeed(one.Name, step.Name, step.Verb.Name, key));
             }
         }
+
+        return new ReadOnlyCollection<UndeclaredNeed>(found);
+    }
+
+    /// <summary>
+    /// The same walk, as the refusal a run makes of it: the first gap stops the run.
+    /// <para>
+    /// The first and not all of them, because this is a door rather than a report. An author reading
+    /// <c>winwright_check</c> wants the list; a run wants to stop, and stopping on the first is what
+    /// it did before this was split in two.
+    /// </para>
+    /// </summary>
+    /// <param name="declared">Every case there is.</param>
+    /// <param name="project">The declaration to hold them against.</param>
+    /// <exception cref="ScenarioRefusedException">Where a step needs a key the project has not declared.</exception>
+    private static void RefuseUndeclared(IReadOnlyList<CaseDeclaration> declared, ProjectDeclaration project)
+    {
+        if (Undeclared(declared, project) is [var first, ..])
+            throw new ScenarioRefusedException(first.Case, first.Because(project.Path));
     }
 
     /// <summary>
@@ -390,7 +444,7 @@ public static class Suite
         ArgumentNullException.ThrowIfNull(project);
 
         Something(declared);
-        Undeclared(declared, project);
+        RefuseUndeclared(declared, project);
 
         // Called for its refusal and not for its answer: a selector matching nothing has to stop the
         // run before the first case, or the run is a green about the cases the typo left out.

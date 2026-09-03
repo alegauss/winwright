@@ -80,7 +80,11 @@ loaded and then typed a key out of:
   may repeat it.
 - **`winwright_check`** — a case read back *before* the file exists. Its input schema **is** the
   loader's schema, so a misspelled key is not a thing the caller can send; what comes back is either
-  the loader's own refusal, addressed as `cases[0].steps[1].act`, or what a run of it would do.
+  the loader's own refusal, addressed as `cases[0].steps[1].act`, or what a run of it would do. Name
+  a `project` beside the file and it also answers what the *door* of a run would refuse — a `capture`
+  step in a project declaring no `captures`, which loads and then never runs. Optional, because a
+  scenario is usually first checked before its project exists; without one the answer says it read
+  the file alone rather than letting that read as "this would run".
 - **`winwright_run`** — the cases a selection asks for, run. It answers the verdict, a line per case
   that ran and per case it left alone, the exit code, and what outlived the run. **A desk that cannot
   observe answers a hole**, naming which of the six conditions is missing — not a red, and not a
