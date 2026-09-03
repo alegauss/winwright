@@ -165,11 +165,19 @@ public sealed class NoCooperationTests : IDisposable
         //
         // WW349 made this a claim about the readings and the acts rather than about the whole
         // catalogue, and the difference is the finding: the count was zero for as long as nothing
-        // asked the application to do something no outside process can do for it. Naming the one
-        // that does is what keeps this a measurement — a second appearing without a task behind it
-        // is what would go red here.
-        Assert.Equal(["OwnRender.Into"], Cooperating.NeedingTheHalf().Select(one => one.Named));
-        Assert.Contains("1 need the in-app half", Cooperating.Render()[0]);
+        // asked the application to do something no outside process can do for it. Naming the ones
+        // that do is what keeps this a measurement — one appearing without a task behind it is what
+        // would go red here.
+        //
+        // WW359 is the second, and it is the same seam rather than a new one: both ask the
+        // application to draw its own visual tree, and they differ in which tree. That is why this
+        // reads as a list and not as a count — a third arriving from somewhere other than that
+        // channel is a different fact about the package, and this is where it has to be said out
+        // loud before it passes.
+        Assert.Equal(
+            ["OwnRender.Into", "OwnRender.PopupInto"],
+            Cooperating.NeedingTheHalf().Select(one => one.Named));
+        Assert.Contains("2 need the in-app half", Cooperating.Render()[0]);
 
         // And it is none of the verbs this file is about. Every reading and every pattern act still
         // answers against an application that references nothing, which is the claim the cases below

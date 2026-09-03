@@ -68,6 +68,22 @@ internal sealed class AnsweringWindow : IDisposable
                                 Height = 40,
                                 Background = new SolidColorBrush(Colors.CornflowerBlue),
                             },
+
+                            // WW359. Closed, and they stay that way: a closed popup draws nothing
+                            // into the window, so every case here that photographs the window sees
+                            // what it always saw — and closed is the state the popup ask exists for,
+                            // because it is the one where there is no window anywhere to copy.
+                            new System.Windows.Controls.Primitives.Popup
+                            {
+                                Name = PopupNamed,
+                                Child = new Border
+                                {
+                                    Width = 90,
+                                    Height = 40,
+                                    Background = new SolidColorBrush(Colors.Firebrick),
+                                },
+                            },
+                            new System.Windows.Controls.Primitives.Popup { Name = EmptyPopupNamed },
                         },
                     },
                 };
@@ -120,6 +136,12 @@ internal sealed class AnsweringWindow : IDisposable
         answering = hooked;
         Handle = dispatcher.Invoke(() => new WindowInteropHelper(window).Handle);
     }
+
+    /// <summary>The popup this window holds a drawable tree in. WW359.</summary>
+    internal const string PopupNamed = "details";
+
+    /// <summary>The one it holds nothing in, which is a refusal of its own.</summary>
+    internal const string EmptyPopupNamed = "hollow";
 
     /// <summary>The window's handle, which is what a harness sends to.</summary>
     internal nint Handle { get; }

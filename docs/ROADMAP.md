@@ -18,7 +18,6 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 💭 **WW359** (deps: —) **the render channel WW349 built carries a window's tree and there is no way to ask it for one popup's** — WW349 sends a window handle and a path; a popup's picture is a different ask, and Popups.Picture is still reachable only from inside the application. → §WW359
 - 💭 **WW361** (deps: —) **an application answers renders only for the windows it remembered to name, and a dialog it opens is none of them** — WW349's hook goes on one window at a time, so a capture of the second window an application draws is a hole until somebody adds a second line to it. → §WW361
 - 💭 **WW362** (deps: —) **a capture through the attach door depends on a variable nobody set, and the run that could set it does not** — WW349 tells a launched application where it may write; a run against a window a caller already has tells it nothing, so the same case answers a hole. → §WW362
 
@@ -29,6 +28,7 @@
 - 💭 **WW360** (deps: —) **winwright_check says a file loads and the run then refuses it, because the check tool is handed no project** — WW348 refuses a step whose verb needs an undeclared key, at the door of a run; the check tool reads the file alone, so it cannot ask the question. → §WW360
 - 💭 **WW365** (deps: —) **Of reads at cognitive complexity 119 because its refusals thread twenty locals, and the step they judge now exists** — WW352 left the body where it was: each refusal reads the parameters rather than the record WW351 put in front of it, so none of them can move out. → §WW365
 - 💭 **WW367** (deps: —) **which code an arm runs is still a branch per name in Measured, so an arm reaches the tool in two places again** — WW354 made the names one list and left the dispatch a chain of comparisons; an arm in the list and in no branch is recognised, launched and answered by the bare run. → §WW367
+- 💭 **WW372** (deps: —) **no declared step can ask for a popup's picture, and its four refusals would all reach the verdict as holes** — WW359 built the ask and wired nothing to it, and AsAssertion counts every absence as unchecked — so a case naming an absent popup reads as a machine that could not look. → §WW372
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

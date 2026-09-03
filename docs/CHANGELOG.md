@@ -169,6 +169,7 @@
 - ✅ **WW346** **the largest window a tray process owns is the shadow behind its menu, so the convenience verb answers the desktop** — The shell's shadow behind a menu is named by class and skipped, so Largest answers the window the application drew (design recorded in `src/Winwright/Windowing/TopLevelWindows.cs`).
 - ✅ **WW347** **a WPF popup is layered for its own drop shadow, so the copy route now refuses the only capture that reaches one** — A popup's own tree is photographed by the in-app half, and the layer refusal names that way through (design recorded in `src/Winwright.InApp/Popups.cs`).
 - ✅ **WW349** **the engine can now take a screen copy and still cannot take the render it calls the default** — The run asks over a window message and the application draws its own tree, so an ordinary window is a picture rather than a hole (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
+- ✅ **WW359** **the render channel WW349 built carries a window's tree and there is no way to ask it for one popup's** — A second registered message carries a popup's name, and a name matching two popups is refused rather than photographed (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
 
 ## Block F — Assert — the expectation is derived, never typed
 

@@ -45,6 +45,37 @@ public sealed class RendersAnswered : IDisposable
 }
 
 /// <summary>
+/// What came of a harness asking for one popup's tree. WW359.
+/// <para>
+/// The numbers are the wire and are held to by a case: the engine holds no reference to this half,
+/// so it spells the same five on <c>OwnRender</c> and a test reads both. They are distinct rather
+/// than one bit because the refusals want different things done about them — a name matching
+/// nothing is a case naming a popup that is not there, and a name matching two is an ambiguity in
+/// the application only its author can settle.
+/// </para>
+/// </summary>
+public enum PopupRendered
+{
+    /// <summary>Nothing to answer with: no directory was named, or the window is not this stack's.</summary>
+    NotAnswered = 0,
+
+    /// <summary>The picture is written.</summary>
+    Drawn = 1,
+
+    /// <summary>No popup under that window carries the name asked for.</summary>
+    NoSuchPopup = 2,
+
+    /// <summary>More than one does, so which was meant is not this half's to guess.</summary>
+    MoreThanOnePopup = 3,
+
+    /// <summary>The popup is holding nothing that can be drawn, or nothing at all.</summary>
+    PopupHoldsNothing = 4,
+
+    /// <summary>The file is not inside the directory this application was told it may write into.</summary>
+    PathRefused = 5,
+}
+
+/// <summary>
 /// Rendering this application's own tree when a harness asks for it. WW349.
 /// <para>
 /// The off-screen render is the harness's default route and the one it cannot take: a render draws a
@@ -75,6 +106,17 @@ public static class Renders
 
     /// <summary>The name both halves register, which is how this message is told from any other.</summary>
     public const string Registered = "Winwright.OwnRender";
+
+    /// <summary>
+    /// The name for the ask that names one popup rather than the window's own tree. WW359.
+    /// <para>
+    /// A message of its own and not a field added to the one above, so that an application shipping
+    /// a half older than the harness driving it simply does not answer this — rather than reading a
+    /// two-field payload as a path. Which way that skew runs is not hypothetical: this half is what
+    /// an adopter ships, and it reaches them by a release.
+    /// </para>
+    /// </summary>
+    public const string RegisteredPopup = "Winwright.OwnRender.Popup";
 
     private const uint WmCopyData = 0x004A;
 
@@ -121,7 +163,8 @@ public static class Renders
         ArgumentNullException.ThrowIfNull(source);
 
         var into = Where();
-        var wanted = (uint)RegisterWindowMessageW(Registered);
+        var wanted = RegisterWindowMessageW(Registered);
+        var wantedPopup = RegisterWindowMessageW(RegisteredPopup);
 
         // Hooked either way, and answering only where a directory was named. The hook that answers
         // nothing costs one comparison per message and keeps the disposal symmetrical, which is
@@ -130,7 +173,7 @@ public static class Renders
         return new RendersAnswered(
             source,
             (nint window, int message, nint wParam, nint lParam, ref bool handled) =>
-                Handle(into, wanted, window, message, lParam, ref handled),
+                Handle(into, wanted, wantedPopup, window, message, lParam, ref handled),
             into ?? "");
     }
 
@@ -182,6 +225,71 @@ public static class Renders
     }
 
     /// <summary>
+    /// Render the tree one named popup is holding into a file, refusing where the name reaches
+    /// nothing, reaches more than one thing, or names a file this application may not write. WW359.
+    /// <para>
+    /// Its own verb for the reason <see cref="Drawn" /> is one: a message handler nothing can call
+    /// directly is a rule with no case behind it. This is what the hook runs and what the suite
+    /// drives, and every answer below is reachable from a test that never sends a message.
+    /// </para>
+    /// <para>
+    /// The popup is looked up under the window that was asked, not across the application. A harness
+    /// sends to the window it drove to the state it means to photograph, and a walk that left that
+    /// window would make a name that is unambiguous inside one dialog ambiguous because some other
+    /// window happens to spell a popup the same.
+    /// </para>
+    /// </summary>
+    /// <param name="into">The directory renders may be written into.</param>
+    /// <param name="window">The window whose tree holds the popup.</param>
+    /// <param name="named">The popup's name.</param>
+    /// <param name="path">Where the picture goes.</param>
+    /// <returns>Which of the five answers this ask came to.</returns>
+    public static PopupRendered PopupDrawn(string into, nint window, string named, string path)
+    {
+        if (string.IsNullOrWhiteSpace(into) || string.IsNullOrWhiteSpace(named) || string.IsNullOrWhiteSpace(path))
+            return PopupRendered.NotAnswered;
+
+        if (!Beneath(Path.GetFullPath(into.Trim()), path))
+            return PopupRendered.PathRefused;
+
+        if (HwndSource.FromHwnd(window)?.RootVisual is not FrameworkElement tree)
+            return PopupRendered.NotAnswered;
+
+        // Ordinal and case-sensitive, which is how the author spelled it and how XAML resolves it.
+        // A looser match would make two popups one name reaches, which is the answer below.
+        var matching = Popups.Under(tree)
+            .Where(one => string.Equals(one.Name, named, StringComparison.Ordinal))
+            .ToList();
+
+        if (matching.Count == 0)
+            return PopupRendered.NoSuchPopup;
+
+        if (matching.Count > 1)
+            return PopupRendered.MoreThanOnePopup;
+
+        try
+        {
+            Popups.Picture(matching[0], path);
+            return PopupRendered.Drawn;
+        }
+        catch (UnrenderableException)
+        {
+            // Holding nothing, or holding something with no layout. Said rather than written as an
+            // empty file, and never raised: this runs inside a window procedure, and throwing out of
+            // one would take down the application this is only supposed to photograph.
+            return PopupRendered.PopupHoldsNothing;
+        }
+        catch (IOException)
+        {
+            // Somewhere this application may write and still cannot — a locked file, a full disk.
+            // Not one of the four refusals, because every one of those is a thing the case or the
+            // application could be changed to fix and this is not: it is the same answer the window
+            // ask gives, which the harness reports as the application having drawn nothing.
+            return PopupRendered.NotAnswered;
+        }
+    }
+
+    /// <summary>
     /// Whether a path is inside a directory, compared after both are made absolute.
     /// <para>
     /// The separator is appended to the directory before the comparison, which is the whole of it:
@@ -199,13 +307,14 @@ public static class Renders
     }
 
     private static nint Handle(
-        string? into, uint wanted, nint window, int message, nint lParam, ref bool handled)
+        string? into, uint wanted, uint wantedPopup, nint window, int message, nint lParam, ref bool handled)
     {
         if (message != WmCopyData || into is null)
             return 0;
 
         var carried = Marshal.PtrToStructure<CopyData>(lParam);
-        if ((uint)carried.Data != wanted)
+        var id = (uint)carried.Data;
+        if (id != wanted && id != wantedPopup)
             return 0;
 
         // Handled from here on, whatever the answer: the message was addressed to this and an
@@ -213,11 +322,25 @@ public static class Renders
         // window procedure, which knows nothing about it.
         handled = true;
 
-        var path = carried.Buffer == 0 || carried.Size <= 0
+        // Read whole and split, rather than trimmed to the first NUL. WW359's ask carries two fields
+        // and WW349's carries one, so the count is what says which arrived — and a window ask read
+        // by this parse is still the one field it always was.
+        var said = carried.Buffer == 0 || carried.Size <= 0
             ? null
-            : Marshal.PtrToStringUni(carried.Buffer, carried.Size / 2)?.TrimEnd('\0');
+            : Marshal.PtrToStringUni(carried.Buffer, carried.Size / 2);
 
-        return string.IsNullOrWhiteSpace(path) ? 0 : Drawn(into, window, path) ? 1 : 0;
+        var fields = said?.Split('\0') ?? [];
+        var path = fields.Length > 0 ? fields[0] : null;
+        if (string.IsNullOrWhiteSpace(path))
+            return 0;
+
+        if (id == wanted)
+            return Drawn(into, window, path) ? 1 : 0;
+
+        var named = fields.Length > 1 ? fields[1] : null;
+        return string.IsNullOrWhiteSpace(named)
+            ? (nint)PopupRendered.NotAnswered
+            : (nint)PopupDrawn(into, window, named, path);
     }
 
     [StructLayout(LayoutKind.Sequential)]

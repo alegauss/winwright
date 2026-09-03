@@ -107,9 +107,113 @@ public sealed class OwnRenderTests : IDisposable
     }
 
     [Fact]
+    public void An_application_that_answers_draws_the_tree_one_named_popup_is_holding()
+    {
+        // WW359, across the boundary the design is about. The popup is closed, so there is no window
+        // anywhere for a copy of the screen to reach — and this is the picture it could not take.
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "flyout.png");
+
+        var asked = OwnRender.PopupInto(application.Handle, AnsweringWindow.PopupNamed, path);
+
+        Assert.True(asked.Answered, asked.Sentence());
+        Assert.True(File.Exists(path), $"it said it drew one and {path} is not there");
+
+        // The popup's own child and not the window behind it, read off the file: the child is 90x40
+        // and the window is 240x160, so the pixel count says which tree crossed the boundary.
+        var picture = Pictures.Of(path);
+        Assert.Equal(90 * 40, picture.Pixels);
+        Assert.True(picture.HasInk, picture.Sentence());
+    }
+
+    [Fact]
+    public void A_popup_the_application_does_not_have_is_reported_by_name()
+    {
+        // Named in the absence rather than counted, because the fix is in the case: a run told only
+        // that a picture did not happen cannot tell a wrong name from an application that refused.
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "missing.png");
+
+        var asked = OwnRender.PopupInto(application.Handle, "summary", path);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(path));
+        Assert.Contains("summary", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_popup_holding_nothing_is_a_refusal_about_the_popup_and_not_about_the_file()
+    {
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "hollow.png");
+
+        var asked = OwnRender.PopupInto(application.Handle, AnsweringWindow.EmptyPopupNamed, path);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(path));
+        Assert.Contains("holding nothing", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_application_whose_half_predates_this_ask_declines_it_rather_than_mistaking_it()
+    {
+        // The reason WW359 is a second registered message rather than a second field on the first
+        // one's payload. An in-app half older than the harness driving it has no such message to
+        // match, so it leaves it unhandled and answers nothing — which is a reading, and is what a
+        // half that read `path\0name` as a path could not have given.
+        using var application = AnsweringWindow.Silent();
+        var path = Path.Combine(root, "never.png");
+
+        var asked = OwnRender.PopupInto(application.Handle, AnsweringWindow.PopupNamed, path);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(path));
+        Assert.Contains("Renders.Answer", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_popup_may_not_be_written_outside_what_the_run_named_and_the_refusal_says_which()
+    {
+        using var application = AnsweringWindow.Open(root);
+        var elsewhere = Path.Combine(Path.GetTempPath(), "winwright-popup-not-asked-for.png");
+
+        var asked = OwnRender.PopupInto(application.Handle, AnsweringWindow.PopupNamed, elsewhere);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(elsewhere));
+        Assert.Contains(OwnRender.RendersInto, asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_name_carrying_the_separator_is_refused_here_rather_than_sent()
+    {
+        // The one field that could break the payload apart. Sent, the half at the other end would
+        // read a shorter name and photograph whatever that matched — which is the wrong picture, and
+        // the whole thing this ask refuses to take.
+        var asked = OwnRender.PopupInto(1, "details\0extra", "x.png");
+
+        Assert.False(asked.Answered);
+        Assert.Contains("NUL", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void No_window_at_all_is_named_rather_than_sent_a_popup_ask()
+    {
+        var asked = OwnRender.PopupInto(0, AnsweringWindow.PopupNamed, Path.Combine(root, "never.png"));
+
+        Assert.False(asked.Answered);
+        Assert.Contains("no window was named", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Nothing_may_be_asked_for_by_passing_nothing()
     {
         Assert.Throws<ArgumentException>(() => OwnRender.Into(1, "  "));
         Assert.Throws<ArgumentOutOfRangeException>(() => OwnRender.Into(1, "x.png", withinMs: 0));
+
+        Assert.Throws<ArgumentException>(() => OwnRender.PopupInto(1, "  ", "x.png"));
+        Assert.Throws<ArgumentException>(() => OwnRender.PopupInto(1, "details", "  "));
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => OwnRender.PopupInto(1, "details", "x.png", withinMs: 0));
     }
 }

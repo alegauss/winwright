@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
 using Winwright.Capturing;
@@ -34,6 +35,151 @@ public sealed class RendersTests : IDisposable
         // place it could: a run against a real application would simply be told it does not answer.
         Assert.Equal(Renders.PathVariable, OwnRender.RendersInto);
         Assert.Equal(Renders.Registered, OwnRender.Registered);
+
+        // WW359 put a second message and five answers on the same seam, and the numbers are as much
+        // the wire as the names are. An engine reading 3 where this half meant 4 would report the
+        // wrong refusal about a real popup, which is a worse answer than no answer.
+        Assert.Equal(Renders.RegisteredPopup, OwnRender.RegisteredPopup);
+        Assert.NotEqual(Renders.Registered, Renders.RegisteredPopup);
+
+        Assert.Equal((int)PopupRendered.Drawn, OwnRender.Drawn);
+        Assert.Equal((int)PopupRendered.NoSuchPopup, OwnRender.NoSuchPopup);
+        Assert.Equal((int)PopupRendered.MoreThanOnePopup, OwnRender.MoreThanOnePopup);
+        Assert.Equal((int)PopupRendered.PopupHoldsNothing, OwnRender.PopupHoldsNothing);
+        Assert.Equal((int)PopupRendered.PathRefused, OwnRender.PathRefused);
+
+        // Zero is the answer a window that does not take the message gives, so no refusal may be it.
+        Assert.DoesNotContain(
+            0,
+            new[]
+            {
+                OwnRender.Drawn, OwnRender.NoSuchPopup, OwnRender.MoreThanOnePopup,
+                OwnRender.PopupHoldsNothing, OwnRender.PathRefused,
+            });
+    }
+
+    [Fact]
+    public void A_named_popup_is_photographed_through_the_tree_it_holds_although_it_is_closed()
+    {
+        // WW359, and the surface WW347 is about. Closed, so there is no window anywhere for a copy
+        // of the screen to reach — and the child is an ordinary element in a tree this process owns,
+        // which is the whole reason this ask exists.
+        var path = Path.Combine(root, "flyout.png");
+
+        var answer = Apartment.Run(() =>
+        {
+            var window = Holding(new Popup
+            {
+                Name = "details",
+                Child = new Border { Width = 90, Height = 40, Background = new SolidColorBrush(Colors.Firebrick) },
+            });
+
+            return Renders.PopupDrawn(root, Handle(window), "details", path);
+        });
+
+        Assert.Equal(PopupRendered.Drawn, answer);
+        Assert.True(File.Exists(path));
+
+        // Which surface, and not merely that there was one. The child is 90x40 and the window behind
+        // it is 240x160, so the count of pixels in the file says which tree was drawn — a render is
+        // one pixel per unit at the default resolution, so this is exact rather than approximate.
+        var picture = Pictures.Of(path);
+        Assert.Equal(90 * 40, picture.Pixels);
+        Assert.True(picture.HasInk, picture.Sentence());
+    }
+
+    [Fact]
+    public void A_name_no_popup_under_that_window_carries_is_said_rather_than_guessed_at()
+    {
+        var path = Path.Combine(root, "missing.png");
+
+        var answer = Apartment.Run(() =>
+        {
+            var window = Holding(new Popup { Name = "details", Child = new Border { Width = 20, Height = 20 } });
+            return Renders.PopupDrawn(root, Handle(window), "summary", path);
+        });
+
+        Assert.Equal(PopupRendered.NoSuchPopup, answer);
+        Assert.False(File.Exists(path));
+    }
+
+    [Fact]
+    public void A_name_two_popups_share_is_refused_rather_than_resolved_to_either_one()
+    {
+        // The failure this ask was designed around. A name is not unique across a tree, and a
+        // picture of whichever came first in the walk is a picture no run could prove was the
+        // surface it meant — which is what this block refuses everywhere else.
+        var path = Path.Combine(root, "ambiguous.png");
+
+        var answer = Apartment.Run(() =>
+        {
+            var window = Holding(
+                new Popup { Name = "row", Child = new Border { Width = 20, Height = 20 } },
+                new Popup { Name = "row", Child = new Border { Width = 30, Height = 30 } });
+
+            return Renders.PopupDrawn(root, Handle(window), "row", path);
+        });
+
+        Assert.Equal(PopupRendered.MoreThanOnePopup, answer);
+        Assert.False(File.Exists(path));
+    }
+
+    [Fact]
+    public void A_popup_holding_nothing_is_refused_rather_than_written_as_an_empty_file()
+    {
+        // An empty file is a successful render to everything that only checks one exists, which is
+        // exactly what the harness checks.
+        var path = Path.Combine(root, "empty.png");
+
+        var answer = Apartment.Run(() =>
+        {
+            var window = Holding(new Popup { Name = "hollow" });
+            return Renders.PopupDrawn(root, Handle(window), "hollow", path);
+        });
+
+        Assert.Equal(PopupRendered.PopupHoldsNothing, answer);
+        Assert.False(File.Exists(path));
+    }
+
+    [Fact]
+    public void A_popup_may_not_be_written_outside_the_directory_the_run_named()
+    {
+        // The same guard the window ask has, and the application's to make rather than the
+        // harness's. Said apart from the other refusals because it is the one about the sender.
+        var elsewhere = Path.Combine(Path.GetTempPath(), "winwright-popup-not-asked-for.png");
+
+        var answer = Apartment.Run(() =>
+        {
+            var window = Holding(new Popup { Name = "details", Child = new Border { Width = 20, Height = 20 } });
+            return Renders.PopupDrawn(root, Handle(window), "details", elsewhere);
+        });
+
+        Assert.Equal(PopupRendered.PathRefused, answer);
+        Assert.False(File.Exists(elsewhere));
+    }
+
+    [Fact]
+    public void A_popup_ask_an_application_was_told_nowhere_to_write_for_answers_nothing()
+    {
+        var answer = Apartment.Run(() =>
+        {
+            var window = Holding(new Popup { Name = "details", Child = new Border { Width = 20, Height = 20 } });
+            return Renders.PopupDrawn("", Handle(window), "details", Path.Combine(root, "page.png"));
+        });
+
+        Assert.Equal(PopupRendered.NotAnswered, answer);
+    }
+
+    [Fact]
+    public void A_window_this_presentation_stack_does_not_own_holds_no_popup_to_ask_about()
+    {
+        // Answered rather than thrown, for the reason the window ask is: this rule runs inside a
+        // window procedure. And NotAnswered rather than NoSuchPopup, because there is no tree to
+        // have looked in — saying a popup is absent would be a claim about a window this never read.
+        var answer = Apartment.Run(
+            () => Renders.PopupDrawn(root, 0x1234, "details", Path.Combine(root, "page.png")));
+
+        Assert.Equal(PopupRendered.NotAnswered, answer);
     }
 
     [Fact]
@@ -175,6 +321,38 @@ public sealed class RendersTests : IDisposable
                     new Border { Width = 120, Height = 40, Background = new SolidColorBrush(Colors.CornflowerBlue) },
                 },
             },
+        };
+
+        window.Show();
+        window.UpdateLayout();
+        return window;
+    }
+
+    /// <summary>
+    /// A shown window whose tree carries these popups, which is what a harness would ask about.
+    /// WW359.
+    /// <para>
+    /// They go in closed and are left that way. Closed is the state that matters — it is the one a
+    /// copy of the screen has nothing at all to reach, and the one a case photographing a flyout
+    /// nobody has clicked would be in.
+    /// </para>
+    /// </summary>
+    /// <param name="popups">The popups to hang under the window.</param>
+    private static Window Holding(params Popup[] popups)
+    {
+        var page = new StackPanel();
+        page.Children.Add(new TextBlock { Text = "the report", Margin = new Thickness(12) });
+        foreach (var popup in popups)
+            page.Children.Add(popup);
+
+        var window = new Window
+        {
+            Width = 240,
+            Height = 160,
+            Left = 40,
+            Top = 40,
+            Background = new SolidColorBrush(Colors.White),
+            Content = page,
         };
 
         window.Show();

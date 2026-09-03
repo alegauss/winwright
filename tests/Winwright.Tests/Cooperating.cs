@@ -331,6 +331,16 @@ internal static class Cooperating
                 + "read back whether it did — the route this block calls its default, which the "
                 + "engine cannot take because a render needs a visual tree and nothing outside that "
                 + "process has one"),
+
+        // --- WW359, the same channel carrying the one surface no capture reaches --------------------
+        // Listed apart from the window ask rather than folded into it, because what it buys an
+        // adopter is different in kind. That one is a better picture of something every capture route
+        // can already reach; this one is the only picture of a popup there is — open, it is a layered
+        // window whose edge is the desktop behind it, and closed it has no window at all.
+        new("OwnRender.PopupInto", Cooperation.TheInAppHalf, false,
+            "ask the application for the tree one named popup is holding — the surface a copy of the "
+                + "screen cannot photograph open and has nothing to photograph closed, so a preview "
+                + "of a flyout nobody has clicked is a picture only the application can take"),
     ]);
 
     /// <summary>The verbs a bare window is enough for, which is what the run drives.</summary>

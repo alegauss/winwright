@@ -131,27 +131,6 @@ between here and that is four more arms and an evening.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW359 the popup the channel does not carry
-
-WW347 opened the way through and WW349 built the channel — most of it. A harness now
-sends a window handle and a path, and the application draws the tree behind that window
-and says it did. What it cannot ask for is one popup's own tree, which is the surface
-WW347 exists about: `Popups.Picture` is still reachable only from inside the process.
-
-The gap is in what the message carries rather than in whether there is one. An open
-popup is its own top-level window, so a handle reaches it — but what is wanted is the
-tree it holds rather than the layered surface Windows composites. A closed popup has no
-handle at all, and that is the case worth having: its child is in a tree the process
-owns, so a preview of a flyout nobody has clicked is a picture this could take and no
-copy of the screen ever could.
-
-So the ask needs a second field, and what that field is, is the task. A popup's name is
-the obvious one — `Popups.Under` already walks them and each carries the name its author
-gave it — but a name is not unique across a tree, and the failure mode of the wrong one
-is a picture of the wrong surface, which is what this block refuses everywhere else.
-What is not in doubt is that both halves of the verb exist and only the sentence between
-them is missing.
-
 ### §WW361 the window nobody remembered to answer for
 
 `Renders.Answer` hooks one window, and the harness sends to the window it wants a
@@ -274,6 +253,31 @@ The cheap half is worth having whichever way that goes. `Measured` could refuse 
 it has no branch for rather than falling past all four into the typing run, which turns
 the remaining hole from a wrong answer into a red — and a red is what every other list
 in this project gets for the same mistake.
+
+### §WW372 the popup ask no scenario can make
+
+WW359 built the ask and left it reachable only from C#. `CaseRun.Rendered` calls
+`OwnRender.Into` with the window it found, and no clause a declared step can carry would
+make it call `PopupInto` instead. So the surface a scenario most wants a picture of — a
+flyout nobody has clicked — is the one a scenario cannot ask for.
+
+WW349 wired its own ask in the commit that built it, which is why this reads as an
+omission. It is not the same work. That step already named a window and the route
+decided the rest; this one has to name something inside the window, and the grammar has
+nowhere to put it.
+
+The obvious spelling is a capture step taking a popup's name, and what it opens is what
+happens where the name is wrong. The channel answers four refusals — no such popup, more
+than one, holding nothing, path refused — each a fact about the case rather than the
+desk. So they are reds, which is the opposite of how `RenderAsked` counts: `AsAssertion`
+reports every absence as unchecked, because WW349's only failure was an unadopted half.
+
+That collapse is the finding. A run told the application did not render its own tree,
+where the truth is a scenario naming a popup that is not there, has a green-adjacent
+answer to a typo.
+
+The candidate is a step clause naming a popup, and a rule separating the refusals a case
+can fix from the absence only a machine can.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
