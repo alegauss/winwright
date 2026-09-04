@@ -357,6 +357,29 @@ exactly the failure WW356 was, arriving from the other side. It also gives WW322
 a sentence it does not have: what these two fixtures differ in is the desk, and a case
 that asserts the trees agree is where that stops being folklore.
 
+### §WW383 the other list nothing reaches
+
+WW370 gave `Get-DeskLooks` its desktop list as a parameter and a case now runs the
+branch that answers `$null`. The shell surfaces are the other list in that file and they
+got nothing: `Read-DeskState` decides `shell` against `$script:ShellSurfaces`, read
+straight off the script with no way in.
+
+The two are not the same shape. The desktop list is read by the loop, which WW370
+opened; the shell list is read by the classification, which cases already reach —
+`Classified` hands it looks somebody typed, so a case names `Shell_TrayWnd` in a made-up
+one. What is missing is the join: nothing puts a real window up, calls its class a shell
+surface, and reads `shell` out the far end.
+
+That join is what WW357 was for on the other branch, and it caught a real defect there —
+a look whose class read empty classified perfectly, so a quiet desk would have refused
+every run. The same defect on this path would send a reader to a guest console to answer
+the taskbar, which is WW331 arriving from the loop instead of from the words.
+
+The change is the one WW370 already made, one list over: a `-Shell` parameter on the
+polling would let a case say its own window is the taskbar and assert the runner is told
+`shell` rather than `asking`. Cheap, and it turns the one classification a person acts
+on by *not* going to the console into something a case has actually produced end to end.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW379 the control that is late on purpose
