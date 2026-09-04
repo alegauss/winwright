@@ -114,6 +114,24 @@ public class TypingArmTests
     }
 
     [Fact]
+    public void Every_arm_carries_the_code_it_runs_rather_than_a_branch_somewhere_else()
+    {
+        // WW367, and the half WW354 left open. The words became one list and the dispatch stayed a
+        // comparison per name in `Program`, so an arm added to the list and to no branch there was
+        // recognised, launched, and answered by the bare typing run — this entry's own failure one
+        // level down, with the refusal above standing in front of a word it did recognise.
+        //
+        // The code is a field now, so that arm does not compile. What this pins is that it stays
+        // one: a default value here would make the field optional again, and an arm declared
+        // without it would be back to falling through to the default experiment.
+        var declared = typeof(TypingArm).GetConstructors().Single().GetParameters();
+        var run = Assert.Single(declared, one => one.Name == "Run");
+
+        Assert.False(run.HasDefaultValue, "an arm may be declared without the code it runs");
+        Assert.All(Arms.All, one => Assert.NotNull(one.Run));
+    }
+
+    [Fact]
     public void Every_arm_says_which_task_built_it_and_what_it_drives()
     {
         // The .cmd's paragraphs are what a person reads to choose one, so an arm that carried only

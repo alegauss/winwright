@@ -131,30 +131,6 @@ which costs nothing and turns the untrue sentence into a wait.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW367 the half the list does not dispatch
-
-WW354 made the arms' names one list and stopped a mistyped word being answered by the
-default. What it did not reach is which code each name runs. `Measured` still asks
-`arm?.Name == "sweep"` and then `"delay"`, `"acts"`, `"provoke"`, so an arm added to
-`Arms.All` and to no branch there is recognised, launched, and answered by the bare
-typing run — the failure that entry was about, one level down and with a refusal now
-standing in front of it.
-
-Smaller than it was and the same shape. The word is checked, so a typo is refused; what
-is not checked is that a recognised word has somewhere to go.
-
-The reason it was left is that the four runners take four different argument sets.
-`Sweep` and `FirstRead` want the box and two captions, `Landing` wants the root, and
-`Disturbance` wants the window handle too. A delegate on `TypingArm` needs one shape all
-four fit, so it needs a context carrying the root, the box, the captions and the handle
-— a thing to design rather than extract, because what it holds is what a future arm may
-reach for.
-
-The cheap half is worth having whichever way that goes. `Measured` could refuse an arm
-it has no branch for rather than falling past all four into the typing run, which turns
-the remaining hole from a wrong answer into a red — and a red is what every other list
-in this project gets for the same mistake.
-
 ### §WW372 the popup ask no scenario can make
 
 WW359 built the ask and left it reachable only from C#. `CaseRun.Rendered` calls

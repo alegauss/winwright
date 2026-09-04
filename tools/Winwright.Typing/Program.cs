@@ -180,40 +180,20 @@ public static class Program
         var arrived = On(root, "Text#arrived");
         var packets = On(root, "Text#injected");
 
-        // WW312. The sweep answers on its own and shares nothing below it: the counts, the drift and
-        // the repair's verdict are all about the engine's send, and printing them under a run that
-        // never called it would attribute this arm's numbers to the thing it exists to differ from.
-        if (arm?.Name == "sweep")
+        // Every arm answers on its own and shares nothing below this line. The counts, the drift and
+        // the repair's verdict under it are all about the engine's own send, and printing them under
+        // a run that never called it would attribute an arm's numbers to the thing it exists to
+        // differ from.
+        //
+        // WW367. One call and no longer a comparison per name. WW354 made the words one list and
+        // left this a chain of four `arm?.Name ==` tests, so an arm added to `Arms.All` and to no
+        // branch here was recognised, launched, and answered by the bare typing run — WW354's own
+        // failure one level down, with a refusal standing in front of it that had nothing to say
+        // about a word it did recognise. An arm now carries the code it is, and one without it does
+        // not compile.
+        if (arm is not null)
         {
-            Sweep.Run(box, arrived, packets, rounds);
-            return 0;
-        }
-
-        // WW329, and it answers on its own for the sweep's reason: the counts and the repair's
-        // verdict below are about the engine's own act, and this arm takes the act apart to put a
-        // pause inside it. Printing those under a run that never called `Type` would attribute this
-        // arm's numbers to the thing it exists to differ from.
-        if (arm?.Name == "delay")
-        {
-            FirstRead.Run(box, arrived, packets, rounds);
-            return 0;
-        }
-
-        // WW341, and it answers on its own for the same reason as the two above: nothing below this
-        // is about a click, a key or a range, and printing the typing counts under a run that never
-        // typed would attribute them to the acts this arm is measuring.
-        if (arm?.Name == "acts")
-        {
-            Landing.Run(root, rounds);
-            return 0;
-        }
-
-        // WW342, and the window and not the control: two of its four arms deliberately never go
-        // through automation, and the one that touches the window without waking its thread has no
-        // element to touch. It answers on its own for the reason the three above do.
-        if (arm?.Name == "provoke")
-        {
-            Disturbance.Run(box, arrived, packets, Handle(fixture), rounds);
+            arm.Run(new TypingRun(root, box, arrived, packets, Handle(fixture), rounds));
             return 0;
         }
 
