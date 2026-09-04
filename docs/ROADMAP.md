@@ -41,6 +41,7 @@
 - 💭 **WW371** (deps: —) **an asking desk refuses every guest run, and the only remedy is a person at the guest console** — A browser window survived twelve SW_MINIMIZE calls here, so even the non-destructive repair fails and no unattended run can clear the desk it refuses on. → §WW371
 - 💭 **WW373** (deps: —) **a case that deadlocks wedges the run instead of failing, and only a person watching the guest ends it** — run-tests.cmd passes no --blame-hang, so a stuck case and a slow suite read alike from outside and the honest response to both is to wait longer. → §WW373
 - 💭 **WW375** (deps: —) **a minimized window holding a stale foreground refuses every guest run as a question waiting to be answered** — An Edge window left focused in the guest was iconic for all twelve looks, and the refusal sent a reader to answer a window nobody can see. → §WW375
+- 💭 **WW382** (deps: —) **the two tray menu kinds read as the same tree and nothing claims they must, so a framework changing one is invisible** — WW369 read both and found a Menu of two MenuItems each, which says WW322's difference stops at the desk — a fact no case states. → §WW382
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

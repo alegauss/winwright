@@ -357,6 +357,29 @@ available where the look is built — `IsIconic` beside the class check. What is
 deciding is whether an iconic foreground is a null look, making the desk `clear`, or its
 own word, saying a desk was left with a stale foreground and letting the run go on.
 
+### §WW382 the difference that stops at the desk
+
+WW369 read both tray menus' trees and the reading is the same on each: a `Menu` holding
+two `MenuItem`s, named as the adopters name them. The Win32 kind had never been read as
+a shape at all, so what an adopter's locator would find in a `TrackPopupMenu` was
+unmeasured until this ran. It is what they find in the drop-down.
+
+That is worth more than the check it landed as. WW322 built the pair because the kinds
+differ at the *desk*: a Win32 popup answers the focus reading and a drop-down does not,
+and three adopted cases failed on it for weeks. What WW369 measured is that the
+difference stops there — inside the tree they are one shape, so a locator proven against
+either is proven against both.
+
+Nothing says so. The two cases sit apart, each asserting its own kind, and a reader
+comparing them has to notice that the assertions are word for word identical. The claim
+that they *must* be identical is the useful one, and it is one line: the two trees,
+rendered, are equal.
+
+What that would catch is a framework changing one kind and not the other — which is
+exactly the failure WW356 was, arriving from the other side. It also gives WW322's pair
+a sentence it does not have: what these two fixtures differ in is the desk, and a case
+that asserts the trees agree is where that stops being folklore.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW379 the control that is late on purpose
