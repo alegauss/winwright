@@ -5,6 +5,7 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
+- 💭 **WW376** (deps: —) **the rate WW363 added says nothing on the run that first shows a rise, which is the run a reader is holding** — The run that shipped it excused 9 against four runs of 8, the ninth a tray case, and no line carried a rate because a new case is at one. → §WW376
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -42,6 +43,7 @@
 - 💭 **WW370** (deps: —) **the loop's one branch that answers nothing is the desktop skip, and no case arranges a desktop-held desk to run it** — WW357 runs the polling against a window this suite puts up, so every look it takes is a window; the skip that makes a quiet desk read clear is still run by nothing. → §WW370
 - 💭 **WW371** (deps: —) **an asking desk refuses every guest run, and the only remedy is a person at the guest console** — A browser window survived twelve SW_MINIMIZE calls here, so even the non-destructive repair fails and no unattended run can clear the desk it refuses on. → §WW371
 - 💭 **WW373** (deps: —) **a case that deadlocks wedges the run instead of failing, and only a person watching the guest ends it** — run-tests.cmd passes no --blame-hang, so a stuck case and a slow suite read alike from outside and the honest response to both is to wait longer. → §WW373
+- 💭 **WW375** (deps: —) **a minimized window holding a stale foreground refuses every guest run as a question waiting to be answered** — An Edge window left focused in the guest was iconic for all twelve looks, and the refusal sent a reader to answer a window nobody can see. → §WW375
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

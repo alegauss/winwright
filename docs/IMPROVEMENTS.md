@@ -28,6 +28,28 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
+### §WW376 the fraction about the set, not the member
+
+WW363 was measured on five runs that excused 8, 8, 8, 9 and 10. The run that shipped it
+excused 9 against four runs of 8, and the case that made the difference was
+`TrayPlacementTests.Two_icons_from_the_same_run_are_each_placed_before_their_own_add_returns`
+— the chevron pressed and no flyout inside 2003ms, which is the tray shape the whole
+task is about. Not one line of that report carried a rate.
+
+Every clause was correct. The eight that recurred are in all four runs before it, so the
+stronger claim fires and the rate stays quiet by design. The ninth was at one, and one
+is where every excuse starts. So the reading arrives on the run after the one a reader
+is holding, and the run that first shows a rise reads exactly as it did before WW363.
+
+What is missing is the same argument one level up. WW363 answers how often *this case*
+was excused; nobody asks how much of *this run's* excusing is old. Three of nine excuses
+being cases the last twenty runs excused in over half of them is a sentence about the
+set rather than about any member of it, and it can be said on the run that adds a new
+case, because it does not depend on that case having a history.
+
+The numbers are already read — `HowOften` carries the whole table. What is undecided is
+which fraction a reader is owed and whether it belongs in the sentence or under it.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW364 the promise the signature does not make
@@ -360,5 +382,27 @@ with an address, which is what every other failure in this repository already is
 
 The candidate is a timeout on the runner, generous enough that the slowest honest case
 never meets it, and a guest kill that no longer needs a person.
+
+### §WW375 the question nobody can read
+
+WW331 taught the probe that the shell holding the desk is not a question, and WW357 made
+the looks themselves runnable so a look built wrong could be caught. Neither reading
+covers the desk that refused a run today: a Microsoft Edge window, left focused in the
+guest, held the foreground for all twelve looks and was classified `asking`. The remedy
+printed with it sends a reader to the guest console to answer a prompt, and names the
+ShellExperienceHost dialog that cost a run — a window that was not there.
+
+What the desk held was measured before anything was touched. `IsIconic` on that handle
+was true: the window was already minimized, and Windows had kept it as the foreground
+because nothing else claimed it. Minimizing it again changed nothing, and so did the
+shell's own `MinimizeAll`. A `Win+D` at the guest handed the foreground to `Progman` and
+the next run read `clear`.
+
+So the classification has a third shape it does not know. `Get-DeskLooks` drops the
+desktop by class and the shell surfaces by class, and a minimized window is neither and
+cannot be a question either: nobody can read it, so nobody can answer it. The reading is
+available where the look is built — `IsIconic` beside the class check. What is worth
+deciding is whether an iconic foreground is a null look, making the desk `clear`, or its
+own word, saying a desk was left with a stale foreground and letting the run go on.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
