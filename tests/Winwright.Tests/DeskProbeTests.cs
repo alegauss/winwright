@@ -61,7 +61,7 @@ public sealed class DeskProbeTests
     private static string Clearer() => File.ReadAllText(Checkout.At("tools", "desk-clear.ps1"));
 
     /// <summary>Every answer the probe can write, and the runner has an arm for each.</summary>
-    private static readonly string[] States = ["clear", "busy", "asking", "shell", "broken"];
+    private static readonly string[] States = ["clear", "busy", "asking", "shell", "stale", "broken"];
 
     /// <summary>What <see cref="Looked" /> prints for a look the probe skipped. WW357.</summary>
     private const string Desktop = "the desktop";
@@ -235,8 +235,11 @@ public sealed class DeskProbeTests
             Set-StrictMode -Version Latest
             $ErrorActionPreference = 'Stop'
             . '{{probe}}' -DefineOnly
-            function Look($handle, $class, $title) {
-                [pscustomobject]@{ Handle = $handle; Pid = 42; Process = 'prompt'; Class = $class; Title = $title }
+            function Look($handle, $class, $title, $iconic = $false) {
+                [pscustomobject]@{
+                    Handle = $handle; Pid = 42; Process = 'prompt'; Class = $class; Title = $title
+                    Iconic = $iconic
+                }
             }
             {{body}}
             """);
@@ -325,6 +328,37 @@ public sealed class DeskProbeTests
         Assert.Equal("testhost", fields[2]);
         Assert.Equal("Static", fields[3]);
         Assert.Equal("winwright desk probe", fields[4]);
+
+        // WW375's field, read with the rest: the classification is a pure function of what the loop
+        // returns, and a state it had to infer is a state it would get wrong. This dialog is up and
+        // in front, so it is the answer that says a look carries the reading at all.
+        Assert.Equal("False", fields[5]);
+    }
+
+    [Fact]
+    public void A_minimised_window_holding_the_desk_is_not_a_question_anybody_can_answer()
+    {
+        // WW375, measured on this guest: an Edge window left focused held the foreground for all
+        // twelve looks and refused every run, and IsIconic on that handle answered true throughout.
+        // It was minimised, and Windows keeps a minimised window as the foreground until something
+        // else claims it — so the refusal sent a reader to the guest console to answer a window
+        // nobody can see.
+        //
+        // Its own word rather than folded into the desktop, which is WW331's lesson: making the
+        // refusal go away by calling this "nothing but the desktop held the foreground" is a
+        // sentence that is not true about a desk a window is holding. The reading was right and
+        // there was no word for it.
+        var said = Classified(
+            "@((Look 1 'Chrome_WidgetWin_1' 'a browser' $true), (Look 1 'Chrome_WidgetWin_1' 'a browser' $true))",
+            "@((Look 1 '#32770' 'Save changes?'), (Look 1 '#32770' 'Save changes?'))",
+
+            // And the shell still wins where both would answer, because a taskbar is the shell's
+            // whatever state its window is in — the two words are about different things.
+            "@((Look 1 'Shell_TrayWnd' '' $true), (Look 1 'Shell_TrayWnd' '' $true))");
+
+        Assert.StartsWith("stale|prompt|42|Chrome_WidgetWin_1|a browser", said[0], StringComparison.Ordinal);
+        Assert.StartsWith("asking|", said[1], StringComparison.Ordinal);
+        Assert.StartsWith("shell|", said[2], StringComparison.Ordinal);
     }
 
     [Fact]
@@ -482,7 +516,7 @@ public sealed class DeskProbeTests
         $looks = Get-DeskLooks {{arguments}}
         foreach ($one in $looks) {
             if ($null -eq $one) { 'the desktop' }
-            else { "$($one.Handle)|$($one.Pid)|$($one.Process)|$($one.Class)|$($one.Title)" }
+            else { "$($one.Handle)|$($one.Pid)|$($one.Process)|$($one.Class)|$($one.Title)|$($one.Iconic)" }
         }
         """);
 

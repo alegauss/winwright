@@ -351,6 +351,7 @@
 - ✅ **WW370** **the loop's one branch that answers nothing is the desktop skip, and no case arranges a desktop-held desk to run it** — Get-DeskLooks takes the desktop list, so a case names the class of its own window and runs the skip that makes a quiet desk clear (design recorded in `tools/desk-probe.ps1`).
 - ✅ **WW371** **an asking desk refuses every guest run, and the only remedy is a person at the guest console** — A window with a minimise button is put away and only a question still refuses (design superseded: the minimise it called failed had held every time) (design recorded in `tools/desk-clear.ps1`).
 - ✅ **WW373** **a case that deadlocks wedges the run instead of failing, and only a person watching the guest ends it** — A single case is bounded at ten minutes against a slowest honest one of 158 seconds, so a deadlock is a red naming it (design recorded in `tests/Winwright.Tests/Winwright.Tests.csproj`).
+- ✅ **WW375** **a minimized window holding a stale foreground refuses every guest run as a question waiting to be answered** — A minimised window holding the desk gets its own word and the run goes on, because nobody can read it and nobody can answer it (design recorded in `tools/desk-probe.ps1`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

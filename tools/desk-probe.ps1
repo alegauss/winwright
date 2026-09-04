@@ -22,6 +22,11 @@
     asking   one window held it for every look, so it is waiting for an answer and no amount of
              waiting is the answer. Named with its process and its title, because a person has to
              go and click it.
+    stale    the same, and the window is minimised. WW375: nobody can read it, so nobody can
+             answer it - a window nobody can see is not a question whatever it holds. Windows
+             keeps a minimised window as the foreground until something else claims it, which is
+             how an ordinary desk ends up here. Said and not refused, and the first case to take
+             the foreground clears it.
     shell    the same, and the window is the taskbar or the overflow flyout. WW331: not a question,
              because the shell has none to ask - a desk somebody left selected, which the next
              thing touched clears. Said and not refused, and it names WW330, which is what stops a
@@ -95,8 +100,22 @@ function Read-DeskState {
         # is turns on whose window it is. A question is some application's, with a caption, and no
         # amount of waiting answers it; the shell holding the desk is a desk somebody left selected,
         # which clears the moment anything else is touched and is what WW330 stops a run leaving.
+        #
+        # WW375 is the third of them and was measured on this guest: an Edge window held the
+        # foreground for all twelve looks and IsIconic answered true the whole time. It was minimised
+        # and Windows had simply kept it as the foreground, because a minimised window stays the
+        # foreground until something else claims it. So the refusal sent a reader to the guest
+        # console to answer a window nobody can see.
+        #
+        # Its own word rather than folded into the desktop, which is WW331's lesson exactly: making
+        # the refusal go away by calling this "nothing but the desktop held the foreground" would be
+        # a sentence that is not true about a desk a window is holding. The reading is right; what
+        # was missing is a word for it.
         $one = $held[0]
-        $state = if ($script:ShellSurfaces -contains $one.Class) { 'shell' } else { 'asking' }
+        $state = if ($script:ShellSurfaces -contains $one.Class) { 'shell' }
+            elseif ($one.Iconic) { 'stale' }
+            else { 'asking' }
+
         return "$state|$($one.Process)|$($one.Pid)|$($one.Class)|$($one.Title)"
     }
 
@@ -120,6 +139,7 @@ using System.Text;
 
 public static class Fg {
     [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
     [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowTextW(IntPtr h, StringBuilder s, int n);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassNameW(IntPtr h, StringBuilder s, int n);
@@ -175,6 +195,10 @@ function Get-DeskLooks {
             Process = if ($named) { $named.ProcessName } else { "pid $owner" }
             Class   = $class
             Title   = [Fg]::TextOf($handle)
+
+            # WW375. Read here with the rest of what a look is, because the classification is a pure
+            # function of what this returns and a state it has to infer is a state it will get wrong.
+            Iconic  = [Fg]::IsIconic($handle)
         }
     }
 

@@ -263,28 +263,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW375 the question nobody can read
-
-WW331 taught the probe that the shell holding the desk is not a question, and WW357 made
-the looks themselves runnable so a look built wrong could be caught. Neither reading
-covers the desk that refused a run today: a Microsoft Edge window, left focused in the
-guest, held the foreground for all twelve looks and was classified `asking`. The remedy
-printed with it sends a reader to the guest console to answer a prompt, and names the
-ShellExperienceHost dialog that cost a run — a window that was not there.
-
-What the desk held was measured before anything was touched. `IsIconic` on that handle
-was true: the window was already minimized, and Windows had kept it as the foreground
-because nothing else claimed it. Minimizing it again changed nothing, and so did the
-shell's own `MinimizeAll`. A `Win+D` at the guest handed the foreground to `Progman` and
-the next run read `clear`.
-
-So the classification has a third shape it does not know. `Get-DeskLooks` drops the
-desktop by class and the shell surfaces by class, and a minimized window is neither and
-cannot be a question either: nobody can read it, so nobody can answer it. The reading is
-available where the look is built — `IsIconic` beside the class check. What is worth
-deciding is whether an iconic foreground is a null look, making the desk `clear`, or its
-own word, saying a desk was left with a stale foreground and letting the run go on.
-
 ### §WW382 the difference that stops at the desk
 
 WW369 read both tray menus' trees and the reading is the same on each: a `Menu` holding

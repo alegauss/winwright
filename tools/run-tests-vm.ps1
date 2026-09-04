@@ -531,6 +531,20 @@ switch ($desk.State) {
             'what stops a tray act doing it. The run goes on â€” the first case to take the ' +
             'foreground clears it.') -ForegroundColor Yellow
     }
+    'stale' {
+        # WW375. Not a refusal, and the difference is the whole reading: the window holding the desk
+        # is minimised, so nobody can see it and nobody can answer it. Windows keeps a minimised
+        # window as the foreground until something else claims it, which is how an ordinary desk
+        # ends up here — measured on this guest, where an Edge window left focused was iconic for
+        # all twelve looks and refused every run.
+        #
+        # Said out loud for WW331's reason: the run goes on, and a desk left this way is still a
+        # desk somebody's window is holding rather than a clear one.
+        Write-Host (
+            "  foreground  a minimised window holds it, so there is nothing to answer: " +
+            "$($desk.Process) (pid $($desk.Pid), $($desk.Class)) '$($desk.Detail)'. The run goes " +
+            'on — the first case to take the foreground clears it.') -ForegroundColor Yellow
+    }
     'asking' {
         # WW371. Tried once before refusing, and read again afterwards rather than believed.
         #
