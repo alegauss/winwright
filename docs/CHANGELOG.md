@@ -73,6 +73,7 @@
 - ✅ **WW297** **the roll call never runs on a failing suite, so the worst runs report no excuses and file no ledger** — CallTarget makes the failure a task's, so OnError reaches the roll: a red guest run printed 9 excused against 8 the run before, filed its ledger, and still exited 1.
 - ✅ **WW298** **the excused count is compared with one predecessor, so a second busy-desk run in a row reads as ordinary** — Four counts read as a series rather than one difference: a guest run said 8, where the 4 before it excused 8, 8, 8 and 9, so a repeated anomaly cannot become the baseline.
 - ✅ **WW299** **a run that discovers 600 fewer cases than the last still reads as green** — Read off the listing each run keeps and said only where it moved: a guest run printed all 1813 discovered cases ran, where the run before discovered 1812.
+- ✅ **WW363** **the run report says whether an excuse is new and not whether this suite is getting harder to run on a real desk** — An excused case now says how often the last 20 ledgers excused it, so a rising set of tray cases stops reading as ordinary (design recorded in `tools/Winwright.RollCall/Readers.cs`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

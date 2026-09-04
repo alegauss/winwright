@@ -15,6 +15,27 @@ public sealed record Recorded(string Name, string Outcome, bool Ran)
 }
 
 /// <summary>
+/// How often each case was excused, and over how many runs that was read. WW363.
+/// <para>
+/// The denominator travels with the numerator because it is half the reading: 3 is a rate on a
+/// checkout with four ledgers and a rounding error on one with forty, and a number reported without
+/// the runs it came from is the second of those pretending to be the first.
+/// </para>
+/// </summary>
+/// <param name="Ledgers">How many earlier runs were read, which is what the counts are out of.</param>
+/// <param name="Times">How many of them excused each case, by case name.</param>
+public sealed record HowOften(int Ledgers, IReadOnlyDictionary<string, int> Times)
+{
+    /// <summary>Nothing read, which a first run on a fresh checkout is.</summary>
+    public static readonly HowOften Nothing =
+        new(0, new ReadOnlyDictionary<string, int>(new Dictionary<string, int>(StringComparer.Ordinal)));
+
+    /// <summary>How many of the runs read excused this case, which is none where it never was.</summary>
+    /// <param name="named">The case, as the ledger spells it.</param>
+    public int For(string named) => Times.TryGetValue(named, out var many) ? many : 0;
+}
+
+/// <summary>
 /// Reading the two lists this check compares.
 /// <para>
 /// Both are read from what the runner already produces, on purpose: a roll call that needed the
@@ -185,6 +206,58 @@ public static class Readers
     }
 
     /// <summary>
+    /// How often each case was excused across the ledgers on disk, and over how many. WW363.
+    /// <para>
+    /// The three readings above answer whether a count moved and whether an excuse recurs. None of
+    /// them sees a slope: five runs excused 8, 8, 8, 9 and 10, each rise a different tray case, and
+    /// every clause read as ordinary — because a case excused for the first time recurs with nothing
+    /// and a count compared with the one before it went up by one.
+    /// </para>
+    /// <para>
+    /// A rate is what separates them, and a case excused in half its runs is a different thing from
+    /// one excused in its first. Nothing new is measured: the ledgers are already on disk, and this
+    /// counts what is in them.
+    /// </para>
+    /// <para>
+    /// A deeper window than the recurrence reading, and deliberately. "Every one of the last four"
+    /// is a strong claim that wants unanimity over a short run; a rate wants depth, and four ledgers
+    /// give five possible answers — a case at 3 of 4 and one at 15 of 20 are the same fraction and
+    /// not the same evidence.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The results root every run writes a directory under.</param>
+    /// <param name="thisRun">This run's own directory, which is not its own predecessor.</param>
+    /// <param name="most">How many of the most recent to read; the default is what the tool uses.</param>
+    public static HowOften ExcusedHowOften(string root, string thisRun, int most = Deep)
+    {
+        var times = new Dictionary<string, int>(StringComparer.Ordinal);
+        var read = 0;
+
+        foreach (var ledger in Kept(root, thisRun, most, Excused))
+        {
+            var rows = ExcusedIn(ledger);
+            if (rows is null)
+                continue;
+
+            read++;
+
+            // Once per run per case, not once per row: a case excused twice in one run is one run
+            // that excused it, and counting rows would make a case that fires several checks look
+            // like a case that has been going for longer.
+            var named = rows
+                .Select(one => Excuse(one).Case)
+                .Where(one => one is not null)
+                .Select(one => one!)
+                .Distinct(StringComparer.Ordinal);
+
+            foreach (var one in named)
+                times[one] = times.GetValueOrDefault(one) + 1;
+        }
+
+        return new HowOften(read, new ReadOnlyDictionary<string, int>(times));
+    }
+
+    /// <summary>
     /// The file each of the last few runs kept under the root, oldest last read first — the part both
     /// series and the recurrence reading ask identically, so they cannot drift apart on it.
     /// </summary>
@@ -237,6 +310,13 @@ public static class Readers
     /// </para>
     /// </summary>
     public const int Recent = 4;
+
+    /// <summary>
+    /// How many ledgers a rate is read over. WW363, and five times the recurrence window on purpose:
+    /// a claim about every run wants unanimity over a few, and a rate wants enough runs that its
+    /// fractions mean something.
+    /// </summary>
+    public const int Deep = 20;
 
     /// <summary>
     /// The desk facts a run excused a check for, one per line, or null where nobody wrote them down.

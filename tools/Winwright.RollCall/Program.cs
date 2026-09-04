@@ -146,5 +146,10 @@ public static class Program
         new(
             Readers.ExcusedRecently(root, thisRun),
             Readers.DiscoveredRecently(root, thisRun),
-            Readers.ExcusedEveryTime(root, thisRun));
+            Readers.ExcusedEveryTime(root, thisRun),
+
+            // WW363, and the fourth reading of the same directories. Deeper than the other three
+            // because it is a rate rather than a comparison: four ledgers give a fraction five
+            // values, and a slope needs more room than that to be visible in.
+            Readers.ExcusedHowOften(root, thisRun));
 }

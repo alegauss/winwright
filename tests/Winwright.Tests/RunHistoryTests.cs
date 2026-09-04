@@ -197,6 +197,93 @@ public sealed class RunHistoryTests : IDisposable
     }
 
     [Fact]
+    public void How_often_a_case_was_excused_is_counted_over_the_ledgers_and_says_over_how_many()
+    {
+        // WW363. The slope neither of the readings above can see: a tray case excused in half its
+        // runs and one excused for the first time are the same to a count compared with the run
+        // before it, and to a list of what every recent run excused.
+        Excusing("first", ["TrayTests.A_chevron", "PointerTests.A_click"], new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        Excusing("second", ["TrayTests.A_chevron"], new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+        Excusing("third", [], new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc));
+        Excusing("fourth", ["TrayTests.A_chevron"], new DateTime(2026, 4, 1, 0, 0, 0, DateTimeKind.Utc));
+        var mine = Excusing("this-run", ["TrayTests.A_chevron"], DateTime.UtcNow);
+
+        var often = Readers.ExcusedHowOften(root, mine);
+
+        // Four ledgers read, and this run's own is not one of them.
+        Assert.Equal(4, often.Ledgers);
+        Assert.Equal(3, often.For("Winwright.Tests.TrayTests.A_chevron"));
+        Assert.Equal(1, often.For("Winwright.Tests.PointerTests.A_click"));
+
+        // A case no ledger names is none rather than absent, because the question is how often and
+        // never whether the ledgers were read — which is what Ledgers answers.
+        Assert.Equal(0, often.For("Winwright.Tests.NudgeTests.A_nudge"));
+    }
+
+    [Fact]
+    public void A_case_excused_twice_in_one_run_is_one_run_that_excused_it()
+    {
+        // Rows and runs are different denominators. Counting rows would make a case firing several
+        // checks read as a case that has been going for longer, which is the opposite of the reading.
+        Excusing("first", ["TrayTests.A_chevron", "TrayTests.A_chevron"], new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        Excusing("second", ["TrayTests.A_chevron"], new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+        var mine = Excusing("this-run", [], DateTime.UtcNow);
+
+        Assert.Equal(2, Readers.ExcusedHowOften(root, mine).For("Winwright.Tests.TrayTests.A_chevron"));
+    }
+
+    [Fact]
+    public void A_rate_is_reported_beside_the_case_and_never_beside_the_stronger_claim()
+    {
+        var roll = Roll.Of(
+            ["Winwright.Tests.TrayTests.A_chevron"],
+            [new Recorded("Winwright.Tests.TrayTests.A_chevron", "Passed", true)],
+            [Row("TrayTests.A_chevron"), Row("NudgeTests.A_nudge"), Row("PointerTests.A_click")],
+            new Earlier(
+                [8, 8, 9, 10],
+                [],
+                ["Winwright.Tests.NudgeTests.A_nudge"],
+                new HowOften(
+                    20,
+                    new Dictionary<string, int>(StringComparer.Ordinal)
+                    {
+                        ["Winwright.Tests.TrayTests.A_chevron"] = 11,
+                        ["Winwright.Tests.NudgeTests.A_nudge"] = 20,
+                        ["Winwright.Tests.PointerTests.A_click"] = 1,
+                    })));
+
+        var said = roll.ToString();
+
+        // The one the other clauses called ordinary: excused in over half its runs and in none of
+        // the sentences, because it was new each of the times it was new.
+        Assert.Contains("A_chevron", said, StringComparison.Ordinal);
+        Assert.Contains("(excused in 11 of the last 20 runs)", said, StringComparison.Ordinal);
+
+        // Not beside the recurrence clause, which already made the stronger claim over its own
+        // window — two fractions about one case on one line is a line nobody finishes.
+        Assert.Contains("A_nudge", said, StringComparison.Ordinal);
+        Assert.Contains("(in all 4 runs before it)", said, StringComparison.Ordinal);
+        Assert.DoesNotContain("(excused in 20 of the last 20 runs)", said, StringComparison.Ordinal);
+
+        // And silent at one, because one run is where every excuse starts.
+        Assert.DoesNotContain("excused in 1 of the last", said, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_rate_says_nothing_where_no_ledger_was_read()
+    {
+        // The state this whole type has a word for. A run that asked nothing is not a run whose
+        // cases have never been excused, and printing "0 of the last 0" would be the second.
+        var roll = Roll.Of(
+            ["Winwright.Tests.TrayTests.A_chevron"],
+            [new Recorded("Winwright.Tests.TrayTests.A_chevron", "Passed", true)],
+            [Row("TrayTests.A_chevron")],
+            new Earlier([8], [], []));
+
+        Assert.DoesNotContain("of the last", roll.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void One_earlier_run_is_not_a_pattern_and_agrees_with_itself()
     {
         // A single run agreeing with itself would make the first coincidence structural, which is the

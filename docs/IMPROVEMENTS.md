@@ -28,30 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW363 the count that cannot see a slope
-
-WW289 gave every run its count against the run before it, WW298 made that four counts
-rather than one, and WW300 said which of them recur. Between them a reader can tell a
-busy desk from this suite's own structure, for a count that stays put and for one that
-jumps.
-
-What none of the three reads is a slope. Five runs over WW346 to WW350 excused 8, 8, 8,
-9 and 10, and each rise was a different notification-area case: a chevron that opened no
-flyout, an overflow that shut mid-search, input the run had not synthesised. Every
-clause was true and none alarming — the count is compared, a new one is named, and a
-case excused once and not again recurs with nothing.
-
-The tray cases are the reason and they are correctly written. Each excuses the desk fact
-it needs, so each is individually right; together they are a growing set of checks a
-slow shell can take away one at a time, and the run that takes eight away reads like the
-run that takes one.
-
-So what is missing is a rate rather than a count. How often a given case is excused
-across the ledgers already on disk is a number this could carry without measuring
-anything new, and a case excused in half its runs is a different thing from one excused
-in its first. What that number should do — reported, or a threshold — is worth deciding
-rather than assuming.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW364 the promise the signature does not make

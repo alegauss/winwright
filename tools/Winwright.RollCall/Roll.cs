@@ -494,7 +494,8 @@ public sealed record Roll
             .Take(most)
             .Select(one => $"  excused   {one.Case ?? "<unnamed>"}: {one.Fact}"
                 + (one.Absence is null ? "" : $" — {one.Absence}")
-                + Recurring(one.Case))
+                + Recurring(one.Case)
+                + Often(one.Case))
             .ToList();
 
         if (read.Count > most)
@@ -522,6 +523,39 @@ public sealed record Roll
         !Everywhere && named is not null && Earlier.Always.Contains(named, StringComparer.Ordinal)
             ? $" (in all {Earlier.Excused.Count} runs before it)"
             : "";
+
+    /// <summary>
+    /// How often this case has been excused across the ledgers on disk. WW363.
+    /// <para>
+    /// The slope the other clauses cannot see. A count compared with the run before it and a list of
+    /// what every recent run excused both read a newly-excused case as ordinary, so a set of tray
+    /// cases a slow shell takes away one at a time arrives as five unremarkable runs — measured: 8,
+    /// 8, 8, 9 and 10, a different case each time.
+    /// </para>
+    /// <para>
+    /// Said where the recurrence clause is not, and never beside it: that one already made the
+    /// stronger claim over its own window, and two fractions about one case on one line is a line
+    /// nobody finishes. Silent below two, because one run is where every excuse starts and marking
+    /// them all marks nothing.
+    /// </para>
+    /// <para>
+    /// A number and not a judgement. What a rate means is the reader's, which is why nothing here
+    /// refuses a run over it — a desk fact that could make a green go away is the one thing this
+    /// block says it will not do.
+    /// </para>
+    /// </summary>
+    /// <param name="named">The case the excused row names, which an older ledger may not carry.</param>
+    private string Often(string? named)
+    {
+        if (named is null || Earlier.Often.Ledgers == 0)
+            return "";
+
+        if (!Everywhere && Earlier.Always.Contains(named, StringComparer.Ordinal))
+            return "";
+
+        var times = Earlier.Often.For(named);
+        return times < 2 ? "" : $" (excused in {times} of the last {Earlier.Often.Ledgers} runs)";
+    }
 
     /// <summary>
     /// Whether every excuse this run made was made by every run before it too.

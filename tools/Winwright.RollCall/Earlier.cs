@@ -27,8 +27,16 @@ public sealed record Earlier
     /// <param name="excused">How many checks each excused, oldest first.</param>
     /// <param name="discovered">How many cases each discovered, oldest first.</param>
     /// <param name="always">The cases every one of them excused, which is what recurs.</param>
+    /// <param name="often">
+    /// How often each case was excused across the ledgers on disk. WW363, and defaulted because a
+    /// caller that never asked is the state this type has a word for: nothing read, which is not
+    /// the same as nothing found.
+    /// </param>
     public Earlier(
-        IEnumerable<int> excused, IEnumerable<int> discovered, IEnumerable<string> always)
+        IEnumerable<int> excused,
+        IEnumerable<int> discovered,
+        IEnumerable<string> always,
+        HowOften? often = null)
     {
         ArgumentNullException.ThrowIfNull(excused);
         ArgumentNullException.ThrowIfNull(discovered);
@@ -37,6 +45,7 @@ public sealed record Earlier
         Excused = new ReadOnlyCollection<int>(excused.ToList());
         Discovered = new ReadOnlyCollection<int>(discovered.ToList());
         Always = new ReadOnlyCollection<string>(always.ToList());
+        Often = often ?? HowOften.Nothing;
     }
 
     /// <summary>
@@ -74,4 +83,22 @@ public sealed record Earlier
     /// </para>
     /// </summary>
     public IReadOnlyList<string> Always { get; }
+
+    /// <summary>
+    /// How often each case was excused across the ledgers on disk, and over how many. WW363.
+    /// <para>
+    /// The reading none of the three above could make. A count compared with the one before it and a
+    /// list of what recurs both call a case excused for the first time ordinary — which it is, once.
+    /// Five runs excused 8, 8, 8, 9 and 10, each rise a different tray case, and every clause the
+    /// report had was true and none of them said the set was growing.
+    /// </para>
+    /// <para>
+    /// Reported and never a threshold, which is the decision this task turned on. Block B's own
+    /// criterion is that nothing about the desk is reported as a defect in the code, and a rate that
+    /// refused a run would be exactly that — a machine's slow shell making a green go away. The
+    /// recurrence reading beside it already says the same thing about its own window: a threshold is
+    /// a number somebody tunes the day it refuses. So this is evidence a reader weighs.
+    /// </para>
+    /// </summary>
+    public HowOften Often { get; }
 }
