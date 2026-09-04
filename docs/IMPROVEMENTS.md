@@ -178,6 +178,31 @@ the four signatures at the runner rather than in the list: then `Run.Method` nam
 real method on a real type and a case can assert which. The second removes a spelling
 rather than adding one, which is the direction this project has taken every other time.
 
+### §WW385 the branch between the field and the ask
+
+WW372 added `popup` to the step and every case that proves it stops one layer above a
+run. `OwnRenderTests` drives `PopupInto` against a real answering window and reads the
+verdict off `RenderAsked`; `CaseRunTests` and `ScenarioFileTests` prove the field
+parses, refuses under the wrong verb, and arrives on the step. Nothing declares a
+capture naming a popup and runs it.
+
+So the wiring in `CaseRun.Captured` is asserted by nothing, and each of its three lines
+is a way to be wrong: a popup step taking the copy route photographs the window and
+passes, `PopupInto` handed the wrong handle answers about another window, and the ask
+fetched with its reading dropped answers nothing. All three end in a green with a file
+beside it.
+
+What it needs is a case that runs, and the pieces exist: `AnsweringWindow` draws a popup
+and answers for it, and `CaseRunTests` runs declared cases against real windows under a
+project declaring `captures`. What is missing is the join — declare a capture naming
+`AnsweringWindow.PopupNamed`, run it, read the file's pixel count. The popup's child is
+90x40 against a 240x160 window, so the count says which tree was photographed and a run
+that took the window cannot pass.
+
+The red belongs in the same case: the same declaration with a name no popup has,
+asserting the verdict is a failure rather than a hole — which is the half of WW372 a run
+has never produced.
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
