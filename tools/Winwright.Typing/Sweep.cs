@@ -499,6 +499,42 @@ internal static class Spaced
         SendInput((uint)array.Length, array, Marshal.SizeOf<Win32.Input>());
     }
 
+    /// <summary>
+    /// The caret to the end, in a call of its own. WW368.
+    /// <para>
+    /// <see cref="Clear"/> sends End and the backspaces in one <c>SendInput</c>; the engine sends
+    /// them in two, because <c>MoveToTheEnd</c> and <c>Erase</c> are separate calls a line apart.
+    /// So a round of the engine's is three calls into the queue and a round of the arms' is two,
+    /// and no arm had ever separated the two shapes — which is one of the things that could be
+    /// carrying the rate the arms read as zero and the act still reads.
+    /// </para>
+    /// </summary>
+    public static void End()
+    {
+        Win32.Input[] pair = [Pressed(VkEnd, 0), Pressed(VkEnd, KeyUp)];
+        SendInput((uint)pair.Length, pair, Marshal.SizeOf<Win32.Input>());
+    }
+
+    /// <summary>
+    /// The backspaces alone, in a call of their own. WW368, and the other half of the split.
+    /// </summary>
+    /// <param name="characters">How many characters are standing in the box.</param>
+    public static void Erase(int characters)
+    {
+        if (characters <= 0)
+            return;
+
+        var inputs = new List<Win32.Input>(characters * 2);
+        for (var each = 0; each < characters; each++)
+        {
+            inputs.Add(Pressed(VkBack, 0));
+            inputs.Add(Pressed(VkBack, KeyUp));
+        }
+
+        var array = inputs.ToArray();
+        SendInput((uint)array.Length, array, Marshal.SizeOf<Win32.Input>());
+    }
+
     private const uint KeyUp = 0x0002;
     private const uint KeyUnicode = 0x0004;
     private const uint InputKeyboard = 1;

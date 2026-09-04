@@ -345,6 +345,18 @@ public static class Keyboard
         // guards a fault thirty times rarer, and that a round is very much shorter: 1200 rounds with
         // both read 0 faulted at 91-95ms a quarter, where WW329 priced the same act at 146ms with no
         // pause and 153ms with one. Most of what a settle cost was the walk it took every poll.
+        //
+        // WW368 found what did not transfer, and it is not on this line. A ladder walked the arm to
+        // the act one difference at a time on the guest, 1200 rounds a rung: the arm's own shape 0,
+        // plus a SetFocus every round 1, plus the engine's split send 0, plus the engine's own
+        // stop-on-match read 1 — which is the act's rate, reproduced outside the engine for the
+        // first time. The three rungs that take the focus read 2 of 3600 where the one that does not
+        // read 0 of 1200, against WW355's 0 of 3200.
+        //
+        // So the provoking call is on the other side of the send. `TakeFocus` above is a provider
+        // round-trip issued on the line before the keys go in, and this pause is spent after them —
+        // it is guarding the read, and the read was acquitted twice. What that opens is a pause that
+        // guards the focus instead, which would be a repair rather than a floor found by sweeping.
         Thread.Sleep(Keys.FirstLookMs);
 
         var settled = Attempt.Until(

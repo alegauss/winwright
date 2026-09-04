@@ -111,6 +111,13 @@ public static class Arms
                 + "fifty milliseconds pay for is attributable to the call out of this process or to "
                 + "the message loop run on the target's thread",
             run => Disturbance.Run(run.Box, run.Arrived, run.Injected, run.Window, run.Rounds)),
+        new(
+            "transfer",
+            "WW368",
+            "the walk from the arm to the act, one difference a rung — the focus taken every round, "
+                + "End sent in a call of its own, and the read stopped the moment the box says what "
+                + "was sent — so the rung where a rate appears is what the arm was not doing",
+            run => Transfer.Run(run.Box, run.Arrived, run.Injected, run.Window, run.Rounds)),
     ]);
 
     /// <summary>

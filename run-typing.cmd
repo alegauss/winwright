@@ -42,9 +42,22 @@ rem while it drains, `peek` reads the window's rectangle without waking its thre
 rem thread dispatch a WM_NULL and reads nothing back, and `read` is the engine's own first look. What
 rem the rows say is which half the fault needs, which is what the fifty milliseconds are paying for.
 rem
+rem `transfer` is WW368's, and it is the only arm that walks towards the engine rather than away from
+rem it. WW355 measured four cheap readers clean over 800 rounds each and the engine then read 1 of
+rem 1200 with the pause taken out - so the arm is not the act, and nothing said where they part. Four
+rem rungs, each the one before it plus exactly one thing the real act does: `arm` is WW355's own
+rem reading, `focus` takes the focus before every round, `split` sends End in a call of its own so
+rem the queue sees three arrays and not two, and `settle` stops reading the moment the box says what
+rem was sent - which by that rung is the engine's round with the pause at zero. The rung where a rate
+rem appears is the answer.
+rem
+rem Give it rounds. A rate of one in twelve hundred expects a third of a fault at 400 a rung, so a row
+rem of zeros there is the count being too small rather than the rungs being clean; 1200 is what WW355
+rem measured the act at.
+rem
 rem The configuration moved to the third argument when this gained the second. `run-typing.cmd 400`,
-rem `run-typing.cmd 150 sweep`, `run-typing.cmd 1200 delay`, `run-typing.cmd 300 acts` and
-rem `run-typing.cmd 400 provoke` are the five a person types.
+rem `run-typing.cmd 150 sweep`, `run-typing.cmd 1200 delay`, `run-typing.cmd 300 acts`,
+rem `run-typing.cmd 400 provoke` and `run-typing.cmd 1200 transfer` are the six a person types.
 rem
 rem WW354: the arms are a list in the tool now - Arms.All - and a second word naming none of them is
 rem refused with that list rather than falling through to the bare run, which used to print the
