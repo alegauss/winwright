@@ -41,6 +41,7 @@
 - 💭 **WW375** (deps: —) **a minimized window holding a stale foreground refuses every guest run as a question waiting to be answered** — An Edge window left focused in the guest was iconic for all twelve looks, and the refusal sent a reader to answer a window nobody can see. → §WW375
 - 💭 **WW382** (deps: —) **the two tray menu kinds read as the same tree and nothing claims they must, so a framework changing one is invisible** — WW369 read both and found a Menu of two MenuItems each, which says WW322's difference stops at the desk — a fact no case states. → §WW382
 - 💭 **WW383** (deps: —) **no case puts a real window up and reads shell out of the probe, so that arm is only ever produced from typed looks** — WW370 opened the desktop list to a case and left the shell surfaces where they were, read off the script with no way in. → §WW383
+- 💭 **WW384** (deps: —) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — WW371 made the decision a function cases call and left the minimise, the foreground and the sentence where WW345 found the probe. → §WW384
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

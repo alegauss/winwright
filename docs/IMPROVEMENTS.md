@@ -354,6 +354,29 @@ polling would let a case say its own window is the taskbar and assert the runner
 `shell` rather than `asking`. Cheap, and it turns the one classification a person acts
 on by *not* going to the console into something a case has actually produced end to end.
 
+### §WW384 the repair nothing has watched
+
+WW371 put a second guest-side script beside the probe, and it arrived in the state the
+probe was in before WW345: the decision is a function cases can call, and the acting
+half is run by nothing but a real guest. `Test-Clearable` is driven with styles somebody
+typed; what happens when the script meets a window — the minimise, the foreground handed
+on, the sentence it writes — is exercised only by the runner refusing a run.
+
+That is the shape both of this probe's defects had. WW345 made the classification
+runnable and a look built wrong still classified perfectly; WW357 closed that. The
+clearer has the same room: a `ShowWindow` on the wrong handle, a foreground handed
+nowhere, or a sentence that says it worked would each leave the desk as it was — and the
+run after would refuse under a line saying the clearing had happened.
+
+Half of it is writable today. `PumpedDialog` is `WS_POPUP` with no minimise button, so a
+case can put it up, run the clearer on the desk it is holding, and assert the script
+left it alone and said so — which is the arm that must never move a window.
+
+The other half needs a window this suite does not build: one with `WS_MINIMIZEBOX`, put
+up, cleared, and read back as gone from the foreground. That is a fixture window and a
+line of style bits, and it is the arm that decides whether an unattended run can start
+at all.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW379 the control that is late on purpose
