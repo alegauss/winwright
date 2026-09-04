@@ -143,6 +143,7 @@
 - ✅ **WW350** **which of a tray menu's two readings answers is a race, and the suite asserted the one that won a single run** — Both readings are taken at the answering look, the menu gets one more poll where only the proxy answered, and Read prefers it (design recorded in `src/Winwright/Acting/NotificationArea.cs`).
 - ✅ **WW353** **a click sends and reads once, so its answer is whatever was there at that instant and nothing retries it** — The click takes the pause WW329 measured rather than a poll, since it has no named thing to poll toward; priced at 50ms a round (design recorded in `src/Winwright/Acting/Pointer.cs`).
 - ✅ **WW355** **every send waits fifty milliseconds for a provider that only one kind of read wakes, and no cheaper read was tried** — The settle asks one pattern of an element already resolved, at 92ms a round against 153; the pause stays, on 1 of 1200 without (design recorded in `src/Winwright/Acting/Keyboard.cs`).
+- ✅ **WW366** **a step's trace line carries the reading the act took and the verdict beside it used one the expectation polled for** — The act's own trace line now carries what the verdict settled on where that differs from what the act read (design recorded in `src/Winwright/Tracing/TraceStep.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

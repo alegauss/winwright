@@ -422,6 +422,65 @@ public sealed class CaseRunTests : IDisposable
         Assert.Throws<ScenarioRefusedException>(() => StepDeclaration.Of("Edit", "capture"));
     }
 
+    [Fact]
+    public void The_act_line_says_what_the_verdict_settled_on_where_that_is_not_what_the_act_read()
+    {
+        // WW366. An act reads once, the moment it returns; the expectation beside it polls after
+        // that to a deadline, and it is the second reading the verdict turns on. Both are true and
+        // they are about different instants, and the act's line is the one a reader lands on —
+        // it names the verb they wrote — so a line reading 'On, ok' above a pass sends them to the
+        // control when the answer was elsewhere.
+        //
+        // Pinned through a reading that differs by projection rather than by timing: a checkbox
+        // reads 'On' through its own patterns and 'Wrap lines' through its name, and this fixture
+        // has no control that settles late on demand. It is the same fact on the line — the value
+        // the verdict used is not the value the act read — which is why the field is shown and
+        // never judged.
+        var frame = Dialog();
+        var declared = CaseDeclaration.Of(
+            "the box says what it is called",
+            StepDeclaration.Of("CheckBox", "toggle", expected: "Wrap lines", reads: "name"));
+
+        var run = Run(declared, frame);
+
+        Assert.Equal(RunOutcome.Passed, run.Verdict.Outcome);
+        Assert.Equal(2, run.Trace.Count);
+
+        // The act's own reading, which is not what was checked.
+        Assert.Equal("toggle", run.Trace[0].Verb);
+        Assert.NotEqual("Wrap lines", run.Trace[0].ReadBack);
+
+        // And what was: the same value the expectation's own line carries, said on the line above
+        // it so a reader never has to hold two lines together to see that they disagree.
+        Assert.Equal("Wrap lines", run.Trace[0].Settled);
+        Assert.Equal(run.Trace[1].ReadBack, run.Trace[0].Settled);
+    }
+
+    [Fact]
+    public void The_act_line_says_nothing_extra_where_the_verdict_settled_on_what_it_read()
+    {
+        // The other half, and the reason the field is nullable: a step whose window had already
+        // settled has nothing to add, and a second value on every line is the mark that marks
+        // nothing.
+        var frame = Dialog();
+        var declared = CaseDeclaration.Of(
+            "the drop-down opens and the field takes a name",
+            StepDeclaration.Of("ComboBox", "expand"),
+            StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value"));
+
+        var run = Run(declared, frame);
+
+        Assert.Equal(RunOutcome.Passed, run.Verdict.Outcome);
+
+        // A step with no expectation never reaches the question.
+        Assert.Equal("expand", run.Trace[0].Verb);
+        Assert.Null(run.Trace[0].Settled);
+
+        // And one whose expectation settled on what the act read has nothing to add.
+        Assert.Equal("beta", run.Trace[1].ReadBack);
+        Assert.Null(run.Trace[1].Settled);
+    }
+
     private CaseResult Run(CaseDeclaration declared, nint frame, bool captures = false) =>
         Run(declared, AutomationElement.FromHandle(frame), captures);
 

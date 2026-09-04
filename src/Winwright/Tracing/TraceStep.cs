@@ -31,6 +31,30 @@ public sealed record TraceStep
     /// <summary>What was read back afterwards — the value that makes the verdict checkable.</summary>
     public string? ReadBack { get; init; }
 
+    /// <summary>
+    /// What the reading had settled to by the time the verdict was taken, where that is not what
+    /// this step read. WW366.
+    /// <para>
+    /// An act reads once, the moment it returns; a step that also expects something polls after it
+    /// to a deadline. Both readings are true and they are about different instants, so a trace line
+    /// carrying only the first sits beside a verdict that turned on the second — and a reader whom
+    /// the verdict surprised is sent to the control when the answer was the timing. That is the
+    /// afternoon WW353 described, moved from the verdict to the page a person actually opens.
+    /// </para>
+    /// <para>
+    /// Null where there is nothing to say, which is most lines: a step with no expectation, and a
+    /// step whose expectation settled on what the act had already read. A second value on every
+    /// line would be the mark that marks nothing.
+    /// </para>
+    /// <para>
+    /// A difference is shown and never judged. It is the window settling after the act, or it is
+    /// the step naming a reading the act's own is not — <c>toggle</c> against what the element
+    /// offers first — and both are things a reader wants in front of them rather than things this
+    /// line should decide between.
+    /// </para>
+    /// </summary>
+    public string? Settled { get; init; }
+
     /// <summary>How long the step waited for the locator to resolve, in milliseconds.</summary>
     public int WaitedMs { get; init; }
 

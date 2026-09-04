@@ -1010,9 +1010,16 @@ public static class CaseRun
         var attempted = Retry.Bounded(() => Attempting(step, subject, backTo, declared), one => one.Held, cap);
         var landed = attempted.Last;
 
+        // WW366. Where the act's own line is, so the expectation below can go back and say what the
+        // reading had settled to by the time the verdict was taken. Nothing has been written out
+        // here — the trace is a list this run hands back whole — so the line a reader opens is the
+        // amended one and never a first draft of it.
+        var actedAt = -1;
+
         if (landed.Acted is { } acted)
         {
             trace.Add(Retry.Recorded(acted.AsTraceStep() with { Step = trace.Count + 1 }, attempted));
+            actedAt = trace.Count - 1;
 
             // WW225 and WW229. An act that was never attempted is a hole and never a red, and this is
             // where that becomes true of the verdict rather than only of the trace line. Measured: a
@@ -1046,6 +1053,20 @@ public static class CaseRun
         {
             expectation = expectation.Explaining(
                 Diagnosis.OfWindow(expectation.AsAssertion(), subject.Window, landed.Saw, budget));
+        }
+
+        // WW366. The act read once, the moment it returned; this expectation polled after it to the
+        // deadline, and it is the second reading the verdict turned on. Said on the act's own line
+        // and not only on this one, because the act's line is where a reader lands when a green
+        // surprises them — it names the verb they wrote — and a line reading 'off, ok' above a pass
+        // sends them to the control when the answer is the timing.
+        //
+        // Only where the two differ. A step whose window had already settled has nothing to say
+        // here, and a mark on every line marks nothing.
+        if (actedAt >= 0
+            && !string.Equals(trace[actedAt].ReadBack, expectation.LastRead, StringComparison.Ordinal))
+        {
+            trace[actedAt] = trace[actedAt] with { Settled = expectation.LastRead };
         }
 
         var recorded = expectation.AsTraceStep() with { Step = trace.Count + 1 };

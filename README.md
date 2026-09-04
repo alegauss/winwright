@@ -508,6 +508,12 @@ reads. An act that survives being repeated is attempted again where its read-bac
 that does not — `toggle`, `invoke` — gets a single go, because a retried toggle fails about the
 opposite state.
 
+Both instants reach the trace. An act reads once, the moment it returns; the expectation beside it
+polls after that to the deadline, and it is the second reading the verdict turns on. Where the two
+differ the act's own line carries **what the run settled on** as well as what the act read, because
+the line a reader lands on is the one naming the verb they wrote — and a read-back there that
+disagrees with the verdict above it sends them to the control when the answer was the timing.
+
 ### An expectation nobody types
 
 `covers` names a key in the project's strings, and the claim runs **both ways**: every string declared

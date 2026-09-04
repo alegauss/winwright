@@ -11,7 +11,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 💭 **WW366** (deps: —) **a step's trace line carries the reading the act took and the verdict beside it used one the expectation polled for** — WW353 found Expect.That polls after the act, so a settled value can decide the verdict while the line a reader opens shows the one the act read. → §WW366
 - 💭 **WW368** (deps: —) **the provoke arm reads zero for the read the engine now makes and the engine still faults once in twelve hundred** — WW355 measured four cheap readers clean over 800 rounds each and the act using one of them read 1 of 1200, so the arm is not the act and nothing says where they differ. → §WW368
 - 💭 **WW377** (deps: —) **Chord.TryParse has the shape WW364 annotated and none of the annotation, so its callers spell the bangs instead** — Three in ChordTests, and both engine callers happen to dodge it by interpolating the reason or passing the chord on as nullable. → §WW377
 
