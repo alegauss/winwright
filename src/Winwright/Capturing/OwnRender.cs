@@ -226,6 +226,32 @@ public static class OwnRender
     public const int DefaultBudgetMs = 8000;
 
     /// <summary>
+    /// How long a window that is up and not answering yet is waited for. WW374.
+    /// <para>
+    /// An application answers from the moment it hooks the message and not before, and nothing tells
+    /// a harness when that is. <c>Suite.Launch</c> waits for a window, which is earlier: the handle
+    /// exists and the window is enumerable while <c>Loaded</c> — where <c>Renders.Everywhere</c>
+    /// hooks it — has not run. A capture asked for in that gap answered nothing.
+    /// </para>
+    /// <para>
+    /// What made it worse than an ordinary race is the sentence. Every name the refusal has is about
+    /// how the application was built or started — no half, told nowhere to write, a window it does
+    /// not own — and <em>not yet</em> is none of them, so a run that asked too early was told
+    /// something untrue about the product and its reader went to check a line that was right.
+    /// </para>
+    /// <para>
+    /// Two seconds against a gap measured in the milliseconds between a handle existing and a
+    /// routed event running, which is the margin a wait wants: it is spent only where the ask
+    /// already failed, and an application with no half pays it once per capture step to be told the
+    /// truth about itself rather than being guessed at.
+    /// </para>
+    /// </summary>
+    public const int HookedWithinMs = 2000;
+
+    /// <summary>How long between goes while a window that is up is waited for. WW374.</summary>
+    private const int BetweenGoesMs = 100;
+
+    /// <summary>
     /// Ask the application owning <paramref name="window" /> to render that window's tree into
     /// <paramref name="path" />.
     /// </summary>
@@ -242,15 +268,67 @@ public static class OwnRender
             return new RenderAsked(false, "no window was named");
 
         var full = System.IO.Path.GetFullPath(path.Trim());
-        var refused = Asked(window, Registered, full + "\0", withinMs, out var answer);
-        if (refused is not null)
-            return refused;
-
-        if (answer == 0)
-            return Why(window, full, withinMs);
-
-        return Landed(full);
+        return Asking(
+            window,
+            Registered,
+            full + "\0",
+            full,
+            withinMs,
+            code => code != 0 ? Landed(full) : Why(WhyCode(window, full, withinMs), full));
     }
+
+    /// <summary>
+    /// Ask, and wait where the silence is a window that has not started answering yet. WW374.
+    /// <para>
+    /// The loop both asks take, because the gap is the window's and not the message's: a window
+    /// whose hook has not run answers neither of them, and an application with no half answers
+    /// neither ever. What separates those is time, so this spends a little of it — and only on the
+    /// path that already failed, which is what keeps the happy run exactly as fast as it was.
+    /// </para>
+    /// <para>
+    /// The why ask is what says which it is. Nothing at all means nobody is hooked on that window;
+    /// <see cref="Refusals.WouldDraw" /> means somebody is now and nothing is wrong, which after a
+    /// render that drew nothing is this race and no other reading. Either is worth another go.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The window being asked.</param>
+    /// <param name="registered">Which registered message to send.</param>
+    /// <param name="payload">What that message carries.</param>
+    /// <param name="full">The file being asked for, which the why ask also names.</param>
+    /// <param name="withinMs">How long to wait for one answer.</param>
+    /// <param name="said">What the answer comes to, given the code — zero where nothing answered.</param>
+    private static RenderAsked Asking(
+        nint window, string registered, string payload, string full, int withinMs, Func<int, RenderAsked> said)
+    {
+        var waited = System.Diagnostics.Stopwatch.StartNew();
+        while (true)
+        {
+            var refused = Asked(window, registered, payload, withinMs, out var answer);
+            if (refused is not null)
+                return refused;
+
+            if (answer != 0)
+                return said((int)answer);
+
+            if (waited.ElapsedMilliseconds >= HookedWithinMs || !NotYet(WhyCode(window, full, withinMs)))
+                return said(0);
+
+            Thread.Sleep(BetweenGoesMs);
+        }
+    }
+
+    /// <summary>
+    /// Whether a window that answered nothing is one that has not started answering yet. WW374.
+    /// </summary>
+    /// <param name="code">What the why ask said, or zero where it said nothing.</param>
+    private static bool NotYet(int code) => code is 0 or Refusals.WouldDraw;
+
+    /// <summary>What the why ask answered, or zero where nobody was there to answer. WW362.</summary>
+    /// <param name="window">The window that was asked about.</param>
+    /// <param name="full">The file that was asked for.</param>
+    /// <param name="withinMs">How long to wait for the answer.</param>
+    private static int WhyCode(nint window, string full, int withinMs) =>
+        Asked(window, RegisteredWhy, full + "\0", withinMs, out var answer) is not null ? 0 : (int)answer;
 
     /// <summary>
     /// Ask the application why it drew nothing, and say what it answers. WW362.
@@ -267,22 +345,16 @@ public static class OwnRender
     /// round trip on every capture in every run to answer a question almost none of them have.
     /// </para>
     /// </summary>
-    /// <param name="window">The window that was asked about.</param>
+    /// <param name="code">What the why ask answered, or zero where nobody answered it.</param>
     /// <param name="full">The file that was asked for.</param>
-    /// <param name="withinMs">How long to wait for the answer.</param>
-    private static RenderAsked Why(nint window, string full, int withinMs)
+    private static RenderAsked Why(int code, string full)
     {
         const string Unheard =
             "it answered and drew nothing, so it does not take this message — an application takes "
                 + "it by calling Winwright.InApp's Renders.Answer, and that does nothing unless "
                 + RendersInto + " names a directory it may write into";
 
-        // A send that fails here is not worth a sentence of its own: the render's own failure is
-        // what the caller asked about, and this is only the part that would have named it better.
-        if (Asked(window, RegisteredWhy, full + "\0", withinMs, out var answer) is not null)
-            return new RenderAsked(false, Unheard);
-
-        return (int)answer switch
+        return code switch
         {
             Refusals.ToldNowhere => new RenderAsked(
                 false,
@@ -351,11 +423,11 @@ public static class OwnRender
             return new RenderAsked(false, "no window was named");
 
         var full = System.IO.Path.GetFullPath(path.Trim());
-        var refused = Asked(window, RegisteredPopup, full + "\0" + named + "\0", withinMs, out var answer);
-        if (refused is not null)
-            return refused;
 
-        return (int)answer switch
+        // WW374, and the same wait the window ask takes: the gap is the window's hook and not the
+        // message, so a popup asked for before Loaded has run answers nothing here too — and the
+        // sentence below would name a half that is there and had not been reached.
+        return Asking(window, RegisteredPopup, full + "\0" + named + "\0", full, withinMs, code => code switch
         {
             Drawn => Landed(full),
 
@@ -384,7 +456,7 @@ public static class OwnRender
                 "it answered and drew nothing, so it does not take this message — an application "
                     + "takes it by calling Winwright.InApp's Renders.Answer, and a half older than "
                     + "this one answers no popup ask at all"),
-        };
+        });
     }
 
     /// <summary>

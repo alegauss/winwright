@@ -139,6 +139,13 @@ internal static class Sleeps
                 + "found — but the real act still read 1 of 1200 with the pause taken out, against 0 "
                 + "of 1200 with it. So the pause stays, guarding a fault thirty times rarer, and a "
                 + "round costs 92ms where WW329 priced it at 153"),
+        new("OwnRender.cs", 1, Sleeping.Machinery,
+            "WW374, and it is a poll rather than a pause: an application answers renders from the "
+                + "moment it hooks the message, `Suite.Launch` waits only for a window, and a "
+                + "capture asked for in that gap answered nothing. So this is the interval between "
+                + "one ask and the next while a window that is up starts answering — the same "
+                + "machinery a deadline is made of, spent only where the ask already failed and "
+                + "ended the moment the application replies"),
         new("Finished.cs", 1, Sleeping.Machinery,
             "WW218's move into place needs delete access to the destination, and a harness polling "
                 + "that file has it open — so this is the interval between one attempt and the next, "

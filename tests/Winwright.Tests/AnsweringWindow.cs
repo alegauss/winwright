@@ -32,10 +32,17 @@ internal sealed class AnsweringWindow : IDisposable
     private readonly Window window;
     private readonly RendersAnswered? answering;
 
+    /// <summary>
+    /// What a late hook produced, where one was arranged. WW374, and it is a field rather than the
+    /// constructor's local because it is set after the constructor has returned — which is the whole
+    /// of what this shape is for.
+    /// </summary>
+    private RendersAnswered? hookedLate;
+
     /// <summary>Every window <see cref="AlsoOpen"/> put up, so disposal closes them too. WW361.</summary>
     private readonly List<Window> opened = [];
 
-    private AnsweringWindow(string into, bool answers, bool everywhere = false)
+    private AnsweringWindow(string into, bool answers, bool everywhere = false, int hooksAfterMs = 0)
     {
         using var ready = new ManualResetEventSlim();
         Window? built = null;
@@ -94,7 +101,7 @@ internal sealed class AnsweringWindow : IDisposable
                 built.Show();
                 built.UpdateLayout();
 
-                if (answers)
+                if (answers && hooksAfterMs <= 0)
                 {
                     var was = Environment.GetEnvironmentVariable(Renders.PathVariable);
                     Environment.SetEnvironmentVariable(Renders.PathVariable, into);
@@ -108,6 +115,39 @@ internal sealed class AnsweringWindow : IDisposable
                     {
                         Environment.SetEnvironmentVariable(Renders.PathVariable, was);
                     }
+                }
+                else if (answers)
+                {
+                    // WW374. The gap the task is about, made on purpose: the window is up, on
+                    // screen and enumerable, and nothing is hooked on it yet. A real application
+                    // spends this between its handle existing and `Loaded` running; here it is a
+                    // timer, because a gap measured in milliseconds is not one a case can catch.
+                    //
+                    // Scheduled on this thread and not slept on it: the dispatcher has to keep
+                    // pumping, or the harness's own send would block on a thread that is asleep and
+                    // the case would be measuring that instead.
+                    var late = new System.Windows.Threading.DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromMilliseconds(hooksAfterMs),
+                    };
+
+                    late.Tick += (_, _) =>
+                    {
+                        late.Stop();
+
+                        var was = Environment.GetEnvironmentVariable(Renders.PathVariable);
+                        Environment.SetEnvironmentVariable(Renders.PathVariable, into);
+                        try
+                        {
+                            hookedLate = Renders.Answer(built);
+                        }
+                        finally
+                        {
+                            Environment.SetEnvironmentVariable(Renders.PathVariable, was);
+                        }
+                    };
+
+                    late.Start();
                 }
             }
             catch (Exception raised)
@@ -152,7 +192,8 @@ internal sealed class AnsweringWindow : IDisposable
     internal nint Handle { get; }
 
     /// <summary>What it says it is answering, read on its own thread.</summary>
-    internal string Sentence() => answering is null ? "answering nothing at all." : dispatcher.Invoke(answering.Sentence);
+    internal string Sentence() =>
+        (answering ?? hookedLate) is { } said ? dispatcher.Invoke(said.Sentence) : "answering nothing at all.";
 
     /// <summary>How many windows are answering under it, which is nothing where none are. WW361.</summary>
     internal int Windows => answering?.Windows ?? 0;
@@ -183,6 +224,21 @@ internal sealed class AnsweringWindow : IDisposable
     /// </summary>
     /// <param name="into">The directory it may write into.</param>
     internal static AnsweringWindow Everywhere(string into) => new(into, answers: true, everywhere: true);
+
+    /// <summary>
+    /// Open one whose window is up before anything is hooked on it, and which starts answering a
+    /// moment later. WW374.
+    /// <para>
+    /// The state every launched application passes through and no fixture here could produce: the
+    /// handle exists, the window is enumerable, and the line that hooks it has not run. A harness
+    /// that asks in that gap was told the application does not take the message — which is a
+    /// sentence about how the product was built, said about a product that was built correctly.
+    /// </para>
+    /// </summary>
+    /// <param name="into">The directory it may write into, once it is answering.</param>
+    /// <param name="afterMs">How long the gap lasts.</param>
+    internal static AnsweringWindow HooksLate(string into, int afterMs) =>
+        new(into, answers: true, hooksAfterMs: afterMs);
 
     /// <summary>
     /// Show a second window on the same thread, after the answering was arranged. WW361.
@@ -235,6 +291,12 @@ internal sealed class AnsweringWindow : IDisposable
             dispatcher.Invoke(() =>
             {
                 answering?.Dispose();
+
+                // WW374's own, where a case arranged one. Disposed on this thread with the other,
+                // because a hook left on a window this class is about to close is a hook whose
+                // window goes without it — and the next case in this collection inherits that.
+                hookedLate?.Dispose();
+
                 foreach (var also in opened)
                     also.Close();
 

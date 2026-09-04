@@ -357,6 +357,53 @@ public sealed class OwnRenderTests : IDisposable
     }
 
     [Fact]
+    public void A_window_that_is_up_and_not_hooked_yet_is_waited_for_rather_than_named_wrong()
+    {
+        // WW374. An application answers from the moment it hooks the message and not before, and
+        // nothing tells a harness when that is: `Suite.Launch` waits for a window, and the handle
+        // exists while the line that hooks it has not run. Found by a case rather than reasoned
+        // about — WW361's toast passed where it was written and failed in the guest, which got in
+        // between the toast appearing and the frame finishing.
+        //
+        // What made it worse than an ordinary race is the sentence. Every name the refusal has is
+        // about how the application was built or started, so a run that asked too early was told
+        // something untrue about the product and its reader went to check a line that was right.
+        using var application = AnsweringWindow.HooksLate(root, afterMs: 400);
+        var path = Path.Combine(root, "waited.png");
+
+        var asked = OwnRender.Into(application.Handle, path);
+
+        Assert.True(asked.Answered, asked.Sentence());
+        Assert.True(File.Exists(path), $"it said it drew one and {path} is not there");
+
+        // And the wait is bounded by what it is for, not by the render's own budget: it ends the
+        // moment the application starts answering.
+        Assert.Contains("answering renders for", application.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_application_that_never_answers_is_still_told_apart_from_one_that_had_not_yet()
+    {
+        // The other side of the same wait, and the reason it has a bound. A window with no half
+        // never starts answering, so the wait ends and the sentence that was always right about it
+        // is the one it gets — which is what would go wrong if a wait were allowed to be a hang.
+        using var application = AnsweringWindow.Silent();
+
+        var waited = System.Diagnostics.Stopwatch.StartNew();
+        var asked = OwnRender.Into(application.Handle, Path.Combine(root, "never.png"));
+        waited.Stop();
+
+        Assert.False(asked.Answered);
+        Assert.Contains("Renders.Answer", asked.Sentence(), StringComparison.Ordinal);
+
+        // Bounded, and generously: the check is that it ended, not how fast. A wait that ran to the
+        // render's own budget would be the harness hanging on a question it had already answered.
+        Assert.True(
+            waited.Elapsed.TotalMilliseconds < OwnRender.DefaultBudgetMs,
+            $"it took {waited.Elapsed.TotalSeconds:F1}s to conclude an application has no half");
+    }
+
+    [Fact]
     public void Nothing_may_be_asked_for_by_passing_nothing()
     {
         Assert.Throws<ArgumentException>(() => OwnRender.Into(1, "  "));
