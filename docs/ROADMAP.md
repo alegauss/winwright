@@ -12,6 +12,7 @@
 ## Block D — Act — patterns before pointers
 
 - 💭 **WW377** (deps: —) **Chord.TryParse has the shape WW364 annotated and none of the annotation, so its callers spell the bangs instead** — Three in ChordTests, and both engine callers happen to dodge it by interpolating the reason or passing the chord on as nullable. → §WW377
+- 💭 **WW381** (deps: —) **the pause sits after the send and WW368 put the provoking call before it, so it guards the half already acquitted** — Three readings cleared the drain — the pumping, four cheap readers, and the arm's own rungs — and the rate entered with SetFocus on the line above the keys. → §WW381
 
 ## Block E — Capture — the picture that proves what it photographed
 

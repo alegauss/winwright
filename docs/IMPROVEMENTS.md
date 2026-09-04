@@ -79,6 +79,29 @@ change, and `LocatorTests.The_signature_makes_the_promise_the_body_keeps` is the
 the check takes. Worth reading the two `ActVerb` sites first: an annotation that makes
 either of them warn is a reading this filed too quickly.
 
+### §WW381 the pause on the wrong side of the send
+
+WW329 put fifty milliseconds after the send and the fault went away, and every reading
+since has been about what happens during the drain. WW342 acquitted the pumping over
+4800 dispatched messages. WW355 acquitted four cheap readers over 3200 rounds. WW368
+walked the arm to the act and the rate appeared on the rung that adds `SetFocus` before
+every round — a provider round-trip issued on the line *above* the send, where the pause
+this engine pays is spent below it.
+
+So the pause is guarding the reader, and the reader has now been acquitted twice. What
+provokes is on the other side of the keys.
+
+The candidate is a pause after the focus rather than after the send, measured rather
+than assumed. `Keys.FirstLookMs` is one constant two verbs sleep on, so trying the other
+placement means the tool holding both: a rung that focuses, waits and sends, beside one
+that focuses and sends. If the fault follows the focus the interval moves and costs the
+same; if it does not, both calls need one — a worse answer and a true one.
+
+Two things make this worth doing rather than filing and forgetting. The measurement is
+already built: `transfer` runs the ladder and one more rung is a line. And the prize is
+the same one WW355 chased — an act with no interval in it at all — reached from the end
+nobody has looked at.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW374 the gap between a window and an answer
