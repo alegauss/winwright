@@ -99,6 +99,7 @@
 - ✅ **WW207** **four sweeps carry their own copy of the member walk and two of them get a tuple-returning member wrong** — One walk beside the file walk, with the tuple fix the two older copies lacked — and it turned out all four read a field initialised by a call as a member.
 - ✅ **WW206** **the sweep rule is checked per file, so a file holding two sweeps passes on the strength of the one that reads code** — The unit is the sweep, so a file holding two is two: thirteen are found where eight files were, and the excuse list is empty rather than hand-written.
 - ✅ **WW328** **the diagnosis of a locator that matched nothing walks the whole desktop and throws where that walk fails** — The door walk catches the COM failure beside the one it already caught, so a locator correctly found to match nothing no longer fails from the code explaining why.
+- ✅ **WW364** **Locator.TryParse is not null-annotated, so a caller that refused on false still carries a bang to use what it parsed** — TryParse now says which out is null on which answer, so the four bangs are gone and reading a refused parse's locator warns (design recorded in `src/Winwright/Locating/Locator.cs`).
 
 ## Block D — Act — patterns before pointers
 

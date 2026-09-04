@@ -52,30 +52,6 @@ which fraction a reader is owed and whether it belongs in the sentence or under 
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW364 the promise the signature does not make
-
-`Locator.TryParse` answers a bool and two outs, and neither out is annotated. So a
-caller that throws on false still holds a `Locator?`, and the compiler has no way to
-know the only route past that throw has one. `StepDeclaration` spells `parsed!` four
-times for it.
-
-The attribute is the one .NET puts on exactly this shape. `[NotNullWhen(true)]` on the
-locator and `[NotNullWhen(false)]` on the reason say what the method already promises,
-and every bang goes with them.
-
-A bang is not a bug, and that is why this is filed rather than fixed in passing. Each
-one is a place a reader has to rebuild the argument the compiler could have made, and
-every rebuild is right today because the throw is directly above the use. What it costs
-is that the next person to move code between the two has nothing telling them they did —
-which is what happened in WW351: a construction moved above the one bang that had been
-narrowing the rest of the method, and the compiler asked for a second rather than for
-the annotation.
-
-Small, and worth one check before it is done. An annotation makes reading a failed
-parse's locator a warning rather than a habit, so what is worth knowing first is whether
-anything does that deliberately — a caller collecting refusals rather than stopping is
-the shape this verb exists for, and it is the shape most likely to look at both outs.
-
 ## Block D — Act — patterns before pointers
 
 ### §WW366 the two instants on one line

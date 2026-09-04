@@ -991,10 +991,7 @@ public sealed record StepDeclaration
             _ => Pointing.Same,
         };
 
-        // The bang for the reason the one below this carries it: TryParse is not annotated, so the
-        // throw above narrows nothing the compiler can see, and the locator is not null by the only
-        // route that reaches this line.
-        var step = new StepDeclaration(called ?? Describing(act.Name, parsed!.Text), act, reading)
+        var step = new StepDeclaration(called ?? Describing(act.Name, parsed.Text), act, reading)
         {
             Locator = parsed,
             Argument = string.IsNullOrWhiteSpace(argument) ? null : argument.Trim(),
@@ -1296,7 +1293,7 @@ public sealed record StepDeclaration
         //
         // Naming the element some other way and reading its name is the useful shape, so the sentence
         // says which locator field to move rather than that the reading is wrong.
-        if (reading.PinnedBy(parsed!.Steps[^1]) is { } already && (wanted is not null || moves || answers))
+        if (reading.PinnedBy(parsed.Steps[^1]) is { } already && (wanted is not null || moves || answers))
         {
             throw new ScenarioRefusedException(
                 subject,
@@ -1474,7 +1471,7 @@ public sealed record StepDeclaration
 
         return this with
         {
-            Locator = parsed!,
+            Locator = parsed,
             Name = $"{Name} [{member}]",
             // The last step and not the whole locator: that is the one a sweep's matches are of, so
             // `Group[name="{}"]` finding nothing is the strings and the window disagreeing, and
@@ -1557,7 +1554,7 @@ public sealed record StepDeclaration
         if (!Locator.TryParse(text, out var parsed, out var because))
             throw new ScenarioRefusedException(Name, $"'{text}' does not parse: {because}");
 
-        return this with { Locator = parsed! };
+        return this with { Locator = parsed };
     }
 
     /// <summary>

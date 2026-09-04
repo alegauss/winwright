@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Winwright.Locating;
@@ -81,8 +82,23 @@ public sealed record Locator
         return new Locator(text, new ReadOnlyCollection<LocatorStep>(steps));
     }
 
-    /// <summary>Parse one without throwing, for a caller collecting refusals rather than stopping.</summary>
-    public static bool TryParse(string text, out Locator? locator, out string? because)
+    /// <summary>
+    /// Parse one without throwing, for a caller collecting refusals rather than stopping.
+    /// <para>
+    /// WW364. The two attributes say what the body already does, so a caller that threw on false
+    /// reads the locator without a bang and one that reads it anyway gets a warning. Four sites in
+    /// <c>StepDeclaration</c> had spelt <c>parsed!</c> for the compiler's benefit, and each was a
+    /// place a reader had to rebuild an argument the signature could have made — right every time,
+    /// and worth nothing to whoever next moves code between the throw and the use. WW351 is that
+    /// move: a construction went above the one bang narrowing the rest of the method, and the
+    /// compiler asked for a second bang rather than for this.
+    /// </para>
+    /// </summary>
+    /// <param name="text">The locator as written.</param>
+    /// <param name="locator">What it parsed to, or null where it did not.</param>
+    /// <param name="because">Why it did not, or null where it did.</param>
+    public static bool TryParse(
+        string text, [NotNullWhen(true)] out Locator? locator, [NotNullWhen(false)] out string? because)
     {
         try
         {

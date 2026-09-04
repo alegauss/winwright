@@ -9,8 +9,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-- 💭 **WW364** (deps: —) **Locator.TryParse is not null-annotated, so a caller that refused on false still carries a bang to use what it parsed** — Four sites in StepDeclaration spell it, and WW351 added one by moving a construction above the bang that had been narrowing the rest. → §WW364
-
 ## Block D — Act — patterns before pointers
 
 - 💭 **WW366** (deps: —) **a step's trace line carries the reading the act took and the verdict beside it used one the expectation polled for** — WW353 found Expect.That polls after the act, so a settled value can decide the verdict while the line a reader opens shows the one the act read. → §WW366

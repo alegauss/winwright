@@ -1,4 +1,7 @@
-﻿using Winwright.Locating;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+
+using Winwright.Locating;
 
 using Xunit;
 
@@ -210,6 +213,26 @@ public class LocatorTests
         Assert.False(Locator.TryParse("Buton", out var bad, out var because));
         Assert.Null(bad);
         Assert.Contains("no UI Automation control type", because);
+    }
+
+    [Fact]
+    public void The_signature_makes_the_promise_the_body_keeps()
+    {
+        // WW364. Both `out`s above are read without a bang, and that is the whole of what this
+        // pins: the attributes are what make the throw above a use narrow the locator, and nothing
+        // else notices them going. Four sites in StepDeclaration had spelt `parsed!` instead, and
+        // WW351 added the fourth — a construction moved above the bang narrowing the rest of the
+        // method, and the compiler asked for another bang rather than for the annotation.
+        var outs = typeof(Locator)
+            .GetMethod(nameof(Locator.TryParse))!
+            .GetParameters()
+            .Where(one => one.IsOut)
+            .ToList();
+
+        Assert.Equal(["locator", "because"], outs.Select(one => one.Name));
+        Assert.Equal(
+            [true, false],
+            outs.Select(one => one.GetCustomAttribute<NotNullWhenAttribute>()?.ReturnValue));
     }
 
     [Fact]
