@@ -346,6 +346,7 @@
 - ✅ **WW356** **the fixture's tray menu is built of buttons, so the locator an adopter writes against a real menu finds nothing here** — The entries are menu items now, so a case here names MenuItem as the adopters do and the container still reads unnamed (design recorded in `tests/Winwright.Tests/TrayIconFixture.cs`).
 - ✅ **WW357** **the probe's twelve looks at a live foreground are run by nothing, so a look built wrong classifies perfectly** — The polling is a function taking its count and pause, and two cases run it against a desk this suite arranged (design recorded in `tools/desk-probe.ps1`).
 - ✅ **WW369** **a locator naming a control type the tree lacks reads as nothing answered, which is what a vanished menu reads as** — Both menu kinds are read as a shape now, so a regression to buttons is a red naming the tree and not a desk sentence (design recorded in `tests/Winwright.Tests/NotificationAreaTests.cs`).
+- ✅ **WW370** **the loop's one branch that answers nothing is the desktop skip, and no case arranges a desktop-held desk to run it** — Get-DeskLooks takes the desktop list, so a case names the class of its own window and runs the skip that makes a quiet desk clear (design recorded in `tools/desk-probe.ps1`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

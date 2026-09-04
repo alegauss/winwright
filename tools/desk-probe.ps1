@@ -143,8 +143,18 @@ function Get-DeskLooks {
       The count and the pause are parameters because the guest's twelve looks over six seconds are a
       measurement and a case is not. A case arranges a desk it already owns and asks for two looks
       with no pause, which runs every line of this and takes no time.
+
+      WW370 makes the desktop's own list the third, and for the same reason: a case cannot arrange a
+      desk the desktop is holding, so the one branch here that answers $null was run by nothing. A
+      case names the class of the window it has just put up and asserts the look came back as
+      nothing, which is the branch under test - that a class on the list is skipped, rather than that
+      Progman is a desktop, which is a constant a case would only be restating.
+
+      Defaulted to the list itself, so the guest's own run is the run it always was and no caller has
+      to know this parameter exists. What the words are stays checked where it was, by a case reading
+      them out of this file beside the shell surfaces: those are two claims and not one.
     #>
-    param([int] $Count = 12, [int] $PauseMs = 500)
+    param([int] $Count = 12, [int] $PauseMs = 500, [string[]] $Desktop = $script:Desktop)
 
     $looks = @()
     for ($at = 0; $at -lt $Count; $at++) {
@@ -156,7 +166,7 @@ function Get-DeskLooks {
         $owner = 0
         [void][Fg]::GetWindowThreadProcessId($handle, [ref] $owner)
         $class = [Fg]::ClassOf($handle)
-        if ($script:Desktop -contains $class) { $looks += $null; continue }
+        if ($Desktop -contains $class) { $looks += $null; continue }
 
         $named = (Get-Process -Id $owner -ErrorAction SilentlyContinue)
         $looks += [pscustomobject]@{

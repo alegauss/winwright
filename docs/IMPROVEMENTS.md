@@ -262,29 +262,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW370 the look that is supposed to be nothing
-
-WW357 made the polling runnable and ran it: two cases arrange a window, ask for two
-looks, and read what the loop built. Every look those take is a window, which leaves one
-branch untouched — the one answering `$null` because the class is on `$script:Desktop`.
-
-It is the branch a quiet desk depends on. Progman and WorkerW hold the foreground of an
-idle logged-in session, and skipping them is what makes `clear` mean "nothing but the
-desktop". If it stopped skipping, a quiet desk would build twelve looks of one window
-and read as a question — which is the refusal WW331 was filed about, produced by the
-loop this time instead of by the classification.
-
-A case cannot arrange a desktop-held desk. What it can do is pass the list: the loop
-reads `$script:Desktop` off the script, and a parameter defaulting to that would let a
-case name the class of the window it just put up and assert the look came back as
-nothing. What is under test then is that a class on the list is skipped, which is the
-branch — rather than that Progman is a desktop, which is a constant a case would only be
-restating.
-
-The list itself stays checked as it is now, by a case reading it out of the file beside
-the shell surfaces. Those are two claims and not one, and the second is about what the
-words are rather than about what the loop does with them.
-
 ### §WW371 a refusal an unattended run cannot answer
 
 `desk-probe.ps1` reads and never repairs, and WW311 argues that well: a toast goes and a

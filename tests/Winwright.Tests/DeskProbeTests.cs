@@ -315,6 +315,52 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    public void A_class_on_the_desktop_list_is_skipped_and_the_look_is_nothing()
+    {
+        // WW370. The one branch of the polling that answers $null, and until now nothing ran it: the
+        // cases above arrange a window, so every look they build is a window. What that branch does
+        // is what makes a quiet desk read `clear` — Progman and WorkerW hold the foreground of an
+        // idle logged-in session, and a loop that stopped skipping them would build twelve looks of
+        // one window and hand up a question. That is WW331's refusal produced by the loop instead of
+        // by the classification, and it would have been invisible here.
+        //
+        // A case cannot arrange a desk the desktop is holding. What it can do is name the class of
+        // the window it has just put up, which puts the same branch under the same test: a class on
+        // the list is skipped. What the list actually says stays checked where it was, by the case
+        // that reads it out of the file beside the shell surfaces.
+        using var dialog = PumpedDialog.Open("winwright desktop stand-in");
+        dialog.BringToFront();
+
+        if (BusyDesk.Excused(Winwright.Windowing.Foreground.Check(dialog.Frame).AsPrecondition()))
+            return;
+
+        // Both looks, because the branch has to answer for every one of them: a loop that skipped
+        // the first and kept the second would build a set Read-DeskState reads as `busy`, which is
+        // a desk somebody was using said about a desk nobody was.
+        var skipped = Looked("-Count 2 -PauseMs 0 -Desktop 'Static'");
+
+        Assert.Equal([Desktop, Desktop], skipped);
+
+        // And the same window with the list back as it is, so what the case just proved is the list
+        // being read rather than this dialog being unreadable.
+        var kept = Looked("-Count 2 -PauseMs 0").FirstOrDefault();
+
+        if (kept == Desktop
+            && BusyDesk.Excused(
+                Winwright.Verdicts.Precondition.Absent(
+                    "the foreground belongs to the window under test",
+                    "the probe's look found the desktop rather than the dialog this case put up")))
+        {
+            return;
+        }
+
+        Assert.StartsWith(
+            dialog.Frame.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            kept,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_desk_this_process_is_holding_is_read_as_a_question_end_to_end()
     {
         // WW357, and the two halves joined: the loop builds the looks and the classification names
