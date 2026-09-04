@@ -107,6 +107,29 @@
          the default is to ask; naming a logger on the command line still wins. -->
     <VSTestLogger Condition="'$(VSTestLogger)' == '' and '$(RollCall)' == 'true'">trx%3bLogFileName=winwright.trx</VSTestLogger>
     <VSTestResultsDirectory Condition="'$(VSTestResultsDirectory)' == '' and '$(RollCall)' == 'true'">$(RollCallResults)</VSTestResultsDirectory>
+
+    <!-- WW373. A case that deadlocks used to wedge the run rather than fail it: nothing bounded a
+         single test, so the run sat, the guest held whatever windows the case had left on the desk,
+         and the only thing that ended it was a person noticing and killing testhost inside the
+         guest. Measured on WW361, where the run had been going long enough to have finished twice.
+
+         The cost is not the minutes. A wedge and a slow suite read identically from outside, so the
+         honest response to a run taking too long is to wait longer - and what separates them is a
+         desk nobody is watching. `run-tests-vm` already argues this about `vmrun start` and polls
+         rather than blocking; the suite it launches had no such bound.
+
+         Ten minutes is a bound and not a budget. The slowest honest case in this suite is
+         SuiteRunTests' capture project at 158 seconds on the guest, and the next is fifteen - so
+         this is four times the longest thing that legitimately happens, which is the margin a
+         timeout wants: it must never be the thing that decides a red.
+
+         A mini dump rather than none, and it is small. The sequence file alone turns a wedge into a
+         red with an address, which is what every other failure here already is; the dump is what
+         says WHY, and WW361's was a dispatcher that had stopped pumping - a question a stack answers
+         and a name does not. It stays in the guest, which is where whoever wants it would look. -->
+    <VSTestBlameHang Condition="'$(VSTestBlameHang)' == ''">true</VSTestBlameHang>
+    <VSTestBlameHangTimeout Condition="'$(VSTestBlameHangTimeout)' == ''">10m</VSTestBlameHangTimeout>
+    <VSTestBlameHangDumpType Condition="'$(VSTestBlameHangDumpType)' == ''">mini</VSTestBlameHangDumpType>
   </PropertyGroup>
 
   <!-- Skipped where a filter was given, and that is not a convenience: a filtered run is short of

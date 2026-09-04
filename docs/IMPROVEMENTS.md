@@ -262,30 +262,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW373 the run nobody can tell from a slow one
-
-A case that deadlocks does not fail. `run-tests.cmd` passes no `--blame-hang`, so the
-run sits, the guest holds whatever windows the case left on the desk, and the only thing
-that ends it is a person noticing and killing `testhost` inside the guest.
-
-Measured on WW361. A hook disposed across a dispatcher that was not pumping wedged the
-run on its own thread; the host command went on waiting, the guest console showed two
-windows and nothing else, and what stopped it was the operator seeing them. The run had
-been going long enough to have finished twice.
-
-The cost is not the minutes. It is that a wedge and a slow suite read identically from
-outside, so the honest response to a run taking too long is to wait longer, and what
-separates them is a desk nobody is watching. `run-tests-vm` already argues this shape
-about `vmrun start` and refuses to block on it: ten silent minutes and a wedge look
-alike, which is why it polls. The suite it then launches has no such bound.
-
-`dotnet test` takes `--blame-hang --blame-hang-timeout`, which ends a stuck case, names
-it, and writes a sequence file saying what was running. That turns a wedge into a red
-with an address, which is what every other failure in this repository already is.
-
-The candidate is a timeout on the runner, generous enough that the slowest honest case
-never meets it, and a guest kill that no longer needs a person.
-
 ### §WW375 the question nobody can read
 
 WW331 taught the probe that the shell holding the desk is not a question, and WW357 made

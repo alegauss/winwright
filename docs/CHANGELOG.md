@@ -349,6 +349,7 @@
 - ✅ **WW369** **a locator naming a control type the tree lacks reads as nothing answered, which is what a vanished menu reads as** — Both menu kinds are read as a shape now, so a regression to buttons is a red naming the tree and not a desk sentence (design recorded in `tests/Winwright.Tests/NotificationAreaTests.cs`).
 - ✅ **WW370** **the loop's one branch that answers nothing is the desktop skip, and no case arranges a desktop-held desk to run it** — Get-DeskLooks takes the desktop list, so a case names the class of its own window and runs the skip that makes a quiet desk clear (design recorded in `tools/desk-probe.ps1`).
 - ✅ **WW371** **an asking desk refuses every guest run, and the only remedy is a person at the guest console** — A window with a minimise button is put away and only a question still refuses (design superseded: the minimise it called failed had held every time) (design recorded in `tools/desk-clear.ps1`).
+- ✅ **WW373** **a case that deadlocks wedges the run instead of failing, and only a person watching the guest ends it** — A single case is bounded at ten minutes against a slowest honest one of 158 seconds, so a deadlock is a red naming it (design recorded in `tests/Winwright.Tests/Winwright.Tests.csproj`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

@@ -5,6 +5,12 @@ rem
 rem A test host that dies mid-run takes its remaining tests with it and the runner still prints a
 rem pass: measured here at 352 of 374, a green covering twenty-two tests that never ran.
 rem
+rem WW373: a single case is bounded now, so a deadlock ends the run rather than sitting in it. The
+rem bound is declared in the test project rather than typed here - it is a property of this suite and
+rem not of the command that starts it, and the guest runner types this same line. Ten minutes against
+rem a slowest honest case of 158 seconds, and what comes back is a red naming the case with a
+rem sequence file beside it instead of a run somebody has to go and notice.
+rem
 rem WW297: `dotnet msbuild -t:TestAndRoll` and no longer `dotnet test`, because the roll used to be
 rem hung on AfterTargets and MSBuild skips those where the target failed - so a red run said nothing
 rem about what it had excused. TestAndRoll reaches it on both verdicts and changes neither. This is
