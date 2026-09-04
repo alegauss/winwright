@@ -355,6 +355,28 @@ was doing, or it is WW371's refusal in another form — an operator sent to a co
 desk probe is already carried and already answers, so the shape is: stop waiting, read
 the desk, bring the log back, refuse with what both said.
 
+### §WW388 the desk two readings both answer
+
+WW371 and WW375 landed an hour apart and answer the same desk two different ways. A
+minimised window holding the foreground is `stale` — not a question, so the run goes on
+— and it is also exactly what `desk-clear.ps1` puts away: it has a minimise button, it
+is already minimised, and handing the foreground on is the half that repair exists for.
+
+Nothing decides between them, and the order settled it by accident. `stale` is
+classified before the `asking` arm, so the desk WW371 was filed about never gets there:
+the Edge window that refused every run is reported and stepped over, and the clearer
+runs only for a window that is not iconic. WW384 already says nothing drives that path.
+
+The run going on is right and is not the whole answer. WW331 accepted the same for a
+focused taskbar — the first case to take the foreground clears it — but the first case
+is not always one that takes it. A case reading the foreground as a precondition sees a
+window that is neither the desktop nor the one under test, and excuses a check over a
+desk this run could have cleared in a second.
+
+So what is worth deciding is whether `stale` should be cleared as well as said. The
+runner has both readings and both tools in hand; what it does not have is a sentence
+about which desks it is willing to tidy before a run, and which it only reports.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW379 the control that is late on purpose
