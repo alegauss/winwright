@@ -41,6 +41,7 @@
 - 💭 **WW382** (deps: —) **the two tray menu kinds read as the same tree and nothing claims they must, so a framework changing one is invisible** — WW369 read both and found a Menu of two MenuItems each, which says WW322's difference stops at the desk — a fact no case states. → §WW382
 - 💭 **WW383** (deps: —) **no case puts a real window up and reads shell out of the probe, so that arm is only ever produced from typed looks** — WW370 opened the desktop list to a case and left the shell surfaces where they were, read off the script with no way in. → §WW383
 - 💭 **WW384** (deps: —) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — WW371 made the decision a function cases call and left the minimise, the foreground and the sentence where WW345 found the probe. → §WW384
+- 💭 **WW386** (deps: —) **the runner waits on the guest with no bound, so a wedge outside a case is still a run nobody can tell from a slow one** — WW373 bounded a case and the run around it inherited none of it, though Start-Guest already refuses to block on vmrun for exactly this reason. → §WW386
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

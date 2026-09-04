@@ -353,6 +353,29 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
+### §WW386 the wait the runner does not bound
+
+WW373 bounded a case and left the run around it unbounded. `run-tests-vm.ps1` starts the
+suite in the guest and waits for it to write an exit code; nothing there says how long
+that may take. What ends a wedge now is the suite's own timeout, and that only works
+while the wedge is inside a case.
+
+Everything outside one is the old shape. A guest that stops answering vmrun, a build
+that hangs on a restore, a testhost that dies without writing the exit file — each
+leaves the host command waiting with no bound, which is what `Start-Guest` refuses to do
+about `vmrun start`: ten silent minutes and a wedge look alike, so it polls. The run it
+launches inherits none of that.
+
+The numbers are in hand. A guest run of this suite is seven to fifteen minutes and the
+carry adds one, so a whole run has never taken twenty; the bound wants to be an hour or
+so — several times the longest, the same margin WW373 gave a case, because a bound that
+decides a red is worse than none.
+
+Beside a number it needs a reading. A run that hit the bound has to say what the guest
+was doing, or it is WW371's refusal in another form — an operator sent to a console. The
+desk probe is already carried and already answers, so the shape is: stop waiting, read
+the desk, bring the log back, refuse with what both said.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW379 the control that is late on purpose
