@@ -540,7 +540,11 @@ public static class CaseRun
 
         var into = System.IO.Path.Combine(pictures, $"{Filed(step.Argument!)}.png");
 
-        if (route.Renders)
+        // WW372. A popup takes the render route whatever the route says, because there is no other
+        // route to take: WW347 measured an open popup as its own layered window whose soft edge is a
+        // strip of what stands behind it, so a copy of the screen is refused — and a closed one has
+        // no window to copy at all. Asking is not the better answer here, it is the only one.
+        if (route.Renders || step.Popup is not null)
         {
             // WW349. The default route, taken by asking rather than by drawing: a render needs the
             // application's own tree and nothing outside that process has one. This used to be a
@@ -628,9 +632,28 @@ public static class CaseRun
         List<TraceStep> trace,
         List<AssertionResult> results)
     {
-        var asked = OwnRender.Into(found.Handle, into);
+        // WW372. Which ask, decided by whether the step named a surface inside the window. The two
+        // are the same channel and the same receipt afterwards; what differs is what the application
+        // is asked to walk, and a step that named nothing means the window it already found.
+        var asked = step.Popup is { } popup
+            ? OwnRender.PopupInto(found.Handle, popup, into)
+            : OwnRender.Into(found.Handle, into);
+
         if (!asked.Answered)
         {
+            // WW372, and the collapse that entry is about. Every absence used to be a hole, which
+            // was the whole truth while the only ask named a window the run had already found — an
+            // application that never adopted the in-app half has told this run nothing. A case that
+            // named a popup the application does not have is the opposite: the run asked, the
+            // application answered, and what is wrong is the word the case wrote. The reading says
+            // which it is, so a typo stops reading as a machine that could not look.
+            if (asked.Wrote)
+            {
+                trace.Add(asked.AsTraceStep(named) with { Step = trace.Count + 1, Asserted = named });
+                results.Add(asked.AsAssertion(named).At(trace.Count));
+                return;
+            }
+
             Hole(trace, results, named, Precondition.Absent(RenderAsked.PreconditionName, asked.Sentence()));
             return;
         }

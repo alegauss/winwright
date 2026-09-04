@@ -254,7 +254,7 @@ public class ScenarioFileTests
                 "locator", "tray", "act", "with", "expect", "reads", "moves", "answers", "matches", "discloses",
                 "sameAs", "unlike", "sameCountdownAs", "contains", "label", "expectReported", "notLabel", "beginsWithLabel", "absent",
                 "ownHeader", "eachSpoken", "spoken", "never", "covers",
-                "coversAtLeast", "coversWithin", "meansIt", "named",
+                "coversAtLeast", "coversWithin", "meansIt", "popup", "named",
             ],
             ScenarioSchema.Step.Select(field => field.Name));
 
@@ -316,5 +316,31 @@ public class ScenarioFileTests
         Assert.Equal("the first stop", steps[3].SameCountdownAs);
         Assert.Null(steps[3].SameAs);
         Assert.Null(steps[3].Unlike);
+    }
+
+    [Fact]
+    public void The_popup_a_capture_names_arrives_on_the_step_from_the_document()
+    {
+        // WW372, held to WW307's rule. The field is read by name at one line of ScenarioFile, and a
+        // typo in that string fails nothing on its own: the document's keys are checked against the
+        // schema and pass, the read returns null, and the capture loads asking for the window rather
+        // than the flyout — a picture of the wrong surface, green.
+        var cases = ScenarioFile.Read("popup.cases.json", """
+            {
+              "cases": [
+                {
+                  "name": "the flyout is photographed",
+                  "steps": [
+                    { "locator": "Pane", "act": "capture", "with": "the flyout", "popup": "details" }
+                  ]
+                }
+              ]
+            }
+            """);
+
+        var step = Assert.Single(Assert.Single(cases).Steps);
+
+        Assert.Equal("details", step.Popup);
+        Assert.Equal("capture", step.Verb.Name);
     }
 }

@@ -360,6 +360,7 @@ public sealed class ScenarioFile
         var expectReported = Text(at, step, ScenarioSchema.Step, "expectReported");
         var meansIt = Truth(at, step, ScenarioSchema.Step, "meansIt");
         var named = Text(at, step, ScenarioSchema.Step, "named");
+        var popup = Text(at, step, ScenarioSchema.Step, "popup");
 
         // WW258. Asked of the schema rather than checked here, so the rule and the `oneOf` a tool is
         // published cannot drift: the group is declared on the fields, and a third way of addressing a
@@ -379,7 +380,7 @@ public sealed class ScenarioFile
             () => StepDeclaration.Of(
                 locator, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches, discloses,
                 sameAs, never, spoken, label, notLabel, beginsWithLabel, absent, unlike, sameCountdownAs, contains, expectReported,
-                eachSpoken, ownHeader, tray, coversAtLeast, coversWithin));
+                eachSpoken, ownHeader, tray, coversAtLeast, coversWithin, popup));
     }
 
     /// <summary>

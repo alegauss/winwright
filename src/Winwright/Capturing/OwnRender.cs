@@ -10,7 +10,28 @@ namespace Winwright.Capturing;
 /// </summary>
 /// <param name="Answered">Whether the application drew the picture and said so.</param>
 /// <param name="Absence">Why it did not, where it did not. Empty where it did.</param>
-public sealed record RenderAsked(bool Answered, string Absence)
+/// <param name="Wrote">
+/// Whether what went wrong is something the case wrote. WW372.
+/// <para>
+/// WW349 had one kind of absence and this type was built for it: an application that has not
+/// adopted the in-app half, or one started without the variable that lets it write, has told the
+/// run nothing — so every failure was a hole, and that was the whole truth while the only ask
+/// named a window the run had already found.
+/// </para>
+/// <para>
+/// WW359's ask takes a name the case typed, and three of its refusals are about that name: no
+/// popup is called it, more than one is, or the one that is holds nothing to draw. A run told
+/// <em>the application did not render its own tree</em> about a typo has a green-adjacent answer
+/// to a case that is wrong — and a hole is exactly the reading a machine that could not look gets.
+/// </para>
+/// <para>
+/// The line is where the fault is and not how many refusals are on each side. The path being
+/// refused stays a hole on both asks though the design listed it with the name refusals: it is the
+/// project's <c>captures</c> and the application's own directory disagreeing, which is a harness
+/// fact WW362 already filed as one, and a case that never typed a path cannot be at fault for it.
+/// </para>
+/// </param>
+public sealed record RenderAsked(bool Answered, string Absence, bool Wrote = false)
 {
     /// <summary>What this reading is called wherever it is reported.</summary>
     public const string PreconditionName = "an application that renders its own tree when asked";
@@ -23,19 +44,39 @@ public sealed record RenderAsked(bool Answered, string Absence)
     /// <inheritdoc cref="Sentence" />
     public override string ToString() => Sentence();
 
-    /// <summary>The result a verdict counts. An application that does not answer is a hole.</summary>
+    /// <summary>
+    /// The result a verdict counts. An application that does not answer is a hole; a case that
+    /// named a surface the application does not have is a red. WW372.
+    /// </summary>
     /// <param name="named">What the assertion claims, as the scenario spells it.</param>
-    public AssertionResult AsAssertion(string named) => Answered
-        ? AssertionResult.Pass(named, Sentence())
-        : AssertionResult.Unchecked(named, Precondition.Absent(PreconditionName, Sentence()));
+    public AssertionResult AsAssertion(string named)
+    {
+        if (Answered)
+            return AssertionResult.Pass(named, Sentence());
 
-    /// <summary>The step a trace records.</summary>
+        return Wrote
+            ? AssertionResult.Fail(named, Sentence())
+            : AssertionResult.Unchecked(named, Precondition.Absent(PreconditionName, Sentence()));
+    }
+
+    /// <summary>The step a trace records, reading the way the verdict beside it does.</summary>
     public TraceStep AsTraceStep(string named) => new()
     {
         Verb = "ask the application to render its own tree",
         Locator = named,
-        Verdict = Answered ? StepVerdict.Ok : StepVerdict.Unchecked,
+        Verdict = Verdict(),
         Detail = Answered ? null : Sentence(),
+    };
+
+    /// <summary>
+    /// What this reading earns, said once so the trace line and the assertion cannot disagree about
+    /// it — which is WW369's shape one surface over.
+    /// </summary>
+    private StepVerdict Verdict() => (Answered, Wrote) switch
+    {
+        (true, _) => StepVerdict.Ok,
+        (_, true) => StepVerdict.Failed,
+        _ => StepVerdict.Unchecked,
     };
 }
 
@@ -301,7 +342,10 @@ public static class OwnRender
         // meant something this cannot ask for. Refused here rather than sent, because the half at
         // the other end would read it as a shorter name and photograph whatever that matched.
         if (named.Contains('\0', StringComparison.Ordinal))
-            return new RenderAsked(false, "a popup's name may not carry a NUL, which is what separates the ask");
+        {
+            return new RenderAsked(
+                false, "a popup's name may not carry a NUL, which is what separates the ask", Wrote: true);
+        }
 
         if (window == 0)
             return new RenderAsked(false, "no window was named");
@@ -314,16 +358,24 @@ public static class OwnRender
         return (int)answer switch
         {
             Drawn => Landed(full),
-            NoSuchPopup => new RenderAsked(false, $"it holds no popup called {named} under that window"),
+
+            // WW372. The three about the name, and they are reds rather than holes: the run asked
+            // and the application answered, so nothing about the machine is unknown — what is wrong
+            // is the word the case wrote. A hole here would report a typo as a desk that could not
+            // be looked at.
+            NoSuchPopup => new RenderAsked(
+                false, $"it holds no popup called {named} under that window", Wrote: true),
             MoreThanOnePopup => new RenderAsked(
                 false,
                 $"more than one popup under that window is called {named}, so which one was meant is "
                     + "the application's to say — a picture of either would be a picture this run "
-                    + "could not prove was the right surface"),
+                    + "could not prove was the right surface",
+                Wrote: true),
             PopupHoldsNothing => new RenderAsked(
                 false,
                 $"the popup called {named} is holding nothing that can be drawn, so there is no tree "
-                    + "to photograph"),
+                    + "to photograph",
+                Wrote: true),
             PathRefused => new RenderAsked(
                 false,
                 $"it refused to write {full}, which is not inside the directory {RendersInto} named"),

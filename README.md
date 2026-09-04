@@ -350,6 +350,16 @@ same rule every other field here follows. Its claim is the receipt and it takes 
 application's own visual tree and only the application can take one, so the answer names
 `Winwright.InApp` instead of reaching for the screen.
 
+A capture may also name a **`popup`** — the surface inside the window whose tree the picture is of,
+by the name the application's own author gave it. It is the one picture no copy of the screen can
+ever take: an open popup is its own layered window whose soft edge is a strip of whatever it stands
+in front of, and a closed one has no window at all — while to the application it is an element in a
+tree it owns either way, so a preview of a flyout nobody has clicked is a picture that can be asked
+for. Only a capture takes the field, because every other act reaches an element a locator matched.
+The refusals divide the way the verdict does: an application that never took the message is a hole,
+and a name no popup has — or that two popups share, or whose popup is holding nothing — is a **red**,
+because the run asked, the application answered, and what is wrong is the word the case wrote.
+
 `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
 `toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `description`, `enabled`, `focused`, defaulting to `anything`, the one value the element

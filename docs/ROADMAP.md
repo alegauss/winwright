@@ -22,7 +22,6 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 💭 **WW372** (deps: —) **no declared step can ask for a popup's picture, and its four refusals would all reach the verdict as holes** — WW359 built the ask and wired nothing to it, and AsAssertion counts every absence as unchecked — so a case naming an absent popup reads as a machine that could not look. → §WW372
 - 💭 **WW378** (deps: —) **the absent refusal keeps the last hand-written copy of the claim set, and it is already one claim behind** — Seventeen terms over the parameters, written before contains existed, so absent beside it is refused as two claims rather than as one. → §WW378
 - 💭 **WW380** (deps: —) **an arm now carries a delegate and nothing checks it is the right one, so sweep could run the delay experiment** — WW367 made the code a field the compiler demands; the lambdas are compiler-generated, so reflection cannot say which runner one reaches. → §WW380
 

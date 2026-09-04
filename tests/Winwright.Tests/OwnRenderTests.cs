@@ -301,6 +301,62 @@ public sealed class OwnRenderTests : IDisposable
     }
 
     [Fact]
+    public void A_popup_the_case_named_wrongly_is_a_red_and_not_a_hole()
+    {
+        // WW372, and the collapse it is about. Every absence this type carried was reported as
+        // unchecked, which was the whole truth while the only ask named a window the run had already
+        // found: an application that never adopted the in-app half has told the run nothing, and a
+        // red about that would be the harness's own wiring reported against the application.
+        //
+        // A name the case typed is the other kind. The run asked, the application answered, and
+        // nothing about the machine is unknown — so a hole here reports a typo as a desk that could
+        // not be looked at, which is a green-adjacent answer to a case that is wrong.
+        using var application = AnsweringWindow.Open(root);
+
+        var missing = OwnRender.PopupInto(application.Handle, "summary", Path.Combine(root, "missing.png"));
+        var hollow = OwnRender.PopupInto(
+            application.Handle, AnsweringWindow.EmptyPopupNamed, Path.Combine(root, "hollow.png"));
+
+        foreach (var asked in new[] { missing, hollow })
+        {
+            Assert.True(asked.Wrote, asked.Sentence());
+
+            var result = asked.AsAssertion("the flyout is photographed");
+            Assert.Equal(Winwright.Verdicts.AssertionOutcome.Failed, result.Outcome);
+            Assert.False(result.DidNotRun, asked.Sentence());
+
+            // And the trace line reads the way the verdict does, which is the join this project
+            // keeps everywhere else: a record that disagrees with the summary beside it sends its
+            // reader to the wrong half.
+            Assert.Equal(Winwright.Tracing.StepVerdict.Failed, asked.AsTraceStep("the flyout").Verdict);
+        }
+    }
+
+    [Fact]
+    public void The_wiring_the_case_did_not_write_stays_a_hole_on_both_asks()
+    {
+        // The other side of the same line, and the one the design drew differently: it listed the
+        // path refusal with the three about the name. It is not one of them. What refuses there is
+        // the project's `captures` and the application's own directory disagreeing — a harness fact
+        // WW362 already filed as one — and a case that never typed a path cannot be at fault for it.
+        using var application = AnsweringWindow.Open(root);
+        var elsewhere = Path.Combine(Path.GetTempPath(), "winwright-popup-not-asked-for.png");
+
+        var refused = OwnRender.PopupInto(application.Handle, AnsweringWindow.PopupNamed, elsewhere);
+
+        Assert.False(refused.Wrote, refused.Sentence());
+        Assert.True(refused.AsAssertion("the flyout is photographed").DidNotRun);
+
+        // And an application that never took the message at all, which is WW349's own absence and
+        // the reason this type reported holes to begin with.
+        using var silent = AnsweringWindow.Silent();
+        var unheard = OwnRender.PopupInto(silent.Handle, AnsweringWindow.PopupNamed, Path.Combine(root, "n.png"));
+
+        Assert.False(unheard.Wrote, unheard.Sentence());
+        Assert.True(unheard.AsAssertion("the flyout is photographed").DidNotRun);
+    }
+
+    [Fact]
     public void Nothing_may_be_asked_for_by_passing_nothing()
     {
         Assert.Throws<ArgumentException>(() => OwnRender.Into(1, "  "));

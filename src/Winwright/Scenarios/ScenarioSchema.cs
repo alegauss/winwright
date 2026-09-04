@@ -239,6 +239,7 @@ public static class ScenarioSchema
         new("coversAtLeast", false, Taking.Text, "the same set, claiming only that every declared string is read here and allowing values that are not in it — for a container the locator cannot separate from its neighbours", [], Claims: true),
         new("coversWithin", false, Taking.Text, "the same set, claiming each declared string appears inside the name of something read rather than equalling it — for an entry that decorates what it is about", [], Claims: true),
         new("meansIt", false, Taking.Truth, "that this step means a destructive entry it names", []),
+        new("popup", false, Taking.Text, "the popup inside this step's window whose tree the picture is of, by the name the application's own author gave it — for a capture, and the one surface no copy of the screen can ever take", []),
         new("named", false, Taking.Text, "what a report should call it, where the act and the locator will not do", []),
     ]);
 

@@ -277,6 +277,7 @@
 - ✅ **WW360** **winwright_check says a file loads and the run then refuses it, because the check tool is handed no project** — winwright_check takes an optional project, holds the file against it with the run's own walk, and says when it read the file alone (design recorded in `tools/Winwright.Mcp/Served.cs`).
 - ✅ **WW365** **Of reads at cognitive complexity 119 because its refusals thread twenty locals, and the step they judge now exists** — Nine refusal families ask the step rather than twenty locals, in the order they always ran; Of reads 15 not 119 (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 - ✅ **WW367** **which code an arm runs is still a branch per name in Measured, so an arm reaches the tool in two places again** — An arm carries the code it runs, over one context all four fit, so an arm with no branch no longer compiles (design recorded in `tools/Winwright.Typing/Arms.cs`).
+- ✅ **WW372** **no declared step can ask for a popup's picture, and its four refusals would all reach the verdict as holes** — A capture names the popup its picture is of, and a name no popup has is a red where an unadopted half stays a hole (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

@@ -423,6 +423,31 @@ public sealed class CaseRunTests : IDisposable
     }
 
     [Fact]
+    public void A_capture_may_name_the_popup_it_is_of_and_no_other_verb_may()
+    {
+        // WW372. WW359 built the ask and wired nothing to it, so the surface a scenario most wants a
+        // picture of — a flyout nobody has clicked — was the one a scenario could not ask for. It is
+        // a field on the capture and not a third kind of subject: the step still addresses a window
+        // the ordinary way, and this says which surface inside it the picture is of.
+        var step = StepDeclaration.Of("Pane", "capture", "the flyout", popup: "  details  ");
+
+        Assert.Equal("details", step.Popup);
+
+        // Trimmed like every other field, because the name crosses a process boundary and a case
+        // that indented its JSON would be asking for a popup called ' details '.
+        Assert.Equal("capture", step.Verb.Name);
+
+        // And nowhere else. Every other act reaches an element a locator matched, and a popup nobody
+        // has opened is not one — so a step naming it under another verb would load and mean
+        // nothing, which is the key that does nothing this format exists to refuse.
+        var refused = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of("Pane", "read", reads: "name", answers: true, popup: "details"));
+
+        Assert.Contains("a popup is the surface a capture asks", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("details", refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void The_act_line_says_what_the_verdict_settled_on_where_that_is_not_what_the_act_read()
     {
         // WW366. An act reads once, the moment it returns; the expectation beside it polls after

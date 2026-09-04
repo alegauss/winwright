@@ -137,6 +137,24 @@ public sealed record StepDeclaration
     /// </summary>
     public string Addressed => Locator?.Text ?? $"tray icon '{Tray}'";
 
+    /// <summary>
+    /// The popup inside this step's window whose tree the capture is of, by the name the
+    /// application's own author gave it. Null on every step but a capture that names one. WW372.
+    /// <para>
+    /// Not a second subject and not a locator. The step still addresses a window the ordinary way,
+    /// and this says which surface <em>inside</em> it the picture is of — which is why it is a
+    /// field on the capture rather than a third arm of the group WW258 opened.
+    /// </para>
+    /// <para>
+    /// It is the surface an outside process cannot photograph at all, which is what makes the ask
+    /// worth a field. WW347: an open popup is its own layered window whose soft edge is a strip of
+    /// whatever it stands in front of, so a screen copy is refused; a closed one has no window to
+    /// copy. To the application it is an element in a tree it owns either way, so a preview of a
+    /// flyout nobody has clicked is a picture this can ask for and no copy ever could.
+    /// </para>
+    /// </summary>
+    public string? Popup { get; private init; }
+
     /// <summary>What it does.</summary>
     public ActVerb Verb { get; }
 
@@ -747,6 +765,11 @@ public sealed record StepDeclaration
     /// The key whose every declared string must appear <em>inside</em> the name of something the
     /// locator matched. WW292, and at most one of the three ways of claiming a set.
     /// </param>
+    /// <param name="popup">
+    /// The popup inside this step's window whose tree the picture is of. WW372, and only on a
+    /// capture: every other verb acts on the element a locator matched, and a popup nobody has
+    /// clicked has no element in this run's reach at all.
+    /// </param>
     public static StepDeclaration Of(
         string? locator,
         string verb,
@@ -775,7 +798,8 @@ public sealed record StepDeclaration
         bool ownHeader = false,
         string? tray = null,
         string? coversAtLeast = null,
-        string? coversWithin = null)
+        string? coversWithin = null,
+        string? popup = null)
     {
         var (matching, covering) = OneSetClaim(named, covers, coversAtLeast, coversWithin);
         covers = covering;
@@ -946,6 +970,7 @@ public sealed record StepDeclaration
             Pointing = pointing,
             BeginsWithLabel = opening,
             Absent = absent,
+            Popup = Trimmed(popup),
         };
 
         // WW365. Every refusal from here reads the step rather than the locals that built it, which
@@ -958,6 +983,7 @@ public sealed record StepDeclaration
         // that named no reading and one that named the default carry the same ReadBack, and half of
         // these refusals turn on which of the two it was.
         RefusesCapturingClaim(step, subject, reads);
+        RefusesPopupBesideAnythingElse(step, subject);
         RefusesClaimCount(step, subject, reads);
         RefusesClaimAgainstVerb(step, subject, reads);
 
@@ -1157,6 +1183,29 @@ public sealed record StepDeclaration
                 $"it captures and names the '{reads.Trim()}' reading; a capture is about the "
                     + "window the locator is inside rather than about what that element says");
         }
+    }
+
+    /// <summary>
+    /// A popup is a capture's field and no other verb's. WW372.
+    /// <para>
+    /// Every other act reaches an element a locator matched; a popup nobody has clicked has no
+    /// element in this run's reach, which is the whole reason the picture is asked for rather than
+    /// taken. So a step naming one under any other verb is a case that would load and mean nothing
+    /// — the key that loads and does nothing being the failure this format is built to refuse.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step, built and asked rather than rebuilt out of locals.</param>
+    /// <param name="subject">What a refusal calls this step.</param>
+    private static void RefusesPopupBesideAnythingElse(StepDeclaration step, string subject)
+    {
+        if (step.Popup is not { } popup || step.Verb.Captures)
+            return;
+
+        throw new ScenarioRefusedException(
+            subject,
+            $"it names the '{popup}' popup and acts with '{step.Verb.Name}'; a popup is the surface a "
+                + "capture asks the application to draw, and every other act reaches an element the "
+                + "locator matched — which a popup nobody has opened is not");
     }
 
     /// <summary>
