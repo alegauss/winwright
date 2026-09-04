@@ -57,6 +57,9 @@ public sealed class DeskProbeTests
     /// <summary>The probe itself, which decides what a desk is called.</summary>
     private static string Probe() => File.ReadAllText(Checkout.At("tools", "desk-probe.ps1"));
 
+    /// <summary>The clearer, which decides what a run may put away. WW371.</summary>
+    private static string Clearer() => File.ReadAllText(Checkout.At("tools", "desk-clear.ps1"));
+
     /// <summary>Every answer the probe can write, and the runner has an arm for each.</summary>
     private static readonly string[] States = ["clear", "busy", "asking", "shell", "broken"];
 
@@ -240,30 +243,40 @@ public sealed class DeskProbeTests
 
         try
         {
-            var ran = Process.Start(new ProcessStartInfo("powershell.exe")
-            {
-                ArgumentList = { "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", script },
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-
-                // No console, so this cannot be the window that takes the desk. The class is serial
-                // as well, which is the rule; this is the reason the rule exists.
-                CreateNoWindow = true,
-            })!;
-
-            var said = ran.StandardOutput.ReadToEnd();
-            var wrong = ran.StandardError.ReadToEnd();
-            ran.WaitForExit(30000);
-
-            Assert.True(wrong.Trim().Length == 0, $"the probe wrote to standard error: {wrong}");
-
-            return said.Split('\n').Select(one => one.Trim('\r', ' ')).Where(one => one.Length > 0).ToList();
+            return Answered(script);
         }
         finally
         {
             File.Delete(script);
         }
+    }
+
+    /// <summary>
+    /// Start PowerShell on a script and hand back the lines it wrote. WW371 pulled it out of
+    /// <see cref="Ran" />, because the clearer needs the same launch and a different preamble.
+    /// </summary>
+    /// <param name="script">The file to run.</param>
+    private static IReadOnlyList<string> Answered(string script)
+    {
+        var ran = Process.Start(new ProcessStartInfo("powershell.exe")
+        {
+            ArgumentList = { "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", script },
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+
+            // No console, so this cannot be the window that takes the desk. The class is serial
+            // as well, which is the rule; this is the reason the rule exists.
+            CreateNoWindow = true,
+        })!;
+
+        var said = ran.StandardOutput.ReadToEnd();
+        var wrong = ran.StandardError.ReadToEnd();
+        ran.WaitForExit(30000);
+
+        Assert.True(wrong.Trim().Length == 0, $"the script wrote to standard error: {wrong}");
+
+        return said.Split('\n').Select(one => one.Trim('\r', ' ')).Where(one => one.Length > 0).ToList();
     }
 
     [Fact]
@@ -312,6 +325,78 @@ public sealed class DeskProbeTests
         Assert.Equal("testhost", fields[2]);
         Assert.Equal("Static", fields[3]);
         Assert.Equal("winwright desk probe", fields[4]);
+    }
+
+    [Fact]
+    public void A_window_with_no_minimise_button_is_the_one_a_run_leaves_alone()
+    {
+        // WW371, and the whole of the line it draws. The refusal used to have one remedy — a person
+        // at the guest console — so a session working a backlog could not run at all on a desk
+        // somebody had left a browser in front of. Measured on WW358: a cold start passed 1961
+        // cases, and the next run refused because Edge had restored its session at login.
+        //
+        // What separates that from a question is the minimise button. A window a person can put
+        // away is one a run may put away, and a modal prompt has none — which is what makes it a
+        // question rather than clutter. So this drives the decision with the styles rather than the
+        // windows, because what is under test is where the line is and not that Windows sets bits.
+        var said = Cleared(
+            "Test-Clearable -Class 'Chrome_WidgetWin_1' -Style 0x00020000",
+            "Test-Clearable -Class 'Chrome_WidgetWin_1' -Style 0x00000000",
+            "Test-Clearable -Class '#32770' -Style 0x00000000",
+
+            // The shell's own, refused whatever its style says. A taskbar holding the desk is
+            // `shell` and never reaches this file, and a run that put it away would be taking the
+            // thing WW330 exists to give back.
+            "Test-Clearable -Class 'Shell_TrayWnd' -Style 0x00020000");
+
+        Assert.Equal(["True", "False", "False", "False"], said);
+    }
+
+    [Fact]
+    public void The_runner_reads_the_desk_again_rather_than_believing_the_clearing()
+    {
+        // The rule that keeps WW311 intact while WW371 relaxes the refusal: a repair is attempted
+        // and never trusted. The clearer says what it did; the desk is read a second time, and it
+        // is the second reading that decides — so a window that comes back is a window that refuses
+        // this run, and a prompt is still exactly what a person has to go and answer.
+        var runner = Runner();
+        var asking = Arm(runner, "asking");
+
+        Assert.Contains("Clear-GuestDesk", asking, StringComparison.Ordinal);
+        Assert.Contains("Read-GuestDesk", asking, StringComparison.Ordinal);
+
+        // And it still refuses. A relaxation that could not refuse would be the reading thrown away
+        // rather than acted on, which is the repair WW331 was filed about wearing a new name.
+        Assert.Contains("Refuse", asking, StringComparison.Ordinal);
+        Assert.Contains("Waiting does not clear a question", asking, StringComparison.Ordinal);
+
+        // The clearer is carried the way the probe is, which is what makes the file the guest runs
+        // the file this suite exercises.
+        Assert.Contains("desk-clear.ps1", runner, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_clearer_moves_a_window_and_hands_the_foreground_on()
+    {
+        // WW371 was filed on a wrong premise and this is the sentence that corrects it. The entry
+        // said a browser window survived twelve SW_MINIMIZE calls, each reporting the same handle in
+        // the foreground 600ms later, and concluded something was restoring it. Read again, IsIconic
+        // on that handle answered true throughout: the minimise had worked every time, and Windows
+        // keeps a minimised window as the foreground until something else claims it.
+        //
+        // So a repair that only minimises reads as one that did nothing, which is what the twelve
+        // calls were. Handing the foreground on is the half that was missing, and it is asserted
+        // here because it is the half a reader of that entry would leave out.
+        var clearer = Clearer();
+
+        Assert.Contains("ShowWindow", clearer, StringComparison.Ordinal);
+        Assert.Contains("ShowTheDesktop", clearer, StringComparison.Ordinal);
+
+        // Nothing is closed and nothing is killed, which is WW311's lesson kept: killing a prompt's
+        // owner cleared the prompt and cost the tray, and the run after it went red with no icon
+        // anywhere.
+        foreach (var one in new[] { "TerminateProcess", "Stop-Process", "CloseWindow", "WM_CLOSE" })
+            Assert.DoesNotContain(one, clearer, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -400,6 +485,48 @@ public sealed class DeskProbeTests
             else { "$($one.Handle)|$($one.Pid)|$($one.Process)|$($one.Class)|$($one.Title)" }
         }
         """);
+
+    /// <summary>
+    /// Run the clearer's own decision over each window, and answer what it said. WW371.
+    /// <para>
+    /// Through PowerShell and dot-sourced with <c>-DefineOnly</c>, for the reason
+    /// <see cref="Classified" /> is: a copy of the rule in C# would agree with itself forever while
+    /// the file the guest runs drifted away from it, and nothing here touches a desk.
+    /// </para>
+    /// </summary>
+    /// <param name="windows">One <c>Test-Clearable</c> call per window, as PowerShell spells it.</param>
+    private static IReadOnlyList<string> Cleared(params string[] windows)
+    {
+        var script = Path.Combine(Path.GetTempPath(), $"winwright-ww371-{Guid.NewGuid():N}.ps1");
+        var clearer = Checkout.At("tools", "desk-clear.ps1");
+
+        File.WriteAllText(
+            script,
+            $$"""
+            Set-StrictMode -Version Latest
+            $ErrorActionPreference = 'Stop'
+            . '{{clearer}}' -DefineOnly
+            {{string.Join(Environment.NewLine, windows)}}
+            """);
+
+        try
+        {
+            var said = Answered(script);
+
+            // The count and not only the content, for the reason Classified checks it: a script that
+            // threw halfway answers fewer lines than it was asked for, and comparing the ones that
+            // arrived against the first few expectations reports the wrong window as the wrong answer.
+            Assert.True(
+                said.Count == windows.Length,
+                $"asked about {windows.Length} window(s) and got {said.Count}: {string.Join(" / ", said)}");
+
+            return said;
+        }
+        finally
+        {
+            File.Delete(script);
+        }
+    }
 
     /// <summary>The text between two markers, or empty where either is missing.</summary>
     /// <param name="text">The whole file.</param>

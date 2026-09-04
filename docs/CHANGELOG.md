@@ -347,6 +347,7 @@
 - ✅ **WW357** **the probe's twelve looks at a live foreground are run by nothing, so a look built wrong classifies perfectly** — The polling is a function taking its count and pause, and two cases run it against a desk this suite arranged (design recorded in `tools/desk-probe.ps1`).
 - ✅ **WW369** **a locator naming a control type the tree lacks reads as nothing answered, which is what a vanished menu reads as** — Both menu kinds are read as a shape now, so a regression to buttons is a red naming the tree and not a desk sentence (design recorded in `tests/Winwright.Tests/NotificationAreaTests.cs`).
 - ✅ **WW370** **the loop's one branch that answers nothing is the desktop skip, and no case arranges a desktop-held desk to run it** — Get-DeskLooks takes the desktop list, so a case names the class of its own window and runs the skip that makes a quiet desk clear (design recorded in `tools/desk-probe.ps1`).
+- ✅ **WW371** **an asking desk refuses every guest run, and the only remedy is a person at the guest console** — A window with a minimise button is put away and only a question still refuses (design superseded: the minimise it called failed had held every time) (design recorded in `tools/desk-clear.ps1`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

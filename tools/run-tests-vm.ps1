@@ -303,6 +303,45 @@ function Read-GuestDesk {
     }
 }
 
+function Clear-GuestDesk {
+    <#
+      WW371. Put an ordinary window away, so a desk nobody is standing at can still be run on.
+
+      What this is for is in `tools/desk-clear.ps1`, which decides what may be moved and why - the
+      probe reads and never repairs, and the argument for keeping those apart is WW311's. Here is
+      only the carrying, which is `Read-GuestDesk`'s shape one file over.
+
+      What it answers is what the guest said it did, and never whether the desk is clear. The caller
+      reads the desk again for that: a window that comes back is a window that refuses this run, and
+      a repair trusted on its own report would be exactly the green this project refuses.
+    #>
+    param([Parameter(Mandatory)] [string] $Vmx, [Parameter(Mandatory)] [string] $Stage)
+
+    $clearer = Join-Path $PSScriptRoot 'desk-clear.ps1'
+    if (-not (Test-Path -LiteralPath $clearer)) { return "the desk clearer is missing: $clearer" }
+
+    $null = Invoke-VmRun -Guest -Arguments @('deleteFileInGuest', $Vmx, "$script:GuestSync\cleared.txt")
+
+    $sent = Invoke-VmRun -Guest -Arguments @(
+        'copyFileFromHostToGuest', $Vmx, $clearer, "$script:GuestSync\clear.ps1")
+    if (-not $sent.Ok) { return "could not copy the desk clearer into the guest: $($sent.Output)" }
+
+    # On the desk, for the reason the probe is: a program run outside the session has no foreground
+    # to put away, and one that reported success from out there would be reporting about no desk.
+    $null = Invoke-OnTheDesk -Vmx $Vmx -Arguments @(
+        'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe',
+        '-NoProfile', '-ExecutionPolicy', 'Bypass',
+        '-File', "$script:GuestSync\clear.ps1")
+
+    $answerFile = Join-Path $Stage 'cleared.txt'
+    $null = Invoke-VmRun -Guest -Arguments @(
+        'copyFileFromGuestToHost', $Vmx, "$script:GuestSync\cleared.txt", $answerFile)
+
+    if (-not (Test-Path -LiteralPath $answerFile)) { return 'the desk clearer wrote no answer in the guest' }
+
+    return (Read-ConsoleText $answerFile).Trim()
+}
+
 function Start-Guest {
     <#
       Power the guest on without letting `vmrun start` decide how long this run lasts.
@@ -493,16 +532,52 @@ switch ($desk.State) {
             'foreground clears it.') -ForegroundColor Yellow
     }
     'asking' {
-        Refuse (
-            "the guest's desk is waiting for an answer: $($desk.Process) (pid $($desk.Pid), " +
-            "$($desk.Class)) '$($desk.Detail)' held the foreground for every look"
-        ) (
-            'Answer it at the guest console and run again. Waiting does not clear a question, and ' +
-            'killing its owner cost the tray the last time it was tried: the window belongs to ' +
-            'ShellExperienceHost, and the run after that went red with no icon anywhere. This is ' +
-            'the prompt that took three steps off the adoption keyboard case and reported them ' +
-            'unchecked twenty minutes after the carry.'
-        )
+        # WW371. Tried once before refusing, and read again afterwards rather than believed.
+        #
+        # What this arm used to be was a refusal with one remedy — go and click it at the guest
+        # console — and a session working a backlog has nobody there. Measured on WW358: a cold
+        # start passed 1961 cases, and the next run refused because Edge had restored its session
+        # at login and held the foreground for all twelve looks. The runner had manufactured the
+        # desk that then refused it.
+        #
+        # The clearer moves a window a person could have minimised and leaves anything else alone,
+        # which is where the line is: a modal prompt has no minimise button, and that is what makes
+        # it a question. So the desk is read again and this refuses on what the second reading says.
+        # WW311's rule is intact — waiting does not clear a question — and a question is still
+        # exactly what refuses the run.
+        Write-Host (
+            "  foreground  waiting for an answer: $($desk.Process) (pid $($desk.Pid), " +
+            "$($desk.Class)) '$($desk.Detail)'. Trying to put it away.") -ForegroundColor Yellow
+
+        $cleared = Clear-GuestDesk -Vmx $vmxPath -Stage $stage
+        Write-Host "  clearing    $cleared"
+
+        $desk = Read-GuestDesk -Vmx $vmxPath -Stage $stage
+        if ($desk.State -eq 'asking') {
+            Refuse (
+                "the guest's desk is waiting for an answer: $($desk.Process) (pid $($desk.Pid), " +
+                "$($desk.Class)) '$($desk.Detail)' held the foreground for every look, and it is " +
+                "still there after the run tried to put it away — $cleared"
+            ) (
+                'Answer it at the guest console and run again. Waiting does not clear a question, ' +
+                'and killing its owner cost the tray the last time it was tried: the window belongs ' +
+                'to ShellExperienceHost, and the run after that went red with no icon anywhere. ' +
+                'This is the prompt that took three steps off the adoption keyboard case and ' +
+                'reported them unchecked twenty minutes after the carry.'
+            )
+        }
+
+        # The second reading is read whole and not only for `asking`. A desk that came back
+        # `broken` or unreadable is a desk this run cannot use either, and falling past it because
+        # the arm it landed in was chosen by the first reading is the kind of green that gets a
+        # suite run against a session that renders nothing.
+        if ($desk.State -notin @('clear', 'busy', 'shell')) {
+            Refuse (
+                "the desk was cleared and now reads '$($desk.State)': $($desk.Detail)"
+            ) 'Look at the guest console. The window was put away and what is there now is not a desk this run can drive.'
+        }
+
+        Write-Host "  foreground  cleared, and now reads $($desk.State)" -ForegroundColor Yellow
     }
     'broken' {
         Refuse "the guest is logged in and has no shell: $($desk.Detail)" 'Sign out and back in at the guest console. A desk with no foreground renders nothing for a capture and takes no input.'

@@ -262,32 +262,6 @@ deletion the whole adoption produces. It is also the hardest, because a thousand
 tests sit around it and the migration must not disturb the parallelism setting the
 runner config exists to hold in place.
 
-### §WW371 a refusal an unattended run cannot answer
-
-`desk-probe.ps1` reads and never repairs, and WW311 argues that well: a toast goes and a
-question does not, and killing the owner cost the tray once already. What it leaves is a
-refusal with one remedy — go and click it at the guest console — and a session working
-the backlog has nobody there.
-
-Measured on WW358. The first run cold-started the guest and passed 1961 cases. The
-second refused: an Edge window held the foreground for all twelve looks. Edge restores
-its session at login, so the runner manufactured the desk that then refused it.
-
-Both non-destructive repairs failed. `Shell.Application.MinimizeAll` left it in front,
-and `ShowWindow(SW_MINIMIZE)` aimed at the window itself was called twelve times, each
-one reporting the same handle back in the foreground 600ms later. So the window is not
-merely selected — something restores it — and the probe's reading was right both times.
-
-That leaves three things unseparated that a run would treat differently: a question
-nobody can answer but a person, an ordinary window that minimises, and a window that
-refuses to. Only the first deserves the refusal it gets. `WS_MINIMIZEBOX`, the owner
-handle, and whether a minimise holds are each readable before the twenty minutes are
-spent.
-
-The candidate is a repair the probe may attempt and must then re-read, refusing only
-where the desk did not clear — and a cold start that does not restore a browser session
-at all.
-
 ### §WW373 the run nobody can tell from a slow one
 
 A case that deadlocks does not fail. `run-tests.cmd` passes no `--blame-hang`, so the
