@@ -28,6 +28,8 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
+- 💭 **WW387** (deps: —) **nothing can answer for a window that is not hooked, so an absent half is told from a late one by waiting** — WW374 found the sixth answer its design proposed has no speaker: Everywhere hooks per window on Loaded, which is the event the gap waits for. → §WW387
+
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW83** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅) **the switch case drives the one path that rewrites a real setting** — The case and the store bracket are written and wait on it: the adopter's engine comes from nuget.org. → §WW83

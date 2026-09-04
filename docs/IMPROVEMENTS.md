@@ -185,6 +185,29 @@ has never produced.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
+### §WW387 the answer with nobody to give it
+
+WW374 was filed with two candidates and only one exists. The second was a sixth answer
+meaning *the half is here and this window is not hooked yet*, and there is nobody to
+give it: the harness sends `WM_COPYDATA` to one window, and where nothing is hooked
+there no code of the in-app half runs at all. `Renders.Everywhere` does not change it —
+it hooks per window on `Loaded`, the very event the gap waits for.
+
+The half's own comment says so about the why ask: *telling the two apart needs the
+process-wide hook first*. There is none. What `Everywhere` gives is a class handler
+hooking each window as it loads — a per-window hook arriving later, which is the thing
+WW374 waits for rather than one that could answer for it.
+
+So the wait is what there is, and it costs what a wait costs: an application with no
+in-app half now spends two seconds per capture step being told the truth about itself.
+That is the right trade at one capture and the wrong one at forty, and forty is what an
+adopting suite has.
+
+What removes it is a reading per process rather than per window: one hook answering
+*this application has the half* whatever window is asked about, put up by `Everywhere`
+on a message-only window of its own. The gap becomes a question with an answer instead
+of a duration, and no run waits to learn what the application could have said at once.
+
 ## Block J — Adoption — the proof is the deletion
 
 ### §WW83 The switch case rewrites a real setting
