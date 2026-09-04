@@ -60,6 +60,9 @@ internal static class Deadlines
         new("AttemptTests.cs", 7, "null on most, and deliberately never on one: a look that is always "
             + "answered is what proves a thing already there costs no sleep"),
         new("FixtureTests.cs", 1, "null, until the fixture has written the dump this is waiting on"),
+        new("NotificationAreaTests.cs", 1, "null, while no Menu on the desktop holds this fixture's "
+            + "entries — a menu the verb has reported open is a window the tree may not have caught "
+            + "up with, and nothing found is what that looks like"),
         new("TrayIconFixture.cs", 1, "null, from the search's own Icon — which is the whole of WW175: "
             + "the search itself is never null and waiting on it would poll once"),
         new("Waits.cs", 1, "whatever the caller's look answers, since this only supplies the deadline"),

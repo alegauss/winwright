@@ -513,6 +513,126 @@ public sealed class NotificationAreaTests : IDisposable
         }
     }
 
+    /// <summary>
+    /// The menu standing on the desktop that holds this fixture's entries, or null where none does.
+    /// WW369.
+    /// <para>
+    /// Found by what is under it rather than by being the only one: the shell owns menus of its own,
+    /// and a case that took the first Menu on the desktop would assert about whichever one happened
+    /// to be up. Polled, because a menu the verb has just reported open is a window the tree may not
+    /// have caught up with — which is the race WW350 is about, met here on the reading side.
+    /// </para>
+    /// </summary>
+    private static AutomationElement? Standing()
+    {
+        var looked = Attempt.Until(
+            () =>
+            {
+                var menus = AutomationElement.RootElement.FindAll(
+                    TreeScope.Children,
+                    new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Menu));
+
+                foreach (AutomationElement one in menus)
+                {
+                    var entry = one.FindFirst(
+                        TreeScope.Descendants,
+                        new PropertyCondition(AutomationElement.NameProperty, "winwright open"));
+
+                    if (entry is not null)
+                        return one;
+                }
+
+                return null;
+            },
+            4000,
+            50);
+
+        return looked.Found ? looked.Value : null;
+    }
+
+    [Fact]
+    public void The_drop_down_this_fixture_puts_up_is_a_Menu_of_MenuItems() =>
+        MenuIsAMenuOfMenuItems(TrayMenuKind.DropDown, "winwright tree dropdown");
+
+    [Fact]
+    public void The_Win32_menu_this_fixture_puts_up_is_a_Menu_of_MenuItems() =>
+        MenuIsAMenuOfMenuItems(TrayMenuKind.Win32, "winwright tree win32");
+
+    /// <summary>
+    /// One kind's tree, read and asserted. WW369, and a method rather than a theory because the enum
+    /// naming the kinds is this assembly's own — a case taking one as a parameter has to be as
+    /// internal as it is, and a case nobody can see is a case that quietly stops running.
+    /// </summary>
+    /// <param name="kind">Which menu the fixture puts up.</param>
+    /// <param name="tip">What the shell calls this case's icon, which no other case shares.</param>
+    private static void MenuIsAMenuOfMenuItems(TrayMenuKind kind, string tip)
+    {
+        // WW369. Nothing here read this fixture's own tree, and WW356 is what that cost: the entries
+        // were ToolStripButtons because `Items.Add(string)` asks the container for a default item and
+        // ToolStripDropDown's answer is ToolStrip's. A locator naming MenuItem then matched nothing,
+        // and what it said was "nothing answered to it in 30 polls over 4080ms" — which is also what
+        // a menu that closed says, and what a menu that never opened says. Three faults, one
+        // sentence, and six guest runs spent inside it across WW343 and WW356.
+        //
+        // So this reads the shape rather than a value: the container is a Menu and its entries are
+        // MenuItems, named as the adopters name them. A regression to buttons is a red in its own
+        // words here, one line, instead of a scenario failing in the words of a desk problem.
+        //
+        // Both kinds, because the Win32 one has never been read either. It is asserted through the
+        // verbs that open it and never as a shape, so what an adopter's locator would find in it is
+        // unmeasured rather than known — which is exactly the state the drop-down was in.
+        using var answering = BusyDesk.Built(() => TrayIconFixture.Add(tip, kind));
+        if (answering is null)
+            return;
+
+        var menu = NotificationArea.OpenMenu(answering.Tip, settleMs: 4000, pollMs: 40);
+
+        try
+        {
+            if (BusyDesk.Excused(menu.AsAssertion("the icon shows its menu")))
+                return;
+
+            var standing = Standing();
+            Assert.True(standing is not null, $"the menu opened and no Menu on the desktop holds its entries: {menu}");
+
+            var tree = Inspect.Under(standing);
+            Assert.True(tree is not null, "the menu is on the desktop and its tree could not be walked");
+
+            // Printed into every failure below, because a control type that is not what this expects
+            // is a finding about a tree, and a reader handed only the wrong word has to go and get
+            // the rest of it on a desk that has since put the menu away.
+            var said = string.Join(Environment.NewLine, Inspect.Render(tree!));
+
+            Assert.True("Menu" == tree!.Facts.ControlType, $"the container is not a Menu:{Environment.NewLine}{said}");
+
+            // The entries by name, because the container carries other things — a drop-down has a
+            // scroll button at each end whatever it is holding — and a count over all of them would
+            // be a check about the framework rather than about what this fixture declares.
+            var entries = tree.Walk()
+                .Where(one => one.Facts.Name.StartsWith("winwright ", StringComparison.Ordinal))
+                .ToList();
+
+            Assert.True(
+                entries.Count == 2,
+                $"the menu holds {entries.Count} entry(ies) of this fixture's, not 2:{Environment.NewLine}{said}");
+
+            Assert.True(
+                entries.All(one => one.Facts.ControlType == "MenuItem"),
+                $"an entry is not a MenuItem, which is the word every adopter's locator uses:"
+                    + $"{Environment.NewLine}{said}");
+
+            Assert.Equal(["winwright open", "winwright quit"], entries.Select(one => one.Facts.Name));
+        }
+        finally
+        {
+            // WW330's rule, and the pair every case in this class ends with: the menu is this case's
+            // to dismiss, and what the act took is the act's to give back once nothing is left to
+            // lose by it.
+            answering.DismissMenu();
+            menu.PutBack();
+        }
+    }
+
     [Fact]
     public void A_menu_that_stands_without_taking_the_focus_is_seen_too()
     {
