@@ -777,72 +777,21 @@ public sealed record StepDeclaration
         string? coversAtLeast = null,
         string? coversWithin = null)
     {
-        // WW275 and WW292. At most one of the three, and refused where they are written: they are one
-        // set claimed three different ways, and a step naming two would have the run honour whichever
-        // the code reads first.
-        var ways = new List<string>();
-        if (!string.IsNullOrWhiteSpace(covers))
-            ways.Add("'covers'");
-        if (!string.IsNullOrWhiteSpace(coversAtLeast))
-            ways.Add("'coversAtLeast'");
-        if (!string.IsNullOrWhiteSpace(coversWithin))
-            ways.Add("'coversWithin'");
+        var (matching, covering) = OneSetClaim(named, covers, coversAtLeast, coversWithin);
+        covers = covering;
 
-        if (ways.Count > 1)
-        {
-            throw new ScenarioRefusedException(
-                string.IsNullOrWhiteSpace(named) ? "<a step>" : named.Trim(),
-                $"it carries {string.Join(" and ", ways)}; those are the same set claimed different "
-                    + "ways, so name the one this step means");
-        }
-
-        // All three derive the same set through the same door, so everything below reads it as
-        // `covers` and only the comparison is told which claim it is.
-        var matching = !string.IsNullOrWhiteSpace(coversAtLeast) ? Asserting.SetMatch.AtLeast
-            : !string.IsNullOrWhiteSpace(coversWithin) ? Asserting.SetMatch.Within
-            : Asserting.SetMatch.Exactly;
-
-        covers = ways.Count == 0 ? covers : (covers ?? coversAtLeast ?? coversWithin);
-
-        var called = string.IsNullOrWhiteSpace(named) ? null : named.Trim();
-        var named_tray = string.IsNullOrWhiteSpace(tray) ? null : tray.Trim();
+        var called = Trimmed(named);
+        var named_tray = Trimmed(tray);
         var subject = called ?? Describing(verb, locator ?? $"tray icon '{named_tray}'");
 
-        // WW258. Both arms, and here as well as in the schema: the loader comes through
-        // `ScenarioSchema.Miscarried`, and a caller building a declaration in code does not — so the
-        // rule that a step addresses exactly one thing lives on the type that cannot be bypassed.
-        if (string.IsNullOrWhiteSpace(locator) && named_tray is null)
-            throw new ScenarioRefusedException(subject, "a step acts on something, and this one names nothing");
-
-        if (!string.IsNullOrWhiteSpace(locator) && named_tray is not null)
-        {
-            throw new ScenarioRefusedException(
-                subject,
-                "a step acts on one thing, and this one names a locator and a tray icon; a tray icon is "
-                    + "not in the window's tree, so no locator reaches it and naming both names two subjects");
-        }
+        RefusesTwoSubjects(subject, locator, named_tray);
 
         if (named_tray is not null)
             return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, beginsWithLabel, absent, unlike, sameCountdownAs, contains, expectReported, eachSpoken, ownHeader);
 
-        // WW263 and WW273. A locator with a brace in it has to parse with something in it as well as
-        // with the placeholder, and both are facts about the file rather than about a run. Probed here
-        // so the refusal arrives where the locator was written, not on the member — or the string —
-        // that happened to expose it.
-        // Not null from here: the two guards above returned for a tray step and threw for a step that
-        // named neither, so what is left named a locator.
-        if (Braced.IsMatch(locator!)
-            && !Locator.TryParse(Braced.Replace(locator!, "probe"), out _, out var wrongly))
-        {
-            throw new ScenarioRefusedException(
-                subject,
-                $"it is built out of something the run substitutes and does not parse with one in it: {wrongly}");
-        }
-
-        // Parsed here rather than at run time on purpose: a locator that does not parse is wrong on
-        // every machine, and the reader of a red about one is opening the wrong repository.
-        if (!Locator.TryParse(locator!, out var parsed, out var because))
-            throw new ScenarioRefusedException(subject, $"its locator does not parse — {because}");
+        // Not null from here: the guard above threw for a step that named neither, and the return
+        // above took every step that named a tray icon — so what is left named a locator.
+        var parsed = Parsed(subject, locator!);
 
         var act = ActVerb.Named(verb);
         if (act.Refuses(argument) is { } wrong)
@@ -855,65 +804,48 @@ public sealed record StepDeclaration
         // otherwise fire first and say the wrong thing: a sweep expects nothing of one reading on
         // purpose, so "the reading changes nothing" and "the step does nothing at all" are both false
         // of it — and a refusal that names the wrong field is a refusal somebody fixes the wrong way.
-        var sweeping = string.IsNullOrWhiteSpace(covers) ? null : covers.Trim();
+        var sweeping = Trimmed(covers);
 
         // WW250, computed here for the same reason and with the same history: the two rules under this
         // one do not know about it, so a step whose only claim is a pattern would be refused as a step
         // that claims nothing — a refusal naming the wrong field, which somebody then fixes wrongly.
-        var pattern = string.IsNullOrWhiteSpace(matches) ? null : Compiled(subject, matches.Trim());
+        var pattern = Trimmed(matches) is { } written ? Compiled(subject, written) : null;
 
         // WW255, computed here with the two above it and for the same reason — and then made the one
         // local the rules below ask, because the clause they each carried had grown to six negations
         // and a claim any of them had not heard of is a refusal naming the wrong field.
-        var back = string.IsNullOrWhiteSpace(sameAs) ? null : sameAs.Trim();
+        var back = Trimmed(sameAs);
 
         // WW268, the same shape as the one above it: the rules that ask whether a step claims
         // anything have to know about this one before they can name the right field.
-        var apart = string.IsNullOrWhiteSpace(unlike) ? null : unlike.Trim();
+        var apart = Trimmed(unlike);
 
         // WW269, and the same again. It is `sameAs` for a reading that ticks while the case runs, so
         // every rule below that names one of the three has to know about it or it names the wrong one.
-        var ticking = string.IsNullOrWhiteSpace(sameCountdownAs) ? null : sameCountdownAs.Trim();
+        var ticking = Trimmed(sameCountdownAs);
 
         // WW326, the fourth, and folded in with the three above for their reason: a rule that does
         // not know about a claim names the wrong field when it refuses one.
-        var holding = string.IsNullOrWhiteSpace(contains) ? null : contains.Trim();
+        var holding = Trimmed(contains);
 
         // WW294, computed with the others for the reason all of them are: a step whose only claim is
         // this one must not be refused as a step that claims nothing.
-        var reportedly = string.IsNullOrWhiteSpace(expectReported) ? null : expectReported.Trim();
+        var reportedly = Trimmed(expectReported);
 
-        // WW323. `expectReported` beside `expect` was refused here and beside nothing else, which is
-        // the hole that task was filed for. Both are now claims in one set below, so this pair is
-        // refused by the same rule as every other pair rather than by a line of its own.
-        if (holding is not null && (back ?? apart ?? ticking) is { } alsoHolding)
-        {
-            throw new ScenarioRefusedException(
-                subject,
-                $"it claims its reading holds what '{holding}' read and also compares it with "
-                    + $"'{alsoHolding}'; a step answers one thing, and these are two");
-        }
-
-        if (ticking is not null && (back ?? apart) is { } alsoPointing)
-        {
-            throw new ScenarioRefusedException(
-                subject,
-                $"it claims its reading is back to '{ticking}' give or take a tick and also compares it "
-                    + $"with '{alsoPointing}'; a step answers one thing, and these are two");
-        }
+        RefusesTwoComparisons(subject, back, apart, ticking, holding);
 
         // WW256, and the same again: a claim about the wait is still a claim, so a step making only
         // this one must not be refused as a step that makes none.
-        var forbidden = string.IsNullOrWhiteSpace(never) ? null : never.Trim();
+        var forbidden = Trimmed(never);
 
         // WW261 and WW270, computed with the others and for the same reason: the rules that ask
         // whether a step claims anything must know about a claim before it can name the right field.
-        var declared = string.IsNullOrWhiteSpace(label) ? null : label.Trim();
-        var undeclared = string.IsNullOrWhiteSpace(notLabel) ? null : notLabel.Trim();
+        var declared = Trimmed(label);
+        var undeclared = Trimmed(notLabel);
 
         // WW83, the third of the same family and folded in with the two above it: every rule below
         // that asks whether a step claims anything has to know about it, or it names the wrong field.
-        var opening = string.IsNullOrWhiteSpace(beginsWithLabel) ? null : beginsWithLabel.Trim();
+        var opening = Trimmed(beginsWithLabel);
 
         // WW318. One claim per step, as everywhere else, and here the sharpest case of it: every
         // other claim reads a subject and this one says there is none, so a second claim beside it
@@ -994,7 +926,7 @@ public sealed record StepDeclaration
         var step = new StepDeclaration(called ?? Describing(act.Name, parsed.Text), act, reading)
         {
             Locator = parsed,
-            Argument = string.IsNullOrWhiteSpace(argument) ? null : argument.Trim(),
+            Argument = Trimmed(argument),
             Expected = wanted,
             MeansIt = meansIt,
             Moves = moves,
@@ -1016,32 +948,227 @@ public sealed record StepDeclaration
             Absent = absent,
         };
 
+        // WW365. Every refusal from here reads the step rather than the locals that built it, which
+        // is what lets each family be a method instead of six hundred lines in one verb. They ran in
+        // this order before they moved and they run in it now: this suite asserts which refusal wins
+        // where a step is wrong twice over, so the sequence is a fact about the format rather than
+        // an accident of how the verb grew.
+        //
+        // `reads` travels beside the step because it is the one thing the step cannot say. A step
+        // that named no reading and one that named the default carry the same ReadBack, and half of
+        // these refusals turn on which of the two it was.
+        RefusesCapturingClaim(step, subject, reads);
+        RefusesClaimCount(step, subject, reads);
+        RefusesClaimAgainstVerb(step, subject, reads);
+
+        // WW268. Both point at a step and both are refused for the same three things, so they are
+        // judged together: two copies of these rules is where the second one goes on saying the old
+        // thing after the first moves.
+        //
+        // The one refusal here that cannot ask the step. The fold above put whichever was written
+        // into one field, so by this line a step that wrote both looks like a step that wrote one —
+        // and the fold is right to do that, because every step that survives wrote one.
+        if (back is not null && apart is not null)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims its reading is back to '{back}' and also that it differs from '{apart}'; "
+                    + "a step answers one thing, and these are two");
+        }
+
+        RefusesPointingWithoutReading(step, subject, reads);
+        RefusesTwoStringClaims(step, subject);
+        RefusesReadingBesideClaim(step, subject, reads);
+        RefusesPinnedReading(step, subject);
+        RefusesSweepingStep(step, subject, reads);
+
+        // WW351. The step every refusal above was asked about, handed back. It was built before them
+        // rather than after, because the set they read is its own — and nothing between here and
+        // there changes a field, so what is returned is what was judged.
+        return step;
+    }
+
+    /// <summary>
+    /// The one trim this verb does, in one place. WW365.
+    /// <para>
+    /// Thirteen locals spelled it out, and thirteen ternaries is most of a verb's complexity spent
+    /// on the same three words. Blank is nothing and never the empty string: a field a case left as
+    /// <c>""</c> claimed nothing, and a claim of nothing is what every rule below reads as absent.
+    /// </para>
+    /// </summary>
+    /// <param name="text">The field as the case wrote it.</param>
+    private static string? Trimmed(string? text) =>
+        string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+
+    /// <summary>
+    /// One set claimed one way, and which way. WW275, WW292, and WW365 moved it here.
+    /// </summary>
+    /// <param name="named">What the case called the step, which is all a refusal has this early.</param>
+    /// <param name="covers">The set claimed exactly.</param>
+    /// <param name="coversAtLeast">The same set, allowing values it does not declare.</param>
+    /// <param name="coversWithin">The same set, matched inside the names it found.</param>
+    private static (Asserting.SetMatch Matching, string? Covers) OneSetClaim(
+        string? named, string? covers, string? coversAtLeast, string? coversWithin)
+    {
+        // WW275 and WW292. At most one of the three, and refused where they are written: they are one
+        // set claimed three different ways, and a step naming two would have the run honour whichever
+        // the code reads first.
+        var ways = new List<string>();
+        if (!string.IsNullOrWhiteSpace(covers))
+            ways.Add("'covers'");
+        if (!string.IsNullOrWhiteSpace(coversAtLeast))
+            ways.Add("'coversAtLeast'");
+        if (!string.IsNullOrWhiteSpace(coversWithin))
+            ways.Add("'coversWithin'");
+
+        if (ways.Count > 1)
+        {
+            throw new ScenarioRefusedException(
+                Trimmed(named) ?? "<a step>",
+                $"it carries {string.Join(" and ", ways)}; those are the same set claimed different "
+                    + "ways, so name the one this step means");
+        }
+
+        // All three derive the same set through the same door, so everything below reads it as
+        // `covers` and only the comparison is told which claim it is.
+        var matching = (Trimmed(coversAtLeast), Trimmed(coversWithin)) switch
+        {
+            (not null, _) => Asserting.SetMatch.AtLeast,
+            (_, not null) => Asserting.SetMatch.Within,
+            _ => Asserting.SetMatch.Exactly,
+        };
+
+        return (matching, ways.Count == 0 ? covers : (covers ?? coversAtLeast ?? coversWithin));
+    }
+
+    /// <summary>
+    /// A step acts on exactly one thing. WW258, and WW365 moved it here.
+    /// <para>
+    /// Both arms, and here as well as in the schema: the loader comes through
+    /// <see cref="ScenarioSchema.Miscarried"/>, and a caller building a declaration in code does not
+    /// — so the rule that a step addresses exactly one thing lives on the type that cannot be
+    /// bypassed.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="locator">The locator, where the step named one.</param>
+    /// <param name="tray">The notification-area icon, where the step named one.</param>
+    private static void RefusesTwoSubjects(string subject, string? locator, string? tray)
+    {
+        if (string.IsNullOrWhiteSpace(locator) && tray is null)
+            throw new ScenarioRefusedException(subject, "a step acts on something, and this one names nothing");
+
+        if (!string.IsNullOrWhiteSpace(locator) && tray is not null)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                "a step acts on one thing, and this one names a locator and a tray icon; a tray icon is "
+                    + "not in the window's tree, so no locator reaches it and naming both names two subjects");
+        }
+    }
+
+    /// <summary>
+    /// The locator, parsed where the case wrote it. WW263, WW273, and WW365 moved it here.
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="locator">The locator as the case wrote it, braces and all.</param>
+    private static Locator Parsed(string subject, string locator)
+    {
+        // WW263 and WW273. A locator with a brace in it has to parse with something in it as well as
+        // with the placeholder, and both are facts about the file rather than about a run. Probed here
+        // so the refusal arrives where the locator was written, not on the member — or the string —
+        // that happened to expose it.
+        if (Braced.IsMatch(locator)
+            && !Locator.TryParse(Braced.Replace(locator, "probe"), out _, out var wrongly))
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it is built out of something the run substitutes and does not parse with one in it: {wrongly}");
+        }
+
+        // Parsed here rather than at run time on purpose: a locator that does not parse is wrong on
+        // every machine, and the reader of a red about one is opening the wrong repository.
+        if (!Locator.TryParse(locator, out var parsed, out var because))
+            throw new ScenarioRefusedException(subject, $"its locator does not parse — {because}");
+
+        return parsed;
+    }
+
+    /// <summary>
+    /// One comparison per step, refused before the four spellings are folded into one field. WW323,
+    /// WW326, and WW365 moved it here.
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="back">The step this one claims its reading is back to.</param>
+    /// <param name="apart">The step this one claims its reading differs from.</param>
+    /// <param name="ticking">The same as <paramref name="back"/>, allowing a tick.</param>
+    /// <param name="holding">The step whose reading this one claims to hold.</param>
+    private static void RefusesTwoComparisons(
+        string subject, string? back, string? apart, string? ticking, string? holding)
+    {
+        // WW323. `expectReported` beside `expect` was refused here and beside nothing else, which is
+        // the hole that task was filed for. Both are now claims in one set below, so this pair is
+        // refused by the same rule as every other pair rather than by a line of its own.
+        if (holding is not null && (back ?? apart ?? ticking) is { } alsoHolding)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims its reading holds what '{holding}' read and also compares it with "
+                    + $"'{alsoHolding}'; a step answers one thing, and these are two");
+        }
+
+        if (ticking is not null && (back ?? apart) is { } alsoPointing)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims its reading is back to '{ticking}' give or take a tick and also compares it "
+                    + $"with '{alsoPointing}'; a step answers one thing, and these are two");
+        }
+    }
+
+    /// <summary>
+    /// A capture claims its receipt and nothing beside it. WW336, and WW365 moved it here.
+    /// </summary>
+    /// <param name="step">The step, built and asked rather than rebuilt out of locals.</param>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="reads">The reading as the case wrote it, or nothing where it named none.</param>
+    private static void RefusesCapturingClaim(StepDeclaration step, string subject, string? reads)
+    {
+        if (!step.Verb.Captures)
+            return;
+
+        // WW336. A capture's claim is the receipt, and it is the whole of it. Every field in the
+        // claim set is a reading of an element the locator matched; a capture is about the window
+        // that element is in, and the two are answered at different moments by different machinery —
+        // so a step carrying both would owe two results and a trace line standing for two things.
+        if (step.Claims is [var claimed, ..])
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it captures and also claims {claimed}; a capture's claim is the picture — "
+                    + "that it is of this window, out of this process and with nothing showing "
+                    + "through it — and a reading of an element is a second thing to check");
+        }
+
+        if (!string.IsNullOrWhiteSpace(reads))
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it captures and names the '{reads.Trim()}' reading; a capture is about the "
+                    + "window the locator is inside rather than about what that element says");
+        }
+    }
+
+    /// <summary>
+    /// One claim, and at least one. WW213, WW254, WW323, and WW365 moved them here.
+    /// </summary>
+    /// <param name="step">The step, built and asked rather than rebuilt out of locals.</param>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="reads">The reading as the case wrote it, or nothing where it named none.</param>
+    private static void RefusesClaimCount(StepDeclaration step, string subject, string? reads)
+    {
         var claiming = step.Claims;
         var claims = claiming.Count > 0;
-
-        // WW336. A capture's claim is the receipt, and it is the whole of it. Every field in the set
-        // above is a reading of an element the locator matched; a capture is about the window that
-        // element is in, and the two are answered at different moments by different machinery — so a
-        // step carrying both would owe two results and a trace line standing for two things.
-        if (act.Captures)
-        {
-            if (claiming.Count > 0)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it captures and also claims {claiming[0]}; a capture's claim is the picture — "
-                        + "that it is of this window, out of this process and with nothing showing "
-                        + "through it — and a reading of an element is a second thing to check");
-            }
-
-            if (!string.IsNullOrWhiteSpace(reads))
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it captures and names the '{reads.Trim()}' reading; a capture is about the "
-                        + "window the locator is inside rather than about what that element says");
-            }
-        }
 
         // Both idioms the older refusals used, because they are what a reader recognises and what
         // this suite matches on — and because they are both true of the finding: the step made
@@ -1058,14 +1185,17 @@ public sealed record StepDeclaration
         if (!claims && !string.IsNullOrWhiteSpace(reads))
         {
             throw new ScenarioRefusedException(
-                subject, $"it reads '{reading.Name}' and expects nothing of it, so the reading changes nothing");
+                subject, $"it reads '{step.Reads.Name}' and expects nothing of it, so the reading changes nothing");
         }
 
         // WW213. An act with no expectation is a navigation a later step is the check for. A read
         // with no expectation is nothing at all: it touches nothing and claims nothing, so a case
         // carrying one is a case with a step in it that could not fail.
-        if (!claims && act.Reads)
-            throw new ScenarioRefusedException(subject, $"'{act.Name}' expects nothing, so the step does nothing at all");
+        if (!claims && step.Verb.Reads)
+        {
+            throw new ScenarioRefusedException(
+                subject, $"'{step.Verb.Name}' expects nothing, so the step does nothing at all");
+        }
 
         // WW254. The one act whose landing the engine can see. It was handed a value by name and can
         // read what the picker settled on, so a step that walks a picker and claims nothing has thrown
@@ -1073,134 +1203,157 @@ public sealed record StepDeclaration
         // happened to stop at. That is WW244's failure with the act delivered rather than dropped, and
         // the migration this verb exists for made exactly this claim in the script: the picker walked
         // one label to another and back, checked at each stop.
-        if (act.Reaches && !claims)
+        if (step.Verb.Reaches && !claims)
         {
             throw new ScenarioRefusedException(
                 subject,
-                $"'{act.Name}' is told what to reach and claims nothing of what it reached; name the "
+                $"'{step.Verb.Name}' is told what to reach and claims nothing of what it reached; name the "
                     + "value in 'expect', because a walk that stopped somewhere else is every step "
                     + "after this one reading the wrong thing");
         }
+    }
 
+    /// <summary>
+    /// The claims a verb or a reading cannot carry. WW237, WW238, and WW365 moved them here.
+    /// </summary>
+    /// <param name="step">The step, built and asked rather than rebuilt out of locals.</param>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="reads">The reading as the case wrote it, or nothing where it named none.</param>
+    private static void RefusesClaimAgainstVerb(StepDeclaration step, string subject, string? reads)
+    {
         // A read moves nothing by construction, so a read claiming movement is a claim about whatever
         // else is happening on the desk rather than about this step.
-        if (moves && act.Reads)
+        if (step.Moves && step.Verb.Reads)
         {
             throw new ScenarioRefusedException(
-                subject, $"'{act.Name}' reads and never acts, so it cannot be what moved a reading");
+                subject, $"'{step.Verb.Name}' reads and never acts, so it cannot be what moved a reading");
         }
 
         // The reading has to be able to answer nothing, or the claim cannot be false. 'focused' says
         // 'not focused' for every element that resolved, so a step claiming it answers is a step that
         // holds whenever the locator matched — which is existence wearing the words of a reading.
-        if (answers && reading.Always)
+        if (step.Answers && step.Reads.Always)
         {
             throw new ScenarioRefusedException(
                 subject,
-                $"it claims '{reading.Name}' answers, and that reading answers for every element that "
+                $"it claims '{step.Reads.Name}' answers, and that reading answers for every element that "
                     + "resolved at all; the claim could never be false, so it says nothing");
         }
 
-        if (pattern is not null)
-        {
-            // The unearned green this field is easiest to write. A pattern that matches the empty
-            // string matches every answer there is, so the step holds wherever the reading answered at
-            // all — which is what 'answers' says, in a field that reads as though it checked more.
-            // The same shape WW237 and WW238 each closed once.
-            if (pattern.IsMatch(""))
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"'{pattern}' matches the empty string, so it holds for every answer there is; "
-                        + "say 'answers' if that is the claim");
-            }
-
-            // Deliberately no rule about an always-answering reading here, unlike 'answers'. A pattern
-            // over 'focused' picks one of its two states, which is a claim that can be false — the
-            // problem 'answers' has with that reading is that it asks only whether there was an answer,
-            // and this asks which.
-        }
-
-        if (discloses)
-        {
-            // A read discloses nothing. The claim is that an act put something there, so a step whose
-            // verb only looks would be asserting that a window changed while nobody touched it — which
-            // is either a race or a lie, and green either way.
-            if (act.Reads)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it claims a disclosure and '{act.Name}' only reads, so nothing it does could "
-                        + "have disclosed anything");
-            }
-
-            // And no reading beside it, because the subject is the subtree. A 'reads' here would look
-            // like it narrowed the claim and would narrow nothing.
-            if (!string.IsNullOrWhiteSpace(reads))
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it claims a disclosure and names the '{reads.Trim()}' reading; a disclosure is "
-                        + "about what is under the locator and not about what it says");
-            }
-        }
-
-        // WW268. Both point at a step and both are refused for the same three things, so they are
-        // judged together: two copies of these rules is where the second one goes on saying the old
-        // thing after the first moves.
-        if (back is not null && apart is not null)
+        // The unearned green this field is easiest to write. A pattern that matches the empty string
+        // matches every answer there is, so the step holds wherever the reading answered at all —
+        // which is what 'answers' says, in a field that reads as though it checked more. The same
+        // shape WW237 and WW238 each closed once.
+        //
+        // Deliberately no rule about an always-answering reading beside it, unlike 'answers'. A
+        // pattern over 'focused' picks one of its two states, which is a claim that can be false —
+        // the problem 'answers' has with that reading is that it asks only whether there was an
+        // answer, and this asks which.
+        if (step.Matches is { } pattern && pattern.IsMatch(""))
         {
             throw new ScenarioRefusedException(
                 subject,
-                $"it claims its reading is back to '{back}' and also that it differs from '{apart}'; "
-                    + "a step answers one thing, and these are two");
+                $"'{pattern}' matches the empty string, so it holds for every answer there is; "
+                    + "say 'answers' if that is the claim");
         }
 
-        if ((back ?? apart ?? ticking ?? holding) is { } pointed)
+        if (!step.Discloses)
+            return;
+
+        // A read discloses nothing. The claim is that an act put something there, so a step whose
+        // verb only looks would be asserting that a window changed while nobody touched it — which
+        // is either a race or a lie, and green either way.
+        if (step.Verb.Reads)
         {
-            // The field the case wrote, and this is the one place that still has to know: a refusal
-            // names what to go and delete, so it says the spelling the file used and never the mode
-            // the engine folded it into.
-            var field = back is not null ? "sameAs"
-                : apart is not null ? "unlike"
-                : ticking is not null ? "sameCountdownAs" : "contains";
-
-            var claim = apart is not null ? "differs from"
-                : holding is not null ? "holds what" : "is back to";
-
-            // A step comparing itself to itself is answered before the window is: `sameAs` holds
-            // whatever it did and `unlike` fails whatever it did, and neither is a reading. It is also
-            // the easy typo — a round trip's stops read the same element under the same verb, so a
-            // case that left them unnamed would have written this by accident.
-            if (string.Equals(pointed, subject, StringComparison.Ordinal))
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it claims its reading {claim} itself, which is answered before the window is; "
-                        + "name the earlier step in 'named' and point at that");
-            }
-
-            // Which reading, said out loud. The comparison is between two readings and the default is
-            // whichever one the element happens to answer first, so a step that left it out would
-            // compare a value to a name on the day the control gained a pattern.
-            if (string.IsNullOrWhiteSpace(reads))
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it claims its reading {claim} '{pointed}' and does not say which reading; "
-                        + $"'{field}' compares two of them, so the default would compare whichever "
-                        + "answered first");
-            }
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims a disclosure and '{step.Verb.Name}' only reads, so nothing it does could "
+                    + "have disclosed anything");
         }
 
+        // And no reading beside it, because the subject is the subtree. A 'reads' here would look
+        // like it narrowed the claim and would narrow nothing.
+        if (!string.IsNullOrWhiteSpace(reads))
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims a disclosure and names the '{reads.Trim()}' reading; a disclosure is "
+                    + "about what is under the locator and not about what it says");
+        }
+    }
+
+    /// <summary>
+    /// A comparison against an earlier step, and what it needs said. WW365 moved it here.
+    /// <para>
+    /// The field the case wrote is read back off <see cref="Pointing"/> rather than off the four
+    /// parameters: the fold that produced it took them in this order, so it is the same answer with
+    /// nothing left to drift. A refusal names what to go and delete, so it says the spelling the
+    /// file used and never the mode the engine folded it into.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step, built and asked rather than rebuilt out of locals.</param>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="reads">The reading as the case wrote it, or nothing where it named none.</param>
+    private static void RefusesPointingWithoutReading(StepDeclaration step, string subject, string? reads)
+    {
+        if (step.PointsAt is not { } pointed)
+            return;
+
+        var field = step.Pointing switch
+        {
+            Pointing.Unlike => "unlike",
+            Pointing.Countdown => "sameCountdownAs",
+            Pointing.Contains => "contains",
+            _ => "sameAs",
+        };
+
+        var claim = step.Pointing switch
+        {
+            Pointing.Unlike => "differs from",
+            Pointing.Contains => "holds what",
+            _ => "is back to",
+        };
+
+        // A step comparing itself to itself is answered before the window is: `sameAs` holds
+        // whatever it did and `unlike` fails whatever it did, and neither is a reading. It is also
+        // the easy typo — a round trip's stops read the same element under the same verb, so a
+        // case that left them unnamed would have written this by accident.
+        if (string.Equals(pointed, subject, StringComparison.Ordinal))
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims its reading {claim} itself, which is answered before the window is; "
+                    + "name the earlier step in 'named' and point at that");
+        }
+
+        // Which reading, said out loud. The comparison is between two readings and the default is
+        // whichever one the element happens to answer first, so a step that left it out would
+        // compare a value to a name on the day the control gained a pattern.
+        if (string.IsNullOrWhiteSpace(reads))
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims its reading {claim} '{pointed}' and does not say which reading; "
+                    + $"'{field}' compares two of them, so the default would compare whichever "
+                    + "answered first");
+        }
+    }
+
+    /// <summary>
+    /// One declared string claimed one way. WW83, and WW365 moved it here.
+    /// </summary>
+    /// <param name="step">The step, built and asked rather than rebuilt out of locals.</param>
+    /// <param name="subject">What a refusal calls this step.</param>
+    private static void RefusesTwoStringClaims(StepDeclaration step, string subject)
+    {
         // WW83. Three ways of claiming one declared string — is it, is it not, does it begin with it —
         // and at most one of them, named one by one so the refusal says which field to delete.
         var strings = new List<string>();
-        if (declared is not null)
+        if (step.Label is not null)
             strings.Add("'label'");
-        if (undeclared is not null)
+        if (step.NotLabel is not null)
             strings.Add("'notLabel'");
-        if (opening is not null)
+        if (step.BeginsWithLabel is not null)
             strings.Add("'beginsWithLabel'");
 
         if (strings.Count > 1)
@@ -1210,122 +1363,149 @@ public sealed record StepDeclaration
                 $"it carries {string.Join(" and ", strings)}; those are one declared string claimed "
                     + "different ways, so name the one this step means");
         }
+    }
 
-        if (ownHeader)
+    /// <summary>
+    /// The four claims that take no reading beside them, and the two that take no act. WW365 moved
+    /// them here, and they stay in one method because they stay in one order.
+    /// </summary>
+    /// <param name="step">The step, built and asked rather than rebuilt out of locals.</param>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="reads">The reading as the case wrote it, or nothing where it named none.</param>
+    private static void RefusesReadingBesideClaim(StepDeclaration step, string subject, string? reads)
+    {
+        // The reading as the case spelled it, which is both the question these four ask and the word
+        // each of them quotes back.
+        var named = Trimmed(reads);
+
+        if (step.OwnHeader)
         {
             // The same rule a sweep is under: this reads every row the locator matches and everything
             // inside them, and one act over all of that is not a claim about any of it.
-            if (!act.Reads)
+            if (!step.Verb.Reads)
             {
                 throw new ScenarioRefusedException(
                     subject,
-                    $"it claims each row's controls announce that row and acts with '{act.Name}'; the "
+                    $"it claims each row's controls announce that row and acts with '{step.Verb.Name}'; the "
                         + "pairing reads every row its locator matches, and one act over many of them "
                         + "is not a claim");
             }
 
-            if (!string.IsNullOrWhiteSpace(reads))
+            if (named is not null)
             {
                 throw new ScenarioRefusedException(
                     subject,
-                    $"it claims each row's controls announce that row and names the '{reads.Trim()}' "
+                    $"it claims each row's controls announce that row and names the '{named}' "
                         + "reading; the claim is about what those controls announce, which is their name");
             }
         }
 
-        if (eachSpoken)
+        if (step.EachSpoken)
         {
             // The same rule `covers` is under, and for its reason: a sweep reads every element its
             // locator matches, and one act over many of them is not a claim about any of them.
-            if (!act.Reads)
+            if (!step.Verb.Reads)
             {
                 throw new ScenarioRefusedException(
                     subject,
-                    $"it claims every element it matches is named and acts with '{act.Name}'; a sweep "
+                    $"it claims every element it matches is named and acts with '{step.Verb.Name}'; a sweep "
                         + "reads every element its locator matches, and one act over many of them is "
                         + "not a claim");
             }
 
             // And no reading beside it, for the reason a disclosure takes none: what these elements
             // announce is their name, always, and a 'reads' here would narrow nothing.
-            if (!string.IsNullOrWhiteSpace(reads))
+            if (named is not null)
             {
                 throw new ScenarioRefusedException(
                     subject,
-                    $"it claims every element it matches is named and names the '{reads.Trim()}' "
+                    $"it claims every element it matches is named and names the '{named}' "
                         + "reading; the claim is about what those elements announce, which is their name");
             }
         }
 
-        if (spoken)
-        {
-            // And no reading beside it, for the reason a disclosure takes none: the subject is the
-            // subtree, and a 'reads' here would look like it narrowed the claim and would narrow
-            // nothing. What the elements under it announce is their name, always.
-            if (!string.IsNullOrWhiteSpace(reads))
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it claims what is under the locator is named and names the '{reads.Trim()}' reading; "
-                        + "the claim is about what those elements announce, which is their name");
-            }
-        }
-
-        if (forbidden is not null)
-        {
-            // A reading beside it narrows nothing. The claim is about the window, not about this
-            // element: the string may show anywhere, and the locator is what says when to stop
-            // looking rather than what to look at.
-            if (!string.IsNullOrWhiteSpace(reads))
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it claims '{forbidden}' never shows and names the '{reads.Trim()}' reading; the "
-                        + "claim is about the window while this step waited, and the locator is what "
-                        + "says when the waiting is over");
-            }
-        }
-
-        // WW238. The other half of the same rule: a reading the locator already selected by is fixed
-        // before the act runs, so a step reading it asserts what chose the element. Refused whatever
-        // the claim is — 'expect' repeats the locator, 'answers' holds because the locator matched,
-        // and both are the step passing on its own selection.
-        //
-        // Naming the element some other way and reading its name is the useful shape, so the sentence
-        // says which locator field to move rather than that the reading is wrong.
-        if (reading.PinnedBy(parsed.Steps[^1]) is { } already && (wanted is not null || moves || answers))
+        // And no reading beside it, for the reason a disclosure takes none: the subject is the
+        // subtree, and a 'reads' here would look like it narrowed the claim and would narrow
+        // nothing. What the elements under it announce is their name, always.
+        if (step.Spoken && named is not null)
         {
             throw new ScenarioRefusedException(
                 subject,
-                $"it reads '{reading.Name}' and its locator already matched on that — '{already}' — so the "
-                    + "reading is fixed before the act runs; select the element another way to claim "
-                    + "anything about it");
+                $"it claims what is under the locator is named and names the '{named}' reading; "
+                    + "the claim is about what those elements announce, which is their name");
         }
 
-        // One claim over many elements, and every other field on a step is about one.
-        if (sweeping is not null)
+        // A reading beside it narrows nothing. The claim is about the window, not about this
+        // element: the string may show anywhere, and the locator is what says when to stop
+        // looking rather than what to look at.
+        if (step.Never is { } forbidden && named is not null)
         {
-            if (!act.Reads)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it covers '{sweeping}' and acts with '{act.Name}'; a sweep reads every element its "
-                        + "locator matches, and one act over many of them is not a claim");
-            }
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims '{forbidden}' never shows and names the '{named}' reading; the "
+                    + "claim is about the window while this step waited, and the locator is what "
+                    + "says when the waiting is over");
+        }
+    }
 
-            if (!string.IsNullOrWhiteSpace(reads))
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it covers '{sweeping}' and reads '{reading.Name}'; a sweep compares the names the "
-                        + "locator matched against the strings, and a pattern reading is not one of them");
-            }
+    /// <summary>
+    /// A reading the locator already selected by. WW238, and WW365 moved it here.
+    /// <para>
+    /// The other half of the same rule: a reading the locator already selected by is fixed before
+    /// the act runs, so a step reading it asserts what chose the element. Refused whatever the claim
+    /// is — 'expect' repeats the locator, 'answers' holds because the locator matched, and both are
+    /// the step passing on its own selection.
+    /// </para>
+    /// <para>
+    /// Naming the element some other way and reading its name is the useful shape, so the sentence
+    /// says which locator field to move rather than that the reading is wrong.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step, built and asked rather than rebuilt out of locals.</param>
+    /// <param name="subject">What a refusal calls this step.</param>
+    private static void RefusesPinnedReading(StepDeclaration step, string subject)
+    {
+        if (step.Locator is not { } located
+            || step.Reads.PinnedBy(located.Steps[^1]) is not { } already
+            || (step.Expected is null && !step.Moves && !step.Answers))
+        {
+            return;
         }
 
-        // WW351. The step every refusal above was asked about, handed back. It was built before them
-        // rather than after, because the set they read is its own — and nothing between here and
-        // there changes a field, so what is returned is what was judged.
-        return step;
+        throw new ScenarioRefusedException(
+            subject,
+            $"it reads '{step.Reads.Name}' and its locator already matched on that — '{already}' — so the "
+                + "reading is fixed before the act runs; select the element another way to claim "
+                + "anything about it");
+    }
+
+    /// <summary>
+    /// A sweep is one claim over many elements, and every other field on a step is about one. WW365
+    /// moved it here.
+    /// </summary>
+    /// <param name="step">The step, built and asked rather than rebuilt out of locals.</param>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="reads">The reading as the case wrote it, or nothing where it named none.</param>
+    private static void RefusesSweepingStep(StepDeclaration step, string subject, string? reads)
+    {
+        if (step.Sweeps is not { } sweeping)
+            return;
+
+        if (!step.Verb.Reads)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it covers '{sweeping}' and acts with '{step.Verb.Name}'; a sweep reads every element its "
+                    + "locator matches, and one act over many of them is not a claim");
+        }
+
+        if (!string.IsNullOrWhiteSpace(reads))
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it covers '{sweeping}' and reads '{step.Reads.Name}'; a sweep compares the names the "
+                    + "locator matched against the strings, and a pattern reading is not one of them");
+        }
     }
 
     /// <summary>

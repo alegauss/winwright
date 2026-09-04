@@ -156,30 +156,6 @@ which costs nothing and turns the untrue sentence into a wait.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW365 the refusals that could ask the step
-
-WW352 took the constructor apart and left `Of`'s body alone, which is where the
-analyser's number actually comes from: S3776 reads 119 against an allowed 15, and it is
-six hundred lines of refusals rather than the parameter list above them.
-
-They cannot move out as they stand. Each reads the locals `Of` parsed — `back`, `apart`,
-`declared`, `sweeping` and about twenty more — so a refusal extracted into a helper
-would take half of them as arguments and buy nothing: the arity would move rather than
-go.
-
-What changed is that the thing they are about now exists before they run. WW351 moved
-the construction above the refusals so the claim set could be read off it, and every
-local those refusals read is a field on that step. A refusal that took the step and the
-subject is two parameters, and a group of them is a private static named for the family
-it turns away.
-
-The catch is the one that made WW352 careful. A refusal names the field the case
-actually wrote, and the step carries some families folded: `PointsAt` with `Pointing` is
-four spellings in two fields. WW351 made the fold carry that precedence for the claim
-set, and the same question has to be asked of each refusal moved rather than assumed —
-which is why this is a task and not a tidy-up. The order is the other half: this suite
-asserts which refusal wins where a step is wrong twice over.
-
 ### §WW367 the half the list does not dispatch
 
 WW354 made the arms' names one list and stopped a mistyped word being answered by the

@@ -23,7 +23,6 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 💭 **WW365** (deps: —) **Of reads at cognitive complexity 119 because its refusals thread twenty locals, and the step they judge now exists** — WW352 left the body where it was: each refusal reads the parameters rather than the record WW351 put in front of it, so none of them can move out. → §WW365
 - 💭 **WW367** (deps: —) **which code an arm runs is still a branch per name in Measured, so an arm reaches the tool in two places again** — WW354 made the names one list and left the dispatch a chain of comparisons; an arm in the list and in no branch is recognised, launched and answered by the bare run. → §WW367
 - 💭 **WW372** (deps: —) **no declared step can ask for a popup's picture, and its four refusals would all reach the verdict as holes** — WW359 built the ask and wired nothing to it, and AsAssertion counts every absence as unchecked — so a case naming an absent popup reads as a machine that could not look. → §WW372
 

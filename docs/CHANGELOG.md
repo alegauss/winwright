@@ -273,6 +273,7 @@
 - ✅ **WW352** **StepDeclaration.Of takes 28 parameters and its constructor 23, so every new field is threaded through both by hand** — A field reaches a step by name now and the constructor is three; Of keeps the signature its format's keys give it (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 - ✅ **WW354** **the typing tool's arms are documented in a .cmd and parsed in a switch, and nothing holds the two lists together** — The arms are one list the parse reads and a case holds the .cmd's prose to, and a word naming none is refused with it (design recorded in `tools/Winwright.Typing/Arms.cs`).
 - ✅ **WW360** **winwright_check says a file loads and the run then refuses it, because the check tool is handed no project** — winwright_check takes an optional project, holds the file against it with the run's own walk, and says when it read the file alone (design recorded in `tools/Winwright.Mcp/Served.cs`).
+- ✅ **WW365** **Of reads at cognitive complexity 119 because its refusals thread twenty locals, and the step they judge now exists** — Nine refusal families ask the step rather than twenty locals, in the order they always ran; Of reads 15 not 119 (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
