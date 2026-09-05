@@ -56,12 +56,13 @@ internal static class FirstRead
     /// <summary>
     /// Run the arm and print what each pause did.
     /// </summary>
-    /// <param name="box">The text box under test.</param>
-    /// <param name="arrived">The caption the arriving characters are written to.</param>
-    /// <param name="packets">The caption the injected code units are written to.</param>
-    /// <param name="rounds">How many rounds each pause types.</param>
-    public static void Run(Subject box, Subject arrived, Subject packets, int rounds)
+    /// <param name="run">The fixture this arm measures, and how many rounds it was asked for.</param>
+    public static void Run(TypingRun run)
     {
+        ArgumentNullException.ThrowIfNull(run);
+
+        var (box, arrived, packets, rounds) = (run.Box, run.Arrived, run.Injected, run.Rounds);
+
         Console.WriteLine(
             $"WW329: the pause before the first look, {rounds} round(s) at each of"
                 + $" {string.Join("ms, ", Pauses)}ms. Every round erases and sends the way the engine does"

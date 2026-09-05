@@ -126,13 +126,14 @@ internal static class Disturbance
     private const int PokeMs = 200;
 
     /// <summary>Run the four arms and print what each disturbed.</summary>
-    /// <param name="box">The text box under test.</param>
-    /// <param name="arrived">The caption the arriving characters are written to.</param>
-    /// <param name="packets">The caption the injected code units are written to.</param>
-    /// <param name="window">The window under test, for the two arms that do not go through automation.</param>
-    /// <param name="rounds">How many rounds each arm types.</param>
-    public static void Run(Subject box, Subject arrived, Subject packets, nint window, int rounds)
+    /// <param name="run">The fixture this arm measures, and how many rounds it was asked for.</param>
+    public static void Run(TypingRun run)
     {
+        ArgumentNullException.ThrowIfNull(run);
+
+        var (box, arrived, packets, window, rounds) =
+            (run.Box, run.Arrived, run.Injected, run.Window, run.Rounds);
+
         Console.WriteLine(
             $"WW342: what a read does to a send, taken apart. {rounds} round(s) on each of"
                 + $" {Arms.Length} arms. Every round erases and sends the way the engine does — one"

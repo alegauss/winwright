@@ -42,6 +42,19 @@ public sealed record TypingRun(
 /// an arm added to <see cref="Arms.All"/> and to no branch there was recognised, launched, and
 /// answered by the bare typing run — the failure WW354 was about, one level down. Declared here, an
 /// arm without one does not compile.
+/// <para>
+/// A method group and never a lambda, which is WW380's whole change. WW367 guaranteed that an arm
+/// carries <em>a</em> delegate and nothing said which: <c>sweep</c> pointing at <c>FirstRead.Run</c>
+/// would compile, pass every case, and print the wrong experiment's numbers under the word a person
+/// typed — WW354's failure again by another route, an arm wired to the wrong branch rather than to
+/// none. A lambda is a compiler-generated method on a display class, so reflection could see four
+/// delegates and nothing about which runner any of them reached.
+/// </para>
+/// <para>
+/// Written this way the runner is readable at the list and nameable by a case. Each takes the run
+/// and unpacks what it needs, so the four signatures are adapted where they are implemented rather
+/// than in the row that names them — which is what makes the row a name and not a body.
+/// </para>
 /// </param>
 /// <param name="NeedsRanges">
 /// Whether the fixture has to be launched with <c>--ranges</c>. It is a property of the arm rather
@@ -88,21 +101,21 @@ public static class Arms
             "one SendInput per code unit at six spacings, reading what was injected beside what "
                 + "arrived, so a fault inside WW310's band can be attributed to the send or to what "
                 + "happens after it",
-            run => Sweep.Run(run.Box, run.Arrived, run.Injected, run.Rounds)),
+            Sweep.Run),
         new(
             "delay",
             "WW329",
             "the send the engine does have with the pause it did not take — erase and send in one "
                 + "act, then wait 0, 50 or 150ms before looking at the box — reporting the "
                 + "milliseconds a round beside the rate",
-            run => FirstRead.Run(run.Box, run.Arrived, run.Injected, run.Rounds)),
+            FirstRead.Run),
         new(
             "acts",
             "WW341",
             "the only arm that types nothing: a click, a traversal key and a nudge, each compared "
                 + "against a reading taken afterwards with time to settle, which separates an act "
                 + "read too early from one that never arrived",
-            run => Landing.Run(run.Root, run.Rounds),
+            Landing.Run,
             NeedsRanges: true),
         new(
             "provoke",
@@ -110,14 +123,14 @@ public static class Arms
             "the read taken apart rather than delayed — quiet, peek, poke and read — so what the "
                 + "fifty milliseconds pay for is attributable to the call out of this process or to "
                 + "the message loop run on the target's thread",
-            run => Disturbance.Run(run.Box, run.Arrived, run.Injected, run.Window, run.Rounds)),
+            Disturbance.Run),
         new(
             "transfer",
             "WW368",
             "the walk from the arm to the act, one difference a rung — the focus taken every round, "
                 + "End sent in a call of its own, and the read stopped the moment the box says what "
                 + "was sent — so the rung where a rate appears is what the arm was not doing",
-            run => Transfer.Run(run.Box, run.Arrived, run.Injected, run.Window, run.Rounds)),
+            Transfer.Run),
     ]);
 
     /// <summary>

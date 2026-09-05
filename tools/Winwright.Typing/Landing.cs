@@ -77,11 +77,12 @@ internal static class Landing
     /// <summary>
     /// Run the arm and print what each verb's own reading was worth.
     /// </summary>
-    /// <param name="root">The fixture's window.</param>
-    /// <param name="rounds">How many rounds each verb runs.</param>
-    public static void Run(AutomationElement root, int rounds)
+    /// <param name="run">The fixture this arm measures, and how many rounds it was asked for.</param>
+    public static void Run(TypingRun run)
     {
-        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(run);
+
+        var (root, rounds) = (run.Root, run.Rounds);
 
         Console.WriteLine(
             $"WW341: what each synthesised act's own reading was worth, {rounds} round(s) each."

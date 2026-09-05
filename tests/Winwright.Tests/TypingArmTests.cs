@@ -131,6 +131,50 @@ public class TypingArmTests
         Assert.All(Arms.All, one => Assert.NotNull(one.Run));
     }
 
+    /// <summary>
+    /// Which runner each arm is supposed to reach. WW380.
+    /// <para>
+    /// A list here rather than in the tool, because it is the check and not the wiring: the tool
+    /// names the runner once, at the row, and this says what that row was meant to say. The names
+    /// do not follow from the arm's own — <c>delay</c> is <c>FirstRead</c> and <c>acts</c> is
+    /// <c>Landing</c>, because each is named for what it measures and the arm for what a person
+    /// types — so there is nothing to derive it from and a pairing is what is left.
+    /// </para>
+    /// </summary>
+    private static readonly (string Arm, string Runner)[] Wiring =
+    [
+        ("sweep", "Sweep"),
+        ("delay", "FirstRead"),
+        ("acts", "Landing"),
+        ("provoke", "Disturbance"),
+        ("transfer", "Transfer"),
+    ];
+
+    [Fact]
+    public void Every_arm_reaches_the_runner_it_is_named_for()
+    {
+        // WW380. WW367 made an arm carry the code it runs and left which code unchecked: `sweep`
+        // pointing at `FirstRead.Run` would compile, pass every case in this file, and print the
+        // wrong experiment's numbers under the word a person typed — WW354's failure by another
+        // route, an arm wired to the wrong branch rather than to none.
+        //
+        // A lambda made that invisible: each is a compiler-generated method on a display class, so
+        // the target said nothing about `Sweep` or `Landing` and comparing four of them proved only
+        // that four lambdas are four lambdas. Written as method groups the target is the runner, and
+        // this is the case that could not be written before.
+        Assert.Equal(Wiring.Select(one => one.Arm), Arms.All.Select(one => one.Name));
+
+        Assert.All(
+            Arms.All.Zip(Wiring),
+            pair => Assert.Equal(pair.Second.Runner, pair.First.Run.Method.DeclaringType?.Name));
+
+        // And a real method on a real type, which is the property the pairing above rests on: a
+        // lambda would answer a display class here and the assertion would be about nothing.
+        Assert.All(
+            Arms.All,
+            one => Assert.Equal(nameof(TypingArm.Run), one.Run.Method.Name));
+    }
+
     [Fact]
     public void Every_arm_says_which_task_built_it_and_what_it_drives()
     {

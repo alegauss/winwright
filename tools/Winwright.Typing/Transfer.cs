@@ -116,13 +116,14 @@ internal static class Transfer
     private const string BoxId = "profile";
 
     /// <summary>Climb the rungs and print what each one read.</summary>
-    /// <param name="box">The text box under test.</param>
-    /// <param name="arrived">The caption the arriving characters are written to.</param>
-    /// <param name="packets">The caption the injected code units are written to.</param>
-    /// <param name="window">The window under test, which is where the element is resolved from.</param>
-    /// <param name="rounds">How many rounds each rung types.</param>
-    public static void Run(Subject box, Subject arrived, Subject packets, nint window, int rounds)
+    /// <param name="run">The fixture this arm measures, and how many rounds it was asked for.</param>
+    public static void Run(TypingRun run)
     {
+        ArgumentNullException.ThrowIfNull(run);
+
+        var (box, arrived, packets, window, rounds) =
+            (run.Box, run.Arrived, run.Injected, run.Window, run.Rounds);
+
         Console.WriteLine(
             $"WW368: what does not carry from the arm to the act, {rounds} round(s) on each of"
                 + $" {Rungs.Length} rungs. Every rung reads the same value the engine now reads — one"

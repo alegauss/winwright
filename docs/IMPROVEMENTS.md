@@ -109,30 +109,6 @@ the other half: a catalogue covering less than a reader assumes is worse than no
 
 ## Block G — The scenario — a case is a data file
 
-### §WW380 the wiring the list cannot read
-
-`TypingArmTests` holds the arms to `run-typing.cmd` in both directions and says so at
-the top: *nothing here runs an arm — the tool takes the desk for minutes, and a guest
-run should not pay for a question asked once.* That is right, and it is why WW367's own
-check is a reflection assertion about a constructor parameter rather than about
-behaviour.
-
-So what is now guaranteed is that an arm carries *a* delegate. Which delegate is not
-checked by anything. `sweep` pointing at `FirstRead.Run` would compile, pass every case
-in that file, and print the wrong experiment's numbers under the word a person typed —
-which is WW354's failure again, arrived by a different route: not an arm with no branch,
-but an arm wired to the wrong one.
-
-The lambdas make it invisible to reflection. Each is a compiler-generated method on a
-display class, so the target says nothing about `Sweep` or `Landing`, and comparing them
-to each other only proves four lambdas are four lambdas.
-
-Two ways out. Each runner could carry its own name, checked against the arm's — one more
-thing to keep in step. Or the arms could be method groups rather than lambdas, adapting
-the four signatures at the runner rather than in the list: then `Run.Method` names a
-real method on a real type and a case can assert which. The second removes a spelling
-rather than adding one, which is the direction this project has taken every other time.
-
 ### §WW385 the branch between the field and the ask
 
 WW372 added `popup` to the step and every case that proves it stops one layer above a
