@@ -84,6 +84,7 @@ internal static class Surfaces
         new("PickersPane", Carrying.AShape, "pickers"),
         new("RowsPane", Carrying.AShape, "rows"),
         new("RangesPane", Carrying.AShape, "ranges"),
+        new("SettlesPane", Carrying.AShape, "settles"),
         new("Shadowed", Carrying.AShape, "shadowed"),
         new("SizelessPane", Carrying.AShape, "sizeless"),
         new("Store", Carrying.AShape, "store"),

@@ -379,26 +379,3 @@ runner has both readings and both tools in hand; what it does not have is a sent
 about which desks it is willing to tidy before a run, and which it only reports.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW379 the control that is late on purpose
-
-WW366 wanted a case where a control settles after the act returns, and this fixture has
-none. `CaseRunTests` builds four Win32 controls by hand and every one answers the
-instant it is asked. So the check that landed pins the mechanism through a reading that
-differs by *projection* — a checkbox reads `On` through its patterns and `Wrap lines`
-through its name — and the timing half is asserted by nothing.
-
-The gap is older than this task. `SlowMachineTests` excuses three checks a run because
-the desk was slow, which is slowness by accident; a control late on purpose is a
-different thing and nothing here can ask for one. WW353 found the defect by reading
-`CaseRun` rather than by running it, and WW366 could only close it the same way.
-
-The fixture is the place for it, and Block K is what that block is: an application built
-to be hard to test. A control whose reading arrives a declared number of milliseconds
-after the act returns would give this suite the one case it cannot currently write — and
-it is exactly the shape a real application has, where a click starts work and the label
-catches up.
-
-What to decide is where the delay is declared. A flag on the fixture is one answer and a
-control that is always late is another, and the second is a control every unrelated case
-would have to wait for.

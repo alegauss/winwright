@@ -60,6 +60,12 @@ public partial class MainWindow : Window
         if (Shapes.Has("peerless"))
             Peerless.AddTo(panes);
 
+        if (Shapes.Value("settles") is string howLate)
+        {
+            SettlesPane.AddTo(
+                panes, int.Parse(howLate, System.Globalization.CultureInfo.InvariantCulture));
+        }
+
         if (Shapes.Value("loading") is string howLong)
             LoadFor(int.Parse(howLong, System.Globalization.CultureInfo.InvariantCulture));
 

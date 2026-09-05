@@ -296,6 +296,12 @@ public sealed record Flags
             "the loading refusal was discovered on a machine that happened to be slow, and reproducing it meant finding another one",
             Numeric: true),
         new Flag(
+            "settles",
+            "milliseconds",
+            "a box that reads back what was written to it and then, this long later, what the application made of it",
+            "every control here answered the instant it was asked, so the reading an act took and the reading a verdict turned on were never two different things and no case could tell them apart",
+            Numeric: true),
+        new Flag(
             "animate",
             "milliseconds",
             "an animation of a declared length whose states announce their own place",

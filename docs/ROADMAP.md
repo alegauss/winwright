@@ -45,8 +45,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 💭 **WW379** (deps: —) **no fixture control settles after the act returns, so every claim about the two instants is asserted through a projection** — WW366 pinned its trace field on a checkbox read two ways, because the four hand-made Win32 controls all answer the moment they are asked. → §WW379
-
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine

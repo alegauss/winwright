@@ -2712,6 +2712,7 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         "backdrop" => "=mica",
         "toast" => "=beside",
         "loading" => "=300",
+        "settles" => "=300",
         "animate" => "=300",
         "language" => "=en",
         "store" => $"={Path.Combine(root, "by-hand")}",
