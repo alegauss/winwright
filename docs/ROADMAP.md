@@ -45,6 +45,8 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
+- 💭 **WW392** (deps: —) **a pane joins the fixture in five places and the only way to learn which is to add one and read the reds** — WW379 failed the suite on a catalogue rather than on behaviour, and each red costs a ten-minute guest run to find the next. → §WW392
+
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine
