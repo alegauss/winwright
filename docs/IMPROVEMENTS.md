@@ -158,6 +158,30 @@ holds: `reads` is the one every family asks for, and WW378 spent a task moving o
 family off the parameters. A different door has to carry those, and which ones is the
 design.
 
+### §WW393 the arm nothing has ever run
+
+Three tasks have now been spent on the arms and not one of them ran an arm. WW354 held
+the names to `run-typing.cmd` in both directions, WW367 made each carry the code it
+runs, and WW380 made that code nameable so a case can say which runner an arm reaches.
+Every one is a claim about shapes: a list, a constructor parameter, a delegate's
+declaring type.
+
+`TypingArmTests` says why, and the reason is right: the tool takes the desk for minutes
+and a guest run should not pay for a question asked once. What that sentence has come to
+cover is something else — no line inside any runner has been executed by anything but a
+person. A runner that throws on its first statement compiles, satisfies all three
+checks, and waits for whoever next measures.
+
+The reason does not hold at one round. Every runner takes its count as an argument: at
+one round `sweep` is eighteen, `provoke` eight, `transfer` four, `delay` and `acts`
+three — seconds of desk, and every line of every runner reached. What costs minutes is
+the measurement, not the code that takes it.
+
+So what is worth deciding is whether one round is a case or a command. A case in the
+suite would find a broken runner on the run that broke it; a `--smoke` a person types
+finds it when somebody remembers. WW368 spent thirty minutes learning that `transfer`
+worked at all, which is the price of the second answer.
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness

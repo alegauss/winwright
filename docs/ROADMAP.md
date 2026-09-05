@@ -22,6 +22,7 @@
 
 - 💭 **WW385** (deps: —) **no run ever declares a capture naming a popup, so the branch wiring the step to the ask is asserted by nothing** — WW372 proved the field parses and the ask answers, and left the three lines joining them where a wrong handle or the copy route would still pass. → §WW385
 - 💭 **WW391** (deps: —) **a claim joins the format by being a field and a field still joins in five places, one of them a 29-parameter verb** — WW372 paid all five to add popup, and the analyser has reported Of and Trayed ever since WW352 took the constructor and left them. → §WW391
+- 💭 **WW393** (deps: —) **three tasks held the arms to lists and none of them ran one, so a runner that throws on its first line is green** — The rule against running an arm is about the measurement, which takes minutes, and every runner takes its round count as an argument. → §WW393
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
