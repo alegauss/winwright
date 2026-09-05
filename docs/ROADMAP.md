@@ -22,6 +22,7 @@
 
 - 💭 **WW380** (deps: —) **an arm now carries a delegate and nothing checks it is the right one, so sweep could run the delay experiment** — WW367 made the code a field the compiler demands; the lambdas are compiler-generated, so reflection cannot say which runner one reaches. → §WW380
 - 💭 **WW385** (deps: —) **no run ever declares a capture naming a popup, so the branch wiring the step to the ask is asserted by nothing** — WW372 proved the field parses and the ask answers, and left the three lines joining them where a wrong handle or the copy route would still pass. → §WW385
+- 💭 **WW391** (deps: —) **a claim joins the format by being a field and a field still joins in five places, one of them a 29-parameter verb** — WW372 paid all five to add popup, and the analyser has reported Of and Trayed ever since WW352 took the constructor and left them. → §WW391
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
