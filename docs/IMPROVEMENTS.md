@@ -78,6 +78,31 @@ already built: `transfer` runs the ladder and one more rung is a line. And the p
 the same one WW355 chased — an act with no interval in it at all — reached from the end
 nobody has looked at.
 
+### §WW390 the promise no list holds
+
+Two verbs in this engine answer a bool with an out for the value and an out for the
+reason, and both got their annotation by somebody noticing the other. WW364 annotated
+`Locator.TryParse` because four bangs in `StepDeclaration` had accumulated and WW351 had
+just added one; WW377 annotated `Chord.TryParse` because WW364's own shipping made the
+omission visible one verb over.
+
+Nothing holds a third. A method written tomorrow with the same signature and no
+attributes compiles, its callers spell bangs, and the argument for fixing it arrives the
+way both of these did — as a bang somebody already wrote, months later, in a file about
+something else. Each of those repairs cost a task.
+
+The check is derivable rather than curated, which is what this project reaches for
+whenever two lists could drift. Every exported method that answers a `bool` and carries
+`out` parameters is findable by reflection; requiring `NotNullWhen` on the nullable ones
+is one assertion, and a method that means something else says so in a list beside it —
+the shape `MayAnswerYesOrNo` already has in `RecordedResultTests` for a neighbouring
+rule.
+
+Scope is what to decide first. The engine's two are the whole population, so the check
+passes the day it is written and its only value is the third method — which is exactly
+the value `Deadlines` and `Sleeps` have. Whether the fixture and the tools are in it is
+the other half: a catalogue covering less than a reader assumes is worse than none.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

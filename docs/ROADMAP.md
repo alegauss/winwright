@@ -12,6 +12,7 @@
 ## Block D — Act — patterns before pointers
 
 - 💭 **WW381** (deps: —) **the pause sits after the send and WW368 put the provoking call before it, so it guards the half already acquitted** — Three readings cleared the drain — the pumping, four cheap readers, and the arm's own rungs — and the rate entered with SetFocus on the line above the keys. → §WW381
+- 💭 **WW390** (deps: —) **nothing holds a third bool-and-two-outs verb to the annotation, so the next one costs a task to notice** — WW364 and WW377 each found the other's omission by shipping, and a method written tomorrow with that signature compiles unannotated. → §WW390
 
 ## Block E — Capture — the picture that proves what it photographed
 
