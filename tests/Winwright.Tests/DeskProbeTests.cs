@@ -36,6 +36,14 @@ namespace Winwright.Tests;
 /// pause and every line of it runs.
 /// </para>
 /// <para>
+/// WW370 and WW383 are the same repair on the two lists this file turns on. Neither can be arranged:
+/// no case can hold a desk the desktop is holding, and none can hold one the taskbar is. So each
+/// list takes a parameter defaulting to itself, a case names its own dialog's class, and the branch
+/// that was reachable only from a real guest runs against a window this suite put up. What is on
+/// each list stays a separate claim, checked by the case that reads both out of the file — a
+/// parameter says the list is consulted and says nothing about what is in it.
+/// </para>
+/// <para>
 /// The twelve looks over six seconds stay the guest's, and they are a measurement rather than a
 /// shape: what they are for is that a toast lives for seconds and the prompt that cost a run had
 /// been up for hours. A case that waited them out would be paying six seconds to learn what two
@@ -201,9 +209,25 @@ public sealed class DeskProbeTests
     /// </para>
     /// </summary>
     /// <param name="looks">One PowerShell expression per set, each an array of looks or nulls.</param>
-    private static IReadOnlyList<string> Classified(params string[] looks)
+    private static IReadOnlyList<string> Classified(params string[] looks) => ClassifiedWith("", looks);
+
+    /// <summary>
+    /// The same, with something further said to the classification. WW383, which gave it a list to
+    /// take.
+    /// <para>
+    /// A method of its own rather than an optional argument on <see cref="Classified" />, because an
+    /// overload taking a string first would swallow every existing single-set call: the compiler
+    /// would bind the looks to the new parameter and hand the classification nothing, and the case
+    /// would fail somewhere that says nothing about what it was asking.
+    /// </para>
+    /// </summary>
+    /// <param name="andThen">What follows <c>-Looks</c>, as PowerShell spells it.</param>
+    /// <param name="looks">One PowerShell expression per set, each an array of looks or nulls.</param>
+    private static IReadOnlyList<string> ClassifiedWith(string andThen, params string[] looks)
     {
-        var lines = Ran(string.Join(Environment.NewLine, looks.Select(one => $"Read-DeskState -Looks {one}")));
+        var lines = Ran(string.Join(
+            Environment.NewLine,
+            looks.Select(one => $"Read-DeskState -Looks {one} {andThen}")));
 
         // The count and not only the content: a probe that threw halfway answers fewer lines than it
         // was asked for, and comparing the ones that arrived against the first few expectations would
@@ -501,6 +525,67 @@ public sealed class DeskProbeTests
 
         Assert.StartsWith("asking|testhost|", answer, StringComparison.Ordinal);
         Assert.Contains("|Static|winwright desk held", answer, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_desk_held_by_a_shell_surface_is_read_as_shell_end_to_end()
+    {
+        // WW383. `shell` is the one answer nothing had ever produced from a real look. WW345 made the
+        // classification runnable and WW357 made the loop runnable, and the case joining them arrives
+        // at `asking` — because a case can arrange a desk its own dialog is holding and cannot arrange
+        // one the taskbar is. So the arm that decides whether a reader is sent to a guest console was
+        // only ever reached by looks somebody typed, and a typed look is one that cannot be built
+        // wrong.
+        //
+        // Which matters here more than anywhere else in this file, because `shell` is the answer a
+        // person acts on by NOT going to the console. WW331 is what it costs when the word is wrong:
+        // a focused chevron read as a question and refused every later run, and a reader was sent to
+        // answer a prompt a capture showed was not there.
+        //
+        // The join is WW370's, one list over. The case names its own dialog's class a shell surface
+        // and the probe polls the live foreground, so what runs is the whole path — a real window, a
+        // look this suite did not write, the list consulted, and the word the runner switches on.
+        using var dialog = PumpedDialog.Open("winwright desk shell");
+        dialog.BringToFront();
+
+        if (BusyDesk.Excused(Winwright.Windowing.Foreground.Check(dialog.Frame).AsPrecondition()))
+            return;
+
+        var held = ClassifiedWith("-Shell 'Static'", "(Get-DeskLooks -Count 2 -PauseMs 0)").Single();
+
+        // Something else taking the foreground between the looks is the desk and not the list: the
+        // answer is `busy` or `clear`, and neither says anything about which word a held desk gets.
+        // `asking` is not excused, because that is the list going unread — the whole finding.
+        if (!held.StartsWith("shell|", StringComparison.Ordinal)
+            && !held.StartsWith("asking|", StringComparison.Ordinal)
+            && BusyDesk.Excused(
+                Winwright.Verdicts.Precondition.Absent(
+                    "the foreground belongs to the window under test",
+                    $"the probe read the desk as '{held}' rather than as the dialog this case put up")))
+        {
+            return;
+        }
+
+        Assert.StartsWith("shell|testhost|", held, StringComparison.Ordinal);
+        Assert.Contains("|Static|winwright desk shell", held, StringComparison.Ordinal);
+
+        // And the same window with the list back as it is, which is what makes the line above about
+        // the list rather than about this dialog. WW370's case ends the same way and for the reason:
+        // a case that only ever passed its own list could not tell a list being read from a window
+        // that reads as a shell surface whatever anybody says.
+        var byTheList = Classified("(Get-DeskLooks -Count 2 -PauseMs 0)").Single();
+
+        if (!byTheList.StartsWith("shell|", StringComparison.Ordinal)
+            && !byTheList.StartsWith("asking|", StringComparison.Ordinal)
+            && BusyDesk.Excused(
+                Winwright.Verdicts.Precondition.Absent(
+                    "the foreground belongs to the window under test",
+                    $"the probe read the desk as '{byTheList}' rather than as the dialog this case put up")))
+        {
+            return;
+        }
+
+        Assert.StartsWith("asking|testhost|", byTheList, StringComparison.Ordinal);
     }
 
     /// <summary>

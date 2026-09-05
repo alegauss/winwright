@@ -77,10 +77,23 @@ function Read-DeskState {
       per look, $null where that look found the desktop or nothing at all; $StillNothing is whether
       the foreground was empty when the polling stopped, which is the only thing separating a desk
       with no shell from a desk nobody is using.
+
+      WW383 makes the shell's own list the third parameter, for WW370's reason one list over. A case
+      cannot arrange a desk the taskbar is holding, so `shell` was the one answer nothing had ever
+      produced end to end: the classification was reachable and reached, but only with looks somebody
+      typed - and a look typed by hand is a look that cannot be built wrong. Named by a case, its own
+      window's class is a shell surface, and the whole path runs from a real foreground to the word
+      the runner switches on.
+
+      Defaulted to the list itself, so the guest's run is the run it always was and no caller has to
+      know this exists. What the list SAYS stays checked where it was, by the case that reads it out
+      of this file beside the desktop's: this parameter is about the list being consulted, and that
+      one is about what is on it.
     #>
     param(
         [AllowEmptyCollection()] [Parameter(Mandatory)] [AllowNull()] [object[]] $Looks,
-        [bool] $StillNothing = $false)
+        [bool] $StillNothing = $false,
+        [string[]] $Shell = $script:ShellSurfaces)
 
     $held = @($Looks | Where-Object { $null -ne $_ })
 
@@ -112,7 +125,7 @@ function Read-DeskState {
         # a sentence that is not true about a desk a window is holding. The reading is right; what
         # was missing is a word for it.
         $one = $held[0]
-        $state = if ($script:ShellSurfaces -contains $one.Class) { 'shell' }
+        $state = if ($Shell -contains $one.Class) { 'shell' }
             elseif ($one.Iconic) { 'stale' }
             else { 'asking' }
 

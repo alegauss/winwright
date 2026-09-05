@@ -358,6 +358,7 @@
 - ✅ **WW373** **a case that deadlocks wedges the run instead of failing, and only a person watching the guest ends it** — A single case is bounded at ten minutes against a slowest honest one of 158 seconds, so a deadlock is a red naming it (design recorded in `tests/Winwright.Tests/Winwright.Tests.csproj`).
 - ✅ **WW375** **a minimized window holding a stale foreground refuses every guest run as a question waiting to be answered** — A minimised window holding the desk gets its own word and the run goes on, because nobody can read it and nobody can answer it (design recorded in `tools/desk-probe.ps1`).
 - ✅ **WW382** **the two tray menu kinds read as the same tree and nothing claims they must, so a framework changing one is invisible** — The entries match and the containers do not: the Win32 kind names its Menu, which is where the difference stops (design recorded in `tests/Winwright.Tests/NotificationAreaTests.cs`).
+- ✅ **WW383** **no case puts a real window up and reads shell out of the probe, so that arm is only ever produced from typed looks** — The shell list takes a parameter now, so a case names its own dialog a shell surface and reads `shell` out of a real look (design recorded in `tests/Winwright.Tests/DeskProbeTests.cs`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
