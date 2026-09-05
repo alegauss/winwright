@@ -10,6 +10,8 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+- 💭 **WW398** (deps: —) **a case wanting the tree without the rectangle wrote a second walk of it, beside the one renderer that says it is the one** — WW382 needed control type and name and nothing else, and `Rendered` already hands back the element and the level each line came from. → §WW398
+
 ## Block D — Act — patterns before pointers
 
 - 💭 **WW390** (deps: —) **nothing holds a third bool-and-two-outs verb to the annotation, so the next one costs a task to notice** — WW364 and WW377 each found the other's omission by shipping, and a method written tomorrow with that signature compiles unannotated. → §WW390
@@ -44,6 +46,7 @@
 - 💭 **WW384** (deps: —) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — WW371 made the decision a function cases call and left the minimise, the foreground and the sentence where WW345 found the probe. → §WW384
 - 💭 **WW386** (deps: —) **the runner waits on the guest with no bound, so a wedge outside a case is still a run nobody can tell from a slow one** — WW373 bounded a case and the run around it inherited none of it, though Start-Guest already refuses to block on vmrun for exactly this reason. → §WW386
 - 💭 **WW388** (deps: —) **a stale desk is reported and a clearable one is repaired, and nothing says which desks a run tidies before it starts** — WW375 classifies before WW371's arm is reached, so the window that motivated the repair is now stepped over rather than put away. → §WW388
+- 💭 **WW399** (deps: —) **a tray locator naming its container works against one kind of tray and not the other, and nothing warns an adopter** — WW382 measured it: the Win32 popup's Menu carries a name and the drop-down's carries none, which only a case in this suite says. → §WW399
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

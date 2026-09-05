@@ -76,6 +76,30 @@ its own rather than the caller's.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+### §WW398 the second renderer, in a test file
+
+`Inspect.Rendered` is deliberately the only walk that turns a tree into lines, and
+`Render` is documented as its text — "so the step a reader is handed cannot drift from
+the step the line opens with". WW382 wanted the same tree with the rectangle and the
+window class taken out, because those are what two tray menu kinds are entitled to
+differ in, and it got there by writing a second recursion in `NotificationAreaTests`.
+
+It is eleven lines and it already disagrees with the first in a way nobody chose: the
+elision marker is indented one way here and another way there, and neither is wrong
+because nothing compares them. The next case wanting a shape copies whichever one it
+finds.
+
+There is no need for the recursion at all. `Rendered` returns a `RenderedLine` per
+element carrying the element and its level, so a projection is a `Select` over what the
+one renderer already walked — the same tree, the same order, the same elisions, and a
+line built from whichever facts the caller wants.
+
+What it would take is somewhere for that to live. A `Shape` beside `Render`, taking the
+fields to keep, is one answer; a caller writing its own `Select` over `Rendered` is
+another and needs nothing added at all. What decides is whether more than one case wants
+it, and today exactly one does — which is the moment to move it, before the second one
+copies the recursion instead of the line.
+
 ## Block D — Act — patterns before pointers
 
 ### §WW390 the promise no list holds
@@ -419,6 +443,29 @@ desk this run could have cleared in a second.
 So what is worth deciding is whether `stale` should be cleared as well as said. The
 runner has both readings and both tools in hand; what it does not have is a sentence
 about which desks it is willing to tidy before a run, and which it only reports.
+
+### §WW399 the container an adopter must not name
+
+WW382 read both tray menu kinds and found the entries identical and the containers not:
+a `TrackPopupMenu` reports its `Menu` with a name and a WinForms drop-down reports one
+with none. Everything below is the same — two `MenuItem`s named as the adopters name
+them — so a locator that starts at an entry is proven against both kinds by either, and
+a locator that starts at the container is proven against neither.
+
+That is a trap in the shape adopters keep walking into. WW322 exists because three
+adopted cases failed for weeks on the desk half of this difference, and the tree half is
+easier to hit: the container is the first thing the inspector prints, its line is
+written to be copied, and copying it from a Win32 tray produces a locator that matches
+nothing on a drop-down and says "nothing answered to it" — the sentence WW356 spent six
+guest runs inside.
+
+The case that measured it is where the fact lives, and an adopter does not read this
+suite. What they read is the inspector's output and whatever this project tells them
+about locators. So the fix belongs on one of those two: a line in the guidance saying a
+tray menu's container is named by the shell in one kind and not the other, or the
+inspector itself marking the line as one not to start from.
+
+Which of the two is a question about how much the inspector should know about menus.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
