@@ -28,28 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW376 the fraction about the set, not the member
-
-WW363 was measured on five runs that excused 8, 8, 8, 9 and 10. The run that shipped it
-excused 9 against four runs of 8, and the case that made the difference was
-`TrayPlacementTests.Two_icons_from_the_same_run_are_each_placed_before_their_own_add_returns`
-— the chevron pressed and no flyout inside 2003ms, which is the tray shape the whole
-task is about. Not one line of that report carried a rate.
-
-Every clause was correct. The eight that recurred are in all four runs before it, so the
-stronger claim fires and the rate stays quiet by design. The ninth was at one, and one
-is where every excuse starts. So the reading arrives on the run after the one a reader
-is holding, and the run that first shows a rise reads exactly as it did before WW363.
-
-What is missing is the same argument one level up. WW363 answers how often *this case*
-was excused; nobody asks how much of *this run's* excusing is old. Three of nine excuses
-being cases the last twenty runs excused in over half of them is a sentence about the
-set rather than about any member of it, and it can be said on the run that adds a new
-case, because it does not depend on that case having a history.
-
-The numbers are already read — `HowOften` carries the whole table. What is undecided is
-which fraction a reader is owed and whether it belongs in the sentence or under it.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

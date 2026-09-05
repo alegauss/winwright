@@ -439,7 +439,7 @@ public sealed record Roll
         // much of this green is real, and then whose doing the rest was. A desk excuse says come back
         // when the machine is quiet; a budget this suite chose and missed says the number is wrong,
         // and a reader who cannot tell them apart cannot act on either.
-        return $", and {Excused.Count} check(s) were excused{Against()}{Always()}{Kinds(Excused)}"
+        return $", and {Excused.Count} check(s) were excused{Against()}{Always()}{Seen()}{Kinds(Excused)}"
             + $" — {string.Join(", ", facts)}";
     }
 
@@ -588,6 +588,57 @@ public sealed record Roll
     /// </para>
     /// </summary>
     private string Always() => Everywhere ? ", and none of them is new" : "";
+
+    /// <summary>
+    /// How much of this run's excusing the ledgers have seen before. WW376.
+    /// <para>
+    /// WW363 answers how often <em>one case</em> was excused and says nothing on the run that first
+    /// shows a rise: a case excused for the first time is at one, and one is where every excuse
+    /// starts. Measured on the run that shipped it — nine excused against four runs of eight, the
+    /// ninth a tray case, and not a line of the report carried a rate. Every clause was correct and
+    /// the run read exactly as it had before.
+    /// </para>
+    /// <para>
+    /// This is the same question about the set, which the member cannot answer. How many of these
+    /// have been excused before does not depend on any of them having a history, so it can be said
+    /// on the run that adds one — and what it names is the rise, on the report a reader is holding.
+    /// </para>
+    /// <para>
+    /// Silent where <see cref="Always"/> spoke, which is most runs: every excuse recurring in each
+    /// of the last few is a stronger claim about the same thing, and two fractions in one breath is
+    /// a sentence nobody finishes. Silent too where any row names no case, because a row the reading
+    /// cannot place makes the count a guess — and absent is unknown here as everywhere else.
+    /// </para>
+    /// <para>
+    /// A count and never a verdict, which is WW363's own rule kept: what a set that is half new
+    /// means is the reader's, and a threshold is a number somebody tunes the day it refuses a run.
+    /// </para>
+    /// </summary>
+    private string Seen()
+    {
+        if (Excused is not { Count: > 0 } || Earlier.Often.Ledgers == 0 || Everywhere)
+            return "";
+
+        var known = Excused
+            .Select(one => Readers.Excuse(one).Case)
+            .Where(one => one is not null)
+            .Select(one => one!)
+            .ToList();
+
+        if (known.Count != Excused.Count)
+            return "";
+
+        var newly = known.Count(one => Earlier.Often.For(one) == 0);
+        var runs = Earlier.Often.Ledgers;
+
+        if (newly == 0)
+            return $", and every one of them has been excused inside the last {runs} runs";
+
+        if (newly == known.Count)
+            return $", and not one of them has been excused inside the last {runs} runs";
+
+        return $", and {newly} of them {(newly == 1 ? "is" : "are")} new to the last {runs} runs";
+    }
 
     /// <summary>The reading as a block of text.</summary>
     public override string ToString() => string.Join('\n', Render());

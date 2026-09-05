@@ -270,6 +270,76 @@ public sealed class RunHistoryTests : IDisposable
     }
 
     [Fact]
+    public void The_sentence_names_the_rise_on_the_run_that_has_it()
+    {
+        // WW376. WW363 answers how often one case was excused and says nothing on the run that
+        // first shows a rise: a case excused for the first time is at one, and one is where every
+        // excuse starts. Measured on the run that shipped it — nine excused against four runs of
+        // eight, the ninth a tray case, and not a line carried a rate.
+        //
+        // The same question about the set does not need the new case to have a history, so it can
+        // be asked on the report a reader is holding. Two old and one that no ledger has seen.
+        var roll = Roll.Of(
+            ["Winwright.Tests.TrayTests.A_chevron"],
+            [new Recorded("Winwright.Tests.TrayTests.A_chevron", "Passed", true)],
+            [Row("TrayTests.A_chevron"), Row("NudgeTests.A_nudge"), Row("PointerTests.A_click")],
+            new Earlier(
+                [8, 8, 8, 8],
+                [],
+                [],
+                new HowOften(
+                    20,
+                    new Dictionary<string, int>(StringComparer.Ordinal)
+                    {
+                        ["Winwright.Tests.TrayTests.A_chevron"] = 11,
+                        ["Winwright.Tests.NudgeTests.A_nudge"] = 20,
+                    })));
+
+        Assert.Contains("1 of them is new to the last 20 runs", roll.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_set_is_said_either_way_and_never_beside_the_stronger_claim()
+    {
+        // A set nothing has seen before is the alarming one and says so; a set entirely old is the
+        // reassurance, and both are counts rather than judgements — what a set half new means is
+        // the reader's, and a threshold is a number somebody tunes the day it refuses a run.
+        var nothing = Roll.Of(
+            ["Winwright.Tests.TrayTests.A_chevron"],
+            [new Recorded("Winwright.Tests.TrayTests.A_chevron", "Passed", true)],
+            [Row("TrayTests.A_chevron"), Row("NudgeTests.A_nudge")],
+            new Earlier([8, 8, 8, 8], [], [], new HowOften(20, new Dictionary<string, int>(StringComparer.Ordinal))));
+
+        Assert.Contains(
+            "not one of them has been excused inside the last 20 runs",
+            nothing.Sentence(),
+            StringComparison.Ordinal);
+
+        // And silent where the recurrence clause already made the stronger claim about the same
+        // thing, which is what most runs are: two fractions in one breath is a sentence nobody
+        // finishes, and "none of them is new" says it over its own window.
+        var settled = Roll.Of(
+            ["Winwright.Tests.TrayTests.A_chevron"],
+            [new Recorded("Winwright.Tests.TrayTests.A_chevron", "Passed", true)],
+            [Row("NudgeTests.A_nudge")],
+            new Earlier(
+                [8, 8, 8, 8],
+                [],
+                ["Winwright.Tests.NudgeTests.A_nudge"],
+                new HowOften(
+                    20,
+                    new Dictionary<string, int>(StringComparer.Ordinal)
+                    {
+                        ["Winwright.Tests.NudgeTests.A_nudge"] = 20,
+                    })));
+
+        var said = settled.Sentence();
+
+        Assert.Contains("none of them is new", said, StringComparison.Ordinal);
+        Assert.DoesNotContain("inside the last 20 runs", said, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_rate_says_nothing_where_no_ledger_was_read()
     {
         // The state this whole type has a word for. A run that asked nothing is not a run whose
