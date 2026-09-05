@@ -109,30 +109,6 @@ the other half: a catalogue covering less than a reader assumes is worse than no
 
 ## Block G — The scenario — a case is a data file
 
-### §WW378 the list that outlived its rule
-
-WW365 moved every refusal that runs after the step is built. One family did not move,
-because it runs before: `absent` is judged where the parameters are still the only thing
-in hand, and its first rule is a seventeen-term chain over them — `expected is not null
-|| moves || answers || sweeping is not null || ...`, one term per claim the format had on
-the day it was written.
-
-That is the shape WW323 was filed for and WW340 and WW351 each closed once. The list
-here is the last hand-written copy of the claim set, and it is already one behind:
-`contains` joined the format in WW326 and is not in the chain, so a step claiming
-`absent` beside it falls through to the generic multi-claim refusal and is told it makes
-two claims rather than that a claim about nothing is a claim about something.
-
-Nothing between this block and the construction throws, so it could run after the step
-instead and read `Claims` — which is the whole of the fix, and the fix changes the
-sentence a step with `absent` and `contains` is refused with. That is the decision this
-holds: a better refusal for a case nobody has written, against a sentence this suite may
-already assert.
-
-There is a second reason it is worth doing. `Of` now reads at exactly 15 against an
-allowed 15, and most of what remains is this block. The next claim added to that chain
-puts the verb back over the line, which is the same forgetting in a new place.
-
 ### §WW380 the wiring the list cannot read
 
 `TypingArmTests` holds the arms to `run-typing.cmd` in both directions and says so at

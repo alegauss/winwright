@@ -871,44 +871,6 @@ public sealed record StepDeclaration
         // that asks whether a step claims anything has to know about it, or it names the wrong field.
         var opening = Trimmed(beginsWithLabel);
 
-        // WW318. One claim per step, as everywhere else, and here the sharpest case of it: every
-        // other claim reads a subject and this one says there is none, so a second claim beside it
-        // would be a reading of the element the step is asserting is not there.
-        if (absent)
-        {
-            if (expected is not null || moves || answers || sweeping is not null || matches is not null
-                || discloses || sameAs is not null || unlike is not null || sameCountdownAs is not null
-                || never is not null || spoken || eachSpoken || ownHeader
-                || label is not null || notLabel is not null || beginsWithLabel is not null
-                || expectReported is not null)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    "it claims its locator matches nothing and also makes a claim about what it "
-                        + "matched; there is no reading of an element that is not there");
-            }
-
-            if (!string.IsNullOrWhiteSpace(reads))
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it claims its locator matches nothing and names the '{reads.Trim()}' reading; "
-                        + "an element that is not there answers no reading, and naming one would "
-                        + "look like it narrowed the claim");
-            }
-
-            // An act on a thing the step says is not there is a step that cannot run: the act
-            // resolves the subject first, so it would fail on the absence this is asserting.
-            if (!ActVerb.Named(verb).Reads)
-            {
-                throw new ScenarioRefusedException(
-                    subject,
-                    $"it claims its locator matches nothing and acts with '{ActVerb.Named(verb).Name}'; "
-                        + "an act resolves what it acts on, so this would fail on the very absence "
-                        + "it is asserting");
-            }
-        }
-
         // WW323. Every claim this step makes, in one list, said the way a refusal has to say it: the
         // field the case wrote, and what that field claims.
         //
@@ -982,6 +944,7 @@ public sealed record StepDeclaration
         // `reads` travels beside the step because it is the one thing the step cannot say. A step
         // that named no reading and one that named the default carry the same ReadBack, and half of
         // these refusals turn on which of the two it was.
+        RefusesClaimBesideAbsence(step, subject, reads);
         RefusesCapturingClaim(step, subject, reads);
         RefusesPopupBesideAnythingElse(step, subject);
         RefusesClaimCount(step, subject, reads);
@@ -1182,6 +1145,65 @@ public sealed record StepDeclaration
                 subject,
                 $"it captures and names the '{reads.Trim()}' reading; a capture is about the "
                     + "window the locator is inside rather than about what that element says");
+        }
+    }
+
+    /// <summary>
+    /// A claim about nothing is the whole of what a step can claim. WW318, and WW378 moved it here.
+    /// <para>
+    /// The sharpest case of the one-claim rule: every other claim reads a subject and this one says
+    /// there is none, so a second beside it would be a reading of the element the step is asserting
+    /// is not there.
+    /// </para>
+    /// <para>
+    /// WW365 left this family where it was, because it ran before the step existed and could only
+    /// read the parameters. What it read was a seventeen-term chain — one term per claim the format
+    /// had on the day it was written — and it was already a claim behind: <c>contains</c> joined in
+    /// WW326 and never joined the chain, so a step claiming absence beside it was told it made two
+    /// claims rather than that a claim about nothing is a claim about something.
+    /// </para>
+    /// <para>
+    /// That is WW323's shape, which WW340 and WW351 each closed once, and this was the last
+    /// hand-written copy of the set. Asking <see cref="Claims"/> costs nothing and cannot fall
+    /// behind: a claim joins by being a field. Nothing between the old position and this one throws,
+    /// so every refusal still fires in the order it always did.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step, built and asked rather than rebuilt out of locals.</param>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="reads">The reading as the case wrote it, or nothing where it named none.</param>
+    private static void RefusesClaimBesideAbsence(StepDeclaration step, string subject, string? reads)
+    {
+        if (!step.Absent)
+            return;
+
+        // Absence is itself one of them, so more than one is absence and something else.
+        if (step.Claims.Count > 1)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                "it claims its locator matches nothing and also makes a claim about what it "
+                    + "matched; there is no reading of an element that is not there");
+        }
+
+        if (Trimmed(reads) is { } named)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims its locator matches nothing and names the '{named}' reading; "
+                    + "an element that is not there answers no reading, and naming one would "
+                    + "look like it narrowed the claim");
+        }
+
+        // An act on a thing the step says is not there is a step that cannot run: the act
+        // resolves the subject first, so it would fail on the absence this is asserting.
+        if (!step.Verb.Reads)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims its locator matches nothing and acts with '{step.Verb.Name}'; "
+                    + "an act resolves what it acts on, so this would fail on the very absence "
+                    + "it is asserting");
         }
     }
 

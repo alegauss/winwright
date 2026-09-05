@@ -81,6 +81,24 @@ public sealed class AbsentTests : IDisposable
     }
 
     [Fact]
+    public void The_claim_the_old_chain_had_never_heard_of_is_refused_like_the_rest()
+    {
+        // WW378. The rule above used to be a seventeen-term chain over the parameters — one term per
+        // claim the format had on the day it was written — and `contains` joined in WW326 and never
+        // joined it. So a step claiming absence beside it fell through to the generic multi-claim
+        // refusal and was told it made two claims, rather than that a claim about nothing is a claim
+        // about something.
+        //
+        // It asks the claim set now, which a claim joins by being a field. What this case pins is
+        // the one behaviour that changed: the sentence a reader is given for the pair.
+        var refused = Assert.Throws<ScenarioRefusedException>(
+            () => StepDeclaration.Of(
+                "Button#gone", "read", reads: "name", absent: true, contains: "the earlier stop"));
+
+        Assert.Contains("no reading of an element that is not there", refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Naming_a_reading_of_something_that_is_not_there_is_refused()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(

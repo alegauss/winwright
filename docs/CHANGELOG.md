@@ -281,6 +281,7 @@
 - ✅ **WW365** **Of reads at cognitive complexity 119 because its refusals thread twenty locals, and the step they judge now exists** — Nine refusal families ask the step rather than twenty locals, in the order they always ran; Of reads 15 not 119 (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 - ✅ **WW367** **which code an arm runs is still a branch per name in Measured, so an arm reaches the tool in two places again** — An arm carries the code it runs, over one context all four fit, so an arm with no branch no longer compiles (design recorded in `tools/Winwright.Typing/Arms.cs`).
 - ✅ **WW372** **no declared step can ask for a popup's picture, and its four refusals would all reach the verdict as holes** — A capture names the popup its picture is of, and a name no popup has is a red where an unadopted half stays a hole (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
+- ✅ **WW378** **the absent refusal keeps the last hand-written copy of the claim set, and it is already one claim behind** — The absent refusal asks the claim set instead of a chain, so the claim it had never heard of is refused with the right sentence (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
