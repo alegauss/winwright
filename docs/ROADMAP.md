@@ -5,6 +5,7 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
+- 💭 **WW389** (deps: —) **five readings come off one set of ledgers and each knows when to be quiet only from the ones already written** — WW376's silence rule cites WW363's, which cites WW248's, and a sixth reading has to find all three before it can decide its own. → §WW389
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

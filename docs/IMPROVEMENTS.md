@@ -28,6 +28,29 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
+### §WW389 the readings nothing composes
+
+Five readings come off the same ledgers: WW298's series, WW248's *none of them is new*,
+WW376's count of what the deeper window has not seen, WW281's split between the desk and
+a budget, and WW363's rate on each excused line. Every one is right, and each knows when
+to be quiet only because whoever added it read the ones already there.
+
+The rules are written where they were added and nowhere together. WW363 is silent beside
+the recurrence clause and below two; WW376 where WW248 spoke and where a row names no
+case; WW281 where one kind is the whole set. A sixth reading has to find all of those to
+decide its own, and the way to find them is to know they exist.
+
+What that produces is a fragile sentence rather than a wrong one. Two clauses that both
+fire say the same thing twice — the failure WW363 wrote its rule against — and the
+reader who stops finishing it is the one the report is for. It is also how a reading
+goes quiet for good: WW363's rate appeared on no run this session that *none of them is
+new* had not covered.
+
+So what is worth having is the composition in one place: which readings a run can make
+of its excuses, over which window each speaks, and which is the stronger where two are
+true. A list rather than a rule — the shape this project already has wherever two things
+must agree.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
