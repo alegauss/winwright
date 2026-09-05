@@ -55,31 +55,6 @@ must agree.
 
 ## Block D — Act — patterns before pointers
 
-### §WW377 the same promise, one verb over
-
-WW364 annotated `Locator.TryParse` and four bangs in `StepDeclaration` went with it.
-`Chord.TryParse` has the same signature — a bool and two outs, neither annotated — and
-was not touched, because the task was about the sites that had gone wrong rather than
-about the shape.
-
-It costs three bangs, all in `ChordTests`: `one!.Text` and `two!.Text` after an
-`Assert.True`, and `wrong!` after an `Assert.False`. Fewer than the four WW364 removed,
-and in a test rather than in the engine, which is why this is filed small rather than
-done in passing.
-
-What makes it worth doing anyway is that the engine's own callers are already written as
-if the annotation were there. `ActVerb.Refuses` reads the reason on the false branch
-without a bang because it interpolates it, and `ActVerb.Chorded` returns the chord on
-the true branch as a `Chord?` and lets the caller carry the nullability onward. Both are
-right, and neither is what the method promises. The next caller that has to name the
-chord rather than pass it along is the one that will spell a bang, and by then the
-argument for the annotation will be a bang somebody already wrote.
-
-`[NotNullWhen(true)]` on the chord and `[NotNullWhen(false)]` on the reason is the whole
-change, and `LocatorTests.The_signature_makes_the_promise_the_body_keeps` is the shape
-the check takes. Worth reading the two `ActVerb` sites first: an annotation that makes
-either of them warn is a reading this filed too quickly.
-
 ### §WW381 the pause on the wrong side of the send
 
 WW329 put fifty milliseconds after the send and the fault went away, and every reading

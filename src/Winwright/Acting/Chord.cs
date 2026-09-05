@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Winwright.Acting;
 
@@ -91,11 +92,26 @@ public sealed record Chord
             + $"{string.Join(", ", Held.Select(one => one.Name))}, and the key is a letter, a digit, "
             + $"F1 to F24, or {string.Join(", ", Named.Keys)}";
 
-    /// <summary>Parse one, or say why it is not a chord.</summary>
+    /// <summary>
+    /// Parse one, or say why it is not a chord.
+    /// <para>
+    /// WW377, and the annotation WW364 put one verb over. The two outs say what the body already
+    /// does, so a caller that answered on false reads the chord without a bang — and one that reads
+    /// it anyway gets a warning where it used to get a habit.
+    /// </para>
+    /// <para>
+    /// Both engine callers were already written as if this were here: <c>ActVerb.Refuses</c>
+    /// interpolates the reason on the false branch, and <c>ActVerb.Chorded</c> hands the chord on as
+    /// a <c>Chord?</c>. Both are right and neither is what the signature promised, so what this
+    /// closes is the next caller — the one that has to name the chord rather than pass it along, and
+    /// would have written the bang before anybody argued about the annotation.
+    /// </para>
+    /// </summary>
     /// <param name="text">The chord as a case wrote it.</param>
     /// <param name="chord">The chord, where it parsed.</param>
     /// <param name="because">Why it did not, where it did not.</param>
-    public static bool TryParse(string? text, out Chord? chord, out string? because)
+    public static bool TryParse(
+        string? text, [NotNullWhen(true)] out Chord? chord, [NotNullWhen(false)] out string? because)
     {
         chord = null;
         because = null;

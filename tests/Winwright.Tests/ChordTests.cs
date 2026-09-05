@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+
 using Winwright.Acting;
 using Winwright.Processes;
 using Winwright.Projects;
@@ -82,8 +85,12 @@ public sealed class ChordTests : IDisposable
 
         // One keystroke has one spelling wherever it is reported, or a trace shows two acts where
         // there was one.
-        Assert.Equal("Ctrl+Shift+I", one!.Text);
-        Assert.Equal(one.Text, two!.Text);
+        //
+        // WW377: read without a bang, which is the whole of what the annotation buys. These three
+        // were the sites the entry counted, and each was a place a reader had to rebuild the
+        // argument the signature could have made.
+        Assert.Equal("Ctrl+Shift+I", one.Text);
+        Assert.Equal(one.Text, two.Text);
     }
 
     [Theory]
@@ -95,7 +102,29 @@ public sealed class ChordTests : IDisposable
     public void A_chord_that_is_not_one_says_which_part_is_wrong(string written, string because)
     {
         Assert.False(Chord.TryParse(written, out _, out var wrong));
-        Assert.Contains(because, wrong!, StringComparison.Ordinal);
+        Assert.Contains(because, wrong, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_signature_makes_the_promise_the_body_keeps()
+    {
+        // WW377, and it is WW364's check one verb over. Both outs above are read without a bang, and
+        // that is what this pins: the attributes are what make an answered `false` narrow the reason
+        // and an answered `true` narrow the chord, and nothing else notices them going.
+        //
+        // The engine's own callers hid the omission rather than paying for it — one interpolates the
+        // reason, the other passes the chord on as nullable — so the argument for the annotation was
+        // going to be a bang somebody had already written.
+        var outs = typeof(Chord)
+            .GetMethod(nameof(Chord.TryParse))!
+            .GetParameters()
+            .Where(one => one.IsOut)
+            .ToList();
+
+        Assert.Equal(["chord", "because"], outs.Select(one => one.Name));
+        Assert.Equal(
+            [true, false],
+            outs.Select(one => one.GetCustomAttribute<NotNullWhenAttribute>()?.ReturnValue));
     }
 
     [Fact]

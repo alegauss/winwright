@@ -146,6 +146,7 @@
 - ✅ **WW355** **every send waits fifty milliseconds for a provider that only one kind of read wakes, and no cheaper read was tried** — The settle asks one pattern of an element already resolved, at 92ms a round against 153; the pause stays, on 1 of 1200 without (design recorded in `src/Winwright/Acting/Keyboard.cs`).
 - ✅ **WW366** **a step's trace line carries the reading the act took and the verdict beside it used one the expectation polled for** — The act's own trace line now carries what the verdict settled on where that differs from what the act read (design recorded in `src/Winwright/Tracing/TraceStep.cs`).
 - ✅ **WW368** **the provoke arm reads zero for the read the engine now makes and the engine still faults once in twelve hundred** — A ladder walks the arm to the act a difference at a rung, reproduces its 1 in 1200, and names the per-round focus (design recorded in `tools/Winwright.Typing/Transfer.cs`).
+- ✅ **WW377** **Chord.TryParse has the shape WW364 annotated and none of the annotation, so its callers spell the bangs instead** — Chord.TryParse says which out is null on which answer, the three bangs are gone, and neither engine caller had to change (design recorded in `src/Winwright/Acting/Chord.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 
