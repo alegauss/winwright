@@ -357,6 +357,11 @@ public static class Keyboard
         // round-trip issued on the line before the keys go in, and this pause is spent after them —
         // it is guarding the read, and the read was acquitted twice. What that opens is a pause that
         // guards the focus instead, which would be a repair rather than a floor found by sweeping.
+        //
+        // WW381 built the reading rather than argued it: `transfer` grew a fifth rung, `guard`, which
+        // is the engine's own round with these same fifty milliseconds spent above the send instead
+        // of below it. The two placements cost the same, so the pair either confirms the move or
+        // says both calls need one — and this line does not move until a run says which.
         Thread.Sleep(Keys.FirstLookMs);
 
         var settled = Attempt.Until(

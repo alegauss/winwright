@@ -57,10 +57,51 @@ namespace Winwright.Typing;
 /// fixed 300ms, and 144ms for the one that stops on a match. The last is the act's own round, and
 /// it agrees with the 91-95ms WW355 measured with the walk taken out.
 /// </para>
+/// <para>
+/// WW381 puts the candidate on the same ladder. If what provokes is the focus, the fifty
+/// milliseconds this engine pays are on the wrong side of the send, and the repair is to move them
+/// rather than to buy more: <c>guard</c> is <c>settle</c> with that interval spent between the
+/// focus and the keys instead of after them. It is the one rung that is not a difference the real
+/// act has — every other adds something the act does, and this takes the act somewhere it has
+/// never been — and it is here because the two placements cost the same and only a reading can say
+/// which one buys anything.
+/// </para>
+/// <para>
+/// Which makes the pair, and not the rung, the thing to read. <c>settle</c> is the act with the
+/// pause at zero and <c>guard</c> is the same round with it above the send, so what separates them
+/// is where the interval is spent — and they are compared against each other in the run they were
+/// both measured in, because this fault's rate is a property of the desk on the evening and not a
+/// number to carry across from WW368's row.
+/// </para>
+/// <para>
+/// It is the count that decides whether that pair says anything, and the ladder cannot help with
+/// it: <c>settle</c> reads about 1 in 1200, so 1200 rounds expects one substitution and a
+/// <c>guard</c> that reads zero beside it has separated nothing. <see cref="Verdict"/> works the
+/// expectation out from what <c>settle</c> read in that same run and says which of the two answers
+/// the run earned, rather than reading a zero as a repair.
+/// </para>
+/// <para>
+/// What the rung read, on the guest on 2026-09-05, 1200 rounds a rung twice: nothing, and the tool
+/// said so both times. The control faulted on each run — <c>arm</c> 1 of 1200, where WW355 read 0
+/// of 3200 and WW368 read 0 of 1200 — so the guard clause in front of every verdict refused to
+/// attribute anything. It was a desk faulting everywhere at once: 1, 0, 2, 0, 3 up the ladder on
+/// the first run and 1, 2, 0, 4, 1 on the second, with the control, the act and the repair all
+/// inside the same handful. A row that moves like that is the evening and not the rungs.
+/// </para>
+/// <para>
+/// So the pair is still owed a reading, and what the two runs did settle is what the rung costs:
+/// 261 and 271ms a round against <c>settle</c>'s 145 and 231 on those same runs. The 116 and the
+/// 40 do not agree with each other either, which is the same evening moving under both rather than
+/// a price for the placement — and the first thing a quiet guest would measure properly.
+/// </para>
 /// </summary>
 internal static class Transfer
 {
-    /// <summary>One step of the walk from the arm to the act.</summary>
+    /// <summary>
+    /// One step of the walk from the arm to the act, and then the one step past it. WW381's rung is
+    /// declared here with the rest because it is a shape of the same round; what keeps it out of the
+    /// walk is <see cref="Walk"/> and not this list.
+    /// </summary>
     private enum Rung
     {
         /// <summary>
@@ -91,10 +132,32 @@ internal static class Transfer
         /// with the pause at zero.
         /// </summary>
         Settle,
+
+        /// <summary>
+        /// Plus the pause, taken after the focus rather than after the send. WW381, and the one rung
+        /// that walks away from the act instead of towards it: the engine spends this interval below
+        /// the keys and WW368 put the provoking call above them, so this is the third placement and
+        /// the only one nobody has measured. It is last because it is <c>settle</c> repaired rather
+        /// than a step that gets nearer the act, and it inherits every difference below it so the
+        /// two of them differ in the placement and in nothing else.
+        /// </summary>
+        Guard,
     }
 
-    /// <summary>The rungs, in the order they are climbed.</summary>
-    private static readonly Rung[] Rungs = [Rung.Arm, Rung.Focus, Rung.Split, Rung.Settle];
+    /// <summary>
+    /// The walk from the arm to the act, which is what a rate appearing on a rung attributes. WW368.
+    /// </summary>
+    private static readonly Rung[] Walk = [Rung.Arm, Rung.Focus, Rung.Split, Rung.Settle];
+
+    /// <summary>
+    /// The rungs, in the order they are climbed: the walk, and then the one that departs from it.
+    /// <para>
+    /// Written off <see cref="Walk"/> rather than beside it, because the two lists are one fact. The
+    /// verdict searches the walk for where a rate enters, and WW381's rung inside that search would
+    /// be a repair reported as a difference the act already has.
+    /// </para>
+    /// </summary>
+    private static readonly Rung[] Rungs = [.. Walk, Rung.Guard];
 
     /// <summary>
     /// How long the three fixed-drain rungs read for, which is WW312's number and Disturbance's.
@@ -107,6 +170,31 @@ internal static class Transfer
 
     /// <summary>How long the settling rung waits before giving up on a reading that never arrives.</summary>
     private const int SettleMs = 2000;
+
+    /// <summary>
+    /// How long the guarding rung waits between the focus and the keys. WW381, and it is
+    /// <c>Keys.FirstLookMs</c> — the interval the engine already spends on the other side of the
+    /// send.
+    /// <para>
+    /// Spelled here for the reason <c>Spaced</c>'s interop is spelled here: the engine's copy is
+    /// internal to it. The same number and not a swept one, because what this rung varies is where
+    /// the interval is spent and a second difference in the length would make the pair unreadable —
+    /// the question is the placement, and the price of answering it has to be one the engine is
+    /// already paying.
+    /// </para>
+    /// </summary>
+    private const int GuardMs = 50;
+
+    /// <summary>
+    /// How many substitutions a rung has to expect before a zero on it means anything. WW381.
+    /// <para>
+    /// The bare run's number, for its reason: below about five expected events a clean rung is
+    /// something a quiet evening produces, so a verdict read off one would call every short run a
+    /// repair. It is the count that decides this, and the ladder cannot make the fault likelier —
+    /// so the honest answer to a run too small is the number of rounds that would not be.
+    /// </para>
+    /// </summary>
+    private const double Resolvable = 5;
 
     /// <summary>
     /// The automation id of the box every rung types into, spelled here for the reason Disturbance
@@ -127,15 +215,19 @@ internal static class Transfer
         Console.WriteLine(
             $"WW368: what does not carry from the arm to the act, {rounds} round(s) on each of"
                 + $" {Rungs.Length} rungs. Every rung reads the same value the engine now reads — one"
-                + " ValuePattern round-trip on an element resolved before the send — and each adds"
-                + " exactly one thing the real act does. `arm` is WW355's reading, which read zero:"
+                + " ValuePattern round-trip on an element resolved before the send — and each of the"
+                + $" first {Walk.Length} adds exactly one thing the real act does. `arm` is WW355's"
+                + " reading, which read zero:"
                 + " the focus taken once, End and the backspaces in one SendInput, the text in"
                 + " another, and the value read every poll for a fixed 300ms. `focus` takes the focus"
                 + " before every round the way the act does. `split` sends End in a call of its own,"
                 + " so a round is three arrays into the queue rather than two, which is the engine's"
                 + " shape. `settle` stops reading the moment the box says what was sent instead of"
                 + " draining for a fixed time, which makes the round the act's with the pause at"
-                + " zero. `substituted` is what the window received differing from what was sent.");
+                + " zero. `guard` is WW381's and the only rung that is not something the act does:"
+                + $" it is `settle` with {GuardMs}ms spent between the focus and the keys instead of"
+                + " after them, which is the engine's own interval on the other side of the send."
+                + " `substituted` is what the window received differing from what was sent.");
 
         // Resolved once and before the rungs, for WW355's reason: the walk is most of what the
         // engine's old look asked the provider for, and a rung that re-resolved every poll would be
@@ -248,6 +340,13 @@ internal static class Transfer
         if (rung >= Rung.Focus)
             Focused(element);
 
+        // WW381. Between the focus and the keys, which is the one placement this ladder has never
+        // tried: the engine spends the same interval below the send, and WW368 put the call that
+        // provokes above it. Nothing else about the round changes, so the two rungs either side of
+        // this line are the same act with the pause in two places and not two experiments.
+        if (rung >= Rung.Guard)
+            Thread.Sleep(GuardMs);
+
         if (rung >= Rung.Split)
         {
             Spaced.End();
@@ -336,11 +435,17 @@ internal static class Transfer
     }
 
     /// <summary>
-    /// What the rungs come to, said as which step the rate appeared on.
+    /// What the rungs come to, said as which step the rate appeared on — and then what the two
+    /// placements of the pause came to, which is a second question off the same run.
     /// <para>
     /// The control leads, as it does in Disturbance and for the same reason: a control rung that
     /// faulted has no clean baseline for the rungs above it to have departed from, and a sentence
     /// about where the difference enters written off that is a conclusion about the desk.
+    /// </para>
+    /// <para>
+    /// WW381's rung is read after the climb and never inside it. Where a rate enters is a fact about
+    /// the act, and <c>guard</c> is not the act — a search that found it first would report the
+    /// repair as the difference, which is the one sentence this ladder must not produce.
     /// </para>
     /// </summary>
     /// <param name="read">What each rung read.</param>
@@ -359,14 +464,15 @@ internal static class Transfer
                 + " else and nothing here attributes anything. Run it again on a quiet guest.";
         }
 
-        var first = Rungs.Skip(1).FirstOrDefault(one => read[one].Substituted > 0);
+        var first = Walk.Skip(1).FirstOrDefault(one => read[one].Substituted > 0);
         if (first == default)
         {
             return $"Nothing separated: {counted}. Every rung read clean, including the one that is"
                 + " the act's own shape with the pause at zero — so either the difference is not in"
                 + $" this list, or {rounds} rounds a rung cannot see it. WW355 read the act at 1 in"
                 + " 1200, so a rung of a few hundred expects a fraction of a fault and a row of"
-                + " zeros is the count being too small rather than the rungs being clean.";
+                + " zeros is the count being too small rather than the rungs being clean."
+                + Placement(read);
         }
 
         var added = first switch
@@ -378,6 +484,70 @@ internal static class Transfer
 
         return $"It enters at `{first.ToString().ToLowerInvariant()}`: {counted}. Every rung below it"
             + $" read clean, and what that one adds is {added} — so that is what the arm was not"
-            + " doing, and it is where the rate the act still carries comes from.";
+            + " doing, and it is where the rate the act still carries comes from."
+            + Placement(read);
+    }
+
+    /// <summary>
+    /// What the two placements of the pause came to. WW381.
+    /// <para>
+    /// Read as a pair and against each other, never against a number from another evening. WW368
+    /// read <c>settle</c> at 1 in 1200 and WW313 measured this fault's rate moving within a single
+    /// run, so what a clean <c>guard</c> has to beat is what <c>settle</c> read beside it — in the
+    /// same rounds, on the same desk, an hour apart at most.
+    /// </para>
+    /// <para>
+    /// Which makes the expectation the sentence rather than the counts. At the rate the act carries,
+    /// a rung of a few hundred rounds expects a fraction of a substitution, and two rungs that both
+    /// read zero there have agreed about nothing at all — so a run too small is told what it would
+    /// take rather than given a verdict it did not earn.
+    /// </para>
+    /// </summary>
+    /// <param name="read">What each rung read.</param>
+    private static string Placement(IReadOnlyDictionary<Rung, Measured> read)
+    {
+        var settle = read[Rung.Settle];
+        var guard = read[Rung.Guard];
+
+        var said = $"{Environment.NewLine}The placement: `settle` spends nothing and read"
+            + $" {settle.Substituted} of {settle.Ran}; `guard` spends the engine's own {GuardMs}ms"
+            + $" between the focus and the keys and read {guard.Substituted} of {guard.Ran}.";
+
+        if (settle.Substituted == 0 || settle.Ran == 0)
+        {
+            return said + " There is no rate here to have moved: `settle` is the act with the pause"
+                + " at zero and it faulted nowhere in this run, so a clean `guard` is two clean rungs"
+                + " and not a repair. The pair says something only where the rung below it faults.";
+        }
+
+        var rate = (double)settle.Substituted / settle.Ran;
+        var predicted = rate * guard.Ran;
+
+        if (predicted < Resolvable)
+        {
+            return said + $" That does not separate them: at `settle`'s own rate in this run,"
+                + $" {guard.Ran} rounds carry about {predicted:F1} substitutions, and a rung"
+                + $" expecting fewer than {Resolvable:F0} reads clean on a quiet evening whatever the"
+                + $" pause is doing. It would take about {Math.Ceiling(Resolvable / rate):F0} rounds"
+                + " a rung to ask this properly.";
+        }
+
+        if (guard.Substituted == 0)
+        {
+            return said + $" The fault follows the focus: this length expects about {predicted:F0}"
+                + " with the pause below the keys and `guard` carried none. So the interval moves"
+                + " rather than doubles — the same milliseconds the engine already pays, spent above"
+                + " the send instead of after it.";
+        }
+
+        return guard.Substituted * 2 <= predicted
+            ? said + $" It moves most of it and not all: this length expects about {predicted:F0} and"
+                + $" `guard` carried {guard.Substituted}. Halving is the crude reading a count this"
+                + " size supports, and what it says is that the focus is part of what provokes and"
+                + " that the send is not acquitted by moving the pause off it."
+            : said + $" The fault does not follow the focus: this length expects about {predicted:F0}"
+                + $" and `guard` carried {guard.Substituted}, so a pause above the keys is not the"
+                + " pause below them. Both calls would need one, which is a worse answer than the"
+                + " move and a true one.";
     }
 }

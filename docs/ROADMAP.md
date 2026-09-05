@@ -6,13 +6,16 @@
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
 - 💭 **WW389** (deps: —) **five readings come off one set of ledgers and each knows when to be quiet only from the ones already written** — WW376's silence rule cites WW363's, which cites WW248's, and a sixth reading has to find all three before it can decide its own. → §WW389
+- 💭 **WW396** (deps: —) **a run that powers the guest on never closes its output, so a caller that pipes it waits long past the end** — Observed at sixty-five minutes: the script had exited leaving no descendants, the pipe still open, and the VMware window it started holding the far end. → §WW396
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
 
-- 💭 **WW381** (deps: —) **the pause sits after the send and WW368 put the provoking call before it, so it guards the half already acquitted** — Three readings cleared the drain — the pumping, four cheap readers, and the arm's own rungs — and the rate entered with SetFocus on the line above the keys. → §WW381
 - 💭 **WW390** (deps: —) **nothing holds a third bool-and-two-outs verb to the annotation, so the next one costs a task to notice** — WW364 and WW377 each found the other's omission by shipping, and a method written tomorrow with that signature compiles unannotated. → §WW390
+- 💭 **WW394** (deps: —) **a rung added to the ladder's walk prints the rung below it's sentence, because the verdict's switch ends in a default** — WW381 added the fifth rung and read the switch to check it was safe; it is, and only because `settle` is the one the default happens to name. → §WW394
+- 💭 **WW395** (deps: —) **the guarding rung spells the engine's interval itself, so moving the engine's leaves it pricing a placement nobody pays** — WW381 needed the engine's fifty milliseconds outside the engine and `Keys.FirstLookMs` is internal, so the number is now typed in three places. → §WW395
+- 💭 **WW397** (deps: —) **the ladder's control has stopped reading zero, so every rung above it is refused and the tool can attribute nothing** — WW381 ran it twice on 2026-09-05 and `arm` faulted 1 of 1200 both times, where WW355 read 0 of 3200 and WW368 read 0 of 1200. → §WW397
 
 ## Block E — Capture — the picture that proves what it photographed
 

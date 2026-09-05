@@ -49,11 +49,21 @@ rem rungs, each the one before it plus exactly one thing the real act does: `arm
 rem reading, `focus` takes the focus before every round, `split` sends End in a call of its own so
 rem the queue sees three arrays and not two, and `settle` stops reading the moment the box says what
 rem was sent - which by that rung is the engine's round with the pause at zero. The rung where a rate
-rem appears is the answer.
+rem appears is the answer, and it appeared at `focus`.
 rem
-rem Give it rounds. A rate of one in twelve hundred expects a third of a fault at 400 a rung, so a row
-rem of zeros there is the count being too small rather than the rungs being clean; 1200 is what WW355
-rem measured the act at.
+rem WW381 adds the fifth, which is the only one that is not something the act does. The engine sleeps
+rem fifty milliseconds after the send and the call WW368 caught provoking is the SetFocus on the line
+rem above it, so the pause is guarding the half two readings already acquitted. `guard` is `settle`
+rem with those same fifty milliseconds spent between the focus and the keys instead of after them -
+rem the act as it would be repaired, beside the act as it is, in the same run on the same desk. What
+rem the run prints under the rows is that pair: if the fault follows the focus the interval moves and
+rem costs what it already costs, and if it does not then both calls need one.
+rem
+rem Give it rounds, and the pair needs more of them than the climb does. A rate of one in twelve
+rem hundred expects a third of a fault at 400 a rung, so a row of zeros there is the count being too
+rem small rather than the rungs being clean; 1200 is what WW355 measured the act at, and it expects
+rem one - which is why a clean `guard` beside it is not yet a repair and the run says so with the
+rem count that would be.
 rem
 rem The configuration moved to the third argument when this gained the second. `run-typing.cmd 400`,
 rem `run-typing.cmd 150 sweep`, `run-typing.cmd 1200 delay`, `run-typing.cmd 300 acts`,

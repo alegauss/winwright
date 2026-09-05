@@ -129,7 +129,8 @@ public static class Arms
             "WW368",
             "the walk from the arm to the act, one difference a rung — the focus taken every round, "
                 + "End sent in a call of its own, and the read stopped the moment the box says what "
-                + "was sent — so the rung where a rate appears is what the arm was not doing",
+                + "was sent — so the rung where a rate appears is what the arm was not doing, and "
+                + "one rung past the act with the pause moved above the send rather than below it",
             Transfer.Run),
     ]);
 

@@ -51,32 +51,32 @@ of its excuses, over which window each speaks, and which is the stronger where t
 true. A list rather than a rule — the shape this project already has wherever two things
 must agree.
 
+### §WW396 the run that ended and would not say so
+
+`run-tests-vm.cmd` was started with its output piped, on a host where the guest was
+powered off, and printed nothing for an hour. At sixty-five minutes the host's process
+table said the run was already over: the wrapper's shell had no descendants at all, so
+the .cmd, the .ps1 and every vmrun they make had exited. The pipe was open and empty.
+
+What that run does and a warm one does not is start the guest. `vmrun start` on a
+powered-off VM launches VMware's own window, and that process outlives the script by
+design — it is the console a person watches. It inherits the handles it was launched
+with, so the write end of the caller's pipe stays open in a process nobody is waiting
+for, and the end of file arrives when somebody closes the VM.
+
+Re-run through `Start-Process -RedirectStandardOutput`, the same command reached the
+guest in seconds and finished green, which is what makes the inherited handle the
+suspect rather than the boot.
+
+So it is a host-side hang on a run that worked, which is the worst shape available:
+nothing is wrong in the guest, nothing is red, and a person watching an empty terminal
+has no reason to think the suite has already passed. The wrapper is where the repair
+goes — it is the thing a person types, and it can hand the guest's console a handle of
+its own rather than the caller's.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
-
-### §WW381 the pause on the wrong side of the send
-
-WW329 put fifty milliseconds after the send and the fault went away, and every reading
-since has been about what happens during the drain. WW342 acquitted the pumping over
-4800 dispatched messages. WW355 acquitted four cheap readers over 3200 rounds. WW368
-walked the arm to the act and the rate appeared on the rung that adds `SetFocus` before
-every round — a provider round-trip issued on the line *above* the send, where the pause
-this engine pays is spent below it.
-
-So the pause is guarding the reader, and the reader has now been acquitted twice. What
-provokes is on the other side of the keys.
-
-The candidate is a pause after the focus rather than after the send, measured rather
-than assumed. `Keys.FirstLookMs` is one constant two verbs sleep on, so trying the other
-placement means the tool holding both: a rung that focuses, waits and sends, beside one
-that focuses and sends. If the fault follows the focus the interval moves and costs the
-same; if it does not, both calls need one — a worse answer and a true one.
-
-Two things make this worth doing rather than filing and forgetting. The measurement is
-already built: `transfer` runs the ladder and one more rung is a line. And the prize is
-the same one WW355 chased — an act with no interval in it at all — reached from the end
-nobody has looked at.
 
 ### §WW390 the promise no list holds
 
@@ -102,6 +102,71 @@ Scope is what to decide first. The engine's two are the whole population, so the
 passes the day it is written and its only value is the third method — which is exactly
 the value `Deadlines` and `Sleeps` have. Whether the fixture and the tools are in it is
 the other half: a catalogue covering less than a reader assumes is worse than none.
+
+### §WW394 the rung the ladder would misname
+
+`Transfer.Verdict` says which rung a rate entered on, and says what that rung adds with
+a switch over two cases and a default: `focus` names the focus taken every round,
+`split` names End sent in a call of its own, and everything else names the read stopped
+the moment the box says what was sent. That is right today for one reason — the search
+runs over `Walk`, and `settle` is the only rung the default can reach.
+
+WW381 added the fifth rung and kept it out of `Walk` on purpose, so nothing here
+changed; reading the switch to check that is how this was found. A rung that did join
+the walk — the next difference somebody finds between the arm and the act — would arrive
+through the default and be reported under its own name carrying `settle`'s sentence. The
+row above would say one thing and the verdict under it another, and the verdict is the
+line a person reads.
+
+It is WW354's failure in the one place that entry did not reach: a name in one list and
+not in the other, answered rather than refused. The repair is WW354's own shape — the
+sentence beside the rung it describes, so a rung declared without one does not compile
+rather than borrowing its neighbour's.
+
+### §WW395 the interval the ladder moves, spelled twice
+
+WW381's `guard` rung is `settle` with the engine's own pause spent above the send
+instead of below it, and the whole reading rests on it being the *same* interval: what
+the pair answers is where the milliseconds go, and a rung sleeping a different number
+would be answering how many.
+
+The engine's copy is `Keys.FirstLookMs`, which is internal, so the rung has `GuardMs =
+50` of its own and `run-typing.cmd` says "fifty milliseconds" twice in prose. Three
+spellings of one number, and the two that matter are in different assemblies with
+nothing between them. Move the engine's and the ladder goes on running, printing rows,
+and reporting a placement at a price the engine stopped paying — a wrong answer with no
+red anywhere, which is the shape this project keeps finding in its own catalogues.
+
+`Spaced`'s interop is the precedent for the duplication and it is not the same case:
+that is a send the engine does not make, deliberately reimplemented so the arm can vary
+it. This is the engine's own number, borrowed to be moved.
+
+The cheap repair is the one `PollMs` and `SettleMs` did not need: a case that reads the
+constant and fails where the ladder disagrees with it. Reading it needs the field
+visible to the tests, which is a smaller ask than making it public — and it is the
+assertion, not the constant, that has to exist.
+
+### §WW397 the baseline that stopped being a baseline
+
+`transfer` refuses to attribute anything on a run where `arm` faults, and it is right
+to: that rung is WW355's own reading, the one measured at 0 of 3200, and a ladder whose
+control faults has no clean floor for the rungs above it to have departed from.
+
+It faulted on both of WW381's runs. 1 of 1200 each time, and the rest of the rows moved
+with it — 1, 0, 2, 0, 3 up the ladder on the first and 1, 2, 0, 4, 1 on the second, with
+the control, the act and the candidate repair all inside the same handful. Nothing
+separates at that spread, and two runs of it cost about seventy minutes of guest desk to
+be told so twice.
+
+So the instrument is currently unusable on this guest, and that is the finding rather
+than an obstacle to one. WW368 read the same ladder clean on 2026-09-04, so something
+about this desk changed inside a day: an update, a service, a snapshot that came back
+different. Nothing here says which.
+
+What it needs is a fact about the guest and not about the engine — what the fault's
+floor is on this machine now, taken with the ladder or with any of the four arms that
+used to read zero. Until that exists, every reading `transfer`, `provoke` and `sweep`
+are asked for is a reading somebody has to throw away after the run.
 
 ## Block E — Capture — the picture that proves what it photographed
 
