@@ -50,6 +50,21 @@ namespace Winwright.Tests;
 /// looks already say about how a look is built.
 /// </para>
 /// <para>
+/// WW384 reached the clearer's acting half, and reached one arm of it. `Clear-TheDesk` is a function
+/// now, so a case puts up a window with no minimise button, runs the whole repair against the desk
+/// that window is holding, and reads off the desk that nothing moved — the arm that must never move
+/// one.
+/// </para>
+/// <para>
+/// The other arm cannot be a case here, and that was measured rather than argued. Written, it passed
+/// and took five cases in two other classes down with it and excused four more in this one; written
+/// again with the desktop handed back by the same key that took it, identically. The repair ends in
+/// Win+D, and showing the desktop sets Windows' foreground lock — for the timeout after it nothing
+/// this process asks for is granted, not a restore, not <c>BringToFront</c>, not a window a later
+/// case creates and activates from its own thread. So the price of that reading is every case that
+/// runs in the next few minutes, which is an unrelated red bought with a real one.
+/// </para>
+/// <para>
 /// Serial since WW345, and WW125's rule is why: running the classification means starting a real
 /// PowerShell, and a process this suite launches is a process that can take the foreground away from
 /// whatever case is measuring it. The console is suppressed below as well — both, because one is the
@@ -588,6 +603,52 @@ public sealed class DeskProbeTests
         Assert.StartsWith("asking|testhost|", byTheList, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void The_clearer_leaves_a_real_window_with_no_minimise_button_exactly_where_it_is()
+    {
+        // WW384. `Test-Clearable` has been reachable since WW371 and the acting half had not — it ran
+        // for nobody but the runner, on a refusal, on a guest. So every case about this file asked
+        // what the decision says and none asked what the script does with the answer, which is the
+        // room WW345 left in the probe: a decision that is right and an act that is not.
+        //
+        // This is the arm that must never move a window. A modal question has no minimise button and
+        // is the whole reason the clearer exists to be careful, so what is asserted is a window still
+        // standing after the script ran against it — not a sentence, which is the thing that would go
+        // on being written by a script that had minimised it anyway.
+        //
+        // `PumpedDialog.Open` is WS_POPUP, so it carries no WS_MINIMIZEBOX and it is a question as far
+        // as this file is concerned. The dialog holds the foreground, which is what makes the script
+        // find it rather than something else.
+        using var dialog = PumpedDialog.Open("winwright clearer leaves alone");
+        dialog.BringToFront();
+
+        if (BusyDesk.Excused(Winwright.Windowing.Foreground.Check(dialog.Frame).AsPrecondition()))
+            return;
+
+        var said = Clearing();
+
+        Assert.Contains("left 'winwright clearer leaves alone' (Static) alone", said, StringComparison.Ordinal);
+
+        // And the desk itself, because the sentence is the script's own account of what it did. This
+        // is the assertion the words cannot stand in for: the window is up, unminimised, and still
+        // holds the foreground it held before the script ran.
+        Assert.False(Iconic(dialog.Frame), $"the clearer minimised a window it said it left alone: {said}");
+        Assert.True(
+            Winwright.Windowing.Foreground.Check(dialog.Frame).Ours,
+            $"the clearer handed the desk on from a window it said it left alone: {said}");
+    }
+
+    /// <summary>
+    /// Whether a window is down, which is the half of the repair its own sentence cannot show. WW384,
+    /// and read here rather than taken from the script for that reason: the script saying
+    /// <c>iconic=True</c> is the script's account of itself, and a repair that moved no window would
+    /// go on writing it.
+    /// </summary>
+    /// <param name="window">The window to read.</param>
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "IsIconic")]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool Iconic(nint window);
+
     /// <summary>
     /// Run the probe's own polling and hand back one line per look. WW357.
     /// <para>
@@ -614,7 +675,24 @@ public sealed class DeskProbeTests
     /// </para>
     /// </summary>
     /// <param name="windows">One <c>Test-Clearable</c> call per window, as PowerShell spells it.</param>
-    private static IReadOnlyList<string> Cleared(params string[] windows)
+    private static IReadOnlyList<string> Cleared(params string[] windows) => RanClearer(windows);
+
+    /// <summary>
+    /// Run the clearer against the desk this case is holding, and answer the one sentence it wrote.
+    /// WW384.
+    /// <para>
+    /// The same launch as <see cref="Cleared" /> and a different thing entirely: that one asks the
+    /// decision about windows nobody put up, and this one lets the script find the foreground for
+    /// itself, act on it, and say what it did. It is the half that touches a desk, which is why it
+    /// has a name of its own — a caller reaching for the wrong one would minimise the window under
+    /// test.
+    /// </para>
+    /// </summary>
+    private static string Clearing() => RanClearer(["Clear-TheDesk"]).Single();
+
+    /// <summary>Dot-source the clearer and run what a caller asked, line by line. WW371, WW384.</summary>
+    /// <param name="lines">The PowerShell to run once the clearer is defined.</param>
+    private static IReadOnlyList<string> RanClearer(IReadOnlyList<string> lines)
     {
         var script = Path.Combine(Path.GetTempPath(), $"winwright-ww371-{Guid.NewGuid():N}.ps1");
         var clearer = Checkout.At("tools", "desk-clear.ps1");
@@ -625,7 +703,7 @@ public sealed class DeskProbeTests
             Set-StrictMode -Version Latest
             $ErrorActionPreference = 'Stop'
             . '{{clearer}}' -DefineOnly
-            {{string.Join(Environment.NewLine, windows)}}
+            {{string.Join(Environment.NewLine, lines)}}
             """);
 
         try
@@ -636,8 +714,8 @@ public sealed class DeskProbeTests
             // threw halfway answers fewer lines than it was asked for, and comparing the ones that
             // arrived against the first few expectations reports the wrong window as the wrong answer.
             Assert.True(
-                said.Count == windows.Length,
-                $"asked about {windows.Length} window(s) and got {said.Count}: {string.Join(" / ", said)}");
+                said.Count == lines.Count,
+                $"asked about {lines.Count} window(s) and got {said.Count}: {string.Join(" / ", said)}");
 
             return said;
         }

@@ -467,6 +467,29 @@ foreground" is a sentence no case has produced from a real poll.
 no shell, and a suite that could make one would have nowhere to run. `busy` needs the
 foreground taken between two looks, which is a race rather than an arrangement.
 
+### §WW401 the red that names the wrong thing
+
+This project's rule about a green covering an assertion that did not run has a mirror
+nobody has written down. WW384 put a case in that showed the desktop, and Windows'
+foreground lock then refused every later request for it — measured twice, and both runs
+cost the same five cases in `ContainsTests` and `ChordTests`. Every one of them failed,
+and none said anything about a desk. The one printed was `Assert.Contains() Failure:
+Sub-string not found`.
+
+A reader handed that goes looking at `Contains`. What actually happened is that the keys
+went to explorer, the read-out never changed, and the assertion compared two strings
+that were both honest about a window nobody had typed into.
+
+The suite already knows how to say this. `BusyDesk.Excused` turns a lost foreground into
+a hole naming the desk, and the cases that lose it *before* acting take that door. What
+has no door is losing it *during* — the precondition was met, the act ran, and the
+reading came back off a desk that had moved underneath it.
+
+Which is the excused check's own argument one step later: a reading taken after the desk
+moved is not a reading about the subject. The repair is a second look, and where the two
+disagree the verdict is a hole rather than a failure. The cost is one foreground read an
+act, against a class of red that sends a reader to the wrong file.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW392 the five lists a pane joins

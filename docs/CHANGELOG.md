@@ -359,6 +359,7 @@
 - ✅ **WW375** **a minimized window holding a stale foreground refuses every guest run as a question waiting to be answered** — A minimised window holding the desk gets its own word and the run goes on, because nobody can read it and nobody can answer it (design recorded in `tools/desk-probe.ps1`).
 - ✅ **WW382** **the two tray menu kinds read as the same tree and nothing claims they must, so a framework changing one is invisible** — The entries match and the containers do not: the Win32 kind names its Menu, which is where the difference stops (design recorded in `tests/Winwright.Tests/NotificationAreaTests.cs`).
 - ✅ **WW383** **no case puts a real window up and reads shell out of the probe, so that arm is only ever produced from typed looks** — The shell list takes a parameter now, so a case names its own dialog a shell surface and reads `shell` out of a real look (design recorded in `tests/Winwright.Tests/DeskProbeTests.cs`).
+- ✅ **WW384 (the arm that must not move a window)** **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — `Clear-TheDesk` is a function, and a case runs the whole repair at a window with no minimise button and reads off the desk that nothing moved.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

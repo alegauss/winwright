@@ -42,11 +42,12 @@
 - 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - ⏳ **WW87** (deps: Block G, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
-- 💭 **WW384** (deps: —) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — WW371 made the decision a function cases call and left the minimise, the foreground and the sentence where WW345 found the probe. → §WW384
+- ⏳ **WW384** (deps: —) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds in other classes and four excuses here, twice. → §WW384
 - 💭 **WW386** (deps: —) **the runner waits on the guest with no bound, so a wedge outside a case is still a run nobody can tell from a slow one** — WW373 bounded a case and the run around it inherited none of it, though Start-Guest already refuses to block on vmrun for exactly this reason. → §WW386
 - 💭 **WW388** (deps: —) **a stale desk is reported and a clearable one is repaired, and nothing says which desks a run tidies before it starts** — WW375 classifies before WW371's arm is reached, so the window that motivated the repair is now stepped over rather than put away. → §WW388
 - 💭 **WW399** (deps: —) **a tray locator naming its container works against one kind of tray and not the other, and nothing warns an adopter** — WW382 measured it: the Win32 popup's Menu carries a name and the drop-down's carries none, which only a case in this suite says. → §WW399
 - 💭 **WW400** (deps: —) **three of the probe's six answers are still produced only from typed looks, and two of them can now be arranged** — WW383 joined `shell` and left `stale`, `clear` and `busy` where they were — and a minimised dialog reaches the first, a parameter WW370 already added the second. → §WW400
+- 💭 **WW401** (deps: —) **a case that loses the desk mid-act fails in the words of its own subject, so a desk fault reads as five separate defects** — WW384 took the foreground away mid-run twice and five cases in two classes went red saying `Sub-string not found`, naming nothing about the desk. → §WW401
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
@@ -207,6 +208,14 @@
   deleted and its five assertions are readings CaptureReceipt.Taking takes, driven from
   freewilly's own case project against the engine as nuget.org publishes it. Until then
   the count is one script of two, and the line says which.
+
+## Done when — WW384
+
+- **The minimising arm is run against a real window, on a desk it may take** A case puts
+  up a window carrying WS_MINIMIZEBOX, runs `Clear-TheDesk` at the desk it holds, and
+  reads off that desk that the window went down and no longer holds the foreground. Both
+  halves off the desk and never off the script's sentence. It cannot be this suite's
+  desk: two runs of it cost five reds elsewhere.
 
 ## Non-goals
 

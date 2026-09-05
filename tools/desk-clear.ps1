@@ -24,7 +24,9 @@
   and refuses on what that says, so a window that comes back is a window that refuses the run, and
   no green here can stand in for a desk that did not clear.
 
-  -DefineOnly dot-sources it without touching a desk, which is how the suite reaches the decision.
+  -DefineOnly dot-sources it without touching a desk, which is how the suite reaches the decision
+  and, since WW384, the acting half as well - `Clear-TheDesk` is a function, so a case puts up a
+  window of its own and runs the whole repair against it.
 #>
 param([switch] $DefineOnly)
 
@@ -94,32 +96,49 @@ public static class Clr {
 "@
 }
 
-if ($DefineOnly) { return }
-
 # SW_MINIMIZE, which puts the window down without activating whatever is behind it.
-$minimize = 6
+$script:Minimize = 6
 
-$handle = [Clr]::GetForegroundWindow()
-if ($handle -eq [IntPtr]::Zero) {
-    $said = 'nothing held the foreground, so there was nothing to put away'
-}
-else {
+function Clear-TheDesk {
+    <#
+      Read the foreground, decide about it, and act. WW384, and it is above the -DefineOnly return
+      for the reason `Get-DeskLooks` is: this half was run by nothing but a real guest.
+
+      `Test-Clearable` was reachable from the day this file existed and this was not, so every check
+      here was about a decision and none about what the script does with it. A ShowWindow on the
+      wrong handle, a foreground handed nowhere, or a sentence that says it worked would each leave
+      the desk as it was - and the runner reads the desk again afterwards, so what a reader would see
+      is a refusal under a line saying the clearing had happened. That is the same room WW345 left in
+      the probe and WW357 closed, one file over.
+
+      Answers the sentence rather than writing it. What a case wants is the words; what the guest
+      wants is them in a file, and a function that did both would make the file the only way to read
+      the words.
+    #>
+    $handle = [Clr]::GetForegroundWindow()
+    if ($handle -eq [IntPtr]::Zero) {
+        return 'nothing held the foreground, so there was nothing to put away'
+    }
+
     $class = [Clr]::ClassOf($handle)
     $title = [Clr]::TextOf($handle)
 
     if (-not (Test-Clearable -Class $class -Style ([Clr]::StyleOf($handle)))) {
-        $said = "left '$title' ($class) alone: it has no minimise button, which is what a question looks like"
+        return "left '$title' ($class) alone: it has no minimise button, which is what a question looks like"
     }
-    else {
-        [void][Clr]::ShowWindow($handle, $minimize)
-        [Clr]::ShowTheDesktop()
-        Start-Sleep -Milliseconds 800
 
-        $now = [Clr]::GetForegroundWindow()
-        $still = if ($now -eq $handle) { ', and it took the foreground back' } else { '' }
-        $said = "put '$title' ($class) away, iconic=$([Clr]::IsIconic($handle))$still"
-    }
+    [void][Clr]::ShowWindow($handle, $script:Minimize)
+    [Clr]::ShowTheDesktop()
+    Start-Sleep -Milliseconds 800
+
+    $now = [Clr]::GetForegroundWindow()
+    $still = if ($now -eq $handle) { ', and it took the foreground back' } else { '' }
+    return "put '$title' ($class) away, iconic=$([Clr]::IsIconic($handle))$still"
 }
+
+if ($DefineOnly) { return }
+
+$said = Clear-TheDesk
 
 # Into a file beside this script, for the reason the probe writes one: vmrun runs the program and
 # does not carry what it printed, so an answer written to the console is an answer nobody reads.
