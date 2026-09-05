@@ -444,6 +444,29 @@ inspector itself marking the line as one not to start from.
 
 Which of the two is a question about how much the inspector should know about menus.
 
+### §WW400 the arms a real look still cannot reach
+
+The probe writes six words and the runner switches on all six. Three are now produced
+end to end from a window this suite put up: `asking` by WW357, nothing by WW370's
+skipped look, and `shell` by WW383. The other three are still only ever made of looks
+somebody typed, which is the state each of the joined ones was in when a defect was
+found in it.
+
+`stale` is the one worth doing and the cheapest. WW375 put `Iconic` on the look because
+the classification is a pure function of what the loop returns, and nothing has ever
+read that field off a real window — a loop that answered it wrong would send a reader to
+a guest console to answer a window nobody can see, which is the failure WW375 exists
+for, arrived at from the loop instead of the words. A case owns its dialog and can
+minimise it.
+
+`clear` is one line from where WW370 stopped. That case asserts the looks come back as
+nothing and never hands them to the classification, so "nothing but the desktop held the
+foreground" is a sentence no case has produced from a real poll.
+
+`broken` cannot be arranged and should not be pretended: it means a logged-in desk with
+no shell, and a suite that could make one would have nowhere to run. `busy` needs the
+foreground taken between two looks, which is a race rather than an arrangement.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW392 the five lists a pane joins

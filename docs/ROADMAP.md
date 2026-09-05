@@ -46,6 +46,7 @@
 - 💭 **WW386** (deps: —) **the runner waits on the guest with no bound, so a wedge outside a case is still a run nobody can tell from a slow one** — WW373 bounded a case and the run around it inherited none of it, though Start-Guest already refuses to block on vmrun for exactly this reason. → §WW386
 - 💭 **WW388** (deps: —) **a stale desk is reported and a clearable one is repaired, and nothing says which desks a run tidies before it starts** — WW375 classifies before WW371's arm is reached, so the window that motivated the repair is now stepped over rather than put away. → §WW388
 - 💭 **WW399** (deps: —) **a tray locator naming its container works against one kind of tray and not the other, and nothing warns an adopter** — WW382 measured it: the Win32 popup's Menu carries a name and the drop-down's carries none, which only a case in this suite says. → §WW399
+- 💭 **WW400** (deps: —) **three of the probe's six answers are still produced only from typed looks, and two of them can now be arranged** — WW383 joined `shell` and left `stale`, `clear` and `busy` where they were — and a minimised dialog reaches the first, a parameter WW370 already added the second. → §WW400
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
