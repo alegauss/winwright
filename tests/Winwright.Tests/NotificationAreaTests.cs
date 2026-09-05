@@ -565,8 +565,8 @@ public sealed class NotificationAreaTests : IDisposable
     /// </summary>
     /// <param name="kind">Which menu the fixture puts up.</param>
     /// <param name="tip">What the shell calls this case's icon, which no other case shares.</param>
-    private static void MenuIsAMenuOfMenuItems(TrayMenuKind kind, string tip)
-    {
+    private static void MenuIsAMenuOfMenuItems(TrayMenuKind kind, string tip) =>
+
         // WW369. Nothing here read this fixture's own tree, and WW356 is what that cost: the entries
         // were ToolStripButtons because `Items.Add(string)` asks the container for a default item and
         // ToolStripDropDown's answer is ToolStrip's. A locator naming MenuItem then matched nothing,
@@ -581,29 +581,9 @@ public sealed class NotificationAreaTests : IDisposable
         // Both kinds, because the Win32 one has never been read either. It is asserted through the
         // verbs that open it and never as a shape, so what an adopter's locator would find in it is
         // unmeasured rather than known — which is exactly the state the drop-down was in.
-        using var answering = BusyDesk.Built(() => TrayIconFixture.Add(tip, kind));
-        if (answering is null)
-            return;
-
-        var menu = NotificationArea.OpenMenu(answering.Tip, settleMs: 4000, pollMs: 40);
-
-        try
+        WithTheMenuUp(kind, tip, (tree, said) =>
         {
-            if (BusyDesk.Excused(menu.AsAssertion("the icon shows its menu")))
-                return;
-
-            var standing = Standing();
-            Assert.True(standing is not null, $"the menu opened and no Menu on the desktop holds its entries: {menu}");
-
-            var tree = Inspect.Under(standing);
-            Assert.True(tree is not null, "the menu is on the desktop and its tree could not be walked");
-
-            // Printed into every failure below, because a control type that is not what this expects
-            // is a finding about a tree, and a reader handed only the wrong word has to go and get
-            // the rest of it on a desk that has since put the menu away.
-            var said = string.Join(Environment.NewLine, Inspect.Render(tree!));
-
-            Assert.True("Menu" == tree!.Facts.ControlType, $"the container is not a Menu:{Environment.NewLine}{said}");
+            Assert.True("Menu" == tree.Facts.ControlType, $"the container is not a Menu:{Environment.NewLine}{said}");
 
             // The entries by name, because the container carries other things — a drop-down has a
             // scroll button at each end whatever it is holding — and a count over all of them would
@@ -622,6 +602,43 @@ public sealed class NotificationAreaTests : IDisposable
                     + $"{Environment.NewLine}{said}");
 
             Assert.Equal(["winwright open", "winwright quit"], entries.Select(one => one.Facts.Name));
+        });
+
+    /// <summary>
+    /// Put one kind's menu up, hand its tree to the caller, and take it down again. WW382 lifted this
+    /// out of WW369's case so a second reading could be taken the same way — two cases opening a tray
+    /// menu by two spellings is two chances for one of them to leave it standing, and a menu left up
+    /// owns the foreground the next case in this class reads.
+    /// </summary>
+    /// <param name="kind">Which menu the fixture puts up.</param>
+    /// <param name="tip">What the shell calls this icon, which no other case shares.</param>
+    /// <param name="read">
+    /// What to assert about it: the tree, and the tree rendered — which every failure carries,
+    /// because a finding about a tree handed over as one wrong word leaves its reader to go and get
+    /// the rest of it from a desk that has since put the menu away.
+    /// </param>
+    /// <returns>False where the desk refused, which is the caller's cue to return.</returns>
+    private static bool WithTheMenuUp(TrayMenuKind kind, string tip, Action<InspectedElement, string> read)
+    {
+        using var answering = BusyDesk.Built(() => TrayIconFixture.Add(tip, kind));
+        if (answering is null)
+            return false;
+
+        var menu = NotificationArea.OpenMenu(answering.Tip, settleMs: 4000, pollMs: 40);
+
+        try
+        {
+            if (BusyDesk.Excused(menu.AsAssertion("the icon shows its menu")))
+                return false;
+
+            var standing = Standing();
+            Assert.True(standing is not null, $"the menu opened and no Menu on the desktop holds its entries: {menu}");
+
+            var tree = Inspect.Under(standing);
+            Assert.True(tree is not null, "the menu is on the desktop and its tree could not be walked");
+
+            read(tree!, string.Join(Environment.NewLine, Inspect.Render(tree!)));
+            return true;
         }
         finally
         {
@@ -631,6 +648,114 @@ public sealed class NotificationAreaTests : IDisposable
             answering.DismissMenu();
             menu.PutBack();
         }
+    }
+
+    [Fact]
+    public void The_two_tray_menu_kinds_differ_at_the_container_and_nowhere_under_it()
+    {
+        // WW382. WW369 read both kinds and found the same thing under each — a Menu of two MenuItems,
+        // named as the adopters name them — and that is the more useful half of what it measured. The
+        // kinds differ at the DESK: a Win32 popup answers the focus reading and a drop-down does not,
+        // which is WW322's whole pair and three adopted cases that failed on it for weeks. Where that
+        // difference stops is the question, and nothing claimed an answer.
+        //
+        // It stops one level below the top, which this case measured rather than assumed. Asserting
+        // the two trees equal outright is what it did first, and the guest answered:
+        //
+        //     drop-down            win32
+        //     Menu (unnamed)       Menu Menu
+        //       MenuItem winwright open
+        //       MenuItem winwright quit
+        //
+        // Identical entries, and a container the shell names in one kind and not in the other. So
+        // "a locator proven against either is proven against both" is true of every entry and false
+        // of the container, and an adopter addressing the menu by name has written a locator that
+        // works against one tray and not the other. That is worth a case saying so, and it is the
+        // half nobody would have found by reading the two cases above side by side.
+        //
+        // Read as a locator reads, which is what makes any of this assertable. A rendered line also
+        // carries the rectangle the menu popped up at and the window class its framework gives it,
+        // and those differ for reasons that are nobody's regression — two icons at two places in the
+        // tray, and `#32768` against WinForms' own chrome. An adopter writes a control type and a
+        // name, so a control type and a name is what is compared.
+        InspectedElement? dropDown = null;
+        if (!WithTheMenuUp(TrayMenuKind.DropDown, "winwright shape dropdown", (tree, _) => dropDown = tree))
+            return;
+
+        // Taken one after the other and never together: one tray icon's menu is up at a time, and a
+        // case holding both open would be reading whichever of them the desk had left in front.
+        InspectedElement? win32 = null;
+        if (!WithTheMenuUp(TrayMenuKind.Win32, "winwright shape win32", (tree, _) => win32 = tree))
+            return;
+
+        var below = Shape(dropDown!).Skip(1).ToList();
+        var alsoBelow = Shape(win32!).Skip(1).ToList();
+
+        Assert.True(
+            below.SequenceEqual(alsoBelow, StringComparer.Ordinal),
+            "the two tray menu kinds no longer put the same thing under the container, so a locator"
+                + " proven against one entry is no longer proven against the other's:"
+                + $"{Environment.NewLine}drop-down{Environment.NewLine}{string.Join(Environment.NewLine, below)}"
+                + $"{Environment.NewLine}win32{Environment.NewLine}{string.Join(Environment.NewLine, alsoBelow)}");
+
+        // The containers agree about the one thing an adopter's first step names.
+        Assert.Equal("Menu", dropDown!.Facts.ControlType);
+        Assert.Equal("Menu", win32!.Facts.ControlType);
+
+        // And disagree about the other. Held as whether there is a name and never as which one: the
+        // word is the shell's and the shell is localised, so a case pinning it would be red on a
+        // guest in another language and say "the trees diverged" about a translation.
+        Assert.True(
+            dropDown.Facts.Says is null,
+            $"the drop-down's container is named '{dropDown.Facts.Says}' now, which WW338's case reads"
+                + " as the menu being told from the one before it — two unnamed menus are what that"
+                + " one is about");
+
+        Assert.True(
+            win32.Facts.Says is not null,
+            "the Win32 container has lost its name, so the two kinds now agree where WW382 measured"
+                + " them differing — which is a finding and not a failure, and this case is where it"
+                + " is written down");
+    }
+
+    /// <summary>
+    /// A tree as a locator sees it: one line an element, indented by depth, carrying the control type
+    /// and the name and nothing else. WW382.
+    /// <para>
+    /// The rectangle and the window class are left out because they are what the two kinds are
+    /// entitled to differ in — the menus pop up at two icons in two places, and the class is the
+    /// framework's chrome, which is the difference WW322 exists to hold. The patterns are left out
+    /// for a weaker reason and it is worth saying which: no locator in this project names one on a
+    /// menu entry, so a difference there would be a claim this case has not earned.
+    /// </para>
+    /// <para>
+    /// What was elided is kept, because it is the one absence that would otherwise pass: a kind that
+    /// grew children past the walk's width would render the same lines and the same shape, and the
+    /// count of what nobody looked at is what says the two trees were not both read to the end.
+    /// </para>
+    /// </summary>
+    /// <param name="tree">The menu's tree, already walked.</param>
+    private static List<string> Shape(InspectedElement tree)
+    {
+        var lines = new List<string>();
+        Shaped(tree, 0, lines);
+        return lines;
+    }
+
+    /// <summary>One element and its children, as <see cref="Shape"/> renders them.</summary>
+    /// <param name="element">What to render.</param>
+    /// <param name="level">How deep it sits, which the indent carries.</param>
+    /// <param name="lines">Where the lines go.</param>
+    private static void Shaped(InspectedElement element, int level, List<string> lines)
+    {
+        var indent = new string(' ', level * 2);
+        lines.Add($"{indent}{element.Facts.ControlType} {element.Facts.Says ?? "(unnamed)"}");
+
+        foreach (var child in element.Children)
+            Shaped(child, level + 1, lines);
+
+        if (element.Elided > 0)
+            lines.Add($"{indent}  ... {element.Elided} more not walked");
     }
 
     [Fact]
