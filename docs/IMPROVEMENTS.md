@@ -102,26 +102,6 @@ copies the recursion instead of the line.
 
 ## Block D — Act — patterns before pointers
 
-### §WW394 the rung the ladder would misname
-
-`Transfer.Verdict` says which rung a rate entered on, and says what that rung adds with
-a switch over two cases and a default: `focus` names the focus taken every round,
-`split` names End sent in a call of its own, and everything else names the read stopped
-the moment the box says what was sent. That is right today for one reason — the search
-runs over `Walk`, and `settle` is the only rung the default can reach.
-
-WW381 added the fifth rung and kept it out of `Walk` on purpose, so nothing here
-changed; reading the switch to check that is how this was found. A rung that did join
-the walk — the next difference somebody finds between the arm and the act — would arrive
-through the default and be reported under its own name carrying `settle`'s sentence. The
-row above would say one thing and the verdict under it another, and the verdict is the
-line a person reads.
-
-It is WW354's failure in the one place that entry did not reach: a name in one list and
-not in the other, answered rather than refused. The repair is WW354's own shape — the
-sentence beside the rung it describes, so a rung declared without one does not compile
-rather than borrowing its neighbour's.
-
 ### §WW395 the interval the ladder moves, spelled twice
 
 WW381's `guard` rung is `settle` with the engine's own pause spent above the send
@@ -188,6 +168,30 @@ fact about paths lives, so there is already a place for it.
 What it would settle is not this rule but the next one's first paragraph. A sweep would
 name its coverage by pointing rather than by arguing, and one that meant something
 narrower would say so against a list rather than in place of one.
+
+### §WW411 the flyout that closed between two lines
+
+`A_window_taking_the_foreground_shuts_the_flyout_under_whoever_was_looking_in_it` opens
+the overflow, excuses a desk that would not open it, asserts the verb held it — and then
+asserts `NotificationArea.Overflow()` is not null. A run on 2026-09-06 failed on that
+last line and the next run passed.
+
+Which is the thing the case is about, arriving one line early. WW288 exists because the
+flyout closes under whoever is looking in it; the case provokes that with a dialog and
+measures what happens. What it does not allow for is the shell closing it before the
+dialog is ever shown — and then the reading is not a failed measurement, it is a
+measurement that never started, which every other line in this case already knows how to
+say.
+
+The verb's own answer is what makes the difference visible. `opened.Held` is true, so
+the flyout was up when the verb let go of it; the read a line later found nothing.
+Nothing else took the desk in between, so what closed it is the shell doing what this
+case exists to prove it does.
+
+So the repair is the one the case already uses twice: a flyout gone before the
+provocation is a hole naming the desk, not a red. It is a `BusyDesk.Excused` where an
+`Assert.NotNull` is now, and the sentence it needs — the overflow closed before anything
+provoked it — is one the excuse ledger can carry and count.
 
 ## Block E — Capture — the picture that proves what it photographed
 

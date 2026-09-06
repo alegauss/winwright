@@ -145,9 +145,40 @@ internal static class Transfer
     }
 
     /// <summary>
-    /// The walk from the arm to the act, which is what a rate appearing on a rung attributes. WW368.
+    /// The rung the walk starts from, which is the one a rate cannot enter at. WW368: it is
+    /// WW355's own reading, and a run where it faults has no clean floor for the rungs above it to
+    /// have departed from — so it is the control rather than a step, and the verdict says so.
     /// </summary>
-    private static readonly Rung[] Walk = [Rung.Arm, Rung.Focus, Rung.Split, Rung.Settle];
+    private const Rung Control = Rung.Arm;
+
+    /// <summary>
+    /// Each step of the walk and what it adds, paired. WW394.
+    /// <para>
+    /// The sentence used to be a switch in <see cref="Verdict" /> over two rungs and a default, and
+    /// the default happened to name the third. It was right by arithmetic: the search runs over the
+    /// walk, and <c>settle</c> was the only rung the default could reach. A rung joining the walk
+    /// tomorrow would have arrived through it and been reported under its own name carrying
+    /// <c>settle</c>'s sentence — the row above saying one thing and the verdict below another, and
+    /// the verdict is the line a person reads.
+    /// </para>
+    /// <para>
+    /// Paired rather than checked, which is the stronger of the two repairs available: the walk is
+    /// derived from this list, so a rung joins it by having a sentence and there is no way to add
+    /// one without writing what it adds. WW354's shape, one file over.
+    /// </para>
+    /// </summary>
+    private static readonly (Rung Rung, string Adds)[] Climbing =
+    [
+        (Rung.Focus, "taking the focus before every round"),
+        (Rung.Split, "sending End in a call of its own, so the queue sees three arrays and not two"),
+        (Rung.Settle, "stopping the read the moment the box says what was sent, which is the act's own shape"),
+    ];
+
+    /// <summary>
+    /// The walk from the arm to the act, which is what a rate appearing on a rung attributes. WW368,
+    /// and derived from <see cref="Climbing" /> since WW394 so the two cannot disagree.
+    /// </summary>
+    private static readonly Rung[] Walk = [Control, .. Climbing.Select(one => one.Rung)];
 
     /// <summary>
     /// The rungs, in the order they are climbed: the walk, and then the one that departs from it.
@@ -455,17 +486,20 @@ internal static class Transfer
             ", ",
             Rungs.Select(one => $"{one.ToString().ToLowerInvariant()} {read[one].Substituted} of {read[one].Ran}"));
 
-        var rounds = read[Rung.Arm].Ran;
+        var rounds = read[Control].Ran;
 
-        if (read[Rung.Arm].Substituted > 0)
+        if (read[Control].Substituted > 0)
         {
             return $"The control faulted: {counted}. `arm` is WW355's own reading, which read zero"
                 + " over eight hundred rounds, so a run where it faults is a desk doing something"
                 + " else and nothing here attributes anything. Run it again on a quiet guest.";
         }
 
-        var first = Walk.Skip(1).FirstOrDefault(one => read[one].Substituted > 0);
-        if (first == default)
+        // The first step above the control that faulted, and what it adds, taken together off the
+        // one list. WW394: they were two lookups a switch apart, and the switch's default named a
+        // rung rather than refusing to answer for one it had not heard of.
+        var entered = Climbing.Where(one => read[one.Rung].Substituted > 0).ToList();
+        if (entered.Count == 0)
         {
             return $"Nothing separated: {counted}. Every rung read clean, including the one that is"
                 + " the act's own shape with the pause at zero — so either the difference is not in"
@@ -475,12 +509,7 @@ internal static class Transfer
                 + Placement(read);
         }
 
-        var added = first switch
-        {
-            Rung.Focus => "taking the focus before every round",
-            Rung.Split => "sending End in a call of its own, so the queue sees three arrays and not two",
-            _ => "stopping the read the moment the box says what was sent, which is the act's own shape",
-        };
+        var (first, added) = entered[0];
 
         return $"It enters at `{first.ToString().ToLowerInvariant()}`: {counted}. Every rung below it"
             + $" read clean, and what that one adds is {added} — so that is what the arm was not"
