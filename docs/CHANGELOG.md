@@ -288,6 +288,7 @@
 - ✅ **WW380** **an arm now carries a delegate and nothing checks it is the right one, so sweep could run the delay experiment** — The arms are method groups, so the row names its runner and a case reads which one each reaches off the delegate (design recorded in `tools/Winwright.Typing/Arms.cs`).
 - ✅ **WW385** **no run ever declares a capture naming a popup, so the branch wiring the step to the ask is asserted by nothing** — A declared case captures the popup and the pixel count says which tree crossed; naming one nobody has is a red, not a hole (design recorded in `tests/Winwright.Tests/CaseRunTests.cs`).
 - ✅ **WW391 (the second signature)** **a claim joins the format by being a field and a field still joins in five places, one of them a 29-parameter verb** — A tray step is refused off the step every other refusal reads, so a 25-parameter twin and its hand-written list of 21 claims are gone.
+- ✅ **WW393** **three tasks held the arms to lists and none of them ran one, so a runner that throws on its first line is green** — Every arm and the bare run are driven at one round, so a runner that throws is red on the run that broke it (design recorded in `tests/Winwright.Tests/TypingArmRunTests.cs`).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

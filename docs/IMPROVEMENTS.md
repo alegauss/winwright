@@ -242,30 +242,6 @@ holds: `reads` is the one every family asks for, and WW378 spent a task moving o
 family off the parameters. A different door has to carry those, and which ones is the
 design.
 
-### §WW393 the arm nothing has ever run
-
-Three tasks have now been spent on the arms and not one of them ran an arm. WW354 held
-the names to `run-typing.cmd` in both directions, WW367 made each carry the code it
-runs, and WW380 made that code nameable so a case can say which runner an arm reaches.
-Every one is a claim about shapes: a list, a constructor parameter, a delegate's
-declaring type.
-
-`TypingArmTests` says why, and the reason is right: the tool takes the desk for minutes
-and a guest run should not pay for a question asked once. What that sentence has come to
-cover is something else — no line inside any runner has been executed by anything but a
-person. A runner that throws on its first statement compiles, satisfies all three
-checks, and waits for whoever next measures.
-
-The reason does not hold at one round. Every runner takes its count as an argument: at
-one round `sweep` is eighteen, `provoke` eight, `transfer` four, `delay` and `acts`
-three — seconds of desk, and every line of every runner reached. What costs minutes is
-the measurement, not the code that takes it.
-
-So what is worth deciding is whether one round is a case or a command. A case in the
-suite would find a broken runner on the run that broke it; a `--smoke` a person types
-finds it when somebody remembers. WW368 spent thirty minutes learning that `transfer`
-worked at all, which is the price of the second answer.
-
 ### §WW403 the label a criterion is filed under
 
 `Criteria.Known` is a list of blocks and leads, grouped by comment into A through K, and
@@ -288,6 +264,29 @@ It is a comment and a sentence, or it is a smaller field: `Block` could be `Unde
 which is the thing it has always held. Either is cheap, and what decides it is whether a
 criterion bound to a task should sort with its block's or stand apart — which is a
 question about how the list is read rather than about what it holds.
+
+### §WW410 what a smoke run is allowed to conclude
+
+WW393 drives every arm at one round and asserts two things: it exited zero, and it named
+the task it was built for. Both are deliberate — the tool counts and never fails, so an
+exit code alone speaks for nothing, and a rate at one round is a number about nothing.
+
+What that leaves uncovered is the verdict. Every runner ends by composing a sentence off
+what it read, and several of those have arms for a run too small to say anything —
+`transfer` has one, `sweep` has one, the bare run has two. At one round those are the
+arms that fire, and nothing checks that the right one did. A runner whose verdict threw
+would be caught; one that reached the confident sentence off a single round would not,
+and that is the more likely fault of the two: it is the shape WW312's own report had
+before the entry that split it into three outcomes.
+
+The reading is cheap and the case already has it. Each runner's small-run arm carries
+words nobody else uses — "the count being too small", "says nothing at all" — so
+asserting the sentence at one round is one `Contains` per arm, against a list beside the
+arms rather than in the case.
+
+What it would settle is the thing a smoke run should never do: agree with itself. A
+verdict that reads confidently off one round is exactly the false green this project
+spends its whole verdict block refusing.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
