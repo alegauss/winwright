@@ -810,14 +810,19 @@ public sealed record StepDeclaration
 
         RefusesTwoSubjects(subject, locator, named_tray);
 
-        if (named_tray is not null)
-            return Trayed(subject, named_tray, verb, argument, expected, reads, meansIt, moves, covers, answers, matches, discloses, sameAs, never, spoken, label, notLabel, beginsWithLabel, absent, unlike, sameCountdownAs, contains, expectReported, eachSpoken, ownHeader);
-
-        // Not null from here: the guard above threw for a step that named neither, and the return
-        // above took every step that named a tray icon — so what is left named a locator.
-        var parsed = Parsed(subject, locator!);
-
         var act = ActVerb.Named(verb);
+
+        // WW391. The tray's own refusal about the verb, kept ahead of everything else a case wrote:
+        // an icon that named a pressing act is refused for that and not for whichever claim the
+        // reader would then delete. It stood at the top of a verb of its own until this task, and
+        // the order is what this suite asserts rather than where the code sat.
+        RefusesTrayVerb(subject, named_tray, act);
+
+        // Null for a tray step, which has no locator to parse, and never null for the other kind:
+        // the guard above threw for a step that named neither. Parsed before the argument is judged,
+        // which is the order a step with two faults is refused in.
+        var parsed = named_tray is null ? Parsed(subject, locator!) : null;
+
         if (act.Refuses(argument) is { } wrong)
             throw new ScenarioRefusedException(subject, wrong);
 
@@ -909,7 +914,10 @@ public sealed record StepDeclaration
             _ => Pointing.Same,
         };
 
-        var step = new StepDeclaration(called ?? Describing(act.Name, parsed.Text), act, reading)
+        // The name a report shows: what the case called it, or the verb and what it acts on. A tray
+        // step has no locator to describe, and `subject` is what that case's own name was built from
+        // at the top of this verb — so it is what stands in.
+        var step = new StepDeclaration(called ?? (parsed is null ? subject : Describing(act.Name, parsed.Text)), act, reading)
         {
             Locator = parsed,
             Argument = Trimmed(argument),
@@ -933,7 +941,24 @@ public sealed record StepDeclaration
             BeginsWithLabel = opening,
             Absent = absent,
             Popup = Trimmed(popup),
+            Tray = named_tray,
         };
+
+        // WW391. A tray step is finished here, and what finishes it is the same step every other
+        // refusal reads. It used to be a verb of its own carrying twenty-five parameters and a
+        // hand-written list of twenty-one field names — the second copy of exactly what WW351 made
+        // this step able to answer for itself, and the copy that would have gone stale the next time
+        // a claim was added.
+        //
+        // What comes back is this step and not a smaller one built beside it. Every claim field is
+        // refused above, so a tray step that survives carries a subject, a verb and an icon — which
+        // is what WW352 said a tray step is, reached now by having nothing else rather than by
+        // being constructed without it.
+        if (named_tray is not null)
+        {
+            RefusesTrayClaims(step, subject, reads);
+            return step;
+        }
 
         // WW365. Every refusal from here reads the step rather than the locals that built it, which
         // is what lets each family be a method instead of six hundred lines in one verb. They ran in
@@ -1594,90 +1619,62 @@ public sealed record StepDeclaration
     /// author wrote and the run never made, and the second subject would ship with a dozen of them.
     /// </para>
     /// </summary>
-    private static StepDeclaration Trayed(
-        string subject,
-        string tray,
-        string verb,
-        string? argument,
-        string? expected,
-        string? reads,
-        bool meansIt,
-        bool moves,
-        string? covers,
-        bool answers,
-        string? matches,
-        bool discloses,
-        string? sameAs,
-        string? never,
-        bool spoken,
-        string? label,
-        string? notLabel,
-        string? beginsWithLabel,
-        bool absent,
-        string? unlike,
-        string? sameCountdownAs,
-        string? contains,
-        string? expectReported,
-        bool eachSpoken,
-        bool ownHeader)
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="tray">The icon it is about, or null where it is about a locator.</param>
+    /// <param name="act">The verb it named.</param>
+    private static void RefusesTrayVerb(string subject, string? tray, ActVerb act)
     {
-        var act = ActVerb.Named(verb);
-        if (!act.OnATray)
-        {
-            throw new ScenarioRefusedException(
-                subject,
-                $"it is about a tray icon and names '{act.Name}'; an icon is not an element, so the acts "
-                    + $"that ask a control through its patterns do not apply — it takes "
-                    + $"{string.Join(" or ", ActVerb.All.Where(one => one.OnATray).Select(one => $"'{one.Name}'"))}");
-        }
+        if (tray is null || act.OnATray)
+            return;
 
-        if (act.Refuses(argument) is { } wrong)
-            throw new ScenarioRefusedException(subject, wrong);
+        throw new ScenarioRefusedException(
+            subject,
+            $"it is about a tray icon and names '{act.Name}'; an icon is not an element, so the acts "
+                + $"that ask a control through its patterns do not apply — it takes "
+                + $"{string.Join(" or ", ActVerb.All.Where(one => one.OnATray).Select(one => $"'{one.Name}'"))}");
+    }
 
-        // Named one by one rather than as a count, so the refusal says which field to delete.
-        var claimed = new List<string>();
-        foreach (var (field, written) in new (string, bool)[]
-        {
-            ("expect", expected is not null),
-            ("reads", reads is not null),
-            ("moves", moves),
-            ("answers", answers),
-            ("matches", matches is not null),
-            ("discloses", discloses),
-            ("sameAs", sameAs is not null),
-            ("unlike", unlike is not null),
-            ("sameCountdownAs", sameCountdownAs is not null),
-            ("contains", contains is not null),
-            ("expectReported", expectReported is not null),
-            ("label", label is not null),
-            ("notLabel", notLabel is not null),
-            ("beginsWithLabel", beginsWithLabel is not null),
-            ("absent", absent),
-            ("never", never is not null),
-            ("covers", covers is not null),
-            ("spoken", spoken),
-            ("eachSpoken", eachSpoken),
-            ("ownHeader", ownHeader),
-            ("meansIt", meansIt),
-        })
-        {
-            if (written)
-                claimed.Add($"'{field}'");
-        }
+    /// <summary>
+    /// Every claim a tray step may not make, refused by name. WW258, read off the step since WW391.
+    /// <para>
+    /// The list used to be written here — twenty-one field names in a fixed order, added to by hand
+    /// whenever a claim was — which is the second copy of the thing <see cref="Claims" /> exists to
+    /// be. A claim added to the format and not to that list would have loaded on a tray step and
+    /// done nothing, which is this format's founding failure pointed at its own oldest guard.
+    /// </para>
+    /// <para>
+    /// Two fields are named beside it and neither is a claim. <c>reads</c> travels here for the
+    /// reason it travels beside every other refusal: a step that named no reading and one that named
+    /// the default carry the same <see cref="ReadBack" />, so the step cannot say which it was. And
+    /// <c>meansIt</c> is a permission rather than a claim — it says a destructive entry was meant,
+    /// which an icon has no way to be.
+    /// </para>
+    /// <para>
+    /// What the refusal names is the field the case wrote, which is what the claim set already
+    /// carries: a step writing <c>coversWithin</c> is told to delete that and not <c>covers</c>.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step as the case wrote it.</param>
+    /// <param name="subject">What a refusal calls it.</param>
+    /// <param name="reads">The reading the case named, which the step cannot distinguish from none.</param>
+    private static void RefusesTrayClaims(StepDeclaration step, string subject, string? reads)
+    {
+        var claimed = step.Claims.Select(one => $"'{one.Field}'").ToList();
 
-        if (claimed.Count > 0)
-        {
-            throw new ScenarioRefusedException(
-                subject,
-                $"it is about a tray icon and carries {string.Join(", ", claimed)}; those are claims about "
-                    + "a reading taken through a control's patterns, and an icon has none — it is a "
-                    + "rectangle and a tooltip, so the claim a tray step makes is that it can be found");
-        }
+        if (!string.IsNullOrWhiteSpace(reads))
+            claimed.Add("'reads'");
 
-        // WW352. Three fields and eighteen absences, and the absences used to be written: twenty-one
-        // positional arguments of which most were null or false, so the three that said anything
-        // were findable by counting commas. What a tray step is, is now what this line says.
-        return new StepDeclaration(subject, act, ReadBack.Named(null)) { Tray = tray };
+        if (step.MeansIt)
+            claimed.Add("'meansIt'");
+
+        if (claimed.Count == 0)
+            return;
+
+        throw new ScenarioRefusedException(
+            subject,
+            $"it is about a tray icon and carries {string.Join(", ", claimed)}; those are claims about "
+                + "a reading taken through a control's patterns, and an icon has none — it is a "
+                + "rectangle and a tooltip, so the claim a tray step makes is that it can be found");
     }
 
     /// <summary>

@@ -200,6 +200,12 @@ internal static class Criteria
         // Labelled by the task and not by the block, because that is how the roadmap labels it: a
         // criterion raised by a partial ship binds the line that is still open rather than the block
         // it sits in, and its list is headed with the id. WW384.
+        new("WW391", "A field joins the format in two places and not five", "", Unshown.NotYet,
+            "WW391 shipped the second signature — a tray step is refused off the step now, so a "
+                + "25-parameter twin and a hand-written list of 21 claims are gone — and left the "
+                + "29-parameter verb it was filed for. What it settled is the design: `reads` is "
+                + "the only refusal input a step cannot answer for itself, so it is the only thing "
+                + "a different door has to carry"),
         new("WW384", "The minimising arm is run against a real window, on a desk it may take", "", Unshown.NotYet,
             "WW384 made the arm reachable and wrote the case, and the case cannot live here: the "
                 + "repair ends in Win+D, whose foreground lock then refuses this process everything "

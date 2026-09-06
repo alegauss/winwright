@@ -27,7 +27,7 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 💭 **WW391** (deps: —) **a claim joins the format by being a field and a field still joins in five places, one of them a 29-parameter verb** — WW372 paid all five to add popup, and the analyser has reported Of and Trayed ever since WW352 took the constructor and left them. → §WW391
+- ⏳ **WW391** (deps: —) **a claim joins the format by being a field and a field still joins in five places, one of them a 29-parameter verb** — `Of` is still 29 parameters and a field still joins in five places; what a different door has to carry is `reads`, and only that. → §WW391
 - 💭 **WW393** (deps: —) **three tasks held the arms to lists and none of them ran one, so a runner that throws on its first line is green** — The rule against running an arm is about the measurement, which takes minutes, and every runner takes its round count as an argument. → §WW393
 - 💭 **WW403** (deps: —) **a criterion a partial ship raises is labelled by its task and the catalogue groups by block, which nothing says** — WW385's run went red both ways on WW384's criterion, and the message naming `WW384` where a block letter was expected is the only thing that says so. → §WW403
 
@@ -217,6 +217,14 @@
   reads off that desk that the window went down and no longer holds the foreground. Both
   halves off the desk and never off the script's sentence. It cannot be this suite's
   desk: two runs of it cost five reds elsewhere.
+
+## Done when — WW391
+
+- **A field joins the format in two places and not five** Adding a field costs a
+  property and a schema row. `Of` takes the shape a step is built from rather than a
+  positional list, the loader fills that shape from the schema, and the construction
+  stops being a line per field. WW391 found the door that still has to carry `reads`:
+  the one input a step cannot answer for.
 
 ## Non-goals
 

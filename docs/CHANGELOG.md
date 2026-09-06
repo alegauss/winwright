@@ -287,6 +287,7 @@
 - ✅ **WW378** **the absent refusal keeps the last hand-written copy of the claim set, and it is already one claim behind** — The absent refusal asks the claim set instead of a chain, so the claim it had never heard of is refused with the right sentence (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 - ✅ **WW380** **an arm now carries a delegate and nothing checks it is the right one, so sweep could run the delay experiment** — The arms are method groups, so the row names its runner and a case reads which one each reaches off the delegate (design recorded in `tools/Winwright.Typing/Arms.cs`).
 - ✅ **WW385** **no run ever declares a capture naming a popup, so the branch wiring the step to the ask is asserted by nothing** — A declared case captures the popup and the pixel count says which tree crossed; naming one nobody has is a red, not a hole (design recorded in `tests/Winwright.Tests/CaseRunTests.cs`).
+- ✅ **WW391 (the second signature)** **a claim joins the format by being a field and a field still joins in five places, one of them a 29-parameter verb** — A tray step is refused off the step every other refusal reads, so a 25-parameter twin and its hand-written list of 21 claims are gone.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
