@@ -146,9 +146,37 @@ internal static class Surfaces
     /// </summary>
     internal static IReadOnlyDictionary<string, string> Declared() => declared.Value;
 
-    private static readonly Lazy<IReadOnlyDictionary<string, string>> declared = new(Ask);
+    /// <summary>
+    /// What each flag takes after its <c>=</c>, and empty where it takes nothing. WW392.
+    /// <para>
+    /// The fifth place a pane joins turns on this. A flag taking free text needs a value written
+    /// where the suite drives every shape; a flag listing its choices supplies its own, because the
+    /// catalogue prints them. Read off the same line as the reason, so the two cannot disagree.
+    /// </para>
+    /// </summary>
+    internal static IReadOnlyDictionary<string, string> Taking() => taking.Value;
 
-    private static IReadOnlyDictionary<string, string> Ask()
+    /// <summary>
+    /// The flags that put a window up, which is every one the catalogue does not mark as drawing
+    /// nothing. WW392.
+    /// <para>
+    /// It is the qualifier the value rule turns on, and the check found it rather than the other way
+    /// round: <c>--render</c> takes a path and needs no value written for it, because the run that
+    /// drives every shape skips the ones that draw nothing and never passes it.
+    /// </para>
+    /// </summary>
+    internal static IReadOnlySet<string> Drawing() => drawing.Value;
+
+    private static readonly Lazy<IReadOnlyDictionary<string, string>> declared = new(() => Ask().Because);
+
+    private static readonly Lazy<IReadOnlyDictionary<string, string>> taking = new(() => Ask().Takes);
+
+    private static readonly Lazy<IReadOnlySet<string>> drawing = new(() => Ask().Draws);
+
+    private static (
+        IReadOnlyDictionary<string, string> Because,
+        IReadOnlyDictionary<string, string> Takes,
+        IReadOnlySet<string> Draws) Ask()
     {
         var start = new System.Diagnostics.ProcessStartInfo(Fixture.Executable())
         {
@@ -163,6 +191,8 @@ internal static class Surfaces
         running.WaitForExit(30_000);
 
         var found = new Dictionary<string, string>(StringComparer.Ordinal);
+        var takes = new Dictionary<string, string>(StringComparer.Ordinal);
+        var draws = new HashSet<string>(StringComparer.Ordinal);
         var name = "";
         foreach (var line in said.Split('\n').Select(one => one.TrimEnd('\r').Trim()))
         {
@@ -171,6 +201,16 @@ internal static class Surfaces
                 var end = line.IndexOfAny([' ', '=']);
                 name = end < 0 ? line[2..] : line[2..end];
                 found[name] = "";
+
+                // WW392. What it takes, off the same line: `--toast=<beside|over>` lists its
+                // choices and `--store=<path>` does not, and only the second needs a value written
+                // where this suite drives every shape.
+                takes[name] = end < 0 || line[end] != '='
+                    ? ""
+                    : line[(end + 1)..].Split(' ')[0].Trim('<', '>');
+
+                if (!line.Contains("[draws nothing]", StringComparison.Ordinal))
+                    draws.Add(name);
             }
             else if (name.Length > 0 && line.StartsWith("because ", StringComparison.Ordinal))
             {
@@ -178,7 +218,7 @@ internal static class Surfaces
             }
         }
 
-        return found;
+        return (found, takes, draws);
     }
 
     /// <summary>The reading a person gets: the count first, then a line each.</summary>

@@ -487,30 +487,6 @@ claims nothing shows, so the wall is met at the design rather than at the red.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW392 the five lists a pane joins
-
-Adding one pane failed the suite on a catalogue rather than on behaviour.
-`SurfaceCatalogueTests` named a type the fixture carries with no row saying which flag
-reaches it; a second red was avoided only because the same edit had already touched
-`FixtureTests.Value`, the switch supplying a numeric flag's value. Both lists did their
-job.
-
-What is worth noticing is how many there are and that nothing names them together. A
-pane joins in five places — the file, a `Flags.Known` row, a line in `MainWindow`, a
-`Surfaces` row, and a value in that switch — and the only way to learn the set is to add
-one and read the reds. WW391 filed the same shape for a step's fields; this is the
-fixture's.
-
-The reds are cheap and arrive one run apart, which is the cost: a guest run is ten
-minutes, so learning a five-place list by failing it is most of an hour. Two of the five
-need no run at all — `Surfaces` and `Flags` are both read by reflection over one
-assembly, and a pane with a flag but no row is knowable at build time.
-
-What to decide is whether that is one check or a note. A single case asserting the five
-lists agree would replace three, and it would be the place a person adding a pane is
-sent — which is the thing missing now, since the current answer is a run that fails,
-then another.
-
 ### §WW406 the exception that took the run with it
 
 A guest run died 48 seconds in: *Falha no processo do host de teste :
@@ -534,3 +510,26 @@ not a diagnosis but somewhere to keep one — a hang dump belongs where the trx 
 the host. Then the question: which thread raises this where nothing catches it, and
 whether the rule `Renders` already states — never raise out of a window procedure —
 belongs somewhere else too.
+
+### §WW409 the shapes the driver steps over
+
+`Every_shape_that_draws_opens_a_window_somebody_can_look_at` drives every flag the
+catalogue lists and skips the ones marked `[draws nothing]`, which is right: a shape
+that opens no window cannot be asserted to have opened one.
+
+What nothing says is what those shapes do instead. `--render` writes a file and exits;
+`--sizeless` and `--blank` do the same through it and exit 3 and 0; `--flags` prints and
+stops. Each is exercised somewhere — `ProvokedByFlagTests` drives two of them and reads
+the exit code — but the pairing is the reverse of the drawing one: there, a shape added
+tomorrow is driven because the case reads the catalogue, and here it is skipped because
+the case reads the catalogue, and nothing notices that nobody else picked it up.
+
+WW392 met the clause from the other side. Its value rule had to learn that a non-drawing
+flag needs no value, which is the same fact read for the opposite purpose — and the way
+it learned was a red naming `--render`, which is exactly the cost that entry was about.
+
+The shape of the answer is the one this project keeps reaching for: the catalogue
+already divides the flags, so the skipped half is a list, and a list nothing claims
+about is the thing to fix. Either each names the case that drives it, the way a shape
+names the flag that justifies it, or the count of them is asserted so the fifth arrives
+as a red rather than as a silence.

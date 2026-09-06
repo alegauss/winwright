@@ -51,8 +51,8 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 💭 **WW392** (deps: —) **a pane joins the fixture in five places and the only way to learn which is to add one and read the reds** — WW379 failed the suite on a catalogue rather than on behaviour, and each red costs a ten-minute guest run to find the next. → §WW392
 - 💭 **WW406** (deps: —) **an UnrenderableException reached the test host and killed it, and 904 of 2025 cases never ran** — Seen once on the guest on 2026-09-05, named `sizelessPane`, not reproduced on the next run; the roll call refused it and a hang dump is beside the results. → §WW406
+- 💭 **WW409** (deps: —) **a flag that draws nothing is skipped by the run that drives every shape, so what those shapes open is asserted nowhere** — WW392 found the qualifier by going red on `--render`, and the same clause is what excuses four shapes from the only case that launches them. → §WW409
 
 ## Done when — Block A
 

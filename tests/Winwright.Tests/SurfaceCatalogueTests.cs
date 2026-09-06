@@ -9,21 +9,108 @@ namespace Winwright.Tests;
 public sealed class SurfaceCatalogueTests
 {
     [Fact]
-    public void Every_type_the_fixture_carries_is_in_the_catalogue()
+    public void Every_place_a_pane_joins_the_fixture_agrees_with_the_others()
     {
-        // The check the criterion was missing at this end: a pane added later is red here until
-        // somebody has said which flag reaches it, and a flag is where the reason lives.
+        // WW392. A pane joins in five places and the only way to learn which was to add one and
+        // read the reds — WW379 did, and each red arrived a run apart. Two of them were separate
+        // cases here, one was a case below, and the fifth had nothing holding it at all: the value
+        // a free-text flag needs where this suite drives every shape, which is found by a guest run
+        // refusing `--store` for want of one.
+        //
+        // So they are one check, and the failure is the list. What a person adding a pane needs is
+        // not which of five they missed first but all of them at once, and a case per place cannot
+        // give that however many of them there are.
         var listed = Surfaces.Known.Select(one => one.Named).ToList();
+        var declared = Surfaces.Declared();
+        var gating = Surfaces.Gating();
+        var valued = Valued();
 
-        Assert.Empty(Surfaces.Carried().Except(listed, StringComparer.Ordinal));
+        var missing = new List<string>();
+
+        // The type is there and nothing says which flag reaches it.
+        missing.AddRange(Surfaces.Carried()
+            .Except(listed, StringComparer.Ordinal)
+            .Select(one => $"{one} is a type the fixture carries and Surfaces.Known has no row for it"));
+
+        // And the other way, which is the row that outlived what it described.
+        missing.AddRange(listed
+            .Except(Surfaces.Carried(), StringComparer.Ordinal)
+            .Select(one => $"Surfaces.Known has a row for {one}, which the fixture no longer carries"));
+
+        foreach (var shape in Surfaces.Known.Where(one => one.Kind != Carrying.ThePlumbing))
+        {
+            // The reason lives on the flag, so a shape naming one nobody declares is justified by
+            // nothing whatever its row says.
+            if (!declared.ContainsKey(shape.Flag))
+            {
+                missing.Add($"{shape.Named} names --{shape.Flag}, which this fixture does not declare");
+                continue;
+            }
+
+            // The line in the window: catalogued behind a flag the code reaching it does not test.
+            // The default route is exempt and checked on its own terms below.
+            if (shape.Kind == Carrying.AShape && !gating[shape.Named].Contains(shape.Flag, StringComparer.Ordinal))
+            {
+                missing.Add(
+                    $"{shape.Named} is catalogued behind --{shape.Flag}, and the code reaching it tests "
+                        + $"{(gating[shape.Named].Count == 0 ? "no flag at all" : string.Join(", ", gating[shape.Named]))}");
+            }
+        }
+
+        // The fifth, and the one that used to cost a guest run: a flag taking free text needs a
+        // value written where every shape is driven. Three things narrow it, and the last was found
+        // by this check going red rather than by anybody knowing — a flag listing its choices
+        // supplies its own because the catalogue prints them, one already written needs nothing,
+        // and one that draws nothing is never driven, which is what `--render` is.
+        var drawing = Surfaces.Drawing();
+        foreach (var (flag, takes) in Surfaces.Taking())
+        {
+            if (takes.Length == 0
+                || takes.Contains('|', StringComparison.Ordinal)
+                || valued.Contains(flag)
+                || !drawing.Contains(flag))
+            {
+                continue;
+            }
+
+            missing.Add(
+                $"--{flag} takes <{takes}>, draws a window, and FixtureTests.Value has no arm for it — "
+                    + "so the run that drives every shape passes it with no value and the fixture refuses");
+        }
+
+        Assert.True(
+            missing.Count == 0,
+            "a pane joins this fixture in five places — its own file, a Flags.Known row, a line in "
+                + "MainWindow reached behind that flag, a Surfaces.Known row, and a value in "
+                + $"FixtureTests.Value where the flag takes free text. These do not agree:"
+                + $"{Environment.NewLine}  {string.Join($"{Environment.NewLine}  ", missing)}");
     }
 
-    [Fact]
-    public void Nothing_is_catalogued_that_the_fixture_no_longer_carries()
+    /// <summary>
+    /// The flags the suite has a value written for, read out of the switch that writes them. WW392.
+    /// <para>
+    /// Off the source and not by calling it: the member is private to the class that drives every
+    /// shape, and making it visible to be checked would be the check changing what it checks. The
+    /// arms are string literals in a switch, which is a shape a line can be read from and a shape
+    /// that goes red here if somebody writes it another way — which is the right way round, because
+    /// this list is only worth anything while it is the one the driver uses.
+    /// </para>
+    /// </summary>
+    private static IReadOnlySet<string> Valued()
     {
-        var listed = Surfaces.Known.Select(one => one.Named).ToList();
+        var source = File.ReadAllText(Checkout.At("tests", "Winwright.Tests", "FixtureTests.cs"));
+        var switching = source.IndexOf("private string Value(string name) => name switch", StringComparison.Ordinal);
 
-        Assert.Empty(listed.Except(Surfaces.Carried(), StringComparer.Ordinal));
+        Assert.True(switching > 0, "FixtureTests no longer has the switch that supplies a flag's value");
+
+        var body = source[switching..];
+        var ends = body.IndexOf("};", StringComparison.Ordinal);
+        Assert.True(ends > 0, "the value switch was found and its end was not");
+
+        return System.Text.RegularExpressions.Regex
+            .Matches(body[..ends], "\"([a-z]+)\" =>")
+            .Select(one => one.Groups[1].Value)
+            .ToHashSet(StringComparer.Ordinal);
     }
 
     [Fact]
@@ -46,34 +133,27 @@ public sealed class SurfaceCatalogueTests
     }
 
     [Fact]
-    public void Every_shape_names_a_flag_the_fixture_actually_declares()
+    public void The_readings_the_joined_check_rests_on_all_found_something()
     {
-        // The link itself, and the whole of what this task is. The reason is on the flag; a shape
-        // naming a flag nobody declares is a shape justified by nothing, whatever it says.
+        // The control the four folded cases each carried a piece of. Every one of the joined
+        // comparisons is an `Except` or a `Contains`, and all of them pass against nothing at all —
+        // so a reading that stopped finding anything would turn the check above into a green about
+        // an empty set, which is the shape this project refuses everywhere else.
         var declared = Surfaces.Declared();
 
         Assert.True(declared.Count > 10, $"only {declared.Count} flag(s) were read from the fixture");
+        Assert.True(Surfaces.Gating().Count > 10, "the gating reading found almost nothing");
+        Assert.Contains(Surfaces.Taking(), one => one.Value.Length > 0);
 
-        Assert.All(
-            Surfaces.Known.Where(one => one.Kind != Carrying.ThePlumbing),
-            one => Assert.True(
-                declared.ContainsKey(one.Flag),
-                $"{one.Named} names --{one.Flag}, which this fixture does not declare"));
-    }
+        // Both ways on the drawing reading, because either half being empty makes the value rule
+        // vacuous: nothing drawing skips every flag, and everything drawing would have caught
+        // `--render` — which is the case that put this line here.
+        Assert.Contains("store", Surfaces.Drawing(), StringComparer.Ordinal);
+        Assert.DoesNotContain("render", Surfaces.Drawing(), StringComparer.Ordinal);
 
-    [Fact]
-    public void Every_shape_is_reached_from_code_that_tests_its_flag()
-    {
-        // Named and then checked, rather than named and believed. An entry that says a pane is
-        // reached through a flag nothing tests near it is an entry that has stopped being true.
-        var gating = Surfaces.Gating();
-
-        Assert.All(
-            Surfaces.Known.Where(one => one.Kind == Carrying.AShape),
-            one => Assert.True(
-                gating[one.Named].Contains(one.Flag, StringComparer.Ordinal),
-                $"{one.Named} is catalogued behind --{one.Flag}, and the code that reaches it tests "
-                    + $"{(gating[one.Named].Count == 0 ? "no flag at all" : string.Join(", ", gating[one.Named]))}"));
+        // And the value switch, which is the reading WW392 added: it is read out of a source file
+        // by shape, so it is the one most able to quietly stop matching.
+        Assert.Contains("store", Valued(), StringComparer.Ordinal);
     }
 
     [Fact]
