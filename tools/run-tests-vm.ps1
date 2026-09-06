@@ -510,17 +510,59 @@ function Start-Guest {
 
       It also says the time out loud, every poll. Ten silent minutes and a wedge read identically
       from outside, and reading them apart is the whole reason this waits rather than blocks.
+
+      WW396. The start writes to files of its own, and that is not tidiness. `vmrun start ... gui`
+      launches VMware's own window, which outlives this script by design - it is the console a
+      person watches - and it inherits the handles it was launched with. Started inside a job those
+      are this process's, and this process's are the caller's: a run piped anywhere printed nothing
+      for sixty-five minutes after the script itself had exited, because the write end of that pipe
+      was open in a window nobody was waiting for and end-of-file arrives when somebody closes the
+      VM.
+
+      Redirecting the start's own output does not fix it, which was measured rather than assumed: a
+      cold run with `-NoNewWindow -RedirectStandardOutput` hung exactly as it had, because a
+      redirected launch still passes every other inheritable handle down and the caller's pipe is
+      one of them. What breaks the chain is a launch that inherits nothing - which is what
+      Start-Process does when it is given no redirection and no console to share.
+
+      So the command is a file and the file is what runs, which is the shape this script already
+      uses for everything it sends the guest: a generated script quotes nothing through anybody, and
+      it can redirect vmrun's own words to files itself while this process hands it nothing.
+
+      The improvement that filed this proposed the repair in the wrapper a person types, and that is
+      the wrong place: the wrapper can only redirect everything, which would take the script's own
+      output away from the caller as well. What has to be handed a handle of its own is the console,
+      and the only line that can is the one that starts it.
     #>
     param([Parameter(Mandatory)] [string] $Vmx)
 
     # gui and never nogui: this run needs a desk that draws, and a headless guest is the session
     # WW42 was measured on - everything present, nothing rendering.
     $argv = Get-VmRunArguments -Arguments @('start', $Vmx, 'gui')
-    $starting = Start-Job -ScriptBlock {
-        param($Exe, $Argv)
-        $said = & $Exe @Argv 2>&1
-        [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = ($said | Out-String).Trim() }
-    } -ArgumentList $script:VmRun, $argv
+
+    $said = Join-Path ([IO.Path]::GetTempPath()) "$($script:Name)-start.log"
+    $wrong = "$said.err"
+
+    # Two rules, and both were learned by a cold run rather than reasoned about. A path with a space
+    # in it arrives as two arguments unless it is quoted, and the .vmx has one on this machine. And
+    # the encryption password is never written down: it goes as the name of the variable holding it,
+    # which the child inherits and expands itself, so the secret is not on disk and is not quoted by
+    # anybody - the second cold run answered `Incorrect password` when it was.
+    $line = ($argv | ForEach-Object {
+        if ($env:WINWRIGHT_VM_PASSWORD -and $_ -ceq $env:WINWRIGHT_VM_PASSWORD) { '$env:WINWRIGHT_VM_PASSWORD' }
+        elseif ($_ -match '\s') { '"' + $_ + '"' }
+        else { $_ }
+    }) -join ' '
+
+    $asking = Join-Path ([IO.Path]::GetTempPath()) "$($script:Name)-start.ps1"
+    "& `"$($script:VmRun)`" $line 1> `"$said`" 2> `"$wrong`"; exit `$LASTEXITCODE" |
+        Set-Content -LiteralPath $asking -Encoding ascii
+
+    # No -NoNewWindow and no -Redirect*, which is the whole of the repair: either of those makes
+    # Start-Process launch the child itself and pass it this process's handles. Without them it goes
+    # through the shell, which inherits none, and the window it would show is hidden.
+    $starting = Start-Process -FilePath 'powershell.exe' -PassThru -WindowStyle Hidden `
+        -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$asking`""
 
     # Ten minutes, not five. freewilly measured an agent taking longer than five to come up after a
     # component install, and gave up on a machine that was fine.
@@ -531,28 +573,46 @@ function Start-Guest {
 
         $tools = Invoke-VmRun -Arguments @('checkToolsState', $Vmx)
         if ($tools.Output -match 'running') {
-            Remove-Job -Job $starting -Force -ErrorAction SilentlyContinue
             return
         }
 
         # A start that came back non-zero is an answer, and waiting out the rest of the deadline for
-        # a guest nobody is powering on is ten minutes spent on a question already settled. Read as
-        # the last thing the job produced and only when it is the record the job promises, because
-        # an error written on the way there arrives on the same pipe and is not an exit code.
-        if ($starting.State -ne 'Running') {
-            $said = @(Receive-Job -Job $starting -ErrorAction SilentlyContinue) | Select-Object -Last 1
-            if ($said -and $said.PSObject.Properties['ExitCode'] -and $said.ExitCode -ne 0) {
-                Refuse "the guest would not start: $($said.Output)"
-            }
+        # a guest nobody is powering on is ten minutes spent on a question already settled. Read off
+        # the process rather than a record it promised: an exit code is what it has, and what it
+        # wrote is in the files beside it.
+        if ($starting.HasExited -and $starting.ExitCode -ne 0) {
+            Refuse "the guest would not start: $(Started $said $wrong)"
         }
 
         $waited = [int]((Get-Date) - $began).TotalSeconds
-        $asked = if ($starting.State -eq 'Running') { 'vmrun start has not returned yet' } else { 'vmrun start returned' }
+        $asked = if ($starting.HasExited) { 'vmrun start returned' } else { 'vmrun start has not returned yet' }
         $state = if ($tools.Output) { $tools.Output.Trim() } else { 'no answer' }
         Write-Host "  starting    ${waited}s waited; $asked, tools: $state"
     }
 
     Refuse 'VMware Tools never answered in the guest within ten minutes' 'Look at the VM console. A guest stopped at the encryption prompt or the boot menu is waiting for a person, not for this script.'
+}
+
+function Started {
+    <#
+      What the start wrote, out of the two files it was given. WW396.
+
+      Both, and the error first: vmrun says why it refused on standard error and says nothing at all
+      on the other, so a refusal read from stdout alone is a refusal with no sentence in it.
+    #>
+    param([Parameter(Mandatory)] [string] $Said, [Parameter(Mandatory)] [string] $Wrong)
+
+    # Wrapped, because a pipeline that produced one string is that string under Set-StrictMode and
+    # a string has no Count. Measured on the first cold run after WW396: the refusal this composes
+    # threw instead of saying why the guest would not start.
+    $lines = @(
+        @($Wrong, $Said) |
+            Where-Object { Test-Path -LiteralPath $_ } |
+            ForEach-Object { (Read-ConsoleText $_).Trim() } |
+            Where-Object { $_.Length -gt 0 })
+
+    if ($lines.Count -eq 0) { return 'it wrote nothing at all' }
+    return ($lines -join ' ')
 }
 
 function Read-ConsoleText {

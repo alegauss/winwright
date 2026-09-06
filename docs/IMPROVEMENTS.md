@@ -28,29 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW396 the run that ended and would not say so
-
-`run-tests-vm.cmd` was started with its output piped, on a host where the guest was
-powered off, and printed nothing for an hour. At sixty-five minutes the host's process
-table said the run was already over: the wrapper's shell had no descendants at all, so
-the .cmd, the .ps1 and every vmrun they make had exited. The pipe was open and empty.
-
-What that run does and a warm one does not is start the guest. `vmrun start` on a
-powered-off VM launches VMware's own window, and that process outlives the script by
-design — it is the console a person watches. It inherits the handles it was launched
-with, so the write end of the caller's pipe stays open in a process nobody is waiting
-for, and the end of file arrives when somebody closes the VM.
-
-Re-run through `Start-Process -RedirectStandardOutput`, the same command reached the
-guest in seconds and finished green, which is what makes the inherited handle the
-suspect rather than the boot.
-
-So it is a host-side hang on a run that worked, which is the worst shape available:
-nothing is wrong in the guest, nothing is red, and a person watching an empty terminal
-has no reason to think the suite has already passed. The wrapper is where the repair
-goes — it is the thing a person types, and it can hand the guest's console a handle of
-its own rather than the caller's.
-
 ### §WW407 the reading its own neighbour covers
 
 WW363 reads how often one case was excused across the deep window, and it is silent
@@ -73,6 +50,28 @@ is right and both are worth keeping for the rare runs, in which case what to add
 case that goes red when one has been quiet for a whole window. Or the composition should
 change: the rate is the reading that sees a slope, and a slope on a recurring case is
 what the mark above it cannot show.
+
+### §WW412 the session the runner does not wait for
+
+`Start-Guest` waits ten minutes for VMware Tools to answer and argues the number:
+freewilly measured an agent taking longer than five to come up, and gave up on a machine
+that was fine. The session check a few lines later waits nothing at all.
+
+WW396 met it twice while proving a cold run terminates. Tools answered in ten seconds,
+the run went straight to the session probe, and the guest refused — it had booted and
+had not finished logging in. Ninety seconds later the same command carried the whole
+suite. So the refusal was true when it was made and false about the machine, which is
+the shape the tools wait exists to avoid.
+
+What makes it a task rather than a sentence is who meets it. A cold guest is what an
+adopter has: this repository's runs mostly find the VM already up, so the state is the
+one a new machine is always in — and the remedy, log in at the guest console and leave
+it unlocked, reads as a configuration error rather than as "give it a minute".
+
+The shape is here twice over: a deadline, a poll, and the time said out loud. What has
+to be decided is the number, and the argument is the tools wait's own — long enough that
+a machine that is fine is not called broken, and bounded because a run that cannot end
+is worse than one that refuses.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

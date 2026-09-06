@@ -114,6 +114,45 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    public void The_guest_console_is_started_with_handles_of_its_own()
+    {
+        // WW396. `vmrun start ... gui` launches VMware's own window, which outlives this script by
+        // design — it is the console a person watches — and it inherits the handles it was launched
+        // with. Started inside a job those are the runner's, and the runner's are its caller's: a
+        // run piped anywhere printed nothing for sixty-five minutes after the script had exited,
+        // because the write end of that pipe was open in a window nobody was waiting for.
+        //
+        // Read as the shape of the launch, which is the only place the fault can be. Nothing in a
+        // suite can watch a pipe stay open for an hour, and nothing here starts a VM — so what is
+        // checked is that the line which does hands its child files rather than whatever it was
+        // handed.
+        var runner = Runner();
+
+        // The code and not the prose around it, which this case learned by failing on the comment
+        // that explains it: a rule written as "these words are not here" is one every sentence
+        // about the rule breaks.
+        var starting = string.Join(
+            Environment.NewLine,
+            Between(runner, "$argv = Get-VmRunArguments -Arguments @('start'", "$deadline")
+                .Split('\n')
+                .Where(one => !one.TrimStart().StartsWith('#')));
+
+        // Neither of the two things that make Start-Process launch the child itself, because either
+        // one passes this process's handles down. Redirecting the start's own output was tried and
+        // measured: a cold run hung exactly as it had, since a redirected launch still inherits
+        // every other handle and the caller's pipe is one of them.
+        Assert.DoesNotContain("-NoNewWindow", starting, StringComparison.Ordinal);
+        Assert.DoesNotContain("-RedirectStandard", starting, StringComparison.Ordinal);
+
+        // And not through a job either, which is the shape it started as: a job's child gets this
+        // process's handles for the same reason.
+        Assert.DoesNotContain("Start-Job", starting, StringComparison.Ordinal);
+
+        // What is left has to actually start something, or this is three absences about nothing.
+        Assert.Contains("Start-Process", starting, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Every_desk_the_runner_tidies_is_one_it_declares_it_tidies()
     {
         // WW388. WW371 and WW375 landed an hour apart and answered one desk two ways — a minimised

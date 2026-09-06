@@ -76,6 +76,7 @@
 - ✅ **WW363** **the run report says whether an excuse is new and not whether this suite is getting harder to run on a real desk** — An excused case now says how often the last 20 ledgers excused it, so a rising set of tray cases stops reading as ordinary (design recorded in `tools/Winwright.RollCall/Readers.cs`).
 - ✅ **WW376** **the rate WW363 added says nothing on the run that first shows a rise, which is the run a reader is holding** — The sentence says how many of this run's excuses no ledger has seen, which needs no history and names the rise on the run that has it (design recorded in `tools/Winwright.RollCall/Roll.cs`).
 - ✅ **WW389** **five readings come off one set of ledgers and each knows when to be quiet only from the ones already written** — The five readings are one list now — the window each speaks over and which outranks which — driven by two cases (design recorded in `tools/Winwright.RollCall/Readings.cs`).
+- ✅ **WW396** **a run that powers the guest on never closes its output, so a caller that pipes it waits long past the end** — The console is started through a launch that inherits nothing, so a piped run ends when the run does — measured cold (design recorded in `tools/run-tests-vm.ps1`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
