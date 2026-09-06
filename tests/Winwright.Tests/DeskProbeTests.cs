@@ -720,6 +720,83 @@ public sealed class DeskProbeTests
             $"the clearer handed the desk on from a window it said it left alone: {said}");
     }
 
+    [Fact]
+    public void A_minimised_window_that_still_holds_the_desk_is_read_as_stale_end_to_end()
+    {
+        // WW400. `stale` was only ever made of looks somebody typed, and it is the answer whose
+        // whole content is a field the loop reads: WW375 put `Iconic` on the look because the
+        // classification is a pure function of what the loop returns, and a loop that answered it
+        // wrong would send a reader to a guest console to answer a window nobody can see — which is
+        // the failure WW375 exists for, arrived at from the loop instead of from the words.
+        //
+        // Arranged rather than waited for, and WW375's own finding is what makes it arrangeable:
+        // Windows keeps a minimised window as the foreground until something else claims it, so a
+        // dialog this case put down is both down and in front.
+        using var dialog = PumpedDialog.Open("winwright desk stale");
+        dialog.BringToFront();
+
+        if (BusyDesk.Excused(Winwright.Windowing.Foreground.Check(dialog.Frame).AsPrecondition()))
+            return;
+
+        Assert.True(ShowWindow(dialog.Frame, Minimise), "the window would not go down");
+
+        var answer = Classified("(Get-DeskLooks -Count 2 -PauseMs 0)").Single();
+
+        // Something else taking the desk while the window went down is the desk and not the loop.
+        // `asking` is deliberately not excused: that is the loop reading a minimised window as an
+        // ordinary one, which is the whole of what this case is for.
+        if (!answer.StartsWith("stale|", StringComparison.Ordinal)
+            && !answer.StartsWith("asking|", StringComparison.Ordinal)
+            && BusyDesk.Excused(
+                Winwright.Verdicts.Precondition.Absent(
+                    "the foreground belongs to the window under test",
+                    $"the probe read the desk as '{answer}' after this case put its window down")))
+        {
+            return;
+        }
+
+        Assert.StartsWith("stale|testhost|", answer, StringComparison.Ordinal);
+        Assert.Contains("|Static|winwright desk stale", answer, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_desk_with_nothing_but_the_desktop_on_it_is_read_as_clear_end_to_end()
+    {
+        // WW400, and one line past where WW370 stopped. That case asserts the loop skips a class on
+        // the desktop list and never hands the looks it built to the classification — so "nothing
+        // but the desktop held the foreground", which is what an idle logged-in desk answers and
+        // what decides a run happens at all, was a sentence no case had produced from a real poll.
+        //
+        // The desktop cannot be arranged and does not have to be: a case names its own window's
+        // class as the desktop's, the loop skips it exactly as it skips Progman, and every look is
+        // nothing. That is the same set of looks an idle desk produces, built by the loop.
+        using var dialog = PumpedDialog.Open("winwright desk clear");
+        dialog.BringToFront();
+
+        if (BusyDesk.Excused(Winwright.Windowing.Foreground.Check(dialog.Frame).AsPrecondition()))
+            return;
+
+        // The list goes to the loop and nowhere else: what it decides is which windows are skipped
+        // while looking, and the classification is a pure function of the looks that came back.
+        var answer = Classified("(Get-DeskLooks -Count 2 -PauseMs 0 -Desktop 'Static')").Single();
+
+        Assert.Equal("clear||||nothing but the desktop held the foreground", answer);
+    }
+
+    /// <summary>SW_MINIMIZE, which puts a window down without activating what is behind it. WW400.</summary>
+    private const int Minimise = 6;
+
+    /// <summary>
+    /// Put a window down. WW400, and the one act this class performs on its own window: every other
+    /// case here arranges a desk by what it shows, and `stale` is the one answer that needs a window
+    /// shown and then hidden.
+    /// </summary>
+    /// <param name="window">The window to put down.</param>
+    /// <param name="how">What to do with it.</param>
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool ShowWindow(nint window, int how);
+
     /// <summary>
     /// Whether a window is down, which is the half of the repair its own sentence cannot show. WW384,
     /// and read here rather than taken from the script for that reason: the script saying

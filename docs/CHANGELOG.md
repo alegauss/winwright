@@ -374,6 +374,7 @@
 - ✅ **WW386** **the runner waits on the guest with no bound, so a wedge outside a case is still a run nobody can tell from a slow one** — The wait is bounded, says which minute it is on, and ends by reading the desk and the log rather than by being killed (design recorded in `tools/run-tests-vm.ps1`).
 - ✅ **WW388** **a stale desk is reported and a clearable one is repaired, and nothing says which desks a run tidies before it starts** — A stale desk is put away as well as said, and the runner declares which desks it tidies against a case that reads its arms (design recorded in `tools/run-tests-vm.ps1`).
 - ✅ **WW399** **a tray locator naming its container works against one kind of tray and not the other, and nothing warns an adopter** — The skill says to address a tray menu at its entries and why, and a case holds that sentence to what this suite measured (design recorded in `skills/winwright/SKILL.md`).
+- ✅ **WW400** **three of the probe's six answers are still produced only from typed looks, and two of them can now be arranged** — `stale` and `clear` are produced from real looks now, so five of the six answers come from a window this suite put up (design recorded in `tests/Winwright.Tests/DeskProbeTests.cs`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
