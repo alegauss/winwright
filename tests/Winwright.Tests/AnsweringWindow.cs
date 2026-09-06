@@ -83,6 +83,15 @@ internal sealed class AnsweringWindow : IDisposable
                             // into the window, so every case here that photographs the window sees
                             // what it always saw — and closed is the state the popup ask exists for,
                             // because it is the one where there is no window anywhere to copy.
+                            // WW385. Two colours, and the second one is what a run found: the child
+                            // was one flat Firebrick rectangle, `OwnRenderTests` read it back as 90x40
+                            // with ink in it, and the first case to take this popup through a real
+                            // capture failed at the receipt — "one colour across all 3600 of its
+                            // pixels, which is what a display that was rendering nothing copies as".
+                            // The rule is right and the fixture was the thing standing in for a
+                            // surface, so the fixture is what changed. The outer size is untouched,
+                            // because the pixel count is how every case here says which tree crossed
+                            // the boundary.
                             new System.Windows.Controls.Primitives.Popup
                             {
                                 Name = PopupNamed,
@@ -91,6 +100,12 @@ internal sealed class AnsweringWindow : IDisposable
                                     Width = 90,
                                     Height = 40,
                                     Background = new SolidColorBrush(Colors.Firebrick),
+                                    Child = new Border
+                                    {
+                                        Width = 40,
+                                        Height = 16,
+                                        Background = new SolidColorBrush(Colors.Gold),
+                                    },
                                 },
                             },
                             new System.Windows.Controls.Primitives.Popup { Name = EmptyPopupNamed },

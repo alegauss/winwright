@@ -284,6 +284,7 @@
 - ✅ **WW372** **no declared step can ask for a popup's picture, and its four refusals would all reach the verdict as holes** — A capture names the popup its picture is of, and a name no popup has is a red where an unadopted half stays a hole (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
 - ✅ **WW378** **the absent refusal keeps the last hand-written copy of the claim set, and it is already one claim behind** — The absent refusal asks the claim set instead of a chain, so the claim it had never heard of is refused with the right sentence (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 - ✅ **WW380** **an arm now carries a delegate and nothing checks it is the right one, so sweep could run the delay experiment** — The arms are method groups, so the row names its runner and a case reads which one each reaches off the delegate (design recorded in `tools/Winwright.Typing/Arms.cs`).
+- ✅ **WW385** **no run ever declares a capture naming a popup, so the branch wiring the step to the ask is asserted by nothing** — A declared case captures the popup and the pixel count says which tree crossed; naming one nobody has is a red, not a hole (design recorded in `tests/Winwright.Tests/CaseRunTests.cs`).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

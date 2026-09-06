@@ -21,13 +21,15 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
+- 💭 **WW402** (deps: —) **a render of a surface that is genuinely one colour is refused as a display that was drawing nothing** — WW385 took a popup through a real capture and the receipt refused it, correctly by its own rule and about a picture the application had drawn. → §WW402
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
 
-- 💭 **WW385** (deps: —) **no run ever declares a capture naming a popup, so the branch wiring the step to the ask is asserted by nothing** — WW372 proved the field parses and the ask answers, and left the three lines joining them where a wrong handle or the copy route would still pass. → §WW385
 - 💭 **WW391** (deps: —) **a claim joins the format by being a field and a field still joins in five places, one of them a 29-parameter verb** — WW372 paid all five to add popup, and the analyser has reported Of and Trayed ever since WW352 took the constructor and left them. → §WW391
 - 💭 **WW393** (deps: —) **three tasks held the arms to lists and none of them ran one, so a runner that throws on its first line is green** — The rule against running an arm is about the measurement, which takes minutes, and every runner takes its round count as an argument. → §WW393
+- 💭 **WW403** (deps: —) **a criterion a partial ship raises is labelled by its task and the catalogue groups by block, which nothing says** — WW385's run went red both ways on WW384's criterion, and the message naming `WW384` where a block letter was expected is the only thing that says so. → §WW403
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
@@ -39,10 +41,10 @@
 
 - ⏳ **WW83** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅) **the switch case drives the one path that rewrites a real setting** — The case and the store bracket are written and wait on it: the adopter's engine comes from nuget.org. → §WW83
 - 📋 **WW85** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅) **the environment sweep walks a submenu per sampled mode** — Its own claims need the same three fields, and the submenu it walks is the one WW322 says will not open. → §WW85
-- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
-- ⏳ **WW87** (deps: Block G, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
+- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
+- ⏳ **WW87** (deps: Block G, Block E, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
-- ⏳ **WW384** (deps: —) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds in other classes and four excuses here, twice. → §WW384
+- ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
 - 💭 **WW386** (deps: —) **the runner waits on the guest with no bound, so a wedge outside a case is still a run nobody can tell from a slow one** — WW373 bounded a case and the run around it inherited none of it, though Start-Guest already refuses to block on vmrun for exactly this reason. → §WW386
 - 💭 **WW388** (deps: —) **a stale desk is reported and a clearable one is repaired, and nothing says which desks a run tidies before it starts** — WW375 classifies before WW371's arm is reached, so the window that motivated the repair is now stepped over rather than put away. → §WW388
 - 💭 **WW399** (deps: —) **a tray locator naming its container works against one kind of tray and not the other, and nothing warns an adopter** — WW382 measured it: the Win32 popup's Menu carries a name and the drop-down's carries none, which only a case in this suite says. → §WW399

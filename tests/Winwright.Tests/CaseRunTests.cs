@@ -381,6 +381,69 @@ public sealed class CaseRunTests : IDisposable
     }
 
     [Fact]
+    public void A_case_that_captures_a_popup_gets_the_popup_and_says_so_when_it_names_the_wrong_one()
+    {
+        // WW385. WW372 added `popup` to the step and every case proving it stops one layer above a
+        // run: `OwnRenderTests` drives `PopupInto` against a real answering window, and the parsing
+        // cases prove the field arrives on the step. Nothing declared a capture naming a popup and
+        // ran it, so the three lines in `Captured` joining the two were asserted by nothing — and
+        // each of them is a way to be wrong that ends in a green with a file beside it. A popup step
+        // taking the copy route photographs the window; `PopupInto` handed the wrong handle answers
+        // about another window; the ask fetched with its reading dropped answers nothing.
+        //
+        // The pixel count is what tells those apart, and it is why this window is the fixture. The
+        // popup's child is 90x40 against a 240x160 window, so a run that photographed the window
+        // cannot pass this line by having written a file.
+        using var application = AnsweringWindow.Open(root);
+
+        var declared = CaseDeclaration.Of(
+            "the flyout is photographed",
+            StepDeclaration.Of(
+                "Text[name=\"the report\"]",
+                "capture",
+                "the details as they open",
+                popup: AnsweringWindow.PopupNamed));
+
+        var run = Run(declared, AutomationElement.FromHandle(application.Handle), captures: true);
+
+        Assert.True(
+            run.Verdict.Outcome == RunOutcome.Passed,
+            string.Join(
+                Environment.NewLine,
+                run.Verdict.Unchecked.Select(one => $"  unchecked {one}")
+                    .Concat(run.Verdict.Failures.Select(one => $"  failed    {one}"))));
+
+        var into = Path.Combine(root, "pictures", "the flyout is photographed", "the details as they open.png");
+        Assert.True(File.Exists(into), $"nothing was written to {into}");
+        Assert.Equal(90 * 40, Winwright.Capturing.Pictures.Of(into).Pixels);
+
+        // And the other half of WW372, which no run has produced either: a case naming a popup the
+        // application does not have is the case being wrong, not the machine being unable to look.
+        // Every absence used to be a hole — honest while the only ask named a window the run had
+        // already found — and a typo then read as an application that never adopted the in-app half.
+        var wrong = CaseDeclaration.Of(
+            "the flyout that is not there",
+            StepDeclaration.Of(
+                "Text[name=\"the report\"]",
+                "capture",
+                "the details as they open",
+                popup: "summary"));
+
+        var missed = Run(wrong, AutomationElement.FromHandle(application.Handle), captures: true);
+
+        Assert.Equal(RunOutcome.Failed, missed.Verdict.Outcome);
+
+        var failure = Assert.Single(missed.Verdict.Failures);
+        Assert.Contains("summary", failure.Detail, StringComparison.Ordinal);
+
+        // Nothing was written, which is the claim a red about a name has to carry: a file beside a
+        // failure is a picture of something, and a reader who finds one goes looking for what.
+        Assert.False(
+            File.Exists(Path.Combine(root, "pictures", "the flyout that is not there", "the details as they open.png")),
+            "the run failed on the name and left a picture behind");
+    }
+
+    [Fact]
     public void A_capture_with_nowhere_declared_to_put_it_is_a_hole_and_not_a_path_invented_here()
     {
         // WW336. A run that guessed a directory would be a run whose pictures land somewhere nobody

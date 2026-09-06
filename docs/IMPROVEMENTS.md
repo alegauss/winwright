@@ -194,34 +194,32 @@ are asked for is a reading somebody has to throw away after the run.
 
 ## Block E — Capture — the picture that proves what it photographed
 
+### §WW402 the flat surface a receipt cannot tell from a blank one
+
+`CaptureReceipt` refuses a picture of one colour, and the sentence says why: it is what
+a display that was rendering nothing copies as. That rule was written for the screen
+route, where a flat rectangle means the copy reached a surface nobody was drawing, and
+it is right there.
+
+A render is not a copy. WW385 asked the application to draw a closed popup, the
+application drew it, the file was a correct 90x40 picture of a Firebrick rectangle, and
+the receipt failed the case. The picture was of exactly what the popup held.
+
+The fixture was changed, because the fixture was standing in for a surface and a real
+flyout holds more than one colour. But a real one can hold exactly one — a colour
+swatch, a progress fill, a blank canvas an application draws on demand — and an adopter
+photographing one gets a red whose sentence is about a display, in a route where no
+display was involved.
+
+What separates the two is the route, which the receipt already carries. On the render
+route there is no screen to have been blank: the tree was walked, the size came back,
+and a single colour is a fact about the surface rather than a symptom. The reading is
+worth keeping either way — a flat render is still worth saying out loud — and what it
+should not be is a failure about a display in a picture no display took.
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
-
-### §WW385 the branch between the field and the ask
-
-WW372 added `popup` to the step and every case that proves it stops one layer above a
-run. `OwnRenderTests` drives `PopupInto` against a real answering window and reads the
-verdict off `RenderAsked`; `CaseRunTests` and `ScenarioFileTests` prove the field
-parses, refuses under the wrong verb, and arrives on the step. Nothing declares a
-capture naming a popup and runs it.
-
-So the wiring in `CaseRun.Captured` is asserted by nothing, and each of its three lines
-is a way to be wrong: a popup step taking the copy route photographs the window and
-passes, `PopupInto` handed the wrong handle answers about another window, and the ask
-fetched with its reading dropped answers nothing. All three end in a green with a file
-beside it.
-
-What it needs is a case that runs, and the pieces exist: `AnsweringWindow` draws a popup
-and answers for it, and `CaseRunTests` runs declared cases against real windows under a
-project declaring `captures`. What is missing is the join — declare a capture naming
-`AnsweringWindow.PopupNamed`, run it, read the file's pixel count. The popup's child is
-90x40 against a 240x160 window, so the count says which tree was photographed and a run
-that took the window cannot pass.
-
-The red belongs in the same case: the same declaration with a name no popup has,
-asserting the verdict is a failure rather than a hole — which is the half of WW372 a run
-has never produced.
 
 ### §WW391 the field that joins in five places
 
@@ -270,6 +268,29 @@ So what is worth deciding is whether one round is a case or a command. A case in
 suite would find a broken runner on the run that broke it; a `--smoke` a person types
 finds it when somebody remembers. WW368 spent thirty minutes learning that `transfer`
 worked at all, which is the price of the second answer.
+
+### §WW403 the label a criterion is filed under
+
+`Criteria.Known` is a list of blocks and leads, grouped by comment into A through K, and
+it has held every criterion this roadmap declares since WW176. WW384's partial ship
+raised the first one that is not a block's.
+
+roadkeep files a criterion raised by an open line under a heading naming the task, so
+the roadmap declares it as `WW384` and the catalogue was given `J`. Both gates fired —
+one saying the roadmap declares something nothing here mentions, one saying something
+here is not in the roadmap — and between them they name the fault exactly. That is the
+catalogue working.
+
+What is missing is anywhere that says the label can be an id. The type's own field is
+documented as "the block it binds, as the roadmap labels it", which is true and reads as
+a block letter; the list is grouped under block comments; and the next partial ship will
+put its criterion under whichever letter looks right and cost another guest run to find
+out.
+
+It is a comment and a sentence, or it is a smaller field: `Block` could be `Under`,
+which is the thing it has always held. Either is cheap, and what decides it is whether a
+criterion bound to a task should sort with its block's or stand apart — which is a
+question about how the list is read rather than about what it holds.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

@@ -197,6 +197,14 @@ internal static class Criteria
         new("J", "The migrated suite is not slower than what it replaced", "", Unshown.NotYet,
             "WW87 timed both on one machine over the same five states, 152.3s against 4s, and wrote "
                 + "them beside each other where the migration is rather than where this suite is"),
+        // Labelled by the task and not by the block, because that is how the roadmap labels it: a
+        // criterion raised by a partial ship binds the line that is still open rather than the block
+        // it sits in, and its list is headed with the id. WW384.
+        new("WW384", "The minimising arm is run against a real window, on a desk it may take", "", Unshown.NotYet,
+            "WW384 made the arm reachable and wrote the case, and the case cannot live here: the "
+                + "repair ends in Win+D, whose foreground lock then refuses this process everything "
+                + "for minutes — measured twice, at five reds in two other classes each time. What "
+                + "it is owed is a desk the suite may take, and not a case somebody forgot to write"),
 
         // --- K, the proving ground -----------------------------------------------------------------------
         new("K", "Every refusal has something that provokes it",
