@@ -76,30 +76,6 @@ readable. The first is worth doing whatever is decided about the second.
 
 ## Block D — Act — patterns before pointers
 
-### §WW411 the flyout that closed between two lines
-
-`A_window_taking_the_foreground_shuts_the_flyout_under_whoever_was_looking_in_it` opens
-the overflow, excuses a desk that would not open it, asserts the verb held it — and then
-asserts `NotificationArea.Overflow()` is not null. A run on 2026-09-06 failed on that
-last line and the next run passed.
-
-Which is the thing the case is about, arriving one line early. WW288 exists because the
-flyout closes under whoever is looking in it; the case provokes that with a dialog and
-measures what happens. What it does not allow for is the shell closing it before the
-dialog is ever shown — and then the reading is not a failed measurement, it is a
-measurement that never started, which every other line in this case already knows how to
-say.
-
-The verb's own answer is what makes the difference visible. `opened.Held` is true, so
-the flyout was up when the verb let go of it; the read a line later found nothing.
-Nothing else took the desk in between, so what closed it is the shell doing what this
-case exists to prove it does.
-
-So the repair is the one the case already uses twice: a flyout gone before the
-provocation is a hole naming the desk, not a red. It is a `BusyDesk.Excused` where an
-`Assert.NotNull` is now, and the sentence it needs — the overflow closed before anything
-provoked it — is one the excuse ledger can carry and count.
-
 ### §WW413 the floor the other arms cannot see
 
 `transfer` refuses to attribute anything when its control faults, and WW397 is the run
@@ -146,6 +122,30 @@ So the tree wants naming, next to `Engine` and `Suite` — and the naming is the
 half. The larger is deciding what a sweep should do when it meets one: exempt it, or
 hold it to the rules an adopter really is subject to, which is a shorter list and one
 nothing states.
+
+### §WW427 the part of an expectation that is only the arrangement
+
+WW401 built a case where a window takes the desk while a run is reading, and asserted
+the run came back with a hole naming the foreground. It went red on the guest naming the
+focus instead — the decoy had arrived a moment earlier, before the act rather than
+during the reading, so the act was what the desk refused.
+
+Both readings are correct and both are the thing WW401 is about: a hole naming the desk
+instead of a red about a text box. Which one the engine reaches depends on where in the
+step the intruder landed, and that is the one property the case cannot arrange — it
+opens the decoy on a timer against a poll whose length is the machine's.
+
+The repair was to assert what the claim actually is: `DeskFacts.Names` says whether the
+engine calls a condition the desk's, so the case asks that rather than naming one. It
+cost a guest run.
+
+What is worth reading across the rest of the suite is how often the same
+over-specification is there. A case that provokes the desk and then names the condition
+it expects is asserting its own timing, and there are several —
+`RefusedForegroundTests`, `PointerTests`, `KeyboardTests` and `MenuTests` all excuse on
+one named fact. Each may be right, because each provokes differently. None of them says
+which part of its expectation is the claim and which is the arrangement, and that is the
+distinction this one had to learn twice.
 
 ## Block E — Capture — the picture that proves what it photographed
 

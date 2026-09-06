@@ -352,7 +352,9 @@ internal static class DeskAsks
             "WW288. The foreground moving is the provocation this measures rather than a condition "
                 + "it needs: the case takes the desk itself, reads who ended up with it, and returns "
                 + "naming the desk where the dialog did not take it — so an excuse would be an "
-                + "excuse for the event under test"),
+                + "excuse for the event under test. WW411: what it does excuse is the other side, "
+                + "the flyout gone before anything provoked it, which is a measurement that never "
+                + "started rather than the one this makes"),
         new("NotificationAreaTests.A_shell_that_will_not_work_the_flyout_is_a_hole_naming_what_it_was",
             Unaffected.Shape,
             "the case exists for the refused arm: it asserts the pass where the flyout opened and "

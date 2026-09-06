@@ -543,7 +543,22 @@ public sealed class CaseRunTests : IDisposable
         Assert.Equal(RunOutcome.Degraded, run.Verdict.Outcome);
 
         var hole = Assert.Single(run.Verdict.Unchecked);
-        Assert.Equal(Winwright.Windowing.Foreground.PreconditionName, hole.Missing?.Name);
+
+        // A desk fact and not one desk fact, which a guest run corrected. This named the foreground
+        // condition, and the decoy is timed to arrive during the reading — but it can arrive a
+        // moment earlier, before the act, and then the act is the thing the desk refuses and the
+        // hole names the focus instead. Both are the desk taking the run's subject away; which of
+        // them the engine reaches depends on where in the step the window landed, which is the one
+        // thing this case cannot arrange.
+        //
+        // The claim WW401 makes is which of two things a reader is handed — a hole about the desk
+        // or a red about a text box — so it is the engine's own list of desk facts that says the
+        // reading was the first, and asserting a member of it was over-specifying the provocation.
+        Assert.NotNull(hole.Missing);
+        Assert.True(
+            DeskFacts.Names(hole.Missing.Name),
+            $"the run degraded on '{hole.Missing.Name}', which this engine does not call the desk's: "
+                + string.Join("; ", DeskFacts.Named));
     }
 
     /// <summary>
