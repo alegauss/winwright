@@ -380,6 +380,40 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    public void The_session_probe_is_the_one_call_that_waits_for_a_guest_to_finish_logging_in()
+    {
+        // WW412. The runner spends ten minutes on VMware Tools answering and used to spend nothing
+        // at all on the desk those tools exist to reach: a guest powered on by this run had booted,
+        // had not finished logging in, and was refused — the same command ninety seconds later
+        // carried the whole suite. A refusal true when it was made and false about the machine.
+        //
+        // Read as which call asks for the wait, because that is the half a reader cannot see and
+        // the half that would go wrong: every other caller runs after a session has been proved, so
+        // one that asked for a wait would be quietly sitting out a real refusal.
+        var runner = Runner();
+
+        var asking = System.Text.RegularExpressions.Regex
+            .Matches(runner, @"-SessionWithinMinutes\s+(?<given>\S+)")
+            .Select(one => one.Groups["given"].Value)
+            .ToList();
+
+        Assert.Single(asking);
+        Assert.Equal("$script:SessionMinutes", asking[0]);
+
+        // The call it is on, so the one wait cannot drift to a different question. `cmd /c exit` is
+        // the session probe: the cheapest program that cannot run without a session.
+        var probe = Between(runner, "'C:\\Windows\\System32\\cmd.exe', '/c', 'exit')", "Write-Host '  desk");
+        Assert.Contains("-SessionWithinMinutes", probe, StringComparison.Ordinal);
+
+        // And a number that is a wait rather than a nod at one. Bounded for the reason WW386 gives
+        // about the run itself: a wait that cannot end is worse than a refusal.
+        var minutes = Between(runner, "$script:SessionMinutes = ", "\n").Trim();
+
+        Assert.True(int.TryParse(minutes, out var waiting), $"the session wait is '{minutes}'");
+        Assert.InRange(waiting, 1, 10);
+    }
+
+    [Fact]
     public void The_shell_is_not_on_the_list_of_things_that_are_the_desktop()
     {
         // The repair that hid the reading. Folding the taskbar in with Progman and WorkerW makes a

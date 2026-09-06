@@ -5,8 +5,8 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-- 💭 **WW412** (deps: —) **a guest that has just been powered on is refused for having no session, which it has a minute later** — WW396's cold runs met it twice: the runner waits ten minutes for VMware Tools and not one second for the desk those tools are there to reach. → §WW412
 - 💭 **WW422** (deps: —) **a ledger row an older build wrote silences the rate on every line, and nothing says a reading has gone** — WW407 found the regime: a row naming no case makes the recurrence claim unmakeable, the mark drops on to every line, and each mark takes its line's rate with it. → §WW422
+- 💭 **WW428** (deps: —) **the runner waits for four things and each wait was argued alone, so the numbers agree with nothing** — WW412 added the fourth and had to reason from the tools wait's paragraph; the bound, the tools wait and the flyout timeout each argue their own and none names another. → §WW428
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

@@ -28,28 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW412 the session the runner does not wait for
-
-`Start-Guest` waits ten minutes for VMware Tools to answer and argues the number:
-freewilly measured an agent taking longer than five to come up, and gave up on a machine
-that was fine. The session check a few lines later waits nothing at all.
-
-WW396 met it twice while proving a cold run terminates. Tools answered in ten seconds,
-the run went straight to the session probe, and the guest refused — it had booted and
-had not finished logging in. Ninety seconds later the same command carried the whole
-suite. So the refusal was true when it was made and false about the machine, which is
-the shape the tools wait exists to avoid.
-
-What makes it a task rather than a sentence is who meets it. A cold guest is what an
-adopter has: this repository's runs mostly find the VM already up, so the state is the
-one a new machine is always in — and the remedy, log in at the guest console and leave
-it unlocked, reads as a configuration error rather than as "give it a minute".
-
-The shape is here twice over: a deadline, a poll, and the time said out loud. What has
-to be decided is the number, and the argument is the tools wait's own — long enough that
-a machine that is fine is not called broken, and bounded because a run that cannot end
-is worse than one that refuses.
-
 ### §WW422 the reading that leaves without saying so
 
 `Everywhere` asks whether every excuse this run made was made by every earlier run too,
@@ -71,6 +49,27 @@ of a report: cheap, honest, and one more line on every run. Or the ledger could 
 row it cannot place, which is the stronger claim and the more disruptive — a format this
 tool still tolerates on purpose, so that a history written across a version change stays
 readable. The first is worth doing whatever is decided about the second.
+
+### §WW428 four waits and no list
+
+`run-tests-vm.ps1` now waits in four places: ten minutes for VMware Tools, three for a
+session, sixty for the run, and a poll inside the desk probe. Each number is argued in a
+paragraph beside itself and none of them mentions another.
+
+The arguments are the same argument. Long enough that a machine which is fine is not
+called broken; bounded, because a wait that cannot end is worse than a refusal. WW412
+wrote it again because there was nowhere to point at it, and picked three by reasoning
+from the tools wait's ten — which is how the next one will be picked too.
+
+What that costs is not a wrong number. It is that the numbers cannot be read together: a
+person asking how long a cold run can take before something is wrong has to find four
+paragraphs, and the answer is their sum with one of them multiplied by a retry.
+
+The shape this project uses is a list. `$script:Tidied` is one for the desks a run will
+tidy; `Sleeps.Known` is one for what the suite may wait on and why. A row per wait —
+what it is for, how long, and the sentence it prints when it gives up — would make the
+total readable, let a case assert the runner has no wait outside it, and give the fifth
+one a place to be argued against rather than beside.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

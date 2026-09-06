@@ -139,6 +139,12 @@ $script:GuestRepo = "C:\src\$($script:Name)"
 # chose, which is also what stops two guest runs from colliding.
 $script:RunName = 'vm-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')
 
+# WW412. How long a guest gets to finish logging in before having no session is a refusal. Three,
+# argued the way the tools wait above argues ten: long enough that a machine which is fine is not
+# called broken — the cold run this was measured on reached a desk in ninety seconds — and short,
+# because a login that has not finished in three minutes is a desk to look at rather than wait on.
+$script:SessionMinutes = 3
+
 # What the guest runs, and where it leaves what it wrote. WW227: defaulted rather than required, so
 # this repository's own invocation is unchanged and an adopter names the two things that differ.
 $script:Run = if ($Run) { $Run } else { "run-tests.cmd $Configuration" }
@@ -265,22 +271,52 @@ function Invoke-OnTheDesk {
         # Where the reading a bound produces is written, with --minutes. Named by the caller rather
         # than chosen here, because what a person opens after a run that would not end is the same
         # directory they open after one that did.
-        [string] $Stage = '')
+        [string] $Stage = '',
+
+        # WW412. How long to let a guest finish logging in before its lack of a session is a
+        # refusal. Zero for every caller but the first, and that is the whole design: by the time
+        # anything else runs here a session has already been proved, so a retry there would be a
+        # genuine refusal quietly waited out.
+        [int] $SessionWithinMinutes = 0)
 
     $asked = @('runProgramInGuest', $Vmx, '-interactive') + $Arguments
+    $waitingUntil = (Get-Date).AddMinutes($SessionWithinMinutes)
+    $said = $false
 
-    # Both arms end here, which is the point of the branch being inside this function: the refusal
-    # below is the one voice WW314 wrote for a guest with no session, and a second caller with a
-    # second copy of it is the copy that goes on saying the old thing.
-    $ran = if ($Minutes -gt 0) {
-        Wait-OnTheDesk -Vmx $Vmx -Arguments $asked -Minutes $Minutes -Stage $Stage
-    }
-    else {
-        Invoke-VmRun -Guest -Arguments $asked
-    }
+    while ($true) {
+        # Both arms end here, which is the point of the branch being inside this function: the
+        # refusal below is the one voice WW314 wrote for a guest with no session, and a second
+        # caller with a second copy of it is the copy that goes on saying the old thing.
+        $ran = if ($Minutes -gt 0) {
+            Wait-OnTheDesk -Vmx $Vmx -Arguments $asked -Minutes $Minutes -Stage $Stage
+        }
+        else {
+            Invoke-VmRun -Guest -Arguments $asked
+        }
 
-    if (-not $ran.Ok -and $ran.Output -match 'logged in interactively') {
-        Refuse 'the guest has no interactive desktop session' 'Log in at the guest console once, and leave it unlocked. A locked desk renders nothing, which is the session WW42 was measured on.'
+        if ($ran.Ok -or $ran.Output -notmatch 'logged in interactively') { break }
+
+        # WW412. A guest that has just been powered on has no session and has one a minute later,
+        # and this refusal was true when it was made and false about the machine. Measured twice on
+        # WW396's cold runs: tools answered in ten seconds, the session probe refused, and the same
+        # command ninety seconds later carried the whole suite.
+        #
+        # The tools wait above spends ten minutes so that a machine which is fine is not called
+        # broken. This is the same argument about the thing those tools exist to reach, and a
+        # shorter number because a login that has not finished in three minutes is a desk somebody
+        # should look at rather than one to keep waiting on.
+        if ((Get-Date) -ge $waitingUntil) {
+            Refuse 'the guest has no interactive desktop session' "Log in at the guest console once, and leave it unlocked. A locked desk renders nothing, which is the session WW42 was measured on. A guest that has just been powered on reaches one on its own, and this waited $SessionWithinMinutes minute(s) for it."
+        }
+
+        # Said once and not per go: a line every few seconds about a machine that is logging in
+        # reads as a loop that has stuck, which is the opposite of what it is for.
+        if (-not $said) {
+            Write-Host "  desk        no session yet; waiting up to $SessionWithinMinutes minute(s) for the guest to finish logging in" -ForegroundColor Yellow
+            $said = $true
+        }
+
+        Start-Sleep -Seconds 5
     }
 
     return $ran
@@ -709,7 +745,12 @@ Write-Host '  guest       running, tools answering'
 #
 # `cmd /c exit` and nothing else: the cheapest program that cannot run without a session, so the
 # probe costs one process start and answers the one question it asks.
-$null = Invoke-OnTheDesk -Vmx $vmxPath -Arguments @('C:\Windows\System32\cmd.exe', '/c', 'exit')
+#
+# WW412: and the one call here that waits for one. A guest this run may have powered on itself is
+# still logging in, and the ten minutes spent above on the tools that reach the desk were spent so
+# that a machine which is fine is not called broken.
+$null = Invoke-OnTheDesk -Vmx $vmxPath -Arguments @('C:\Windows\System32\cmd.exe', '/c', 'exit') `
+    -SessionWithinMinutes $script:SessionMinutes
 Write-Host '  desk        a session is logged in'
 
 # --- the tree the guest will test ---------------------------------------------------------------
