@@ -41,6 +41,12 @@
   Carry HEAD alone. By default the guest gets the working tree - uncommitted and untracked included -
   because testing a tree nobody has in front of them is the failure this whole project is about.
 
+.PARAMETER Bound
+  How many minutes the guest run may take before this stops waiting on it, sixty by default. WW386:
+  the wait is bounded and the guest is not touched, so what a bound produces is a reading - the desk
+  as the probe finds it and the log as far as the run got - rather than a command that has to be
+  killed by hand.
+
 .NOTES
   Secrets are never parameters and never printed. KEY=VALUE lines in a file, searched in order:
 
@@ -99,7 +105,22 @@ param(
 
     # What to bring back out of it. The first is fetched always; the rest only on a green run, for
     # the reason the roll call is: a check that was never due is not a check that is missing.
-    [string[]] $Bring
+    [string[]] $Bring,
+
+    # WW386. How many minutes the guest run may take before this stops waiting on it.
+    #
+    # A bound on the wait and never a deadline for the suite: what it ends is this command, and what
+    # is in the guest is left exactly where it is for somebody to look at. WW373 bounded a case and
+    # everything around one inherited nothing - a guest that stops answering, a restore that hangs, a
+    # testhost that dies without writing the exit file each leave this waiting with no bound, which
+    # is the state `Start-Guest` refuses about `vmrun start` for the same reason. Ten silent minutes
+    # and a wedge look alike from outside.
+    #
+    # Sixty, which is several times anything measured here - seven to fifteen minutes for the suite
+    # and about one for the carry, so a whole run has never reached twenty. The margin is WW373's and
+    # is the argument: a bound that decides a red is worse than no bound at all. A parameter because
+    # an adopter's suite is not this one's, and `-Run` is where they already say so.
+    [int] $Bound = 60
 )
 
 Set-StrictMode -Version Latest
@@ -232,14 +253,145 @@ function Invoke-OnTheDesk {
       died with 0xC000013A, STATUS_CONTROL_C_EXIT, which is a keystroke of the suite's own reaching
       the console hosting it. The fixtures take the foreground themselves; nothing else may compete.
     #>
-    param([Parameter(Mandatory)] [string] $Vmx, [Parameter(Mandatory)] [string[]] $Arguments)
+    param(
+        [Parameter(Mandatory)] [string] $Vmx,
+        [Parameter(Mandatory)] [string[]] $Arguments,
 
-    $ran = Invoke-VmRun -Guest -Arguments (@('runProgramInGuest', $Vmx, '-interactive') + $Arguments)
+        # WW386. How long this may take, in minutes, or nothing to block until it answers. The three
+        # short calls - the session probe, the desk probe, the clearer - block: each is seconds, and
+        # a bound on one of those would be a knob nobody turns. The run is the one that wants it.
+        [int] $Minutes = 0,
+
+        # Where the reading a bound produces is written, with --minutes. Named by the caller rather
+        # than chosen here, because what a person opens after a run that would not end is the same
+        # directory they open after one that did.
+        [string] $Stage = '')
+
+    $asked = @('runProgramInGuest', $Vmx, '-interactive') + $Arguments
+
+    # Both arms end here, which is the point of the branch being inside this function: the refusal
+    # below is the one voice WW314 wrote for a guest with no session, and a second caller with a
+    # second copy of it is the copy that goes on saying the old thing.
+    $ran = if ($Minutes -gt 0) {
+        Wait-OnTheDesk -Vmx $Vmx -Arguments $asked -Minutes $Minutes -Stage $Stage
+    }
+    else {
+        Invoke-VmRun -Guest -Arguments $asked
+    }
+
     if (-not $ran.Ok -and $ran.Output -match 'logged in interactively') {
         Refuse 'the guest has no interactive desktop session' 'Log in at the guest console once, and leave it unlocked. A locked desk renders nothing, which is the session WW42 was measured on.'
     }
 
     return $ran
+}
+
+function Wait-OnTheDesk {
+    <#
+      The same call, launched rather than blocked on, and given a bound. WW386.
+
+      `Start-Guest`'s shape one call over, and for its reason: waited on directly this is unbounded,
+      and a run that cannot end is worse than one that refuses - it gets killed by hand, which is the
+      thing that leaves a guest tree the next sync cannot delete.
+
+      What the bound ends is the wait. Nothing is stopped in the guest and nothing is cleaned up
+      there, because a wedge is the one state worth looking at and a script that tidied it away would
+      be the last thing to see it.
+
+      That has a cost the refusal names, measured the first time this bound fired: what is still
+      running holds the tree open, and the next run's sync refuses with `the process cannot access
+      the file C:\src\winwright`. It is the same state a killed run leaves and it arrives from the
+      other side - so the sentence says it, rather than a person meeting it one command later.
+
+      It says the time out loud every minute, which is the other half. A run that prints nothing for
+      quarter of an hour reads exactly like one that will never print again, and this file already
+      spends ten lines arguing that about `vmrun start`.
+    #>
+    param(
+        [Parameter(Mandatory)] [string] $Vmx,
+        [Parameter(Mandatory)] [string[]] $Arguments,
+        [Parameter(Mandatory)] [int] $Minutes,
+        [string] $Stage = '')
+
+    $argv = Get-VmRunArguments -Arguments $Arguments -Guest
+    $running = Start-Job -ScriptBlock {
+        param($Exe, $Argv)
+        $said = & $Exe @Argv 2>&1
+        [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = ($said | Out-String).Trim() }
+    } -ArgumentList $script:VmRun, $argv
+
+    $deadline = (Get-Date).AddMinutes($Minutes)
+    $began = Get-Date
+    $spoke = 0
+    while ((Get-Date) -lt $deadline) {
+        # Looked at often and spoken about rarely, which are two different intervals and were one in
+        # the first version of this. Polling once a minute would add up to a minute to every run that
+        # finished normally, for a line nobody needed; saying it every five seconds would bury the
+        # run's own output under its clock.
+        Start-Sleep -Seconds 5
+
+        if ($running.State -eq 'Running') {
+            $waited = [int]((Get-Date) - $began).TotalMinutes
+            if ($waited -gt $spoke) {
+                $spoke = $waited
+                Write-Host "  waiting     ${waited}m of $Minutes; the guest has not answered yet"
+            }
+
+            continue
+        }
+
+        # Read as the last thing the job produced and only where it is the record the job promises:
+        # an error written on the way there arrives on the same pipe and is not an exit code. That is
+        # Start-Guest's own correction, and it applies here for the same reason.
+        $said = @(Receive-Job -Job $running -ErrorAction SilentlyContinue) | Select-Object -Last 1
+        Remove-Job -Job $running -Force -ErrorAction SilentlyContinue
+
+        if ($said -and $said.PSObject.Properties['ExitCode']) {
+            return [pscustomobject]@{
+                ExitCode = $said.ExitCode
+                Output   = $said.Output
+                Ok       = ($said.ExitCode -eq 0)
+            }
+        }
+
+        return [pscustomobject]@{
+            ExitCode = 1
+            Ok       = $false
+            Output   = "the guest run ended without an exit code: $($said | Out-String)".Trim()
+        }
+    }
+
+    # The bound, and everything below it is the reading rather than the refusal. A run told only that
+    # an hour passed is WW371's refusal in another form - an operator sent to a console to find out
+    # what this could have asked. The desk probe is already carried and already answers.
+    Stop-Job -Job $running -ErrorAction SilentlyContinue
+    Remove-Job -Job $running -Force -ErrorAction SilentlyContinue
+
+    Write-Host ''
+    Write-Host "  the guest has not answered in $Minutes minute(s); reading its desk" -ForegroundColor Yellow
+
+    $desk = Read-GuestDesk -Vmx $Vmx -Stage $Stage
+    $log = if ($Stage) { Join-Path $Stage 'vm-run.log' } else { '' }
+    if ($log) {
+        $null = Invoke-VmRun -Guest -Arguments @(
+            'copyFileFromGuestToHost', $Vmx, "$script:GuestSync\vm-run.log", $log)
+    }
+
+    $far = if ($log -and (Test-Path -LiteralPath $log)) {
+        $lines = (Read-ConsoleText $log) -split "`r?`n"
+        "It had written $($lines.Count) line(s) to $log; the last is: $(($lines | Where-Object { $_.Trim() } | Select-Object -Last 1))"
+    }
+    else {
+        'It had written no log this could fetch, so the run may not have reached the suite at all.'
+    }
+
+    Refuse (
+        "the guest run did not answer within $Minutes minute(s). Its desk reads $($desk.State)" +
+        "$(if ($desk.Process) { ": $($desk.Process) (pid $($desk.Pid), $($desk.Class))" } else { '' })" +
+        " - $($desk.Detail). $far"
+    ) ('Nothing was stopped in the guest, so look at its console - and note that whatever is still ' +
+        'running there holds the tree: the next run refuses to sync until it ends. Raise -Bound if ' +
+        'this suite really takes that long.')
 }
 
 function Read-GuestDesk {
@@ -732,21 +884,26 @@ Write-Host "  guest tree  $syncSaid"
 Write-Host ''
 Write-Host "  running the suite in the guest ($Configuration). The host is yours." -ForegroundColor Cyan
 
+# TestResults\vm and never TestResults itself. Measured the hard way: the guest's trx landed on the
+# host's, and the only thing in it saying which desk had produced the run was a computerName buried
+# in the XML. Two machines writing one path is a result that cannot say where it came from, which is
+# the same defect as a green that cannot say what it covered.
+#
+# WW386 made this the line before the run rather than the line after it. What a bound produces is a
+# reading, and the log it fetches belongs where the log of a run that finished goes: a person who has
+# just been told the guest stopped answering should not also be told about a directory.
+$results = Join-Path $script:Tree 'TestResults\vm'
+if (-not (Test-Path -LiteralPath $results)) { $null = New-Item -ItemType Directory -Path $results -Force }
+
 # Through the same door the probe used, so a desk that locked itself between the two is refused with
 # the sentence the probe would have given it rather than with "the guest never finished the run".
-$ran = Invoke-OnTheDesk -Vmx $vmxPath -Arguments @("$script:GuestSync\run.cmd")
+# WW386: and with a bound, which is the one call here that has ever had time to need one.
+$ran = Invoke-OnTheDesk -Vmx $vmxPath -Arguments @("$script:GuestSync\run.cmd") -Minutes $Bound -Stage $results
 if (-not $ran.Ok) {
     Refuse "the guest never finished the run: $($ran.Output)"
 }
 
 # --- back to the host -----------------------------------------------------------------------------
-
-# TestResults\vm and never TestResults itself. Measured the hard way: the guest's trx landed on the
-# host's, and the only thing in it saying which desk had produced the run was a computerName buried
-# in the XML. Two machines writing one path is a result that cannot say where it came from, which is
-# the same defect as a green that cannot say what it covered.
-$results = Join-Path $script:Tree 'TestResults\vm'
-if (-not (Test-Path -LiteralPath $results)) { $null = New-Item -ItemType Directory -Path $results -Force }
 
 $exitFile = Join-Path $stage 'vm-exit.txt'
 $back = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\vm-exit.txt", $exitFile)

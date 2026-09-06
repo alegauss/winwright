@@ -397,29 +397,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW386 the wait the runner does not bound
-
-WW373 bounded a case and left the run around it unbounded. `run-tests-vm.ps1` starts the
-suite in the guest and waits for it to write an exit code; nothing there says how long
-that may take. What ends a wedge now is the suite's own timeout, and that only works
-while the wedge is inside a case.
-
-Everything outside one is the old shape. A guest that stops answering vmrun, a build
-that hangs on a restore, a testhost that dies without writing the exit file — each
-leaves the host command waiting with no bound, which is what `Start-Guest` refuses to do
-about `vmrun start`: ten silent minutes and a wedge look alike, so it polls. The run it
-launches inherits none of that.
-
-The numbers are in hand. A guest run of this suite is seven to fifteen minutes and the
-carry adds one, so a whole run has never taken twenty; the bound wants to be an hour or
-so — several times the longest, the same margin WW373 gave a case, because a bound that
-decides a red is worse than none.
-
-Beside a number it needs a reading. A run that hit the bound has to say what the guest
-was doing, or it is WW371's refusal in another form — an operator sent to a console. The
-desk probe is already carried and already answers, so the shape is: stop waiting, read
-the desk, bring the log back, refuse with what both said.
-
 ### §WW388 the desk two readings both answer
 
 WW371 and WW375 landed an hour apart and answer the same desk two different ways. A
@@ -510,6 +487,29 @@ Which is the excused check's own argument one step later: a reading taken after 
 moved is not a reading about the subject. The repair is a second look, and where the two
 disagree the verdict is a hole rather than a failure. The cost is one foreground read an
 act, against a class of red that sends a reader to the wrong file.
+
+### §WW404 the file nobody says who is holding
+
+The sync deletes the guest tree and writes it again, and where something has a file open
+in it Windows refuses with a sentence naming the directory. That sentence is the whole
+of what comes back: `Remove-Item : cannot remove the item C:\src\winwright: the process
+cannot access the file`.
+
+Which process is the only question a reader has, and the guest already knows. WW386 made
+this reachable twice over — the bound leaves whatever was running exactly where it is,
+and the refusal now says the next sync will meet it — but a person who runs again anyway
+gets the path and no name, and a person whose guest is holding it for some other reason
+gets nothing at all.
+
+This is the same shape as every other refusal here. WW371's clearer names the window it
+left alone and why; the probe names the process holding the desk, its pid and its class,
+because WW331 proved a state without a name sends a reader to a console. The sync is the
+one refusal in this file that answers with a path.
+
+What it would take is a handle reading in the guest — `openfiles`, or a walk of the
+processes whose working directory is under the tree — run on the failure rather than
+always, and folded into the same sentence. Nothing about it needs a new door: `sync.ps1`
+is generated here and already reports back through `sync.log`.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

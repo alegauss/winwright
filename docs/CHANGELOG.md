@@ -361,6 +361,7 @@
 - ✅ **WW382** **the two tray menu kinds read as the same tree and nothing claims they must, so a framework changing one is invisible** — The entries match and the containers do not: the Win32 kind names its Menu, which is where the difference stops (design recorded in `tests/Winwright.Tests/NotificationAreaTests.cs`).
 - ✅ **WW383** **no case puts a real window up and reads shell out of the probe, so that arm is only ever produced from typed looks** — The shell list takes a parameter now, so a case names its own dialog a shell surface and reads `shell` out of a real look (design recorded in `tests/Winwright.Tests/DeskProbeTests.cs`).
 - ✅ **WW384 (the arm that must not move a window)** **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — `Clear-TheDesk` is a function, and a case runs the whole repair at a window with no minimise button and reads off the desk that nothing moved.
+- ✅ **WW386** **the runner waits on the guest with no bound, so a wedge outside a case is still a run nobody can tell from a slow one** — The wait is bounded, says which minute it is on, and ends by reading the desk and the log rather than by being killed (design recorded in `tools/run-tests-vm.ps1`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
