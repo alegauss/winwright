@@ -295,6 +295,7 @@
 - ✅ **WW385** **no run ever declares a capture naming a popup, so the branch wiring the step to the ask is asserted by nothing** — A declared case captures the popup and the pixel count says which tree crossed; naming one nobody has is a red, not a hole (design recorded in `tests/Winwright.Tests/CaseRunTests.cs`).
 - ✅ **WW391 (the second signature)** **a claim joins the format by being a field and a field still joins in five places, one of them a 29-parameter verb** — A tray step is refused off the step every other refusal reads, so a 25-parameter twin and its hand-written list of 21 claims are gone.
 - ✅ **WW393** **three tasks held the arms to lists and none of them ran one, so a runner that throws on its first line is green** — Every arm and the bare run are driven at one round, so a runner that throws is red on the run that broke it (design recorded in `tests/Winwright.Tests/TypingArmRunTests.cs`).
+- ✅ **WW403** **a criterion a partial ship raises is labelled by its task and the catalogue groups by block, which nothing says** — The field is `Under` now and says a label may be a task's id, with the partial ships kept in a place of their own (design superseded: WW87's criterion was already labelled by its task).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

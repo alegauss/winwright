@@ -13,14 +13,14 @@ public sealed class CriteriaTests
     [Fact]
     public void Every_criterion_the_roadmap_declares_is_in_the_catalogue()
     {
-        var listed = Criteria.Known.Select(one => (one.Block, one.Lead)).ToHashSet();
+        var listed = Criteria.Known.Select(one => (one.Under, one.Lead)).ToHashSet();
 
         var missing = Criteria.Declared().Where(one => !listed.Contains(one)).ToList();
 
         Assert.True(
             missing.Count == 0,
             $"the roadmap declares {missing.Count} criterion(s) nothing here says anything about: "
-                + string.Join("; ", missing.Select(one => $"{one.Block} {one.Lead}")));
+                + string.Join("; ", missing.Select(one => $"{one.Under} {one.Lead}")));
     }
 
     [Fact]
@@ -28,12 +28,12 @@ public sealed class CriteriaTests
     {
         var declared = Criteria.Declared().ToHashSet();
 
-        var gone = Criteria.Known.Where(one => !declared.Contains((one.Block, one.Lead))).ToList();
+        var gone = Criteria.Known.Where(one => !declared.Contains((one.Under, one.Lead))).ToList();
 
         Assert.True(
             gone.Count == 0,
             $"{gone.Count} criterion(s) here are not in the roadmap, so a lead has moved or been "
-                + $"reworded: {string.Join("; ", gone.Select(one => $"{one.Block} {one.Lead}"))}");
+                + $"reworded: {string.Join("; ", gone.Select(one => $"{one.Under} {one.Lead}"))}");
     }
 
     [Fact]
@@ -44,8 +44,13 @@ public sealed class CriteriaTests
         var declared = Criteria.Declared();
 
         Assert.True(declared.Count > 25, $"only {declared.Count} criterion(s) were read out of the roadmap");
-        Assert.Contains(declared, one => one.Block == "A");
-        Assert.Contains(declared, one => one.Block == "K");
+        Assert.Contains(declared, one => one.Under == "A");
+        Assert.Contains(declared, one => one.Under == "K");
+
+        // And a label that is not a block letter, which is what WW403 is about: roadkeep files a
+        // criterion raised by a partial ship under the task's own id, and this reading has always
+        // taken both. A parser narrowed to letters would drop those silently.
+        Assert.Contains(declared, one => one.Under.StartsWith("WW", StringComparison.Ordinal));
 
         // And nothing from the neighbouring list: the non-goals are bullets of the same shape under
         // a different heading, and reading them as criteria would be a count that means nothing.
@@ -55,7 +60,7 @@ public sealed class CriteriaTests
     [Fact]
     public void No_criterion_is_paired_twice()
     {
-        var listed = Criteria.Known.Select(one => (one.Block, one.Lead)).ToList();
+        var listed = Criteria.Known.Select(one => (one.Under, one.Lead)).ToList();
 
         Assert.Equal(listed.Count, listed.Distinct().Count());
     }
@@ -67,7 +72,7 @@ public sealed class CriteriaTests
             Criteria.Known,
             one => Assert.True(
                 one.Demonstrated ^ (one.Why is not null),
-                $"{one.Block} '{one.Lead}' names {(one.Demonstrated ? "a case and a reason it has none" : "neither")}"));
+                $"{one.Under} '{one.Lead}' names {(one.Demonstrated ? "a case and a reason it has none" : "neither")}"));
     }
 
     [Fact]

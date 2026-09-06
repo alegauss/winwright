@@ -176,29 +176,6 @@ holds: `reads` is the one every family asks for, and WW378 spent a task moving o
 family off the parameters. A different door has to carry those, and which ones is the
 design.
 
-### §WW403 the label a criterion is filed under
-
-`Criteria.Known` is a list of blocks and leads, grouped by comment into A through K, and
-it has held every criterion this roadmap declares since WW176. WW384's partial ship
-raised the first one that is not a block's.
-
-roadkeep files a criterion raised by an open line under a heading naming the task, so
-the roadmap declares it as `WW384` and the catalogue was given `J`. Both gates fired —
-one saying the roadmap declares something nothing here mentions, one saying something
-here is not in the roadmap — and between them they name the fault exactly. That is the
-catalogue working.
-
-What is missing is anywhere that says the label can be an id. The type's own field is
-documented as "the block it binds, as the roadmap labels it", which is true and reads as
-a block letter; the list is grouped under block comments; and the next partial ship will
-put its criterion under whichever letter looks right and cost another guest run to find
-out.
-
-It is a comment and a sentence, or it is a smaller field: `Block` could be `Under`,
-which is the thing it has always held. Either is cheap, and what decides it is whether a
-criterion bound to a task should sort with its block's or stand apart — which is a
-question about how the list is read rather than about what it holds.
-
 ### §WW410 what a smoke run is allowed to conclude
 
 WW393 drives every arm at one round and asserts two things: it exited zero, and it named

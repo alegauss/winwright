@@ -23,7 +23,6 @@
 ## Block G — The scenario — a case is a data file
 
 - ⏳ **WW391** (deps: —) **a claim joins the format by being a field and a field still joins in five places, one of them a 29-parameter verb** — `Of` is still 29 parameters and a field still joins in five places; what a different door has to carry is `reads`, and only that. → §WW391
-- 💭 **WW403** (deps: —) **a criterion a partial ship raises is labelled by its task and the catalogue groups by block, which nothing says** — WW385's run went red both ways on WW384's criterion, and the message naming `WW384` where a block letter was expected is the only thing that says so. → §WW403
 - 💭 **WW410** (deps: —) **a runner at one round is asserted to have printed and never to have printed something a reader could act on** — WW393 checks the exit code and the task's own name, which a runner that measured nothing and said so would satisfy exactly as one that worked. → §WW410
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

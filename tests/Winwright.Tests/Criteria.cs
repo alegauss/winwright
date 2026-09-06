@@ -17,19 +17,30 @@ internal enum Unshown
 /// <summary>
 /// One criterion that decides whether a block is finished, and what demonstrates it.
 /// </summary>
-/// <param name="Block">The block it binds, as the roadmap labels it.</param>
+/// <param name="Under">
+/// The heading it is filed under, as the roadmap labels it — which is a block letter for a
+/// criterion that decides whether a block is finished, and a task's id for one a partial ship
+/// raised.
+/// <para>
+/// WW403 named it for what it holds rather than for what it usually is. It was <c>Block</c>, and the
+/// first criterion that was not a block's cost a guest run to place: roadkeep files a criterion
+/// raised by an open line under a heading naming the task, so the roadmap said <c>WW384</c> where
+/// this list had been given <c>J</c>. Both gates fired and between them named the fault exactly,
+/// which is the catalogue working — and neither of them could say what the label was allowed to be.
+/// </para>
+/// </param>
 /// <param name="Lead">The criterion's lead, exactly as the roadmap spells it.</param>
 /// <param name="Shown">The case that demonstrates it, as <c>TypeTests.Method_name</c>. Empty where none does.</param>
 /// <param name="Why">Why none does, where none does. Null where a case is named.</param>
 /// <param name="Because">What the named case actually establishes, or what is missing.</param>
-internal sealed record Criterion(string Block, string Lead, string Shown, Unshown? Why = null, string Because = "")
+internal sealed record Criterion(string Under, string Lead, string Shown, Unshown? Why = null, string Because = "")
 {
     /// <summary>Whether anything in this suite reads the claim back.</summary>
     public bool Demonstrated => Shown.Length > 0;
 
     public override string ToString() => Demonstrated
-        ? $"{Block} {Lead,-58} {Because} [{Shown}]"
-        : $"{Block} {Lead,-58} (nothing shows it, {Phrase(Why!.Value)}): {Because}";
+        ? $"{Under} {Lead,-58} {Because} [{Shown}]"
+        : $"{Under} {Lead,-58} (nothing shows it, {Phrase(Why!.Value)}): {Because}";
 
     private static string Phrase(Unshown why) => why switch
     {
@@ -200,17 +211,6 @@ internal static class Criteria
         // Labelled by the task and not by the block, because that is how the roadmap labels it: a
         // criterion raised by a partial ship binds the line that is still open rather than the block
         // it sits in, and its list is headed with the id. WW384.
-        new("WW391", "A field joins the format in two places and not five", "", Unshown.NotYet,
-            "WW391 shipped the second signature — a tray step is refused off the step now, so a "
-                + "25-parameter twin and a hand-written list of 21 claims are gone — and left the "
-                + "29-parameter verb it was filed for. What it settled is the design: `reads` is "
-                + "the only refusal input a step cannot answer for itself, so it is the only thing "
-                + "a different door has to carry"),
-        new("WW384", "The minimising arm is run against a real window, on a desk it may take", "", Unshown.NotYet,
-            "WW384 made the arm reachable and wrote the case, and the case cannot live here: the "
-                + "repair ends in Win+D, whose foreground lock then refuses this process everything "
-                + "for minutes — measured twice, at five reds in two other classes each time. What "
-                + "it is owed is a desk the suite may take, and not a case somebody forgot to write"),
 
         // --- K, the proving ground -----------------------------------------------------------------------
         new("K", "Every refusal has something that provokes it",
@@ -251,6 +251,29 @@ internal static class Criteria
                 + "published package does not carry it, so the case that would read this back cannot "
                 + "be written in the repository it belongs in — and nothing here can open freewilly's menu"),
 
+        // --- what a partial ship left open --------------------------------------------------------
+        //
+        // WW403. A criterion raised by a line that shipped half of itself is filed under that line's
+        // id, exactly as the three above are: what changed is that the field says so. It was called
+        // `Block`, the groups above it run A through K, and the first partial ship of this kind put
+        // its entry under a letter and cost a guest run to be told — twice over, since both gates
+        // fired.
+        //
+        // Kept apart rather than sorted into the blocks they sit in, because they answer a different
+        // question. A block's criterion decides whether the block is finished; these say how much of
+        // one task is left, and a reader counting a block's is not counting these.
+        new("WW391", "A field joins the format in two places and not five", "", Unshown.NotYet,
+            "WW391 shipped the second signature — a tray step is refused off the step now, so a "
+                + "25-parameter twin and a hand-written list of 21 claims are gone — and left the "
+                + "29-parameter verb it was filed for. What it settled is the design: `reads` is "
+                + "the only refusal input a step cannot answer for itself, so it is the only thing "
+                + "a different door has to carry"),
+        new("WW384", "The minimising arm is run against a real window, on a desk it may take", "", Unshown.NotYet,
+            "WW384 made the arm reachable and wrote the case, and the case cannot live here: the "
+                + "repair ends in Win+D, whose foreground lock then refuses this process everything "
+                + "for minutes — measured twice, at five reds in two other classes each time. What "
+                + "it is owed is a desk the suite may take, and not a case somebody forgot to write"),
+
         // WW315's own criterion stood here — that two profiles and a transcript exist on the guest as
         // a disposable fixture — and it went with the task: the bench fabricates both, so the roadmap
         // no longer declares the lead and a catalogue entry for one is a lead pointing nowhere. It is
@@ -261,9 +284,13 @@ internal static class Criteria
     /// Every criterion the roadmap declares, read out of the governed file rather than out of the
     /// list above. The roadmap is the source of truth and roadkeep is its writer; this only reads.
     /// </summary>
-    internal static IReadOnlyList<(string Block, string Lead)> Declared()
+    internal static IReadOnlyList<(string Under, string Lead)> Declared()
     {
         var declared = new List<(string, string)>();
+
+        // The heading's own label, whatever it is: a block letter where the list is a block's, and a
+        // task's id where a partial ship raised one. WW403 — this line always read both and nothing
+        // said so, which is how the first task-labelled criterion cost a run to place.
         var block = "";
 
         foreach (var raw in File.ReadAllLines(Roadmap()))
