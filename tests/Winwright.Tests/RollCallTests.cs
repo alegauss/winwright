@@ -238,6 +238,160 @@ public sealed class RollCallTests
         Assert.Contains("2 of 2 were recorded and never ran", roll.Sentence());
     }
 
+    /// <summary>
+    /// One excused row as the ledger writes one: the fact, the case, what was absent, and the kind.
+    /// WW389, and spelled here because every reading below is about rows and none of them could be
+    /// driven before: this class had no case that made the roll say anything about an excuse at all.
+    /// </summary>
+    /// <param name="named">The case the row names.</param>
+    /// <param name="kind">Whether the desk or a budget this suite chose.</param>
+    private static string Row(string named, string kind = Readers.Desk) =>
+        $"the foreground belongs to the window under test\t{named}\tsomething else owns it\t{kind}";
+
+    /// <summary>What the runs before this one said, built for one reading at a time. WW389.</summary>
+    /// <param name="always">The cases every earlier run excused.</param>
+    /// <param name="often">How many of the deeper window's runs excused each case.</param>
+    /// <param name="ledgers">How many runs that deeper window read.</param>
+    private static Earlier Before(
+        IEnumerable<string> always, (string Case, int Times)[]? often = null, int ledgers = 20) =>
+        new(
+            [8, 8, 8, 8],
+            [2000, 2000, 2000, 2000],
+            always,
+            often is null
+                ? null
+                : new HowOften(ledgers, often.ToDictionary(one => one.Case, one => one.Times, StringComparer.Ordinal)));
+
+    /// <summary>
+    /// One run built to make each reading speak, and the text it speaks in. WW389.
+    /// <para>
+    /// A recipe a row rather than one run for all of them, because several of these are silent
+    /// exactly where another is speaking — that is the composition the list states, so a single run
+    /// could never make more than a few of them talk at once.
+    /// </para>
+    /// <para>
+    /// The text is the whole sentence for a reading that lands there and one excused line for a
+    /// reading that lands on one. Per line and not per report, which a run got wrong first: the
+    /// precedence between the two line readings is about one case's line, and a report carrying
+    /// another case's rate reads as both firing when neither line does.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyDictionary<string, string> Speaking() =>
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            // WW298's series: four runs of eight against this run's one, which is what a series is.
+            ["the series"] = Sentence(["a.one"], Before(always: [])),
+
+            // WW248: every excuse recurring in every earlier run, which is this suite's normal run.
+            // Given a rate as well, so what silences WW376 here is the precedence and not an absence.
+            ["none of them is new"] = Sentence(["a.one"], Before(always: ["a.one"], often: [("a.one", 17)])),
+
+            // WW376: not every one recurs, so the stronger clause is quiet and this counts the set
+            // against the deeper window instead.
+            ["how many the ledgers have seen"] =
+                Sentence(["a.one", "a.two"], Before(always: ["a.one"], often: [("a.one", 9), ("a.two", 4)])),
+
+            // WW281: one of each kind, which is the only shape that divides them.
+            ["the desk against a budget"] =
+                Sentence(["a.one", "a.two"], Before(always: []), budget: "a.two"),
+
+            // WW248 again, on the line: one case recurs and one does not, so the run is not
+            // everywhere and the mark divides the rows. Both carry a rate, so this line being
+            // without one is WW363 giving way rather than nothing to give.
+            ["in all N runs before it"] = LineFor(
+                "a.one", ["a.one", "a.two"], Before(always: ["a.one"], often: [("a.one", 17), ("a.two", 3)])),
+
+            // WW363: the same run's other line, which recurs nowhere and has a rate to report.
+            ["excused in N of the last M"] = LineFor(
+                "a.two", ["a.one", "a.two"], Before(always: ["a.one"], often: [("a.one", 17), ("a.two", 3)])),
+        };
+
+    [Fact]
+    public void Every_reading_of_the_excuses_speaks_where_the_list_says_it_does()
+    {
+        // WW389. Five readings come off one set of ledgers and each knew when to be quiet only
+        // because whoever added it had read the ones already there — WW376's rule cites WW363's,
+        // which cites WW248's. Nothing composed them, and nothing drove any of them: this class had
+        // no case that made the roll say a word about an excuse, so a clause that stopped firing
+        // stopped in silence. WW363's rate did exactly that for a whole session.
+        //
+        // So each row of the list gets a run built to make it speak, and the marker it declares is
+        // what is looked for. A reading that goes quiet fails here rather than in a report nobody
+        // can tell was short.
+        var said = Speaking();
+
+        Assert.All(
+            Readings.All,
+            one => Assert.True(
+                said.TryGetValue(one.Named, out var read) && read.Contains(one.Marker, StringComparison.Ordinal),
+                $"nothing here makes '{one.Named}' ({one.Task}) speak, and it declares it says"
+                    + $" '{one.Marker}' on {one.Where}: {said.GetValueOrDefault(one.Named, "<no run built for it>")}"));
+    }
+
+    [Fact]
+    public void A_reading_the_list_calls_the_quieter_one_is_silent_where_the_louder_speaks()
+    {
+        // WW389, and the half the list exists for. Two clauses that both fire say the same thing
+        // twice, which is the failure WW363 wrote its own rule against — and every one of those
+        // rules lives where it was added, so the next reading's author has to find all of them
+        // before deciding their own. This is that composition, read back.
+        //
+        // Read off the run built to make the LOUDER one speak, which is the only run the precedence
+        // is about — and the precedence chains, so a run built for the quieter one is often a run
+        // where the louder is itself outranked by something else. That is how this first went red:
+        // one excused case that recurs makes `none of them is new` speak, which silences the line
+        // mark that was supposed to be doing the silencing.
+        var said = Speaking();
+        var pairs = Readings.All.Where(one => one.Louder.Length > 0).ToList();
+        Assert.NotEmpty(pairs);
+
+        foreach (var quieter in pairs)
+        {
+            var louder = Readings.Named(quieter.Louder);
+            Assert.True(
+                louder is not null,
+                $"'{quieter.Named}' says it is silenced by '{quieter.Louder}', which is no reading here");
+
+            var read = said[louder!.Named];
+
+            Assert.Contains(louder.Marker, read, StringComparison.Ordinal);
+            Assert.False(
+                read.Contains(quieter.Marker, StringComparison.Ordinal),
+                $"'{quieter.Named}' says '{louder.Named}' silences it and both are in: {read}");
+        }
+    }
+
+    /// <summary>The roll's one sentence for a run that excused these cases. WW389.</summary>
+    /// <param name="excused">The cases this run excused.</param>
+    /// <param name="earlier">What the runs before it said.</param>
+    /// <param name="budget">One of them that was a budget this suite chose rather than the desk.</param>
+    private static string Sentence(string[] excused, Earlier earlier, string? budget = null) =>
+        Rolled(excused, earlier, budget).Sentence();
+
+    /// <summary>
+    /// The one excused line naming that case. WW389, and one line rather than all of them: the two
+    /// line readings compose per case, so a report carrying another case's rate would read as both
+    /// firing where neither did on the line in question.
+    /// </summary>
+    /// <param name="named">The case whose line is wanted.</param>
+    /// <param name="excused">The cases this run excused.</param>
+    /// <param name="earlier">What the runs before it said.</param>
+    private static string LineFor(string named, string[] excused, Earlier earlier) =>
+        Assert.Single(
+            Rolled(excused, earlier, budget: null).Render(),
+            one => one.StartsWith($"  excused   {named}:", StringComparison.Ordinal));
+
+    /// <summary>A whole run whose only interesting fact is what it excused. WW389.</summary>
+    /// <param name="excused">The cases this run excused.</param>
+    /// <param name="earlier">What the runs before it said.</param>
+    /// <param name="budget">One of them that was a budget rather than the desk.</param>
+    private static Roll Rolled(string[] excused, Earlier earlier, string? budget) =>
+        Roll.Of(
+            excused,
+            Ran(excused),
+            excused.Select(one => Row(one, one == budget ? Readers.Budget : Readers.Desk)),
+            earlier);
+
     [Fact]
     public void A_skip_and_a_lost_host_are_kept_apart_rather_than_added()
     {

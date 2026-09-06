@@ -28,29 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW389 the readings nothing composes
-
-Five readings come off the same ledgers: WW298's series, WW248's *none of them is new*,
-WW376's count of what the deeper window has not seen, WW281's split between the desk and
-a budget, and WW363's rate on each excused line. Every one is right, and each knows when
-to be quiet only because whoever added it read the ones already there.
-
-The rules are written where they were added and nowhere together. WW363 is silent beside
-the recurrence clause and below two; WW376 where WW248 spoke and where a row names no
-case; WW281 where one kind is the whole set. A sixth reading has to find all of those to
-decide its own, and the way to find them is to know they exist.
-
-What that produces is a fragile sentence rather than a wrong one. Two clauses that both
-fire say the same thing twice — the failure WW363 wrote its rule against — and the
-reader who stops finishing it is the one the report is for. It is also how a reading
-goes quiet for good: WW363's rate appeared on no run this session that *none of them is
-new* had not covered.
-
-So what is worth having is the composition in one place: which readings a run can make
-of its excuses, over which window each speaks, and which is the stronger where two are
-true. A list rather than a rule — the shape this project already has wherever two things
-must agree.
-
 ### §WW396 the run that ended and would not say so
 
 `run-tests-vm.cmd` was started with its output piped, on a host where the guest was
@@ -73,6 +50,29 @@ nothing is wrong in the guest, nothing is red, and a person watching an empty te
 has no reason to think the suite has already passed. The wrapper is where the repair
 goes — it is the thing a person types, and it can hand the guest's console a handle of
 its own rather than the caller's.
+
+### §WW407 the reading its own neighbour covers
+
+WW363 reads how often one case was excused across the deep window, and it is silent
+where the recurrence mark spoke — the right rule, because two fractions about one case
+on one line is a line nobody finishes. WW376 is silent where *none of them is new*
+spoke, for the same reason.
+
+What WW389 makes visible by putting them in one list is that this suite's ordinary run
+silences both. Its steady state is that every excuse it makes recurs in every earlier
+run, which is the exact condition the two loudest clauses fire on — so the rate appeared
+on no run of a whole session, and the count against the deep window appeared on none
+either.
+
+That is not a defect and it is not nothing. Each is correct and each is dead on the runs
+a person actually reads; both come alive only on a run that already looks unusual, which
+is the run whose reader least needs a second opinion.
+
+Two ways to weigh it, and the list is what makes either arguable. Either the precedence
+is right and both are worth keeping for the rare runs, in which case what to add is a
+case that goes red when one has been quiet for a whole window. Or the composition should
+change: the rate is the reading that sees a slope, and a slope on a recurring case is
+what the mark above it cannot show.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

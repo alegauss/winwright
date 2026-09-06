@@ -543,6 +543,12 @@ public sealed record Roll
     /// refuses a run over it — a desk fact that could make a green go away is the one thing this
     /// block says it will not do.
     /// </para>
+    /// <para>
+    /// WW389: this rule and the four beside it are composed in <see cref="Readings" />, which is
+    /// where a sixth reading's author should start. Each was written where it was added and cited
+    /// the ones already there, so finding them meant knowing they existed — and this one had gone
+    /// quiet for a whole session under the clause above it without anything noticing.
+    /// </para>
     /// </summary>
     /// <param name="named">The case the excused row names, which an older ledger may not carry.</param>
     private string Often(string? named)
