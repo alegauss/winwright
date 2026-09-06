@@ -40,14 +40,13 @@
 - ⏳ **WW87** (deps: Block G, Block E, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
-- 💭 **WW401** (deps: —) **a case that loses the desk mid-act fails in the words of its own subject, so a desk fault reads as five separate defects** — WW384 took the foreground away mid-run twice and five cases in two classes went red saying `Sub-string not found`, naming nothing about the desk. → §WW401
 - 💭 **WW404** (deps: —) **a sync refused by something holding the guest tree names the path and never what is holding it** — WW386's bound left a process there, the next run answered `the process cannot access the file C:\src\winwright`, and finding out which meant knowing. → §WW404
 - 💭 **WW405** (deps: —) **the suite drives the engine inside its own process, so anything the engine keys by process is untestable here** — WW387 keyed a reading by process id, passed every host check, and went red in the guest because two fixtures with different halves share one pid. → §WW405
 - 💭 **WW414** (deps: —) **the skill may not backtick a control type, so guidance about the tree is written around a rule about the engine** — WW399 wrote `MenuItem` and `Menu` and the skill's own catalogue refused them as types the engine does not export, which is true and is not the point. → §WW414
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 💭 **WW406** (deps: —) **an UnrenderableException reached the test host and killed it, and 904 of 2025 cases never ran** — Seen once on the guest on 2026-09-05, named `sizelessPane`, not reproduced on the next run; the roll call refused it and a hang dump is beside the results. → §WW406
+- 💭 **WW406** (deps: —) **an UnrenderableException reached the test host and killed it, and 904 of 2025 cases never ran** — Seen twice on the guest, 2026-09-05 and 2026-09-06, named `sizelessPane`; both runs name the same last-answered case and the same case never run. → §WW406
 - 💭 **WW409** (deps: —) **a flag that draws nothing is skipped by the run that drives every shape, so what those shapes open is asserted nowhere** — WW392 found the qualifier by going red on `--render`, and the same clause is what excuses four shapes from the only case that launches them. → §WW409
 
 ## Done when — Block A

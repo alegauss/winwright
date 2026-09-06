@@ -327,29 +327,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW401 the red that names the wrong thing
-
-This project's rule about a green covering an assertion that did not run has a mirror
-nobody has written down. WW384 put a case in that showed the desktop, and Windows'
-foreground lock then refused every later request for it — measured twice, and both runs
-cost the same five cases in `ContainsTests` and `ChordTests`. Every one of them failed,
-and none said anything about a desk. The one printed was `Assert.Contains() Failure:
-Sub-string not found`.
-
-A reader handed that goes looking at `Contains`. What actually happened is that the keys
-went to explorer, the read-out never changed, and the assertion compared two strings
-that were both honest about a window nobody had typed into.
-
-The suite already knows how to say this. `BusyDesk.Excused` turns a lost foreground into
-a hole naming the desk, and the cases that lose it *before* acting take that door. What
-has no door is losing it *during* — the precondition was met, the act ran, and the
-reading came back off a desk that had moved underneath it.
-
-Which is the excused check's own argument one step later: a reading taken after the desk
-moved is not a reading about the subject. The repair is a second look, and where the two
-disagree the verdict is a hole rather than a failure. The cost is one foreground read an
-act, against a class of red that sends a reader to the wrong file.
-
 ### §WW404 the file nobody says who is holding
 
 The sync deletes the guest tree and writes it again, and where something has a file open
@@ -422,27 +399,28 @@ the skill can say the word the tree says.
 
 ### §WW406 the exception that took the run with it
 
-A guest run died 48 seconds in: *Falha no processo do host de teste :
+A guest run died 48 seconds in: *Falha no processo do host de teste:
 UnrenderableException: Border 'sizelessPane' laid out to 0x0*. The suite reported 1121
 of 1121 passing and the roll call refused it — 904 of 2025 were never recorded at all —
 which is WW117 working exactly as it was built to. Then Blame waited out its ten idle
 minutes and dumped, so the run cost twenty.
 
 `SizelessPane` exists to provoke that refusal and the fixture raises it on purpose, in
-its own process, exiting 3. Nothing here says how one reached the test host. No case
-builds that pane in this process, and the last case to answer — `SuiteRunTests` — has
-nothing to do with rendering, so what the trace names is the thread that died rather
-than the case that armed it.
+its own process, exiting 3. Nothing here says how one reached the test host: no case
+builds that pane in this process.
 
-It did not reproduce: the next run passed 2025 of 2025 with nothing new excused, which
-makes this a rare fault rather than a broken build.
+It has reproduced, on 2026-09-06, in the same words and at about the same point — and
+both runs name the same two cases:
+`SuiteRunTests.The_whole_reading_names_every_case_that_ran_and_every_case_that_did_not`
+last to answer, and
+`AbsentTests.A_control_that_is_there_fails_the_claim_and_says_what_it_found` never run.
+Twice in about a dozen runs, so it is rare and it is not random, and those two names are
+where a diagnosis starts.
 
-The dump was the evidence and it is gone: it was written under the guest's own tree,
+The dump is the evidence and both are gone: each was written under the guest's own tree,
 which the next run's sync deletes before writing it again. So what this needs first is
 not a diagnosis but somewhere to keep one — a hang dump belongs where the trx goes, on
-the host. Then the question: which thread raises this where nothing catches it, and
-whether the rule `Renders` already states — never raise out of a window procedure —
-belongs somewhere else too.
+the host. Then the question: which thread raises this where nothing catches it.
 
 ### §WW409 the shapes the driver steps over
 

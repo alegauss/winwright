@@ -444,6 +444,98 @@ public sealed class CaseRunTests : IDisposable
     }
 
     [Fact]
+    public void A_reading_taken_after_the_desk_moved_is_a_hole_and_not_a_red()
+    {
+        // WW401. The rule against reporting a desk as a defect runs before an act: a step that could
+        // not own the foreground is a hole naming the desk, and the suite is full of cases taking
+        // that door. Its mirror was missing. The precondition was met, the keys went in, and by the
+        // time the expectation was read the window under test was not the one receiving them — and
+        // the run said the reading was wrong.
+        //
+        // What that cost is measured: WW384 put a case in that showed the desktop, and five cases in
+        // two other classes went red saying `Sub-string not found`. A desk fault wearing the words of
+        // five unrelated subjects, five times sending a reader to the wrong file.
+        //
+        // Arranged rather than waited for. The expectation is false, so it polls to its deadline;
+        // the decoy opens inside that window and takes the desk while the run is still looking. That
+        // is the shape of the real thing — an act that landed and a reading that did not come from
+        // the window it was about.
+        using var dialog = PumpedDialog.Open(
+            "winwright desk moves under it",
+            new PumpedDialog.ChildWindow("Edit", "alpha", WsChild | WsVisible, 20, 60, 200, 24));
+
+        dialog.BringToFront();
+
+        if (BusyDesk.Excused(Winwright.Windowing.Foreground.Check(dialog.Frame).AsPrecondition()))
+            return;
+
+        using var decoy = new Decoying();
+
+        var declared = CaseDeclaration.Of(
+            "the desk moves while the reading is taken",
+            StepDeclaration.Of("Edit", "type", "beta", expected: "never this", reads: "value"));
+
+        var run = Run(declared, AutomationElement.FromHandle(dialog.Frame));
+
+        // The decoy did not arrive in time, which is the desk and not the rule: what this case is
+        // about only happens where the foreground actually moved, and saying so beats asserting
+        // about a run in which nothing did.
+        if (Winwright.Windowing.Foreground.Check(dialog.Frame).Ours)
+        {
+            Assert.True(
+                BusyDesk.Excused(
+                    Winwright.Verdicts.Precondition.Absent(
+                        "the foreground belongs to the window under test",
+                        "the decoy never took the desk, so nothing moved under the reading")),
+                "the decoy never took the desk and this measured nothing");
+
+            return;
+        }
+
+        // A hole naming the desk, and not a red about a text box. The whole of WW401 is which of the
+        // two a reader is handed.
+        Assert.Equal(RunOutcome.Degraded, run.Verdict.Outcome);
+
+        var hole = Assert.Single(run.Verdict.Unchecked);
+        Assert.Equal(Winwright.Windowing.Foreground.PreconditionName, hole.Missing?.Name);
+    }
+
+    /// <summary>
+    /// A window that takes the desk a moment from now. WW401, and a moment rather than at once: what
+    /// this case needs is the foreground moving <em>during</em> a reading, so the decoy has to arrive
+    /// after the act has been attempted and before the expectation gives up.
+    /// </summary>
+    private sealed class Decoying : IDisposable
+    {
+        private readonly ManualResetEventSlim opened = new();
+        private PumpedDialog? decoy;
+
+        internal Decoying()
+        {
+            var thread = new Thread(() =>
+            {
+                Thread.Sleep(100);
+                decoy = PumpedDialog.Open("winwright takes the desk mid-act");
+                opened.Set();
+            })
+            {
+                IsBackground = true,
+            };
+
+            thread.Start();
+        }
+
+        public void Dispose()
+        {
+            // Waited for before it is closed, or a decoy still opening outlives this case and takes
+            // the desk from whatever runs next — which is the fault WW384 spent two guest runs on.
+            opened.Wait(TimeSpan.FromSeconds(10));
+            decoy?.Dispose();
+            opened.Dispose();
+        }
+    }
+
+    [Fact]
     public void A_capture_with_nowhere_declared_to_put_it_is_a_hole_and_not_a_path_invented_here()
     {
         // WW336. A run that guessed a directory would be a run whose pictures land somewhere nobody

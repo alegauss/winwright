@@ -1110,8 +1110,59 @@ public static class CaseRun
         }
 
         trace.Add(recorded);
+
+        // WW401. A reading taken after the desk moved is not a reading about the subject, and until
+        // here it was reported as one. The rule this project already has runs before an act — a step
+        // that could not own the foreground is a hole naming the desk — and its mirror was missing:
+        // the precondition was met, the keys went in, and by the time the expectation was read the
+        // window under test was not the one receiving them.
+        //
+        // Measured, and it is what WW384 cost. A case in this suite showed the desktop, Windows'
+        // foreground lock then refused every later request for it, and five cases in two other
+        // classes went red saying `Assert.Contains() Failure: Sub-string not found` — a desk fault
+        // wearing the words of five unrelated subjects, sending a reader to the wrong file five
+        // times.
+        //
+        // Narrow on purpose, and each clause pays for itself. Only where the expectation failed,
+        // because a step that held is a step whose reading arrived. Only where the verb synthesises
+        // input, because a pattern act needs no foreground and a hole about one would be an excuse
+        // for a defect. And only where the subject has a window of its own to compare, since a case
+        // resolving against the desktop has none and the comparison would answer about the shell.
+        if (!expectation.Held && step.Verb.Synthesises && LostTheDesk(subject) is { } elsewhere)
+        {
+            results.Add(AssertionResult.Unchecked(step.Name, elsewhere).At(trace.Count));
+
+            // Stopped, for the reason an act that was never attempted stops: everything after this
+            // was written assuming the window took what was sent, and running it produces reds about
+            // a state nobody put the application into.
+            return false;
+        }
+
         results.Add(expectation.AsAssertion().At(trace.Count));
         return true;
+    }
+
+    /// <summary>
+    /// Whether the desk moved out from under this subject, said as the absence it is. WW401.
+    /// <para>
+    /// Read after the act rather than kept from before it, which is the whole of what it adds: the
+    /// reading the run turned on was taken at the end, so what has to be true is that the window was
+    /// still the one in front <em>then</em>.
+    /// </para>
+    /// <para>
+    /// Null where the subject has no window, and that is not a fallback. A case resolving against the
+    /// desktop — which is what a resident fixture's cases do — would otherwise be compared against
+    /// the shell's own window and answer that the desk belongs to somebody else on every run.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">The subject the step acted on.</param>
+    private static Precondition? LostTheDesk(Subject subject)
+    {
+        if (subject.Window == 0)
+            return null;
+
+        var held = Winwright.Windowing.Foreground.Check(subject.Window);
+        return held.Ours ? null : held.AsPrecondition();
     }
 
     /// <summary>

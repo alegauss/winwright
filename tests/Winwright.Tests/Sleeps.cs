@@ -159,6 +159,15 @@ internal static class Sleeps
         new("FrameRunTests.cs", 2, Sleeping.UnderTest,
             "a writer made deliberately slow so the capture falls behind — the sleeping is the "
                 + "condition under test and waiting for it would be waiting for the case's own hand"),
+        new("CaseRunTests.cs", 2, Sleeping.UnderTest,
+            "WW401, and the delay is the condition: what that rule is about is a desk that moves "
+                + "while a reading is being taken, so the decoy has to arrive after the act landed "
+                + "and before the expectation gives up. There is nothing to wait on — the thing "
+                + "being reproduced is the timing itself, and a signal would be the case telling "
+                + "itself when to fire. The second parking is the opposite and is why the count is "
+                + "two: disposal waits on that thread's own signal before closing the decoy, because "
+                + "one still opening would outlive the case and take the desk from whatever runs "
+                + "next, which is the fault WW384 spent two guest runs on"),
         // --- parked on a signal, which WW198 widened the reading to see ------------------------------
         new("ApartmentTests.cs", 2, Sleeping.UnderTest,
             "an event nobody ever sets, waited on twice so the apartment's own deadline has something "
