@@ -281,29 +281,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW404 the file nobody says who is holding
-
-The sync deletes the guest tree and writes it again, and where something has a file open
-in it Windows refuses with a sentence naming the directory. That sentence is the whole
-of what comes back: `Remove-Item : cannot remove the item C:\src\winwright: the process
-cannot access the file`.
-
-Which process is the only question a reader has, and the guest already knows. WW386 made
-this reachable twice over — the bound leaves whatever was running exactly where it is,
-and the refusal now says the next sync will meet it — but a person who runs again anyway
-gets the path and no name, and a person whose guest is holding it for some other reason
-gets nothing at all.
-
-This is the same shape as every other refusal here. WW371's clearer names the window it
-left alone and why; the probe names the process holding the desk, its pid and its class,
-because WW331 proved a state without a name sends a reader to a console. The sync is the
-one refusal in this file that answers with a path.
-
-What it would take is a handle reading in the guest — `openfiles`, or a walk of the
-processes whose working directory is under the tree — run on the failure rather than
-always, and folded into the same sentence. Nothing about it needs a new door: `sync.ps1`
-is generated here and already reports back through `sync.log`.
-
 ### §WW405 the process the suite cannot have two of
 
 A run drives an application in a process of its own, and every reading the engine takes
@@ -348,6 +325,77 @@ The vocabulary is not a guess: `UiaVocabulary` already knows every control type 
 grammar accepts, and the locator step will not carry one it does not. So the rule can
 have a second arm — a backticked token that is a control type is a control type — and
 the skill can say the word the tree says.
+
+### §WW415 the name is worth most while it is still running
+
+The refusal WW386 writes when `-Bound` runs out says what will happen next: whatever is
+running holds the tree, and the next sync will refuse. It is a correct sentence and an
+incomplete one, because the guest is standing right there and could be asked.
+
+WW404 wrote the asking. `Get-WhatHolds` walks the guest's processes twice over — one
+running from under the tree, one with the tree's assemblies mapped in — and folds the
+answer into the sync's refusal. The bound could call the same walk and does not, so the
+order a person meets these in is backwards: the bound refuses with a prediction, and the
+prediction comes true a command later with the names attached.
+
+What it costs is one more `runProgramInGuest` on the bound's own failure path, running a
+script already sitting in the sync folder. Nothing new is generated and nothing new is
+copied. The walk would need lifting out of `sync.ps1` into a file of its own so both
+callers reach the same code, which is the shape `desk-probe.ps1` and `desk-clear.ps1`
+already have and the reason they have it.
+
+The reading is worth more at the bound than at the sync, too. At the bound the process
+is still doing whatever wedged it, and its name is the question — a test host at 40% CPU
+and one sitting on a modal dialog are different faults. By the next sync it is only in
+the way.
+
+### §WW416 the words that cross between the two machines
+
+`sync.ps1` and `run.cmd` are generated on the host, run in the guest, and answer through
+a log file. What crosses that gap is a handful of capitalised words at the start of a
+line — `GUEST-MISSING dotnet` since WW149, `GUEST-HELD` and `GUEST-HOLDER` since WW404 —
+and the host switches on them with `-match`. It is a protocol, and it is the only one
+here nobody reads back.
+
+The failure it allows is quiet in both directions. A marker the guest writes that no arm
+matches falls through to the general refusal, which prints the log and loses the point
+of having written it; an arm matching a marker the guest stopped writing is dead code
+that reads as coverage. Neither shows up as a red, because the sync failing at all is
+already rare enough to be somebody's afternoon.
+
+Every other catalogue in this project is held both ways, and for exactly this:
+`Arms.All`, `Surfaces.Known`, `Criteria.Known`, `Sleeps.Known`, `Readings.All`. The
+runner has one of its own — WW388's `$script:Tidied` against the arms that clear a desk.
+This is the same case one file over.
+
+What it needs is the split the reading depends on. The generated scripts live inside
+`@"` here-strings in `run-tests-vm.ps1`, so the guest's half and the host's half are the
+same file, and a case would have to cut it at those markers before comparing. That cut
+is worth having anyway: it is the line between the two machines, and nothing names it.
+
+### §WW417 the half that could answer before the VM starts
+
+A large part of this suite never touches a desk. `SettledTeardownTests` reads the
+sources and matches three tokens; `CriteriaTests`, `SurfaceCatalogueTests`, `SleepTests`
+and the rest of the catalogues held both ways do the same. They cost milliseconds and
+they are the cases most likely to be red after an edit, because they are the ones nobody
+was thinking about.
+
+WW404 measured what it costs to meet one of them last. The case added there copied an
+executable into a temp tree, started it and deleted the tree — the shape WW201 wrote a
+rule against — and the rule said so seventeen minutes into a guest run, having already
+carried the tree, built nine projects and run two thousand cases. The fix took a minute.
+Then another run, because the first is not evidence of the second.
+
+The split is already written down. A class that needs the desk carries
+`[Collection(WindowFixture.Serial)]`; a class that does not, does not. Everything
+outside that collection runs on the host, in any order, while somebody is using the
+machine — which is the whole reason the collection exists.
+
+So the runner could answer the cheap half before it starts a VM, and refuse there. What
+it needs is the sentence as much as the filter: a red from the host gate has to read as
+*this would have been red in the guest too*, not as a second suite with a verdict of its
+own. And `run-tests-vm.cmd` has to run it rather than offer it.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

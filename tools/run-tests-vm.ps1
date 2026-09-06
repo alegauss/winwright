@@ -898,7 +898,35 @@ Write-Host "  carrying    $($files.Count) files, $size MB ($carrying)"
 # over from a file that is no longer in the tree.
 @"
 `$ErrorActionPreference = 'Stop'
-if (Test-Path -LiteralPath '$script:GuestRepo') { Remove-Item -LiteralPath '$script:GuestRepo' -Recurse -Force }
+
+function Get-WhatHolds {
+    # WW404. Windows refuses the delete with the directory's name and never with the name of whoever
+    # has it open, and the one machine that can answer that is this one. Two readings, because a
+    # suite in the guest is two kinds of process: the test host runs from under the tree, and the
+    # runtime hosting it does not but has the tree's assemblies mapped in.
+    `$held = @()
+    foreach (`$one in Get-Process) {
+        `$where = `$null
+        try { `$where = `$one.Path } catch { }
+        if (`$where -and `$where.StartsWith('$script:GuestRepo', 'OrdinalIgnoreCase')) {
+            `$held += "`$(`$one.ProcessName) (`$(`$one.Id)) runs from `$where"
+            continue
+        }
+        `$mapped = @()
+        try { `$mapped = @(`$one.Modules | Where-Object { `$_.FileName -and `$_.FileName.StartsWith('$script:GuestRepo', 'OrdinalIgnoreCase') }) } catch { }
+        if (`$mapped.Count -gt 0) { `$held += "`$(`$one.ProcessName) (`$(`$one.Id)) has `$(`$mapped[0].FileName) loaded" }
+    }
+    return `$held
+}
+
+if (Test-Path -LiteralPath '$script:GuestRepo') {
+    try { Remove-Item -LiteralPath '$script:GuestRepo' -Recurse -Force }
+    catch {
+        Write-Output ('GUEST-HELD ' + (`$_.Exception.Message -replace '\s+', ' '))
+        foreach (`$one in Get-WhatHolds) { Write-Output "GUEST-HOLDER `$one" }
+        exit 92
+    }
+}
 `$null = New-Item -ItemType Directory -Path '$script:GuestRepo' -Force
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [IO.Compression.ZipFile]::ExtractToDirectory('$script:GuestSync\source.zip', '$script:GuestRepo')
@@ -986,6 +1014,19 @@ if (-not $synced.Ok) {
     if ($syncSaid -match 'GUEST-MISSING dotnet') {
         Refuse 'the guest has no .NET SDK' 'Install it once in the VM. This script does not provision a machine.'
     }
+
+    # WW404. The tree would not delete, and the guest was asked who has it before the answer got
+    # this far. An empty list is an answer too, and a different one: it says the walk ran and found
+    # nothing running from under the tree, which sends a reader somewhere other than Task Manager.
+    if ($syncSaid -match 'GUEST-HELD') {
+        $said = $syncSaid -split "`r?`n"
+        $windows = (($said | Where-Object { $_ -match '^GUEST-HELD ' }) -replace '^GUEST-HELD ', '') -join ' '
+        $holders = @(($said | Where-Object { $_ -match '^GUEST-HOLDER ' }) -replace '^GUEST-HOLDER ', '')
+        $by = if ($holders.Count -gt 0) { "held open by $($holders -join '; ')" }
+              else { 'held open by nothing the guest is running, so something outside it has a file there' }
+        Refuse "the guest tree is $by" "Windows said: $windows. End them at the guest console, or revert the VM to a clean snapshot. A run that -Bound gave up on, or one killed by hand, leaves exactly this."
+    }
+
     Refuse "the guest tree would not sync: $syncSaid $($synced.Output)"
 }
 Write-Host "  guest tree  $syncSaid"

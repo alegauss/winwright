@@ -378,6 +378,7 @@
 - ✅ **WW399** **a tray locator naming its container works against one kind of tray and not the other, and nothing warns an adopter** — The skill says to address a tray menu at its entries and why, and a case holds that sentence to what this suite measured (design recorded in `skills/winwright/SKILL.md`).
 - ✅ **WW400** **three of the probe's six answers are still produced only from typed looks, and two of them can now be arranged** — `stale` and `clear` are produced from real looks now, so five of the six answers come from a window this suite put up (design recorded in `tests/Winwright.Tests/DeskProbeTests.cs`).
 - ✅ **WW401** **a case that loses the desk mid-act fails in the words of its own subject, so a desk fault reads as five separate defects** — A failed reading after a synthesised act looks again, and a window that lost the desk is a hole naming it, not a red (design recorded in `src/Winwright/Scenarios/CaseRun.cs`).
+- ✅ **WW404** **a sync refused by something holding the guest tree names the path and never what is holding it** — The refusal names the processes holding the tree, and finding none is its own sentence (design recorded in `tools/run-tests-vm.ps1, tests/Winwright.Tests/DeskProbeTests.cs`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

@@ -196,6 +196,82 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    public void A_tree_something_is_running_from_is_reported_with_the_name_holding_it()
+    {
+        // WW404. Windows refuses the sync with the directory it would not delete and never with the
+        // name of what has it open, and that sentence was the whole of what came back — WW386's
+        // bound leaves a suite exactly where it was, so the next run met `the process cannot access
+        // the file C:\src\winwright` and finding out which process meant already knowing.
+        //
+        // The walk runs in the guest, so what is checked here is the walk and not the refusal: this
+        // builds the state the guest gets into — a tree with a live process running out of it — and
+        // asks the runner's own code who has it. Read out of the generated script rather than
+        // copied, because a case holding its own copy would pass over a guest that lost this one.
+        var tree = Path.Combine(Path.GetTempPath(), $"winwright-ww404-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tree);
+
+        // A copy, so what answers is a process of this tree and not the system's own cmd. It runs
+        // long enough for the walk to see it and is stopped below either way.
+        var holder = Path.Combine(tree, "holder.exe");
+        File.Copy(Path.Combine(Environment.SystemDirectory, "cmd.exe"), holder);
+
+        var script = Path.Combine(Path.GetTempPath(), $"winwright-ww404-{Guid.NewGuid():N}.ps1");
+
+        try
+        {
+            // WW201's door, and this case is the exact shape it was written for: the tree deleted
+            // below is the one the image runs out of, and stopped is not gone. The block closes
+            // before the delete, on the way out of an assertion as much as past one.
+            using (var settling = Attachable.Settling())
+            {
+                var walking = Attachable.Launch(
+                    settling.Register,
+                    new ProcessStartInfo(holder)
+                    {
+                        ArgumentList = { "/c", "ping", "127.0.0.1", "-n", "60" },
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    });
+
+                var walk = Between(Runner(), "function Get-WhatHolds {", "\n}")
+                    .Replace("$script:GuestRepo", tree, StringComparison.Ordinal)
+                    .Replace("`$", "$", StringComparison.Ordinal);
+
+                Assert.Contains("Get-Process", walk, StringComparison.Ordinal);
+
+                File.WriteAllText(
+                    script,
+                    $$"""
+                    $ErrorActionPreference = 'Stop'
+                    function Get-WhatHolds {
+                    {{walk}}
+                    }
+                    Get-WhatHolds | ForEach-Object { Write-Output $_ }
+                    """);
+
+                var said = Answered(script);
+
+                // The pid as well as the name, because the sentence exists to be acted on: two runs
+                // wedged in the guest are two of the same name, and a reader ending the wrong one
+                // has done nothing except lose the state that would have said why.
+                Assert.Contains(
+                    said,
+                    one => one.Contains($"({walking.Pid})", StringComparison.Ordinal)
+                        && one.Contains("holder", StringComparison.OrdinalIgnoreCase));
+
+                // And nothing else, which is the half that makes the sentence worth printing: a
+                // walk answering every process on the machine names the holder and buries it.
+                Assert.All(said, one => Assert.Contains(tree, one, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+        finally
+        {
+            File.Delete(script);
+            Directory.Delete(tree, recursive: true);
+        }
+    }
+
+    [Fact]
     public void The_shell_is_not_on_the_list_of_things_that_are_the_desktop()
     {
         // The repair that hid the reading. Folding the taskbar in with Progman and WorkerW makes a
