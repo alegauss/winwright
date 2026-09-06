@@ -398,6 +398,11 @@ public sealed record Flags
             "",
             "a pane drawn with no automation peers at all, which a locator resolves against nothing",
             "the only surface with no accessibility tree was an installer page in another repository, behind a compiler that has to be installed first"),
+        new Flag(
+            "unadopted",
+            "",
+            "a window whose application never took the in-app half, so a render ask reaches a window procedure that declines it",
+            "an application with no half and one with a half armed were two windows of the suite's own process, so a reading the engine holds per application could not be told from one held per window - which is the mistake WW387 shipped and a guest run found"),
     ]);
 
     /// <summary>The shapes a person driving this by hand can actually look at.</summary>

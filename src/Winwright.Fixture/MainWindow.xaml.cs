@@ -155,7 +155,13 @@ public partial class MainWindow : Window
         // so the toast this fixture raises beside it was a window a harness was told the application
         // did not take the message for — the same sentence as an application that never adopted the
         // half at all, and a different fault.
-        renders ??= Protocol.Renders();
+        //
+        // WW405: unless this run was asked to be that application. Every window here answers, so an
+        // application with no half at all was a thing the suite could only build inside its own
+        // process — and a reading the engine holds per application is exactly what one process
+        // cannot prove. This is the other half, in a process of its own.
+        if (!Shapes.Has("unadopted"))
+            renders ??= Protocol.Renders();
 
         Protocol.Report(this, panes, panes.SelectedContent as FrameworkElement);
     }

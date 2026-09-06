@@ -659,6 +659,77 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
     }
 
     [Fact]
+    public void An_application_with_no_half_teaches_the_harness_nothing_about_the_one_beside_it()
+    {
+        // WW405. The reading WW387 got wrong and could not be checked here. A memo keyed by process
+        // id is the right key for a run — a half is armed for an application, not for one of its
+        // windows — and this suite drives its fixtures inside the process running the cases, so
+        // keyed that way it was wrong on its first guest run and green on every host one.
+        //
+        // Two processes, which is what --unadopted is for: one application that never took the half
+        // and one that did, each with a pid of its own. Nothing here asserts which key the engine
+        // uses. What it asserts is the behaviour that key exists to get right, so the next reading
+        // held per application meets a case rather than a guest run.
+        var pictures = Directory.CreateTempSubdirectory("winwright-two-applications-").FullName;
+        try
+        {
+            var without = Starting("--unadopted");
+            without.Environment[OwnRender.RendersInto] = pictures;
+            var deaf = Attachable.Launch(register, without);
+            var unadopted = Assert.Single(Waited(deaf.Pid, howMany: 1));
+
+            // Asked first, so whatever the harness remembers about it is remembered before the
+            // application that answers is ever asked. The order is the whole provocation.
+            var waited = System.Diagnostics.Stopwatch.StartNew();
+            var refused = OwnRender.Into(unadopted.Handle, Path.Combine(pictures, "unadopted.png"));
+            var paid = waited.ElapsedMilliseconds;
+
+            Assert.False(refused.Answered, refused.Sentence());
+            Assert.Contains("Renders.Answer", refused.Sentence(), StringComparison.Ordinal);
+
+            var with = Starting();
+            with.Environment[OwnRender.RendersInto] = pictures;
+            var armed = Attachable.Launch(register, with);
+            var adopted = Assert.Single(Waited(armed.Pid, howMany: 1));
+
+            Assert.NotEqual(deaf.Pid, armed.Pid);
+
+            // Waited on rather than asked once: an application starts answering when its content has
+            // rendered, and a desk slow enough to be asked before that reads a race as the defect.
+            var path = Path.Combine(pictures, "adopted.png");
+            Waits.Until(
+                "draw",
+                $"pid {armed.Pid} never answered a render, having been asked after one that does not",
+                () => OwnRender.Into(adopted.Handle, path).Answered);
+
+            Assert.True(File.Exists(path));
+
+            // And back the other way, because a memo that leaked would leak in whichever direction
+            // it was written: the application with no half still has none, and still says so.
+            var second = System.Diagnostics.Stopwatch.StartNew();
+            var again = OwnRender.Into(unadopted.Handle, Path.Combine(pictures, "again.png"));
+            var cost = second.ElapsedMilliseconds;
+
+            Assert.False(again.Answered, again.Sentence());
+            Assert.Contains("Renders.Answer", again.Sentence(), StringComparison.Ordinal);
+
+            // WW387's saving, with a second application armed in between. Whether the memory stands
+            // is a per-process reading — it is set aside for a process that has put up a presence
+            // window — and in one process that question can only be asked about the suite itself, so
+            // OwnRenderTests answers it about windows whose owner is the test host either way. Here
+            // the half that armed belongs to somebody else, which is the case a run has.
+            Assert.True(
+                cost < OwnRender.HookedWithinMs,
+                $"the second ask spent {cost}ms against the first's {paid}ms, which is the whole wait"
+                    + " again for an application that had already said it has no half");
+        }
+        finally
+        {
+            Directory.Delete(pictures, recursive: true);
+        }
+    }
+
+    [Fact]
     public void A_run_whose_only_window_is_a_toast_has_no_main_window_at_all()
     {
         // The whole reason the launcher enumerates. Asked which window it had, this process

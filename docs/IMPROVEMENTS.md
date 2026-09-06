@@ -281,28 +281,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW405 the process the suite cannot have two of
-
-A run drives an application in a process of its own, and every reading the engine takes
-about "the application" means that process. This suite drives its fixtures in the
-process running the cases, which is why WW247 moved three of them in — and it means one
-process holds the harness, an application with no in-app half, one armed, and one about
-to arm, all at once.
-
-WW387 found the edge. A memory keyed by process id is the right key for a run and the
-wrong one here: a fixture with no half taught the harness a sentence, and the harness
-then said it about a different fixture's window that was seconds from answering. The
-case that caught it is WW374's, which had nothing to do with the change.
-
-The repair was to key by window, which is sound and buys less. What is not repaired is
-the shape: the next reading the engine wants to hold per application meets the same
-wall, and nothing says so before the guest run does.
-
-Two doors, and they are not the same size. A fixture in a process of its own is what
-`Winwright.Fixture` already is, so a case wanting one has one — at the cost of a launch.
-Or the suite says out loud which readings it cannot prove, the way `Criteria` says which
-claims nothing shows, so the wall is met at the design rather than at the red.
-
 ### §WW414 the word the skill cannot say
 
 `Every_verb_the_skill_names_is_a_verb_the_engine_exports` reads every backticked token
@@ -397,32 +375,80 @@ it needs is the sentence as much as the filter: a red from the host gate has to 
 *this would have been red in the guest too*, not as a second suite with a verdict of its
 own. And `run-tests-vm.cmd` has to run it rather than offer it.
 
+### §WW418 the owner the reading asks about is us
+
+`OwnRender` skips the wait for a window it has already waited out, and sets that memory
+aside the moment the owning process puts up a presence window — a half that arms later
+has something new to say, and the run has to hear it. The reading is about the owner,
+and `OwnRenderTests` asks it about windows built on pumping threads here, so the owner
+is the test host.
+
+That makes `An_application_with_no_half_is_waited_out_once_and_not_once_a_step` true
+only while nothing else in this process is holding an armed half open. Every case that
+arms one disposes it, so it holds today; a class that kept one for its lifetime — which
+is what `FixtureTests` does with a register, and what an adopting suite would naturally
+do — turns that case into a wait taken twice and a red about somebody else's fixture.
+
+WW405 built the way out and used it once. `--unadopted` gives the suite an application
+in a process of its own that never took the half, so the ownership question has a real
+answer: the presence window the harness looks for belongs to a process that is not this
+one, and what an unrelated class did has nothing to do with it.
+
+So the skip case could move, or gain a twin, and stop depending on the test host's own
+state. It costs two launches where it costs none now, which is the reason to think about
+it rather than a reason not to.
+
+### §WW419 the second application nobody has asked anything
+
+The engine asks an application several questions through the in-app half: what surfaces
+it drew, where its controls are, whether this binary is already running, what it
+renders. Each answer comes back through a variable naming a file, and every case here
+drives exactly one application while it asks.
+
+That is not what a run looks like. A scenario attaches to a product that launched a
+helper, or drives two applications that talk to each other, or meets the copy of itself
+an earlier case left behind. Each of those is two processes with the half armed in both,
+writing into the directory one variable names — and nothing here has ever put two of
+them there at once.
+
+WW387 is what this costs when it is wrong: a reading held per application, right on
+every host run, wrong on the first guest one. WW405 fixed the reason nobody could check
+— the suite now launches applications that differ in whether they took the half at all —
+and spent it on the one reading that had already gone wrong.
+
+So the rest are unasked rather than answered. What it would take is a case per reading
+with two fixtures up: a surface report from each, a geometry dump from each, an instance
+check that finds one and not the other. If the answers collide in the file they share,
+that is a fault every adopter meets and this suite is built not to find.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW406 the exception that took the run with it
 
-A guest run died 48 seconds in: *Falha no processo do host de teste:
-UnrenderableException: Border 'sizelessPane' laid out to 0x0*. The suite reported 1121
-of 1121 passing and the roll call refused it — 904 of 2025 were never recorded at all —
-which is WW117 working exactly as it was built to. Then Blame waited out its ten idle
-minutes and dumped, so the run cost twenty.
+A guest run died 48 seconds in: *UnrenderableException: Border 'sizelessPane' laid out
+to 0x0*. The suite reported 1121 of 1121 passing and the roll call refused it — 904 of
+2025 were never recorded at all — which is WW117 working exactly as it was built to.
+Then Blame waited out its ten idle minutes and dumped, so the run cost twenty.
 
 `SizelessPane` exists to provoke that refusal and the fixture raises it on purpose, in
-its own process, exiting 3. Nothing here says how one reached the test host: no case
-builds that pane in this process.
+its own process, exiting 3. No case builds that pane in this process.
 
-It has reproduced, on 2026-09-06, in the same words and at about the same point — and
-both runs name the same two cases:
+Three runs now, the third on 2026-09-06, and every one names
 `SuiteRunTests.The_whole_reading_names_every_case_that_ran_and_every_case_that_did_not`
-last to answer, and
-`AbsentTests.A_control_that_is_there_fails_the_claim_and_says_what_it_found` never run.
-Twice in about a dozen runs, so it is rare and it is not random, and those two names are
-where a diagnosis starts.
+as the last to answer. The third kept its Blame sequence, whose final entry is the case
+that was still executing:
+`SuiteRunTests.A_project_that_declares_captures_runs_the_step_rather_than_refusing_it`.
+It printed no exception at all — the host simply went away — so what these runs share is
+the point they reach, not the words they end with.
 
-The dump is the evidence and both are gone: each was written under the guest's own tree,
-which the next run's sync deletes before writing it again. So what this needs first is
-not a diagnosis but somewhere to keep one — a hang dump belongs where the trx goes, on
-the host. Then the question: which thread raises this where nothing catches it.
+The dump is the evidence and the first two are gone: each was written under the guest's
+own tree, which the next run's sync deletes before writing it again. The third was
+copied off by hand and is kept at `d:\tmp\winwright-ww406`, with its sequence and trx
+beside it.
+
+That is the shape of the first half — a hang dump belongs where the trx goes, on the
+host, without anybody remembering. The second is the question it answers: which thread
+is waiting, and on what.
 
 ### §WW409 the shapes the driver steps over
 
