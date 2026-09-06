@@ -14,10 +14,10 @@
 
 ## Block D — Act — patterns before pointers
 
-- 💭 **WW390** (deps: —) **nothing holds a third bool-and-two-outs verb to the annotation, so the next one costs a task to notice** — WW364 and WW377 each found the other's omission by shipping, and a method written tomorrow with that signature compiles unannotated. → §WW390
 - 💭 **WW394** (deps: —) **a rung added to the ladder's walk prints the rung below it's sentence, because the verdict's switch ends in a default** — WW381 added the fifth rung and read the switch to check it was safe; it is, and only because `settle` is the one the default happens to name. → §WW394
 - 💭 **WW395** (deps: —) **the guarding rung spells the engine's interval itself, so moving the engine's leaves it pricing a placement nobody pays** — WW381 needed the engine's fifty milliseconds outside the engine and `Keys.FirstLookMs` is internal, so the number is now typed in three places. → §WW395
 - 💭 **WW397** (deps: —) **the ladder's control has stopped reading zero, so every rung above it is refused and the tool can attribute nothing** — WW381 ran it twice on 2026-09-05 and `arm` faulted 1 of 1200 both times, where WW355 read 0 of 3200 and WW368 read 0 of 1200. → §WW397
+- 💭 **WW408** (deps: —) **the sweeps over the shipped halves each name their own two assemblies, and nothing says what shipped means** — WW390 had to decide its own coverage and write the reason down; the sweep beside it reads one assembly and a third reads a namespace. → §WW408
 
 ## Block E — Capture — the picture that proves what it photographed
 

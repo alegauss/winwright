@@ -149,6 +149,7 @@
 - ✅ **WW368** **the provoke arm reads zero for the read the engine now makes and the engine still faults once in twelve hundred** — A ladder walks the arm to the act a difference at a rung, reproduces its 1 in 1200, and names the per-round focus (design recorded in `tools/Winwright.Typing/Transfer.cs`).
 - ✅ **WW377** **Chord.TryParse has the shape WW364 annotated and none of the annotation, so its callers spell the bangs instead** — Chord.TryParse says which out is null on which answer, the three bangs are gone, and neither engine caller had to change (design recorded in `src/Winwright/Acting/Chord.cs`).
 - ✅ **WW381** **the pause sits after the send and WW368 put the provoking call before it, so it guards the half already acquitted** — The ladder holds both placements: `guard` is the act with the engine's fifty milliseconds above the send, a run from an answer (design recorded in `tools/Winwright.Typing/Transfer.cs`).
+- ✅ **WW390** **nothing holds a third bool-and-two-outs verb to the annotation, so the next one costs a task to notice** — A sweep over both shipped halves finds every bool-and-out verb by reflection, so the third one is caught the day it compiles (design recorded in `tests/Winwright.Tests/TryVerbTests.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

@@ -102,31 +102,6 @@ copies the recursion instead of the line.
 
 ## Block D — Act — patterns before pointers
 
-### §WW390 the promise no list holds
-
-Two verbs in this engine answer a bool with an out for the value and an out for the
-reason, and both got their annotation by somebody noticing the other. WW364 annotated
-`Locator.TryParse` because four bangs in `StepDeclaration` had accumulated and WW351 had
-just added one; WW377 annotated `Chord.TryParse` because WW364's own shipping made the
-omission visible one verb over.
-
-Nothing holds a third. A method written tomorrow with the same signature and no
-attributes compiles, its callers spell bangs, and the argument for fixing it arrives the
-way both of these did — as a bang somebody already wrote, months later, in a file about
-something else. Each of those repairs cost a task.
-
-The check is derivable rather than curated, which is what this project reaches for
-whenever two lists could drift. Every exported method that answers a `bool` and carries
-`out` parameters is findable by reflection; requiring `NotNullWhen` on the nullable ones
-is one assertion, and a method that means something else says so in a list beside it —
-the shape `MayAnswerYesOrNo` already has in `RecordedResultTests` for a neighbouring
-rule.
-
-Scope is what to decide first. The engine's two are the whole population, so the check
-passes the day it is written and its only value is the third method — which is exactly
-the value `Deadlines` and `Sleeps` have. Whether the fixture and the tools are in it is
-the other half: a catalogue covering less than a reader assumes is worse than none.
-
 ### §WW394 the rung the ladder would misname
 
 `Transfer.Verdict` says which rung a rate entered on, and says what that rung adds with
@@ -191,6 +166,28 @@ What it needs is a fact about the guest and not about the engine — what the fa
 floor is on this machine now, taken with the ladder or with any of the four arms that
 used to read zero. Until that exists, every reading `transfer`, `provoke` and `sweep`
 are asked for is a reading somebody has to throw away after the run.
+
+### §WW408 what a sweep means by shipped
+
+Every reflection sweep here begins by saying which code it is about, and each says it
+differently. WW390's reads the engine and the in-app half, because those are what
+somebody else writes against. `RecordedResultTests` reads one assembly and narrows to a
+namespace. `SourceSweepTests` walks files. None is wrong and no two agree.
+
+What that costs is paid at the moment a sweep is written, which is the moment its author
+has least to go on: WW390 spent a paragraph arguing that the fixture and the tools are
+programs whose bangs their own author can see, and the next sweep will argue it again,
+possibly the other way. A catalogue covering less than a reader assumes is worse than
+none, and nothing here says what a reader should assume.
+
+The fact is small and stable: two assemblies are consumed by code this project does not
+own, and two are programs with one caller each. It belongs somewhere a sweep can read it
+rather than in the sweeps that have already chosen — `Checkout` is where the equivalent
+fact about paths lives, so there is already a place for it.
+
+What it would settle is not this rule but the next one's first paragraph. A sweep would
+name its coverage by pointing rather than by arguing, and one that meant something
+narrower would say so against a list rather than in place of one.
 
 ## Block E — Capture — the picture that proves what it photographed
 
