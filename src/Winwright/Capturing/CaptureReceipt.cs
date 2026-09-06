@@ -214,6 +214,12 @@ public sealed record CaptureReceipt
     /// <param name="take">What writes the file. Given the path, and called between the readings.</param>
     /// <param name="frame">What is being copied against what the window owns, where it was read.</param>
     /// <param name="route">Which way the picture is being got, and why.</param>
+    /// <param name="surface">
+    /// Whether the picture is of a surface inside the window rather than of the window. WW402: it
+    /// decides one question and no other — a surface drawn by the application may honestly hold one
+    /// colour, and a window that laid out flat is the defect <c>--blank</c> reproduces. The caller
+    /// says which, because it is the one fact this door cannot read off the file.
+    /// </param>
     /// <exception cref="WrongCaptureException">
     /// Where any of the questions answers wrongly. The file is written either way, because a
     /// picture nobody may trust is still evidence about what went wrong — what the refusal withdraws
@@ -225,7 +231,8 @@ public sealed record CaptureReceipt
         AppTarget target,
         Action<string> take,
         PaintedFrame? frame = null,
-        CaptureRoute? route = null)
+        CaptureRoute? route = null,
+        bool surface = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(window);
@@ -256,7 +263,7 @@ public sealed record CaptureReceipt
         // as itself instead of as a picture of one colour.
         var colours = File.Exists(path) ? Capturing.Colours.In(path) : null;
 
-        return Of(path, window, target, frame, route, over, glass, colours, layers);
+        return Of(path, window, target, frame, route, over, glass, colours, layers, surface);
     }
 
     /// <summary>
@@ -300,6 +307,10 @@ public sealed record CaptureReceipt
     /// own glass is carrying what is behind it, or where the picture is one flat colour. Every one
     /// is a wrong capture that a file on disk looks exactly the same as.
     /// </exception>
+    /// <param name="surface">
+    /// Whether the picture is of a surface inside the window rather than of the window itself.
+    /// WW402, and it exempts exactly one refusal: a rendered surface may honestly be one colour.
+    /// </param>
     /// <param name="layers">
     /// How the window's own pixels reach the screen, where a caller asked.
     /// <para>
@@ -319,7 +330,8 @@ public sealed record CaptureReceipt
         RegionThroughout? over = null,
         Glass? glass = null,
         ColourCheck? colours = null,
-        SeeThrough? layers = null)
+        SeeThrough? layers = null,
+        bool surface = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(window);
@@ -387,7 +399,22 @@ public sealed record CaptureReceipt
         // had everything present and nothing rendering — so the file was written and the run exited
         // zero. Counted rather than scanned for ink: a screen copy has no alpha channel, and the
         // reading that answers "did anything draw" cannot answer for it at all.
-        if (colours is { Counted: true, IsFlat: true })
+        //
+        // WW402 exempts a rendered surface, and only that. On this route there is no display to
+        // have been blank — the application walked its own tree, laid it out and drew what it holds
+        // — and a surface holding one colour is a swatch, a progress fill or a canvas drawn on
+        // demand. Measured: WW385 asked for a closed popup, the application drew a correct 90x40
+        // picture of exactly what the popup held, and the case failed on this line.
+        //
+        // A whole window is not that, however it was got, and this suite already says so in a case
+        // written on purpose: a render of a window that laid out flat is what `--blank` reproduces,
+        // and it is a defect rather than a shape. So the exemption turns on what the picture is of
+        // and never on the route alone — the caller says whether it asked for a surface inside the
+        // window, because that is the one thing this door cannot see from the file.
+        //
+        // The reading is kept either way and only the refusal moves. A flat render is still worth
+        // saying out loud, so it stays on the receipt and in the sentence.
+        if (colours is { Counted: true, IsFlat: true } && !(surface && route?.Renders is true))
             throw new WrongCaptureException(
                 WrongCapture.OneFlatColour, $"the capture is of {window}, and {colours.Sentence()}");
 
@@ -404,6 +431,14 @@ public sealed record CaptureReceipt
         var said = $"captured {Window} from pid {Target.Pid} to {Path}; {Target.Sentence()}";
         if (Route is not null)
             said = $"{said} {Route.Sentence()}";
+
+        // WW402. A flat picture that got past the refusal above is a render of a surface holding one
+        // colour, which is allowed and is still worth a reader knowing: it is the one shape where a
+        // correct picture and a picture of nothing look identical, and the pass is where somebody
+        // would otherwise never be told. Said only where it is flat, because a count on every line
+        // is a count nobody reads.
+        if (Colours is { Counted: true, IsFlat: true })
+            said = $"{said} {Colours.Sentence()}";
 
         return Frame is null ? said : $"{said} {Frame.Sentence()}";
     }

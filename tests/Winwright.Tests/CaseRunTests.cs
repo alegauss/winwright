@@ -444,6 +444,52 @@ public sealed class CaseRunTests : IDisposable
     }
 
     [Fact]
+    public void A_render_of_a_surface_that_is_one_colour_passes_and_says_it_is_flat()
+    {
+        // WW402. `CaptureReceipt` refuses a picture of one colour, and the sentence says why: it is
+        // what a display that was rendering nothing copies as. That is right on the screen route,
+        // where a flat rectangle means the copy reached a surface nobody was drawing.
+        //
+        // A render is not a copy. The application walked its own tree, laid it out and drew what it
+        // holds, so there is no display to have been blank — and a surface holding one colour is a
+        // swatch, a progress fill or a canvas drawn on demand. WW385 met it: the fixture's popup was
+        // one Firebrick rectangle, the picture was a correct 90x40 of exactly that, and the case
+        // failed on a sentence about a screen nobody copied.
+        //
+        // The reading is kept and only the refusal moved, which is the half this asserts second: a
+        // flat render is still the one shape where a correct picture and a picture of nothing look
+        // alike, so the pass says so rather than leaving a reader to find out by opening the file.
+        using var application = AnsweringWindow.Open(root);
+
+        var declared = CaseDeclaration.Of(
+            "the swatch is photographed",
+            StepDeclaration.Of(
+                "Text[name=\"the report\"]",
+                "capture",
+                "the swatch as it is",
+                popup: AnsweringWindow.FlatPopupNamed));
+
+        var run = Run(declared, AutomationElement.FromHandle(application.Handle), captures: true);
+
+        Assert.True(
+            run.Verdict.Outcome == RunOutcome.Passed,
+            string.Join(
+                Environment.NewLine,
+                run.Verdict.Unchecked.Select(one => $"  unchecked {one}")
+                    .Concat(run.Verdict.Failures.Select(one => $"  failed    {one}"))));
+
+        var into = Path.Combine(root, "pictures", "the swatch is photographed", "the swatch as it is.png");
+        Assert.True(File.Exists(into), $"nothing was written to {into}");
+        Assert.Equal(60 * 20, Winwright.Capturing.Pictures.Of(into).Pixels);
+
+        // And the flatness is said on the pass, which is where somebody would otherwise never be
+        // told: a receipt that stayed quiet about it would leave the one shape it cannot judge
+        // looking exactly like every shape it can.
+        var passed = Assert.Single(run.Verdict.Results);
+        Assert.Contains("colour", passed.Detail ?? "", StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void A_reading_taken_after_the_desk_moved_is_a_hole_and_not_a_red()
     {
         // WW401. The rule against reporting a desk as a defect runs before an act: a step that could

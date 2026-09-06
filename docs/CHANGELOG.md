@@ -187,6 +187,7 @@
 - ✅ **WW361** **an application answers renders only for the windows it remembered to name, and a dialog it opens is none of them** — Renders.Everywhere hooks every window one UI thread shows, including ones shown later, and says how many it is answering for (design recorded in `src/Winwright.InApp/Renders.cs`).
 - ✅ **WW362** **a capture through the attach door depends on a variable nobody set, and the run that could set it does not** — A third message asks the application why it drew nothing, so a half told nowhere to write stops reading as no half at all (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
 - ✅ **WW374** **a capture asked for before the application hooked the message is refused as a product built wrong** — Both asks wait where the silence is a window whose hook has not run, so a race stops being a sentence about the product (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
+- ✅ **WW402** **a render of a surface that is genuinely one colour is refused as a display that was drawing nothing** — A rendered surface may be one colour and says so on the pass; a window that rendered flat is refused exactly as it was (design recorded in `src/Winwright/Capturing/CaptureReceipt.cs`).
 
 ## Block F — Assert — the expectation is derived, never typed
 

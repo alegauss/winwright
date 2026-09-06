@@ -109,6 +109,22 @@ internal sealed class AnsweringWindow : IDisposable
                                 },
                             },
                             new System.Windows.Controls.Primitives.Popup { Name = EmptyPopupNamed },
+
+                            // WW402. One colour on purpose, which is the surface a receipt cannot
+                            // tell from a display that drew nothing — a swatch, a progress fill, a
+                            // canvas drawn on demand. It is a shape a real application has, and
+                            // until this task a capture of one was refused with a sentence about a
+                            // screen that was never copied.
+                            new System.Windows.Controls.Primitives.Popup
+                            {
+                                Name = FlatPopupNamed,
+                                Child = new Border
+                                {
+                                    Width = 60,
+                                    Height = 20,
+                                    Background = new SolidColorBrush(Colors.SeaGreen),
+                                },
+                            },
                         },
                     },
                 };
@@ -202,6 +218,12 @@ internal sealed class AnsweringWindow : IDisposable
 
     /// <summary>The one it holds nothing in, which is a refusal of its own.</summary>
     internal const string EmptyPopupNamed = "hollow";
+
+    /// <summary>
+    /// The one holding a single colour. WW402, and it is a surface a real application has: what the
+    /// receipt could not tell apart was a swatch drawn correctly and a display drawing nothing.
+    /// </summary>
+    internal const string FlatPopupNamed = "swatch";
 
     /// <summary>The window's handle, which is what a harness sends to.</summary>
     internal nint Handle { get; }

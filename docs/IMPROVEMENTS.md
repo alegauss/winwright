@@ -148,29 +148,6 @@ re-run. Two verdicts, one clause each, and the counts they already take.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW402 the flat surface a receipt cannot tell from a blank one
-
-`CaptureReceipt` refuses a picture of one colour, and the sentence says why: it is what
-a display that was rendering nothing copies as. That rule was written for the screen
-route, where a flat rectangle means the copy reached a surface nobody was drawing, and
-it is right there.
-
-A render is not a copy. WW385 asked the application to draw a closed popup, the
-application drew it, the file was a correct 90x40 picture of a Firebrick rectangle, and
-the receipt failed the case. The picture was of exactly what the popup held.
-
-The fixture was changed, because the fixture was standing in for a surface and a real
-flyout holds more than one colour. But a real one can hold exactly one — a colour
-swatch, a progress fill, a blank canvas an application draws on demand — and an adopter
-photographing one gets a red whose sentence is about a display, in a route where no
-display was involved.
-
-What separates the two is the route, which the receipt already carries. On the render
-route there is no screen to have been blank: the tree was walked, the size came back,
-and a single colour is a fact about the surface rather than a symptom. The reading is
-worth keeping either way — a flat render is still worth saying out loud — and what it
-should not be is a failure about a display in a picture no display took.
-
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file

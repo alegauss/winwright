@@ -662,7 +662,14 @@ public static class CaseRun
         {
             // The file is already written, so the take writes nothing: what the door is being asked
             // for here are the readings, which is the whole reason a capture goes through it at all.
-            var receipt = CaptureReceipt.Taking(into, found, target, _ => { }, frame: null, route);
+            //
+            // WW402 tells it which picture this is. A step naming a popup asked for a surface inside
+            // the window, and a surface may honestly hold one colour — a swatch, a progress fill, a
+            // canvas drawn on demand — where a whole window that rendered flat is the defect
+            // `--blank` reproduces. The door cannot tell those apart from the file, and this is the
+            // one place that knows.
+            var receipt = CaptureReceipt.Taking(
+                into, found, target, _ => { }, frame: null, route, surface: step.Popup is not null);
 
             trace.Add(receipt.AsTraceStep() with { Step = trace.Count + 1, Asserted = named });
             results.Add(AssertionResult.Pass(named, receipt.Sentence()).At(trace.Count));
