@@ -404,6 +404,113 @@ public sealed class OwnRenderTests : IDisposable
     }
 
     [Fact]
+    public void An_application_with_no_half_is_waited_out_once_and_not_once_a_step()
+    {
+        // WW387. WW374's wait is spent by the applications it is not for: a product with no in-app
+        // half never starts answering, so every capture step pays two seconds to be told the
+        // sentence that was right the first time. At one step that is the honest price of not
+        // guessing; at the forty an adopting suite has it is eighty seconds of a run learning
+        // nothing.
+        //
+        // Read as two asks of one application rather than as a duration, because the number is the
+        // desk's and the claim is not: what this says is that the second cost less than the first,
+        // which is only true if the wait was skipped.
+        using var application = AnsweringWindow.Silent();
+
+        var first = System.Diagnostics.Stopwatch.StartNew();
+        var once = OwnRender.Into(application.Handle, Path.Combine(root, "never-1.png"));
+        first.Stop();
+
+        var again = System.Diagnostics.Stopwatch.StartNew();
+        var twice = OwnRender.Into(application.Handle, Path.Combine(root, "never-2.png"));
+        again.Stop();
+
+        // The same answer both times, which is the half of this that must not change: faster is
+        // worth nothing if what it says stops being true.
+        Assert.False(once.Answered);
+        Assert.False(twice.Answered);
+        Assert.Equal(once.Sentence(), twice.Sentence());
+
+        Assert.True(
+            again.ElapsedMilliseconds < OwnRender.HookedWithinMs,
+            $"the second ask spent {again.ElapsedMilliseconds}ms, which is the whole wait again"
+                + $" (the first spent {first.ElapsedMilliseconds}ms)");
+    }
+
+    [Fact]
+    public void A_window_that_arms_after_being_waited_out_is_asked_again_rather_than_remembered()
+    {
+        // WW387, and the reason the memory above is safe to have. What it may do is skip a wait, so
+        // the one thing it must never do is outlive the silence it recorded: a half that arms after
+        // the first capture step would otherwise be described for the rest of the run in a sentence
+        // that had stopped being true.
+        //
+        // Armed later than the wait is long, which is what makes this a different case from WW374's
+        // rather than a slower copy of it: there the arming lands inside the wait and the first ask
+        // answers, so nothing is ever remembered. Here the first ask spends the whole wait, records
+        // the silence, and the arming happens after it — which is the only way to put a memory in
+        // front of a window that is about to answer.
+        using var application = AnsweringWindow.HooksLate(root, afterMs: OwnRender.HookedWithinMs + 800);
+
+        var early = OwnRender.Into(application.Handle, Path.Combine(root, "too-early.png"));
+        Assert.False(early.Answered, "the half armed inside the wait, so nothing was remembered");
+
+        // Given until it is answering, because what this case is about is what happens next and not
+        // how long the fixture takes to get there.
+        Assert.True(
+            Winwright.Locating.Attempt.UntilTrue(
+                () => application.Sentence().Contains("answering renders for", StringComparison.Ordinal),
+                4000,
+                50).Happened,
+            $"the fixture never started answering: {application.Sentence()}");
+
+        var path = Path.Combine(root, "after.png");
+        var asked = OwnRender.Into(application.Handle, path);
+
+        Assert.True(asked.Answered, asked.Sentence());
+        Assert.True(File.Exists(path), $"it said it drew one and {path} is not there");
+    }
+
+    [Fact]
+    public void The_window_saying_the_half_is_armed_goes_up_with_it_and_comes_down_with_it()
+    {
+        // WW387. The claim is its existence and nothing else — a handle cannot outlive the process
+        // that owns it, so a harness finding one is that process saying so and there is no reply to
+        // wait for. What has to be true is the pairing: up while answering, gone after.
+        Assert.False(Present(), "something was already saying a half is armed in this process");
+
+        using (var application = AnsweringWindow.Open(root))
+        {
+            Assert.True(Present(), $"nothing says the half is armed while it is: {application.Sentence()}");
+        }
+
+        Assert.False(Present(), "the half stopped answering and the window saying it can is still up");
+    }
+
+    /// <summary>
+    /// Whether this process has the window an armed half puts up. WW387, read the way the engine
+    /// reads it: message-only windows hang off HWND_MESSAGE and are enumerated nowhere else.
+    /// </summary>
+    private static bool Present()
+    {
+        var found = nint.Zero;
+        while ((found = FindWindowExW(-3, found, null, Winwright.InApp.Renders.PresenceWindow)) != 0)
+        {
+            _ = GetWindowThreadProcessId(found, out var owner);
+            if (owner == Environment.ProcessId)
+                return true;
+        }
+
+        return false;
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern nint FindWindowExW(nint parent, nint after, string? className, string? title);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(nint window, out uint processId);
+
+    [Fact]
     public void Nothing_may_be_asked_for_by_passing_nothing()
     {
         Assert.Throws<ArgumentException>(() => OwnRender.Into(1, "  "));

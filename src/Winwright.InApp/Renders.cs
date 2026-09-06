@@ -11,16 +11,26 @@ namespace Winwright.InApp;
 public sealed class RendersAnswered : IDisposable
 {
     private readonly List<(HwndSource Source, HwndSourceHook Hook)> hooked = [];
+    private readonly HwndSource? present;
     private bool released;
 
-    internal RendersAnswered(HwndSource source, HwndSourceHook hook, string into)
-        : this(into) => Also(source, hook);
+    internal RendersAnswered(HwndSource source, HwndSourceHook hook, string into, HwndSource? present = null)
+        : this(into, present) => Also(source, hook);
 
     /// <summary>
     /// One that starts empty and is given windows as they arrive. WW361.
     /// </summary>
     /// <param name="into">The directory those windows may write into.</param>
-    internal RendersAnswered(string into) => Into = into;
+    /// <param name="present">
+    /// The message-only window saying this application's half is armed, or null where nothing named
+    /// a directory. WW387: held here rather than left to a finaliser because it goes when the answer
+    /// does — an application that has stopped answering must stop saying it can.
+    /// </param>
+    internal RendersAnswered(string into, HwndSource? present = null)
+    {
+        Into = into;
+        this.present = present;
+    }
 
     /// <summary>The directory these windows may write pictures into. Empty where they answer nothing.</summary>
     public string Into { get; }
@@ -116,6 +126,13 @@ public sealed class RendersAnswered : IDisposable
 
             source.RemoveHook(hook);
         }
+
+        // WW387. Last, and only after the windows are back: while this is up the process is saying
+        // its half is armed, and taking it down first would leave a moment in which a harness reads
+        // "no half" about windows that are still hooked. Guarded the way the sources are, because a
+        // message-only window belongs to the thread that made it exactly as they do.
+        if (present is { IsDisposed: false } && present.CheckAccess())
+            present.Dispose();
     }
 }
 
@@ -242,7 +259,77 @@ public static class Renders
     /// </summary>
     public const string RegisteredWhy = "Winwright.OwnRender.Why";
 
+    /// <summary>
+    /// What this application calls the window it puts up to say the half is armed here. WW387.
+    /// <para>
+    /// Not a message: a window nobody sends anything to, whose whole content is that it exists. A
+    /// handle cannot outlive the process that owns it, so finding one is the process saying so and
+    /// there is no stale answer to guard against — which is what lets a harness read this without
+    /// waiting for a reply, on a thread that may not be pumping yet.
+    /// </para>
+    /// <para>
+    /// The name is spelled again on <c>OwnRender</c>, for the reason the three messages are: the
+    /// engine holds no reference to this half. A case reads both.
+    /// </para>
+    /// </summary>
+    public const string PresenceWindow = "Winwright.OwnRender.Present";
+
+    /// <summary>HWND_MESSAGE. A window under it is never drawn, never enumerated, and never seen.</summary>
+    private const int MessageOnly = -3;
+
     private const uint WmCopyData = 0x004A;
+
+    /// <summary>
+    /// Put up the window that says this application has the half, or nothing where it is not
+    /// answering. WW387.
+    /// <para>
+    /// The gap WW374 waits out is a window that is up and not hooked yet, and what it costs is paid
+    /// by the applications that are never going to answer: the harness cannot tell "no half" from
+    /// "not armed yet" without spending the wait, so an adopting suite pays it once a capture step
+    /// for a product that has no half at all. That is the right trade at one step and the wrong one
+    /// at forty.
+    /// </para>
+    /// <para>
+    /// This is the per-process reading that trade needs. It says nothing about which windows are
+    /// hooked — that is the per-window ask, and it stays the answer — and it is not asked in place
+    /// of one. What it separates is the two silences: a process with this window up is one whose
+    /// half is armed and whose window has not caught up, and a process without one has told the
+    /// harness nothing yet.
+    /// </para>
+    /// <para>
+    /// Guarded on the directory, which is the rule the whole file is built on: an application
+    /// shipped to its users is not under test, and one putting up a window because it once was is
+    /// the same defect as one writing files. Where nothing named a directory this puts up nothing
+    /// and the harness reads the process exactly as it did before WW387.
+    /// </para>
+    /// </summary>
+    /// <param name="into">Where renders may be written, or null where nothing asked for any.</param>
+    private static HwndSource? Present(string? into)
+    {
+        if (into is null)
+            return null;
+
+        try
+        {
+            return new HwndSource(new HwndSourceParameters(PresenceWindow)
+            {
+                ParentWindow = MessageOnly,
+
+                // Nothing is ever painted on it, and saying so is not an optimisation: a
+                // message-only window with a visible style is a contradiction Windows resolves
+                // quietly, and the quiet resolution is the one nobody would find.
+                WindowStyle = 0,
+            });
+        }
+        catch (Exception refused) when (refused is InvalidOperationException or System.ComponentModel.Win32Exception)
+        {
+            // A process that would not give this a window is one the harness reads as it always did
+            // — the wait, and the truth at the end of it. Never raised: this runs inside an
+            // adopter's arrangement call, and taking their application down to speed up a harness
+            // is the wrong way round.
+            return null;
+        }
+    }
 
     /// <summary>Where renders may be written, or null where nothing asked for any.</summary>
     public static string? Where()
@@ -292,7 +379,12 @@ public static class Renders
         // nothing costs one comparison per message and keeps the disposal symmetrical, which is
         // worth more than the branch it saves: a caller holding an answer that never installed
         // anything would still have to put something back.
-        return new RendersAnswered(source, Hooking(into), into ?? "");
+        //
+        // WW387: and the presence window on both lines, because what it says is about the process
+        // and not about which windows are covered. An adopter who hooked one window has a half that
+        // is armed, and a harness asking about some other window should be told that rather than
+        // left to find it out by waiting.
+        return new RendersAnswered(source, Hooking(into), into ?? "", Present(into));
     }
 
     /// <summary>
@@ -339,7 +431,7 @@ public static class Renders
     {
         var into = Where();
         var mine = System.Windows.Threading.Dispatcher.CurrentDispatcher;
-        var answering = new RendersAnswered(into ?? "");
+        var answering = new RendersAnswered(into ?? "", Present(into));
 
         // The windows already up on this thread. The dispatcher is compared rather than trusted:
         // CurrentSources reads as this thread's and hands back other threads' as well, which is how

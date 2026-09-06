@@ -296,29 +296,6 @@ question about how the list is read rather than about what it holds.
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-### §WW387 the answer with nobody to give it
-
-WW374 was filed with two candidates and only one exists. The second was a sixth answer
-meaning *the half is here and this window is not hooked yet*, and there is nobody to
-give it: the harness sends `WM_COPYDATA` to one window, and where nothing is hooked
-there no code of the in-app half runs at all. `Renders.Everywhere` does not change it —
-it hooks per window on `Loaded`, the very event the gap waits for.
-
-The half's own comment says so about the why ask: *telling the two apart needs the
-process-wide hook first*. There is none. What `Everywhere` gives is a class handler
-hooking each window as it loads — a per-window hook arriving later, which is the thing
-WW374 waits for rather than one that could answer for it.
-
-So the wait is what there is, and it costs what a wait costs: an application with no
-in-app half now spends two seconds per capture step being told the truth about itself.
-That is the right trade at one capture and the wrong one at forty, and forty is what an
-adopting suite has.
-
-What removes it is a reading per process rather than per window: one hook answering
-*this application has the half* whatever window is asked about, put up by `Everywhere`
-on a message-only window of its own. The gap becomes a question with an answer instead
-of a duration, and no run waits to learn what the application could have said at once.
-
 ## Block J — Adoption — the proof is the deletion
 
 ### §WW83 The switch case rewrites a real setting
@@ -510,6 +487,28 @@ What it would take is a handle reading in the guest — `openfiles`, or a walk o
 processes whose working directory is under the tree — run on the failure rather than
 always, and folded into the same sentence. Nothing about it needs a new door: `sync.ps1`
 is generated here and already reports back through `sync.log`.
+
+### §WW405 the process the suite cannot have two of
+
+A run drives an application in a process of its own, and every reading the engine takes
+about "the application" means that process. This suite drives its fixtures in the
+process running the cases, which is why WW247 moved three of them in — and it means one
+process holds the harness, an application with no in-app half, one armed, and one about
+to arm, all at once.
+
+WW387 found the edge. A memory keyed by process id is the right key for a run and the
+wrong one here: a fixture with no half taught the harness a sentence, and the harness
+then said it about a different fixture's window that was seconds from answering. The
+case that caught it is WW374's, which had nothing to do with the change.
+
+The repair was to key by window, which is sound and buys less. What is not repaired is
+the shape: the next reading the engine wants to hold per application meets the same
+wall, and nothing says so before the guest run does.
+
+Two doors, and they are not the same size. A fixture in a process of its own is what
+`Winwright.Fixture` already is, so a case wanting one has one — at the cost of a launch.
+Or the suite says out loud which readings it cannot prove, the way `Criteria` says which
+claims nothing shows, so the wall is met at the design rather than at the red.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

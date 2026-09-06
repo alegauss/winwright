@@ -155,6 +155,18 @@ public static class OwnRender
     public const string RegisteredWhy = "Winwright.OwnRender.Why";
 
     /// <summary>
+    /// What an application calls the window it puts up to say its half is armed. WW387, and spelled
+    /// here for the reason the three messages are: the engine holds no reference to the in-app half,
+    /// and a case reads both sides.
+    /// <para>
+    /// A window and not a message, so this can be read without a reply: it is looked for exactly
+    /// where the answer to "should I wait?" is wanted, which is a moment at which the application
+    /// may not be pumping anything.
+    /// </para>
+    /// </summary>
+    public const string PresenceWindow = "Winwright.OwnRender.Present";
+
+    /// <summary>
     /// What the why ask answers with, spelled here as numbers for the reason the popup answers are:
     /// the engine holds no reference to the in-app half, and a case reads both lists. WW362.
     /// <para>
@@ -308,14 +320,146 @@ public static class OwnRender
                 return refused;
 
             if (answer != 0)
+            {
+                // Something in there answered, so whatever this process was remembered for is out of
+                // date. Cleared on the way past rather than checked, because the only thing the
+                // memory is allowed to do is skip a wait.
+                Forget(window);
                 return said((int)answer);
+            }
+
+            if (Settled(window))
+                return said(0);
 
             if (waited.ElapsedMilliseconds >= HookedWithinMs || !NotYet(WhyCode(window, full, withinMs)))
+            {
+                Remember(window);
                 return said(0);
+            }
 
             Thread.Sleep(BetweenGoesMs);
         }
     }
+
+    /// <summary>
+    /// Whether this process has already been waited out and still has nothing to say. WW387.
+    /// <para>
+    /// WW374's wait is spent by the applications it is not for. A product with no in-app half never
+    /// starts answering, so every capture step pays two seconds to be told the sentence that was
+    /// right the first time — the correct trade at one step and the wrong one at the forty an
+    /// adopting suite has.
+    /// </para>
+    /// <para>
+    /// So the wait is paid once a window. What makes that safe rather than a shortcut is the second
+    /// reading: a half that arms after the first step puts its presence window up, and finding one
+    /// sets the memory aside — the wait comes back for the application that has something new to
+    /// say. One that never arms has no window to find and no answer to lose.
+    /// </para>
+    /// <para>
+    /// Never on the first ask, which is the whole of the WW374 case: an application arming while the
+    /// harness asks is remembered by nothing yet, waits, and answers inside it.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The window being asked about.</param>
+    private static bool Settled(nint window)
+    {
+        if (window == 0)
+            return false;
+
+        lock (Silent)
+        {
+            if (!Silent.Contains(window))
+                return false;
+        }
+
+        if (!Armed(Owner(window)))
+            return true;
+
+        // It has something now. The memory is wrong rather than stale, so it goes and the wait is
+        // taken again — which is the reading this whole path exists to keep honest.
+        Forget(window);
+        return false;
+    }
+
+    /// <summary>Remember that this window was waited out and said nothing. WW387.</summary>
+    /// <param name="window">The window that was asked about.</param>
+    private static void Remember(nint window)
+    {
+        if (window == 0)
+            return;
+
+        lock (Silent)
+            Silent.Add(window);
+    }
+
+    /// <summary>Forget it, which any answer at all is grounds for. WW387.</summary>
+    /// <param name="window">The window that was asked about.</param>
+    private static void Forget(nint window)
+    {
+        if (window == 0)
+            return;
+
+        lock (Silent)
+            Silent.Remove(window);
+    }
+
+    /// <summary>
+    /// The windows this harness has waited out. WW387.
+    /// <para>
+    /// By window and not by process, which is the correction a run made rather than a preference.
+    /// The process is what the reading is about — a half is armed for an application, not for one of
+    /// its windows — and keyed that way it was wrong the first time it ran: this suite drives its
+    /// fixtures in one process, so a window with no half taught the harness a sentence it then said
+    /// about a window that was about to have one. One application per process is true of a run and
+    /// is not true of the thing that has to prove it.
+    /// </para>
+    /// <para>
+    /// What that costs is a wait per window rather than per application, which is the smaller half of
+    /// the prize and the whole of the safe one: a scenario's capture steps name a handful of windows
+    /// between them, and forty steps still pay a handful of waits instead of forty.
+    /// </para>
+    /// <para>
+    /// A handle Windows later hands to another window is not a hazard: the entry only ever skips a
+    /// wait, and the new window either has an armed half — which <see cref="Armed" /> finds, setting
+    /// this aside — or has not, which is what the entry says.
+    /// </para>
+    /// </summary>
+    private static readonly HashSet<nint> Silent = [];
+
+    /// <summary>The process owning a window, or zero where Windows would not say. WW387.</summary>
+    /// <param name="window">The window to ask about.</param>
+    private static uint Owner(nint window)
+    {
+        if (window == 0)
+            return 0;
+
+        return Winwright.Windowing.Win32.GetWindowThreadProcessId(window, out var owner) == 0 ? 0 : owner;
+    }
+
+    /// <summary>
+    /// Whether that process has put up the window saying its half is armed. WW387.
+    /// <para>
+    /// Message-only windows are reached through <c>HWND_MESSAGE</c> and through nothing else: they
+    /// are not enumerated, so a walk of the desktop finds none of them and this is the one door.
+    /// Every one carrying the name is looked at, because more than one application under test is a
+    /// thing a harness has to survive.
+    /// </para>
+    /// </summary>
+    /// <param name="owner">The process id to look for.</param>
+    private static bool Armed(uint owner)
+    {
+        var found = nint.Zero;
+        while ((found = Winwright.Windowing.Win32.FindWindowExW(MessageOnly, found, null, PresenceWindow)) != 0)
+        {
+            if (Owner(found) == owner)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>HWND_MESSAGE, which is the only parent a message-only window is found under.</summary>
+    private static readonly nint MessageOnly = -3;
 
     /// <summary>
     /// Whether a window that answered nothing is one that has not started answering yet. WW374.

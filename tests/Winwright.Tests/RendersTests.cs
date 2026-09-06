@@ -52,6 +52,16 @@ public sealed class RendersTests : IDisposable
         Assert.Equal(Renders.RegisteredWhy, OwnRender.RegisteredWhy);
         Assert.Equal(3, new[] { Renders.Registered, Renders.RegisteredPopup, Renders.RegisteredWhy }.Distinct(StringComparer.Ordinal).Count());
 
+        // WW387's window, which is the fourth name on this seam and the first that is not a message.
+        // A drift here is the quietest of the lot: the harness finds no presence window, concludes
+        // the process has nothing to say, and pays WW374's wait on every step exactly as it did —
+        // slower and never wrong, which is a defect no run reports.
+        Assert.Equal(Renders.PresenceWindow, OwnRender.PresenceWindow);
+        Assert.DoesNotContain(
+            Renders.PresenceWindow,
+            new[] { Renders.Registered, Renders.RegisteredPopup, Renders.RegisteredWhy },
+            StringComparer.Ordinal);
+
         Assert.Equal((int)RenderRefusal.WouldDraw, OwnRender.Refusals.WouldDraw);
         Assert.Equal((int)RenderRefusal.ToldNowhere, OwnRender.Refusals.ToldNowhere);
         Assert.Equal((int)RenderRefusal.PathRefused, OwnRender.Refusals.PathRefused);

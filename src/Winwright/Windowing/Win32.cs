@@ -60,6 +60,18 @@ internal static class Win32
     internal static extern nint FindWindowW(string? className, string? title);
 
     /// <summary>
+    /// WW387. The same search under a named parent, which is the one way to reach a message-only
+    /// window: those hang off <c>HWND_MESSAGE</c> and are not enumerated, so nothing that walks the
+    /// desktop ever sees one.
+    /// </summary>
+    /// <param name="parent">The parent to search under.</param>
+    /// <param name="after">The child to start after, or zero for the first.</param>
+    /// <param name="className">The class to match, or null for any.</param>
+    /// <param name="title">The window's name.</param>
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern nint FindWindowExW(nint parent, nint after, string? className, string? title);
+
+    /// <summary>
     /// What <c>WM_COPYDATA</c> carries: a tag, a length and a buffer. WW349.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]

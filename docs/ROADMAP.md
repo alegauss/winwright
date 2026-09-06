@@ -35,8 +35,6 @@
 
 ## Block I — The in-app half — the app cooperates with the harness
 
-- 💭 **WW387** (deps: —) **nothing can answer for a window that is not hooked, so an absent half is told from a late one by waiting** — WW374 found the sixth answer its design proposed has no speaker: Everywhere hooks per window on Loaded, which is the event the gap waits for. → §WW387
-
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW83** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅) **the switch case drives the one path that rewrites a real setting** — The case and the store bracket are written and wait on it: the adopter's engine comes from nuget.org. → §WW83
@@ -50,6 +48,7 @@
 - 💭 **WW400** (deps: —) **three of the probe's six answers are still produced only from typed looks, and two of them can now be arranged** — WW383 joined `shell` and left `stale`, `clear` and `busy` where they were — and a minimised dialog reaches the first, a parameter WW370 already added the second. → §WW400
 - 💭 **WW401** (deps: —) **a case that loses the desk mid-act fails in the words of its own subject, so a desk fault reads as five separate defects** — WW384 took the foreground away mid-run twice and five cases in two classes went red saying `Sub-string not found`, naming nothing about the desk. → §WW401
 - 💭 **WW404** (deps: —) **a sync refused by something holding the guest tree names the path and never what is holding it** — WW386's bound left a process there, the next run answered `the process cannot access the file C:\src\winwright`, and finding out which meant knowing. → §WW404
+- 💭 **WW405** (deps: —) **the suite drives the engine inside its own process, so anything the engine keys by process is untestable here** — WW387 keyed a reading by process id, passed every host check, and went red in the guest because two fixtures with different halves share one pid. → §WW405
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
