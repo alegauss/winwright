@@ -14,7 +14,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 💭 **WW395** (deps: —) **the guarding rung spells the engine's interval itself, so moving the engine's leaves it pricing a placement nobody pays** — WW381 needed the engine's fifty milliseconds outside the engine and `Keys.FirstLookMs` is internal, so the number is now typed in three places. → §WW395
 - 💭 **WW397** (deps: —) **the ladder's control has stopped reading zero, so every rung above it is refused and the tool can attribute nothing** — WW381 ran it twice on 2026-09-05 and `arm` faulted 1 of 1200 both times, where WW355 read 0 of 3200 and WW368 read 0 of 1200. → §WW397
 - 💭 **WW408** (deps: —) **the sweeps over the shipped halves each name their own two assemblies, and nothing says what shipped means** — WW390 had to decide its own coverage and write the reason down; the sweep beside it reads one assembly and a third reads a namespace. → §WW408
 - 💭 **WW411** (deps: —) **the flyout case asserts the overflow is there a line after the verb held it, and the shell sometimes shuts it first** — A guest run went red on `Assert.NotNull` at that line and the next passed; every other reading in the case excuses a desk that would not answer. → §WW411

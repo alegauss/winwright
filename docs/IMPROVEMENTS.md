@@ -102,29 +102,6 @@ copies the recursion instead of the line.
 
 ## Block D — Act — patterns before pointers
 
-### §WW395 the interval the ladder moves, spelled twice
-
-WW381's `guard` rung is `settle` with the engine's own pause spent above the send
-instead of below it, and the whole reading rests on it being the *same* interval: what
-the pair answers is where the milliseconds go, and a rung sleeping a different number
-would be answering how many.
-
-The engine's copy is `Keys.FirstLookMs`, which is internal, so the rung has `GuardMs =
-50` of its own and `run-typing.cmd` says "fifty milliseconds" twice in prose. Three
-spellings of one number, and the two that matter are in different assemblies with
-nothing between them. Move the engine's and the ladder goes on running, printing rows,
-and reporting a placement at a price the engine stopped paying — a wrong answer with no
-red anywhere, which is the shape this project keeps finding in its own catalogues.
-
-`Spaced`'s interop is the precedent for the duplication and it is not the same case:
-that is a send the engine does not make, deliberately reimplemented so the arm can vary
-it. This is the engine's own number, borrowed to be moved.
-
-The cheap repair is the one `PollMs` and `SettleMs` did not need: a case that reads the
-constant and fails where the ladder disagrees with it. Reading it needs the field
-visible to the tests, which is a smaller ask than making it public — and it is the
-assertion, not the constant, that has to exist.
-
 ### §WW397 the baseline that stopped being a baseline
 
 `transfer` refuses to attribute anything on a run where `arm` faults, and it is right
