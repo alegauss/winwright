@@ -421,6 +421,53 @@ with two fixtures up: a surface report from each, a geometry dump from each, an 
 check that finds one and not the other. If the answers collide in the file they share,
 that is a fault every adopter meets and this suite is built not to find.
 
+### §WW420 the refusals of the thing that reports refusals
+
+The fixture exists because a refusal nobody can provoke is a refusal that will quietly
+stop working. Every shape it draws is there to make one of the engine's reds real. The
+runner carries at least four refusals of its own and not one is provoked by anything.
+
+They are the arms that matter most, because each fires on a run that has already gone
+wrong: the sync refusing a held tree and naming who holds it, the bound giving up on a
+guest, the missing SDK, and now the gather that keeps what the collector left. A person
+meets these on their worst afternoon. What the suite holds about them is their source —
+`DeskProbeTests` reads the runner and checks it has an arm per answer — which catches an
+arm that was deleted and nothing about one that stopped working.
+
+WW406 was proved by hand, and how it was proved is the point. WW227 gave the runner
+`-Run` and `-ResultsIn` so an adopter could drive its own cases; pointed at a scratch
+command that writes a fake dump and exits non-zero, they drive the runner's failure path
+instead. Four minutes, no suite, and the whole arm ran in the guest — the gather found
+the larger of two dumps, the sequence came back beside it, and both landed where the trx
+goes.
+
+That is a case, and it was a session's improvisation. What it needs is somewhere to live
+and a way to be cheap enough to keep.
+
+### §WW421 the bytes nobody reads back
+
+`tools/run-tests-vm.ps1` carried a double-encoded em-dash in five comments — written as
+UTF-8, read back as Latin-1, and written again as UTF-8. WW345 committed it and every
+run since has been silent about it, because nothing that could fail looks at that file's
+prose: PowerShell parses it, the guest runs it, and the three cases here that read it
+match code.
+
+It is a small thing and its cause is not. Double encoding is what a tool does when it
+rewrites a file it did not open carefully — a shell redirect, a `Set-Content` taking its
+default — and the same hand that did it once will do it again to a file where the
+damaged bytes sit inside a string a case compares, or a sentence a run prints at
+somebody.
+
+This project already reads its own sources for a dozen rules: which classes copy a
+binary they run, which flags reach which pane, how many sleeps a file may hold, what the
+runner's switch has arms for. Encoding is the same kind of claim and cheaper than any —
+the mark is a short list of sequences that never occur in text somebody meant, and a
+file has one or does not.
+
+What it would take is one case sweeping every source in the checkout, and a decision
+about what the list holds beyond the few that arise from Latin-1 round trips. The
+failure names the file and the line, which is the whole of what a reader needs.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW406 the exception that took the run with it

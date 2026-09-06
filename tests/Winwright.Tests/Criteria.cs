@@ -273,6 +273,12 @@ internal static class Criteria
                 + "repair ends in Win+D, whose foreground lock then refuses this process everything "
                 + "for minutes — measured twice, at five reds in two other classes each time. What "
                 + "it is owed is a desk the suite may take, and not a case somebody forgot to write"),
+        new("WW406", "A run that loses the test host says which thread was waiting", "", Unshown.NotBuilt,
+            "WW406 shipped the half that keeps the evidence: a red run brings the collector's dump "
+                + "and sequence back beside the trx, which three occurrences had not left behind. "
+                + "The half it did not ship is reading one, and that is not built rather than owed "
+                + "— it takes a debugger this repository installs nowhere and a stack no case can "
+                + "assert about, since the state it describes is one nothing here can arrange"),
 
         // WW315's own criterion stood here — that two profiles and a transcript exist on the guest as
         // a disposable fixture — and it went with the task: the bench fabricates both, so the roadmap

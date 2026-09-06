@@ -80,7 +80,7 @@ param(
     # WW227. The five that make this an adopter's runner rather than this repository's.
     #
     # An adopting project had exactly one place to run its migrated cases: the desk somebody is
-    # working at. That is the thing this project already knows better than â€” a host run of this suite
+    # working at. That is the thing this project already knows better than — a host run of this suite
     # produced eight failures of which two were only the desk, and reported a negative control
     # passing because the host wrote a file faster than the guest could. Every one of those lessons
     # applied to every adopter and none of them had the runner that taught it.
@@ -240,7 +240,7 @@ function Invoke-OnTheDesk {
     <#
       Run something in the guest's own desktop session, and refuse in one voice where there is none.
 
-      WW314. Two calls need a session â€” a probe before anything is carried, and the run itself â€” and
+      WW314. Two calls need a session — a probe before anything is carried, and the run itself — and
       the sentence they share is WW42's: a suite synthesising input into a lock screen is not a suite
       that ran. Written once here because a rule spelled twice is a rule where the second copy goes
       on saying the old thing after the first one moves.
@@ -704,7 +704,7 @@ Write-Host '  guest       running, tools answering'
 # WW314. Asked here and not where the suite starts, which is a zip, a copy, an extract and an SDK
 # probe later. Tools answering is not a desk: the service side of the guest replies while the login
 # screen is still up, and a guest that nobody has logged into is the likeliest state of one that
-# just cold-booted â€” which WW305 made the ordinary way to reach it. The first cold start of a day
+# just cold-booted — which WW305 made the ordinary way to reach it. The first cold start of a day
 # found a desktop and the second did not, and paid the whole carry to say so.
 #
 # `cmd /c exit` and nothing else: the cheapest program that cannot run without a session, so the
@@ -763,11 +763,11 @@ switch ($desk.State) {
         # WW331. Not a refusal, and the difference is the whole task: the shell asks nothing, so
         # there is nothing at the guest console for a reader to go and answer. Said out loud anyway,
         # because a desk left with the taskbar selected is a run that did not put back what it took
-        # â€” and the run that has just been refused for it is the wrong place to find that out.
+        # — and the run that has just been refused for it is the wrong place to find that out.
         Write-Host (
             "  foreground  the shell is selected, not asking: $($desk.Process) " +
             "(pid $($desk.Pid), $($desk.Class)). Something left the desk on the taskbar; WW330 is " +
-            'what stops a tray act doing it. The run goes on â€” the first case to take the ' +
+            'what stops a tray act doing it. The run goes on — the first case to take the ' +
             'foreground clears it.') -ForegroundColor Yellow
     }
     'stale' {
@@ -984,6 +984,44 @@ rem wrote "ECHO is off." into the file and the host read the suite's verdict as 
 exit /b 0
 "@ | Set-Content -LiteralPath (Join-Path $stage 'run.cmd') -Encoding ascii
 
+# WW406. What Blame leaves behind when the test host stops answering: a dump of every thread, and a
+# sequence naming the case that was still running. Both are the evidence and both were lost three
+# times, because they are written under the tree and the next run's sync deletes the tree whole.
+#
+# Gathered in the guest rather than fetched from it, because vmrun copies by exact path and cannot
+# glob - and these are written under a directory named for a GUID, by a file name carrying the test
+# host's pid and the minute it gave up. Nothing on the host can spell that. So the guest finds them
+# and puts them where the host already knows to look.
+#
+# The largest dump and the newest sequence, one each. The collector writes both twice, once in place
+# and once under an `In\<machine>` folder it copies to, and two of the same file is not two readings.
+@"
+`$ErrorActionPreference = 'Stop'
+foreach (`$stale in @('blame.dmp', 'blame-sequence.xml', 'blame.txt')) {
+    `$at = Join-Path '$script:GuestSync' `$stale
+    if (Test-Path -LiteralPath `$at) { Remove-Item -LiteralPath `$at -Force }
+}
+
+`$said = @()
+
+`$dump = Get-ChildItem -LiteralPath '$script:GuestRepo\$script:ResultsIn' -Recurse -File -Filter '*.dmp' -ErrorAction SilentlyContinue |
+    Sort-Object Length -Descending | Select-Object -First 1
+if (`$dump) {
+    Copy-Item -LiteralPath `$dump.FullName -Destination (Join-Path '$script:GuestSync' 'blame.dmp') -Force
+    `$said += "`$(`$dump.Name) (`$([math]::Round(`$dump.Length / 1MB, 1)) MB)"
+}
+
+`$order = Get-ChildItem -LiteralPath '$script:GuestRepo\$script:ResultsIn' -Recurse -File -Filter 'Sequence_*.xml' -ErrorAction SilentlyContinue |
+    Sort-Object LastWriteTime -Descending | Select-Object -First 1
+if (`$order) {
+    Copy-Item -LiteralPath `$order.FullName -Destination (Join-Path '$script:GuestSync' 'blame-sequence.xml') -Force
+    `$said += `$order.Name
+}
+
+if (`$said.Count -eq 0) { `$said = @('nothing') }
+(`$said -join '; ') | Set-Content -LiteralPath (Join-Path '$script:GuestSync' 'blame.txt') -Encoding ascii
+"@ | Set-Content -LiteralPath (Join-Path $stage 'blame.ps1') -Encoding ascii
+
 # --- into the guest ------------------------------------------------------------------------------
 
 $null = Invoke-VmRun -Guest -Arguments @('createDirectoryInGuest', $vmxPath, $script:GuestSync)
@@ -996,11 +1034,15 @@ $null = Invoke-VmRun -Guest -Arguments @('createDirectoryInGuest', $vmxPath, $sc
 # live under the repository's TestResults, not the sync directory, so deleting them here deleted
 # nothing and the guard everybody read as covering them covered neither. They need no guard now:
 # this run's results directory is named for this run, so there is nothing of an earlier one in it.
-foreach ($stale in @('vm-exit.txt', 'vm-run.log', 'sync.log')) {
+#
+# WW406: and the three the blame gather leaves, for exactly that reason one file further out. They
+# live beside the sync and outlive the tree, so a run that ends cleanly would otherwise copy back the
+# dump of the run before it - which is worse than no dump, because it is a dump with a date on it.
+foreach ($stale in @('vm-exit.txt', 'vm-run.log', 'sync.log', 'blame.dmp', 'blame-sequence.xml', 'blame.txt')) {
     $null = Invoke-VmRun -Guest -Arguments @('deleteFileInGuest', $vmxPath, "$script:GuestSync\$stale")
 }
 
-foreach ($file in @('source.zip', 'sync.ps1', 'sync.cmd', 'run.cmd')) {
+foreach ($file in @('source.zip', 'sync.ps1', 'sync.cmd', 'run.cmd', 'blame.ps1')) {
     $sent = Invoke-VmRun -Guest -Arguments @('copyFileFromHostToGuest', $vmxPath, (Join-Path $stage $file), "$script:GuestSync\$file")
     if (-not $sent.Ok) { Refuse "could not copy $file into the guest: $($sent.Output)" }
 }
@@ -1088,6 +1130,43 @@ if ($code -eq 0) {
     foreach ($also in ($script:Bring | Select-Object -Skip 1)) {
         $roll = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\$also", (Join-Path $results $also))
         if (-not $roll.Ok) { Write-Host "  the run passed and no $also came back" -ForegroundColor Yellow }
+    }
+}
+
+# WW406. The mirror of the block above, and chased only on a red run for the same kind of reason: a
+# run that passed left no dump, and asking after one every time would be two vmrun calls a run to be
+# told so. A host that stopped answering is the one state where the evidence is not in the trx.
+#
+# It has been lost three times. The dump is written under the tree, the next sync deletes the tree
+# before writing it again, and the run that would have explained the last one is the run that
+# destroys it - so this is the only window there is, and nobody has ever been at the keyboard for it.
+if ($code -ne 0) {
+    $null = Invoke-VmRun -Guest -Arguments @(
+        'runProgramInGuest', $vmxPath,
+        'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe',
+        '-NoProfile', '-ExecutionPolicy', 'Bypass',
+        '-File', "$script:GuestSync\blame.ps1")
+
+    $note = Join-Path $stage 'blame.txt'
+    $null = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\blame.txt", $note)
+    $named = if (Test-Path -LiteralPath $note) { (Read-ConsoleText $note).Trim() } else { '' }
+
+    # Said out loud either way. "nothing" is a reading - the host exited on its own rather than
+    # being waited out - and a line that only appears when there is a dump makes its absence look
+    # like a step that did not run.
+    if ($named.Length -eq 0) {
+        Write-Host '  blame       the guest could not be asked what the collector left' -ForegroundColor Yellow
+    }
+    else {
+        Write-Host "  blame       $named"
+
+        foreach ($pair in @(@('blame.dmp', 'hangdump.dmp'), @('blame-sequence.xml', 'sequence.xml'))) {
+            $kept = Join-Path $results $pair[1]
+            $fetched = Invoke-VmRun -Guest -Arguments @(
+                'copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\$($pair[0])", $kept)
+
+            if ($fetched.Ok) { Write-Host "              $kept" }
+        }
     }
 }
 

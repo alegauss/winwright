@@ -43,10 +43,12 @@
 - 💭 **WW417** (deps: —) **a rule that only reads sources is met by a seventeen-minute guest run, and the split that would ask it sooner exists** — WW404's teardown fault was one line of source shape and cost two guest runs; every case that could have said so sits in a class the serial collection omits. → §WW417
 - 💭 **WW418** (deps: —) **the case proving a wait is skipped asks whether the test host is armed, so another class holding a half decides it** — WW387's memory stands only for a process that put up no presence window, and in-process that process is the suite; WW405 gave it a second one to ask about instead. → §WW418
 - 💭 **WW419** (deps: —) **every reading the engine takes about an application is driven with one application up, and a run has several** — WW405 made a second application cheap; the surface report, the geometry dump and the instance check have never been asked while two are answering at once. → §WW419
+- 💭 **WW420** (deps: —) **the runner's failure arms are read for their shape and run by nothing, and the door that would drive them exists** — WW406's arm only fires on a red run, so proving it meant a scratch command and a hand-built dump; WW227's -Run and -ResultsIn are what made that possible. → §WW420
+- 💭 **WW421** (deps: —) **five double-encoded em-dashes sat in the runner for months, and nothing here reads a source for encoding damage** — Committed by WW345 and found by eye while editing the file; every other rule this project holds about its own sources is read by a case. → §WW421
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 💭 **WW406** (deps: —) **the test host goes away mid-run and 900-odd cases never run, three times in about fifteen guest runs** — All three stop at the same case and the third printed no exception at all, so what they share is the point reached; its hang dump is kept off the guest. → §WW406
+- ⏳ **WW406** (deps: —) **the test host goes away mid-run and 900-odd cases never run, three times in about fifteen guest runs** — Which thread is waiting and on what, read out of a dump the runner now keeps rather than one nobody has ever had. → §WW406
 - 💭 **WW409** (deps: —) **a flag that draws nothing is skipped by the run that drives every shape, so what those shapes open is asserted nowhere** — WW392 found the qualifier by going red on `--render`, and the same clause is what excuses four shapes from the only case that launches them. → §WW409
 
 ## Done when — Block A
@@ -220,6 +222,12 @@
   positional list, the loader fills that shape from the schema, and the construction
   stops being a line per field. WW391 found the door that still has to carry `reads`:
   the one input a step cannot answer for.
+
+## Done when — WW406
+
+- **A run that loses the test host says which thread was waiting** Three occurrences and
+  the dump was gone each time; the runner keeps it now, and reading one needs a debugger
+  nothing here installs.
 
 ## Non-goals
 

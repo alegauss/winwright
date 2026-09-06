@@ -272,6 +272,114 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    public void What_the_collector_left_is_gathered_to_the_names_the_host_knows_how_to_ask_for()
+    {
+        // WW406. A test host that stops answering leaves a dump of every thread and a sequence
+        // naming the case still running, and both were lost three times: they are written under a
+        // directory named for a GUID, in a file named for the host's pid and the minute it gave up,
+        // and the run that would explain the last one is the run whose sync deletes it.
+        //
+        // vmrun copies by exact path and cannot glob, so the guest has to do the finding. This runs
+        // that finding — read out of the generated script, not copied — against a tree shaped like
+        // the one the collector leaves, including the second copy it makes of both files.
+        var where = Path.Combine(Path.GetTempPath(), $"winwright-ww406-{Guid.NewGuid():N}");
+        var sync = Path.Combine(Path.GetTempPath(), $"winwright-ww406-sync-{Guid.NewGuid():N}");
+        var script = Path.Combine(Path.GetTempPath(), $"winwright-ww406-{Guid.NewGuid():N}.ps1");
+
+        Directory.CreateDirectory(sync);
+        var under = Directory.CreateDirectory(Path.Combine(where, Guid.NewGuid().ToString())).FullName;
+        var copied = Directory.CreateDirectory(Path.Combine(where, "oobe_MACHINE", "In", "MACHINE")).FullName;
+
+        try
+        {
+            // The one that matters is the larger, because a truncated write is the other one: the
+            // collector copies what it has when it copies, and the file it is still writing is the
+            // file with the whole answer in it.
+            var whole = Path.Combine(under, "testhost_10400_20260906T150844_hangdump.dmp");
+            File.WriteAllBytes(whole, new byte[4096]);
+            File.WriteAllBytes(Path.Combine(copied, "testhost_10400_20260906T150844_hangdump.dmp"), new byte[1024]);
+
+            var older = Path.Combine(copied, "Sequence_aaa.xml");
+            File.WriteAllText(older, "<TestSequence />");
+            File.SetLastWriteTimeUtc(older, DateTime.UtcNow.AddMinutes(-10));
+
+            var newest = Path.Combine(under, "Sequence_bbb.xml");
+            File.WriteAllText(newest, "<TestSequence><Test Name=\"the last one\" /></TestSequence>");
+
+            File.WriteAllText(script, Gathering(where, sync));
+            Answered(script);
+
+            var said = File.ReadAllText(Path.Combine(sync, "blame.txt"));
+
+            Assert.Contains(Path.GetFileName(whole), said, StringComparison.Ordinal);
+            Assert.Contains(Path.GetFileName(newest), said, StringComparison.Ordinal);
+
+            // The files themselves and not only the sentence, which is the whole point of the step:
+            // a note naming a dump nobody copied is the state this replaced.
+            Assert.Equal(4096, new FileInfo(Path.Combine(sync, "blame.dmp")).Length);
+            Assert.Contains("the last one", File.ReadAllText(Path.Combine(sync, "blame-sequence.xml")), StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(script);
+            Directory.Delete(where, recursive: true);
+            Directory.Delete(sync, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void A_run_the_collector_left_nothing_for_says_so_rather_than_going_quiet()
+    {
+        // WW406, the other answer. A host that exited on its own leaves no dump, and that is a
+        // reading: it says the run ended rather than was waited out. Written down, because a line
+        // that appears only when there is a dump makes its absence read as a step that did not run.
+        var where = Directory.CreateTempSubdirectory("winwright-ww406-empty-").FullName;
+        var sync = Directory.CreateTempSubdirectory("winwright-ww406-nothing-").FullName;
+        var script = Path.Combine(Path.GetTempPath(), $"winwright-ww406-{Guid.NewGuid():N}.ps1");
+
+        try
+        {
+            File.WriteAllText(script, Gathering(where, sync));
+            Answered(script);
+
+            Assert.Equal("nothing", File.ReadAllText(Path.Combine(sync, "blame.txt")).Trim());
+            Assert.False(File.Exists(Path.Combine(sync, "blame.dmp")));
+            Assert.False(File.Exists(Path.Combine(sync, "blame-sequence.xml")));
+        }
+        finally
+        {
+            File.Delete(script);
+            Directory.Delete(where, recursive: true);
+            Directory.Delete(sync, recursive: true);
+        }
+    }
+
+    /// <summary>
+    /// The gather the runner generates for the guest, aimed at two directories of this case's own.
+    /// WW406.
+    /// <para>
+    /// Read out of the runner rather than copied here. A case carrying its own copy passes over a
+    /// guest that lost this one, which is the failure the whole step exists to stop.
+    /// </para>
+    /// </summary>
+    /// <param name="results">Where the collector's files are, standing in for the guest's results.</param>
+    /// <param name="sync">Where the gather puts what it found, standing in for the sync folder.</param>
+    private static string Gathering(string results, string sync)
+    {
+        var runner = Runner();
+        var ends = runner.IndexOf("\"@ | Set-Content -LiteralPath (Join-Path $stage 'blame.ps1')", StringComparison.Ordinal);
+
+        Assert.True(ends > 0, "the runner no longer generates a gather for the guest to run");
+
+        var opens = runner.LastIndexOf("@\"", ends, StringComparison.Ordinal);
+
+        return runner[(opens + 2)..ends]
+            .Replace("$script:GuestRepo\\$script:ResultsIn", results, StringComparison.Ordinal)
+            .Replace("$script:GuestSync", sync, StringComparison.Ordinal)
+            .Replace("`$", "$", StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void The_shell_is_not_on_the_list_of_things_that_are_the_desktop()
     {
         // The repair that hid the reading. Folding the taskbar in with Progman and WorkerW makes a
