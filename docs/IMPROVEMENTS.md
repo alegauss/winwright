@@ -177,28 +177,28 @@ holds: `reads` is the one every family asks for, and WW378 spent a task moving o
 family off the parameters. A different door has to carry those, and which ones is the
 design.
 
-### §WW410 what a smoke run is allowed to conclude
+### §WW426 the weakest floor that would have worked
 
-WW393 drives every arm at one round and asserts two things: it exited zero, and it named
-the task it was built for. Both are deliberate — the tool counts and never fails, so an
-exit code alone speaks for nothing, and a rate at one round is a number about nothing.
+WW410's floor is one constant, and its reason is one line of arithmetic: nothing seen in
+n rounds puts a rate under about 3/n, so below thirty the bound is looser than the rates
+every arm is about. That is true of all five and it is the loosest thing true of all
+five.
 
-What that leaves uncovered is the verdict. Every runner ends by composing a sentence off
-what it read, and several of those have arms for a run too small to say anything —
-`transfer` has one, `sweep` has one, the bare run has two. At one round those are the
-arms that fire, and nothing checks that the right one did. A runner whose verdict threw
-would be caught; one that reached the confident sentence off a single round would not,
-and that is the more likely fault of the two: it is the shape WW312's own report had
-before the entry that split it into three outcomes.
+Each arm knows more about itself. `transfer` says a rung of a few hundred expects a
+fraction of a fault, because WW355 read the act at 1 in 1200 — so thirty rounds is not a
+floor for it, it is a rounding error, and a run of a hundred passes the shared floor and
+still concludes nothing worth reading. `sweep` is eighteen cells and divides its rounds
+between them. `acts` types nothing and measures something else.
 
-The reading is cheap and the case already has it. Each runner's small-run arm carries
-words nobody else uses — "the count being too small", "says nothing at all" — so
-asserting the sentence at one round is one `Contains` per arm, against a list beside the
-arms rather than in the case.
+So the guard is right and it is the weakest guard that would have worked. What it stops
+is a rate of one in one being ranked and attributed; what it does not stop is a rate of
+three in ninety being read as a shape.
 
-What it would settle is the thing a smoke run should never do: agree with itself. A
-verdict that reads confidently off one round is exactly the false green this project
-spends its whole verdict block refusing.
+The number each arm wants is already in its own prose, argued against a measurement, and
+that is where it should live: on the row in `Arms.All`, beside the words the .cmd
+prints, the way `NeedsRanges` sits there rather than in a branch. `Enough.Concluded`
+would take it from the arm and keep the shared number for the bare run — which is the
+one experiment with no row to put it on.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

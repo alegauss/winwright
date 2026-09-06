@@ -10,6 +10,11 @@ rem
 rem The first argument is how many rounds it types; the tool's own default stands without one. The
 rem second is which experiment to run, and the third is the build configuration.
 rem
+rem WW410: under thirty rounds no arm reaches a verdict. Nothing seen over that many rules out a rate
+rem no looser than ten percent, and every arm here is measuring one to three - so a short run prints
+rem its numbers and says the run was too short to conclude anything, rather than ranking a fault it
+rem saw once. One round is the suite's own smoke run, and it is what that refusal is asserted at.
+rem
 rem Bare, this reports how often the engine's repair fired and whether anything outlived it, against
 rem the send the engine actually makes - one SendInput for the whole string.
 rem

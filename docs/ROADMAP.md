@@ -23,7 +23,7 @@
 ## Block G — The scenario — a case is a data file
 
 - ⏳ **WW391** (deps: —) **a claim joins the format by being a field and a field still joins in five places, one of them a 29-parameter verb** — `Of` is still 29 parameters and a field still joins in five places; what a different door has to carry is `reads`, and only that. → §WW391
-- 💭 **WW410** (deps: —) **a runner at one round is asserted to have printed and never to have printed something a reader could act on** — WW393 checks the exit code and the task's own name, which a runner that measured nothing and said so would satisfy exactly as one that worked. → §WW410
+- 💭 **WW426** (deps: —) **the floor a verdict needs is one number for five runners measuring rates that differ by an order** — WW410 put thirty rounds in front of every arm off one argument about 3/n; transfer already reasons about its own length in prose and now has a shared number in front of it. → §WW426
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

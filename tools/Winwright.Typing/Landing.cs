@@ -107,7 +107,7 @@ internal static class Landing
                 Console.WriteLine($"        {one}");
         }
 
-        Console.WriteLine(Verdict(readings));
+        Console.WriteLine(Enough.Concluded(rounds, () => Verdict(readings)));
     }
 
     /// <summary>

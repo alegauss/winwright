@@ -42,6 +42,13 @@ public sealed class TypingArmRunTests
     /// <summary>How long one arm gets at a single round, before this stops waiting on it.</summary>
     private const int WithinMs = 120_000;
 
+    /// <summary>
+    /// The rounds this asks for: one, which is a smoke run and says so. WW410 made that a claim the
+    /// tool itself holds — below <see cref="Enough.Rounds" /> no runner concludes anything — so what
+    /// is asserted below is that each of them refuses, rather than that each of them printed.
+    /// </summary>
+    private const string Rounds = "1";
+
     [Fact]
     public void Every_arm_runs_a_round_and_writes_its_own_reading()
     {
@@ -51,7 +58,7 @@ public sealed class TypingArmRunTests
 
         foreach (var arm in Arms.All)
         {
-            var (code, said) = Ran("1", arm.Name);
+            var (code, said) = Ran(Rounds, arm.Name);
 
             if (code != 0)
             {
@@ -63,15 +70,29 @@ public sealed class TypingArmRunTests
             // the task it was built for, so an arm that printed nothing ran nothing — and a tool
             // that counts and never fails is one an exit code alone cannot speak for.
             if (!said.Contains(arm.Task, StringComparison.Ordinal))
+            {
                 broke.Add($"--{arm.Name} exited 0 and never named {arm.Task}: {Tail(said)}");
+                continue;
+            }
+
+            // WW410. And what it concluded, which is the half WW393 left: a runner that printed and
+            // a runner that measured nothing and said so satisfied the two checks above identically.
+            // The one thing a smoke run must never do is agree with itself — a rate of one in one,
+            // ranked and attributed, is the false green this project's whole verdict block refuses,
+            // and it is the reading most likely to be quoted because it is the one that says
+            // something.
+            if (!said.Contains(Enough.TooFew, StringComparison.Ordinal))
+                broke.Add($"--{arm.Name} reached a verdict off {Rounds} round(s): {Tail(said)}");
         }
 
         // And the bare run, which is the one experiment that is not in the list: WW354 kept it out
         // deliberately, so it is the arm a catalogue check can never reach and the one this has to
         // name for itself.
-        var (bare, bareSaid) = Ran("1");
+        var (bare, bareSaid) = Ran(Rounds);
         if (bare != 0)
             broke.Add($"a bare run exited {bare}: {Tail(bareSaid)}");
+        else if (!bareSaid.Contains(Enough.TooFew, StringComparison.Ordinal))
+            broke.Add($"a bare run reached a verdict off {Rounds} round(s): {Tail(bareSaid)}");
 
         Assert.True(
             broke.Count == 0,

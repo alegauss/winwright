@@ -292,7 +292,7 @@ internal static class Transfer
         foreach (var rung in Rungs)
             read[rung] = Measure(box, arrived, packets, rounds, rung, element);
 
-        Console.WriteLine(Verdict(read));
+        Console.WriteLine(Enough.Concluded(rounds, () => Verdict(read)));
     }
 
     /// <summary>What one rung's rounds came to.</summary>

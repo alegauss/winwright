@@ -173,7 +173,7 @@ internal static class Disturbance
             ran[arm] = measured.Ran;
         }
 
-        Console.WriteLine(Verdict(faults, ran));
+        Console.WriteLine(Enough.Concluded(rounds, () => Verdict(faults, ran)));
     }
 
     /// <summary>What one arm's rounds came to.</summary>

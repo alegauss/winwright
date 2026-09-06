@@ -136,7 +136,7 @@ internal static class FirstRead
                 Console.WriteLine($"        {one}");
         }
 
-        Console.WriteLine(Verdict(faults, costs, rounds));
+        Console.WriteLine(Enough.Concluded(rounds, () => Verdict(faults, costs, rounds)));
     }
 
     /// <summary>

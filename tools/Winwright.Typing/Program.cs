@@ -269,7 +269,7 @@ public static class Program
                 Console.WriteLine($"  {one}");
         }
 
-        Console.WriteLine(Verdict(tally));
+        Console.WriteLine(Enough.Concluded(tally.Rounds, () => Verdict(tally)));
         return 0;
     }
 
