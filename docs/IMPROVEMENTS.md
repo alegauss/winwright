@@ -374,28 +374,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW388 the desk two readings both answer
-
-WW371 and WW375 landed an hour apart and answer the same desk two different ways. A
-minimised window holding the foreground is `stale` — not a question, so the run goes on
-— and it is also exactly what `desk-clear.ps1` puts away: it has a minimise button, it
-is already minimised, and handing the foreground on is the half that repair exists for.
-
-Nothing decides between them, and the order settled it by accident. `stale` is
-classified before the `asking` arm, so the desk WW371 was filed about never gets there:
-the Edge window that refused every run is reported and stepped over, and the clearer
-runs only for a window that is not iconic. WW384 already says nothing drives that path.
-
-The run going on is right and is not the whole answer. WW331 accepted the same for a
-focused taskbar — the first case to take the foreground clears it — but the first case
-is not always one that takes it. A case reading the foreground as a precondition sees a
-window that is neither the desktop nor the one under test, and excuses a check over a
-desk this run could have cleared in a second.
-
-So what is worth deciding is whether `stale` should be cleared as well as said. The
-runner has both readings and both tools in hand; what it does not have is a sentence
-about which desks it is willing to tidy before a run, and which it only reports.
-
 ### §WW399 the container an adopter must not name
 
 WW382 read both tray menu kinds and found the entries identical and the containers not:
@@ -535,3 +513,27 @@ What to decide is whether that is one check or a note. A single case asserting t
 lists agree would replace three, and it would be the place a person adding a pane is
 sent — which is the thing missing now, since the current answer is a run that fails,
 then another.
+
+### §WW406 the exception that took the run with it
+
+A guest run died 48 seconds in: *Falha no processo do host de teste :
+UnrenderableException: Border 'sizelessPane' laid out to 0x0*. The suite reported 1121
+of 1121 passing and the roll call refused it — 904 of 2025 were never recorded at all —
+which is WW117 working exactly as it was built to. Then Blame waited out its ten idle
+minutes and dumped, so the run cost twenty.
+
+`SizelessPane` exists to provoke that refusal and the fixture raises it on purpose, in
+its own process, exiting 3. Nothing here says how one reached the test host. No case
+builds that pane in this process, and the last case to answer — `SuiteRunTests` — has
+nothing to do with rendering, so what the trace names is the thread that died rather
+than the case that armed it.
+
+It did not reproduce: the next run passed 2025 of 2025 with nothing new excused, which
+makes this a rare fault rather than a broken build.
+
+The dump was the evidence and it is gone: it was written under the guest's own tree,
+which the next run's sync deletes before writing it again. So what this needs first is
+not a diagnosis but somewhere to keep one — a hang dump belongs where the trx goes, on
+the host. Then the question: which thread raises this where nothing catches it, and
+whether the rule `Renders` already states — never raise out of a window procedure —
+belongs somewhere else too.

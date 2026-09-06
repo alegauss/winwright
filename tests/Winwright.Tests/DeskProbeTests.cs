@@ -114,6 +114,49 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    public void Every_desk_the_runner_tidies_is_one_it_declares_it_tidies()
+    {
+        // WW388. WW371 and WW375 landed an hour apart and answered one desk two ways — a minimised
+        // window holding the foreground is both `stale`, which the run goes on with, and exactly
+        // what the clearer puts away. Nothing decided between them and the order settled it: `stale`
+        // is classified first, so the window WW371 was filed about was reported and stepped over.
+        //
+        // Both are tidied now, and what this holds is the sentence rather than the choice. A state
+        // that quietly starts clearing is a run touching a desk nobody said it would; one that
+        // quietly stops is the defect WW388 is, back again. The list is the claim and the arms are
+        // the code, and this reads them against each other the way every other catalogue here is
+        // read.
+        var runner = Runner();
+
+        var declared = Between(runner, "$script:Tidied = @(", ")")
+            .Split(',')
+            .Select(one => one.Trim().Trim('\''))
+            .Where(one => one.Length > 0)
+            .ToList();
+
+        Assert.NotEmpty(declared);
+
+        // Each arm's body is what stands between its own head and the next one, which is why the
+        // default arm is matched too: without it the last state's body would run to the end of the
+        // file and read as clearing whatever came after the switch.
+        var arms = System.Text.RegularExpressions.Regex
+            .Matches(runner, @"(?m)^    (?:'(?<state>\w+)'|(?<state>default)) \{")
+            .ToList();
+
+        Assert.True(arms.Count > States.Length, "the runner's switch was not read, so nothing below means anything");
+
+        var tidies = new List<string>();
+        for (var at = 0; at < arms.Count - 1; at++)
+        {
+            var body = runner[arms[at].Index..arms[at + 1].Index];
+            if (body.Contains("Clear-GuestDesk", StringComparison.Ordinal))
+                tidies.Add(arms[at].Groups["state"].Value);
+        }
+
+        Assert.Equal(declared.Order(StringComparer.Ordinal), tidies.Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
     public void The_shell_is_not_on_the_list_of_things_that_are_the_desktop()
     {
         // The repair that hid the reading. Folding the taskbar in with Progman and WorkerW makes a

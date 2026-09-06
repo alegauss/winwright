@@ -662,6 +662,33 @@ $null = New-Item -ItemType Directory -Path $stage
 # needs a desk to have a foreground at all, and it is worth nothing once the twenty minutes are
 # already spent. The stage exists by here and the sync directory does not, so the probe makes it.
 $desk = Read-GuestDesk -Vmx $vmxPath -Stage $stage
+
+# WW388. The desks a run is willing to tidy before it starts, and the sentence the two readings had
+# been missing between them.
+#
+# WW371 and WW375 landed an hour apart and answer one desk two ways. A minimised window holding the
+# foreground is `stale` - not a question, so the run goes on - and it is also exactly what the
+# clearer puts away: it has a minimise button, it is already down, and handing the foreground on is
+# the half that repair exists for. Nothing decided between them and the order settled it by
+# accident, so the Edge window WW371 was filed about was reported and stepped over.
+#
+# Both are tidied now, and the line is drawn at what the tidying is for rather than at how bad the
+# desk looks. `asking` and `stale` are a window this run could put away and would rather not leave
+# for a case to trip over: the run going on is right, and it is not the whole answer, because the
+# first case to take the foreground is not always one that takes it - a case reading the foreground
+# as a precondition excuses a check over a desk a second would have cleared.
+#
+# Everything else is reported and never touched, each for its own reason. `clear` has nothing to
+# tidy. `busy` is a desk somebody let go of already, and the suite's own foreground handling is for
+# exactly that. `shell` is the taskbar, which WW331 measured as not a question and WW330 stops a run
+# leaving - and putting the shell away is taking the thing this project spends a whole rule giving
+# back. `broken` and an unreadable answer are refusals: there is nothing there to tidy.
+#
+# What the two tidied arms do NOT share is what a failed tidy means. A question that survives it
+# refuses the run, because a question is what nobody at a console can be sent to answer twice; a
+# minimised window that survives it is the desk WW375 already said the run may go on with.
+$script:Tidied = @('asking', 'stale')
+
 switch ($desk.State) {
     'clear' {
         Write-Host '  foreground  clear'
@@ -690,12 +717,36 @@ switch ($desk.State) {
         # ends up here — measured on this guest, where an Edge window left focused was iconic for
         # all twelve looks and refused every run.
         #
-        # Said out loud for WW331's reason: the run goes on, and a desk left this way is still a
-        # desk somebody's window is holding rather than a clear one.
+        # WW388 put it away as well as saying it. The window is already down, so the whole of the
+        # repair here is the half WW371 was actually filed about — handing the foreground on — and
+        # this is the desk that motivated it: reported and stepped over, because `stale` is
+        # classified before the arm that clears.
+        #
+        # Still not a refusal, and that is the difference from `asking` below. A minimised window
+        # the clearer declines is a window somebody minimised without a minimise button, and WW375
+        # already said a run may go on with it.
         Write-Host (
             "  foreground  a minimised window holds it, so there is nothing to answer: " +
-            "$($desk.Process) (pid $($desk.Pid), $($desk.Class)) '$($desk.Detail)'. The run goes " +
-            'on — the first case to take the foreground clears it.') -ForegroundColor Yellow
+            "$($desk.Process) (pid $($desk.Pid), $($desk.Class)) '$($desk.Detail)'. Putting it " +
+            'away, because a desk nobody can read is one the first case would otherwise trip ' +
+            'over.') -ForegroundColor Yellow
+
+        $cleared = Clear-GuestDesk -Vmx $vmxPath -Stage $stage
+        Write-Host "  clearing    $cleared"
+
+        $desk = Read-GuestDesk -Vmx $vmxPath -Stage $stage
+
+        # Read whole, for the reason the arm below reads its second look whole: a desk that came
+        # back as something this run cannot drive is one to refuse on, and the arm it started in has
+        # nothing to say about that. `stale` is in the list because staying stale is the answer
+        # WW375 gave and this arm does not overturn it.
+        if ($desk.State -notin @('clear', 'busy', 'shell', 'stale')) {
+            Refuse (
+                "the desk was tidied and now reads '$($desk.State)': $($desk.Detail)"
+            ) 'Look at the guest console. The window was put away and what is there now is not a desk this run can drive.'
+        }
+
+        Write-Host "  foreground  tidied, and now reads $($desk.State)" -ForegroundColor Yellow
     }
     'asking' {
         # WW371. Tried once before refusing, and read again afterwards rather than believed.
