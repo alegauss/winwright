@@ -414,6 +414,60 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    public void The_host_gate_takes_the_classes_that_do_not_need_a_desk_and_only_those()
+    {
+        // WW417. The gate is derived from the collection this project already uses to say which
+        // classes need a desk, so it cannot drift the way a written list would — and it is run
+        // rather than read, because what would go wrong is the derivation and not its shape.
+        //
+        // Both ways, off classes this file can name for certain: it is itself in the serial
+        // collection and must not be gated, and the rules that read sources must be.
+        var said = RanGate("Get-HostFilter -Suite '" + Checkout.Suite.Replace("'", "''") + "'");
+        var filter = string.Join("", said);
+
+        Assert.Contains("FullyQualifiedName~Winwright.Tests.SettledTeardownTests.", filter, StringComparison.Ordinal);
+        Assert.Contains("FullyQualifiedName~Winwright.Tests.CriteriaTests.", filter, StringComparison.Ordinal);
+
+        // And not one of the ones that take the desk. This class is the example it can be surest
+        // about: everything in this file drives a real foreground.
+        Assert.DoesNotContain($"Winwright.Tests.{nameof(DeskProbeTests)}.", filter, StringComparison.Ordinal);
+        Assert.DoesNotContain("Winwright.Tests.NotificationAreaTests.", filter, StringComparison.Ordinal);
+
+        // Anchored on the namespace and closed with a dot, which is not decoration: `SweepTests`
+        // and `SourceSweepTests` are a substring pair, and a filter that matched loosely would pull
+        // a serial class in behind one that is not.
+        Assert.All(
+            filter.Split('|'),
+            one => Assert.Matches(@"^FullyQualifiedName~Winwright\.Tests\.\w+\.$", one));
+    }
+
+    /// <summary>Dot-source the host gate and run what a caller asked. WW417.</summary>
+    /// <param name="line">The PowerShell to run once the gate is defined.</param>
+    private static IReadOnlyList<string> RanGate(string line)
+    {
+        var script = Path.Combine(Path.GetTempPath(), $"winwright-ww417-{Guid.NewGuid():N}.ps1");
+        var gate = Checkout.At("tools", "host-gate.ps1");
+
+        File.WriteAllText(
+            script,
+            $$"""
+            Set-StrictMode -Version Latest
+            $ErrorActionPreference = 'Stop'
+            . '{{gate}}' -DefineOnly
+            {{line}}
+            """);
+
+        try
+        {
+            return Answered(script);
+        }
+        finally
+        {
+            File.Delete(script);
+        }
+    }
+
+    [Fact]
     public void The_shell_is_not_on_the_list_of_things_that_are_the_desktop()
     {
         // The repair that hid the reading. Folding the taskbar in with Progman and WorkerW makes a

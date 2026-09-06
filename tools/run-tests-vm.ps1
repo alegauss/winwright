@@ -75,6 +75,11 @@ param(
 
     [switch] $CommittedOnly,
 
+    # WW417. Skip the desk-free half this host could answer before the VM is started. For a run
+    # that is about the guest itself — a cold boot, a refusal arm, the sync — where six seconds of
+    # cases answer a question nobody asked.
+    [switch] $NoGate,
+
     [string] $Vmx,
 
     # WW227. The five that make this an adopter's runner rather than this repository's.
@@ -709,6 +714,42 @@ if ($envFile) { Write-Host "  settings    $envFile" }
 # one it took, or a green is a green about whichever tree the caller believed they named.
 Write-Host "  tree        $script:Tree  ->  $script:GuestRepo"
 Write-Host "  running     $script:Run"
+
+# WW417. The half of the suite that can answer before a VM is started, asked first.
+#
+# Three times in one session a guest run of seventeen minutes ended on a rule that reads sources
+# and would have answered in a second: a class copying a binary it ran, a sweep counting a sample
+# adopter's project, a case naming the solution file. Each cost the carry, the build, two thousand
+# other cases, and then a second run to prove the fix.
+#
+# Not a second suite and the refusal has to say so. What runs here is the same assembly's cheap
+# half, chosen by the collection this project already uses to declare which classes need a desk -
+# so a red is a red the guest would have given, arrived at sooner.
+#
+# Skippable, and off for anything but this repository's own shape: an adopter's tree has no
+# Winwright.Tests, and a gate that cannot find its project says so once rather than refusing a run
+# it knows nothing about.
+if (-not $NoGate) {
+    $gate = Join-Path $PSScriptRoot 'host-gate.ps1'
+    $project = Join-Path $script:Tree 'tests\Winwright.Tests\Winwright.Tests.csproj'
+
+    if ((Test-Path -LiteralPath $gate) -and (Test-Path -LiteralPath $project)) {
+        . $gate -DefineOnly
+
+        $filter = Get-HostFilter -Suite (Join-Path $script:Tree 'tests')
+        if ($filter) {
+            $answered = Invoke-HostGate -Project $project -Filter $filter -Configuration $Configuration
+            $counted = ($answered.Output -split "`r?`n" | Where-Object { $_ -match 'Aprovado|Passed!|Failed!|Com falha' } | Select-Object -Last 1)
+
+            if (-not $answered.Ok) {
+                Write-Host $answered.Output
+                Refuse 'the desk-free half of the suite is red on this host' 'These are the same cases the guest runs, and they need no VM. Fix them here: the guest would have said the same thing seventeen minutes later.'
+            }
+
+            Write-Host "  host gate   $($counted.Trim())"
+        }
+    }
+}
 
 # listSnapshots is the cheapest call that needs the VM actually opened, so it is what tells an
 # absent encryption password from a wrong one. The two messages differ, and matching only the first

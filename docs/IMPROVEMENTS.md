@@ -351,30 +351,6 @@ What it needs is the split the reading depends on. The generated scripts live in
 same file, and a case would have to cut it at those markers before comparing. That cut
 is worth having anyway: it is the line between the two machines, and nothing names it.
 
-### §WW417 the half that could answer before the VM starts
-
-A large part of this suite never touches a desk. `SettledTeardownTests` reads the
-sources and matches three tokens; `CriteriaTests`, `SurfaceCatalogueTests`, `SleepTests`
-and the rest of the catalogues held both ways do the same. They cost milliseconds and
-they are the cases most likely to be red after an edit, because they are the ones nobody
-was thinking about.
-
-WW404 measured what it costs to meet one of them last. The case added there copied an
-executable into a temp tree, started it and deleted the tree — the shape WW201 wrote a
-rule against — and the rule said so seventeen minutes into a guest run, having already
-carried the tree, built nine projects and run two thousand cases. The fix took a minute.
-Then another run, because the first is not evidence of the second.
-
-The split is already written down. A class that needs the desk carries
-`[Collection(WindowFixture.Serial)]`; a class that does not, does not. Everything
-outside that collection runs on the host, in any order, while somebody is using the
-machine — which is the whole reason the collection exists.
-
-So the runner could answer the cheap half before it starts a VM, and refuse there. What
-it needs is the sentence as much as the filter: a red from the host gate has to read as
-*this would have been red in the guest too*, not as a second suite with a verdict of its
-own. And `run-tests-vm.cmd` has to run it rather than offer it.
-
 ### §WW418 the owner the reading asks about is us
 
 `OwnRender` skips the wait for a window it has already waited out, and sets that memory
@@ -443,6 +419,29 @@ goes.
 
 That is a case, and it was a session's improvisation. What it needs is somewhere to live
 and a way to be cheap enough to keep.
+
+### §WW430 the third of the suite that runs twice
+
+WW417's gate runs 738 of 2061 cases on the host in four seconds. The guest then runs all
+2061, including those 738, and they cost it whatever they cost — a minute or two of a
+run that takes ten to seventeen.
+
+The obvious saving is not available. WW117's roll call refuses a run where the cases
+discovered and the cases recorded disagree, and that refusal is the reason a green here
+means what it says: it caught a test host that died with 900 cases never attempted. A
+guest told to skip 738 would have to be told, and a mechanism for telling it is a
+mechanism for telling it the wrong number.
+
+There is also a reason not to want the saving. The gate and the guest run the same cases
+on two machines, and twice this session that has been the finding rather than the waste:
+a case that passes on the host and fails in the guest is what this repository exists to
+notice, and the desk-free half is only desk-free by declaration.
+
+So what is worth having is the measurement rather than the skip. Nobody knows what those
+738 cost in the guest, because the suite reports one duration. If it is twenty seconds
+the question is closed; if it is two minutes, the roll call could carry the gate's own
+reading — the same cases, answered on the host — which is a different claim from
+skipping them and one WW117 could still refuse.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

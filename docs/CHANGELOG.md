@@ -387,6 +387,7 @@
 - ✅ **WW404** **a sync refused by something holding the guest tree names the path and never what is holding it** — The refusal names the processes holding the tree, and finding none is its own sentence (design recorded in `tools/run-tests-vm.ps1, tests/Winwright.Tests/DeskProbeTests.cs`).
 - ✅ **WW405** **the suite drives the engine inside its own process, so anything the engine keys by process is untestable here** — The fixture can be an application that never took the half, so two of them are two processes (design recorded in `src/Winwright.Fixture/Flags.cs, tests/Winwright.Tests/FixtureTests.cs`).
 - ✅ **WW421** **the guard against double-encoded text names the extensions it reads, and the tools' scripts are not among them** — The walk reads every file that is not built output or a binary, so the tools' scripts are in it (design recorded in `tests/Winwright.Tests/EncodingTests.cs`).
+- ✅ **WW417** **a rule that only reads sources is met by a seventeen-minute guest run, and the split that would ask it sooner exists** — The runner answers the desk-free half on this host first, derived from the serial collection (design recorded in `tools/host-gate.ps1`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
