@@ -12,9 +12,9 @@
 
 ## Block D — Act — patterns before pointers
 
-- 💭 **WW413** (deps: —) **two arms have a control that would refuse a run and neither checks it, so both read a desk with a floor and say nothing** — WW397 measured the guest's floor at 4 of 3600 and only `transfer` notices; `provoke` and `sweep` each have a quiet arm and read it as data. → §WW413
 - 💭 **WW423** (deps: —) **a sample adopter's projects are inside this checkout and every sweep that walks it from the root reads them** — WW408's first draft counted samples/Adopter/driving as a library of this project's, which is the reading exactly inverted; nothing marks that tree as somebody else's. → §WW423
 - 💭 **WW427** (deps: —) **a case asserting which desk fact a run degraded on is asserting where the intruder landed, which it cannot arrange** — WW401's decoy is timed for the reading and arrived before the act once; the hole named focus, the case demanded the foreground, and both were the desk. → §WW427
+- 💭 **WW429** (deps: —) **the floor a verdict refuses under is this guest's, measured once, and written into a tool an adopter runs** — WW413 took 4 in 3600 off WW397 and made it a constant; a desk with a different floor is refused too readily or not readily enough, and nothing measures its own. → §WW429
 
 ## Block E — Capture — the picture that proves what it photographed
 

@@ -436,6 +436,14 @@ internal static class Disturbance
                 + " disturbing the send.";
         }
 
+        // WW413. Every sentence below this line attributes the fault to one half of the mechanism,
+        // and each rests on the counts above it. The control is asked first and that is the strong
+        // guard; this is the other one — WW397 measured this desk producing about four faults in
+        // 3600 rounds of doing nothing, so an arm set whose largest number is two says which arm
+        // faulted and that is a sentence the floor can write.
+        if (Math.Max(read, poke) < Enough.Faults)
+            return Enough.TooFewFaults(Math.Max(read, poke), counted);
+
         if (poke > 0 && peek == 0)
         {
             return $"Making the window's thread pump provokes it and touching the window without"

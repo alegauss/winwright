@@ -75,29 +75,6 @@ one a place to be argued against rather than beside.
 
 ## Block D — Act — patterns before pointers
 
-### §WW413 the floor the other arms cannot see
-
-`transfer` refuses to attribute anything when its control faults, and WW397 is the run
-that proved the refusal earns its keep: this guest has had a floor of about 1 in 900
-since 2026-09-05, through a cold boot, and the ladder says so rather than reporting a
-difference.
-
-The other two arms have the same structure and none of the guard. `sweep` runs a `quiet`
-arm which faulted nowhere in 600 rounds when WW312 wrote it, and its verdict reads a
-null across every arm as "a reading about the desk and not about WW249" — which is
-close, and is reached by everything being zero rather than by the control being asked.
-`provoke` runs `quiet` for the same purpose and its verdict compares the arms without
-ever asking whether the quiet one held.
-
-So on this guest both are reading a desk with a floor under them and neither can say it.
-A rate of one in nine hundred is inside the counts those arms use, so a cell that faults
-once is a cell nobody can tell from the machine — and the report says which arm faulted,
-which is exactly the sentence a floor produces by accident.
-
-What each needs is the line `transfer` already has: name the arm that is the control,
-refuse to attribute where it faults, and say what was measured rather than advise a
-re-run. Two verdicts, one clause each, and the counts they already take.
-
 ### §WW423 the repository inside this one
 
 `samples/Adopter` is an adopter's repository kept inside this one. Its projects
@@ -145,6 +122,29 @@ it expects is asserting its own timing, and there are several —
 one named fact. Each may be right, because each provokes differently. None of them says
 which part of its expectation is the claim and which is the arrangement, and that is the
 distinction this one had to learn twice.
+
+### §WW429 a floor measured on one machine
+
+WW397 measured this guest producing four substitutions in 3600 rounds of a control that
+does nothing. WW413 turned that into `Enough.Faults` — five on the leading side before
+an attribution is allowed — and the number's whole justification is that one
+measurement, on one machine, twice.
+
+The tool is not this repository's private instrument. It ships in `tools`, it is driven
+by a .cmd a person types, and the thing it exists to answer is what a desk does to a
+send — which is the property most likely to differ between desks. A machine with a floor
+ten times this one's would pass the guard on noise; one with none would be refused a
+real reading of four.
+
+`transfer` already knows the answer. It runs a control arm that does nothing and reads
+that arm's rate, which is the desk's floor measured by the run that is about to be
+judged against it — the reading WW397 took by hand, taken every time.
+
+So the shape is there and two arms cannot use it: `sweep`'s three arms all type, and
+`provoke`'s control answers a different question. What each would need is a round or two
+of doing nothing before it starts, which is cheap next to what they already spend — and
+then the floor in the verdict is this desk's rather than the one the tool was written
+on.
 
 ## Block E — Capture — the picture that proves what it photographed
 

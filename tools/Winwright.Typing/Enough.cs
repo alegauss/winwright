@@ -36,6 +36,47 @@ public static class Enough
     public const string TooFew = "too short to conclude anything";
 
     /// <summary>
+    /// How many faults an attribution needs on the side it is leaning on. WW413.
+    /// <para>
+    /// WW397 measured this guest's floor: four substitutions in 3600 rounds of a control that does
+    /// nothing, through a cold boot, twice. A cell of a few hundred rounds therefore expects about
+    /// half a fault from the machine alone — so a band of two against nothing, ranked and
+    /// attributed, is a shape made of two events either of which the desk supplies.
+    /// </para>
+    /// <para>
+    /// `transfer` refuses at the control, which is the strongest form and needs an arm that does
+    /// nothing. `sweep` has none — all three of its arms type — and `provoke` has one and already
+    /// asks it. What neither has is this: the counts being large enough for the difference between
+    /// them to be the experiment rather than the room.
+    /// </para>
+    /// </summary>
+    public const int Faults = 5;
+
+    /// <summary>
+    /// The attribution, or the refusal to make one off counts this small. WW413.
+    /// </summary>
+    /// <param name="leading">How many faults the sentence would be leaning on.</param>
+    /// <param name="counted">The counts as the verdict already spells them, so the numbers survive.</param>
+    /// <param name="reading">The attribution, deferred.</param>
+    public static string Attributed(int leading, string counted, Func<string> reading)
+    {
+        ArgumentNullException.ThrowIfNull(reading);
+
+        return leading < Faults ? TooFewFaults(leading, counted) : reading();
+    }
+
+    /// <summary>
+    /// The refusal on its own, for a verdict whose branches are further down than the guard. WW413.
+    /// </summary>
+    /// <param name="leading">How many faults the sentence would have been leaning on.</param>
+    /// <param name="counted">The counts as the verdict already spells them.</param>
+    public static string TooFewFaults(int leading, string counted) =>
+        $"Too few to attribute: {counted}. WW397 measured this desk's floor at 4 in 3600, so a"
+            + $" difference resting on {leading} fault(s) is inside what the machine supplies — the"
+            + $" counts are the reading and the shape is not. {Faults} on the leading side is where"
+            + " that stops being true.";
+
+    /// <summary>
     /// The runner's verdict, or the refusal to reach one.
     /// </summary>
     /// <param name="rounds">How many rounds this run was asked for.</param>

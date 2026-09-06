@@ -342,20 +342,26 @@ internal static class Sweep
                 + " faulted nowhere, so WW310's band does not survive being reconstructed this way."
                 + " Either the shape is not what WW310 swept, or the fault has moved since.");
         }
-        else if (band > shoulders * 2)
-        {
-            said.Add($"The band survives the reconstruction: {band} substitution(s) across 48-64ms"
-                + $" against {shoulders} across 32, 80 and 96 together. What the whole arm has and"
-                + " the other two do not is an erase still draining when the text is injected, so"
-                + " that is where the band lives — two batches in the queue at once, and the"
-                + " interval deciding how far into the first the second lands.");
-        }
         else
         {
-            said.Add($"The whole arm faults ({whole.Values.Sum()} in total) and does not band:"
-                + $" {band} across 48-64ms against {shoulders} across 32, 80 and 96. So the engine's"
-                + " shape reproduces WW249 and the spacing is not what shapes its rate here, which"
-                + " leaves WW310's curve unexplained by anything this sweep varies.");
+            // WW413. The band question, and only where there is enough of it to be a question.
+            // This arm has no control that does nothing — all three type — so what stands in for
+            // one is the size of the difference: a band of two against nothing is a shape made of
+            // two events, and WW397 measured this desk supplying about that many on its own.
+            said.Add(Enough.Attributed(
+                Math.Max(band, shoulders),
+                $"{band} across 48-64ms against {shoulders} across 32, 80 and 96",
+                () => band > shoulders * 2
+                    ? $"The band survives the reconstruction: {band} substitution(s) across 48-64ms"
+                        + $" against {shoulders} across 32, 80 and 96 together. What the whole arm has"
+                        + " and the other two do not is an erase still draining when the text is"
+                        + " injected, so that is where the band lives — two batches in the queue at"
+                        + " once, and the interval deciding how far into the first the second lands."
+                    : $"The whole arm faults ({whole.Values.Sum()} in total) and does not band:"
+                        + $" {band} across 48-64ms against {shoulders} across 32, 80 and 96. So the"
+                        + " engine's shape reproduces WW249 and the spacing is not what shapes its"
+                        + " rate here, which leaves WW310's curve unexplained by anything this sweep"
+                        + " varies."));
         }
 
         if (control > 0 && band == 0 && shoulders == 0)
