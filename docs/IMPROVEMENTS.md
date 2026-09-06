@@ -76,28 +76,6 @@ readable. The first is worth doing whatever is decided about the second.
 
 ## Block D — Act — patterns before pointers
 
-### §WW408 what a sweep means by shipped
-
-Every reflection sweep here begins by saying which code it is about, and each says it
-differently. WW390's reads the engine and the in-app half, because those are what
-somebody else writes against. `RecordedResultTests` reads one assembly and narrows to a
-namespace. `SourceSweepTests` walks files. None is wrong and no two agree.
-
-What that costs is paid at the moment a sweep is written, which is the moment its author
-has least to go on: WW390 spent a paragraph arguing that the fixture and the tools are
-programs whose bangs their own author can see, and the next sweep will argue it again,
-possibly the other way. A catalogue covering less than a reader assumes is worse than
-none, and nothing here says what a reader should assume.
-
-The fact is small and stable: two assemblies are consumed by code this project does not
-own, and two are programs with one caller each. It belongs somewhere a sweep can read it
-rather than in the sweeps that have already chosen — `Checkout` is where the equivalent
-fact about paths lives, so there is already a place for it.
-
-What it would settle is not this rule but the next one's first paragraph. A sweep would
-name its coverage by pointing rather than by arguing, and one that meant something
-narrower would say so against a list rather than in place of one.
-
 ### §WW411 the flyout that closed between two lines
 
 `A_window_taking_the_foreground_shuts_the_flyout_under_whoever_was_looking_in_it` opens
@@ -144,6 +122,30 @@ which is exactly the sentence a floor produces by accident.
 What each needs is the line `transfer` already has: name the arm that is the control,
 refuse to attribute where it faults, and say what was measured rather than advise a
 re-run. Two verdicts, one clause each, and the counts they already take.
+
+### §WW423 the repository inside this one
+
+`samples/Adopter` is an adopter's repository kept inside this one. Its projects
+reference the engine through a package rather than a path, on purpose: WW228 built it to
+prove the adoption a paragraph used to describe, and its whole value is being the thing
+this project is not.
+
+Every sweep here walks from `Checkout.Root`. Most narrow to `Engine` and `Suite` and
+never meet the samples; the ones that do not, meet them without knowing. WW408's first
+draft asked which projects this repository builds, read the whole tree, and was told
+there were three libraries — the third being an adopter's driving half. The case said so
+on its first run, which is the only reason it is a paragraph here rather than a claim
+that shipped.
+
+The reading it broke is the interesting one. A sweep over "this project's code" that
+silently includes a sample is not merely wide: it is wrong in the direction that
+matters, because a sample exists to be written the way an outsider writes, and every
+rule this project holds about its own code is a rule an outsider is exempt from.
+
+So the tree wants naming, next to `Engine` and `Suite` — and the naming is the smaller
+half. The larger is deciding what a sweep should do when it meets one: exempt it, or
+hold it to the rules an adopter really is subject to, which is a shorter list and one
+nothing states.
 
 ## Block E — Capture — the picture that proves what it photographed
 

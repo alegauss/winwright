@@ -59,6 +59,63 @@ internal static class Checkout
     internal static string Suite => At("tests");
 
     /// <summary>
+    /// The halves an adopter writes code against, which is what a sweep over shipped code means.
+    /// WW408.
+    /// <para>
+    /// Every reflection sweep here begins by saying which code it is about, and each said it
+    /// differently — so each author argued the bound from scratch at the moment they had least to go
+    /// on. WW390 spent a paragraph on it; the sweep beside it reads one assembly and narrows to a
+    /// namespace. A catalogue covering less than a reader assumes is worse than none, and nothing
+    /// said what a reader should assume.
+    /// </para>
+    /// <para>
+    /// The fact is small and stable. Two projects here are libraries: a missing annotation, an
+    /// unhandled refusal or a renamed member in one of them is a defect in a repository this project
+    /// does not own. The rest are programs, whose methods have one caller each in the same file.
+    /// </para>
+    /// <para>
+    /// A list rather than a derivation, because a sweep needs assemblies and the checkout has
+    /// project files — and read back against those project files by a case, which is what makes it
+    /// a claim rather than two names somebody typed. The fixture is deliberately not among them:
+    /// it is a program, and the suite references it without loading its assembly, because an
+    /// application under test is launched from its own output rather than read from beside the
+    /// harness.
+    /// </para>
+    /// </summary>
+    internal static IReadOnlyList<System.Reflection.Assembly> Shipped { get; } =
+        new ReadOnlyCollection<System.Reflection.Assembly>(
+        [
+            typeof(Winwright.Acting.Act).Assembly,
+            typeof(Winwright.InApp.Renders).Assembly,
+        ]);
+
+    /// <summary>
+    /// Every project this repository builds, and whether it builds something a person runs. WW408.
+    /// <para>
+    /// Read off the project file and not off a list, so the answer is the build's own: a project
+    /// declaring an output type produces a program, and one that declares none is a library. Every
+    /// project here follows it today, which is why the reading is worth having — the run that adds a
+    /// third library under <c>src</c> is the run that has to decide whether it is shipped.
+    /// </para>
+    /// <para>
+    /// <c>src</c> and <c>tools</c> and nothing else, which the first draft got wrong and a case said
+    /// so: <c>samples/Adopter</c> holds an adopter's own projects, referencing this engine through a
+    /// package the way somebody else's repository does. They are the thing shipped code is shipped
+    /// to, so counting one as a library of this project's is the reading exactly inverted.
+    /// </para>
+    /// </summary>
+    internal static IReadOnlyList<(string Named, bool IsProgram)> Projects() =>
+        new ReadOnlyCollection<(string, bool)>(
+            new[] { Engine, At("tools") }
+                .SelectMany(one => Directory.EnumerateFiles(one, "*.csproj", SearchOption.AllDirectories))
+                .Where(Written)
+                .Select(one => (
+                    Path.GetFileNameWithoutExtension(one),
+                    File.ReadAllText(one).Contains("<OutputType>", StringComparison.Ordinal)))
+                .OrderBy(one => one.Item1, StringComparer.Ordinal)
+                .ToList());
+
+    /// <summary>
     /// Both, for a catalogue whose question is about the whole repository.
     /// <para>
     /// Computed rather than initialised, and that is not a preference. A static field initialiser

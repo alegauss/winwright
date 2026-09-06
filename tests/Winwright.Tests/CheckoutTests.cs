@@ -29,6 +29,29 @@ public sealed class CheckoutTests
     }
 
     [Fact]
+    public void What_a_sweep_means_by_shipped_is_every_library_this_checkout_builds()
+    {
+        // WW408. The bound each sweep used to argue for itself, held against the build's own answer:
+        // a project declaring an output type is a program, and one that declares none is a library
+        // somebody else writes code against. Both ways, so the run that adds a third library under
+        // src is the run that decides whether it is shipped rather than the run that discovers a
+        // sweep quietly covering less than its reader thought.
+        var libraries = Checkout.Projects()
+            .Where(one => !one.IsProgram)
+            .Select(one => one.Named)
+            .ToList();
+
+        var named = Checkout.Shipped.Select(one => one.GetName().Name!).OrderBy(one => one, StringComparer.Ordinal);
+
+        Assert.Equal(libraries, named);
+
+        // And the counterpart, which is the half the sentence rests on: everything else here is a
+        // program. A library appearing among them would make the claim above true by arithmetic.
+        Assert.Contains(Checkout.Projects(), one => one.IsProgram);
+        Assert.DoesNotContain(Checkout.Shipped, one => one.EntryPoint is not null);
+    }
+
+    [Fact]
     public void The_walk_finds_the_sources_and_leaves_out_what_a_build_wrote()
     {
         var sources = Checkout.Sources(Checkout.Everything).ToList();

@@ -106,11 +106,12 @@ internal static class Provocation
     /// under its catalogue, because a list this suite cannot load is one it can still be told.
     /// </para>
     /// </summary>
-    public static IReadOnlyList<Assembly> Assemblies { get; } = new ReadOnlyCollection<Assembly>(
-    [
-        typeof(Winwright.Locating.Subject).Assembly,
-        typeof(Winwright.InApp.Coordinates).Assembly,
-    ]);
+    /// <para>
+    /// WW408: the two are <c>Checkout.Shipped</c> now rather than a second spelling of them. What
+    /// stays here is why the fixture is not one — a fact about how this suite loads it, which no
+    /// list of libraries could carry.
+    /// </para>
+    public static IReadOnlyList<Assembly> Assemblies => Checkout.Shipped;
 
     /// <summary>Every refusal, paired.</summary>
     public static IReadOnlyList<Provoked> Known { get; } = new ReadOnlyCollection<Provoked>(

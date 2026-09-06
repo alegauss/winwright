@@ -34,9 +34,15 @@ public sealed class TryVerbTests
 {
     /// <summary>
     /// The halves a consumer writes code against. WW390, and the whole of what this rule covers.
+    /// <para>
+    /// WW408: pointed at rather than named. The paragraph above argued this bound from scratch
+    /// because there was nowhere to argue it once, and the sweep beside this one reached a different
+    /// answer for the same question. <c>Checkout.Shipped</c> is the answer now, and a case holds it
+    /// against the project files — so a rule meaning something narrower says so against a list
+    /// rather than in place of one.
+    /// </para>
     /// </summary>
-    private static IReadOnlyList<Assembly> Shipped() =>
-        [typeof(Winwright.Acting.Act).Assembly, typeof(Winwright.InApp.Renders).Assembly];
+    private static IReadOnlyList<Assembly> Shipped() => Checkout.Shipped;
 
     /// <summary>
     /// Every exported verb answering a bool that hands something back through an <c>out</c>.

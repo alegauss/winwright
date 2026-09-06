@@ -156,6 +156,7 @@
 - ✅ **WW394** **a rung added to the ladder's walk prints the rung below it's sentence, because the verdict's switch ends in a default** — The walk is derived from the pairs, so a rung joins it by having a sentence and there is no default left to borrow one from (design recorded in `tools/Winwright.Typing/Transfer.cs`).
 - ✅ **WW395** **the guarding rung spells the engine's interval itself, so moving the engine's leaves it pricing a placement nobody pays** — Two cases read all three spellings out of their files and fail where they disagree, the prose included (design recorded in `tests/Winwright.Tests/TypingIntervalTests.cs`).
 - ✅ **WW397** **the ladder's control has stopped reading zero, so every rung above it is refused and the tool can attribute nothing** — The floor is measured and dated: 4 of 3600 over three runs and a cold boot, so a re-run is no remedy and the refusal says so (design recorded in `tools/Winwright.Typing/Transfer.cs`).
+- ✅ **WW408** **the sweeps over the shipped halves each name their own two assemblies, and nothing says what shipped means** — Checkout.Shipped names the libraries once, held against the project files the build reads (design recorded in `tests/Winwright.Tests/Checkout.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 
