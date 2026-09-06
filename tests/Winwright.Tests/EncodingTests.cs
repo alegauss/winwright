@@ -197,11 +197,86 @@ public sealed class EncodingTests
                 + $"UTF-8:{Environment.NewLine}{string.Join(Environment.NewLine, found)}");
     }
 
+    [Fact]
+    public void The_walk_reads_the_scripts_that_used_to_be_outside_it()
+    {
+        // WW421, and the whole of what it moved. This check read seven globs and called itself
+        // every text file; the runner is the file this repository edits most, it is prose almost
+        // throughout, and it carried five damaged em-dashes past every green run for months.
+        //
+        // Named rather than counted, because a count goes up for any reason: what is asserted is
+        // that the kinds this repository actually writes prose in are read.
+        var walked = Tracked().Select(one => Path.GetRelativePath(Checkout.Root, one)).ToList();
+
+        foreach (var wanted in new[]
+        {
+            Path.Combine("tools", "run-tests-vm.ps1"),
+            Path.Combine("tools", "desk-probe.ps1"),
+            Path.Combine("tools", "winwright-mcp.cmd"),
+
+            // Asked for rather than spelled. WW193 refuses a file that names the solution, because
+            // every copy of the walk it replaced named it in a comment — and a case listing it as
+            // one more file to read looks exactly like the nineteenth copy.
+            Checkout.Marker,
+            ".gitignore",
+        })
+        {
+            Assert.Contains(wanted, walked, StringComparer.OrdinalIgnoreCase);
+        }
+
+        // And the sources it always read, so a walk that swapped one set of blind spots for another
+        // is red rather than differently quiet.
+        Assert.Contains(Path.Combine("tests", "Winwright.Tests", "EncodingTests.cs"), walked, StringComparer.OrdinalIgnoreCase);
+        Assert.Contains(Path.Combine("docs", "ROADMAP.md"), walked, StringComparer.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void What_a_build_left_and_what_is_not_text_are_both_stepped_over()
+    {
+        // The other half: a walk admitting everything reads a nupkg on every run, and the answer
+        // would still be right — replacement characters do not encode back to the codepage — but a
+        // check that reads the whole packages directory to conclude nothing is a check nobody keeps.
+        var walked = Tracked().ToList();
+
+        Assert.DoesNotContain(walked, one => Path.GetExtension(one).Equals(".dll", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(walked, one => Path.GetExtension(one).Equals(".png", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(
+            walked,
+            one => one.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase));
+    }
+
     /// <summary>What is not source, and would be read by a walk that did not say so.</summary>
     private static readonly string[] Built = ["bin", "obj", ".git", "TestResults", "packages", "node_modules"];
 
-    /// <summary>What a file has to be named to be text somebody wrote.</summary>
-    private static readonly string[] Written = ["*.cs", "*.md", "*.xaml", "*.csproj", "*.props", "*.json", "*.toml"];
+    /// <summary>
+    /// What a file has to be, to be text somebody wrote. WW421: everything that is not one of these,
+    /// where it used to be everything that was one of seven globs.
+    /// <para>
+    /// The list this replaces read as a claim about every text file and was seven extensions.
+    /// <c>tools/run-tests-vm.ps1</c> carried five double-encoded em-dashes past it for months, green
+    /// every run, because a <c>.ps1</c> was not among them — and neither was a <c>.cmd</c>, a
+    /// <c>.slnx</c>, a <c>.yml</c> or a <c>.gitignore</c>. They were found by eye, by somebody
+    /// editing the file for another task.
+    /// </para>
+    /// <para>
+    /// Admitting by extension is the mistake, because the extension nobody thought of is the one the
+    /// damage is in: a list of what to read has to be extended by whoever adds a file kind, and a
+    /// list of what to skip has to be extended by whoever adds a binary — and this repository adds
+    /// prose far more often than it adds binaries.
+    /// </para>
+    /// <para>
+    /// Read as text and refused as a finding only where the round trip says so, which means a binary
+    /// admitted here costs a slow read rather than a wrong answer: bytes that are not valid UTF-8
+    /// become replacement characters, which do not encode back to the codepage, so
+    /// <see cref="AsCodepage" /> returns null and the line is not a finding. The list below is
+    /// therefore about speed and noise rather than about correctness.
+    /// </para>
+    /// </summary>
+    private static readonly string[] Binary =
+    [
+        ".png", ".jpg", ".jpeg", ".gif", ".ico", ".bmp", ".pdf", ".zip", ".nupkg", ".snupkg",
+        ".dll", ".exe", ".pdb", ".ttf", ".otf", ".woff", ".woff2", ".dmp", ".vmdk",
+    ];
 
     /// <summary>
     /// Every text file under the checkout, walked rather than asked of git.
@@ -214,10 +289,11 @@ public sealed class EncodingTests
     /// </summary>
     private static IEnumerable<string> Tracked()
     {
-        var walked = Written
-            .SelectMany(one => Directory.EnumerateFiles(Checkout.Root, one, SearchOption.AllDirectories))
+        var walked = Directory
+            .EnumerateFiles(Checkout.Root, "*", SearchOption.AllDirectories)
             .Where(one => !Built.Any(skip =>
                 one.Contains($"{Path.DirectorySeparatorChar}{skip}{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase)))
+            .Where(one => !Binary.Contains(Path.GetExtension(one), StringComparer.OrdinalIgnoreCase))
             .ToList();
 
         // A walk that found nothing is not a clean tree. Every file passing because the root was

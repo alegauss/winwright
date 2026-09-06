@@ -445,31 +445,6 @@ goes.
 That is a case, and it was a session's improvisation. What it needs is somewhere to live
 and a way to be cheap enough to keep.
 
-### §WW421 the extensions the guard was told about
-
-WW284 built the reading this project needed: the inverse of the damage rather than a
-list of its shapes, a line at a time, refusing any text that was UTF-8, read as
-Windows-1252, and written back. It is a good check. It walks `*.cs`, `*.md`, `*.xaml`,
-`*.csproj`, `*.props`, `*.json` and `*.toml`.
-
-`tools/run-tests-vm.ps1` carried five double-encoded em-dashes for months and every run
-was green, because a `.ps1` is not on that list. Nor is a `.cmd`, a `.slnx`, a `.xml`, a
-`.yml` or a `.gitignore`. The five were found by eye while editing the file for another
-task.
-
-The list is the whole defect and it is the kind that reads as complete: `Written` is
-documented as "what a file has to be named to be text somebody wrote", which is a claim
-about every text file and a list of seven globs. The tools directory is four scripts and
-a launcher, all of them prose-heavy, and the runner is the file this repository edits
-most.
-
-Two ways to close it, and only one is the project's own idiom. Adding `*.ps1` and
-`*.cmd` fixes today. Reading every file that is not excluded — a walk that skips built
-output and binaries by extension rather than admitting text by extension — makes the
-claim the doc comment already makes. The second needs a rule for what a binary is, which
-is the work; the first needs somebody to notice the eighth extension, which is what
-nobody did for months.
-
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW406 the exception that took the run with it
@@ -524,3 +499,28 @@ So the shape worth having is the one WW409 built, applied where it is missing: a
 hand-made list stays hand-made, and the count it implies is asserted somewhere against
 the article. A list nothing counts is a green about whatever fraction of a set somebody
 last remembered.
+
+### §WW425 the correct character standing in front of the damaged one
+
+WW284 moved this reading from whole-file to line-at-a-time, and said why: one character
+anywhere that cannot round-trip makes the whole file come back invalid, so real damage
+on line 12 is masked by a Portuguese string on line 400. The same masking survives one
+level down, and nothing says so.
+
+A line is a finding only if every character on it encodes back to the codepage and those
+bytes are valid UTF-8 for something shorter. A genuine em-dash encodes to 0x97 — a lone
+continuation byte — so any line carrying one cannot round-trip, and damage sitting
+beside it is not a finding.
+
+Measured, not reasoned about. WW421's control wrote a damaged em-dash into a `.ps1` on a
+line that also carried a real one, and the check passed. Taking the real dash off the
+line made it a finding. That is the whole demonstration and it cost two runs.
+
+It matters here because of what this repository writes. Its prose is full of em-dashes,
+the damage is an em-dash, and the file WW421 was about had five — catchable only because
+none of those lines happened to carry a correct dash as well.
+
+The obvious answer is to narrow further: a run of characters rather than a line, so the
+prose beside the damage is somebody else's substring. What that costs is the sentence —
+the finding prints the line, which is what a reader needs — so it wants a narrower
+reading and the same report.

@@ -382,6 +382,7 @@
 - ✅ **WW401** **a case that loses the desk mid-act fails in the words of its own subject, so a desk fault reads as five separate defects** — A failed reading after a synthesised act looks again, and a window that lost the desk is a hole naming it, not a red (design recorded in `src/Winwright/Scenarios/CaseRun.cs`).
 - ✅ **WW404** **a sync refused by something holding the guest tree names the path and never what is holding it** — The refusal names the processes holding the tree, and finding none is its own sentence (design recorded in `tools/run-tests-vm.ps1, tests/Winwright.Tests/DeskProbeTests.cs`).
 - ✅ **WW405** **the suite drives the engine inside its own process, so anything the engine keys by process is untestable here** — The fixture can be an application that never took the half, so two of them are two processes (design recorded in `src/Winwright.Fixture/Flags.cs, tests/Winwright.Tests/FixtureTests.cs`).
+- ✅ **WW421** **the guard against double-encoded text names the extensions it reads, and the tools' scripts are not among them** — The walk reads every file that is not built output or a binary, so the tools' scripts are in it (design recorded in `tests/Winwright.Tests/EncodingTests.cs`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
