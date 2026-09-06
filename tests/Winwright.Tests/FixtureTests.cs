@@ -2744,7 +2744,12 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         // Said out loud rather than left to be discovered by launching one and waiting. Named here
         // rather than derived from the catalogue's own marker: a list read off the thing it is
         // checking would agree with itself whatever the fixture did.
-        foreach (var quiet in new[] { "--flags", "--render", "--resident", "--sizeless", "--blank", "--unbacked" })
+        //
+        // WW409: read off `Undrawn.Known` and still not off the catalogue, which is the same
+        // independence with the drift taken out. This list was six when the fixture had eleven, and
+        // nothing was wrong with any line of it — a hand-written list inside the only case about
+        // these shapes is exactly where five of them went missing.
+        foreach (var quiet in Undrawn.Known.Select(one => $"--{one.Flag}"))
         {
             var row = Assert.Single(
                 Lines(said), one => one.TrimStart().StartsWith(quiet + " ", StringComparison.Ordinal)

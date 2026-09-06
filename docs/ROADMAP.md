@@ -44,12 +44,12 @@
 - 💭 **WW418** (deps: —) **the case proving a wait is skipped asks whether the test host is armed, so another class holding a half decides it** — WW387's memory stands only for a process that put up no presence window, and in-process that process is the suite; WW405 gave it a second one to ask about instead. → §WW418
 - 💭 **WW419** (deps: —) **every reading the engine takes about an application is driven with one application up, and a run has several** — WW405 made a second application cheap; the surface report, the geometry dump and the instance check have never been asked while two are answering at once. → §WW419
 - 💭 **WW420** (deps: —) **the runner's failure arms are read for their shape and run by nothing, and the door that would drive them exists** — WW406's arm only fires on a red run, so proving it meant a scratch command and a hand-built dump; WW227's -Run and -ResultsIn are what made that possible. → §WW420
-- 💭 **WW421** (deps: —) **five double-encoded em-dashes sat in the runner for months, and nothing here reads a source for encoding damage** — Committed by WW345 and found by eye while editing the file; every other rule this project holds about its own sources is read by a case. → §WW421
+- 💭 **WW421** (deps: —) **the guard against double-encoded text names the extensions it reads, and the tools' scripts are not among them** — WW284 walks every text file it names, and run-tests-vm.ps1 carried five damaged em-dashes past it for months — found by eye, not by the case built to find them. → §WW421
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - ⏳ **WW406** (deps: —) **the test host goes away mid-run and 900-odd cases never run, three times in about fifteen guest runs** — Which thread is waiting and on what, read out of a dump the runner now keeps rather than one nobody has ever had. → §WW406
-- 💭 **WW409** (deps: —) **a flag that draws nothing is skipped by the run that drives every shape, so what those shapes open is asserted nowhere** — WW392 found the qualifier by going red on `--render`, and the same clause is what excuses four shapes from the only case that launches them. → §WW409
+- 💭 **WW424** (deps: —) **a hand-written list inside the only case about a set is where that set drifts, and three of them are still here** — WW409 found one at six entries against eleven, written deliberately so it would not agree with what it checks; the independence is right and the drift is not. → §WW424
 
 ## Done when — Block A
 

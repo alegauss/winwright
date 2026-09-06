@@ -445,29 +445,30 @@ goes.
 That is a case, and it was a session's improvisation. What it needs is somewhere to live
 and a way to be cheap enough to keep.
 
-### §WW421 the bytes nobody reads back
+### §WW421 the extensions the guard was told about
 
-`tools/run-tests-vm.ps1` carried a double-encoded em-dash in five comments — written as
-UTF-8, read back as Latin-1, and written again as UTF-8. WW345 committed it and every
-run since has been silent about it, because nothing that could fail looks at that file's
-prose: PowerShell parses it, the guest runs it, and the three cases here that read it
-match code.
+WW284 built the reading this project needed: the inverse of the damage rather than a
+list of its shapes, a line at a time, refusing any text that was UTF-8, read as
+Windows-1252, and written back. It is a good check. It walks `*.cs`, `*.md`, `*.xaml`,
+`*.csproj`, `*.props`, `*.json` and `*.toml`.
 
-It is a small thing and its cause is not. Double encoding is what a tool does when it
-rewrites a file it did not open carefully — a shell redirect, a `Set-Content` taking its
-default — and the same hand that did it once will do it again to a file where the
-damaged bytes sit inside a string a case compares, or a sentence a run prints at
-somebody.
+`tools/run-tests-vm.ps1` carried five double-encoded em-dashes for months and every run
+was green, because a `.ps1` is not on that list. Nor is a `.cmd`, a `.slnx`, a `.xml`, a
+`.yml` or a `.gitignore`. The five were found by eye while editing the file for another
+task.
 
-This project already reads its own sources for a dozen rules: which classes copy a
-binary they run, which flags reach which pane, how many sleeps a file may hold, what the
-runner's switch has arms for. Encoding is the same kind of claim and cheaper than any —
-the mark is a short list of sequences that never occur in text somebody meant, and a
-file has one or does not.
+The list is the whole defect and it is the kind that reads as complete: `Written` is
+documented as "what a file has to be named to be text somebody wrote", which is a claim
+about every text file and a list of seven globs. The tools directory is four scripts and
+a launcher, all of them prose-heavy, and the runner is the file this repository edits
+most.
 
-What it would take is one case sweeping every source in the checkout, and a decision
-about what the list holds beyond the few that arise from Latin-1 round trips. The
-failure names the file and the line, which is the whole of what a reader needs.
+Two ways to close it, and only one is the project's own idiom. Adding `*.ps1` and
+`*.cmd` fixes today. Reading every file that is not excluded — a walk that skips built
+output and binaries by extension rather than admitting text by extension — makes the
+claim the doc comment already makes. The second needs a rule for what a binary is, which
+is the work; the first needs somebody to notice the eighth extension, which is what
+nobody did for months.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
@@ -498,25 +499,28 @@ That is the shape of the first half — a hang dump belongs where the trx goes, 
 host, without anybody remembering. The second is the question it answers: which thread
 is waiting, and on what.
 
-### §WW409 the shapes the driver steps over
+### §WW424 the list the case keeps to itself
 
-`Every_shape_that_draws_opens_a_window_somebody_can_look_at` drives every flag the
-catalogue lists and skips the ones marked `[draws nothing]`, which is right: a shape
-that opens no window cannot be asserted to have opened one.
+A case that checks a catalogue must not read that catalogue, or it agrees with itself
+whatever the thing under it does. So several here name their subjects by hand, and each
+comment says why — correctly, and each is a list nothing counts.
 
-What nothing says is what those shapes do instead. `--render` writes a file and exits;
-`--sizeless` and `--blank` do the same through it and exit 3 and 0; `--flags` prints and
-stops. Each is exercised somewhere — `ProvokedByFlagTests` drives two of them and reads
-the exit code — but the pairing is the reverse of the drawing one: there, a shape added
-tomorrow is driven because the case reads the catalogue, and here it is skipped because
-the case reads the catalogue, and nothing notices that nobody else picked it up.
+`The_shapes_that_show_nothing_say_so_where_a_person_reads_them` named six flags against
+a fixture that had eleven. Every line of it was true. Five shapes had simply been added
+since, and the case went on passing about the six it knew, which is the failure mode
+this project usually catches by holding a list against a second source.
 
-WW392 met the clause from the other side. Its value rule had to learn that a non-drawing
-flag needs no value, which is the same fact read for the opposite purpose — and the way
-it learned was a red naming `--render`, which is exactly the cost that entry was about.
+The way out is not to drop the independence. WW409's is read off `Undrawn.Known`, which
+is a list built by hand from the same evidence and checked against the fixture in both
+directions — so the case still does not consult the thing it checks, and something else
+does.
 
-The shape of the answer is the one this project keeps reaching for: the catalogue
-already divides the flags, so the skipped half is a list, and a list nothing claims
-about is the thing to fix. Either each names the case that drives it, the way a shape
-names the flag that justifies it, or the count of them is asserted so the fifth arrives
-as a red rather than as a silence.
+What is left is that this was found by reading rather than by anything going red, and
+there are more. `Provocation.Known`, `FixtureArms` and the language lists each hold
+entries typed against a source they deliberately do not read. Each may be complete
+today; none of them would say so if it were not.
+
+So the shape worth having is the one WW409 built, applied where it is missing: a
+hand-made list stays hand-made, and the count it implies is asserted somewhere against
+the article. A list nothing counts is a green about whatever fraction of a set somebody
+last remembered.
