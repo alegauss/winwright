@@ -103,6 +103,7 @@
 - ✅ **WW206** **the sweep rule is checked per file, so a file holding two sweeps passes on the strength of the one that reads code** — The unit is the sweep, so a file holding two is two: thirteen are found where eight files were, and the excuse list is empty rather than hand-written.
 - ✅ **WW328** **the diagnosis of a locator that matched nothing walks the whole desktop and throws where that walk fails** — The door walk catches the COM failure beside the one it already caught, so a locator correctly found to match nothing no longer fails from the code explaining why.
 - ✅ **WW364** **Locator.TryParse is not null-annotated, so a caller that refused on false still carries a bang to use what it parsed** — TryParse now says which out is null on which answer, so the four bangs are gone and reading a refused parse's locator warns (design recorded in `src/Winwright/Locating/Locator.cs`).
+- ✅ **WW398** **a case wanting the tree without the rectangle wrote a second walk of it, beside the one renderer that says it is the one** — The shape is a projection over the one renderer now, and the second recursion is gone (design superseded: the two walks had not drifted; both indented alike).
 
 ## Block D — Act — patterns before pointers
 

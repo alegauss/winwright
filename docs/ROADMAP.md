@@ -10,8 +10,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-- 💭 **WW398** (deps: —) **a case wanting the tree without the rectangle wrote a second walk of it, beside the one renderer that says it is the one** — WW382 needed control type and name and nothing else, and `Rendered` already hands back the element and the level each line came from. → §WW398
-
 ## Block D — Act — patterns before pointers
 
 - 💭 **WW408** (deps: —) **the sweeps over the shipped halves each name their own two assemblies, and nothing says what shipped means** — WW390 had to decide its own coverage and write the reason down; the sweep beside it reads one assembly and a third reads a namespace. → §WW408

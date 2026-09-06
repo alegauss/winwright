@@ -733,30 +733,29 @@ public sealed class NotificationAreaTests : IDisposable
     /// grew children past the walk's width would render the same lines and the same shape, and the
     /// count of what nobody looked at is what says the two trees were not both read to the end.
     /// </para>
-    /// </summary>
+    /// <para>
+    /// WW398 made it a projection over the one renderer rather than a second walk of the tree.
+    /// <c>Rendered</c> hands back the element and the indent of every line it wrote, so what is left
+    /// here is the one thing this case actually wanted — which facts to keep.
+    /// </para>
+    /// <para>
+    /// The entry that filed it said the two walks had already drifted on the elision marker, and
+    /// that was wrong: both put it at the child's indent and agreed line for line. What the second
+    /// walk cost was not a difference, it was the standing chance of one — two recursions over the
+    /// same tree, one of them in a file where nothing compares it to anything, and the next case
+    /// wanting a shape copies whichever it finds first.
+    /// </para>
     /// <param name="tree">The menu's tree, already walked.</param>
-    private static List<string> Shape(InspectedElement tree)
-    {
-        var lines = new List<string>();
-        Shaped(tree, 0, lines);
-        return lines;
-    }
+    private static List<string> Shape(InspectedElement tree) =>
+    [
+        .. Inspect.Rendered(tree).Select(one => one.Element is { } element
+            ? $"{one.Indent}{element.Facts.ControlType} {element.Facts.Says ?? "(unnamed)"}"
 
-    /// <summary>One element and its children, as <see cref="Shape"/> renders them.</summary>
-    /// <param name="element">What to render.</param>
-    /// <param name="level">How deep it sits, which the indent carries.</param>
-    /// <param name="lines">Where the lines go.</param>
-    private static void Shaped(InspectedElement element, int level, List<string> lines)
-    {
-        var indent = new string(' ', level * 2);
-        lines.Add($"{indent}{element.Facts.ControlType} {element.Facts.Says ?? "(unnamed)"}");
-
-        foreach (var child in element.Children)
-            Shaped(child, level + 1, lines);
-
-        if (element.Elided > 0)
-            lines.Add($"{indent}  ... {element.Elided} more not walked");
-    }
+            // A line with no element is the renderer saying what it did not walk, and it is kept as
+            // it wrote it: what that line describes is the children nobody looked at, which is a
+            // fact about the tree and not a fact this projection has any version of.
+            : one.Text),
+    ];
 
     [Fact]
     public void A_menu_that_stands_without_taking_the_focus_is_seen_too()

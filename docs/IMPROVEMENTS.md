@@ -75,30 +75,6 @@ is worse than one that refuses.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW398 the second renderer, in a test file
-
-`Inspect.Rendered` is deliberately the only walk that turns a tree into lines, and
-`Render` is documented as its text — "so the step a reader is handed cannot drift from
-the step the line opens with". WW382 wanted the same tree with the rectangle and the
-window class taken out, because those are what two tray menu kinds are entitled to
-differ in, and it got there by writing a second recursion in `NotificationAreaTests`.
-
-It is eleven lines and it already disagrees with the first in a way nobody chose: the
-elision marker is indented one way here and another way there, and neither is wrong
-because nothing compares them. The next case wanting a shape copies whichever one it
-finds.
-
-There is no need for the recursion at all. `Rendered` returns a `RenderedLine` per
-element carrying the element and its level, so a projection is a `Select` over what the
-one renderer already walked — the same tree, the same order, the same elisions, and a
-line built from whichever facts the caller wants.
-
-What it would take is somewhere for that to live. A `Shape` beside `Render`, taking the
-fields to keep, is one answer; a caller writing its own `Select` over `Rendered` is
-another and needs nothing added at all. What decides is whether more than one case wants
-it, and today exactly one does — which is the moment to move it, before the second one
-copies the recursion instead of the line.
-
 ## Block D — Act — patterns before pointers
 
 ### §WW408 what a sweep means by shipped
