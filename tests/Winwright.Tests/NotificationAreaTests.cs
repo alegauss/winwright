@@ -718,6 +718,30 @@ public sealed class NotificationAreaTests : IDisposable
                 + " is written down");
     }
 
+    [Fact]
+    public void What_an_adopter_is_told_about_a_tray_locator_is_what_this_suite_measured()
+    {
+        // WW399. The case above measured a fact an adopter meets and cannot see: the container is
+        // named in one kind of tray and not the other, so a locator starting there is proven against
+        // neither. It is the easiest half of WW322's difference to hit — the container is the first
+        // line the inspector prints, its line is written to be copied, and copying it from a Win32
+        // tray produces a locator whose only answer is that nothing answered, which is the sentence
+        // WW356 spent six guest runs inside.
+        //
+        // An adopter does not read this suite. What they read is the inspector's output and the
+        // skill, so the skill is where the fact goes — and this is what stops the sentence there
+        // outliving the measurement here. A guidance line nothing holds is the same defect as a
+        // catalogue nothing holds, arriving in prose.
+        var skill = File.ReadAllText(Checkout.At("skills", "winwright", "SKILL.md"));
+
+        Assert.Contains("tray menu is addressed at its entries", skill, StringComparison.Ordinal);
+
+        // And the fact it rests on, in the words this suite proves: one kind names the container and
+        // one does not. A skill that said the opposite would be as confidently wrong as one that
+        // said nothing, and only this line tells them apart.
+        Assert.Contains("only one of them names that menu", skill, StringComparison.Ordinal);
+    }
+
     /// <summary>
     /// A tree as a locator sees it: one line an element, indented by depth, carrying the control type
     /// and the name and nothing else. WW382.

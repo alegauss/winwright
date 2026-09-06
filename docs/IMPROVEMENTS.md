@@ -327,29 +327,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW399 the container an adopter must not name
-
-WW382 read both tray menu kinds and found the entries identical and the containers not:
-a `TrackPopupMenu` reports its `Menu` with a name and a WinForms drop-down reports one
-with none. Everything below is the same — two `MenuItem`s named as the adopters name
-them — so a locator that starts at an entry is proven against both kinds by either, and
-a locator that starts at the container is proven against neither.
-
-That is a trap in the shape adopters keep walking into. WW322 exists because three
-adopted cases failed for weeks on the desk half of this difference, and the tree half is
-easier to hit: the container is the first thing the inspector prints, its line is
-written to be copied, and copying it from a Win32 tray produces a locator that matches
-nothing on a drop-down and says "nothing answered to it" — the sentence WW356 spent six
-guest runs inside.
-
-The case that measured it is where the fact lives, and an adopter does not read this
-suite. What they read is the inspector's output and whatever this project tells them
-about locators. So the fix belongs on one of those two: a line in the guidance saying a
-tray menu's container is named by the shell in one kind and not the other, or the
-inspector itself marking the line as one not to start from.
-
-Which of the two is a question about how much the inspector should know about menus.
-
 ### §WW400 the arms a real look still cannot reach
 
 The probe writes six words and the runner switches on all six. Three are now produced
@@ -440,6 +417,29 @@ Two doors, and they are not the same size. A fixture in a process of its own is 
 `Winwright.Fixture` already is, so a case wanting one has one — at the cost of a launch.
 Or the suite says out loud which readings it cannot prove, the way `Criteria` says which
 claims nothing shows, so the wall is met at the design rather than at the red.
+
+### §WW414 the word the skill cannot say
+
+`Every_verb_the_skill_names_is_a_verb_the_engine_exports` reads every backticked token
+in the skill and, where it looks like a type name, requires the engine to export it. The
+rule is right and has caught what it is for: a skill naming a renamed type sends an
+agent confidently at something that is not there.
+
+What it cannot tell apart is a type and a control type. `MenuItem` and `Menu` are UI
+Automation's words, they are what the tree actually says, and they are exactly what a
+page about addressing an element wants to name — so WW399 wrote its sentence around
+them, saying "entries" and "menu" in prose and putting the real word only inside a
+locator, where the regex does not look.
+
+The prose is no worse for it and possibly better: `MenuItem[name="Quit"]` shows the
+reader the thing to write rather than describing it. But the shape of the constraint is
+wrong — the guidance was bent by a check that has no opinion about tree vocabulary, and
+the next page about the tree will bend the same way or go red.
+
+The vocabulary is not a guess: `UiaVocabulary` already knows every control type the
+grammar accepts, and the locator step will not carry one it does not. So the rule can
+have a second arm — a backticked token that is a control type is a control type — and
+the skill can say the word the tree says.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

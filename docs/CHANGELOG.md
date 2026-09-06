@@ -373,6 +373,7 @@
 - ✅ **WW384 (the arm that must not move a window)** **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — `Clear-TheDesk` is a function, and a case runs the whole repair at a window with no minimise button and reads off the desk that nothing moved.
 - ✅ **WW386** **the runner waits on the guest with no bound, so a wedge outside a case is still a run nobody can tell from a slow one** — The wait is bounded, says which minute it is on, and ends by reading the desk and the log rather than by being killed (design recorded in `tools/run-tests-vm.ps1`).
 - ✅ **WW388** **a stale desk is reported and a clearable one is repaired, and nothing says which desks a run tidies before it starts** — A stale desk is put away as well as said, and the runner declares which desks it tidies against a case that reads its arms (design recorded in `tools/run-tests-vm.ps1`).
+- ✅ **WW399** **a tray locator naming its container works against one kind of tray and not the other, and nothing warns an adopter** — The skill says to address a tray menu at its entries and why, and a case holds that sentence to what this suite measured (design recorded in `skills/winwright/SKILL.md`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
