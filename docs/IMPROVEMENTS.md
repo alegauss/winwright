@@ -28,29 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW407 the reading its own neighbour covers
-
-WW363 reads how often one case was excused across the deep window, and it is silent
-where the recurrence mark spoke — the right rule, because two fractions about one case
-on one line is a line nobody finishes. WW376 is silent where *none of them is new*
-spoke, for the same reason.
-
-What WW389 makes visible by putting them in one list is that this suite's ordinary run
-silences both. Its steady state is that every excuse it makes recurs in every earlier
-run, which is the exact condition the two loudest clauses fire on — so the rate appeared
-on no run of a whole session, and the count against the deep window appeared on none
-either.
-
-That is not a defect and it is not nothing. Each is correct and each is dead on the runs
-a person actually reads; both come alive only on a run that already looks unusual, which
-is the run whose reader least needs a second opinion.
-
-Two ways to weigh it, and the list is what makes either arguable. Either the precedence
-is right and both are worth keeping for the rare runs, in which case what to add is a
-case that goes red when one has been quiet for a whole window. Or the composition should
-change: the rate is the reading that sees a slope, and a slope on a recurring case is
-what the mark above it cannot show.
-
 ### §WW412 the session the runner does not wait for
 
 `Start-Guest` waits ten minutes for VMware Tools to answer and argues the number:
@@ -72,6 +49,28 @@ The shape is here twice over: a deadline, a poll, and the time said out loud. Wh
 to be decided is the number, and the argument is the tools wait's own — long enough that
 a machine that is fine is not called broken, and bounded because a run that cannot end
 is worse than one that refuses.
+
+### §WW422 the reading that leaves without saying so
+
+`Everywhere` asks whether every excuse this run made was made by every earlier run too,
+and it answers no where any row names no case — correctly, because a row it cannot place
+is a row it cannot claim recurred. What follows is not about recurrence: the run stops
+being one the sentence can cover, the per-line mark drops on to every line that earned
+it, and WW363's rate is silent on each of those by the precedence it declares.
+
+So one row written by an older build removes a whole reading from a report, and every
+clause left in it is true. That is what a session of quiet rates looked like, and WW407
+made it a case rather than a memory.
+
+What is left is that nobody is told. The report reads as complete because it is complete
+— there is no gap, only a depth that is no longer being reported — and the reader who
+would notice is the one who already knows the rate exists.
+
+Two shapes it could take. The roll could say which readings it made, once, at the foot
+of a report: cheap, honest, and one more line on every run. Or the ledger could refuse a
+row it cannot place, which is the stronger claim and the more disruptive — a format this
+tool still tolerates on purpose, so that a history written across a version change stays
+readable. The first is worth doing whatever is decided about the second.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

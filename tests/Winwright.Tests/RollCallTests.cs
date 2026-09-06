@@ -361,6 +361,109 @@ public sealed class RollCallTests
         }
     }
 
+    /// <summary>
+    /// The two shapes this suite's own runs actually take, and what each is called. WW407.
+    /// <para>
+    /// Every excuse here is the suite's own structure — a case opens a decoy on purpose, or declares
+    /// a budget — so a run either repeats the whole set or repeats most of it. Both were read off
+    /// guest runs an hour apart rather than reasoned about.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyDictionary<string, Roll> Ordinary() =>
+        new Dictionary<string, Roll>(StringComparer.Ordinal)
+        {
+            // One of each kind, which is not decoration: every guest run of this suite excuses some
+            // checks for the desk and some against a budget it declared, and a shape carrying only
+            // one kind silences WW281 — which is how this pair was found to be a model of a run
+            // nobody has rather than of the run everybody reads.
+            //
+            // Everything recurs, which is the run a person reads most weeks: the sentence carries
+            // the fact once and each line carries its own depth.
+            ["every excuse recurring"] = Rolled(
+                ["a.one", "a.two"],
+                Before(always: ["a.one", "a.two"], often: [("a.one", 20), ("a.two", 19)]),
+                budget: "a.two"),
+
+            // One of them missed a run, which is the other shape and the more common of the two on
+            // a desk that is doing anything else. Here the two line readings divide the rows.
+            ["one of them not"] = Rolled(
+                ["a.one", "a.two"],
+                Before(always: ["a.one"], often: [("a.one", 20), ("a.two", 18)]),
+                budget: "a.two"),
+        };
+
+    [Fact]
+    public void Every_reading_speaks_on_a_run_of_the_shape_this_suite_actually_produces()
+    {
+        // WW407. WW389 proved each reading can speak, by building the run that makes it — which is
+        // the right check and answers a different question from this one. A reading can be perfectly
+        // reachable and never reached: WW363's rate was silent for a whole session under the clause
+        // above it, and what made that invisible was that nothing looked at an ordinary run.
+        //
+        // So this asks the ordinary question instead. Between the two shapes a run of this suite
+        // takes, every reading has to say its piece somewhere — a reading that only speaks in a run
+        // nobody has is a reading nobody reads.
+        var reports = Ordinary().ToDictionary(
+            one => one.Key,
+            one => string.Join(Environment.NewLine, one.Value.Render()),
+            StringComparer.Ordinal);
+
+        var quiet = Readings.All
+            .Where(one => !reports.Values.Any(read => read.Contains(one.Marker, StringComparison.Ordinal)))
+            .ToList();
+
+        Assert.True(
+            quiet.Count == 0,
+            $"{quiet.Count} reading(s) say nothing on either shape this suite's runs take, so they are "
+                + "correct and unread: "
+                + string.Join("; ", quiet.Select(one => $"'{one.Named}' ({one.Task}) wants '{one.Marker}'")));
+    }
+
+    [Fact]
+    public void The_two_ordinary_shapes_are_told_apart_by_which_line_reading_speaks()
+    {
+        // The control for the case above, which would pass on two runs that were the same run. What
+        // divides them is the precedence WW363 declares: where every excuse recurs the fact is said
+        // once in the sentence and every line carries its rate, and where one does not the mark
+        // moves down on to the lines that earned it and takes those rates with it.
+        var ordinary = Ordinary();
+
+        var whole = string.Join(Environment.NewLine, ordinary["every excuse recurring"].Render());
+        var divided = string.Join(Environment.NewLine, ordinary["one of them not"].Render());
+
+        Assert.Contains("none of them is new", whole, StringComparison.Ordinal);
+        Assert.DoesNotContain(" (in all ", whole, StringComparison.Ordinal);
+        Assert.Contains("(excused in 20 of the last 20 runs)", whole, StringComparison.Ordinal);
+
+        Assert.DoesNotContain("none of them is new", divided, StringComparison.Ordinal);
+        Assert.Contains(" (in all ", divided, StringComparison.Ordinal);
+        Assert.Contains("(excused in 18 of the last 20 runs)", divided, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_row_the_ledger_cannot_place_moves_the_mark_on_to_every_line_and_takes_the_rates()
+    {
+        // WW407, and the regime the rate really did go quiet in. `Everywhere` is false where any row
+        // names no case — a row it cannot place makes "every excuse recurred" a claim nobody can
+        // make — and that is a fact about the ledger rather than about recurrence. What follows is
+        // that the mark drops on to the lines, and the mark silences the rate on each one it takes.
+        //
+        // So a report can carry no rate at all while every clause in it is right, which is what a
+        // session of them looked like. It is the precedence working and it is worth being able to
+        // point at: an older build's ledger is enough to make a whole reading disappear.
+        var roll = Roll.Of(
+            ["a.one", "a.two"],
+            Ran("a.one", "a.two"),
+            [Row("a.one"), "the foreground belongs to the window under test\t\tsomething else owns it"],
+            Before(always: ["a.one"], often: [("a.one", 17)]));
+
+        var report = string.Join(Environment.NewLine, roll.Render());
+
+        Assert.Contains(" (in all ", report, StringComparison.Ordinal);
+        Assert.DoesNotContain("excused in", report, StringComparison.Ordinal);
+        Assert.DoesNotContain("none of them is new", report, StringComparison.Ordinal);
+    }
+
     /// <summary>The roll's one sentence for a run that excused these cases. WW389.</summary>
     /// <param name="excused">The cases this run excused.</param>
     /// <param name="earlier">What the runs before it said.</param>
