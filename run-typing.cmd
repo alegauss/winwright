@@ -65,6 +65,12 @@ rem small rather than the rungs being clean; 1200 is what WW355 measured the act
 rem one - which is why a clean `guard` beside it is not yet a repair and the run says so with the
 rem count that would be.
 rem
+rem WW397: and read the control before anything else. This project's own guest stopped being quiet
+rem between 2026-09-04 and 2026-09-05 - `arm`, which used to read 0 of 3200, has read 4 of 3600
+rem across three runs since, one of them after a cold boot. While that holds, `transfer` attributes
+rem nothing and says so, `provoke` and `sweep` are reading a desk with a floor under them, and the
+rem answer is a quieter machine rather than another run.
+rem
 rem The configuration moved to the third argument when this gained the second. `run-typing.cmd 400`,
 rem `run-typing.cmd 150 sweep`, `run-typing.cmd 1200 delay`, `run-typing.cmd 300 acts`,
 rem `run-typing.cmd 400 provoke` and `run-typing.cmd 1200 transfer` are the six a person types.

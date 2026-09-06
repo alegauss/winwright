@@ -14,9 +14,9 @@
 
 ## Block D — Act — patterns before pointers
 
-- 💭 **WW397** (deps: —) **the ladder's control has stopped reading zero, so every rung above it is refused and the tool can attribute nothing** — WW381 ran it twice on 2026-09-05 and `arm` faulted 1 of 1200 both times, where WW355 read 0 of 3200 and WW368 read 0 of 1200. → §WW397
 - 💭 **WW408** (deps: —) **the sweeps over the shipped halves each name their own two assemblies, and nothing says what shipped means** — WW390 had to decide its own coverage and write the reason down; the sweep beside it reads one assembly and a third reads a namespace. → §WW408
 - 💭 **WW411** (deps: —) **the flyout case asserts the overflow is there a line after the verb held it, and the shell sometimes shuts it first** — A guest run went red on `Assert.NotNull` at that line and the next passed; every other reading in the case excuses a desk that would not answer. → §WW411
+- 💭 **WW413** (deps: —) **two arms have a control that would refuse a run and neither checks it, so both read a desk with a floor and say nothing** — WW397 measured the guest's floor at 4 of 3600 and only `transfer` notices; `provoke` and `sweep` each have a quiet arm and read it as data. → §WW413
 
 ## Block E — Capture — the picture that proves what it photographed
 

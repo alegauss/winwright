@@ -101,28 +101,6 @@ copies the recursion instead of the line.
 
 ## Block D — Act — patterns before pointers
 
-### §WW397 the baseline that stopped being a baseline
-
-`transfer` refuses to attribute anything on a run where `arm` faults, and it is right
-to: that rung is WW355's own reading, the one measured at 0 of 3200, and a ladder whose
-control faults has no clean floor for the rungs above it to have departed from.
-
-It faulted on both of WW381's runs. 1 of 1200 each time, and the rest of the rows moved
-with it — 1, 0, 2, 0, 3 up the ladder on the first and 1, 2, 0, 4, 1 on the second, with
-the control, the act and the candidate repair all inside the same handful. Nothing
-separates at that spread, and two runs of it cost about seventy minutes of guest desk to
-be told so twice.
-
-So the instrument is currently unusable on this guest, and that is the finding rather
-than an obstacle to one. WW368 read the same ladder clean on 2026-09-04, so something
-about this desk changed inside a day: an update, a service, a snapshot that came back
-different. Nothing here says which.
-
-What it needs is a fact about the guest and not about the engine — what the fault's
-floor is on this machine now, taken with the ladder or with any of the four arms that
-used to read zero. Until that exists, every reading `transfer`, `provoke` and `sweep`
-are asked for is a reading somebody has to throw away after the run.
-
 ### §WW408 what a sweep means by shipped
 
 Every reflection sweep here begins by saying which code it is about, and each says it
@@ -168,6 +146,29 @@ So the repair is the one the case already uses twice: a flyout gone before the
 provocation is a hole naming the desk, not a red. It is a `BusyDesk.Excused` where an
 `Assert.NotNull` is now, and the sentence it needs — the overflow closed before anything
 provoked it — is one the excuse ledger can carry and count.
+
+### §WW413 the floor the other arms cannot see
+
+`transfer` refuses to attribute anything when its control faults, and WW397 is the run
+that proved the refusal earns its keep: this guest has had a floor of about 1 in 900
+since 2026-09-05, through a cold boot, and the ladder says so rather than reporting a
+difference.
+
+The other two arms have the same structure and none of the guard. `sweep` runs a `quiet`
+arm which faulted nowhere in 600 rounds when WW312 wrote it, and its verdict reads a
+null across every arm as "a reading about the desk and not about WW249" — which is
+close, and is reached by everything being zero rather than by the control being asked.
+`provoke` runs `quiet` for the same purpose and its verdict compares the arms without
+ever asking whether the quiet one held.
+
+So on this guest both are reading a desk with a floor under them and neither can say it.
+A rate of one in nine hundred is inside the counts those arms use, so a cell that faults
+once is a cell nobody can tell from the machine — and the report says which arm faulted,
+which is exactly the sentence a floor produces by accident.
+
+What each needs is the line `transfer` already has: name the arm that is the control,
+refuse to attribute where it faults, and say what was measured rather than advise a
+re-run. Two verdicts, one clause each, and the counts they already take.
 
 ## Block E — Capture — the picture that proves what it photographed
 

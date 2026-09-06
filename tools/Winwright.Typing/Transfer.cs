@@ -94,6 +94,19 @@ namespace Winwright.Typing;
 /// 40 do not agree with each other either, which is the same evening moving under both rather than
 /// a price for the placement — and the first thing a quiet guest would measure properly.
 /// </para>
+/// <para>
+/// WW397 asked whether the guest was the evening, and it is not. A third run on 2026-09-06, after
+/// the VM had been powered off and cold-booted, read <b>arm 2 of 1200</b> with focus, split and
+/// settle at zero and guard at 1. Pooled with the two before it the control is <b>4 of 3600</b>,
+/// against WW355's 0 of 3200 and WW368's 0 of 1200 — so this machine's floor rose from under 1 in
+/// 3200 to about 1 in 900 between 2026-09-04 and 2026-09-05, and a reboot did not put it back.
+/// </para>
+/// <para>
+/// What that costs is every reading this ladder can take at these counts. The control is inside the
+/// same handful as the rungs above it, so nothing separates, and the refusal below is right to
+/// attribute nothing. What it is not is transient: three runs across two days and a power cycle
+/// have said the same thing, so <em>run it again</em> is advice that has already been taken.
+/// </para>
 /// </summary>
 internal static class Transfer
 {
@@ -492,7 +505,13 @@ internal static class Transfer
         {
             return $"The control faulted: {counted}. `arm` is WW355's own reading, which read zero"
                 + " over eight hundred rounds, so a run where it faults is a desk doing something"
-                + " else and nothing here attributes anything. Run it again on a quiet guest.";
+                + " else and nothing here attributes anything."
+                + " WW397 measured what that something is on the guest this project uses: 4 of 3600"
+                + " across three runs on two days, one of them after a cold boot, where WW355 read 0"
+                + " of 3200 and WW368 read 0 of 1200. So a machine whose control faults may not be"
+                + " having a bad evening — this one has had a floor of about 1 in 900 since"
+                + " 2026-09-05, and running it again there answers the same way. What separates at"
+                + " that floor is a quieter machine, or a count several times this one.";
         }
 
         // The first step above the control that faulted, and what it adds, taken together off the

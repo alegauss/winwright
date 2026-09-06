@@ -153,6 +153,7 @@
 - ✅ **WW390** **nothing holds a third bool-and-two-outs verb to the annotation, so the next one costs a task to notice** — A sweep over both shipped halves finds every bool-and-out verb by reflection, so the third one is caught the day it compiles (design recorded in `tests/Winwright.Tests/TryVerbTests.cs`).
 - ✅ **WW394** **a rung added to the ladder's walk prints the rung below it's sentence, because the verdict's switch ends in a default** — The walk is derived from the pairs, so a rung joins it by having a sentence and there is no default left to borrow one from (design recorded in `tools/Winwright.Typing/Transfer.cs`).
 - ✅ **WW395** **the guarding rung spells the engine's interval itself, so moving the engine's leaves it pricing a placement nobody pays** — Two cases read all three spellings out of their files and fail where they disagree, the prose included (design recorded in `tests/Winwright.Tests/TypingIntervalTests.cs`).
+- ✅ **WW397** **the ladder's control has stopped reading zero, so every rung above it is refused and the tool can attribute nothing** — The floor is measured and dated: 4 of 3600 over three runs and a cold boot, so a re-run is no remedy and the refusal says so (design recorded in `tools/Winwright.Typing/Transfer.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 
