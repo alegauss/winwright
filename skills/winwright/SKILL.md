@@ -49,11 +49,11 @@ One grammar, read the same way by every verb: `Button#save`, `Edit#profileName`,
 `TabItem[name="Profiles"]`, `Text#status`. A locator that matches two elements is ambiguous and is
 refused — narrow it rather than taking the first.
 
-**A tray menu is addressed at its entries, never at the menu.** Both kinds a tray puts up hold the
-same entries under a menu, and only one of them names that menu: a Win32 popup carries the shell's
-name and a WinForms drop-down carries none. So write `MenuItem[name="Quit"]`, not a locator starting
-at the container — one copied from a Win32 tray matches nothing on a drop-down, and all it says is
-that nothing answered.
+**A tray menu is addressed at its `MenuItem`s, never at the `Menu`.** Both kinds a tray puts up hold
+the same items under a `Menu`, and only one of them names that container: a Win32 popup carries the
+shell's name and a WinForms drop-down carries none. So write `MenuItem[name="Quit"]`, not a locator
+starting at the `Menu` — one copied from a Win32 tray matches nothing on a drop-down, and all it
+says is that nothing answered.
 
 ## Two things that decide whether an answer can be trusted
 

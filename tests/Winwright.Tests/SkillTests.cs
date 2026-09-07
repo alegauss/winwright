@@ -79,12 +79,50 @@ public sealed class SkillTests
             if (!Regex.IsMatch(spelled, @"^[A-Z][A-Za-z0-9]*(\.[A-Za-z][A-Za-z0-9]*)?$"))
                 continue;
 
+            // WW414. The tree's vocabulary is not the engine's, and this rule could not tell them
+            // apart. `MenuItem` and `Menu` are UI Automation's words — they are what the tree says
+            // and what a page about addressing an element wants to name — and they are not types
+            // this assembly exports, so a skill saying them went red for a true and irrelevant
+            // reason. WW399 wrote its sentence round them rather than fail: "entries" in prose and
+            // the real word only inside a locator, where this regex does not look.
+            //
+            // Not a hole: the grammar will not carry a control type it does not accept, so
+            // `UiaVocabulary` is the same kind of authority about the tree that the exported types
+            // are about the engine. A backticked word is now checked against whichever it is, and a
+            // word that is neither is still the fault this rule was written for.
+            if (Winwright.Locating.UiaVocabulary.IsControlType(spelled))
+            {
+                named++;
+                continue;
+            }
+
             Assert.Contains(spelled.Split('.')[0], types);
             named++;
         }
 
         // A walk that matched nothing would pass this test while checking none of it.
         Assert.True(named > 15, $"only {named} names were read back, which is too few to be the skill");
+    }
+
+    [Fact]
+    public void The_skill_says_the_tree_words_the_arm_that_admits_them_was_added_for()
+    {
+        // WW414's control. The arm above accepts a backticked word that is a control type, and an
+        // arm nothing reaches is an arm that can stop working in silence — so this asserts the
+        // skill really does say one, which is the whole point of adding it.
+        var (_, body) = Read();
+
+        var tree = Backticked(body)
+            .Where(Winwright.Locating.UiaVocabulary.IsControlType)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        Assert.NotEmpty(tree);
+
+        // And that the arm is a door and not a hole: a word that is neither a control type nor a
+        // type this engine exports is still the fault the rule was written for.
+        Assert.False(Winwright.Locating.UiaVocabulary.IsControlType("MenuEntry"));
+        Assert.False(Winwright.Locating.UiaVocabulary.IsControlType("Act"));
     }
 
     [Fact]

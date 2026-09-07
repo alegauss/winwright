@@ -281,29 +281,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW414 the word the skill cannot say
-
-`Every_verb_the_skill_names_is_a_verb_the_engine_exports` reads every backticked token
-in the skill and, where it looks like a type name, requires the engine to export it. The
-rule is right and has caught what it is for: a skill naming a renamed type sends an
-agent confidently at something that is not there.
-
-What it cannot tell apart is a type and a control type. `MenuItem` and `Menu` are UI
-Automation's words, they are what the tree actually says, and they are exactly what a
-page about addressing an element wants to name — so WW399 wrote its sentence around
-them, saying "entries" and "menu" in prose and putting the real word only inside a
-locator, where the regex does not look.
-
-The prose is no worse for it and possibly better: `MenuItem[name="Quit"]` shows the
-reader the thing to write rather than describing it. But the shape of the constraint is
-wrong — the guidance was bent by a check that has no opinion about tree vocabulary, and
-the next page about the tree will bend the same way or go red.
-
-The vocabulary is not a guess: `UiaVocabulary` already knows every control type the
-grammar accepts, and the locator step will not carry one it does not. So the rule can
-have a second arm — a backticked token that is a control type is a control type — and
-the skill can say the word the tree says.
-
 ### §WW415 the name is worth most while it is still running
 
 The refusal WW386 writes when `-Bound` runs out says what will happen next: whatever is
@@ -442,6 +419,28 @@ So what is worth having is the measurement rather than the skip. Nobody knows wh
 the question is closed; if it is two minutes, the roll call could carry the gate's own
 reading — the same cases, answered on the host — which is a different claim from
 skipping them and one WW117 could still refuse.
+
+### §WW431 the case that could have answered here
+
+WW417's gate runs the classes outside the serial collection, and that is the only
+division this project has: a class needs the desk or it does not. It is the right unit
+for the collection, which exists to stop two classes fighting over one foreground.
+
+It is the wrong unit for the gate. `NotificationAreaTests` is serial because most of it
+drives a real tray — and one case in it reads `SKILL.md` and asserts a sentence. WW414
+changed that sentence, the gate passed, and the guest reported it eleven minutes later:
+the exact cost WW417 was filed to remove, met inside the task that removed it.
+
+The same shape is elsewhere. `DeskProbeTests` is serial and holds the cases that read
+the runner's source; `FixtureTests` is serial and holds the ones that read its
+catalogue. Each is a case that could answer on any machine sitting in a class that could
+not.
+
+Splitting by case rather than by class is what the gate wants and xUnit does not offer
+against a collection. A trait would: a case that needs no desk says so, the gate filters
+on it, and the collection goes on meaning what it means. What has to be decided is which
+way round the trait goes — marking the desk-free cases is the smaller edit and the one
+that fails safe, because a case nobody marked stays in the guest.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

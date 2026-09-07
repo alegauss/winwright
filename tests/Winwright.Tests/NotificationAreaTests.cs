@@ -734,12 +734,17 @@ public sealed class NotificationAreaTests : IDisposable
         // catalogue nothing holds, arriving in prose.
         var skill = File.ReadAllText(Checkout.At("skills", "winwright", "SKILL.md"));
 
-        Assert.Contains("tray menu is addressed at its entries", skill, StringComparison.Ordinal);
+        // WW414: in the tree's own words now. WW399 wrote this sentence as "its entries" and "that
+        // menu" because the skill could not backtick a control type — a rule about the engine's
+        // exported types had no arm for UI Automation's vocabulary — so the guidance was bent round
+        // a check that has no opinion about it. What is pinned is the claim and not the phrasing it
+        // was forced into.
+        Assert.Contains("addressed at its `MenuItem`s, never at the `Menu`", skill, StringComparison.Ordinal);
 
         // And the fact it rests on, in the words this suite proves: one kind names the container and
         // one does not. A skill that said the opposite would be as confidently wrong as one that
         // said nothing, and only this line tells them apart.
-        Assert.Contains("only one of them names that menu", skill, StringComparison.Ordinal);
+        Assert.Contains("only one of them names that container", skill, StringComparison.Ordinal);
     }
 
     /// <summary>
