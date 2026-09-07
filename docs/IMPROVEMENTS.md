@@ -332,30 +332,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW416 the words that cross between the two machines
-
-`sync.ps1` and `run.cmd` are generated on the host, run in the guest, and answer through
-a log file. What crosses that gap is a handful of capitalised words at the start of a
-line — `GUEST-MISSING dotnet` since WW149, `GUEST-HELD` and `GUEST-HOLDER` since WW404 —
-and the host switches on them with `-match`. It is a protocol, and it is the only one
-here nobody reads back.
-
-The failure it allows is quiet in both directions. A marker the guest writes that no arm
-matches falls through to the general refusal, which prints the log and loses the point
-of having written it; an arm matching a marker the guest stopped writing is dead code
-that reads as coverage. Neither shows up as a red, because the sync failing at all is
-already rare enough to be somebody's afternoon.
-
-Every other catalogue in this project is held both ways, and for exactly this:
-`Arms.All`, `Surfaces.Known`, `Criteria.Known`, `Sleeps.Known`, `Readings.All`. The
-runner has one of its own — WW388's `$script:Tidied` against the arms that clear a desk.
-This is the same case one file over.
-
-What it needs is the split the reading depends on. The generated scripts live inside
-`@"` here-strings in `run-tests-vm.ps1`, so the guest's half and the host's half are the
-same file, and a case would have to cut it at those markers before comparing. That cut
-is worth having anyway: it is the line between the two machines, and nothing names it.
-
 ### §WW418 the owner the reading asks about is us
 
 `OwnRender` skips the wait for a window it has already waited out, and sets that memory

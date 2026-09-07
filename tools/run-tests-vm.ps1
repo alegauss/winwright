@@ -1046,6 +1046,13 @@ $carrying = if ($CommittedOnly) { 'HEAD only' } else { 'the working tree' }
 Write-Host "  carrying    $($files.Count) files, $size MB ($carrying)"
 
 # --- the scripts the guest runs, generated here so nothing is quoted through vmrun ---------------
+#
+# WW416. Everything inside a here-string below is the other machine's program, and this is the only
+# place in the tree where two machines' code is one file. What crosses back is a capitalised word at
+# the start of a line, which the host switches on further down; the two ends of that protocol are
+# held to each other by a case, and the case cuts this file at these delimiters to tell the writing
+# from the reading. Adding a word to it means adding it to that catalogue as well, which is what
+# being red about it is for.
 
 # Wiped and expanded rather than updated in place. A full rebuild costs under a minute on a tree
 # this size, and it buys the one thing an incremental guest cannot offer: no result can be left

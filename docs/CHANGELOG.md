@@ -390,6 +390,7 @@
 - ✅ **WW417** **a rule that only reads sources is met by a seventeen-minute guest run, and the split that would ask it sooner exists** — The runner answers the desk-free half on this host first, derived from the serial collection (design recorded in `tools/host-gate.ps1`).
 - ✅ **WW414** **the skill may not backtick a control type, so guidance about the tree is written around a rule about the engine** — A backticked word the tree's own vocabulary knows is checked against that, so the skill says MenuItem (design recorded in `tests/Winwright.Tests/SkillTests.cs`).
 - ✅ **WW415** **the bound gives up on a run and names nothing that is still running, one command before the sync names it** — The bound asks the guest who is still running and names them, off the walk the sync shares (design recorded in `tools/holders.ps1`).
+- ✅ **WW416** **the guest answers the host in markers nothing reads back, so one it writes and no arm switches on is silent** — The three words that cross are a catalogue held both ways, cut at the here-strings that tell the writing from the reading (design recorded in `tests/Winwright.Tests/GuestMarkerTests.cs`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
