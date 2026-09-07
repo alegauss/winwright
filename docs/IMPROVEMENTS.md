@@ -332,29 +332,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW418 the owner the reading asks about is us
-
-`OwnRender` skips the wait for a window it has already waited out, and sets that memory
-aside the moment the owning process puts up a presence window — a half that arms later
-has something new to say, and the run has to hear it. The reading is about the owner,
-and `OwnRenderTests` asks it about windows built on pumping threads here, so the owner
-is the test host.
-
-That makes `An_application_with_no_half_is_waited_out_once_and_not_once_a_step` true
-only while nothing else in this process is holding an armed half open. Every case that
-arms one disposes it, so it holds today; a class that kept one for its lifetime — which
-is what `FixtureTests` does with a register, and what an adopting suite would naturally
-do — turns that case into a wait taken twice and a red about somebody else's fixture.
-
-WW405 built the way out and used it once. `--unadopted` gives the suite an application
-in a process of its own that never took the half, so the ownership question has a real
-answer: the presence window the harness looks for belongs to a process that is not this
-one, and what an unrelated class did has nothing to do with it.
-
-So the skip case could move, or gain a twin, and stop depending on the test host's own
-state. It costs two launches where it costs none now, which is the reason to think about
-it rather than a reason not to.
-
 ### §WW419 the second application nobody has asked anything
 
 The engine asks an application several questions through the in-app half: what surfaces

@@ -415,11 +415,27 @@ public sealed class OwnRenderTests : IDisposable
         // Read as two asks of one application rather than as a duration, because the number is the
         // desk's and the claim is not: what this says is that the second cost less than the first,
         // which is only true if the wait was skipped.
+        //
+        // WW418. Whether the memory stands is a reading about the window's owning process, and this
+        // window is built on a pumping thread here — so the owner is the test host, and an armed
+        // half anywhere in it sets the memory aside and the second ask pays the whole wait again.
+        // Said as a precondition rather than left to come out as a slow second ask, because that
+        // red reads as a defect in the skip and the cause is another class holding a half open.
+        //
+        // The same claim about an owner that is not this process is FixtureTests', which launches
+        // one application with the half and one without: two pids, and the ownership question with
+        // a real answer. This is the cheap half of the pair and not the whole of it.
+        Assert.False(Present(), "a half is armed in this process, so no silence recorded here can stand");
+
         using var application = AnsweringWindow.Silent();
 
         var first = System.Diagnostics.Stopwatch.StartNew();
         var once = OwnRender.Into(application.Handle, Path.Combine(root, "never-1.png"));
         first.Stop();
+
+        // Between the two asks, because that is where it would matter: a half arming here is the
+        // one thing the memory is built to notice, and it would be right to take the wait again.
+        Assert.False(Present(), "a half armed between the two asks, which is grounds for the wait to come back");
 
         var again = System.Diagnostics.Stopwatch.StartNew();
         var twice = OwnRender.Into(application.Handle, Path.Combine(root, "never-2.png"));
@@ -450,6 +466,11 @@ public sealed class OwnRenderTests : IDisposable
         // answers, so nothing is ever remembered. Here the first ask spends the whole wait, records
         // the silence, and the arming happens after it — which is the only way to put a memory in
         // front of a window that is about to answer.
+        //
+        // WW418, from the other side: the reading that drops the memory is about this process, so a
+        // half already armed in it would make this case pass without its own fixture arming at all.
+        Assert.False(Present(), "a half is already armed in this process, so nothing here proves the arming");
+
         using var application = AnsweringWindow.HooksLate(root, afterMs: OwnRender.HookedWithinMs + 800);
 
         var early = OwnRender.Into(application.Handle, Path.Combine(root, "too-early.png"));

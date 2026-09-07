@@ -718,6 +718,12 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
             // window — and in one process that question can only be asked about the suite itself, so
             // OwnRenderTests answers it about windows whose owner is the test host either way. Here
             // the half that armed belongs to somebody else, which is the case a run has.
+            //
+            // WW418. So this is the whole of that claim and the in-process one is the cheap half:
+            // that one now says out loud that it holds only while nothing else in the test host is
+            // armed, and a class that kept a half open for its lifetime would make it say so rather
+            // than fail as though the skip were broken. The pair is deliberate — if this case ever
+            // goes, what is left asserts the skip only about windows the suite owns itself.
             Assert.True(
                 cost < OwnRender.HookedWithinMs,
                 $"the second ask spent {cost}ms against the first's {paid}ms, which is the whole wait"
