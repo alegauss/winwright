@@ -46,6 +46,7 @@
 - 💭 **WW431** (deps: —) **the host gate takes whole classes, so a case that reads a file inside a serial class waits for the guest** — WW414 broke a pinned sentence in NotificationAreaTests, which reads only the skill; the gate skipped its class and the guest said so eleven minutes later. → §WW431
 - 💭 **WW432** (deps: —) **the bound's holder walk runs only where a sync has already put it in the guest, and nothing says so** — WW415 sends holders.ps1 with the sync, so a bound that fires on a run whose sync did not happen asks a file that is not there and answers that the guest could not be asked. → §WW432
 - 💭 **WW433** (deps: —) **the host gate takes only classes that are sealed, so a quarter of the desk-free suite never runs in the cheap half** — WW391 measured it: the filter answers 744 cases and 24 unsealed classes holding 278 more sit outside it, which is the drift the script's own prose warns about. → §WW433
+- 💭 **WW439** (deps: —) **the guest exits 91 and 92 to say which sync failure it hit, and nothing on the host reads either number** — WW416 held the words that cross in both directions and left the numbers beside them: two codes are written on one machine and asked for by nobody on the other. → §WW439
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

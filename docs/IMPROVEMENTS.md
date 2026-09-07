@@ -492,6 +492,30 @@ right by changing the suite, under a rule nothing states. Matching `public (seal
 for — and a case holding the gate's list against the suite's is what keeps either from
 drifting again.
 
+### §WW439 the numbers WW416 did not catalogue
+
+WW416 catalogued the words that cross between the machines and held them both ways. The
+numbers beside them did not move.
+
+`sync.ps1` exits 91 where the guest has no SDK and 92 where the tree would not delete.
+Both sit on the same line as the marker saying the same thing, and neither number
+appears anywhere in the host's half: it takes whether the code was zero, then decides
+which failure it was by matching the log. The marker is the protocol; the number is a
+second copy nothing asks for.
+
+Worse than unused, it is unestablished. `runProgramInGuest` is what would carry a guest
+program's code across, and no case and no run has established that 91 and 92 arrive here
+at all — a number nobody reads is also one nobody has watched survive the crossing.
+
+Two ways out and they differ. The numbers could be read: the host would switch on the
+code, and the markers would carry only what a number cannot, which is Windows' own
+sentence about the file that would not delete. Or they could go, leaving the log as the
+one protocol and a single non-zero code, which is honest about what is used.
+
+The first is better if anything but this script ever runs `sync.cmd`; the second is
+better if nothing ever does. Which is true is the design, and it is a question about who
+else may drive the guest.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW424 the list the case keeps to itself
