@@ -71,6 +71,34 @@ what it is for, how long, and the sentence it prints when it gives up — would 
 total readable, let a case assert the runner has no wait outside it, and give the fifth
 one a place to be argued against rather than beside.
 
+### §WW436 the read that waits for a thread this process owns
+
+`TopLevelWindows.OfProcess` walks `EnumWindows`, keeps the windows owned by the process
+it was asked about, and calls `Win32.TextOf` on each of them — which is
+`GetWindowTextW`.
+
+For a window belonging to another process that reads the cached title and returns. For a
+window belonging to the *calling* process it sends `WM_GETTEXT` and does not come back
+until that window's own thread pumps for it. There is no deadline on it and no argument
+to give one.
+
+This suite hosts its fixture windows inside the test host, so a case asking for the
+windows of its own process asks about windows whose threads it also owns — and this
+repository parks threads on purpose, because a window that stops answering is a thing it
+exists to test. Both kept dumps say the same: `Win32.TextOf` under the `EnumWindows`
+callback, under `CaseRun.Captured`, under the captures case. The bound then kills the
+host and takes nine hundred cases with it, which has happened three times in about
+fifteen guest runs.
+
+The repair is `SendMessageTimeout` with `WM_GETTEXT`: `GetWindowText` with a deadline on
+it, and the documented answer to this hazard. A window that does not answer inside it
+has no title as far as this reading is concerned, which is already what `TextOf` hands
+back for one that answers nothing.
+
+What the design owes is that deadline. It would be the first number here deciding
+whether a window is described or passed over, and every other wait in this engine argues
+its own.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -540,3 +568,53 @@ The obvious answer is to narrow further: a run of characters rather than a line,
 prose beside the damage is somebody else's substring. What that costs is the sentence —
 the finding prints the line, which is what a reader needs — so it wants a narrower
 reading and the same report.
+
+### §WW437 the third tree the sleep catalogue does not walk
+
+WW184's catalogue says what it is for in its own words: to see every way of parking a
+thread and then say which is which, because "an unseen one cannot be called right".
+WW198 widened the spellings for exactly that reason, after `FrameRun` parked twice and
+the count said one.
+
+It walks `Checkout.Everything`, which is `src` and `tests`. The repository has three
+trees.
+
+Found by writing an entry and being told the file sleeps nowhere. WW406 put a parked
+thread in `tools/Winwright.Blame/Parked.cs` — deliberately, because the reader of a hang
+dump needs a hang to read — and the catalogue could not see it either way: the sweep
+never offered it, and the entry describing it was refused as one that had stopped
+matching.
+
+What makes this a task rather than a widened constant is that the trees are not the same
+question. A sleep in `src` is the engine waiting, which is what Block C's criterion is
+about. One in `tests` is a case arranging a condition. One in `tools` is neither: those
+are programs a person runs, several measure time on purpose, and `Winwright.Typing` is
+built to take the desk for minutes. A catalogue sweeping them under the same four kinds
+would file most of them under one and say nothing.
+
+So the design is whether `tools` joins the sweep with a kind of its own or gets a
+reading beside it — and the cheap half is that nothing today says it is outside.
+
+### §WW438 the run that was green before the ship
+
+WW176 holds `Criteria.Known` to the roadmap in both directions: a criterion the roadmap
+declares and the catalogue does not is red, and so is one the catalogue keeps after the
+roadmap drops it. That is the right rule and it caught both halves it was written for.
+
+What nothing says is when the catalogue may be read. Shipping a task with a checked
+criterion takes that criterion off the roadmap, so the entry describing it goes stale in
+the same instant — and the suite that proved the work was run before the ship, because
+running it after means the work is finished and the ship is the last thing anybody does.
+
+Both tasks in this session hit it. WW391's guest run passed at 2068, the ship removed
+its criterion, and the next run went red on an entry the code change had nothing to do
+with. WW406 was the same, one task later, by somebody who had watched it happen.
+
+The narrow reading is that a ship edits a file the suite reads, so the order is ship,
+delete the entry, run. The wider one is that a criterion whose existence is a roadmap
+line is something this catalogue could derive rather than hold — WW424 is that shape
+over three other lists, and its argument is that a hand-written copy of a set is where
+the set drifts.
+
+What is owed either way is that the order stops being something a reader has to have
+been bitten by.

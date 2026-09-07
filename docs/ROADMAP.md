@@ -7,6 +7,7 @@
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
 - 💭 **WW422** (deps: —) **a ledger row an older build wrote silences the rate on every line, and nothing says a reading has gone** — WW407 found the regime: a row naming no case makes the recurrence claim unmakeable, the mark drops on to every line, and each mark takes its line's rate with it. → §WW422
 - 💭 **WW428** (deps: —) **the runner waits for four things and each wait was argued alone, so the numbers agree with nothing** — WW412 added the fourth and had to reason from the tools wait's paragraph; the bound, the tools wait and the flyout timeout each argue their own and none names another. → §WW428
+- 📋 **WW436** (deps: —) **listing a process's windows calls GetWindowTextW on each, which never returns for a window of this very process** — WW406's two dumps name it in the same words twice: the thread sat in TextOf under EnumWindows, and a lost test host takes 900 cases with it. → §WW436
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -51,6 +52,8 @@
 
 - 💭 **WW424** (deps: —) **a hand-written list inside the only case about a set is where that set drifts, and three of them are still here** — WW409 found one at six entries against eleven, written deliberately so it would not agree with what it checks; the independence is right and the drift is not. → §WW424
 - 💭 **WW425** (deps: —) **damage on a line that also holds a legitimate non-ascii character is invisible, and this repository writes both** — WW421's own control passed until the real em-dash was taken off the line: the round trip fails for the whole line, so correct prose beside the damage hides it. → §WW425
+- 💭 **WW437** (deps: —) **the catalogue of every way a thread is parked walks src and tests, so a tool that parks one is invisible to it** — WW406 put a parked thread in tools/ and the entry written for it was refused as a file that sleeps nowhere: the sweep never looks there. → §WW437
+- 💭 **WW438** (deps: —) **shipping a task rewrites the roadmap a case reads, so the guest run that proved the work is stale before the commit** — WW391 and WW406 each went red on the criteria catalogue after a green guest run, for the same reason and in the same order, and nothing says the order. → §WW438
 
 ## Done when — Block A
 
