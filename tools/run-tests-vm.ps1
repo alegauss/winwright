@@ -728,6 +728,37 @@ function Read-ConsoleText {
     return $text.TrimStart([char]0xFEFF)
 }
 
+function Show-Blame {
+    <#
+      WW406. Read the dump that came back and say what it says.
+
+      The dump was being kept so somebody could answer one question - which thread was waiting, and
+      on what - and keeping it was only ever half of that. Nobody has been at the keyboard for the
+      twenty minutes a dump exists, and the run that would explain the last death is the run whose
+      sync destroys it. So the reading happens here, on the run that produced the dump, and the
+      answer arrives with the failure.
+
+      Read on the host and never in the guest. The guest is gone by this point - that is what a hang
+      dump means - and the file is already beside the trx.
+
+      Quiet about its own absence in one direction only. A checkout that has this script and not the
+      reader is an adopter who took the runner, and the dump is still theirs to open; a reader that
+      ran and could not read the dump is a different thing and says so.
+    #>
+    param([Parameter(Mandatory)] [string] $Dump, [string] $Configuration = 'Debug')
+
+    $project = Join-Path $PSScriptRoot 'Winwright.Blame\Winwright.Blame.csproj'
+    if (-not (Test-Path -LiteralPath $project)) { return }
+
+    $said = & dotnet run --project $project --configuration $Configuration --nologo -v q -- $Dump
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host '              the dump came back and could not be read' -ForegroundColor Yellow
+        return
+    }
+
+    foreach ($line in $said) { Write-Host "              $line" }
+}
+
 # --- what this needs, named before anything is started ------------------------------------------
 
 $envFile = Import-EnvFile
@@ -1277,13 +1308,21 @@ if ($code -ne 0) {
     else {
         Write-Host "  blame       $named"
 
+        $read = ''
         foreach ($pair in @(@('blame.dmp', 'hangdump.dmp'), @('blame-sequence.xml', 'sequence.xml'))) {
             $kept = Join-Path $results $pair[1]
             $fetched = Invoke-VmRun -Guest -Arguments @(
                 'copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\$($pair[0])", $kept)
 
-            if ($fetched.Ok) { Write-Host "              $kept" }
+            if ($fetched.Ok) {
+                Write-Host "              $kept"
+                if ($pair[1] -eq 'hangdump.dmp') { $read = $kept }
+            }
         }
+
+        # WW406. The half the keeping was for. A path printed under a red run is a thing somebody
+        # has to go and open with a debugger they do not have; the sentence is what the run is for.
+        if ($read) { Show-Blame -Dump $read -Configuration $Configuration }
     }
 }
 

@@ -59,6 +59,11 @@
          here; nothing here runs one. -->
     <ProjectReference Include="../../tools/Winwright.Typing/Winwright.Typing.csproj" />
 
+    <!-- WW406: the reading of a hang dump. Its judgements are over frames a case can write down,
+         and the door that opens a dump is driven here too - by writing one of this very process,
+         because a reader nobody runs against a real dump is a reader asserted by its shape. -->
+    <ProjectReference Include="../../tools/Winwright.Blame/Winwright.Blame.csproj" />
+
     <!-- Referenced so the suite builds the fixture, and copied nowhere: an application under
          test is launched from its own output, not from a half-copy beside the suite. Copying it
          brought the apphost without its assembly and every launch died at CLR startup. -->

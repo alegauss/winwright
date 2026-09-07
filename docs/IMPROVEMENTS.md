@@ -490,33 +490,6 @@ drifting again.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW406 the exception that took the run with it
-
-A guest run died 48 seconds in: *UnrenderableException: Border 'sizelessPane' laid out
-to 0x0*. The suite reported 1121 of 1121 passing and the roll call refused it — 904 of
-2025 were never recorded at all — which is WW117 working exactly as it was built to.
-Then Blame waited out its ten idle minutes and dumped, so the run cost twenty.
-
-`SizelessPane` exists to provoke that refusal and the fixture raises it on purpose, in
-its own process, exiting 3. No case builds that pane in this process.
-
-Three runs now, the third on 2026-09-06, and every one names
-`SuiteRunTests.The_whole_reading_names_every_case_that_ran_and_every_case_that_did_not`
-as the last to answer. The third kept its Blame sequence, whose final entry is the case
-that was still executing:
-`SuiteRunTests.A_project_that_declares_captures_runs_the_step_rather_than_refusing_it`.
-It printed no exception at all — the host simply went away — so what these runs share is
-the point they reach, not the words they end with.
-
-The dump is the evidence and the first two are gone: each was written under the guest's
-own tree, which the next run's sync deletes before writing it again. The third was
-copied off by hand and is kept at `d:\tmp\winwright-ww406`, with its sequence and trx
-beside it.
-
-That is the shape of the first half — a hang dump belongs where the trx goes, on the
-host, without anybody remembering. The second is the question it answers: which thread
-is waiting, and on what.
-
 ### §WW424 the list the case keeps to itself
 
 A case that checks a catalogue must not read that catalogue, or it agrees with itself

@@ -262,26 +262,11 @@ internal static class Criteria
         // Kept apart rather than sorted into the blocks they sit in, because they answer a different
         // question. A block's criterion decides whether the block is finished; these say how much of
         // one task is left, and a reader counting a block's is not counting these.
-        new("WW391", "A field joins the format in two places and not five", "", Unshown.NotYet,
-            "WW391 shipped the second signature — a tray step is refused off the step now, so a "
-                + "25-parameter twin and a hand-written list of 21 claims are gone — and left the "
-                + "29-parameter verb it was filed for. What it settled is the design: `reads` is "
-                + "the only refusal input a step cannot answer for itself, so it is the only thing "
-                + "a different door has to carry"),
-        new("WW384", "The minimising arm is run against a real window, on a desk it may take", "", Unshown.NotYet,
+        new("WW384","The minimising arm is run against a real window, on a desk it may take", "", Unshown.NotYet,
             "WW384 made the arm reachable and wrote the case, and the case cannot live here: the "
                 + "repair ends in Win+D, whose foreground lock then refuses this process everything "
                 + "for minutes — measured twice, at five reds in two other classes each time. What "
                 + "it is owed is a desk the suite may take, and not a case somebody forgot to write"),
-        new("WW406", "A run that loses the test host says which thread was waiting", "", Unshown.NotBuilt,
-            "WW406 shipped the half that keeps the evidence: a red run brings the collector's dump "
-                + "and sequence back beside the trx, which three occurrences had not left behind. "
-                + "It fired for real on the fourth, hours later, and kept both without anybody "
-                + "remembering — and the two sequences that exist now agree on the case still "
-                + "running. The half it did not ship is reading a dump, and that is not built "
-                + "rather than owed: it takes a debugger this repository installs nowhere and a "
-                + "stack no case can assert about, since the state it describes is one nothing "
-                + "here can arrange"),
 
         // WW315's own criterion stood here — that two profiles and a transcript exist on the guest as
         // a disposable fixture — and it went with the task: the bench fabricates both, so the roadmap

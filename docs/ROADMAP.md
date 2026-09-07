@@ -49,7 +49,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- ⏳ **WW406** (deps: —) **the test host goes away mid-run and 900-odd cases never run, three times in about fifteen guest runs** — Which thread is waiting and on what, read out of a dump the runner now keeps rather than one nobody has ever had. → §WW406
 - 💭 **WW424** (deps: —) **a hand-written list inside the only case about a set is where that set drifts, and three of them are still here** — WW409 found one at six entries against eleven, written deliberately so it would not agree with what it checks; the independence is right and the drift is not. → §WW424
 - 💭 **WW425** (deps: —) **damage on a line that also holds a legitimate non-ascii character is invisible, and this repository writes both** — WW421's own control passed until the real em-dash was taken off the line: the round trip fails for the whole line, so correct prose beside the damage hides it. → §WW425
 
@@ -216,12 +215,6 @@
   reads off that desk that the window went down and no longer holds the foreground. Both
   halves off the desk and never off the script's sentence. It cannot be this suite's
   desk: two runs of it cost five reds elsewhere.
-
-## Done when — WW406
-
-- **A run that loses the test host says which thread was waiting** Four occurrences now;
-  the runner kept the fourth on its own, and both sequences name
-  SuiteRunTests.A_project_that_declares_captures as the case still running.
 
 ## Non-goals
 

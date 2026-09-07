@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WW406: this reads a dump of a process that stopped answering, so it is its own process for
+       the reason the roll call is - it runs after the test host, including after one that died. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Winwright.Blaming</RootNamespace>
+    <AssemblyName>Winwright.Blame</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- The one package in this tree outside the suite, and the non-goal it is measured against says
+       "no external dependency in the engine": this is a tool, and the engine keeps its promise.
+
+       Reading a minidump means finding the runtime's own data structures in a memory image and
+       walking a stack with the matching debugging library. There is no in-box door to that and no
+       amount of parsing the file format reaches it - what a hand-written reader could answer is
+       which module an address is in, which is not "which thread was waiting and on what". This is
+       Microsoft's own reader for it, and it is what dotnet-dump is built on. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="4.0.732401" />
+  </ItemGroup>
+
+</Project>
