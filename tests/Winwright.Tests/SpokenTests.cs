@@ -175,19 +175,19 @@ public sealed class SpokenTests : IDisposable
         Assert.Contains(
             "not a claim",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Button", "invoke", eachSpoken: true)).Because,
+                () => Wrote.Step("Button", "invoke", ("eachSpoken", true))).Because,
             StringComparison.Ordinal);
 
         Assert.Contains(
             "also makes another claim",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Button", "read", answers: true, eachSpoken: true)).Because,
+                () => Wrote.Step("Button", "read", ("answers", true), ("eachSpoken", true))).Because,
             StringComparison.Ordinal);
 
         Assert.Contains(
             "which is their name",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Button", "read", reads: "value", eachSpoken: true)).Because,
+                () => Wrote.Step("Button", "read", ("reads", "value"), ("eachSpoken", true))).Because,
             StringComparison.Ordinal);
     }
 
@@ -195,7 +195,7 @@ public sealed class SpokenTests : IDisposable
     public void It_is_one_claim_like_every_other_one()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("#labelledRow", "read", answers: true, spoken: true));
+            () => Wrote.Step("#labelledRow", "read", ("answers", true), ("spoken", true)));
 
         Assert.Contains("also makes another claim", refusal.Because, StringComparison.Ordinal);
     }
@@ -206,7 +206,7 @@ public sealed class SpokenTests : IDisposable
         // The subject is the subtree, so a reading here would look like it narrowed the claim and
         // would narrow nothing: what those elements announce is their name, always.
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("#labelledRow", "read", reads: "value", spoken: true));
+            () => Wrote.Step("#labelledRow", "read", ("reads", "value"), ("spoken", true)));
 
         Assert.Contains("which is their name", refusal.Because, StringComparison.Ordinal);
     }
@@ -214,7 +214,7 @@ public sealed class SpokenTests : IDisposable
     [Fact]
     public void A_step_that_only_claims_this_is_still_a_check()
     {
-        var step = StepDeclaration.Of("#labelledRow", "read", spoken: true);
+        var step = Wrote.Step("#labelledRow", "read", ("spoken", true));
 
         Assert.True(step.Checkable);
         Assert.True(step.Spoken);

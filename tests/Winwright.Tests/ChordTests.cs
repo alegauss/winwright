@@ -131,7 +131,7 @@ public sealed class ChordTests : IDisposable
     public void A_press_that_is_neither_a_traversal_key_nor_a_chord_is_refused_where_it_is_written()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Pane", "press", argument: "Ctrl+Nonsense", named: "a chord nobody has"));
+            () => Wrote.Step("Pane", "press", ("with", "Ctrl+Nonsense"), ("named", "a chord nobody has")));
 
         // Both vocabularies in the sentence, because an author who wrote a chord and is shown only
         // the traversal names has been told their chord is not a traversal key, which they knew.
@@ -142,7 +142,7 @@ public sealed class ChordTests : IDisposable
     [Fact]
     public void The_traversal_names_still_load_beside_it()
     {
-        var step = StepDeclaration.Of("Pane", "press", argument: "ShiftTab", named: "the traversal half");
+        var step = Wrote.Step("Pane", "press", ("with", "ShiftTab"), ("named", "the traversal half"));
 
         Assert.Equal("press", step.Verb.Name);
         Assert.Equal("ShiftTab", step.Argument);

@@ -104,7 +104,7 @@ public sealed class DeclaredStringTests : IDisposable
     public void Claiming_it_is_the_string_and_is_not_the_string_is_two_things()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", label: "a.key", notLabel: "another.key"));
+            () => Wrote.Step("Text", "read", ("label", "a.key"), ("notLabel", "another.key")));
 
         // WW83 made it three ways rather than two, so the refusal names the fields to choose between
         // rather than saying "these are two" of a family that now has a third member.
@@ -117,7 +117,7 @@ public sealed class DeclaredStringTests : IDisposable
     public void It_is_one_claim_like_every_other_one()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", expected: "Refresh interval", label: "settings.interval"));
+            () => Wrote.Step("Text", "read", ("expect", "Refresh interval"), ("label", "settings.interval")));
 
         Assert.Contains("also makes another claim", refusal.Because, StringComparison.Ordinal);
     }
@@ -125,8 +125,8 @@ public sealed class DeclaredStringTests : IDisposable
     [Fact]
     public void A_step_that_only_claims_this_is_still_a_check()
     {
-        Assert.True(StepDeclaration.Of("Text", "read", label: "settings.interval").Checkable);
-        Assert.True(StepDeclaration.Of("Text", "read", notLabel: "stats.live.off").Checkable);
+        Assert.True(Wrote.Step("Text", "read", ("label", "settings.interval")).Checkable);
+        Assert.True(Wrote.Step("Text", "read", ("notLabel", "stats.live.off")).Checkable);
     }
 
     /// <summary>Everything the run said, so a red here carries its own explanation.</summary>

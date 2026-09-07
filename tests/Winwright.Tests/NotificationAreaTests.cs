@@ -1094,8 +1094,11 @@ public sealed class NotificationAreaTests : IDisposable
 
         var declared = Winwright.Scenarios.CaseDeclaration.Of(
             "the tray menu is opened and read",
-            Winwright.Scenarios.StepDeclaration.Of(
-                null, "open tray menu", tray: answering.Tip, named: "the icon shows its menu"),
+            Wrote.Step(
+                null,
+                "open tray menu",
+                ("tray", answering.Tip),
+                ("named", "the icon shows its menu")),
             // WW356. MenuItem, and it is the adopters' own word: claude-tray's case reads
             // `Menu > MenuItem` and freewilly's does the same. It used to be Button here, measured
             // rather than read off the fixture's source — `ToolStripDropDown.Items.Add(string)`
@@ -1114,8 +1117,12 @@ public sealed class NotificationAreaTests : IDisposable
             // Ordered, because the menu has two entries and the engine refuses to guess between
             // them — which is the right refusal and is how this case learned the menu was standing
             // with both of them in it.
-            Winwright.Scenarios.StepDeclaration.Of(
-                "Menu > MenuItem[order=top]", "read", reads: "name", answers: true, named: "the first entry"));
+            Wrote.Step(
+                "Menu > MenuItem[order=top]",
+                "read",
+                ("reads", "name"),
+                ("answers", true),
+                ("named", "the first entry")));
 
         Winwright.Scenarios.CaseResult run;
         try

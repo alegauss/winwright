@@ -152,30 +152,6 @@ on.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW391 the field that joins in five places
-
-WW351 made a *claim* join the format by being a field, and WW378 closed the last place
-that had not caught up. A *field* still joins in five: a property, a parameter on `Of`,
-a line in the construction, a schema row, and a read plus an argument in the loader.
-Adding `popup` paid all five, and nothing but a case holds the schema and the loader
-together.
-
-`Of` is at twenty-nine parameters because of it, which the analyser reports on every
-build and nobody has filed. WW352 took the constructor from twenty-three to an
-initialiser and left the verb, so what remains is the half that grows — and `Trayed`
-threads twenty-five of the same values through a second signature beside it.
-
-The shape a step is built from already exists: the loader reads named fields out of a
-document and the schema declares what those names are. What is missing is the step
-taking that shape rather than a positional argument list, after which a field is a
-property and a schema row — two things already held to each other.
-
-What makes it worth deciding rather than doing is the refusals. `Of` is where every rule
-about a step runs, and several read the raw text a case wrote rather than what the step
-holds: `reads` is the one every family asks for, and WW378 spent a task moving one
-family off the parameters. A different door has to carry those, and which ones is the
-design.
-
 ### §WW426 the weakest floor that would have worked
 
 WW410's floor is one constant, and its reason is one line of arithmetic: nothing seen in

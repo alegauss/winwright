@@ -75,8 +75,7 @@ public sealed class SettlesLateTests : IDisposable
         // has its say while the expectation is still polling.
         var declared = CaseDeclaration.Of(
             "the box settles on what the application made of it",
-            StepDeclaration.Of(
-                $"Edit#{BoxId}", "set value", "beta", expected: "BETA", reads: "value"));
+            Wrote.Step($"Edit#{BoxId}", "set value", ("with", "beta"), ("expect", "BETA"), ("reads", "value")));
 
         var run = CaseRun.Of(declared, window, Declared());
 

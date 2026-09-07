@@ -70,7 +70,7 @@ public sealed class EnabledTests : IDisposable
         // an element that resolved is enabled or is not, so "this reading says something" holds
         // wherever the locator matched — which is existence wearing the words of a reading.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Button#refusing", "read", reads: "enabled", answers: true));
+            () => Wrote.Step("Button#refusing", "read", ("reads", "enabled"), ("answers", true)));
 
         Assert.Contains("could never be false", refused.Because, StringComparison.Ordinal);
     }

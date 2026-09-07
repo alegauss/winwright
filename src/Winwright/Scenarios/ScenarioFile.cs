@@ -332,35 +332,29 @@ public sealed class ScenarioFile
 
         // Every field is read before anything is declared, so a refusal about a field's kind wears
         // that field's own address and never the step's with the field's in brackets after it.
-        var locator = Text(at, step, ScenarioSchema.Step, "locator");
-        var tray = Text(at, step, ScenarioSchema.Step, "tray");
-        var act = Text(at, step, ScenarioSchema.Step, "act");
-        var with = Text(at, step, ScenarioSchema.Step, "with");
-        var expect = Text(at, step, ScenarioSchema.Step, "expect");
-        var reads = Text(at, step, ScenarioSchema.Step, "reads");
-        var moves = Truth(at, step, ScenarioSchema.Step, "moves");
-        var answers = Truth(at, step, ScenarioSchema.Step, "answers");
-        var matches = Text(at, step, ScenarioSchema.Step, "matches");
-        var discloses = Truth(at, step, ScenarioSchema.Step, "discloses");
-        var sameAs = Text(at, step, ScenarioSchema.Step, "sameAs");
-        var never = Text(at, step, ScenarioSchema.Step, "never");
-        var spoken = Truth(at, step, ScenarioSchema.Step, "spoken");
-        var label = Text(at, step, ScenarioSchema.Step, "label");
-        var notLabel = Text(at, step, ScenarioSchema.Step, "notLabel");
-        var beginsWithLabel = Text(at, step, ScenarioSchema.Step, "beginsWithLabel");
-        var absent = Truth(at, step, ScenarioSchema.Step, "absent");
-        var unlike = Text(at, step, ScenarioSchema.Step, "unlike");
-        var eachSpoken = Truth(at, step, ScenarioSchema.Step, "eachSpoken");
-        var ownHeader = Truth(at, step, ScenarioSchema.Step, "ownHeader");
-        var covers = Text(at, step, ScenarioSchema.Step, "covers");
-        var coversAtLeast = Text(at, step, ScenarioSchema.Step, "coversAtLeast");
-        var coversWithin = Text(at, step, ScenarioSchema.Step, "coversWithin");
-        var sameCountdownAs = Text(at, step, ScenarioSchema.Step, "sameCountdownAs");
-        var contains = Text(at, step, ScenarioSchema.Step, "contains");
-        var expectReported = Text(at, step, ScenarioSchema.Step, "expectReported");
-        var meansIt = Truth(at, step, ScenarioSchema.Step, "meansIt");
-        var named = Text(at, step, ScenarioSchema.Step, "named");
-        var popup = Text(at, step, ScenarioSchema.Step, "popup");
+        //
+        // WW391. One line per field stood here — twenty-nine of them, each naming a key the schema
+        // row beside it had already named, and then twenty-nine arguments in a fixed order at the
+        // bottom. Nothing but a case held the two lists together, so a field added to one and not
+        // the other was a key that loaded and did nothing, which is the failure this format exists
+        // to refuse. The schema is walked instead, in the order it declares, and what it says a
+        // field holds is what is read.
+        var wrote = new List<(string Field, object? Value)>();
+        foreach (var field in ScenarioSchema.Step)
+        {
+            wrote.Add((field.Name, field.Holds switch
+            {
+                Taking.Text => Text(at, step, ScenarioSchema.Step, field.Name),
+                Taking.Truth => Truth(at, step, ScenarioSchema.Step, field.Name),
+
+                // A harness error and never a refusal: nothing about the author's file is wrong. A
+                // step's fields are text or a flag, and a row saying otherwise is the schema and the
+                // step disagreeing about what a step is.
+                _ => throw new InvalidOperationException(
+                    $"the schema says a step's '{field.Name}' holds {field.Holds}, and a step's fields "
+                        + "are text or true or false"),
+            }));
+        }
 
         // WW258. Asked of the schema rather than checked here, so the rule and the `oneOf` a tool is
         // published cannot drift: the group is declared on the fields, and a third way of addressing a
@@ -375,12 +369,7 @@ public sealed class ScenarioFile
                 throw new ScenarioRefusedException(at, wrong);
         }
 
-        return Addressed(
-            at,
-            () => StepDeclaration.Of(
-                locator, act!, with, expect, reads, meansIt, named, moves, covers, answers, matches, discloses,
-                sameAs, never, spoken, label, notLabel, beginsWithLabel, absent, unlike, sameCountdownAs, contains, expectReported,
-                eachSpoken, ownHeader, tray, coversAtLeast, coversWithin, popup));
+        return Addressed(at, () => StepDeclaration.Of(new Written(wrote)));
     }
 
     /// <summary>

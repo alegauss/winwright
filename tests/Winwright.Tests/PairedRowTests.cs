@@ -101,19 +101,19 @@ public sealed class PairedRowTests : IDisposable
         Assert.Contains(
             "not a claim",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Group", "invoke", ownHeader: true)).Because,
+                () => Wrote.Step("Group", "invoke", ("ownHeader", true))).Because,
             StringComparison.Ordinal);
 
         Assert.Contains(
             "also makes another claim",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Group", "read", eachSpoken: true, ownHeader: true)).Because,
+                () => Wrote.Step("Group", "read", ("eachSpoken", true), ("ownHeader", true))).Because,
             StringComparison.Ordinal);
 
         Assert.Contains(
             "which is their name",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Group", "read", reads: "name", ownHeader: true)).Because,
+                () => Wrote.Step("Group", "read", ("reads", "name"), ("ownHeader", true))).Because,
             StringComparison.Ordinal);
     }
 

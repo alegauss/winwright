@@ -75,7 +75,7 @@ public sealed class AbsentTests : IDisposable
     public void Claiming_absence_and_anything_about_what_was_matched_is_two_things()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Button#gone", "read", absent: true, answers: true));
+            () => Wrote.Step("Button#gone", "read", ("absent", true), ("answers", true)));
 
         Assert.Contains("no reading of an element that is not there", refused.Because, StringComparison.Ordinal);
     }
@@ -92,8 +92,12 @@ public sealed class AbsentTests : IDisposable
         // It asks the claim set now, which a claim joins by being a field. What this case pins is
         // the one behaviour that changed: the sentence a reader is given for the pair.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of(
-                "Button#gone", "read", reads: "name", absent: true, contains: "the earlier stop"));
+            () => Wrote.Step(
+                "Button#gone",
+                "read",
+                ("reads", "name"),
+                ("absent", true),
+                ("contains", "the earlier stop")));
 
         Assert.Contains("no reading of an element that is not there", refused.Because, StringComparison.Ordinal);
     }
@@ -102,7 +106,7 @@ public sealed class AbsentTests : IDisposable
     public void Naming_a_reading_of_something_that_is_not_there_is_refused()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Button#gone", "read", absent: true, reads: "name"));
+            () => Wrote.Step("Button#gone", "read", ("absent", true), ("reads", "name")));
 
         Assert.Contains("answers no reading", refused.Because, StringComparison.Ordinal);
     }
@@ -112,7 +116,7 @@ public sealed class AbsentTests : IDisposable
     {
         // It would fail on the very absence it asserts: an act resolves its subject first.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Button#gone", "invoke", absent: true));
+            () => Wrote.Step("Button#gone", "invoke", ("absent", true)));
 
         Assert.Contains("the very absence it is asserting", refused.Because, StringComparison.Ordinal);
     }
@@ -120,7 +124,7 @@ public sealed class AbsentTests : IDisposable
     [Fact]
     public void A_step_that_only_claims_absence_is_still_a_check()
     {
-        Assert.True(StepDeclaration.Of("Button#gone", "read", absent: true).Checkable);
+        Assert.True(Wrote.Step("Button#gone", "read", ("absent", true)).Checkable);
     }
 
     /// <summary>Everything the run said, so a red here carries its own explanation.</summary>

@@ -154,7 +154,7 @@ public sealed class AnnouncedStateTests : IDisposable
         // WW238's rule, and the prefix is under it for the same reason: the locator fixed the front
         // of the answer, so a claim that it says something holds because the prefix is not empty.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Button[nameStarts=\"Pessoal \"]", "read", reads: "name", answers: true));
+            () => Wrote.Step("Button[nameStarts=\"Pessoal \"]", "read", ("reads", "name"), ("answers", true)));
 
         Assert.Contains("fixed before the act runs", refused.Because, StringComparison.Ordinal);
     }
@@ -163,7 +163,7 @@ public sealed class AnnouncedStateTests : IDisposable
     public void Three_ways_of_claiming_one_declared_string_are_three_and_never_two()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Button", "read", label: "a.key", beginsWithLabel: "another.key"));
+            () => Wrote.Step("Button", "read", ("label", "a.key"), ("beginsWithLabel", "another.key")));
 
         Assert.Contains("one declared string claimed different ways", refused.Because, StringComparison.Ordinal);
     }
@@ -171,7 +171,7 @@ public sealed class AnnouncedStateTests : IDisposable
     [Fact]
     public void A_step_that_only_claims_the_front_of_a_reading_is_still_a_check()
     {
-        Assert.True(StepDeclaration.Of("Button", "read", beginsWithLabel: "menu.itemChecked").Checkable);
+        Assert.True(Wrote.Step("Button", "read", ("beginsWithLabel", "menu.itemChecked")).Checkable);
     }
 
     /// <summary>Everything the run said, so a red here carries its own explanation.</summary>

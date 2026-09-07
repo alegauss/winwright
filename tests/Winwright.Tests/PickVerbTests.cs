@@ -151,7 +151,7 @@ public sealed class PickVerbTests : IDisposable
     public void A_pick_with_nothing_to_reach_for_is_refused_where_it_was_written()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("ComboBox#profiles", "pick", expected: "Bravo", reads: "value"));
+            () => Wrote.Step("ComboBox#profiles", "pick", ("expect", "Bravo"), ("reads", "value")));
 
         Assert.Contains("acts on text", refusal.Because, StringComparison.Ordinal);
     }
@@ -163,7 +163,7 @@ public sealed class PickVerbTests : IDisposable
         // expectation is a navigation the next step is the check for; a pick with none is every step
         // after it read against whichever value the walk happened to stop at.
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("ComboBox#profiles", "pick", argument: "Bravo"));
+            () => Wrote.Step("ComboBox#profiles", "pick", ("with", "Bravo")));
 
         Assert.Contains("claims nothing of what it reached", refusal.Because, StringComparison.Ordinal);
         Assert.Contains("'expect'", refusal.Because, StringComparison.Ordinal);
@@ -172,8 +172,12 @@ public sealed class PickVerbTests : IDisposable
     [Fact]
     public void A_pick_naming_what_it_ended_on_is_a_step()
     {
-        var step = StepDeclaration.Of(
-            "ComboBox#profiles", "pick", argument: "Bravo", expected: "Bravo", reads: "value");
+        var step = Wrote.Step(
+            "ComboBox#profiles",
+            "pick",
+            ("with", "Bravo"),
+            ("expect", "Bravo"),
+            ("reads", "value"));
 
         Assert.True(step.Checkable);
         Assert.Equal("Bravo", step.Argument);

@@ -98,8 +98,12 @@ public sealed class CountdownTests
         // tolerance would soften every exact claim in every adopting project to serve one caption.
         // `reads` is named because the shared rule requires it: this compares two readings, so the
         // default would compare whichever pattern answered first.
-        var step = StepDeclaration.Of(
-            "Text#reset", "read", reads: "name", named: "the second stop", sameCountdownAs: "the first stop");
+        var step = Wrote.Step(
+            "Text#reset",
+            "read",
+            ("reads", "name"),
+            ("named", "the second stop"),
+            ("sameCountdownAs", "the first stop"));
 
         Assert.Equal("the first stop", step.SameCountdownAs);
         Assert.Null(step.SameAs);
@@ -108,7 +112,13 @@ public sealed class CountdownTests
 
         // And the three cannot be combined: they are three ways of comparing with one earlier step.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text#reset", "read", reads: "name", sameAs: "a", sameCountdownAs: "b", named: "c"));
+            () => Wrote.Step(
+                "Text#reset",
+                "read",
+                ("reads", "name"),
+                ("sameAs", "a"),
+                ("sameCountdownAs", "b"),
+                ("named", "c")));
 
         Assert.Contains("a step answers one thing", refused.Because, StringComparison.Ordinal);
     }
@@ -122,8 +132,12 @@ public sealed class CountdownTests
         Assert.Contains(
             "which is answered before the window is",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of(
-                    "Text#reset", "read", reads: "name", named: "itself", sameCountdownAs: "itself")).Because,
+                () => Wrote.Step(
+                    "Text#reset",
+                    "read",
+                    ("reads", "name"),
+                    ("named", "itself"),
+                    ("sameCountdownAs", "itself"))).Because,
             StringComparison.Ordinal);
     }
 }

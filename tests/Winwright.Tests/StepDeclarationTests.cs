@@ -14,7 +14,7 @@ public class StepDeclarationTests
     [Fact]
     public void A_step_is_a_locator_a_verb_and_what_the_control_should_read()
     {
-        var step = StepDeclaration.Of("""Edit[name="Profile"]""", "set value", "beta", expected: "beta");
+        var step = Wrote.Step("""Edit[name="Profile"]""", "set value", ("with", "beta"), ("expect", "beta"));
 
         Assert.Equal("beta", step.Argument);
         Assert.Equal("beta", step.Expected);
@@ -26,7 +26,7 @@ public class StepDeclarationTests
     [Fact]
     public void A_step_acting_on_nothing_is_refused()
     {
-        var refusal = Assert.Throws<ScenarioRefusedException>(() => StepDeclaration.Of("  ", "invoke"));
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => Wrote.Step("  ", "invoke"));
 
         Assert.Contains("names nothing", refusal.Because);
     }
@@ -35,7 +35,7 @@ public class StepDeclarationTests
     public void A_locator_that_does_not_parse_is_refused_at_declaration_and_not_at_run_time()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("""Button[name=""", "invoke"));
+            () => Wrote.Step("""Button[name=""", "invoke"));
 
         Assert.Contains("does not parse", refusal.Because);
         Assert.Contains("invoke Button[name=", refusal.Subject);
@@ -45,7 +45,7 @@ public class StepDeclarationTests
     public void An_argument_the_verb_cannot_use_is_refused_and_the_step_is_named()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Button", "invoke", "beta", named: "press Save"));
+            () => Wrote.Step("Button", "invoke", ("with", "beta"), ("named", "press Save")));
 
         Assert.Equal("press Save", refusal.Subject);
         Assert.Contains("takes nothing", refusal.Because);
@@ -54,7 +54,7 @@ public class StepDeclarationTests
     [Fact]
     public void An_argument_the_verb_needs_and_has_not_got_is_refused()
     {
-        var refusal = Assert.Throws<ScenarioRefusedException>(() => StepDeclaration.Of("Slider", "set range"));
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => Wrote.Step("Slider", "set range"));
 
         Assert.Contains("acts on a number", refusal.Because);
     }
@@ -63,7 +63,7 @@ public class StepDeclarationTests
     public void A_reading_that_does_not_exist_is_refused_with_the_ones_that_do()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("CheckBox", "toggle", expected: "On", reads: "checked"));
+            () => Wrote.Step("CheckBox", "toggle", ("expect", "On"), ("reads", "checked")));
 
         Assert.Equal("checked", refusal.Subject);
         Assert.Contains("toggle", refusal.Because);
@@ -73,7 +73,7 @@ public class StepDeclarationTests
     public void A_reading_named_with_nothing_expected_of_it_is_refused_as_dead_configuration()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("CheckBox", "toggle", reads: "toggle"));
+            () => Wrote.Step("CheckBox", "toggle", ("reads", "toggle")));
 
         Assert.Contains("expects nothing of it", refusal.Because);
     }
@@ -83,7 +83,7 @@ public class StepDeclarationTests
     {
         // Opening a node so a later step can read what it contains is a step. It is not a check,
         // and the run counts it as neither passed nor failed.
-        var step = StepDeclaration.Of("TreeItem", "expand");
+        var step = Wrote.Step("TreeItem", "expand");
 
         Assert.Null(step.Expected);
         Assert.False(step.Checkable);
@@ -93,11 +93,11 @@ public class StepDeclarationTests
     [Fact]
     public void A_step_is_retryable_only_where_it_waits_for_something_and_the_verb_survives_repeating()
     {
-        Assert.True(StepDeclaration.Of("Edit", "set value", "beta", expected: "beta").Retryable);
+        Assert.True(Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta")).Retryable);
 
         // Waiting for a state a second toggle would leave is how a green becomes a red about the
         // opposite state, so the engine gets one attempt whatever the expectation said.
-        Assert.False(StepDeclaration.Of("CheckBox", "toggle", expected: "On", reads: "toggle").Retryable);
+        Assert.False(Wrote.Step("CheckBox", "toggle", ("expect", "On"), ("reads", "toggle")).Retryable);
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public class StepDeclarationTests
     {
         // WW213. A second go is the same look taken again for the same answer at three times the
         // cost, and the poll inside the wait is what a read is made of.
-        var reading = StepDeclaration.Of("Text#status", "read", expected: "Saved", reads: "text");
+        var reading = Wrote.Step("Text#status", "read", ("expect", "Saved"), ("reads", "text"));
 
         Assert.True(reading.Verb.Repeatable);
         Assert.True(reading.Checkable);
@@ -117,7 +117,7 @@ public class StepDeclarationTests
     {
         // An act with no expectation is a navigation a later step is the check for. A read with none
         // touches nothing and claims nothing.
-        var refusal = Assert.Throws<ScenarioRefusedException>(() => StepDeclaration.Of("Text#status", "read"));
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => Wrote.Step("Text#status", "read"));
 
         Assert.Contains("'read' expects nothing", refusal.Because);
         Assert.Contains("the step does nothing at all", refusal.Because);
@@ -129,23 +129,28 @@ public class StepDeclarationTests
         Assert.Contains(
             "takes nothing",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Text#status", "read", "Saved", expected: "Saved")).Because);
+                () => Wrote.Step("Text#status", "read", ("with", "Saved"), ("expect", "Saved"))).Because);
     }
 
     [Fact]
     public void A_step_that_means_a_destructive_entry_says_so_in_a_field_a_reviewer_finds()
     {
-        var quitting = StepDeclaration.Of(
-            "Button[name=\"Quit\"]", "invoke", expected: "gone", reads: "value", meansIt: true, named: "quit the app");
+        var quitting = Wrote.Step(
+            "Button[name=\"Quit\"]",
+            "invoke",
+            ("expect", "gone"),
+            ("reads", "value"),
+            ("meansIt", true),
+            ("named", "quit the app"));
 
         Assert.True(quitting.MeansIt);
-        Assert.False(StepDeclaration.Of("Button", "invoke").MeansIt);
+        Assert.False(Wrote.Step("Button", "invoke").MeansIt);
     }
 
     [Fact]
     public void A_step_nobody_named_is_named_by_what_it_does()
     {
-        var step = StepDeclaration.Of("""CheckBox[name="Wrap lines"]""", "toggle", expected: "On", reads: "toggle");
+        var step = Wrote.Step("""CheckBox[name="Wrap lines"]""", "toggle", ("expect", "On"), ("reads", "toggle"));
 
         Assert.Equal("""toggle CheckBox[name="Wrap lines"]""", step.Name);
         Assert.Contains("→ toggle 'On'", step.ToString());
@@ -159,9 +164,10 @@ public class StepDeclarationTests
         // the engine rather than in a test: a tray step was built from twenty-one positional
         // arguments of which most were null or false.
         //
-        // Asserted as the count rather than as the absence of a defect, because that is what a
-        // reader can check: three is what a step cannot be without, and a fourth would be a field
-        // that had found its way back into the position where transposing is possible.
+        // Asserted as the names rather than as the absence of a defect, because that is what a
+        // reader can check: three the step cannot be without, plus what the case wrote — and none of
+        // the four can be transposed with another, because no two of them are the same type. A fifth
+        // would be a field that had found its way back into a position.
         var built = typeof(StepDeclaration)
             .GetConstructors(System.Reflection.BindingFlags.Instance
                 | System.Reflection.BindingFlags.NonPublic
@@ -172,21 +178,66 @@ public class StepDeclarationTests
         var declaring = Assert.Single(built);
 
         Assert.Equal(
-            ["name", "verb", "reads"],
+            ["name", "verb", "reads", "wrote"],
             declaring.GetParameters().Select(one => one.Name));
+    }
+
+    [Fact]
+    public void A_field_joins_the_format_in_a_schema_row_and_a_property_and_nowhere_else()
+    {
+        // WW391, and the deletion is the proof. A field used to join in five places: a property, a
+        // parameter on `Of`, a line in the construction under it, a schema row, and a read plus an
+        // argument in the loader. Four of those said what the schema row had already said, and
+        // nothing but a case held them together — so the one somebody forgot was a key that loaded
+        // and did nothing, which is the failure this format exists to refuse.
+        //
+        // The two that are left are held to each other by the read between them: a property asks the
+        // schema for its field before it answers, so a name the schema does not have is a harness
+        // error on the first load rather than a field that quietly answers null forever.
+        Assert.Equal(
+            ["wrote"],
+            typeof(StepDeclaration).GetMethod(nameof(StepDeclaration.Of))!
+                .GetParameters()
+                .Select(one => one.Name));
+
+        // The loader names no field of a step. It walks the schema, which is the list that says what
+        // the names are, so a row added to it is read without this file being told.
+        var naming = File.ReadAllLines(Checkout.At("src", "Winwright", "Scenarios", "ScenarioFile.cs"))
+            .Select((line, at) => (Line: Checkout.Code(line), At: at))
+            .Where(one => one.Line.Contains("ScenarioSchema.Step, \"", StringComparison.Ordinal))
+            .ToList();
+
+        Assert.All(
+            naming,
+            one => Assert.Fail($"line {one.At + 1} reads a step's field by name: {one.Line.Trim()}"));
     }
 
     [Fact]
     public void What_a_field_is_set_by_is_shut_to_everyone_but_the_verb_that_judges_a_step()
     {
-        // The half that keeps the gate, and the reason those fields are `private init` rather than
-        // `init`. Of is where a step faces its refusals, so a caller outside the engine that could
-        // write `step with { Moves = true }` would be holding a step that never faced them — which
-        // is the whole of what declaring a case is for.
+        // The half that keeps the gate. Of is where a step faces its refusals, so a caller outside
+        // the engine that could write `step with { Moves = true }` would be holding a step that
+        // never faced them — which is the whole of what declaring a case is for.
+        //
+        // WW391 made it stronger than `private init`: these are reads of what the case wrote, so
+        // there is no setter to shut. A setter appearing on one of them is a field that has been
+        // copied out of the format and can now disagree with it.
         var fields = new[] { "Moves", "Answers", "Expected", "Sweeps", "Absent", "Label", "Tray" };
 
         Assert.All(
             fields,
+            one =>
+            {
+                var read = typeof(StepDeclaration).GetProperty(one);
+
+                Assert.True(read is not null, $"{one} is not a property of a step any more");
+                Assert.True(read.SetMethod is null, $"{one} is set rather than read off what the case wrote");
+            });
+
+        // The three the verb still writes, which are what it parsed rather than what it was given —
+        // and every one of them shut to everyone but the verb.
+        Assert.All(
+            new[] { "Locator", "Matches", "Name" },
             one =>
             {
                 var setting = typeof(StepDeclaration).GetProperty(one)?.SetMethod;

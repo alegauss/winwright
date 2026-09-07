@@ -28,30 +28,50 @@ public class ClaimsTests
     /// </summary>
     private static readonly (string Field, Func<StepDeclaration> Step)[] Known =
     [
-        ("expect", () => StepDeclaration.Of("Text", "read", expected: "Overview")),
+        ("expect", () => Wrote.Step("Text", "read", ("expect", "Overview"))),
         // An acting verb, because a step that only reads cannot be what moved the reading.
-        ("moves", () => StepDeclaration.Of("Edit", "type", argument: "beta", moves: true)),
-        ("answers", () => StepDeclaration.Of("Text", "read", answers: true)),
-        ("matches", () => StepDeclaration.Of("Text", "read", reads: "name", matches: @"\d{4}")),
-        ("discloses", () => StepDeclaration.Of("TabItem#statusPane", "select", discloses: true)),
-        ("sameAs", () => StepDeclaration.Of("Edit", "read", reads: "value", sameAs: "the start", named: "the end")),
-        ("unlike", () => StepDeclaration.Of("Edit", "read", reads: "value", unlike: "the stop before", named: "the second")),
-        ("sameCountdownAs", () => StepDeclaration.Of("Text#reset", "read", reads: "name", sameCountdownAs: "the first", named: "the second")),
-        ("contains", () => StepDeclaration.Of("Text", "read", reads: "name", contains: "the opener", named: "the dialog")),
-        ("label", () => StepDeclaration.Of("Text", "read", label: "stats.live.on")),
-        ("expectReported", () => StepDeclaration.Of("Text#profile", "read", reads: "name", expectReported: "inUse")),
-        ("notLabel", () => StepDeclaration.Of("Text", "read", notLabel: "stats.live.off")),
-        ("beginsWithLabel", () => StepDeclaration.Of("Button", "read", beginsWithLabel: "menu.itemChecked")),
-        ("absent", () => StepDeclaration.Of("Button#gone", "read", absent: true)),
-        ("ownHeader", () => StepDeclaration.Of("Group", "read", ownHeader: true)),
-        ("eachSpoken", () => StepDeclaration.Of("Group", "read", eachSpoken: true)),
-        ("spoken", () => StepDeclaration.Of("#labelledRow", "read", spoken: true)),
+        ("moves", () => Wrote.Step("Edit", "type", ("with", "beta"), ("moves", true))),
+        ("answers", () => Wrote.Step("Text", "read", ("answers", true))),
+        ("matches", () => Wrote.Step("Text", "read", ("reads", "name"), ("matches", @"\d{4}"))),
+        ("discloses", () => Wrote.Step("TabItem#statusPane", "select", ("discloses", true))),
+        ("sameAs", () => Wrote.Step(
+            "Edit",
+            "read",
+            ("reads", "value"),
+            ("sameAs", "the start"),
+            ("named", "the end"))),
+        ("unlike", () => Wrote.Step(
+            "Edit",
+            "read",
+            ("reads", "value"),
+            ("unlike", "the stop before"),
+            ("named", "the second"))),
+        ("sameCountdownAs", () => Wrote.Step(
+            "Text#reset",
+            "read",
+            ("reads", "name"),
+            ("sameCountdownAs", "the first"),
+            ("named", "the second"))),
+        ("contains", () => Wrote.Step(
+            "Text",
+            "read",
+            ("reads", "name"),
+            ("contains", "the opener"),
+            ("named", "the dialog"))),
+        ("label", () => Wrote.Step("Text", "read", ("label", "stats.live.on"))),
+        ("expectReported", () => Wrote.Step("Text#profile", "read", ("reads", "name"), ("expectReported", "inUse"))),
+        ("notLabel", () => Wrote.Step("Text", "read", ("notLabel", "stats.live.off"))),
+        ("beginsWithLabel", () => Wrote.Step("Button", "read", ("beginsWithLabel", "menu.itemChecked"))),
+        ("absent", () => Wrote.Step("Button#gone", "read", ("absent", true))),
+        ("ownHeader", () => Wrote.Step("Group", "read", ("ownHeader", true))),
+        ("eachSpoken", () => Wrote.Step("Group", "read", ("eachSpoken", true))),
+        ("spoken", () => Wrote.Step("#labelledRow", "read", ("spoken", true))),
         // No 'reads' beside it: the claim is about the window while the step waited rather than
         // about what the element ends up saying.
-        ("never", () => StepDeclaration.Of("Text", "read", never: "labels.stale")),
-        ("covers", () => StepDeclaration.Of("Text", "read", covers: "stats.tab")),
-        ("coversAtLeast", () => StepDeclaration.Of("Text", "read", coversAtLeast: "stats.tab")),
-        ("coversWithin", () => StepDeclaration.Of("MenuItem", "read", coversWithin: "profiles")),
+        ("never", () => Wrote.Step("Text", "read", ("never", "labels.stale"))),
+        ("covers", () => Wrote.Step("Text", "read", ("covers", "stats.tab"))),
+        ("coversAtLeast", () => Wrote.Step("Text", "read", ("coversAtLeast", "stats.tab"))),
+        ("coversWithin", () => Wrote.Step("MenuItem", "read", ("coversWithin", "profiles"))),
     ];
 
     [Fact]
@@ -82,8 +102,8 @@ public class ClaimsTests
 
         // The other half of the rule, and the half a forgotten claim breaks: a step that only acts
         // is not checkable, so a claim missing from the set is a case refused for saying nothing.
-        Assert.False(StepDeclaration.Of("Button", "invoke").Checkable);
-        Assert.Empty(StepDeclaration.Of("Button", "invoke").Claims);
+        Assert.False(Wrote.Step("Button", "invoke").Checkable);
+        Assert.Empty(Wrote.Step("Button", "invoke").Claims);
     }
 
     [Fact]
@@ -95,13 +115,13 @@ public class ClaimsTests
         // tell it from a check. A step carrying only 'reads' is the same rule said louder: it took
         // a reading and asked nothing of it, so it is refused where it is written rather than left
         // to the case-level guard.
-        var navigating = StepDeclaration.Of("Button", "invoke", named: "the way in");
+        var navigating = Wrote.Step("Button", "invoke", ("named", "the way in"));
 
         Assert.Empty(navigating.Claims);
         Assert.False(navigating.Checkable);
 
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", reads: "value", named: "the field"));
+            () => Wrote.Step("Text", "read", ("reads", "value"), ("named", "the field")));
 
         Assert.Contains("the reading changes nothing", refusal.Because);
     }
@@ -113,8 +133,8 @@ public class ClaimsTests
         // one, and neither can collide with a second the way two fields can — so they answer
         // Checkable directly and leave the set to the fields. A set they were in would have to be
         // read as "one of these, unless it is one of those two".
-        var tray = StepDeclaration.Of(null, "open tray menu", tray: "winwright under test");
-        var capture = StepDeclaration.Of("Edit", "capture", "the field as it opens");
+        var tray = Wrote.Step(null, "open tray menu", ("tray", "winwright under test"));
+        var capture = Wrote.Step("Edit", "capture", ("with", "the field as it opens"));
 
         Assert.True(tray.Checkable);
         Assert.True(capture.Checkable);
@@ -129,7 +149,7 @@ public class ClaimsTests
         // never the mode the engine folded it into, so what a refusal says to delete is a key the
         // file has.
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", coversAtLeast: "stats.tab", moves: true));
+            () => Wrote.Step("Text", "read", ("coversAtLeast", "stats.tab"), ("moves", true)));
 
         Assert.Contains("'coversAtLeast'", refusal.Because);
         Assert.Contains("'moves'", refusal.Because);
@@ -178,19 +198,19 @@ public class ClaimsTests
         // it never wrote. WW308 wrote that warning about doing the fold too early, and this is the
         // case that would catch it.
         var unlike = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", reads: "value", unlike: "the stop", moves: true));
+            () => Wrote.Step("Text", "read", ("reads", "value"), ("unlike", "the stop"), ("moves", true)));
 
         Assert.Contains("'unlike'", unlike.Because);
         Assert.DoesNotContain("'sameAs'", unlike.Because);
 
         var ticking = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", reads: "name", sameCountdownAs: "the first", moves: true));
+            () => Wrote.Step("Text", "read", ("reads", "name"), ("sameCountdownAs", "the first"), ("moves", true)));
 
         Assert.Contains("'sameCountdownAs'", ticking.Because);
         Assert.DoesNotContain("'sameAs'", ticking.Because);
 
         var holding = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", reads: "name", contains: "the opener", moves: true));
+            () => Wrote.Step("Text", "read", ("reads", "name"), ("contains", "the opener"), ("moves", true)));
 
         Assert.Contains("'contains'", holding.Because);
         Assert.DoesNotContain("'sameAs'", holding.Because);

@@ -59,7 +59,7 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the field takes a name",
-            StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value"));
+            Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value")));
 
         var run = Run(declared, frame);
 
@@ -77,7 +77,7 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the box ticks",
-            StepDeclaration.Of("""CheckBox[name="Wrap lines"]""", "toggle", expected: "On", reads: "toggle"));
+            Wrote.Step("""CheckBox[name="Wrap lines"]""", "toggle", ("expect", "On"), ("reads", "toggle")));
 
         var run = Run(declared, frame);
 
@@ -91,7 +91,7 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the field takes a name",
-            StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value"));
+            Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value")));
 
         var run = Run(declared, frame);
 
@@ -111,8 +111,8 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the drop-down opens and the field takes a name",
-            StepDeclaration.Of("ComboBox", "expand"),
-            StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value"));
+            Wrote.Step("ComboBox", "expand"),
+            Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value")));
 
         var run = Run(declared, frame);
 
@@ -129,7 +129,7 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the field reads gamma",
-            StepDeclaration.Of("Edit", "set value", "beta", expected: "gamma", reads: "value"));
+            Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "gamma"), ("reads", "value")));
 
         var run = Run(declared, frame);
 
@@ -148,9 +148,9 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "a control nothing draws",
-            StepDeclaration.Of("""Button[name="Nothing draws this"]""", "invoke", expected: "x", reads: "value"),
-            StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value"),
-            StepDeclaration.Of("ComboBox", "expand"));
+            Wrote.Step("""Button[name="Nothing draws this"]""", "invoke", ("expect", "x"), ("reads", "value")),
+            Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value")),
+            Wrote.Step("ComboBox", "expand"));
 
         var run = Run(declared, frame);
 
@@ -172,7 +172,7 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "a control nothing draws",
-            StepDeclaration.Of("""Button[name="Nothing draws this"]""", "invoke", expected: "x", reads: "value"));
+            Wrote.Step("""Button[name="Nothing draws this"]""", "invoke", ("expect", "x"), ("reads", "value")));
 
         var run = Run(declared, frame);
 
@@ -192,7 +192,11 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the box reads a third state",
-            StepDeclaration.Of("""CheckBox[name="Wrap lines"]""", "toggle", expected: "Indeterminate", reads: "toggle"));
+            Wrote.Step(
+                """CheckBox[name="Wrap lines"]""",
+                "toggle",
+                ("expect", "Indeterminate"),
+                ("reads", "toggle")));
 
         var run = Run(declared, frame);
 
@@ -209,7 +213,7 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the field says what it was made with",
-            StepDeclaration.Of("Edit", "read", expected: "alpha", reads: "value"));
+            Wrote.Step("Edit", "read", ("expect", "alpha"), ("reads", "value")));
 
         var run = Run(declared, frame);
 
@@ -230,8 +234,8 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the box is read twice and never flipped",
-            StepDeclaration.Of("""CheckBox[name="Wrap lines"]""", "read", expected: "Off", reads: "toggle"),
-            StepDeclaration.Of("""CheckBox[name="Wrap lines"]""", "read", expected: "Off", reads: "toggle"));
+            Wrote.Step("""CheckBox[name="Wrap lines"]""", "read", ("expect", "Off"), ("reads", "toggle")),
+            Wrote.Step("""CheckBox[name="Wrap lines"]""", "read", ("expect", "Off"), ("reads", "toggle")));
 
         var run = Run(declared, frame);
 
@@ -249,7 +253,7 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the status label says Saved",
-            StepDeclaration.Of("""Text[name="Saved"]""", "read", expected: "Saved", reads: "text"));
+            Wrote.Step("""Text[name="Saved"]""", "read", ("expect", "Saved"), ("reads", "text")));
 
         var run = Run(declared, frame);
 
@@ -264,7 +268,7 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the field says gamma",
-            StepDeclaration.Of("Edit", "read", expected: "gamma", reads: "value"));
+            Wrote.Step("Edit", "read", ("expect", "gamma"), ("reads", "value")));
 
         var run = Run(declared, frame);
 
@@ -279,14 +283,14 @@ public sealed class CaseRunTests : IDisposable
         // loads, and a case of nothing but acts does not.
         var reading = CaseDeclaration.Of(
             "the field says what it was made with",
-            StepDeclaration.Of("Edit", "read", expected: "alpha", reads: "value"));
+            Wrote.Step("Edit", "read", ("expect", "alpha"), ("reads", "value")));
 
         Assert.Equal(1, reading.Checks);
 
         Assert.Contains(
             "can only ever read green",
             Assert.Throws<ScenarioRefusedException>(
-                () => CaseDeclaration.Of("the tree opens", StepDeclaration.Of("ComboBox", "expand"))).Because);
+                () => CaseDeclaration.Of("the tree opens", Wrote.Step("ComboBox", "expand"))).Because);
     }
 
     [Fact]
@@ -295,7 +299,7 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the field takes a name",
-            StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value"));
+            Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value")));
 
         var run = Run(declared, frame);
 
@@ -319,7 +323,7 @@ public sealed class CaseRunTests : IDisposable
         _ = Dialog();
         var declared = CaseDeclaration.Of(
             "the dialog is photographed",
-            StepDeclaration.Of("Text[name=\"winwright statistics\"]", "capture", "the field as it opens"));
+            Wrote.Step("Text[name=\"winwright statistics\"]", "capture", ("with", "the field as it opens")));
 
         var run = Run(declared, AutomationElement.RootElement, captures: true);
 
@@ -368,7 +372,7 @@ public sealed class CaseRunTests : IDisposable
 
         var declared = CaseDeclaration.Of(
             "the main window is photographed",
-            StepDeclaration.Of("Edit", "capture", "the whole window"));
+            Wrote.Step("Edit", "capture", ("with", "the whole window")));
 
         var run = Run(declared, frame, captures: true);
 
@@ -398,11 +402,11 @@ public sealed class CaseRunTests : IDisposable
 
         var declared = CaseDeclaration.Of(
             "the flyout is photographed",
-            StepDeclaration.Of(
+            Wrote.Step(
                 "Text[name=\"the report\"]",
                 "capture",
-                "the details as they open",
-                popup: AnsweringWindow.PopupNamed));
+                ("with", "the details as they open"),
+                ("popup", AnsweringWindow.PopupNamed)));
 
         var run = Run(declared, AutomationElement.FromHandle(application.Handle), captures: true);
 
@@ -423,11 +427,11 @@ public sealed class CaseRunTests : IDisposable
         // already found — and a typo then read as an application that never adopted the in-app half.
         var wrong = CaseDeclaration.Of(
             "the flyout that is not there",
-            StepDeclaration.Of(
+            Wrote.Step(
                 "Text[name=\"the report\"]",
                 "capture",
-                "the details as they open",
-                popup: "summary"));
+                ("with", "the details as they open"),
+                ("popup", "summary")));
 
         var missed = Run(wrong, AutomationElement.FromHandle(application.Handle), captures: true);
 
@@ -463,11 +467,11 @@ public sealed class CaseRunTests : IDisposable
 
         var declared = CaseDeclaration.Of(
             "the swatch is photographed",
-            StepDeclaration.Of(
+            Wrote.Step(
                 "Text[name=\"the report\"]",
                 "capture",
-                "the swatch as it is",
-                popup: AnsweringWindow.FlatPopupNamed));
+                ("with", "the swatch as it is"),
+                ("popup", AnsweringWindow.FlatPopupNamed)));
 
         var run = Run(declared, AutomationElement.FromHandle(application.Handle), captures: true);
 
@@ -519,7 +523,7 @@ public sealed class CaseRunTests : IDisposable
 
         var declared = CaseDeclaration.Of(
             "the desk moves while the reading is taken",
-            StepDeclaration.Of("Edit", "type", "beta", expected: "never this", reads: "value"));
+            Wrote.Step("Edit", "type", ("with", "beta"), ("expect", "never this"), ("reads", "value")));
 
         var run = Run(declared, AutomationElement.FromHandle(dialog.Frame));
 
@@ -605,7 +609,7 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the dialog is photographed",
-            StepDeclaration.Of("Edit", "capture", "the field"));
+            Wrote.Step("Edit", "capture", ("with", "the field")));
 
         var run = Run(declared, frame);
 
@@ -622,20 +626,20 @@ public sealed class CaseRunTests : IDisposable
         // that the picture is of this window, out of this process, with nothing showing through it —
         // and a reading of the element the locator matched is a second thing to check.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Edit", "capture", "the field", expected: "beta", reads: "value"));
+            () => Wrote.Step("Edit", "capture", ("with", "the field"), ("expect", "beta"), ("reads", "value")));
 
         Assert.Contains("a capture's claim is the picture", refused.Because, StringComparison.Ordinal);
 
         // And naming a reading alone is refused too, because a capture is about the window the
         // locator is inside rather than about what that element says.
         var named = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Edit", "capture", "the field", reads: "value"));
+            () => Wrote.Step("Edit", "capture", ("with", "the field"), ("reads", "value")));
 
         Assert.Contains("about the window the locator is inside", named.Because, StringComparison.Ordinal);
 
         // A capture with nothing to call it is refused by the verb's own arity, which is where every
         // other missing argument is caught.
-        Assert.Throws<ScenarioRefusedException>(() => StepDeclaration.Of("Edit", "capture"));
+        Assert.Throws<ScenarioRefusedException>(() => Wrote.Step("Edit", "capture"));
     }
 
     [Fact]
@@ -645,7 +649,7 @@ public sealed class CaseRunTests : IDisposable
         // picture of — a flyout nobody has clicked — was the one a scenario could not ask for. It is
         // a field on the capture and not a third kind of subject: the step still addresses a window
         // the ordinary way, and this says which surface inside it the picture is of.
-        var step = StepDeclaration.Of("Pane", "capture", "the flyout", popup: "  details  ");
+        var step = Wrote.Step("Pane", "capture", ("with", "the flyout"), ("popup", "  details  "));
 
         Assert.Equal("details", step.Popup);
 
@@ -657,7 +661,7 @@ public sealed class CaseRunTests : IDisposable
         // has opened is not one — so a step naming it under another verb would load and mean
         // nothing, which is the key that does nothing this format exists to refuse.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Pane", "read", reads: "name", answers: true, popup: "details"));
+            () => Wrote.Step("Pane", "read", ("reads", "name"), ("answers", true), ("popup", "details")));
 
         Assert.Contains("a popup is the surface a capture asks", refused.Because, StringComparison.Ordinal);
         Assert.Contains("details", refused.Because, StringComparison.Ordinal);
@@ -680,7 +684,7 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the box says what it is called",
-            StepDeclaration.Of("CheckBox", "toggle", expected: "Wrap lines", reads: "name"));
+            Wrote.Step("CheckBox", "toggle", ("expect", "Wrap lines"), ("reads", "name")));
 
         var run = Run(declared, frame);
 
@@ -706,8 +710,8 @@ public sealed class CaseRunTests : IDisposable
         var frame = Dialog();
         var declared = CaseDeclaration.Of(
             "the drop-down opens and the field takes a name",
-            StepDeclaration.Of("ComboBox", "expand"),
-            StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value"));
+            Wrote.Step("ComboBox", "expand"),
+            Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value")));
 
         var run = Run(declared, frame);
 

@@ -12,9 +12,9 @@ namespace Winwright.Tests;
 public class CaseDeclarationTests
 {
     private static StepDeclaration Checking() =>
-        StepDeclaration.Of("""Edit[name="Profile"]""", "set value", "beta", expected: "beta");
+        Wrote.Step("""Edit[name="Profile"]""", "set value", ("with", "beta"), ("expect", "beta"));
 
-    private static StepDeclaration Acting() => StepDeclaration.Of("TreeItem", "expand");
+    private static StepDeclaration Acting() => Wrote.Step("TreeItem", "expand");
 
     [Fact]
     public void A_case_is_its_name_and_its_steps_in_order()

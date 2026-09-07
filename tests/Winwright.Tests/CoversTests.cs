@@ -50,7 +50,7 @@ public sealed class CoversTests : IDisposable
     [Fact]
     public void A_step_covering_a_key_is_a_claim_a_run_can_find_false()
     {
-        var step = StepDeclaration.Of("Text", "read", covers: "stats.tab");
+        var step = Wrote.Step("Text", "read", ("covers", "stats.tab"));
 
         Assert.Equal("stats.tab", step.Covers);
         Assert.True(step.Checkable, "a sweep is one claim, and a claim is checkable");
@@ -64,7 +64,7 @@ public sealed class CoversTests : IDisposable
         // the run honour whichever the code reads first — the shape WW258's subject group refuses one
         // field over.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", covers: "stats.tab", coversAtLeast: "stats.tab"));
+            () => Wrote.Step("Text", "read", ("covers", "stats.tab"), ("coversAtLeast", "stats.tab")));
 
         Assert.Contains("'covers' and 'coversAtLeast'", refused.Because, StringComparison.Ordinal);
         Assert.Contains("name the one this step means", refused.Because, StringComparison.Ordinal);
@@ -74,7 +74,11 @@ public sealed class CoversTests : IDisposable
         Assert.Contains(
             "'coversAtLeast' and 'coversWithin'",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Text", "read", coversAtLeast: "stats.tab", coversWithin: "stats.tab")).Because,
+                () => Wrote.Step(
+                    "Text",
+                    "read",
+                    ("coversAtLeast", "stats.tab"),
+                    ("coversWithin", "stats.tab"))).Because,
             StringComparison.Ordinal);
     }
 
@@ -83,7 +87,7 @@ public sealed class CoversTests : IDisposable
     {
         // WW292. The third way of claiming one set, and the three properties are a view of one choice
         // rather than three things that could disagree with each other.
-        var step = StepDeclaration.Of("MenuItem", "read", coversWithin: "profiles");
+        var step = Wrote.Step("MenuItem", "read", ("coversWithin", "profiles"));
 
         Assert.Equal("profiles", step.CoversWithin);
         Assert.Null(step.Covers);
@@ -99,7 +103,7 @@ public sealed class CoversTests : IDisposable
     {
         // It derives the same set through the same well, so every rule a sweep is under applies to it
         // — and a case writing one is a case that checks something, which is what makes it a claim.
-        var step = StepDeclaration.Of("Text", "read", coversAtLeast: "stats.tab");
+        var step = Wrote.Step("Text", "read", ("coversAtLeast", "stats.tab"));
 
         Assert.Equal("stats.tab", step.CoversAtLeast);
         Assert.Null(step.Covers);
@@ -112,7 +116,7 @@ public sealed class CoversTests : IDisposable
         Assert.Contains(
             "one act over many of them is not a claim",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Text", "invoke", coversAtLeast: "stats.tab")).Because,
+                () => Wrote.Step("Text", "invoke", ("coversAtLeast", "stats.tab"))).Because,
             StringComparison.Ordinal);
     }
 
@@ -120,7 +124,7 @@ public sealed class CoversTests : IDisposable
     public void A_sweep_that_acts_is_refused_because_one_act_over_many_is_not_a_claim()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "invoke", covers: "stats.tab"));
+            () => Wrote.Step("Text", "invoke", ("covers", "stats.tab")));
 
         Assert.Contains("one act over many of them is not a claim", refused.Because, StringComparison.Ordinal);
     }
@@ -129,7 +133,7 @@ public sealed class CoversTests : IDisposable
     public void A_sweep_and_an_expectation_of_one_reading_are_two_claims()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", expected: "Overview", covers: "stats.tab"));
+            () => Wrote.Step("Text", "read", ("expect", "Overview"), ("covers", "stats.tab")));
 
         Assert.Contains("a step answers one", refused.Because, StringComparison.Ordinal);
         Assert.Contains("'covers'", refused.Because, StringComparison.Ordinal);
@@ -141,7 +145,7 @@ public sealed class CoversTests : IDisposable
         Assert.Contains(
             "a step answers one thing",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Text", "read", covers: "stats.tab", moves: true)).Because,
+                () => Wrote.Step("Text", "read", ("covers", "stats.tab"), ("moves", true))).Because,
             StringComparison.Ordinal);
     }
 
@@ -149,7 +153,7 @@ public sealed class CoversTests : IDisposable
     public void A_sweep_naming_a_pattern_reading_is_refused_because_it_compares_names()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", reads: "value", covers: "stats.tab"));
+            () => Wrote.Step("Text", "read", ("reads", "value"), ("covers", "stats.tab")));
 
         Assert.Contains("a pattern reading is not one of them", refused.Because, StringComparison.Ordinal);
     }
@@ -160,7 +164,7 @@ public sealed class CoversTests : IDisposable
         // Two refusals would otherwise fire first and name the wrong field: a sweep expects nothing of
         // one reading on purpose, so "the reading changes nothing" and "the step does nothing at all"
         // are both false of it — and a refusal that names the wrong field is fixed the wrong way.
-        var step = StepDeclaration.Of("Text", "read", covers: "stats.tab");
+        var step = Wrote.Step("Text", "read", ("covers", "stats.tab"));
 
         Assert.Equal("read", step.Verb.Name);
         Assert.True(step.Checkable);
@@ -171,7 +175,7 @@ public sealed class CoversTests : IDisposable
     {
         // WW237. Three of the panes case's four assertions are this: a percentage the application
         // computed, a caption and a headline, each claimed readable rather than equal to something.
-        var step = StepDeclaration.Of("Text#Used", "read", reads: "text", answers: true);
+        var step = Wrote.Step("Text#Used", "read", ("reads", "text"), ("answers", true));
 
         Assert.True(step.Answers);
         Assert.True(step.Checkable);
@@ -184,9 +188,9 @@ public sealed class CoversTests : IDisposable
         foreach (var refused in new[]
         {
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Text", "read", expected: "42", answers: true)),
+                () => Wrote.Step("Text", "read", ("expect", "42"), ("answers", true))),
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Edit", "type", argument: "x", answers: true, moves: true)),
+                () => Wrote.Step("Edit", "type", ("with", "x"), ("answers", true), ("moves", true))),
         })
         {
             // WW323. One rule for every pair, so the sentence names the fields rather than arguing
@@ -200,7 +204,7 @@ public sealed class CoversTests : IDisposable
         Assert.Contains(
             "a step answers one thing",
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Text", "read", covers: "stats.tab", answers: true)).Because,
+                () => Wrote.Step("Text", "read", ("covers", "stats.tab"), ("answers", true))).Because,
             StringComparison.Ordinal);
     }
 

@@ -168,7 +168,7 @@ public sealed class ForEachTests : IDisposable
         // which is the unearned green arriving as arithmetic.
         var refusal = Assert.Throws<ScenarioRefusedException>(() => CaseDeclaration.Declared(
             "a case that repeats and never says over what",
-            [StepDeclaration.Of("Group", "read", eachSpoken: true)],
+            [Wrote.Step("Group", "read", ("eachSpoken", true))],
             forEach: "rows.headers"));
 
         Assert.Contains("no step's locator names the member", refusal.Because, StringComparison.Ordinal);
@@ -180,7 +180,7 @@ public sealed class ForEachTests : IDisposable
         // Both are facts about the file, so both are judged where the locator was written rather than
         // on whichever member happened to expose it.
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Group[name=\"{}", "read", eachSpoken: true));
+            () => Wrote.Step("Group[name=\"{}", "read", ("eachSpoken", true)));
 
         Assert.Contains("does not parse", refusal.Because, StringComparison.Ordinal);
     }
@@ -188,7 +188,7 @@ public sealed class ForEachTests : IDisposable
     [Fact]
     public void A_step_carrying_the_member_says_so_and_substitutes_into_a_new_locator()
     {
-        var step = StepDeclaration.Of("Group[name=\"{}\"]", "read", eachSpoken: true);
+        var step = Wrote.Step("Group[name=\"{}\"]", "read", ("eachSpoken", true));
 
         Assert.True(step.NamesTheMember);
 
@@ -206,7 +206,7 @@ public sealed class ForEachTests : IDisposable
 
         // And a step that reaches no member is not made a claim about one by being repeated beside a
         // step that does — every step of a repeated case is renamed, and only some of them derive.
-        var beside = StepDeclaration.Of("Group", "read", eachSpoken: true).For("Startup");
+        var beside = Wrote.Step("Group", "read", ("eachSpoken", true)).For("Startup");
 
         Assert.Null(beside.Carries);
         Assert.Contains("[Startup]", beside.Name, StringComparison.Ordinal);

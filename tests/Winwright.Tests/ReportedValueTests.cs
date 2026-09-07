@@ -101,15 +101,20 @@ public sealed class ReportedValueTests : IDisposable
     {
         // It is `expect` with the value read rather than typed, so writing both is the same claim
         // twice and the run would honour whichever the code reads first.
-        var step = StepDeclaration.Of("Text#profile", "read", reads: "name", expectReported: "inUse");
+        var step = Wrote.Step("Text#profile", "read", ("reads", "name"), ("expectReported", "inUse"));
 
         Assert.Equal("inUse", step.ExpectReported);
         Assert.Null(step.Expected);
         Assert.True(step.Checkable);
 
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of(
-                "Text#profile", "read", reads: "name", expected: "Pessoal", expectReported: "inUse", named: "a"));
+            () => Wrote.Step(
+                "Text#profile",
+                "read",
+                ("reads", "name"),
+                ("expect", "Pessoal"),
+                ("expectReported", "inUse"),
+                ("named", "a")));
 
         Assert.Contains("a step answers one thing", refused.Because, StringComparison.Ordinal);
     }
@@ -128,14 +133,26 @@ public sealed class ReportedValueTests : IDisposable
         foreach (var refused in new[]
         {
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of(
-                    "Text#profile", "read", reads: "name", label: "menu.open", expectReported: "inUse")),
+                () => Wrote.Step(
+                    "Text#profile",
+                    "read",
+                    ("reads", "name"),
+                    ("label", "menu.open"),
+                    ("expectReported", "inUse"))),
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of(
-                    "Text#profile", "read", reads: "name", notLabel: "menu.open", expectReported: "inUse")),
+                () => Wrote.Step(
+                    "Text#profile",
+                    "read",
+                    ("reads", "name"),
+                    ("notLabel", "menu.open"),
+                    ("expectReported", "inUse"))),
             Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of(
-                    "Text#profile", "read", reads: "name", beginsWithLabel: "menu.open", expectReported: "inUse")),
+                () => Wrote.Step(
+                    "Text#profile",
+                    "read",
+                    ("reads", "name"),
+                    ("beginsWithLabel", "menu.open"),
+                    ("expectReported", "inUse"))),
         })
         {
             Assert.Contains("a step answers one thing", refused.Because, StringComparison.Ordinal);
@@ -145,8 +162,12 @@ public sealed class ReportedValueTests : IDisposable
         // And the field the case actually wrote is what the refusal names, so an author is told
         // which line to delete rather than which family it belongs to.
         var beside = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of(
-                "Text#profile", "read", reads: "name", beginsWithLabel: "menu.open", expectReported: "inUse"));
+            () => Wrote.Step(
+                "Text#profile",
+                "read",
+                ("reads", "name"),
+                ("beginsWithLabel", "menu.open"),
+                ("expectReported", "inUse")));
 
         Assert.Contains("'beginsWithLabel'", beside.Because, StringComparison.Ordinal);
         Assert.DoesNotContain("'label'", beside.Because, StringComparison.Ordinal);
@@ -177,7 +198,7 @@ public sealed class ReportedValueTests : IDisposable
         // WW258's rule reaches the newest field without anybody adding it there: a tray icon has no
         // patterns to read, so a claim about a reading is refused whatever well its value came from.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of(null, "read", tray: "winwright under test", expectReported: "inUse"));
+            () => Wrote.Step(null, "read", ("tray", "winwright under test"), ("expectReported", "inUse")));
 
         Assert.Contains("'expectReported'", refused.Because, StringComparison.Ordinal);
     }

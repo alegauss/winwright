@@ -88,7 +88,7 @@ public sealed class DeclaredLocatorTests : IDisposable
         // A fact about the file, judged where the locator was written and not on the run that happened
         // to resolve it — which is where `WW263` already put the same judgement for the member.
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Group[name=\"{rows.headers.startup}", "read", eachSpoken: true));
+            () => Wrote.Step("Group[name=\"{rows.headers.startup}", "read", ("eachSpoken", true)));
 
         Assert.Contains("does not parse", refusal.Because, StringComparison.Ordinal);
     }
@@ -96,14 +96,14 @@ public sealed class DeclaredLocatorTests : IDisposable
     [Fact]
     public void A_step_says_which_keys_its_locator_is_built_out_of_and_the_member_is_not_one()
     {
-        var both = StepDeclaration.Of("Group[name=\"{}\"] > Button[name=\"{a.key}\"]", "read", eachSpoken: true);
+        var both = Wrote.Step("Group[name=\"{}\"] > Button[name=\"{a.key}\"]", "read", ("eachSpoken", true));
 
         // The member is the run's own hole and not a key, so a case repeating over a set does not go
         // looking in the strings file for a string called nothing.
         Assert.Equal(["a.key"], both.Declares());
         Assert.True(both.NamesTheMember);
 
-        var plain = StepDeclaration.Of("Group", "read", eachSpoken: true);
+        var plain = Wrote.Step("Group", "read", ("eachSpoken", true));
 
         Assert.Empty(plain.Declares());
         Assert.False(plain.NamesTheMember);
@@ -114,7 +114,7 @@ public sealed class DeclaredLocatorTests : IDisposable
     {
         // The substitution is not a pass over every locator: one that names its element outright is
         // returned as it was, so nothing about it can change on a machine that reads a different file.
-        var plain = StepDeclaration.Of("Group#interval", "read", eachSpoken: true);
+        var plain = Wrote.Step("Group#interval", "read", ("eachSpoken", true));
 
         Assert.Same(plain, plain.Naming(_ => throw new InvalidOperationException("nothing to resolve")));
     }

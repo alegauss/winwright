@@ -119,8 +119,13 @@ public sealed class SameAsTests : IDisposable
     public void It_is_one_claim_like_every_other_one()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of(
-                "Edit", "set value", argument: "alpha", expected: "alpha", reads: "value", sameAs: "the first stop"));
+            () => Wrote.Step(
+                "Edit",
+                "set value",
+                ("with", "alpha"),
+                ("expect", "alpha"),
+                ("reads", "value"),
+                ("sameAs", "the first stop")));
 
         Assert.Contains("also makes another claim", refusal.Because, StringComparison.Ordinal);
     }
@@ -132,7 +137,7 @@ public sealed class SameAsTests : IDisposable
         // same element under the same verb, so a case that left both unnamed would write this by
         // accident — and it holds whatever the window did.
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Edit", "read", reads: "value", named: "the stop", sameAs: "the stop"));
+            () => Wrote.Step("Edit", "read", ("reads", "value"), ("named", "the stop"), ("sameAs", "the stop")));
 
         Assert.Contains("back to itself", refusal.Because, StringComparison.Ordinal);
     }
@@ -141,7 +146,7 @@ public sealed class SameAsTests : IDisposable
     public void A_step_claiming_it_is_back_has_to_say_which_reading()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Edit", "read", named: "the second stop", sameAs: "the first stop"));
+            () => Wrote.Step("Edit", "read", ("named", "the second stop"), ("sameAs", "the first stop")));
 
         Assert.Contains("does not say which reading", refusal.Because, StringComparison.Ordinal);
     }
@@ -151,8 +156,19 @@ public sealed class SameAsTests : IDisposable
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(() => CaseDeclaration.Of(
             "a case pointing at a step nobody wrote",
-            StepDeclaration.Of("Edit", "set value", argument: "alpha", expected: "alpha", reads: "value", named: "the first stop"),
-            StepDeclaration.Of("Edit", "read", reads: "value", sameAs: "the stop before", named: "back where it started")));
+            Wrote.Step(
+                "Edit",
+                "set value",
+                ("with", "alpha"),
+                ("expect", "alpha"),
+                ("reads", "value"),
+                ("named", "the first stop")),
+            Wrote.Step(
+                "Edit",
+                "read",
+                ("reads", "value"),
+                ("sameAs", "the stop before"),
+                ("named", "back where it started"))));
 
         Assert.Contains("no step before it is called that", refusal.Because, StringComparison.Ordinal);
         Assert.Contains("'the first stop'", refusal.Because, StringComparison.Ordinal);
@@ -164,8 +180,14 @@ public sealed class SameAsTests : IDisposable
         // A step further down the case is a reading that does not exist yet when this one runs.
         var refusal = Assert.Throws<ScenarioRefusedException>(() => CaseDeclaration.Of(
             "a case pointing at a step that has not run",
-            StepDeclaration.Of("Edit", "read", reads: "value", sameAs: "the later stop", named: "the first stop"),
-            StepDeclaration.Of("Edit", "set value", argument: "alpha", expected: "alpha", reads: "value", named: "the later stop")));
+            Wrote.Step("Edit", "read", ("reads", "value"), ("sameAs", "the later stop"), ("named", "the first stop")),
+            Wrote.Step(
+                "Edit",
+                "set value",
+                ("with", "alpha"),
+                ("expect", "alpha"),
+                ("reads", "value"),
+                ("named", "the later stop"))));
 
         Assert.Contains("no step before it is called that", refusal.Because, StringComparison.Ordinal);
         Assert.Contains("it is the first step", refusal.Because, StringComparison.Ordinal);
@@ -179,9 +201,14 @@ public sealed class SameAsTests : IDisposable
         // that quietly picked the first would be a case that reads correctly and means something else.
         var refusal = Assert.Throws<ScenarioRefusedException>(() => CaseDeclaration.Of(
             "a case with two stops by one name",
-            StepDeclaration.Of("Edit", "read", reads: "value", answers: true),
-            StepDeclaration.Of("Edit", "read", reads: "value", answers: true),
-            StepDeclaration.Of("Edit", "read", reads: "value", sameAs: "read Edit", named: "back where it started")));
+            Wrote.Step("Edit", "read", ("reads", "value"), ("answers", true)),
+            Wrote.Step("Edit", "read", ("reads", "value"), ("answers", true)),
+            Wrote.Step(
+                "Edit",
+                "read",
+                ("reads", "value"),
+                ("sameAs", "read Edit"),
+                ("named", "back where it started"))));
 
         Assert.Contains("2 steps before it are called that", refusal.Because, StringComparison.Ordinal);
     }
@@ -191,8 +218,13 @@ public sealed class SameAsTests : IDisposable
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(() => CaseDeclaration.Of(
             "a case comparing a value to a name",
-            StepDeclaration.Of("Edit", "read", reads: "name", answers: true, named: "the first stop"),
-            StepDeclaration.Of("Edit", "read", reads: "value", sameAs: "the first stop", named: "back where it started")));
+            Wrote.Step("Edit", "read", ("reads", "name"), ("answers", true), ("named", "the first stop")),
+            Wrote.Step(
+                "Edit",
+                "read",
+                ("reads", "value"),
+                ("sameAs", "the first stop"),
+                ("named", "back where it started"))));
 
         Assert.Contains("two different values", refusal.Because, StringComparison.Ordinal);
     }
@@ -270,8 +302,12 @@ public sealed class SameAsTests : IDisposable
     public void Claiming_a_reading_is_back_and_also_unlike_is_two_things()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of(
-                "Edit", "read", reads: "value", sameAs: "the first stop", unlike: "the second stop"));
+            () => Wrote.Step(
+                "Edit",
+                "read",
+                ("reads", "value"),
+                ("sameAs", "the first stop"),
+                ("unlike", "the second stop")));
 
         Assert.Contains("a step answers one thing", refusal.Because, StringComparison.Ordinal);
     }
@@ -282,7 +318,7 @@ public sealed class SameAsTests : IDisposable
         // `sameAs` holds whatever the window did and `unlike` fails whatever it did. Neither is a
         // reading, and both are the same typo.
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Edit", "read", reads: "value", named: "the stop", unlike: "the stop"));
+            () => Wrote.Step("Edit", "read", ("reads", "value"), ("named", "the stop"), ("unlike", "the stop")));
 
         Assert.Contains("answered before the window is", refusal.Because, StringComparison.Ordinal);
     }
@@ -292,8 +328,8 @@ public sealed class SameAsTests : IDisposable
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(() => CaseDeclaration.Of(
             "a case pointing at a step nobody wrote",
-            StepDeclaration.Of("Edit", "read", reads: "value", answers: true, named: "the first stop"),
-            StepDeclaration.Of("Edit", "read", reads: "value", unlike: "the stop before", named: "the second")));
+            Wrote.Step("Edit", "read", ("reads", "value"), ("answers", true), ("named", "the first stop")),
+            Wrote.Step("Edit", "read", ("reads", "value"), ("unlike", "the stop before"), ("named", "the second"))));
 
         Assert.Contains("no step before it is called that", refusal.Because, StringComparison.Ordinal);
     }

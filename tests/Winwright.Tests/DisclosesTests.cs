@@ -38,7 +38,7 @@ public sealed class DisclosesTests : IDisposable
     [Fact]
     public void A_step_can_claim_the_tree_under_it_grew()
     {
-        var step = StepDeclaration.Of("TabItem#statusPane", "select", discloses: true);
+        var step = Wrote.Step("TabItem#statusPane", "select", ("discloses", true));
 
         Assert.True(step.Discloses);
         Assert.True(step.Checkable);
@@ -51,7 +51,7 @@ public sealed class DisclosesTests : IDisposable
         // Nothing acted, so the claim would be that the window changed while nobody touched it: a race
         // or a lie, and green either way.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("TabItem", "read", discloses: true));
+            () => Wrote.Step("TabItem", "read", ("discloses", true)));
 
         Assert.Contains("only reads", refused.Because, StringComparison.Ordinal);
     }
@@ -61,7 +61,7 @@ public sealed class DisclosesTests : IDisposable
     {
         // It would look like it narrowed the claim and would narrow nothing.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("TabItem", "select", reads: "selected", discloses: true));
+            () => Wrote.Step("TabItem", "select", ("reads", "selected"), ("discloses", true)));
 
         Assert.Contains("not about what it says", refused.Because, StringComparison.Ordinal);
     }
@@ -71,11 +71,11 @@ public sealed class DisclosesTests : IDisposable
     {
         foreach (var both in new Action[]
         {
-            () => StepDeclaration.Of("TabItem", "select", expected: "selected", reads: "selected", discloses: true),
-            () => StepDeclaration.Of("TabItem", "select", moves: true, discloses: true),
-            () => StepDeclaration.Of("TabItem", "select", answers: true, discloses: true),
-            () => StepDeclaration.Of("TabItem", "select", covers: "stats.tab", discloses: true),
-            () => StepDeclaration.Of("TabItem", "select", matches: "x", discloses: true),
+            () => Wrote.Step("TabItem", "select", ("expect", "selected"), ("reads", "selected"), ("discloses", true)),
+            () => Wrote.Step("TabItem", "select", ("moves", true), ("discloses", true)),
+            () => Wrote.Step("TabItem", "select", ("answers", true), ("discloses", true)),
+            () => Wrote.Step("TabItem", "select", ("covers", "stats.tab"), ("discloses", true)),
+            () => Wrote.Step("TabItem", "select", ("matches", "x"), ("discloses", true)),
         })
         {
             var refused = Assert.Throws<ScenarioRefusedException>(both);

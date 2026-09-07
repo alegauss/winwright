@@ -52,7 +52,7 @@ public sealed class LabelReadingTests : IDisposable
         // Existence wearing the words of a reading, which arrived with WW225 and WW237 two tasks
         // apart without either noticing.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text#profileLabel", "read", reads: "focused", answers: true));
+            () => Wrote.Step("Text#profileLabel", "read", ("reads", "focused"), ("answers", true)));
 
         Assert.Contains("could never be false", refused.Because, StringComparison.Ordinal);
 
@@ -64,7 +64,7 @@ public sealed class LabelReadingTests : IDisposable
         Assert.Equal(["enabled", "focused"], ReadBack.All.Where(one => one.Always).Select(one => one.Name));
 
         var refusedToo = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text#profileLabel", "read", reads: "enabled", answers: true));
+            () => Wrote.Step("Text#profileLabel", "read", ("reads", "enabled"), ("answers", true)));
 
         Assert.Contains("could never be false", refusedToo.Because, StringComparison.Ordinal);
     }
@@ -112,7 +112,7 @@ public sealed class LabelReadingTests : IDisposable
         // name and then reading it asserts what chose the element: Resolve matches a name by equality,
         // so 'Profile' is the only answer there was.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text[name=\"Profile\"]", "read", reads: "name", expected: "Profile"));
+            () => Wrote.Step("Text[name=\"Profile\"]", "read", ("reads", "name"), ("expect", "Profile")));
 
         Assert.Contains("already matched on that", refused.Because, StringComparison.Ordinal);
         Assert.Contains("'Profile'", refused.Because, StringComparison.Ordinal);
@@ -120,7 +120,7 @@ public sealed class LabelReadingTests : IDisposable
         // Whatever the claim is: 'answers' holds because the locator matched, which is the same
         // unearned green wearing a different field.
         Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text[name=\"Profile\"]", "read", reads: "name", answers: true));
+            () => Wrote.Step("Text[name=\"Profile\"]", "read", ("reads", "name"), ("answers", true)));
 
         // And the sentence has to send the author to the locator, because the useful shape below is
         // one locator field away rather than a different check.
@@ -130,7 +130,7 @@ public sealed class LabelReadingTests : IDisposable
     [Fact]
     public void Naming_the_element_some_other_way_and_reading_its_name_is_the_useful_shape()
     {
-        var step = StepDeclaration.Of("Text#profileLabel", "read", reads: "name", expected: "Profile");
+        var step = Wrote.Step("Text#profileLabel", "read", ("reads", "name"), ("expect", "Profile"));
 
         Assert.Equal("Profile", step.Expected);
         Assert.True(step.Checkable);
@@ -138,7 +138,7 @@ public sealed class LabelReadingTests : IDisposable
         // Not Always, unlike 'focused': a blank name answers nothing, so "this label says something"
         // stays a claim that can be false and 'answers' is allowed to make it.
         Assert.False(ReadBack.Named("name").Always);
-        StepDeclaration.Of("Text#profileLabel", "read", reads: "name", answers: true);
+        Wrote.Step("Text#profileLabel", "read", ("reads", "name"), ("answers", true));
     }
 
     [Fact]

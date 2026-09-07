@@ -69,7 +69,7 @@ public sealed class ContainsTests : IDisposable
     public void Claiming_it_holds_one_step_and_compares_with_another_is_two_things()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", reads: "name", contains: "a step", sameAs: "another"));
+            () => Wrote.Step("Text", "read", ("reads", "name"), ("contains", "a step"), ("sameAs", "another")));
 
         Assert.Contains("a step answers one thing", refused.Because, StringComparison.Ordinal);
     }

@@ -41,11 +41,11 @@ public sealed class SuiteLaunchTests : IDisposable
         FixtureDeclaration.Of("the names pane", arguments: ["--names"], shareable: shareable);
 
     private static StepDeclaration Typing() =>
-        StepDeclaration.Of("Edit#profileBox", "set value", "beta", expected: "beta", reads: "value");
+        Wrote.Step("Edit#profileBox", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value"));
 
     /// <summary>Selecting the pane that is already selected: an act that leaves the window as found.</summary>
     private static StepDeclaration Reading() =>
-        StepDeclaration.Of("TabItem#namesPane", "select", expected: "selected", reads: "selected");
+        Wrote.Step("TabItem#namesPane", "select", ("expect", "selected"), ("reads", "selected"));
 
     [Fact]
     public void The_fixture_a_case_declares_is_the_window_its_expectations_are_read_against()
@@ -256,7 +256,7 @@ public sealed class SuiteLaunchTests : IDisposable
         // exists. The launch is what the earlier refusal saves, so the launch is what this asserts.
         var capturing = CaseDeclaration.Declared(
             "the names pane is photographed",
-            [StepDeclaration.Of("Edit#profileBox", "capture", "the profile box")],
+            [Wrote.Step("Edit#profileBox", "capture", ("with", "the profile box"))],
             fixture: Names(),
             catches: "a picture of the pane that stops being a picture of the pane");
 
@@ -279,7 +279,7 @@ public sealed class SuiteLaunchTests : IDisposable
         // selection pays a launch to be told what was knowable now.
         var capturing = CaseDeclaration.Declared(
             "the names pane is photographed",
-            [StepDeclaration.Of("Edit#profileBox", "capture", "the profile box")],
+            [Wrote.Step("Edit#profileBox", "capture", ("with", "the profile box"))],
             fixture: Names(),
             catches: "a picture of the pane that stops being a picture of the pane");
 
@@ -309,7 +309,7 @@ public sealed class SuiteLaunchTests : IDisposable
         var pictures = Path.Combine(root, "pictures");
         var capturing = CaseDeclaration.Declared(
             "the names pane is photographed",
-            [StepDeclaration.Of("TabItem#namesPane", "capture", "the names pane")],
+            [Wrote.Step("TabItem#namesPane", "capture", ("with", "the names pane"))],
             fixture: Names(),
             catches: "a pane that stops drawing what a capture was taken to prove it draws");
 

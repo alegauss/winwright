@@ -17,7 +17,7 @@ namespace Winwright.Tests;
 public class CaseCatchesTests
 {
     private static StepDeclaration Step() =>
-        StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value");
+        Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value"));
 
     [Fact]
     public void A_case_carries_the_defect_it_exists_to_catch_and_the_task_it_was_filed_under()

@@ -96,7 +96,7 @@ public sealed class NeverTests : IDisposable
     public void It_is_one_claim_like_every_other_one()
     {
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", expected: "Used 41%", reads: "name", never: "labels.stale"));
+            () => Wrote.Step("Text", "read", ("expect", "Used 41%"), ("reads", "name"), ("never", "labels.stale")));
 
         Assert.Contains("also makes another claim", refusal.Because, StringComparison.Ordinal);
     }
@@ -107,7 +107,7 @@ public sealed class NeverTests : IDisposable
         // The claim is about the window and not about this element: the string may show anywhere, and
         // the locator says when to stop looking rather than what to look at.
         var refusal = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", reads: "name", never: "labels.stale"));
+            () => Wrote.Step("Text", "read", ("reads", "name"), ("never", "labels.stale")));
 
         Assert.Contains("the claim is about the window", refusal.Because, StringComparison.Ordinal);
     }
@@ -117,7 +117,7 @@ public sealed class NeverTests : IDisposable
     {
         // The rule every claim before it is under, and the one a new field is quietly left out of: a
         // case whose only step makes this claim must not be refused as a case that claims nothing.
-        var step = StepDeclaration.Of("Text", "read", never: "labels.stale");
+        var step = Wrote.Step("Text", "read", ("never", "labels.stale"));
 
         Assert.True(step.Checkable);
         Assert.Equal(1, CaseDeclaration.Of("a case that only watches", step).Checks);

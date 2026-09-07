@@ -198,7 +198,7 @@ public sealed class SuiteRunTests : IDisposable
         // so the count is on the reading rather than left to whoever last looked.
         var frame = Dialog();
         var unjustified = CaseDeclaration.Of(
-            "something", StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value"));
+            "something", Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value")));
 
         var verdict = Suite.Run([.. Three(), unjustified], Selection.All, Root(frame), Declared());
 
@@ -218,7 +218,7 @@ public sealed class SuiteRunTests : IDisposable
         var frame = Dialog();
         var needing = CaseDeclaration.Declared(
             "the second profile renames",
-            [StepDeclaration.Of("Edit#profileTwo", "set value", "beta", expected: "beta", reads: "value")],
+            [Wrote.Step("Edit#profileTwo", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value"))],
             needs: ["a second profile"],
             catches: "a rename that writes the first profile when the second is selected");
 
@@ -245,7 +245,7 @@ public sealed class SuiteRunTests : IDisposable
         var frame = Dialog();
         var needing = CaseDeclaration.Declared(
             "the field takes a name",
-            [StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value")],
+            [Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value"))],
             needs: ["an editable field"],
             catches: "a value the control never reads back");
 
@@ -263,7 +263,7 @@ public sealed class SuiteRunTests : IDisposable
         var frame = Dialog();
         var needing = CaseDeclaration.Declared(
             "the second profile renames",
-            [StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value")],
+            [Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value"))],
             needs: ["a second profile"]);
 
         var refusal = Assert.Throws<ScenarioRefusedException>(
@@ -300,17 +300,17 @@ public sealed class SuiteRunTests : IDisposable
     [
         CaseDeclaration.Declared(
             "the field takes a name",
-            [StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value")],
+            [Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value"))],
             tags: ["smoke"],
             catches: "a value written through the pattern that the control never reads back"),
         CaseDeclaration.Declared(
             "the box ticks",
-            [StepDeclaration.Of("""CheckBox[name="Wrap lines"]""", "toggle", expected: "On", reads: "toggle")],
+            [Wrote.Step("""CheckBox[name="Wrap lines"]""", "toggle", ("expect", "On"), ("reads", "toggle"))],
             tags: ["smoke", "tray"],
             catches: "a toggle whose peer reports the state it had before the act"),
         CaseDeclaration.Declared(
             "the field reads gamma",
-            [StepDeclaration.Of("Edit", "set value", "beta", expected: "gamma", reads: "value")],
+            [Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "gamma"), ("reads", "value"))],
             catches: "a read-back that never arrives, which is what this one is here to be"),
     ];
 
@@ -323,7 +323,7 @@ public sealed class SuiteRunTests : IDisposable
         var frame = Dialog();
         var capturing = CaseDeclaration.Of(
             "the dialog is photographed",
-            StepDeclaration.Of("Edit", "capture", "the field"));
+            Wrote.Step("Edit", "capture", ("with", "the field")));
 
         var refusal = Assert.Throws<ScenarioRefusedException>(
             () => Suite.Run([capturing], Selection.All, Root(frame), Declared()));
@@ -342,7 +342,7 @@ public sealed class SuiteRunTests : IDisposable
         var frame = Dialog();
         var capturing = CaseDeclaration.Of(
             "the dialog is photographed",
-            StepDeclaration.Of("Edit", "capture", "the field"));
+            Wrote.Step("Edit", "capture", ("with", "the field")));
 
         var verdict = Suite.Run([capturing], Selection.All, Root(frame), Declaring(Path.Combine(root, "pictures")));
 

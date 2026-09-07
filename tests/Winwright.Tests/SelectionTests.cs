@@ -12,7 +12,7 @@ namespace Winwright.Tests;
 public class SelectionTests
 {
     private static CaseDeclaration Case(string name, params string[] tags) => CaseDeclaration.WithTags(
-        name, tags, StepDeclaration.Of("Edit", "set value", "beta", expected: "beta", reads: "value"));
+        name, tags, Wrote.Step("Edit", "set value", ("with", "beta"), ("expect", "beta"), ("reads", "value")));
 
     private static IReadOnlyList<CaseDeclaration> Three() =>
         [Case("renaming a profile", "smoke"), Case("the tray menu opens", "tray", "smoke"), Case("the report renders")];
@@ -140,7 +140,7 @@ public class SelectionTests
     [Fact]
     public void A_case_declaring_no_tags_is_selected_by_its_name_alone()
     {
-        var one = CaseDeclaration.Of("a", StepDeclaration.Of("Edit", "set value", "b", expected: "b"));
+        var one = CaseDeclaration.Of("a", Wrote.Step("Edit", "set value", ("with", "b"), ("expect", "b")));
 
         Assert.Empty(one.Tags);
         Assert.DoesNotContain("[", one.ToString());

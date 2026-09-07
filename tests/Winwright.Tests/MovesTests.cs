@@ -58,7 +58,7 @@ public sealed class MovesTests : IDisposable
     [Fact]
     public void A_step_can_claim_the_reading_moved_without_naming_what_it_moved_to()
     {
-        var step = StepDeclaration.Of("Slider#roomEitherWay", "nudge", reads: "range", moves: true);
+        var step = Wrote.Step("Slider#roomEitherWay", "nudge", ("reads", "range"), ("moves", true));
 
         Assert.True(step.Moves);
         Assert.True(step.Checkable, "a step claiming movement is a step a run can find false");
@@ -72,7 +72,12 @@ public sealed class MovesTests : IDisposable
         // Naming the value already says it moved where it was something else, and a step owing two
         // assertion results is a trace line a reader has to take apart.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Slider#roomEitherWay", "nudge", expected: "10", reads: "range", moves: true));
+            () => Wrote.Step(
+                "Slider#roomEitherWay",
+                "nudge",
+                ("expect", "10"),
+                ("reads", "range"),
+                ("moves", true)));
 
         // WW323. This pair had a rule of its own and now goes through the one rule every pair goes
         // through, which names both fields rather than arguing about these two in particular. What
@@ -89,7 +94,7 @@ public sealed class MovesTests : IDisposable
         // A read touches nothing, so a read claiming movement is a claim about whatever else is
         // happening on the desk.
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text#status", "read", moves: true));
+            () => Wrote.Step("Text#status", "read", ("moves", true)));
 
         Assert.Contains("reads and never acts", refused.Because, StringComparison.Ordinal);
     }
@@ -99,7 +104,7 @@ public sealed class MovesTests : IDisposable
     {
         // 'reads' used to require 'expect', because a reading nothing expects of decides nothing.
         // A movement claim is what it decides now, so the refusal has to stop applying.
-        var step = StepDeclaration.Of("Slider#roomEitherWay", "nudge", reads: "range", moves: true);
+        var step = Wrote.Step("Slider#roomEitherWay", "nudge", ("reads", "range"), ("moves", true));
 
         Assert.Equal("range", step.Reads.Name);
     }

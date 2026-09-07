@@ -22,7 +22,6 @@
 
 ## Block G — The scenario — a case is a data file
 
-- ⏳ **WW391** (deps: —) **a claim joins the format by being a field and a field still joins in five places, one of them a 29-parameter verb** — `Of` is still 29 parameters and a field still joins in five places; what a different door has to carry is `reads`, and only that. → §WW391
 - 💭 **WW426** (deps: —) **the floor a verdict needs is one number for five runners measuring rates that differ by an order** — WW410 put thirty rounds in front of every arm off one argument about 3/n; transfer already reasons about its own length in prose and now has a shared number in front of it. → §WW426
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
@@ -214,14 +213,6 @@
   reads off that desk that the window went down and no longer holds the foreground. Both
   halves off the desk and never off the script's sentence. It cannot be this suite's
   desk: two runs of it cost five reds elsewhere.
-
-## Done when — WW391
-
-- **A field joins the format in two places and not five** Adding a field costs a
-  property and a schema row. `Of` takes the shape a step is built from rather than a
-  positional list, the loader fills that shape from the schema, and the construction
-  stops being a line per field. WW391 found the door that still has to carry `reads`:
-  the one input a step cannot answer for.
 
 ## Done when — WW406
 

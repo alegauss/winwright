@@ -38,7 +38,7 @@ public sealed class MatchesTests : IDisposable
     [Fact]
     public void A_step_can_claim_the_shape_of_a_value_it_cannot_name()
     {
-        var step = StepDeclaration.Of("Text", "read", reads: "name", matches: @"\d{4}-\d{2}-\d{2}");
+        var step = Wrote.Step("Text", "read", ("reads", "name"), ("matches", @"\d{4}-\d{2}-\d{2}"));
 
         Assert.NotNull(step.Matches);
         Assert.True(step.Checkable);
@@ -57,12 +57,12 @@ public sealed class MatchesTests : IDisposable
                 // An empty pattern is no pattern at all, so the step is simply one that claims nothing
                 // — which the rule about a reading with no expectation already refuses.
                 Assert.Throws<ScenarioRefusedException>(
-                    () => StepDeclaration.Of("Text", "read", reads: "name", matches: loose));
+                    () => Wrote.Step("Text", "read", ("reads", "name"), ("matches", loose)));
                 continue;
             }
 
             var refused = Assert.Throws<ScenarioRefusedException>(
-                () => StepDeclaration.Of("Text", "read", reads: "name", matches: loose));
+                () => Wrote.Step("Text", "read", ("reads", "name"), ("matches", loose)));
 
             Assert.Contains("matches the empty string", refused.Because, StringComparison.Ordinal);
             Assert.Contains("say 'answers'", refused.Because, StringComparison.Ordinal);
@@ -73,7 +73,7 @@ public sealed class MatchesTests : IDisposable
     public void A_pattern_that_does_not_parse_is_refused_where_the_locator_would_be()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(
-            () => StepDeclaration.Of("Text", "read", reads: "name", matches: "([unclosed"));
+            () => Wrote.Step("Text", "read", ("reads", "name"), ("matches", "([unclosed")));
 
         Assert.Contains("does not parse", refused.Because, StringComparison.Ordinal);
     }
@@ -83,10 +83,10 @@ public sealed class MatchesTests : IDisposable
     {
         foreach (var both in new Action[]
         {
-            () => StepDeclaration.Of("Text", "read", expected: "x", reads: "name", matches: "x"),
-            () => StepDeclaration.Of("Slider", "nudge", moves: true, matches: "x"),
-            () => StepDeclaration.Of("Text", "read", reads: "name", answers: true, matches: "x"),
-            () => StepDeclaration.Of("Text", "read", covers: "stats.tab", matches: "x"),
+            () => Wrote.Step("Text", "read", ("expect", "x"), ("reads", "name"), ("matches", "x")),
+            () => Wrote.Step("Slider", "nudge", ("moves", true), ("matches", "x")),
+            () => Wrote.Step("Text", "read", ("reads", "name"), ("answers", true), ("matches", "x")),
+            () => Wrote.Step("Text", "read", ("covers", "stats.tab"), ("matches", "x")),
         })
         {
             var refused = Assert.Throws<ScenarioRefusedException>(both);
