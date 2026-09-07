@@ -53,6 +53,7 @@
 - 💭 **WW425** (deps: —) **damage on a line that also holds a legitimate non-ascii character is invisible, and this repository writes both** — WW421's own control passed until the real em-dash was taken off the line: the round trip fails for the whole line, so correct prose beside the damage hides it. → §WW425
 - 💭 **WW437** (deps: —) **the catalogue of every way a thread is parked walks src and tests, so a tool that parks one is invisible to it** — WW406 put a parked thread in tools/ and the entry written for it was refused as a file that sleeps nowhere: the sweep never looks there. → §WW437
 - 💭 **WW438** (deps: —) **shipping a task rewrites the roadmap a case reads, so the guest run that proved the work is stale before the commit** — WW391 and WW406 each went red on the criteria catalogue after a green guest run, for the same reason and in the same order, and nothing says the order. → §WW438
+- 💭 **WW440** (deps: —) **the suite reads whether a half is armed with its own copy of the walk, and three preconditions now lean on it** — WW418 made that reading load-bearing; the name it looks for is held to the engine's by a case and the walk that finds it is held by nothing. → §WW440
 
 ## Done when — Block A
 

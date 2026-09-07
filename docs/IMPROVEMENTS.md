@@ -595,3 +595,30 @@ the set drifts.
 
 What is owed either way is that the order stops being something a reader has to have
 been bitten by.
+
+### §WW440 the second walk that answers the same question
+
+`OwnRender.Armed` decides whether a silence this run recorded still stands: it walks the
+message-only windows under `HWND_MESSAGE` looking for the presence window, and matches
+the owning process. `OwnRenderTests.Present` does the same walk again, with its own
+P/Invokes and its own spelling of `HWND_MESSAGE`, and its doc says so — "read the way
+the engine reads it".
+
+The name the two look for is held together already: `Renders.PresenceWindow` and
+`OwnRender.PresenceWindow` are two constants because the two packages may not reference
+each other, and `RendersTests` asserts they are the same string. That is the half
+somebody thought about.
+
+The walk is the half nobody did. Where the window hangs, that only a message-only parent
+finds one, and which process counts as the owner are all decisions the engine makes and
+the suite repeats. An engine that started putting the window somewhere else, or matching
+an owner differently, would leave the suite answering the old way — and answering
+confidently, because the name still matches.
+
+WW418 is why it is worth saying now. That reading used to answer one case about its own
+subject; it is now the stated precondition of three, so a copy that drifts does not fail
+— it quietly says the precondition holds when it does not, which is the one direction a
+precondition must not be wrong in.
+
+What it needs is for the suite to ask the engine rather than repeat it, and the engine
+has no public door for the question.
