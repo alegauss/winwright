@@ -276,9 +276,12 @@ internal static class Criteria
         new("WW406", "A run that loses the test host says which thread was waiting", "", Unshown.NotBuilt,
             "WW406 shipped the half that keeps the evidence: a red run brings the collector's dump "
                 + "and sequence back beside the trx, which three occurrences had not left behind. "
-                + "The half it did not ship is reading one, and that is not built rather than owed "
-                + "— it takes a debugger this repository installs nowhere and a stack no case can "
-                + "assert about, since the state it describes is one nothing here can arrange"),
+                + "It fired for real on the fourth, hours later, and kept both without anybody "
+                + "remembering — and the two sequences that exist now agree on the case still "
+                + "running. The half it did not ship is reading a dump, and that is not built "
+                + "rather than owed: it takes a debugger this repository installs nowhere and a "
+                + "stack no case can assert about, since the state it describes is one nothing "
+                + "here can arrange"),
 
         // WW315's own criterion stood here — that two profiles and a transcript exist on the guest as
         // a disposable fixture — and it went with the task: the bench fabricates both, so the roadmap

@@ -37,13 +37,13 @@
 - ⏳ **WW87** (deps: Block G, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
-- 💭 **WW415** (deps: —) **the bound gives up on a run and names nothing that is still running, one command before the sync names it** — WW404 put a holder walk in the guest so the sync can say who has the tree; the bound fires first and its sentence is the one a person actually reads. → §WW415
 - 💭 **WW416** (deps: —) **the guest answers the host in markers nothing reads back, so one it writes and no arm switches on is silent** — WW404 added GUEST-HELD and GUEST-HOLDER beside GUEST-MISSING; every other list in this project is read in both directions and these three are not. → §WW416
 - 💭 **WW418** (deps: —) **the case proving a wait is skipped asks whether the test host is armed, so another class holding a half decides it** — WW387's memory stands only for a process that put up no presence window, and in-process that process is the suite; WW405 gave it a second one to ask about instead. → §WW418
 - 💭 **WW419** (deps: —) **every reading the engine takes about an application is driven with one application up, and a run has several** — WW405 made a second application cheap; the surface report, the geometry dump and the instance check have never been asked while two are answering at once. → §WW419
 - 💭 **WW420** (deps: —) **the runner's failure arms are read for their shape and run by nothing, and the door that would drive them exists** — WW406's arm only fires on a red run, so proving it meant a scratch command and a hand-built dump; WW227's -Run and -ResultsIn are what made that possible. → §WW420
 - 💭 **WW430** (deps: —) **the gate answers 738 cases on the host and the guest runs the same 738 again, and nothing may skip them** — WW417's gate is a third of the suite by count, and the roll call refuses a run where discovered and recorded disagree — so the saving cannot be taken safely. → §WW430
 - 💭 **WW431** (deps: —) **the host gate takes whole classes, so a case that reads a file inside a serial class waits for the guest** — WW414 broke a pinned sentence in NotificationAreaTests, which reads only the skill; the gate skipped its class and the guest said so eleven minutes later. → §WW431
+- 💭 **WW432** (deps: —) **the bound's holder walk runs only where a sync has already put it in the guest, and nothing says so** — WW415 sends holders.ps1 with the sync, so a bound that fires on a run whose sync did not happen asks a file that is not there and answers that the guest could not be asked. → §WW432
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
@@ -225,9 +225,9 @@
 
 ## Done when — WW406
 
-- **A run that loses the test host says which thread was waiting** Three occurrences and
-  the dump was gone each time; the runner keeps it now, and reading one needs a debugger
-  nothing here installs.
+- **A run that loses the test host says which thread was waiting** Four occurrences now;
+  the runner kept the fourth on its own, and both sequences name
+  SuiteRunTests.A_project_that_declares_captures as the case still running.
 
 ## Non-goals
 

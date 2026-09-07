@@ -233,20 +233,20 @@ public sealed class DeskProbeTests
                         CreateNoWindow = true,
                     });
 
-                var walk = Between(Runner(), "function Get-WhatHolds {", "\n}")
-                    .Replace("$script:GuestRepo", tree, StringComparison.Ordinal)
-                    .Replace("`$", "$", StringComparison.Ordinal);
+                // WW415: dot-sourced off the file rather than cut out of a here-string. The walk
+                // has two callers now — the sync that cannot delete the tree, and the bound that is
+                // about to leave a process running in it — so it is a script of its own, and this
+                // drives the one the guest is sent.
+                var walk = Checkout.At("tools", "holders.ps1");
 
-                Assert.Contains("Get-Process", walk, StringComparison.Ordinal);
+                Assert.True(File.Exists(walk), $"the holder walk is missing: {walk}");
 
                 File.WriteAllText(
                     script,
                     $$"""
                     $ErrorActionPreference = 'Stop'
-                    function Get-WhatHolds {
-                    {{walk}}
-                    }
-                    Get-WhatHolds | ForEach-Object { Write-Output $_ }
+                    . '{{walk}}' -DefineOnly
+                    Get-WhatHolds -Tree '{{tree}}' | ForEach-Object { Write-Output $_ }
                     """);
 
                 var said = Answered(script);

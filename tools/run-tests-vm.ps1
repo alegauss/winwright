@@ -327,6 +327,40 @@ function Invoke-OnTheDesk {
     return $ran
 }
 
+function Get-WhatHoldsGuest {
+    <#
+      Ask the guest who is running out of the tree, in the words `holders.ps1` writes. WW415.
+
+      The copy that reaches the guest is the sync's, so this runs only after one - which is every
+      caller it has: the bound fires during a run, and a run has been synced.
+
+      Never a refusal of its own. This is called from inside one, and a walk that could not run is a
+      sentence rather than a second failure on top of the first.
+    #>
+    param([Parameter(Mandatory)] [string] $Vmx, [string] $Stage = '')
+
+    $ran = Invoke-VmRun -Guest -Arguments @(
+        'runProgramInGuest', $Vmx,
+        'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe',
+        '-NoProfile', '-ExecutionPolicy', 'Bypass',
+        '-File', "$script:GuestSync\holders.ps1",
+        '-Tree', $script:GuestRepo,
+        '-Into', "$script:GuestSync\holders.txt")
+
+    if (-not $ran.Ok) { return "the guest could not be asked ($($ran.Output.Trim()))" }
+
+    $answer = Join-Path ([IO.Path]::GetTempPath()) "$($script:Name)-holders.txt"
+    if ($Stage) { $answer = Join-Path $Stage 'holders.txt' }
+
+    $back = Invoke-VmRun -Guest -Arguments @(
+        'copyFileFromGuestToHost', $Vmx, "$script:GuestSync\holders.txt", $answer)
+
+    if (-not $back.Ok -or -not (Test-Path -LiteralPath $answer)) { return 'the guest wrote no answer' }
+
+    $said = (Read-ConsoleText $answer) -split "`r?`n" | Where-Object { $_.Trim() }
+    return ($said -join '; ')
+}
+
 function Wait-OnTheDesk {
     <#
       The same call, launched rather than blocked on, and given a bound. WW386.
@@ -426,10 +460,17 @@ function Wait-OnTheDesk {
         'It had written no log this could fetch, so the run may not have reached the suite at all.'
     }
 
+    # WW415. And who is still running, asked now rather than predicted. The sentence this used to
+    # end on was true and one command early: it said the next sync would refuse, and the next sync
+    # is where the names arrived. Here the process is still doing whatever wedged it, which is the
+    # question — a test host at 40% and one sitting on a modal dialog are different faults, and by
+    # the next run it is only in the way.
+    $holding = Get-WhatHoldsGuest -Vmx $Vmx -Stage $Stage
+
     Refuse (
         "the guest run did not answer within $Minutes minute(s). Its desk reads $($desk.State)" +
         "$(if ($desk.Process) { ": $($desk.Process) (pid $($desk.Pid), $($desk.Class))" } else { '' })" +
-        " - $($desk.Detail). $far"
+        " - $($desk.Detail). $far Still running from the tree: $holding"
     ) ('Nothing was stopped in the guest, so look at its console - and note that whatever is still ' +
         'running there holds the tree: the next run refuses to sync until it ends. Raise -Bound if ' +
         'this suite really takes that long.')
@@ -981,31 +1022,16 @@ Write-Host "  carrying    $($files.Count) files, $size MB ($carrying)"
 @"
 `$ErrorActionPreference = 'Stop'
 
-function Get-WhatHolds {
-    # WW404. Windows refuses the delete with the directory's name and never with the name of whoever
-    # has it open, and the one machine that can answer that is this one. Two readings, because a
-    # suite in the guest is two kinds of process: the test host runs from under the tree, and the
-    # runtime hosting it does not but has the tree's assemblies mapped in.
-    `$held = @()
-    foreach (`$one in Get-Process) {
-        `$where = `$null
-        try { `$where = `$one.Path } catch { }
-        if (`$where -and `$where.StartsWith('$script:GuestRepo', 'OrdinalIgnoreCase')) {
-            `$held += "`$(`$one.ProcessName) (`$(`$one.Id)) runs from `$where"
-            continue
-        }
-        `$mapped = @()
-        try { `$mapped = @(`$one.Modules | Where-Object { `$_.FileName -and `$_.FileName.StartsWith('$script:GuestRepo', 'OrdinalIgnoreCase') }) } catch { }
-        if (`$mapped.Count -gt 0) { `$held += "`$(`$one.ProcessName) (`$(`$one.Id)) has `$(`$mapped[0].FileName) loaded" }
-    }
-    return `$held
-}
+# WW415: dot-sourced rather than spelled here. The bound wants the same walk and the answer is
+# worth more there, so it is a file both callers reach - which is what `desk-probe.ps1` already is
+# and for the same reason.
+. '$script:GuestSync\holders.ps1' -DefineOnly
 
 if (Test-Path -LiteralPath '$script:GuestRepo') {
     try { Remove-Item -LiteralPath '$script:GuestRepo' -Recurse -Force }
     catch {
         Write-Output ('GUEST-HELD ' + (`$_.Exception.Message -replace '\s+', ' '))
-        foreach (`$one in Get-WhatHolds) { Write-Output "GUEST-HOLDER `$one" }
+        foreach (`$one in (Get-WhatHolds -Tree '$script:GuestRepo')) { Write-Output "GUEST-HOLDER `$one" }
         exit 92
     }
 }
@@ -1128,6 +1154,15 @@ foreach ($file in @('source.zip', 'sync.ps1', 'sync.cmd', 'run.cmd', 'blame.ps1'
     $sent = Invoke-VmRun -Guest -Arguments @('copyFileFromHostToGuest', $vmxPath, (Join-Path $stage $file), "$script:GuestSync\$file")
     if (-not $sent.Ok) { Refuse "could not copy $file into the guest: $($sent.Output)" }
 }
+
+# WW415. Sent as it sits on disk rather than generated, for the reason WW345 gives about the desk
+# probe: a here-string has no caller but the script that holds it, and this one has two.
+$holders = Join-Path $PSScriptRoot 'holders.ps1'
+if (-not (Test-Path -LiteralPath $holders)) { Refuse "the holder walk is missing: $holders" }
+
+$sentHolders = Invoke-VmRun -Guest -Arguments @(
+    'copyFileFromHostToGuest', $vmxPath, $holders, "$script:GuestSync\holders.ps1")
+if (-not $sentHolders.Ok) { Refuse "could not copy holders.ps1 into the guest: $($sentHolders.Output)" }
 
 $synced = Invoke-VmRun -Guest -Arguments @('runProgramInGuest', $vmxPath, "$script:GuestSync\sync.cmd")
 $syncLog = Join-Path $stage 'sync.log'

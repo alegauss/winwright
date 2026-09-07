@@ -281,29 +281,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW415 the name is worth most while it is still running
-
-The refusal WW386 writes when `-Bound` runs out says what will happen next: whatever is
-running holds the tree, and the next sync will refuse. It is a correct sentence and an
-incomplete one, because the guest is standing right there and could be asked.
-
-WW404 wrote the asking. `Get-WhatHolds` walks the guest's processes twice over — one
-running from under the tree, one with the tree's assemblies mapped in — and folds the
-answer into the sync's refusal. The bound could call the same walk and does not, so the
-order a person meets these in is backwards: the bound refuses with a prediction, and the
-prediction comes true a command later with the names attached.
-
-What it costs is one more `runProgramInGuest` on the bound's own failure path, running a
-script already sitting in the sync folder. Nothing new is generated and nothing new is
-copied. The walk would need lifting out of `sync.ps1` into a file of its own so both
-callers reach the same code, which is the shape `desk-probe.ps1` and `desk-clear.ps1`
-already have and the reason they have it.
-
-The reading is worth more at the bound than at the sync, too. At the bound the process
-is still doing whatever wedged it, and its name is the question — a test host at 40% CPU
-and one sitting on a modal dialog are different faults. By the next sync it is only in
-the way.
-
 ### §WW416 the words that cross between the two machines
 
 `sync.ps1` and `run.cmd` are generated on the host, run in the guest, and answer through
@@ -441,6 +418,28 @@ against a collection. A trait would: a case that needs no desk says so, the gate
 on it, and the collection goes on meaning what it means. What has to be decided is which
 way round the trait goes — marking the desk-free cases is the smaller edit and the one
 that fails safe, because a case nobody marked stays in the guest.
+
+### §WW432 the file the second caller assumes is there
+
+`holders.ps1` reaches the guest with `source.zip` and the generated scripts, which is
+the right place for it: the sync is the step that needs it, and by the time the run
+starts it is there.
+
+The bound is the second caller and it does not have that guarantee stated anywhere. It
+fires during a run, and a run has been synced — true today, and true because of an
+ordering nothing holds. `Invoke-OnTheDesk` takes a bound too, and the desk probe that
+runs before the carry uses the same function; give that one a `-Minutes` and the refusal
+asks a guest for a file no sync has put there.
+
+What it answers then is honest: `Get-WhatHoldsGuest` returns "the guest could not be
+asked" with vmrun's own words, which is a sentence and not a crash. So this is not a
+defect waiting to bite — it is a claim about ordering that only the code knows.
+
+Two ways to close it. The walk could be copied when the sync folder is first made rather
+than beside the tree, which is one line earlier and removes the ordering entirely. Or
+the runner could say what it depends on: WW420 wants a case that drives the failure
+arms, and a bound fired before a sync is exactly the kind of arm that case would run —
+where today it would prove the sentence rather than the walk.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
