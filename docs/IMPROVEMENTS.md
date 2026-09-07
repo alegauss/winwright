@@ -175,6 +175,53 @@ prints, the way `NeedsRanges` sits there rather than in a branch. `Enough.Conclu
 would take it from the arm and keep the shared number for the bare run — which is the
 one experiment with no row to put it on.
 
+### §WW434 the third family that did not move
+
+A step has three families of fields that are one claim spelled several ways. WW275 and
+WW292 gave `covers` its two relatives; WW308 gave `sameAs` its three; WW83 gave `label`
+its two, `notLabel` and `beginsWithLabel`.
+
+WW391 made the first two a list apiece. `Comparisons` and `Sweepings` each hold the
+spellings in the order the fold takes them, beside what each one means, and everything
+that needs either — the property, the mode, the claim set's naming, the refusal that
+says which key to delete — walks that one list. A fourth spelling joins by being a row
+in it.
+
+The label family did not move, and it is the family with the most places to be told.
+Each spelling is its own property, so three; `Claims` picks the field name out of a
+ternary chain; and `RefusesTwoStringClaims` builds the list again to say which two were
+written. A fourth would join in three of those and would compile without the fourth,
+which is the shape WW323 and WW340 each closed once elsewhere.
+
+What holds it back from being the same change is that these three are not folded.
+`Sweeps` and `PointsAt` each hold one value with a mode beside it; the three label
+fields are three values the run reads separately, and `CaseRun` resolves a different
+string for each. So the list is what they share and the fold is not, which is what a
+design has to answer: whether a family can be one list without being one field.
+
+### §WW435 the two shapes the walk did not reach
+
+WW58 made the format data and WW66 made the loader ask it: whether a field is text or a
+flag is said in the schema row and read from there, so what a tool publishes and what a
+run enforces cannot differ.
+
+WW391 took that further for one of the three shapes. `OneStep` walks
+`ScenarioSchema.Step` and reads each field by what its row says it holds, so a field
+added to the schema is loaded without the loader being told — which is why a step's
+fields now join in two places rather than five.
+
+The other two did not move. `OneCase` names nine keys and the fixture reader names
+eight, each on its own line, each spelling a key the row beside it already spelled.
+Nothing holds the two lists together but a case, and what that costs is the failure this
+format exists to refuse: a row added to the schema and not to the loader is a key an
+author may write, a tool will publish, and the run will ignore.
+
+What makes it a different task and not a repeat is the kinds. A step's fields are text
+or a flag, and the walk is a two-armed switch. A case carries `steps`, `tags` and
+`needs`; a file carries `cases` and `fixtures`. Those are arrays of shapes and arrays of
+words, read by verbs answering different types — so the walk needs somewhere for a kind
+that is not a value, and that is the design.
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
@@ -416,6 +463,30 @@ than beside the tree, which is one line earlier and removes the ordering entirel
 the runner could say what it depends on: WW420 wants a case that drives the failure
 arms, and a bound fired before a sync is exactly the kind of arm that case would run —
 where today it would prove the sentence rather than the walk.
+
+### §WW433 the classes the gate cannot see
+
+`host-gate.ps1` says what it takes and why: a class that needs the desk carries
+`[Collection(WindowFixture.Serial)]`, a class that does not, does not. It derives the
+list rather than writing one, because "a class left off the gate is a class the gate
+silently stops covering". Its regex is `^public sealed class (?<named>\w+)`.
+
+Twenty-four of this suite's public test classes are `public class`. They sit outside the
+gate for a keyword that has nothing to do with the desk, and nothing reports it: the
+gate prints a pass over what it ran, and a class it never saw looks exactly like one
+that passed.
+
+Measured while shipping WW391, which changed the scenario format and wanted the cheap
+half first. The gate answered 744 cases; the twenty-four unsealed classes answered 278
+more in 606ms, and `StepDeclarationTests`, `ClaimsTests` and `ScenarioFileTests` are
+among them — the three most likely to be red after a change to the format. The cases
+missing from the saving are the ones that catch the edit.
+
+Two ways to close it and they are not the same. Sealing the twenty-four makes the gate
+right by changing the suite, under a rule nothing states. Matching `public (sealed
+)?class` makes the gate read what its own prose says, which is what the script argued
+for — and a case holding the gate's list against the suite's is what keeps either from
+drifting again.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

@@ -23,6 +23,8 @@
 ## Block G — The scenario — a case is a data file
 
 - 💭 **WW426** (deps: —) **the floor a verdict needs is one number for five runners measuring rates that differ by an order** — WW410 put thirty rounds in front of every arm off one argument about 3/n; transfer already reasons about its own length in prose and now has a shared number in front of it. → §WW426
+- 💭 **WW434** (deps: —) **the label family is three properties and two hand-written chains, where the sweep and pointing families are one list** — WW391 folded `covers` and `sameAs` into a list apiece and left this one: a fourth spelling still joins in three places, and the claim set is one of them. → §WW434
+- 💭 **WW435** (deps: —) **a case's and a fixture's fields still reach the loader one hand-written line each, where a step's are read off its rows** — WW391 walked the schema for a step and left seventeen lines naming a key beside a row that already named it; a case and a fixture are the shape it just closed. → §WW435
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
@@ -43,6 +45,7 @@
 - 💭 **WW430** (deps: —) **the gate answers 738 cases on the host and the guest runs the same 738 again, and nothing may skip them** — WW417's gate is a third of the suite by count, and the roll call refuses a run where discovered and recorded disagree — so the saving cannot be taken safely. → §WW430
 - 💭 **WW431** (deps: —) **the host gate takes whole classes, so a case that reads a file inside a serial class waits for the guest** — WW414 broke a pinned sentence in NotificationAreaTests, which reads only the skill; the gate skipped its class and the guest said so eleven minutes later. → §WW431
 - 💭 **WW432** (deps: —) **the bound's holder walk runs only where a sync has already put it in the guest, and nothing says so** — WW415 sends holders.ps1 with the sync, so a bound that fires on a run whose sync did not happen asks a file that is not there and answers that the guest could not be asked. → §WW432
+- 💭 **WW433** (deps: —) **the host gate takes only classes that are sealed, so a quarter of the desk-free suite never runs in the cheap half** — WW391 measured it: the filter answers 744 cases and 24 unsealed classes holding 278 more sit outside it, which is the drift the script's own prose warns about. → §WW433
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
