@@ -40,3 +40,8 @@ held = 60
 # the third list: what would make a block done, so "the block is finished" is a
 # reading and never a line count reaching zero
 [criteria]
+
+[project]
+name = "winwright"
+description = "Drives a Windows desktop app from a test and reports what was actually observed."
+icon = "🪄"
