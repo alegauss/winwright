@@ -392,6 +392,7 @@
 - ✅ **WW415** **the bound gives up on a run and names nothing that is still running, one command before the sync names it** — The bound asks the guest who is still running and names them, off the walk the sync shares (design recorded in `tools/holders.ps1`).
 - ✅ **WW416** **the guest answers the host in markers nothing reads back, so one it writes and no arm switches on is silent** — The three words that cross are a catalogue held both ways, cut at the here-strings that tell the writing from the reading (design recorded in `tests/Winwright.Tests/GuestMarkerTests.cs`).
 - ✅ **WW418** **the case proving a wait is skipped asks whether the test host is armed, so another class holding a half decides it** — The two in-process cases say out loud that they hold only while nothing else in the test host is armed, and the out-of-process claim is named as the pair's other half.
+- ✅ **WW419** **every reading the engine takes about an application is driven with one application up, and a run has several** — Two fixtures up at once each report their own surfaces and geometry, and the instance check tells them apart by pid (design recorded in `tests/Winwright.Tests/TwoApplicationsTests.cs`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

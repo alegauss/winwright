@@ -332,29 +332,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW419 the second application nobody has asked anything
-
-The engine asks an application several questions through the in-app half: what surfaces
-it drew, where its controls are, whether this binary is already running, what it
-renders. Each answer comes back through a variable naming a file, and every case here
-drives exactly one application while it asks.
-
-That is not what a run looks like. A scenario attaches to a product that launched a
-helper, or drives two applications that talk to each other, or meets the copy of itself
-an earlier case left behind. Each of those is two processes with the half armed in both,
-writing into the directory one variable names — and nothing here has ever put two of
-them there at once.
-
-WW387 is what this costs when it is wrong: a reading held per application, right on
-every host run, wrong on the first guest one. WW405 fixed the reason nobody could check
-— the suite now launches applications that differ in whether they took the half at all —
-and spent it on the one reading that had already gone wrong.
-
-So the rest are unasked rather than answered. What it would take is a case per reading
-with two fixtures up: a surface report from each, a geometry dump from each, an instance
-check that finds one and not the other. If the answers collide in the file they share,
-that is a fault every adopter meets and this suite is built not to find.
-
 ### §WW420 the refusals of the thing that reports refusals
 
 The fixture exists because a refusal nobody can provoke is a refusal that will quietly
@@ -492,6 +469,30 @@ one protocol and a single non-zero code, which is honest about what is used.
 The first is better if anything but this script ever runs `sync.cmd`; the second is
 better if nothing ever does. Which is true is the design, and it is a question about who
 else may drive the guest.
+
+### §WW441 the gate that cannot tell a host with no toolchain from red cases
+
+`Invoke-HostGate` in `tools/host-gate.ps1` answers `Ok` from the exit code of `dotnet
+test` and nothing else, and `run-tests-vm.ps1` turns any non-zero code into one refusal:
+the desk-free half of the suite is red on this host, and the guest would have said the
+same thing seventeen minutes later.
+
+That sentence is true only where cases ran. Measured on 2026-09-14, during WW419: an
+update had removed the host's SDK 10.0.303 five days earlier, `global.json` pins it with
+`latestPatch`, and `dotnet` exited 155 with "A compatible .NET SDK was not found" before
+building anything. The guest carries its own SDK and ran the same tree. So the refusal
+blamed the cases for the host's toolchain, and the only way past it was `-NoGate`, which
+also switches the gate off on the run where it could have answered.
+
+What to build: the gate tells three endings apart. Cases ran and passed. Cases ran and
+some were red, which stays the refusal. Nothing ran: no summary line, a build error, an
+SDK that did not resolve. That one is about the host, so it gets its own sentence naming
+the first line dotnet printed, and the run goes on to the guest. The summary line the
+caller already matches for its count says which ending it was.
+
+Left open: whether the third ending carries on by default or refuses unless a flag says
+to carry on. `DeskProbeTests` already reads `host-gate.ps1`, so the case belongs beside
+it.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
