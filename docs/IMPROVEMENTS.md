@@ -28,28 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW422 the reading that leaves without saying so
-
-`Everywhere` asks whether every excuse this run made was made by every earlier run too,
-and it answers no where any row names no case — correctly, because a row it cannot place
-is a row it cannot claim recurred. What follows is not about recurrence: the run stops
-being one the sentence can cover, the per-line mark drops on to every line that earned
-it, and WW363's rate is silent on each of those by the precedence it declares.
-
-So one row written by an older build removes a whole reading from a report, and every
-clause left in it is true. That is what a session of quiet rates looked like, and WW407
-made it a case rather than a memory.
-
-What is left is that nobody is told. The report reads as complete because it is complete
-— there is no gap, only a depth that is no longer being reported — and the reader who
-would notice is the one who already knows the rate exists.
-
-Two shapes it could take. The roll could say which readings it made, once, at the foot
-of a report: cheap, honest, and one more line on every run. Or the ledger could refuse a
-row it cannot place, which is the stronger claim and the more disruptive — a format this
-tool still tolerates on purpose, so that a history written across a version change stays
-readable. The first is worth doing whatever is decided about the second.
-
 ### §WW428 four waits and no list
 
 `run-tests-vm.ps1` now waits in four places: ten minutes for VMware Tools, three for a

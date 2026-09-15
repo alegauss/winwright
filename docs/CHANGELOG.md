@@ -79,6 +79,7 @@
 - ✅ **WW396** **a run that powers the guest on never closes its output, so a caller that pipes it waits long past the end** — The console is started through a launch that inherits nothing, so a piped run ends when the run does — measured cold (design recorded in `tools/run-tests-vm.ps1`).
 - ✅ **WW407** **the rate on an excused line fires on no ordinary run, because the clause above it covers every one** — A reading silent on both shapes an ordinary run takes is red here (design superseded: the rate does speak on ordinary runs) (design recorded in `tests/Winwright.Tests/RollCallTests.cs`).
 - ✅ **WW412** **a guest that has just been powered on is refused for having no session, which it has a minute later** — The session probe waits three minutes for a guest to finish logging in, and says so while it does (design recorded in `tools/run-tests-vm.ps1`).
+- ✅ **WW422** **a ledger row an older build wrote silences the rate on every line, and nothing says a reading has gone** — A report whose excused rows include one naming no case says which readings that row took away, and says nothing where every row names one (design recorded in `tools/Winwright.RollCall/Roll.cs`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

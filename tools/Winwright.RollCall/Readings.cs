@@ -58,6 +58,11 @@ public sealed record Reading(
 /// list cannot do is decide — <see cref="Roll" /> still holds the code, and the case is what stops
 /// the two drifting.
 /// </para>
+/// <para>
+/// WW422. One line is about these readings rather than one of them, and it is kept off the list for
+/// that reason: the report's <c>unplaced</c> line names which of them a row naming no case took away.
+/// A reading whose silence a row it cannot place decides belongs in what that line can name.
+/// </para>
 /// </summary>
 public static class Readings
 {

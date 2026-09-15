@@ -476,7 +476,73 @@ public sealed record Roll
                 + "one and has not said it means to be — a hole this suite builds for itself is a "
                 + "check switched off; say why in MeantExcuses.Known, or take the excuse away"));
 
+        lines.AddRange(Unplaced());
+
         return new ReadOnlyCollection<string>(lines);
+    }
+
+    /// <summary>
+    /// What this report does not say because a row names no case, said where that took something away.
+    /// WW422.
+    /// <para>
+    /// WW407 found the regime. A row the ledger cannot place makes <see cref="Everywhere"/> false,
+    /// correctly, and what follows is not about recurrence: "none of them is new" goes, the mark drops
+    /// on to every line that earned it and takes that line's rate, and WW376's count is withheld
+    /// because a row it cannot place makes the count a guess. Every clause left is true, so the report
+    /// reads as complete, and the reader who would notice is the one who already knows the rates exist.
+    /// </para>
+    /// <para>
+    /// Said only where a reading actually went, and never as a line on every run. The shape it could
+    /// have taken instead is a foot naming every reading a report made, and this project's own rule
+    /// against that is written three times over in this file: a clause on every run is a clause
+    /// nobody reads by the third. Naming what went is also the half a reader can act on.
+    /// </para>
+    /// <para>
+    /// Exact about what went, because the rows that can be placed decide it. Where every one of them
+    /// recurs, the unplaced rows are the whole difference between this report and one that says none
+    /// of them is new and carries a rate on each line. Where one does not, the mark and its precedence
+    /// would have stood anyway, and what the unplaced rows cost is the count alone.
+    /// </para>
+    /// </summary>
+    private IReadOnlyList<string> Unplaced()
+    {
+        if (Excused is not { Count: > 0 })
+            return [];
+
+        var cases = Excused.Select(one => Readers.Excuse(one).Case).ToList();
+        var unplaced = cases.Count(one => one is null);
+        if (unplaced == 0)
+            return [];
+
+        var placed = cases.Where(one => one is not null).Select(one => one!).ToList();
+        var gone = new List<string>();
+
+        // Named in words that carry no reading's marker. A line saying a reading went, spelled with
+        // that reading's own words, reads as the reading speaking to anybody skimming for it — and to
+        // the case that looks for exactly those words to tell whether it did.
+        if (Earlier.Always.Count > 0 && placed.All(one => Earlier.Always.Contains(one, StringComparer.Ordinal)))
+        {
+            gone.Add("whether any of them is new");
+
+            // The lines that would carry a rate in the run without these rows, which is every placed
+            // one excused at least twice — the rate's own floor.
+            var rates = Earlier.Often.Ledgers == 0 ? 0 : placed.Count(one => Earlier.Often.For(one) >= 2);
+            if (rates > 0)
+                gone.Add($"the rate on {rates} excused line(s)");
+        }
+        else if (Earlier.Often.Ledgers > 0)
+        {
+            gone.Add($"how many of them the last {Earlier.Often.Ledgers} runs had excused");
+        }
+
+        if (gone.Count == 0)
+            return [];
+
+        return
+        [
+            $"  unplaced   {unplaced} excused row(s) name no case, so this report does not say "
+                + string.Join(" or ", gone),
+        ];
     }
 
     /// <summary>

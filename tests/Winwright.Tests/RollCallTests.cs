@@ -462,6 +462,79 @@ public sealed class RollCallTests
         Assert.Contains(" (in all ", report, StringComparison.Ordinal);
         Assert.DoesNotContain("excused in", report, StringComparison.Ordinal);
         Assert.DoesNotContain("none of them is new", report, StringComparison.Ordinal);
+
+        // WW422. And now it says so. The row that can be placed recurs, so the unplaced one is the
+        // whole difference between this report and the one that says none of them is new and carries
+        // a.one's rate — and both of those are named, rather than a reader having to know they exist.
+        Assert.Contains(
+            "  unplaced   1 excused row(s) name no case, so this report does not say whether any of "
+                + "them is new or the rate on 1 excused line(s)",
+            report,
+            StringComparison.Ordinal);
+
+        Unmarked(roll);
+    }
+
+    /// <summary>
+    /// That the unplaced line names what went without any reading's own words. WW422: the first
+    /// spelling said "whether none of them is new", and the case above — which tells whether that
+    /// reading spoke by looking for exactly those words — read the line saying it had gone as the
+    /// reading speaking.
+    /// </summary>
+    /// <param name="roll">A roll whose report carries the line.</param>
+    private static void Unmarked(Roll roll)
+    {
+        var line = Assert.Single(roll.Render(), one => one.StartsWith("  unplaced   ", StringComparison.Ordinal));
+
+        Assert.All(
+            Readings.All,
+            reading => Assert.False(
+                line.Contains(reading.Marker, StringComparison.Ordinal),
+                $"the unplaced line carries '{reading.Marker}', which is how '{reading.Named}' is told to have spoken: {line}"));
+    }
+
+    [Fact]
+    public void A_row_that_cannot_be_placed_beside_one_that_did_not_recur_costs_the_count_and_says_so()
+    {
+        // WW422, the other arm. a.two missed a run, so "none of them is new" was never going to be
+        // said and the mark would have divided the lines anyway: the unplaced row did not take those.
+        // What it did take is WW376's count, which a single row it cannot place makes a guess.
+        var roll = Roll.Of(
+            ["a.one", "a.two"],
+            Ran("a.one", "a.two"),
+            [Row("a.one"), Row("a.two"), "the foreground belongs to the window under test\t\tsomething else owns it"],
+            Before(always: ["a.one"], often: [("a.one", 17), ("a.two", 4)]));
+
+        var unplaced = Assert.Single(roll.Render(), one => one.StartsWith("  unplaced   ", StringComparison.Ordinal));
+
+        Assert.Equal(
+            "  unplaced   1 excused row(s) name no case, so this report does not say how many of them the "
+                + "last 20 runs had excused",
+            unplaced);
+
+        // Named because it is gone, which is the check the line exists to make true.
+        Assert.DoesNotContain("inside the last", roll.Sentence(), StringComparison.Ordinal);
+
+        Unmarked(roll);
+    }
+
+    [Fact]
+    public void A_report_whose_rows_all_name_a_case_says_nothing_about_placing_them()
+    {
+        // WW422's control, and the half that keeps the line worth reading: a clause on every run is a
+        // clause nobody reads by the third. Both shapes this suite's runs take name every row, and a
+        // first run with a row it cannot place had no reading to lose.
+        Assert.All(
+            Ordinary().Values,
+            roll => Assert.DoesNotContain(roll.Render(), one => one.StartsWith("  unplaced   ", StringComparison.Ordinal)));
+
+        var first = Roll.Of(
+            ["a.one"],
+            Ran("a.one"),
+            ["the foreground belongs to the window under test\t\tsomething else owns it"],
+            Before(always: []));
+
+        Assert.DoesNotContain(first.Render(), one => one.StartsWith("  unplaced   ", StringComparison.Ordinal));
     }
 
     /// <summary>The roll's one sentence for a run that excused these cases. WW389.</summary>
