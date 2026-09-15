@@ -116,8 +116,10 @@ proposal against it for you.
 ### Criteria — the newest of roadkeep's lists, and the one this backlog leans on
 
 `criterion` is recent, so it is easy to work here for a week without noticing it, and this project
-has **33 criteria — 32 across all eleven blocks**, three per block and two under Block I, plus one bound to WW158. They are the
-answer to a failure roadkeep measured: a non-goal says what is *not* built, nothing said what would
+leans on them: three per block across all eleven, two under Block I, and one apiece on the open lines
+that raised their own. **The count is `criterion list`'s to give** — a number written here is one
+more copy of a set that changes on every partial ship, and the one that used to stand here was four
+out. They are the answer to a failure roadkeep measured: a non-goal says what is *not* built, nothing said what would
 make a block **done**, so the only test left was *a line count reaching zero* — and a block declared
 closed that way was reopened six times. A definition of done written into a rationale section is one
 `ship` correctly deletes; this list is where it survives.
@@ -149,6 +151,13 @@ closed that way was reopened six times. A definition of done written into a rati
   work *satisfies* a criterion is a judgement it has no model for (L4). Nothing goes red when a
   criterion is untrue, which is exactly why the read-back before shipping is a rule here rather than
   a suggestion.
+- **Ship, then pair, then run.** `ship` writes the roadmap: a partial ship raises a criterion under
+  the task's own id, and the ship that finishes the task takes it away again. Both happen *after* the
+  run that proved the work, because shipping is a task's last act — so the red lands on whoever runs
+  next, about an entry their change never touched. WW438: that happened twice in one session, the
+  second time to somebody who had watched the first. The order is **ship → pair it in
+  `Criteria.Known` or delete the entry → run**, and the run is `tools/host-gate.ps1`, which answers
+  in seconds and has `CriteriaTests` in it. Never a second guest run for this.
 - **WW176 wrote the reading down.** `tests/Winwright.Tests/Criteria.cs` pairs every criterion the
   roadmap declares with the case that demonstrates it, checked against `docs/ROADMAP.md` in both
   directions, and a criterion added later is red until somebody says what shows it. **Read it beside

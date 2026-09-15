@@ -73,6 +73,22 @@ internal sealed record Criterion(string Under, string Lead, string Shown, Unshow
 /// files cannot be demonstrated before scenario files exist, and saying so is not the same admission
 /// as a capability that shipped with nobody reading it back.
 /// </para>
+/// <para>
+/// <b>When this may be read, which is WW438.</b> The source of truth is a file <c>ship</c> writes:
+/// a partial ship raises a criterion under the task's own id, and the ship that finishes the task
+/// takes it away again. A task's last act is its ship, so the run that proved the work happened
+/// before the roadmap it is being checked against existed — and the red lands on whoever runs next,
+/// about an entry their change never touched. It happened twice in one session, the second time to
+/// somebody who had watched the first.
+/// </para>
+/// <para>
+/// So the order is: ship, then pair the criterion here or delete the entry, then run — and the run
+/// is the gate's half rather than a second guest, because this class needs no desk and answers in
+/// seconds. Deriving the list instead of holding it would not help: the pairing is a judgement about
+/// which case reads a claim back, which is the whole content of an entry and the one thing no sweep
+/// can produce. What was owed was the order, said where it is read rather than learned by being
+/// bitten — here, in <see cref="CriteriaTests" />'s own refusals, and in the shipping skill.
+/// </para>
 /// </summary>
 internal static class Criteria
 {
@@ -313,6 +329,15 @@ internal static class Criteria
 
         return declared;
     }
+
+    /// <summary>
+    /// Whether a label is a task's id rather than a block's letter. WW438: which one it is says why
+    /// the roadmap and this list disagree, because a criterion under a task id arrives when that task
+    /// partially ships and leaves when it finishes — and both of those happen after the run.
+    /// </summary>
+    /// <param name="under">The label, as <see cref="Criterion.Under" /> carries it.</param>
+    internal static bool RaisedByATask(string under) =>
+        under.StartsWith("WW", StringComparison.Ordinal);
 
     /// <summary>The ones nothing in this suite reads back, counted rather than left off.</summary>
     internal static IReadOnlyList<Criterion> Unproven() =>

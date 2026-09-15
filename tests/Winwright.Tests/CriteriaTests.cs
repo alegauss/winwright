@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 using Xunit;
 
 namespace Winwright.Tests;
@@ -20,7 +22,8 @@ public sealed class CriteriaTests
         Assert.True(
             missing.Count == 0,
             $"the roadmap declares {missing.Count} criterion(s) nothing here says anything about: "
-                + string.Join("; ", missing.Select(one => $"{one.Under} {one.Lead}")));
+                + string.Join("; ", missing.Select(one => $"{one.Under} {one.Lead}"))
+                + Because(missing.Select(one => one.Under), "raises it"));
     }
 
     [Fact]
@@ -33,7 +36,36 @@ public sealed class CriteriaTests
         Assert.True(
             gone.Count == 0,
             $"{gone.Count} criterion(s) here are not in the roadmap, so a lead has moved or been "
-                + $"reworded: {string.Join("; ", gone.Select(one => $"{one.Under} {one.Lead}"))}");
+                + $"reworded: {string.Join("; ", gone.Select(one => $"{one.Under} {one.Lead}"))}"
+                + Because(gone.Select(one => one.Under), "takes it away"));
+    }
+
+    /// <summary>
+    /// The sentence a red owes whoever reads it, where the criteria in question are a task's own.
+    /// <para>
+    /// WW438. Both of these went red twice in one session on work that had nothing to do with them,
+    /// and the cause is the same both times: a partial ship raises a criterion under the task's id
+    /// and the ship that finishes the task takes it away, so a suite run before the ship — which is
+    /// every suite run, because shipping is a task's last act — is checked against a roadmap that no
+    /// longer exists. Saying so here is the whole of what was owed: the order was learned by being
+    /// bitten by it, twice, by two people who between them had watched it happen.
+    /// </para>
+    /// </summary>
+    /// <param name="labels">What the criteria are filed under.</param>
+    /// <param name="what">What a ship does to such a criterion, as a phrase — raises it, takes it away.</param>
+    private static string Because(IEnumerable<string> labels, string what)
+    {
+        var tasks = labels.Where(Criteria.RaisedByATask).Distinct(StringComparer.Ordinal).ToList();
+        if (tasks.Count == 0)
+            return "";
+
+        var whose = tasks.Count == 1
+            ? $"{tasks[0]} files a criterion of its own"
+            : $"{string.Join(", ", tasks)} each file a criterion of their own";
+
+        return $". {whose}, and a ship is what {what} — after the run that proved the work, because "
+            + "shipping is the last thing a task does. The order is: ship, then pair it here or "
+            + "delete the entry, then run the gate's half, which answers in seconds";
     }
 
     [Fact]
@@ -55,6 +87,25 @@ public sealed class CriteriaTests
         // And nothing from the neighbouring list: the non-goals are bullets of the same shape under
         // a different heading, and reading them as criteria would be a count that means nothing.
         Assert.DoesNotContain(declared, one => one.Lead == "Not cross-platform");
+    }
+
+    [Fact]
+    public void The_order_a_ship_imposes_is_written_where_the_next_person_reads_it()
+    {
+        // WW438. The refusals above say it at the moment somebody is already red; this is the half
+        // that says it before. The shipping skill is what a session loads when a task is finished,
+        // which is exactly the minute the order matters.
+        var skill = File.ReadAllText(Checkout.At(".claude", "skills", "roadmap-docs", "SKILL.md"));
+
+        Assert.Contains("Ship, then pair, then run", skill, StringComparison.Ordinal);
+        Assert.Contains("WW438", skill, StringComparison.Ordinal);
+
+        // And no count of them in prose, which is what stood where that bullet is. A number for a set
+        // that changes on every partial ship is another copy of the set, kept by nobody: this one
+        // said thirty-three when the roadmap declared thirty-seven, and nothing had gone red.
+        Assert.False(
+            Regex.IsMatch(skill, @"\d+\s+criteri", RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1)),
+            "the skill counts the criteria, which is a copy of a set that changes under it");
     }
 
     [Fact]

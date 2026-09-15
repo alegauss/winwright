@@ -240,30 +240,6 @@ worth it is WW430's — what the guest spends on cases that need nothing from it
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW438 the run that was green before the ship
-
-WW176 holds `Criteria.Known` to the roadmap in both directions: a criterion the roadmap
-declares and the catalogue does not is red, and so is one the catalogue keeps after the
-roadmap drops it. That is the right rule and it caught both halves it was written for.
-
-What nothing says is when the catalogue may be read. Shipping a task with a checked
-criterion takes that criterion off the roadmap, so the entry describing it goes stale in
-the same instant — and the suite that proved the work was run before the ship, because
-running it after means the work is finished and the ship is the last thing anybody does.
-
-Both tasks in this session hit it. WW391's guest run passed at 2068, the ship removed
-its criterion, and the next run went red on an entry the code change had nothing to do
-with. WW406 was the same, one task later, by somebody who had watched it happen.
-
-The narrow reading is that a ship edits a file the suite reads, so the order is ship,
-delete the entry, run. The wider one is that a criterion whose existence is a roadmap
-line is something this catalogue could derive rather than hold — WW424 is that shape
-over three other lists, and its argument is that a hand-written copy of a set is where
-the set drifts.
-
-What is owed either way is that the order stops being something a reader has to have
-been bitten by.
-
 ### §WW440 the second walk that answers the same question
 
 `OwnRender.Armed` decides whether a silence this run recorded still stands: it walks the
