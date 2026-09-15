@@ -19,12 +19,22 @@ public sealed class NoDeskTests
     /// <summary>How the mark is spelled, as the sources spell it.</summary>
     private const string Marked = "[Trait(NoDesk.Key, NoDesk.Free)]";
 
-    /// <summary>Every marked case, with the file and the class it is in.</summary>
-    private static IReadOnlyList<(string File, string Owner, string Case, string Body)> Marks()
+    /// <summary>Every marked case in this suite, with the file and the class it is in.</summary>
+    private static IReadOnlyList<(string File, string Owner, string Case, string Body)> Marks() =>
+        Marks(Checkout.SourcesIn(Checkout.Suite, except: $"{nameof(NoDeskTests)}.cs"));
+
+    /// <summary>
+    /// The same over files a caller names, which is what lets the reading be driven rather than
+    /// only run. WW445: every check here starts from this, so a shape it cannot see is a marked case
+    /// held to nothing — and a sample is the only way to prove it sees one.
+    /// </summary>
+    /// <param name="files">The sources to read.</param>
+    private static IReadOnlyList<(string File, string Owner, string Case, string Body)> Marks(
+        IEnumerable<string> files)
     {
         var found = new List<(string, string, string, string)>();
 
-        foreach (var file in Checkout.SourcesIn(Checkout.Suite, except: $"{nameof(NoDeskTests)}.cs"))
+        foreach (var file in files)
         {
             // Read as code, which is this suite's rule for any sweep over its own sources and is
             // what makes the mark a mark: prose about the attribute — this file's own paragraphs
@@ -41,7 +51,19 @@ public sealed class NoDeskTests
                 // The mark sits above the declaration, so the member's own body does not carry it:
                 // what says a case is marked is the text between the case before it and its own
                 // opening line, which is where the attribute is.
-                var declared = text.IndexOf($"public void {member.Name}(", StringComparison.Ordinal);
+                //
+                // WW445. That opening line used to be spelled here as `public void <name>(`, and a
+                // case is not only ever that: `public async Task` is a case xUnit runs and VSTest
+                // filters exactly like any other, and this saw none of them — so one could carry the
+                // mark, be gated, run on somebody's desk and be held to nothing by all three checks
+                // below. A sweep that misses a case reports a clean pass over the ones it did find,
+                // which is this project's own definition of an unearned green, and what it would be
+                // clean about is the one failure WW417 says the gate must never produce.
+                //
+                // The member's own first line instead, which is what `Checkout.Members` opened it on:
+                // one reading of what a declaration looks like, in the place that already had it.
+                var declaration = member.Body.Split('\n')[0];
+                var declared = text.IndexOf(declaration, StringComparison.Ordinal);
                 if (declared < 0)
                     continue;
 
@@ -59,6 +81,59 @@ public sealed class NoDeskTests
         }
 
         return found;
+    }
+
+    [Fact]
+    public void A_case_is_found_by_being_one_and_not_by_how_it_gives_its_answer()
+    {
+        // WW445. The reading is driven over a file written for it, because the miss cannot be shown
+        // any other way: a shape this sweep cannot see is invisible to every check below, and to a
+        // suite that has no case of that shape today. Found while writing WW436's cases — the first
+        // draft was `public async Task`, because its bound was a task, and the mark on it would have
+        // been checked by nothing.
+        // In a directory of its own so the file can carry the name the reading uses as the owner:
+        // a case is named for its file here, which is what a sweep over sources has instead of a
+        // type. Not under the suite's own tree — a file there would be swept by every rule in this
+        // suite, and this one is written to be wrong in ways those rules exist to refuse.
+        var directory = Directory.CreateTempSubdirectory("winwright-ww445-");
+        var sample = Path.Combine(directory.FullName, "SampleTests.cs");
+        File.WriteAllText(sample, $$"""
+            namespace Winwright.Tests;
+
+            public sealed class SampleTests
+            {
+                [Fact]
+                [Trait(NoDesk.Key, NoDesk.Free)]
+                public void A_marked_case_that_answers_directly()
+                {
+                }
+
+                [Fact]
+                [Trait(NoDesk.Key, NoDesk.Free)]
+                public async Task A_marked_case_that_answers_with_a_task()
+                {
+                    await Task.Yield();
+                }
+
+                [Fact]
+                public void A_case_nobody_marked()
+                {
+                }
+            }
+            """);
+
+        try
+        {
+            var marked = Marks([sample]).Select(one => one.Case).ToList();
+
+            Assert.Contains("SampleTests.A_marked_case_that_answers_directly", marked);
+            Assert.Contains("SampleTests.A_marked_case_that_answers_with_a_task", marked);
+            Assert.DoesNotContain("SampleTests.A_case_nobody_marked", marked);
+        }
+        finally
+        {
+            directory.Delete(recursive: true);
+        }
     }
 
     [Fact]

@@ -312,6 +312,7 @@
 - ✅ **WW434** **the label family is three properties and two hand-written chains, where the sweep and pointing families are one list** — The three ways of claiming a declared string are one list the claim set and refusal walk, each saying what it claims (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 - ✅ **WW435** **a case's and a fixture's fields still reach the loader one hand-written line each, where a step's are read off its rows** — A case's and a fixture's fields are read off the schema's rows, and a row nothing hands on is refused at load (design recorded in `src/Winwright/Scenarios/ScenarioFile.cs`).
 - ✅ **WW444** **a step's rows are held to its own reader by nothing, so a row no property reads is a key that loads and does nothing** — Each of a step's rows is paired with what reads it, so a row nothing reads is red rather than published (design recorded in `tests/Winwright.Tests/StepDeclarationTests.cs`).
+- ✅ **WW445** **the sweep that holds a no-desk mark honest finds cases by `public void`, so a marked async case is checked by nothing** — A marked case is found by its own declaration, whatever shape it has, and a written sample proves the sweep sees both (design recorded in `tests/Winwright.Tests/NoDeskTests.cs`).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

@@ -16,19 +16,17 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 💭 **WW445** (deps: —) **the sweep that holds a no-desk mark honest finds cases by `public void`, so a marked async case is checked by nothing** — WW431's mark is what lets the gate run a case on the operator's own machine, and the three checks that keep it honest cannot see half the shapes a case can have. → §WW445
-
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
 
-- ⏳ **WW83** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅) **the switch case drives the one path that rewrites a real setting** — The case and the store bracket are written and wait on it: the adopter's engine comes from nuget.org. → §WW83
-- 📋 **WW85** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅) **the environment sweep walks a submenu per sampled mode** — Its own claims need the same three fields, and the submenu it walks is the one WW322 says will not open. → §WW85
+- ⏳ **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅) **the switch case drives the one path that rewrites a real setting** — The case and the store bracket are written and wait on it: the adopter's engine comes from nuget.org. → §WW83
+- 📋 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅) **the environment sweep walks a submenu per sampled mode** — Its own claims need the same three fields, and the submenu it walks is the one WW322 says will not open. → §WW85
 - 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
-- ⏳ **WW87** (deps: Block G, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
-- ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
+- ⏳ **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
+- ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
 
 ## Block K — The proving ground — a fixture app built to be hard to test

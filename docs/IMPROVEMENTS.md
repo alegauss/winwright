@@ -38,29 +38,6 @@ it.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW445 the marked case the mark's own checks cannot see
-
-WW431 let a case inside a serial class say it needs no desk, so the host gate can answer
-it in seconds instead of eleven minutes later. The mark is a claim about a case, and
-`NoDeskTests` holds it: no marked case reaches for the desk, no class holding one builds
-something that does, and the gate's filter carries the word the cases carry.
-
-All three start from `Marks()`, which finds a marked case by looking for `public void
-<name>(` in the source. A case declared `public async Task` is a case xUnit runs and
-VSTest filters on exactly like any other — and `Marks()` does not see it, so it is
-marked, gated, run on somebody's machine, and held to nothing. Found while writing
-WW436's cases: the first draft was async because the bound was a task, and the mark
-would have been unchecked.
-
-What makes it worth a line rather than a wider regex is the direction it fails in. A
-sweep that misses a case reports a clean pass over the cases it did find, which is this
-project's own definition of an unearned green — and the thing it is being clean about is
-the one failure WW417 says the gate must never produce, a case run on the operator's
-desk.
-
-The repair is to find cases the way the suite's other sweeps do, off `Checkout.Members`,
-and to prove the miss with a marked async case of its own.
-
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
