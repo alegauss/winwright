@@ -130,6 +130,36 @@ public sealed class RunnerWaitsTests
     }
 
     [Fact]
+    public void The_holder_walk_is_sent_by_whoever_is_about_to_use_it()
+    {
+        // WW432. The walk reached the guest with the sync, and the bound's own comment said it ran
+        // only after one — true today, by an ordering nothing held. A desk probe given a bound would
+        // have asked the guest for a file no sync had put there and been told the guest could not be
+        // asked, which is a sentence about the wrong thing.
+        var runner = Runner();
+
+        Assert.Contains("function Send-HolderWalk", runner, StringComparison.Ordinal);
+
+        // The walk's own caller sends it first, which is what removes the ordering rather than
+        // documenting it.
+        var asking = runner.IndexOf("function Get-WhatHoldsGuest", StringComparison.Ordinal);
+        var runs = runner.IndexOf("$script:GuestSync\\holders.ps1", asking, StringComparison.Ordinal);
+        var sends = runner.IndexOf("Send-HolderWalk -Vmx", asking, StringComparison.Ordinal);
+
+        Assert.True(asking > 0 && sends > asking, "the walk does not send itself before asking");
+        Assert.True(sends < runs, "the walk runs the file before sending it");
+
+        // And one spelling of the copy, not two: the sync needs it before its own program runs, and
+        // a second copy beside that one is where the two would come to disagree.
+        Assert.Single(
+            Regex.Matches(
+                runner,
+                @"copyFileFromHostToGuest[^\r\n]*holders\.ps1",
+                RegexOptions.CultureInvariant,
+                TimeSpan.FromSeconds(1)));
+    }
+
+    [Fact]
     public void The_desk_row_is_what_the_probe_actually_spends()
     {
         // The one row argued in another file, held to it. The probe takes its looks a fixed pause

@@ -195,28 +195,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW432 the file the second caller assumes is there
-
-`holders.ps1` reaches the guest with `source.zip` and the generated scripts, which is
-the right place for it: the sync is the step that needs it, and by the time the run
-starts it is there.
-
-The bound is the second caller and it does not have that guarantee stated anywhere. It
-fires during a run, and a run has been synced — true today, and true because of an
-ordering nothing holds. `Invoke-OnTheDesk` takes a bound too, and the desk probe that
-runs before the carry uses the same function; give that one a `-Minutes` and the refusal
-asks a guest for a file no sync has put there.
-
-What it answers then is honest: `Get-WhatHoldsGuest` returns "the guest could not be
-asked" with vmrun's own words, which is a sentence and not a crash. So this is not a
-defect waiting to bite — it is a claim about ordering that only the code knows.
-
-Two ways to close it. The walk could be copied when the sync folder is first made rather
-than beside the tree, which is one line earlier and removes the ordering entirely. Or
-the runner could say what it depends on: WW420 wants a case that drives the failure
-arms, and a bound fired before a sync is exactly the kind of arm that case would run —
-where today it would prove the sentence rather than the walk.
-
 ### §WW433 the classes the gate cannot see
 
 `host-gate.ps1` says what it takes and why: a class that needs the desk carries

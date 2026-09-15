@@ -394,17 +394,50 @@ function Invoke-OnTheDesk {
     return $ran
 }
 
+function Send-HolderWalk {
+    <#
+      Put `holders.ps1` in the guest, and answer whether it is there. WW432.
+
+      Sent as it sits on disk rather than generated, for the reason WW345 gives about the desk probe:
+      a here-string has no caller but the script that holds it, and this one has two - the sync, whose
+      guest program dot-sources it to name what holds a tree it cannot delete, and the bound, which
+      asks who is still running from one.
+
+      One function because the ordering was the claim. The copy used to be the sync's alone, and the
+      bound's own comment said it ran only after one - true today, by an order nothing held: a desk
+      probe given a bound would have asked for a file no sync had put there, and been answered that
+      the guest could not be asked. A caller that sends it before using it depends on nothing.
+    #>
+    param([Parameter(Mandatory)] [string] $Vmx)
+
+    $walk = Join-Path $PSScriptRoot 'holders.ps1'
+    if (-not (Test-Path -LiteralPath $walk)) { return "the holder walk is missing beside the runner: $walk" }
+
+    $null = Invoke-VmRun -Guest -Arguments @('createDirectoryInGuest', $Vmx, $script:GuestSync)
+
+    $sent = Invoke-VmRun -Guest -Arguments @(
+        'copyFileFromHostToGuest', $Vmx, $walk, "$script:GuestSync\holders.ps1")
+
+    if ($sent.Ok) { return '' }
+
+    return "could not copy holders.ps1 into the guest: $($sent.Output)"
+}
+
 function Get-WhatHoldsGuest {
     <#
       Ask the guest who is running out of the tree, in the words `holders.ps1` writes. WW415.
 
-      The copy that reaches the guest is the sync's, so this runs only after one - which is every
-      caller it has: the bound fires during a run, and a run has been synced.
+      WW432. It sends the walk itself rather than assuming a sync put one there. What it costs is one
+      copy on a path that only runs where something has already gone wrong; what it buys is that the
+      answer is about the guest rather than about which step ran first.
 
       Never a refusal of its own. This is called from inside one, and a walk that could not run is a
       sentence rather than a second failure on top of the first.
     #>
     param([Parameter(Mandatory)] [string] $Vmx, [string] $Stage = '')
+
+    $missing = Send-HolderWalk -Vmx $Vmx
+    if ($missing) { return $missing }
 
     $ran = Invoke-VmRun -Guest -Arguments @(
         'runProgramInGuest', $Vmx,
@@ -1265,14 +1298,12 @@ foreach ($file in @('source.zip', 'sync.ps1', 'sync.cmd', 'run.cmd', 'blame.ps1'
     if (-not $sent.Ok) { Refuse "could not copy $file into the guest: $($sent.Output)" }
 }
 
-# WW415. Sent as it sits on disk rather than generated, for the reason WW345 gives about the desk
-# probe: a here-string has no caller but the script that holds it, and this one has two.
-$holders = Join-Path $PSScriptRoot 'holders.ps1'
-if (-not (Test-Path -LiteralPath $holders)) { Refuse "the holder walk is missing: $holders" }
-
-$sentHolders = Invoke-VmRun -Guest -Arguments @(
-    'copyFileFromHostToGuest', $vmxPath, $holders, "$script:GuestSync\holders.ps1")
-if (-not $sentHolders.Ok) { Refuse "could not copy holders.ps1 into the guest: $($sentHolders.Output)" }
+# WW415, and WW432 made it a function the walk's other caller uses too: the sync's guest program
+# dot-sources this to name what holds a tree it cannot delete, so it has to be there before sync.cmd
+# runs - and the bound, which asks the same question when a run will not end, no longer depends on
+# this line having happened first.
+$sentHolders = Send-HolderWalk -Vmx $vmxPath
+if ($sentHolders) { Refuse $sentHolders }
 
 $synced = Invoke-VmRun -Guest -Arguments @('runProgramInGuest', $vmxPath, "$script:GuestSync\sync.cmd")
 $syncLog = Join-Path $stage 'sync.log'
