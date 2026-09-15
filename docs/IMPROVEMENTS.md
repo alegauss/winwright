@@ -81,30 +81,6 @@ its own.
 
 ## Block D — Act — patterns before pointers
 
-### §WW427 the part of an expectation that is only the arrangement
-
-WW401 built a case where a window takes the desk while a run is reading, and asserted
-the run came back with a hole naming the foreground. It went red on the guest naming the
-focus instead — the decoy had arrived a moment earlier, before the act rather than
-during the reading, so the act was what the desk refused.
-
-Both readings are correct and both are the thing WW401 is about: a hole naming the desk
-instead of a red about a text box. Which one the engine reaches depends on where in the
-step the intruder landed, and that is the one property the case cannot arrange — it
-opens the decoy on a timer against a poll whose length is the machine's.
-
-The repair was to assert what the claim actually is: `DeskFacts.Names` says whether the
-engine calls a condition the desk's, so the case asks that rather than naming one. It
-cost a guest run.
-
-What is worth reading across the rest of the suite is how often the same
-over-specification is there. A case that provokes the desk and then names the condition
-it expects is asserting its own timing, and there are several —
-`RefusedForegroundTests`, `PointerTests`, `KeyboardTests` and `MenuTests` all excuse on
-one named fact. Each may be right, because each provokes differently. None of them says
-which part of its expectation is the claim and which is the arrangement, and that is the
-distinction this one had to learn twice.
-
 ### §WW429 a floor measured on one machine
 
 WW397 measured this guest producing four substitutions in 3600 rounds of a control that

@@ -12,7 +12,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 💭 **WW427** (deps: —) **a case asserting which desk fact a run degraded on is asserting where the intruder landed, which it cannot arrange** — WW401's decoy is timed for the reading and arrived before the act once; the hole named focus, the case demanded the foreground, and both were the desk. → §WW427
 - 💭 **WW429** (deps: —) **the floor a verdict refuses under is this guest's, measured once, and written into a tool an adopter runs** — WW413 took 4 in 3600 off WW397 and made it a constant; a desk with a different floor is refused too readily or not readily enough, and nothing measures its own. → §WW429
 
 ## Block E — Capture — the picture that proves what it photographed
