@@ -81,6 +81,7 @@
 - ✅ **WW412** **a guest that has just been powered on is refused for having no session, which it has a minute later** — The session probe waits three minutes for a guest to finish logging in, and says so while it does (design recorded in `tools/run-tests-vm.ps1`).
 - ✅ **WW422** **a ledger row an older build wrote silences the rate on every line, and nothing says a reading has gone** — A report whose excused rows include one naming no case says which readings that row took away, and says nothing where every row names one (design recorded in `tools/Winwright.RollCall/Roll.cs`).
 - ✅ **WW428** **the runner waits for four things and each wait was argued alone, so the numbers agree with nothing** — The runner's waits are one list of rows the deadlines are built from, and the header prints them with the total they imply (design recorded in `tools/run-tests-vm.ps1`).
+- ✅ **WW436** **listing a process's windows calls GetWindowTextW on each, which never returns for a window of this very process** — A window of this process gets 500ms to answer for its title; another process's is still read from the cached caption (design recorded in `src/Winwright/Windowing/Win32.cs`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

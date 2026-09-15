@@ -199,6 +199,13 @@ internal static class Sleeps
             "the same shape for the icon: the shell is asked and the add is signalled, which is what "
                 + "lets every case look straight after Add rather than waiting a guessed interval"),
 
+        new("ParkedTitleTests.cs", 2, Sleeping.UnderTest,
+            "WW436, and the parking is the defect: a window whose thread never pumps is what made a "
+                + "title read a wait with no end on it, so a thread that came back on its own would "
+                + "delete the case. The second is the opposite and is why the count is two — the "
+                + "constructor waits on that thread's own signal, with a ten-second deadline, so a "
+                + "window that never opened is a refusal rather than a case parked on its own fixture"),
+
         new("TraversalTests.cs", 1, Sleeping.StillAWait,
             "there is nothing out here to observe: the state a traversal settles into is the one "
                 + "after the change, and a condition true too early reads as a wait that was proved. "

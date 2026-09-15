@@ -28,34 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW436 the read that waits for a thread this process owns
-
-`TopLevelWindows.OfProcess` walks `EnumWindows`, keeps the windows owned by the process
-it was asked about, and calls `Win32.TextOf` on each of them — which is
-`GetWindowTextW`.
-
-For a window belonging to another process that reads the cached title and returns. For a
-window belonging to the *calling* process it sends `WM_GETTEXT` and does not come back
-until that window's own thread pumps for it. There is no deadline on it and no argument
-to give one.
-
-This suite hosts its fixture windows inside the test host, so a case asking for the
-windows of its own process asks about windows whose threads it also owns — and this
-repository parks threads on purpose, because a window that stops answering is a thing it
-exists to test. Both kept dumps say the same: `Win32.TextOf` under the `EnumWindows`
-callback, under `CaseRun.Captured`, under the captures case. The bound then kills the
-host and takes nine hundred cases with it, which has happened three times in about
-fifteen guest runs.
-
-The repair is `SendMessageTimeout` with `WM_GETTEXT`: `GetWindowText` with a deadline on
-it, and the documented answer to this hazard. A window that does not answer inside it
-has no title as far as this reading is concerned, which is already what `TextOf` hands
-back for one that answers nothing.
-
-What the design owes is that deadline. It would be the first number here deciding
-whether a window is described or passed over, and every other wait in this engine argues
-its own.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -88,6 +60,29 @@ the refusal that counts them — the rows that are not claims are paired with no
 What it wants is the sweep this suite writes everywhere else: for each row, some member
 of `StepDeclaration` reads that name. Read off the source rather than off the type,
 because the name is a string in a property body and never a member name.
+
+### §WW445 the marked case the mark's own checks cannot see
+
+WW431 let a case inside a serial class say it needs no desk, so the host gate can answer
+it in seconds instead of eleven minutes later. The mark is a claim about a case, and
+`NoDeskTests` holds it: no marked case reaches for the desk, no class holding one builds
+something that does, and the gate's filter carries the word the cases carry.
+
+All three start from `Marks()`, which finds a marked case by looking for `public void
+<name>(` in the source. A case declared `public async Task` is a case xUnit runs and
+VSTest filters on exactly like any other — and `Marks()` does not see it, so it is
+marked, gated, run on somebody's machine, and held to nothing. Found while writing
+WW436's cases: the first draft was async because the bound was a task, and the mark
+would have been unchecked.
+
+What makes it worth a line rather than a wider regex is the direction it fails in. A
+sweep that misses a case reports a clean pass over the cases it did find, which is this
+project's own definition of an unearned green — and the thing it is being clean about is
+the one failure WW417 says the gate must never produce, a case run on the operator's
+desk.
+
+The repair is to find cases the way the suite's other sweeps do, off `Checkout.Members`,
+and to prove the miss with a marked async case of its own.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

@@ -97,6 +97,17 @@ internal static class Win32
         nint window, uint message, nint wParam, ref CopyData lParam, uint flags, uint timeoutMs, out nint answer);
 
     /// <summary>
+    /// The same call where what comes back is text. WW436, and it is the deadline
+    /// <c>GetWindowTextW</c> has no way to be given.
+    /// </summary>
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "SendMessageTimeoutW")]
+    internal static extern nint SendMessageTimeoutText(
+        nint window, uint message, nint wParam, StringBuilder lParam, uint flags, uint timeoutMs, out nint answer);
+
+    /// <summary>WM_GETTEXT: the message a window answers its own title with.</summary>
+    internal const uint WmGetText = 0x000D;
+
+    /// <summary>
     /// The same number in every process for the same string, and one nobody else can collide with —
     /// which is the promise a magic constant cannot make. WW349.
     /// </summary>
@@ -358,11 +369,65 @@ internal static class Win32
         return (style & StylePopup) != 0 && (style & StyleCaption) != StyleCaption;
     }
 
+    /// <summary>
+    /// How long a window this process owns gets to answer for its own title before it is read as
+    /// having none. WW436.
+    /// <para>
+    /// The first number here deciding whether a window is described or passed over, so it argues
+    /// itself like the others. Above the engine's own resolve budget of 400ms, because a window
+    /// whose thread is merely busy is a window that will answer and a title dropped for load is a
+    /// listing that quietly changes under a loaded machine. Below a second, because it is spent once
+    /// per parked window in a listing and the listing is what a capture waits on.
+    /// </para>
+    /// <para>
+    /// It is never spent on a window of another process: that read is answered from the caption
+    /// Windows has already cached, and an application that has stopped answering is exactly the one
+    /// this engine has to go on describing.
+    /// </para>
+    /// </summary>
+    internal const uint TitleWithinMs = 500;
+
+    /// <summary>
+    /// A window's title, and never a wait without an end on it.
+    /// <para>
+    /// WW436. <c>GetWindowTextW</c> is two calls wearing one name. For a window of another process
+    /// it reads the cached caption and returns; for a window of the <em>calling</em> process it sends
+    /// <c>WM_GETTEXT</c> and does not come back until that window's own thread pumps for it — with no
+    /// deadline, and no argument that could give it one.
+    /// </para>
+    /// <para>
+    /// This suite hosts its fixture windows inside the test host and parks threads on purpose,
+    /// because a window that stops answering is a thing this engine exists to test. So the read was a
+    /// wait on a thread this very process had stopped: two kept hang dumps name it in the same words,
+    /// <c>Win32.TextOf</c> under the <c>EnumWindows</c> callback, and each time the bound killed the
+    /// host and took nine hundred cases with it.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The window to ask.</param>
     internal static string TextOf(nint window)
     {
         var text = new StringBuilder(512);
-        var read = GetWindowTextW(window, text, text.Capacity);
-        return read > 0 ? text.ToString() : "";
+        if (!Ours(window))
+        {
+            var read = GetWindowTextW(window, text, text.Capacity);
+            return read > 0 ? text.ToString() : "";
+        }
+
+        // Nothing back and no title are one answer on purpose, and it is the answer this reading
+        // already gave for a window that answers with nothing. A caller listing windows wants the
+        // listing; a window that would not say what it is called is described by everything else.
+        var answered = SendMessageTimeoutText(
+            window, WmGetText, text.Capacity, text, AbortIfHung, TitleWithinMs, out var length);
+
+        return answered != 0 && length != 0 ? text.ToString() : "";
+    }
+
+    /// <summary>Whether this process owns the window, which is what makes a title read a wait.</summary>
+    /// <param name="window">The window to ask about.</param>
+    private static bool Ours(nint window)
+    {
+        GetWindowThreadProcessId(window, out var owner);
+        return owner == (uint)System.Environment.ProcessId;
     }
 
     internal static string ClassOf(nint window)
