@@ -447,7 +447,11 @@ public sealed class DeskProbeTests
 
         // And not one of the ones that take the desk. This class is the example it can be surest
         // about: everything in this file drives a real foreground.
-        Assert.DoesNotContain($"Winwright.Tests.{nameof(DeskProbeTests)}.", filter, StringComparison.Ordinal);
+        // Named off the running class rather than spelled, which is not tidiness: WW202's rule pairs
+        // a member that walks this suite's sources with every member whose name appears in its body,
+        // and `DeskProbeTests` carries `Probe` inside it — so spelling the class here made a helper
+        // that reads a .ps1 read as a sweep over C# that matches raw.
+        Assert.DoesNotContain($"Winwright.Tests.{GetType().Name}.", filter, StringComparison.Ordinal);
         Assert.DoesNotContain("Winwright.Tests.NotificationAreaTests.", filter, StringComparison.Ordinal);
 
         // Anchored on the namespace and closed with a dot, which is not decoration: `SweepTests`
@@ -464,6 +468,52 @@ public sealed class DeskProbeTests
         Assert.All(
             clauses[..^1],
             one => Assert.Matches(@"^FullyQualifiedName~Winwright\.Tests\.\w+\.$", one));
+
+        // WW433. The whole list against the suite's own declarations, which is what the gate's prose
+        // claims and what it did not do: the pattern read `public sealed class`, so twenty-four
+        // classes sat outside the gate for a keyword that has nothing to do with the desk — and a
+        // class the gate never saw looks exactly like one that passed.
+        var gated = clauses[..^1]
+            .Select(one => one["FullyQualifiedName~Winwright.Tests.".Length..].TrimEnd('.'))
+            .ToHashSet(StringComparer.Ordinal);
+
+        var missing = new List<string>();
+        var wrongly = new List<string>();
+
+        foreach (var file in Checkout.SourcesIn(Checkout.Suite))
+        {
+            // Read as code, which this suite requires of any sweep over its own sources: a comment
+            // about the collection — this file's own paragraphs about it — would otherwise put a
+            // class on the wrong side of the line.
+            var text = string.Join('\n', File.ReadLines(file).Select(Checkout.Code));
+            var serial = text.Contains($"[Collection(WindowFixture.{nameof(WindowFixture.Serial)})]", StringComparison.Ordinal);
+
+            foreach (var declared in System.Text.RegularExpressions.Regex.Matches(
+                text,
+                @"(?m)^public (?:sealed )?class (?<named>\w+)").Select(one => one.Groups["named"].Value))
+            {
+                // Only a class that holds cases: a helper the suite declares publicly is neither
+                // gated nor the guest's, and a filter naming one would match nothing.
+                if (!text.Contains("[Fact]", StringComparison.Ordinal))
+                    continue;
+
+                if (serial && gated.Contains(declared))
+                    wrongly.Add(declared);
+
+                if (!serial && !gated.Contains(declared))
+                    missing.Add(declared);
+            }
+        }
+
+        Assert.True(
+            missing.Count == 0,
+            $"{missing.Count} class(es) need no desk and the gate does not take them, so they are "
+                + $"answered by the guest alone: {string.Join(", ", missing)}");
+
+        Assert.True(
+            wrongly.Count == 0,
+            $"{wrongly.Count} class(es) are in the serial collection and the gate takes them, which "
+                + $"is a red on the host about the host: {string.Join(", ", wrongly)}");
     }
 
     /// <summary>Dot-source the host gate and run what a caller asked. WW417.</summary>

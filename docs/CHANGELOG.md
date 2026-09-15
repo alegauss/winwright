@@ -403,6 +403,7 @@
 - ✅ **WW430** **the gate answers 738 cases on the host and the guest runs the same 738 again, and nothing may skip them** — The runner reports what the desk-free half cost the guest: about a twentieth of the case time, so the skip is not worth its mechanism (design recorded in `tools/run-tests-vm.ps1`).
 - ✅ **WW431** **the host gate takes whole classes, so a case that reads a file inside a serial class waits for the guest** — A case inside a serial class marks itself as needing no desk, the gate answers it, and a mark that lies is red before the guest (design recorded in `tests/Winwright.Tests/NoDesk.cs`).
 - ✅ **WW432** **the bound's holder walk runs only where a sync has already put it in the guest, and nothing says so** — The holder walk is sent by whoever is about to use it, so a bound fired before any sync asks the guest rather than a file that is not there.
+- ✅ **WW433** **the host gate takes only classes that are sealed, so a quarter of the desk-free suite never runs in the cheap half** — The gate takes a class that needs no desk whether or not it is sealed, and its list is held against the suite's own declarations both ways.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

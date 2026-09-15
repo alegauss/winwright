@@ -195,30 +195,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW433 the classes the gate cannot see
-
-`host-gate.ps1` says what it takes and why: a class that needs the desk carries
-`[Collection(WindowFixture.Serial)]`, a class that does not, does not. It derives the
-list rather than writing one, because "a class left off the gate is a class the gate
-silently stops covering". Its regex is `^public sealed class (?<named>\w+)`.
-
-Twenty-four of this suite's public test classes are `public class`. They sit outside the
-gate for a keyword that has nothing to do with the desk, and nothing reports it: the
-gate prints a pass over what it ran, and a class it never saw looks exactly like one
-that passed.
-
-Measured while shipping WW391, which changed the scenario format and wanted the cheap
-half first. The gate answered 744 cases; the twenty-four unsealed classes answered 278
-more in 606ms, and `StepDeclarationTests`, `ClaimsTests` and `ScenarioFileTests` are
-among them — the three most likely to be red after a change to the format. The cases
-missing from the saving are the ones that catch the edit.
-
-Two ways to close it and they are not the same. Sealing the twenty-four makes the gate
-right by changing the suite, under a rule nothing states. Matching `public (sealed
-)?class` makes the gate read what its own prose says, which is what the script argued
-for — and a case holding the gate's list against the suite's is what keeps either from
-drifting again.
-
 ### §WW439 the numbers WW416 did not catalogue
 
 WW416 catalogued the words that cross between the machines and held them both ways. The

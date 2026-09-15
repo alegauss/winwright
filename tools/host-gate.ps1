@@ -39,6 +39,18 @@ param(
 function Get-GatedClasses {
     <#
       Every test class whose file does not put it in the serial collection.
+
+      Sealed or not. WW433: the pattern read `^public sealed class` and twenty-four of this suite's
+      classes are `public class`, so they sat outside the gate for a keyword that has nothing to do
+      with the desk - and nothing reported it, because a class the gate never saw looks exactly like
+      one that passed. Measured while shipping WW391: the gate answered 744 cases and those classes
+      held 278 more, among them the three most likely to be red after a change to the scenario
+      format. The cases missing from the saving were the ones that catch the edit.
+
+      Which of the two repairs this is matters. Sealing the twenty-four would make the gate right by
+      changing the suite under a rule nothing states; this makes the gate read what its own prose
+      above already says, and `DeskProbeTests` holds the list it produces against the suite's own
+      declarations, both ways, so neither can drift again.
     #>
     param([Parameter(Mandatory)] [string] $Suite)
 
@@ -50,7 +62,7 @@ function Get-GatedClasses {
         $text = Get-Content -LiteralPath $file.FullName -Raw
         if ($text -match '\[Collection\(WindowFixture\.Serial\)\]') { continue }
 
-        foreach ($match in [regex]::Matches($text, '(?m)^public sealed class (?<named>\w+)')) {
+        foreach ($match in [regex]::Matches($text, '(?m)^public (?:sealed )?class (?<named>\w+)')) {
             $null = $found.Add($match.Groups['named'].Value)
         }
     }
