@@ -156,6 +156,44 @@ public sealed class SkillTests
         Assert.Equal("winwright", name);
     }
 
+    [Fact]
+    public void What_an_adopter_is_told_about_a_tray_locator_is_what_this_suite_measured()
+    {
+        // WW399, and WW443 moved it here. It was written in `NotificationAreaTests`, whose field
+        // adds a real icon to the shell's tray before any case in it runs — so a case that reads a
+        // file and asserts on what it read could only be answered by a guest, eleven minutes after
+        // a host gate that would have answered it in seconds. WW414 changed the sentence it pins and
+        // the guest is what said so, which is the run WW431 was filed over.
+        //
+        // Its subject was always this file rather than the tray. The fact behind it stays where it
+        // is measured, in the case that reads both kinds of tray; what moves is the reading of what
+        // an adopter is told about it.
+        //
+        // WW399's own argument: the case there measured a fact an adopter meets and cannot see — the
+        // container is named in one kind of tray and not the other, so a locator starting there is
+        // proven against neither. It is the easiest half of WW322's difference to hit: the container
+        // is the first line the inspector prints, its line is written to be copied, and copying it
+        // from a Win32 tray produces a locator whose only answer is that nothing answered.
+        //
+        // An adopter does not read this suite. What they read is the inspector's output and the
+        // skill, so the skill is where the fact goes — and this is what stops the sentence there
+        // outliving the measurement. A guidance line nothing holds is the same defect as a catalogue
+        // nothing holds, arriving in prose.
+        var (_, body) = Read();
+
+        // WW414: in the tree's own words now. WW399 wrote this sentence as "its entries" and "that
+        // menu" because the skill could not backtick a control type — a rule about the engine's
+        // exported types had no arm for UI Automation's vocabulary — so the guidance was bent round
+        // a check that has no opinion about it. What is pinned is the claim and not the phrasing it
+        // was forced into.
+        Assert.Contains("addressed at its `MenuItem`s, never at the `Menu`", body, StringComparison.Ordinal);
+
+        // And the fact it rests on, in the words this suite proves: one kind names the container and
+        // one does not. A skill that said the opposite would be as confidently wrong as one that
+        // said nothing, and only the case that reads both trays tells them apart.
+        Assert.Contains("only one of them names that container", body, StringComparison.Ordinal);
+    }
+
     /// <summary>Every token the skill puts in backticks, in the order it spells them.</summary>
     private static IEnumerable<string> Backticked(string body) =>
         Regex.Matches(body, "`([^`\n]+)`").Select(one => one.Groups[1].Value);

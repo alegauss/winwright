@@ -126,6 +126,67 @@ public sealed class NoDeskTests
     }
 
     [Fact]
+    public void No_case_that_only_reads_the_checkout_sits_in_a_class_that_acts_before_it()
+    {
+        // WW443. The mark cannot reach a case whose class acts in its fixture — xUnit builds that
+        // class for every case it runs, so a case reading a file would add a tray icon to the
+        // operator's shell before reading a byte, and `No_class_holding_a_marked_case_builds_...`
+        // above refuses the mark for exactly that. The refusal is right and leaves the case in the
+        // guest: eleven minutes for a reading the gate answers in seconds, which is the run WW431
+        // was filed over.
+        //
+        // So the rule is the other side of that one. A case that reads this checkout and reaches for
+        // nothing has no business in a class that acts: it belongs where its subject is, in a class
+        // that needs nothing. Two moved under WW443 — the skill's tray sentence to `SkillTests`, the
+        // fixture's themed-control check to `FixtureNeedsTests` — and both had a home already.
+        //
+        // Narrow on purpose. A case that reads a file *and* drives something is where it belongs,
+        // which is why reaching for anything at all takes it out of this list.
+        var stranded = new List<string>();
+
+        foreach (var file in Checkout.SourcesIn(Checkout.Suite, except: $"{nameof(NoDeskTests)}.cs"))
+        {
+            var text = string.Join('\n', File.ReadLines(file).Select(Checkout.Code));
+            if (!text.Contains(nameof(WindowFixture.Serial), StringComparison.Ordinal))
+                continue;
+
+            // What the class does before any case runs: its fields and its constructor, which is
+            // the region that decides whether a case in it can ever be answered on the host.
+            var opens = text.IndexOf("public sealed class ", StringComparison.Ordinal);
+            var first = text.IndexOf("    [Fact]", StringComparison.Ordinal);
+            if (opens < 0 || first < 0 || first < opens)
+                continue;
+
+            if (!NoDesk.Reaching.Any(one => text[opens..first].Contains(one, StringComparison.Ordinal)))
+                continue;
+
+            foreach (var member in Checkout.Members(file))
+            {
+                // A case and not a helper, asked of the assembly rather than of the source: a
+                // private reader that walks the checkout is how half the cases in a class get their
+                // file, and moving one of those moves nothing.
+                var named = $"{Path.GetFileNameWithoutExtension(file)}.{member.Name}";
+                if (Provocation.CaseNamed(named) is not { } found || !Provocation.IsACase(found))
+                    continue;
+
+                var code = string.Join('\n', member.Body.Split('\n').Select(Checkout.Code));
+
+                if (code.Contains($"{nameof(Checkout)}.", StringComparison.Ordinal)
+                    && !NoDesk.Reaching.Any(one => code.Contains(one, StringComparison.Ordinal)))
+                {
+                    stranded.Add(named);
+                }
+            }
+        }
+
+        Assert.True(
+            stranded.Count == 0,
+            $"{stranded.Count} case(s) read this checkout and reach for nothing, in classes that act "
+                + "before any case runs — so the gate can never answer them and a guest run is what "
+                + $"says they are red: {string.Join(", ", stranded.Order(StringComparer.Ordinal))}");
+    }
+
+    [Fact]
     public void The_gate_takes_the_marked_cases_as_well_as_the_classes()
     {
         // The mark is worth nothing if the filter does not carry it, and that is invisible: the gate

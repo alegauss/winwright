@@ -118,6 +118,28 @@ public sealed class FixtureNeedsTests
     }
 
     [Fact]
+    public void The_fixed_surface_is_drawn_with_no_themed_control_on_it()
+    {
+        // WW443 moved it here from `FixtureTests`, and the move is the point: the case reads one
+        // source file and asserts on what it read, and it sat in a class that launches the fixture
+        // before any case in it runs — so the guest answered in eleven minutes what the host gate
+        // answers in seconds. Its subject is this class's own: what the fixture needs from the
+        // machine, and a themed control is a dependency on the desk's theme.
+        //
+        // The one that is easy to miss: a button, a tab header or a text box draws its chrome from
+        // the desktop's theme and accent colour, so a pane holding one renders differently on two
+        // desks while every value on it is fixed.
+        // WW202's reading, which the case did not have where it came from: a comment in the pane
+        // saying it draws no `new Button` would otherwise be counted as one drawn. This class
+        // already sweeps the fixture's sources twice and both read as code; this is the third.
+        var pane = Sources().Single(one => Path.GetFileName(one) == "FixedPane.cs");
+        var source = string.Join('\n', File.ReadLines(pane).Select(Checkout.Code));
+
+        foreach (var themed in new[] { "new Button", "new TabItem", "new TextBox", "new CheckBox", "SystemColors" })
+            Assert.DoesNotContain(themed, source, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void The_check_would_notice_the_day_the_fixture_started_asking()
     {
         // A check that cannot fail is the green this project exists to withdraw. The engine reads

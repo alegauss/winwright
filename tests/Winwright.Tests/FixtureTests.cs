@@ -1189,17 +1189,10 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         Assert.Empty(TopLevelWindows.OfProcess(running.Id));
     }
 
-    [Fact]
-    public void The_fixed_surface_is_drawn_with_no_themed_control_on_it()
-    {
-        // The one that is easy to miss: a button, a tab header or a text box draws its chrome from
-        // the desktop's theme and accent colour, so a pane holding one renders differently on two
-        // desks while every value on it is fixed.
-        var source = File.ReadAllText(Path.Combine(Sources(), "FixedPane.cs"));
-
-        foreach (var themed in new[] { "new Button", "new TabItem", "new TextBox", "new CheckBox", "SystemColors" })
-            Assert.DoesNotContain(themed, source, StringComparison.Ordinal);
-    }
+    // WW443. The check that the fixed surface carries no themed control stood here and is
+    // `FixtureNeedsTests`' now: it reads one source file, and this class starts the fixture before
+    // any case in it runs, so a reading that needs nothing was answered by a guest. What it claims —
+    // that the fixture depends on no desk's theme — is that class's subject rather than this one's.
 
     /// <summary>Render the fixed surface to a file of its own and hand back the path.</summary>
     private string Rendered(string name)
@@ -1217,9 +1210,6 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
     }
 
     private readonly string root = Directory.CreateTempSubdirectory("winwright-fixed-").FullName;
-
-    /// <summary>Where the fixture's own sources are, for the check that reads them.</summary>
-    private static string Sources() => Checkout.At("src", "Winwright.Fixture");
 
     [Fact]
     public void A_second_windowed_instance_is_what_the_refusal_exists_for()

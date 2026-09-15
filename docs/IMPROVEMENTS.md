@@ -166,29 +166,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW443 the case the mark cannot reach
-
-WW431 let a case inside a serial class say it needs no desk, and the gate answers it.
-The case WW431 was filed about cannot say it: `NotificationAreaTests` builds a tray icon
-in a field, and xUnit builds the class for every case it runs — so the one case in it
-that reads `SKILL.md` would add an icon to the operator's tray before reading a byte.
-
-`NoDeskTests` refuses the mark for that reason, and the refusal is the right answer: a
-marked case whose class acts is a red on the host about the host, which is the one
-failure the gate must never produce.
-
-So that case is still the guest's, and it is the one that cost the eleven minutes WW431
-was filed over — WW414 changed the sentence it pins, the gate passed, and the guest said
-so after the carry, the build and two thousand other cases.
-
-What it wants is to move. A class holding the cases that read the skill needs no tray,
-no window and no collection, and the tray cases keep the fixture they need. The same is
-true of `FixtureTests`, which launches from a register its constructor builds.
-
-What has to be decided is how far to take it: moving one case is an afternoon, and
-moving every case of that shape rearranges the suite. The reading that says which are
-worth it is WW430's — what the guest spends on cases that need nothing from it.
-
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW446 the other spelling of a wait

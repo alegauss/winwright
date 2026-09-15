@@ -31,7 +31,6 @@
 - ⏳ **WW87** (deps: Block G, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
-- 📋 **WW443** (deps: —) **a case that reads a file cannot say it needs no desk while its class builds a tray icon for every case** — WW431 marks the cases that need nothing, and the case it was filed about is in a class whose fixture acts, so it stays the guest's. → §WW443
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

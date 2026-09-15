@@ -718,34 +718,12 @@ public sealed class NotificationAreaTests : IDisposable
                 + " is written down");
     }
 
-    [Fact]
-    public void What_an_adopter_is_told_about_a_tray_locator_is_what_this_suite_measured()
-    {
-        // WW399. The case above measured a fact an adopter meets and cannot see: the container is
-        // named in one kind of tray and not the other, so a locator starting there is proven against
-        // neither. It is the easiest half of WW322's difference to hit — the container is the first
-        // line the inspector prints, its line is written to be copied, and copying it from a Win32
-        // tray produces a locator whose only answer is that nothing answered, which is the sentence
-        // WW356 spent six guest runs inside.
-        //
-        // An adopter does not read this suite. What they read is the inspector's output and the
-        // skill, so the skill is where the fact goes — and this is what stops the sentence there
-        // outliving the measurement here. A guidance line nothing holds is the same defect as a
-        // catalogue nothing holds, arriving in prose.
-        var skill = File.ReadAllText(Checkout.At("skills", "winwright", "SKILL.md"));
-
-        // WW414: in the tree's own words now. WW399 wrote this sentence as "its entries" and "that
-        // menu" because the skill could not backtick a control type — a rule about the engine's
-        // exported types had no arm for UI Automation's vocabulary — so the guidance was bent round
-        // a check that has no opinion about it. What is pinned is the claim and not the phrasing it
-        // was forced into.
-        Assert.Contains("addressed at its `MenuItem`s, never at the `Menu`", skill, StringComparison.Ordinal);
-
-        // And the fact it rests on, in the words this suite proves: one kind names the container and
-        // one does not. A skill that said the opposite would be as confidently wrong as one that
-        // said nothing, and only this line tells them apart.
-        Assert.Contains("only one of them names that container", skill, StringComparison.Ordinal);
-    }
+    // WW443. The case that read the skill stood here and is `SkillTests`' now. Its subject was that
+    // file rather than this tray, and here it could only ever be answered by a guest: this class adds
+    // a real icon to the shell before any case in it runs, so nothing in it can say it needs no desk.
+    // WW414 changed the sentence it pins, the host gate passed, and the guest said so eleven minutes
+    // later — which is the run WW431 was filed over. The fact it rests on is still measured here, by
+    // the case above that reads both kinds of tray.
 
     /// <summary>
     /// A tree as a locator sees it: one line an element, indented by depth, carrying the control type
