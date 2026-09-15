@@ -438,11 +438,19 @@ internal static class Disturbance
 
         // WW413. Every sentence below this line attributes the fault to one half of the mechanism,
         // and each rests on the counts above it. The control is asked first and that is the strong
-        // guard; this is the other one — WW397 measured this desk producing about four faults in
-        // 3600 rounds of doing nothing, so an arm set whose largest number is two says which arm
-        // faulted and that is a sentence the floor can write.
-        if (Math.Max(read, poke) < Enough.Faults)
-            return Enough.TooFewFaults(Math.Max(read, poke), counted);
+        // guard; this is the other one — an arm set whose largest number is two says which arm
+        // faulted, and that is a sentence the floor can write.
+        //
+        // WW429. The floor is this run's own now. `quiet` is a round that does nothing while the
+        // queue drains, and the branch above has already refused where it faulted — so what reaches
+        // here is a control that read clean over its own rounds, which bounds this desk rather than
+        // inheriting the guest WW397 measured.
+        var floor = new Enough.DeskFloor(quiet, ran.GetValueOrDefault(Arm.Quiet), Arm.Quiet.ToString().ToLowerInvariant());
+        var leading = Math.Max(read, poke);
+        var cell = Math.Max(1, ran.GetValueOrDefault(Arm.Read));
+
+        if (leading < Enough.Needed(floor, cell))
+            return Enough.TooFewFaults(leading, counted, floor, cell);
 
         if (poke > 0 && peek == 0)
         {

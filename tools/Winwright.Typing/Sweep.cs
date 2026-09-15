@@ -224,7 +224,7 @@ internal static class Sweep
                 faults[(arm, spacing)] = Measure(box, arrived, packets, rounds, arm, spacing);
         }
 
-        Console.WriteLine(Enough.Concluded(rounds, run.About, () => Verdict(faults)));
+        Console.WriteLine(Enough.Concluded(rounds, run.About, () => Verdict(faults, rounds)));
     }
 
     /// <summary>
@@ -317,7 +317,11 @@ internal static class Sweep
     /// </para>
     /// </summary>
     /// <param name="faults">How many rounds substituted, by arm and spacing.</param>
-    private static string Verdict(IReadOnlyDictionary<(Arm Arm, int Spacing), int> faults)
+    /// <param name="rounds">
+    /// How many rounds each cell ran. WW429: what an attribution is allowed to rest on depends on how
+    /// many rounds the side leaning is made of, and this arm has no control to measure the desk with.
+    /// </param>
+    private static string Verdict(IReadOnlyDictionary<(Arm Arm, int Spacing), int> faults, int rounds)
     {
         if (faults.Values.All(one => one == 0))
         {
@@ -348,9 +352,19 @@ internal static class Sweep
             // This arm has no control that does nothing — all three type — so what stands in for
             // one is the size of the difference: a band of two against nothing is a shape made of
             // two events, and WW397 measured this desk supplying about that many on its own.
+            //
+            // WW429. Which is why the floor passed here is nothing: with no control this run cannot
+            // measure the desk it is on, so the bar stays WW397's and the refusal says so rather
+            // than presenting another machine's number as this one's.
+            var cells = band >= shoulders
+                ? whole.Count(one => one.Key is >= 48 and <= 64)
+                : whole.Count(one => one.Key is 32 or 80 or 96);
+
             said.Add(Enough.Attributed(
                 Math.Max(band, shoulders),
                 $"{band} across 48-64ms against {shoulders} across 32, 80 and 96",
+                floor: null,
+                Math.Max(1, rounds * cells),
                 () => band > shoulders * 2
                     ? $"The band survives the reconstruction: {band} substitution(s) across 48-64ms"
                         + $" against {shoulders} across 32, 80 and 96 together. What the whole arm has"

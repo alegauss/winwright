@@ -59,16 +59,67 @@ public static class Enough
     public const int Faults = 5;
 
     /// <summary>
-    /// The attribution, or the refusal to make one off counts this small. WW413.
+    /// What a run's own control read, which is this desk's floor measured by the run being judged
+    /// against it. WW429.
+    /// </summary>
+    /// <param name="Faulted">How many of the control's rounds substituted.</param>
+    /// <param name="Rounds">How many rounds it ran.</param>
+    /// <param name="Named">What the arm is called, so the sentence says which reading it used.</param>
+    public sealed record DeskFloor(int Faulted, int Rounds, string Named);
+
+    /// <summary>
+    /// How many faults an attribution needs on the side it is leaning on, off this desk rather than
+    /// off the one the tool was written on. WW429.
+    /// <para>
+    /// <see cref="Faults" /> is WW397's number: four substitutions in 3600 rounds of this project's
+    /// guest, twice, which made five the bar. It is a fact about one machine in a tool an adopter
+    /// runs, and the property it is about — what a desk does to a send — is the one most likely to
+    /// differ between desks. A machine ten times noisier passes that bar on its own noise; a quiet
+    /// one is refused a real reading of four.
+    /// </para>
+    /// <para>
+    /// A run that has a control knows better. A control that faulted nowhere over its own rounds
+    /// bounds this desk's rate at about 3 over them — the arithmetic <see cref="Floor(double)"/> is
+    /// already built on — so what it can supply to a cell is that bound across the cell's rounds, and
+    /// a leading side above it is more than the desk. One that faulted measures the rate rather than
+    /// bounding it, and then twice what it supplies is the bar: the counts are the reading either
+    /// way, and it is the shape drawn over them that has to clear the machine.
+    /// </para>
+    /// <para>
+    /// Two, at the least, whatever the arithmetic says. A difference of one event is not a shape on
+    /// any desk.
+    /// </para>
+    /// </summary>
+    /// <param name="floor">What the run's control read, or null where the run has no control.</param>
+    /// <param name="cell">How many rounds the side being leaned on ran.</param>
+    public static int Needed(DeskFloor? floor, int cell)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(cell);
+
+        if (floor is null || floor.Rounds <= 0)
+            return Faults;
+
+        var supplies = floor.Faulted == 0
+            ? 3.0 * cell / floor.Rounds
+            : 2.0 * floor.Faulted * cell / floor.Rounds;
+
+        return Math.Max(2, (int)Math.Ceiling(supplies - 1e-9));
+    }
+
+    /// <summary>
+    /// The attribution, or the refusal to make one off counts this small. WW413, and WW429 made the
+    /// number this desk's where the run measured one.
     /// </summary>
     /// <param name="leading">How many faults the sentence would be leaning on.</param>
     /// <param name="counted">The counts as the verdict already spells them, so the numbers survive.</param>
+    /// <param name="floor">What this run's control read, or null where it has none.</param>
+    /// <param name="cell">How many rounds the side being leaned on ran.</param>
     /// <param name="reading">The attribution, deferred.</param>
-    public static string Attributed(int leading, string counted, Func<string> reading)
+    public static string Attributed(int leading, string counted, DeskFloor? floor, int cell, Func<string> reading)
     {
         ArgumentNullException.ThrowIfNull(reading);
 
-        return leading < Faults ? TooFewFaults(leading, counted) : reading();
+        return leading < Needed(floor, cell) ? TooFewFaults(leading, counted, floor, cell) : reading();
     }
 
     /// <summary>
@@ -76,11 +127,30 @@ public static class Enough
     /// </summary>
     /// <param name="leading">How many faults the sentence would have been leaning on.</param>
     /// <param name="counted">The counts as the verdict already spells them.</param>
-    public static string TooFewFaults(int leading, string counted) =>
-        $"Too few to attribute: {counted}. WW397 measured this desk's floor at 4 in 3600, so a"
-            + $" difference resting on {leading} fault(s) is inside what the machine supplies — the"
-            + $" counts are the reading and the shape is not. {Faults} on the leading side is where"
-            + " that stops being true.";
+    /// <param name="floor">What this run's control read, or null where it has none.</param>
+    /// <param name="cell">How many rounds the side being leaned on ran.</param>
+    public static string TooFewFaults(int leading, string counted, DeskFloor? floor, int cell)
+    {
+        var needed = Needed(floor, cell);
+
+        // Where the number came from, always: a bar this desk measured and one taken off another
+        // machine are different claims, and a reader deciding whether to run it longer needs to know
+        // which of them refused them.
+        var whose = floor is null || floor.Rounds <= 0
+            ? $"This run has no control to measure this desk with, so the bar is WW397's: 4 in 3600"
+                + " rounds of a control that does nothing, read on this project's guest twice."
+            : floor.Faulted == 0
+                ? $"`{floor.Named}` faulted nowhere in {floor.Rounds} round(s) here, which puts this"
+                    + $" desk's floor under about 3 in {floor.Rounds} — so {cell} round(s) can carry"
+                    + $" about {needed} from the machine alone."
+                : $"`{floor.Named}` read {floor.Faulted} of {floor.Rounds} here, so this desk supplies"
+                    + $" about {(double)floor.Faulted * cell / floor.Rounds:F1} to {cell} round(s) and"
+                    + " a shape has to clear twice that.";
+
+        return $"Too few to attribute: {counted}. {whose} A difference resting on {leading} fault(s)"
+            + $" is inside what the machine supplies — the counts are the reading and the shape is"
+            + $" not. {needed} on the leading side is where that stops being true.";
+    }
 
     /// <summary>
     /// How many rounds a run needs before a clean one rules out a rate this size, and never fewer than

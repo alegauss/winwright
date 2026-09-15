@@ -60,29 +60,6 @@ its own.
 
 ## Block D — Act — patterns before pointers
 
-### §WW429 a floor measured on one machine
-
-WW397 measured this guest producing four substitutions in 3600 rounds of a control that
-does nothing. WW413 turned that into `Enough.Faults` — five on the leading side before
-an attribution is allowed — and the number's whole justification is that one
-measurement, on one machine, twice.
-
-The tool is not this repository's private instrument. It ships in `tools`, it is driven
-by a .cmd a person types, and the thing it exists to answer is what a desk does to a
-send — which is the property most likely to differ between desks. A machine with a floor
-ten times this one's would pass the guard on noise; one with none would be refused a
-real reading of four.
-
-`transfer` already knows the answer. It runs a control arm that does nothing and reads
-that arm's rate, which is the desk's floor measured by the run that is about to be
-judged against it — the reading WW397 took by hand, taken every time.
-
-So the shape is there and two arms cannot use it: `sweep`'s three arms all type, and
-`provoke`'s control answers a different question. What each would need is a round or two
-of doing nothing before it starts, which is cheap next to what they already spend — and
-then the floor in the verdict is this desk's rather than the one the tool was written
-on.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

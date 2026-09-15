@@ -108,9 +108,54 @@ public sealed class EnoughTests
     }
 
     [Fact]
+    public void A_run_with_a_clean_control_takes_its_bar_from_this_desk_rather_than_WW397s()
+    {
+        // WW429. A control that faulted nowhere over its own rounds bounds this desk's rate at about
+        // three over them, so what it can supply to a cell of the same size is three - and a leading
+        // side of four is then more than the machine, where the inherited five refused it.
+        var clean = new Enough.DeskFloor(0, 400, "quiet");
+
+        Assert.Equal(3, Enough.Needed(clean, 400));
+        Assert.Equal("the band survives", Enough.Attributed(4, "read 4 of 400", clean, 400, () => "the band survives"));
+
+        // And a cell twice the control's length can carry twice as much of it.
+        Assert.Equal(6, Enough.Needed(clean, 800));
+
+        // A control that faulted measures the desk rather than bounding it, and then a shape has to
+        // clear twice what the machine supplies.
+        Assert.Equal(8, Enough.Needed(new Enough.DeskFloor(4, 400, "quiet"), 400));
+
+        // With no control there is nothing here to measure the desk with, so the bar is the one
+        // WW397 read on this project's guest.
+        Assert.Equal(Enough.Faults, Enough.Needed(null, 400));
+
+        // Never one, whatever the arithmetic says: a difference of a single event is not a shape.
+        Assert.Equal(2, Enough.Needed(new Enough.DeskFloor(0, 4000, "quiet"), 400));
+    }
+
+    [Fact]
+    public void The_refusal_says_whose_floor_refused_it()
+    {
+        // The half that makes the number readable: a bar this desk measured and one taken off
+        // another machine are different claims, and the reader deciding whether to run it longer is
+        // the one who needs to know which refused them.
+        var measured = Enough.TooFewFaults(2, "read 2 of 400", new Enough.DeskFloor(0, 400, "quiet"), 400);
+
+        Assert.Contains("`quiet` faulted nowhere in 400 round(s) here", measured, StringComparison.Ordinal);
+        Assert.Contains("3 on the leading side", measured, StringComparison.Ordinal);
+        Assert.DoesNotContain("WW397", measured, StringComparison.Ordinal);
+
+        var inherited = Enough.TooFewFaults(2, "band 2 against 0", floor: null, 450);
+
+        Assert.Contains("no control to measure this desk with", inherited, StringComparison.Ordinal);
+        Assert.Contains("WW397", inherited, StringComparison.Ordinal);
+        Assert.Contains($"{Enough.Faults} on the leading side", inherited, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_difference_resting_on_too_few_faults_is_the_counts_and_not_a_shape()
     {
-        var said = Enough.Attributed(2, "whole 2 of 300, quiet 0 of 300", () => "the band survives");
+        var said = Enough.Attributed(2, "whole 2 of 300, quiet 0 of 300", floor: null, 300, () => "the band survives");
 
         Assert.DoesNotContain("the band survives", said, StringComparison.Ordinal);
         Assert.Contains("Too few to attribute", said, StringComparison.Ordinal);
@@ -126,7 +171,7 @@ public sealed class EnoughTests
     {
         Assert.Equal(
             "the band survives",
-            Enough.Attributed(Enough.Faults, "whole 5 of 300", () => "the band survives"));
+            Enough.Attributed(Enough.Faults, "whole 5 of 300", floor: null, 300, () => "the band survives"));
     }
 
     [Fact]

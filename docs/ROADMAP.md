@@ -11,8 +11,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 💭 **WW429** (deps: —) **the floor a verdict refuses under is this guest's, measured once, and written into a tool an adopter runs** — WW413 took 4 in 3600 off WW397 and made it a constant; a desk with a different floor is refused too readily or not readily enough, and nothing measures its own. → §WW429
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
