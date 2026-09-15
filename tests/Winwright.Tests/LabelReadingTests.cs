@@ -36,10 +36,7 @@ public sealed class LabelReadingTests : IDisposable
             return;
 
         var launched = settling.Register.Launch(Fixture.Started("--names"));
-        var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(launched.Pid) is not null, 20000, 25);
-
-        Assert.True(drawn.Happened, $"the fixture drew no window in {drawn.WaitedMs}ms");
-        root = AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle);
+        root = AutomationElement.FromHandle(Fixture.Drew(launched.Pid).Handle);
     }
 
     public void Dispose() => settling.Dispose();

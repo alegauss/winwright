@@ -42,10 +42,7 @@ public sealed class ArrivedLateTests : IDisposable
         // The fixture holds the report page back and swaps the real content in after this long, which
         // is the only door in this repository onto a tree that changes under a reader.
         var launched = settling.Register.Launch(Fixture.Started("--loading=1500"));
-        var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(launched.Pid) is not null, 20000, 25);
-
-        Assert.True(drawn.Happened, $"the fixture drew no window in {drawn.WaitedMs}ms");
-        root = AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle);
+        root = AutomationElement.FromHandle(Fixture.Drew(launched.Pid).Handle);
     }
 
     public void Dispose() => settling.Dispose();

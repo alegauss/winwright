@@ -31,8 +31,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 💭 **WW448** (deps: —) **twelve cases wait for the fixture's window with the same line, budget and poll, each written out where it is used** — WW193 took eighteen copies of one walk out of this suite for the same reason; WW446 catalogued these twelve and none of them differs. → §WW448
-
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine

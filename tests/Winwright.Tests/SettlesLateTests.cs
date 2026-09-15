@@ -53,10 +53,7 @@ public sealed class SettlesLateTests : IDisposable
             return;
 
         var launched = settling.Register.Launch(Fixture.Started($"--settles={LateMs}"));
-        var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(launched.Pid) is not null, 20000, 25);
-
-        Assert.True(drawn.Happened, $"the fixture drew no window in {drawn.WaitedMs}ms");
-        window = AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle);
+        window = AutomationElement.FromHandle(Fixture.Drew(launched.Pid).Handle);
     }
 
     public void Dispose()

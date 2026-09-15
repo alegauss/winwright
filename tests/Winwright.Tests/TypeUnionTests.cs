@@ -36,10 +36,7 @@ public sealed class TypeUnionTests : IDisposable
     public TypeUnionTests()
     {
         var launched = settling.Register.Launch(Fixture.Started("--rows=paired"));
-        var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(launched.Pid) is not null, 20000, 25);
-
-        Assert.True(drawn.Happened, $"the fixture drew no window in {drawn.WaitedMs}ms");
-        fixtureRoot = AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle);
+        fixtureRoot = AutomationElement.FromHandle(Fixture.Drew(launched.Pid).Handle);
     }
 
     public void Dispose()

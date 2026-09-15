@@ -121,28 +121,3 @@ line of style bits, and it is the arm that decides whether an unattended run can
 at all.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW448 the launch wait nobody extracted
-
-`Attempt.UntilTrue(() => TopLevelWindows.Largest(launched.Pid) is not null, 20000, 25)`
-appears in eleven test files and, with a different budget, in a twelfth. Each is
-followed by the same assertion — that the fixture drew no window in the milliseconds it
-waited. Counting them is what WW446 did; nothing had, because the catalogue it widened
-had never seen this spelling.
-
-They are identical, and that is the finding. WW193 pulled eighteen copies of the walk up
-to the solution file out of this suite and argued it in one sentence: the loop was
-spelled with three different variable names, which is how a reader misses that they are
-the same four lines. This is the same shape with the numbers still agreeing — and the
-numbers drift first, because a slow guest is answered by raising one budget where the
-red happened to be.
-
-What it wants is the door the suite already has: `Fixture.Started` and its neighbours
-are where a launch is arranged, and waiting for the window the launch was for belongs
-beside them. What has to be decided is whether the wait joins the launch — so a case
-cannot forget it — or stays a call a case makes, which is what the two off-pattern ones
-need: `SuiteLaunchTests` launches through the suite's own door, and the typing rig
-launches its own fixture.
-
-The saving is small and the reason is not: a wait nobody can find is a wait nobody
-tunes.

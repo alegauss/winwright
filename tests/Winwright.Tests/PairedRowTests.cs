@@ -134,10 +134,7 @@ public sealed class PairedRowTests : IDisposable
             return null;
 
         var launched = settling.Register.Launch(Fixture.Started($"--rows={how}"));
-        var drawn = Attempt.UntilTrue(() => TopLevelWindows.Largest(launched.Pid) is not null, 20000, 25);
-
-        Assert.True(drawn.Happened, $"the fixture drew no window in {drawn.WaitedMs}ms");
-        var window = AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle);
+        var window = AutomationElement.FromHandle(Fixture.Drew(launched.Pid).Handle);
 
         var declaration = Path.Combine(root, ProjectDeclaration.FileName);
         File.WriteAllText(

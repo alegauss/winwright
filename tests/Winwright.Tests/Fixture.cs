@@ -54,6 +54,31 @@ internal static class Fixture
         return start;
     }
 
+    /// <summary>
+    /// The window a launched fixture drew, waited for on the deadline this suite declares.
+    /// <para>
+    /// WW448. Twelve cases wrote this out: the same look at the same process, a budget of 20000 and
+    /// a poll of 25, followed by the same assertion. WW446 counted them, because the catalogue it
+    /// widened had never seen the spelling they use — and counting them is what showed they were one
+    /// wait, written where it was needed each time.
+    /// </para>
+    /// <para>
+    /// What the copies also did was bypass the declaration. <c>Waits</c> has named this since WW143
+    /// — <c>draw</c>, ten seconds, argued as the cold start of a fixture on a runner that has never
+    /// run it — and twelve cases typed twice that instead, which is the number nobody could tune
+    /// because nobody could find it. The wait is on the declared deadline now and the number is gone
+    /// from every case.
+    /// </para>
+    /// <para>
+    /// A launch is not folded in with it. Two callers launch through doors of their own — the suite's
+    /// own launch, and the typing rig's, which is a different assembly and keeps its copy — so what
+    /// is shared is the wait and not the starting.
+    /// </para>
+    /// </summary>
+    /// <param name="pid">The process that was launched.</param>
+    public static Winwright.Windowing.TopLevelWindow Drew(int pid) =>
+        Waits.Until("draw", $"the fixture ({pid}) drew no window", () => Winwright.Windowing.TopLevelWindows.Largest(pid));
+
     /// <summary>The catalogue, as the built fixture prints it.</summary>
     public static string Catalogue()
     {

@@ -120,25 +120,11 @@ internal static class Deadlines
             + "always false and one is always true, because what these cases drive is the machinery "
             + "itself — a deadline spent in full and a deadline answered on the first poll"),
 
-        // --- the suite's launches, which are one wait written twelve times ---------------------------
-        // WW446. Each of these is `TopLevelWindows.Largest(launched.Pid) is not null` at 20000ms and a
-        // 25ms poll, and the only differences between them are the two budgets in the two that are not
-        // a fixture launch. Catalogued a file at a time because that is this list's unit; that it is
-        // one wait spelled twelve times is a finding of its own and is filed rather than folded here.
-        new("ArrivedLateTests.cs", 1, "false while the fixture's process owns no top-level window"),
-        new("DeclaredLocatorTests.cs", 1, "false while the fixture's process owns no top-level window"),
-        new("ForEachTests.cs", 1, "false while the fixture's process owns no top-level window"),
-        new("LabelReadingTests.cs", 1, "false while the fixture's process owns no top-level window"),
-        new("NudgeTests.cs", 1, "false while the fixture's process owns no top-level window"),
-        new("PairedRowTests.cs", 1, "false while the fixture's process owns no top-level window"),
-        new("SettlesLateTests.cs", 1, "false while the fixture's process owns no top-level window"),
-        new("ShutPickerTests.cs", 1, "false while the fixture's process owns no top-level window"),
-        new("SpokenTests.cs", 1, "false while the fixture's process owns no top-level window"),
-        new("TypeUnionTests.cs", 1, "false while the fixture's process owns no top-level window"),
-        new("WpfInputTests.cs", 1, "false while the fixture's process owns no top-level window"),
-        new("SuiteLaunchTests.cs", 1, "false while the fixture's process owns no top-level window, on "
-            + "a shorter budget than the eleven above because this case launches through the door the "
-            + "suite uses rather than through the fixture's own"),
+        // --- the launch wait, which is one call now -----------------------------------------------
+        // WW448. Twelve entries stood here, one per file, each the same look at the same process on
+        // the same budget. They are `Fixture.Drew` now, and it waits through `Waits` on the `draw`
+        // deadline this suite has declared since WW143 — so the wait is in this list once, under the
+        // file that owns it, and the twelve numbers nobody could find are gone.
 
         // --- the rest of the suite, and the tools ----------------------------------------------------
         new("OwnRenderTests.cs", 1, "false while the application has not said it is answering renders, "

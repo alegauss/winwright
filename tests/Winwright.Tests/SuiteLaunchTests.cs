@@ -230,17 +230,15 @@ public sealed class SuiteLaunchTests : IDisposable
         var acting = CaseDeclaration.Declared(
             "the profile box takes a name", [Typing()], fixture: Names(shareable: true), catches: "an unwritten control");
 
+        // WW448. This launches through the suite's own door rather than the fixture's, and waited on
+        // numbers of its own — 15000 and a 50ms poll, against the 20000 and 25 the eleven other
+        // copies used, and none of the four was the `draw` deadline this suite declares. The wait is
+        // the same wait whoever started the process, so it is the same call now.
         var launched = register.Launch(Names().Starting(Project().Executable));
-        var window = Winwright.Windowing.TopLevelWindows.Largest(launched.Pid);
-        Assert.True(
-            Winwright.Locating.Attempt.UntilTrue(
-                () => Winwright.Windowing.TopLevelWindows.Largest(launched.Pid) is not null, 15000, 50).Happened,
-            "the fixture drew no window");
-
-        window = Winwright.Windowing.TopLevelWindows.Largest(launched.Pid);
+        var window = Fixture.Drew(launched.Pid);
         var refusal = Assert.Throws<ScenarioRefusedException>(() => CaseRun.Of(
             acting,
-            System.Windows.Automation.AutomationElement.FromHandle(window!.Handle),
+            System.Windows.Automation.AutomationElement.FromHandle(window.Handle),
             Project(),
             lent: true));
 
