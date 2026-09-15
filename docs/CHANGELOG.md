@@ -161,6 +161,7 @@
 - ✅ **WW408** **the sweeps over the shipped halves each name their own two assemblies, and nothing says what shipped means** — Checkout.Shipped names the libraries once, held against the project files the build reads (design recorded in `tests/Winwright.Tests/Checkout.cs`).
 - ✅ **WW411** **the flyout case asserts the overflow is there a line after the verb held it, and the shell sometimes shuts it first** — A flyout gone before the provocation is a hole naming the desk, which is what the rest of the case already does (design recorded in `tests/Winwright.Tests/NotificationAreaTests.cs`).
 - ✅ **WW413** **two arms have a control that would refuse a run and neither checks it, so both read a desk with a floor and say nothing** — Neither arm attributes below the desk's floor (design superseded: provoke already asks its control, and sweep has none) (design recorded in `tools/Winwright.Typing/Enough.cs`).
+- ✅ **WW423** **a sample adopter's projects are inside this checkout and every sweep that walks it from the root reads them** — Checkout names the adopter's tree, every project sits in a named tree, and no reading of this project's code takes from it (design recorded in `tests/Winwright.Tests/Checkout.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

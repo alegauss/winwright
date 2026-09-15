@@ -219,6 +219,11 @@ public sealed class EncodingTests
             // one more file to read looks exactly like the nineteenth copy.
             Checkout.Marker,
             ".gitignore",
+
+            // WW423. An adopter's file, and read here on purpose: this asks about the files this
+            // checkout carries rather than about this project's code, and a sample damaged on this
+            // desk is damage in this repository whoever it models.
+            Path.GetRelativePath(Checkout.Root, Path.Combine(Checkout.Samples, "Adopter", "Adopted.cs")),
         })
         {
             Assert.Contains(wanted, walked, StringComparer.OrdinalIgnoreCase);

@@ -81,30 +81,6 @@ its own.
 
 ## Block D — Act — patterns before pointers
 
-### §WW423 the repository inside this one
-
-`samples/Adopter` is an adopter's repository kept inside this one. Its projects
-reference the engine through a package rather than a path, on purpose: WW228 built it to
-prove the adoption a paragraph used to describe, and its whole value is being the thing
-this project is not.
-
-Every sweep here walks from `Checkout.Root`. Most narrow to `Engine` and `Suite` and
-never meet the samples; the ones that do not, meet them without knowing. WW408's first
-draft asked which projects this repository builds, read the whole tree, and was told
-there were three libraries — the third being an adopter's driving half. The case said so
-on its first run, which is the only reason it is a paragraph here rather than a claim
-that shipped.
-
-The reading it broke is the interesting one. A sweep over "this project's code" that
-silently includes a sample is not merely wide: it is wrong in the direction that
-matters, because a sample exists to be written the way an outsider writes, and every
-rule this project holds about its own code is a rule an outsider is exempt from.
-
-So the tree wants naming, next to `Engine` and `Suite` — and the naming is the smaller
-half. The larger is deciding what a sweep should do when it meets one: exempt it, or
-hold it to the rules an adopter really is subject to, which is a shorter list and one
-nothing states.
-
 ### §WW427 the part of an expectation that is only the arrangement
 
 WW401 built a case where a window takes the desk while a run is reading, and asserted

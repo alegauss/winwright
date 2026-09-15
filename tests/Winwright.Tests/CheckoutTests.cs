@@ -52,6 +52,56 @@ public sealed class CheckoutTests
     }
 
     [Fact]
+    public void Every_project_this_checkout_carries_is_in_a_tree_that_says_whose_it_is()
+    {
+        // WW423. A sweep decides what to read by the tree it walks, so a project in a tree nothing
+        // names is one no sweep knows which side of the line it is on — which is how an adopter's
+        // driving half was read as this project's library. The run that adds a second sample, or a
+        // project at the root, is the run that has to say whose it is.
+        var named = new[] { Checkout.Engine, Checkout.At("tools"), Checkout.Suite, Checkout.Samples };
+
+        var projects = Directory
+            .EnumerateFiles(Checkout.Root, "*.csproj", SearchOption.AllDirectories)
+            .Where(Checkout.Written)
+            .Where(one => !Path.GetRelativePath(Checkout.Root, one).StartsWith("TestResults", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        // A walk that found nothing names nothing, and every project passing because none was found
+        // is the green this case would otherwise be.
+        Assert.NotEmpty(projects);
+
+        var strays = projects
+            .Where(one => !named.Any(tree => one.StartsWith(tree + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)))
+            .Select(one => Path.GetRelativePath(Checkout.Root, one))
+            .ToList();
+
+        Assert.True(
+            strays.Count == 0,
+            $"{strays.Count} project(s) sit in no tree Checkout names, so no sweep can tell whether "
+                + $"they are this project's code or somebody else's: {string.Join(", ", strays)}");
+    }
+
+    [Fact]
+    public void No_reading_of_this_projects_code_takes_anything_from_the_adopters_tree()
+    {
+        // WW423, the reading WW408's first draft inverted. The adopter's projects exist, which is the
+        // control: a sample tree that had gone would make both checks below pass by having nothing
+        // to exclude.
+        var theirs = Directory
+            .EnumerateFiles(Checkout.Samples, "*.csproj", SearchOption.AllDirectories)
+            .Where(Checkout.Written)
+            .Select(Path.GetFileNameWithoutExtension)
+            .ToList();
+
+        Assert.NotEmpty(theirs);
+
+        Assert.DoesNotContain(Checkout.Projects(), one => theirs.Contains(one.Named, StringComparer.Ordinal));
+        Assert.DoesNotContain(
+            Checkout.Sources(Checkout.Everything),
+            one => one.StartsWith(Checkout.Samples + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void The_walk_finds_the_sources_and_leaves_out_what_a_build_wrote()
     {
         var sources = Checkout.Sources(Checkout.Everything).ToList();

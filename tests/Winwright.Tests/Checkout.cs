@@ -59,6 +59,29 @@ internal static class Checkout
     internal static string Suite => At("tests");
 
     /// <summary>
+    /// An adopter's repository kept inside this one, which is a tree this checkout carries and code
+    /// this project does not own. WW423.
+    /// <para>
+    /// WW228 built <c>samples/Adopter</c> to prove the adoption a paragraph used to describe: its
+    /// projects reference the engine through a package, the way somebody else's repository does, and
+    /// its whole value is being the thing this project is not. Nothing said so, so a sweep from the
+    /// root read it as this project's own — WW408's first draft counted its driving half as a library
+    /// of this repository's, which is the reading exactly inverted.
+    /// </para>
+    /// <para>
+    /// What a sweep does on meeting it follows from which question the sweep asks. One about this
+    /// project's code — the catalogues, the shipped members, the projects this repository builds —
+    /// never reads it, and does not by construction: those walk <see cref="Engine" />,
+    /// <see cref="Suite" /> and <c>tools</c>. One about the files this checkout carries reads it like
+    /// any other, because an adopter's file damaged on this desk is damage in this repository —
+    /// which is why the encoding walk holds it. And the rules an adopter really is subject to are the
+    /// short list Block J's criterion states: one package reference and no path into the engine's
+    /// source, which <c>PackagedTests</c> and <c>SeparationTests</c> hold it to by name.
+    /// </para>
+    /// </summary>
+    internal static string Samples => At("samples");
+
+    /// <summary>
     /// The halves an adopter writes code against, which is what a sweep over shipped code means.
     /// WW408.
     /// <para>
