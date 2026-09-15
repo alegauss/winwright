@@ -516,6 +516,87 @@ public sealed class DeskProbeTests
                 + $"is a red on the host about the host: {string.Join(", ", wrongly)}");
     }
 
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void A_host_that_never_ran_a_case_is_told_apart_from_one_whose_cases_failed()
+    {
+        // WW441. The gate answered `Ok` off the exit code alone, and the runner turned every
+        // non-zero into "the desk-free half of the suite is red on this host" — a sentence about
+        // cases, said on a host where none of them ran. Measured on 2026-09-14: an update took the
+        // SDK `global.json` pins, dotnet exited before building anything, and the run that would
+        // have passed in the guest was refused here. Every guest run since has spent `-NoGate`.
+        //
+        // Driven and not read, which is this class's rule for anything the gate decides: the
+        // reading is run against both endings and asked what it says.
+        var said = RanGate("""
+            $green = @('Aprovado!  - Com falha: 0, Aprovado: 1094, Total: 1094')
+            $red = @('Failed!  - Failed: 2, Passed: 1092, Total: 1094')
+            $nothing = @('The command could not be loaded, possibly because:', 'A compatible .NET SDK was not found.', 'Requested SDK version: 10.0.303')
+
+            Write-Output ('green: [' + (Get-GateSummary -Said $green) + ']')
+            Write-Output ('red: [' + (Get-GateSummary -Said $red) + ']')
+            Write-Output ('nothing: [' + (Get-GateSummary -Said $nothing) + ']')
+            """);
+
+        // A suite that ran and a suite that failed both leave the line, which is the point: the
+        // reading tells a host apart from cases, and never a pass apart from a red.
+        Assert.Contains(said, one => one.StartsWith("green: [Aprovado!", StringComparison.Ordinal));
+        Assert.Contains(said, one => one.StartsWith("red: [Failed!", StringComparison.Ordinal));
+
+        // And the ending this task exists for: nothing about the cases is known, so nothing is said
+        // about them.
+        Assert.Contains("nothing: []", said);
+    }
+
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void The_run_goes_on_where_the_gate_could_not_answer_and_stops_where_it_did()
+    {
+        // WW441's other half, and the decision the design left open: the third ending carries on
+        // rather than refusing. The gate is the cheap half asked sooner and never a second verdict
+        // — the guest carries its own toolchain, so refusing here stops a run this host merely
+        // cannot preview. What it owes instead is to be loud, which the arm below is.
+        var runner = Runner();
+
+        var nothing = runner.IndexOf("if (-not $answered.Ran) {", StringComparison.Ordinal);
+        var red = runner.IndexOf("elseif (-not $answered.Ok) {", StringComparison.Ordinal);
+
+        Assert.True(nothing > 0, "the runner does not ask whether anything ran before reading the verdict");
+        Assert.True(red > nothing, "the runner reads the verdict before asking whether any case produced one");
+
+        // The arm that carries on says so and refuses nothing; the arm about the cases still does.
+        var carrying = runner[nothing..red];
+
+        Assert.DoesNotContain("Refuse ", carrying, StringComparison.Ordinal);
+        Assert.Contains("the guest carries its own toolchain", carrying, StringComparison.Ordinal);
+        Assert.Contains(
+            "Refuse 'the desk-free half of the suite is red on this host'",
+            runner[red..],
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void The_code_that_says_a_dump_could_not_be_read_is_the_readers_own()
+    {
+        // WW441. `Show-Blame` had the same shape as the gate: every non-zero exit from the reader
+        // read as "the dump came back and could not be read", so a reader that never started was
+        // reported as a bad dump — and the dump is the one thing that was fine. The reader chooses
+        // exactly one code, and the runner now reads that one and nothing else.
+        //
+        // Held to the reader's own constant, because a number spelled at both ends of a protocol is
+        // the drift WW439 took out of the sync's — and this one crosses from C# into PowerShell,
+        // where no compiler is watching.
+        var runner = Runner();
+
+        Assert.Contains(
+            $"if ($code -eq {Winwright.Blaming.Program.Unreadable}) {{",
+            runner,
+            StringComparison.Ordinal);
+
+        Assert.Contains("the dump is here and the reader would not run on this host", runner, StringComparison.Ordinal);
+    }
+
     /// <summary>Dot-source the host gate and run what a caller asked. WW417.</summary>
     /// <param name="line">The PowerShell to run once the gate is defined.</param>
     private static IReadOnlyList<string> RanGate(string line)

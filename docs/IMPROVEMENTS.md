@@ -166,31 +166,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW441 the gate that cannot tell a host with no toolchain from red cases
-
-`Invoke-HostGate` in `tools/host-gate.ps1` answers `Ok` from the exit code of `dotnet
-test` and nothing else, and `run-tests-vm.ps1` turns any non-zero code into one refusal:
-the desk-free half of the suite is red on this host, and the guest would say the same.
-
-That is true only where cases ran. Measured on 2026-09-14, during WW419: an update had
-removed the host's SDK 10.0.303, `global.json` pins it with `latestPatch`, and `dotnet`
-exited 155 with "A compatible .NET SDK was not found" before building anything. The
-guest carries its own SDK and ran the same tree. The only way past was `-NoGate`, which
-switches the gate off on the run where it could have answered.
-
-`Show-Blame` in the same runner has the same shape, found during WW420: any non-zero
-exit from `dotnet run` on the reader prints "the dump came back and could not be read",
-so a reader that never started reads as a dump that was bad.
-
-What to build: both call sites tell the endings apart. The command ran and answered,
-green or red, which stays as it is. Nothing ran: a build error, an SDK that did not
-resolve. That one is about the host, so it gets its own sentence naming the first line
-dotnet printed, and the gate goes on to the guest. The summary line the gate already
-matches says which ending it was.
-
-Left open: whether the gate's third ending carries on by default or refuses unless a
-flag says. `DeskProbeTests` already reads both scripts.
-
 ### §WW443 the case the mark cannot reach
 
 WW431 let a case inside a serial class say it needs no desk, and the gate answers it.

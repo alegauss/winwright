@@ -863,19 +863,44 @@ function Show-Blame {
       Quiet about its own absence in one direction only. A checkout that has this script and not the
       reader is an adopter who took the runner, and the dump is still theirs to open; a reader that
       ran and could not read the dump is a different thing and says so.
+
+      Three endings, which is WW441's half of this script. Every non-zero code read as "the dump came
+      back and could not be read", so a reader that never started - a host with no SDK, a build error
+      - was reported as a bad dump, and the dump is the one thing that was fine. The reader's own
+      refusal is 2 and it is the only code it chooses; anything else is this machine, and the two
+      remedies are nothing like each other.
     #>
     param([Parameter(Mandatory)] [string] $Dump, [string] $Configuration = 'Debug')
 
     $project = Join-Path $PSScriptRoot 'Winwright.Blame\Winwright.Blame.csproj'
     if (-not (Test-Path -LiteralPath $project)) { return }
 
-    $said = & dotnet run --project $project --configuration $Configuration --nologo -v q -- $Dump
-    if ($LASTEXITCODE -ne 0) {
+    # Not stopping on what the reader writes to stderr, for the reason the gate gives at its own
+    # call: this script runs under `Stop`, and `2>&1` on a native command makes every stderr line a
+    # terminating error — so the ending this is about would end the run instead of being reported.
+    $said = & {
+        $ErrorActionPreference = 'Continue'
+        & dotnet run --project $project --configuration $Configuration --nologo -v q -- $Dump 2>&1
+    } | ForEach-Object { "$_" }
+
+    $code = $LASTEXITCODE
+
+    if ($code -eq 0) {
+        foreach ($line in $said) { Write-Host "              $line" }
+        return
+    }
+
+    # Winwright.Blame's own Unreadable. Held to the reader's constant by a case, because a number
+    # spelled at both ends of a protocol is the drift WW439 took out of the sync's.
+    if ($code -eq 2) {
         Write-Host '              the dump came back and could not be read' -ForegroundColor Yellow
         return
     }
 
-    foreach ($line in $said) { Write-Host "              $line" }
+    Write-Host '              the dump is here and the reader would not run on this host' -ForegroundColor Yellow
+    foreach ($line in $said) {
+        if ($line.Trim()) { Write-Host "              $line" -ForegroundColor DarkYellow }
+    }
 }
 
 # --- what this needs, named before anything is started ------------------------------------------
@@ -934,14 +959,33 @@ if (-not $NoGate) {
         $filter = Get-HostFilter -Suite (Join-Path $script:Tree 'tests')
         if ($filter) {
             $answered = Invoke-HostGate -Project $project -Filter $filter -Configuration $Configuration
-            $counted = ($answered.Output -split "`r?`n" | Where-Object { $_ -match 'Aprovado|Passed!|Failed!|Com falha' } | Select-Object -Last 1)
 
-            if (-not $answered.Ok) {
+            # WW441, and the ending this had to grow. A red here was the only thing a non-zero code
+            # could mean, so a host that could not build read as a host whose cases had failed -
+            # and the refusal said the guest would say the same thing seventeen minutes later,
+            # about cases the guest then passed. The guest carries its own SDK; that sentence was
+            # about this machine and was said about the code.
+            #
+            # It carries on rather than refusing, which is the choice this task had. The gate is the
+            # cheap half asked sooner and never a second verdict: refusing here would stop a run the
+            # guest can answer, which is what happened on 2026-09-14 and what `-NoGate` was spent on
+            # for every run afterwards. What it owes instead is to be loud, and to print what dotnet
+            # said rather than a sentence of its own about it.
+            if (-not $answered.Ran) {
+                Write-Host '  host gate   nothing ran here, so nothing is known about the cases' -ForegroundColor Yellow
+                foreach ($line in ($answered.Output -split "`r?`n")) {
+                    if ($line.Trim()) { Write-Host "              $line" -ForegroundColor DarkYellow }
+                }
+
+                Write-Host '              the guest carries its own toolchain, so the run goes on.' -ForegroundColor Yellow
+            }
+            elseif (-not $answered.Ok) {
                 Write-Host $answered.Output
                 Refuse 'the desk-free half of the suite is red on this host' 'These are the same cases the guest runs, and they need no VM. Fix them here: the guest would have said the same thing seventeen minutes later.'
             }
-
-            Write-Host "  host gate   $($counted.Trim())"
+            else {
+                Write-Host "  host gate   $($answered.Counted)"
+            }
         }
     }
 }

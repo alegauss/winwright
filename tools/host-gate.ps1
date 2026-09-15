@@ -93,25 +93,67 @@ function Get-HostFilter {
     return ((($named | ForEach-Object { "FullyQualifiedName~Winwright.Tests.$_." }) -join '|') + '|desk=free')
 }
 
+function Get-GateSummary {
+    <#
+      The line dotnet prints when cases have run, whatever they said. WW441: its presence is what
+      tells a suite that answered from a host that never got as far as running one.
+
+      Matched on the words rather than on a count, because the runner already matches this line to
+      print it - and both localisations are here for the reason the runner has them: this machine
+      answers in Portuguese and CI does not, and a reading that knew only one would call a whole
+      half of them a host with no toolchain.
+    #>
+    param([Parameter(Mandatory)] [AllowEmptyString()] [string[]] $Said)
+
+    return ($Said | Where-Object { $_ -match 'Aprovado|Passed!|Failed!|Com falha' } | Select-Object -Last 1)
+}
+
 function Invoke-HostGate {
     <#
       Run them, and answer what happened rather than deciding what to do about it.
 
       A red here is a red in the guest too, and the sentence has to say so: this is not a second
       suite with a verdict of its own, it is the same suite's cheap half asked sooner.
+
+      Three endings and it used to answer two. WW441: `Ok` came from the exit code alone, and the
+      runner turned every non-zero into "the desk-free half is red on this host" - which is a
+      sentence about the cases, said on a host where none of them ran. Measured on 2026-09-14: an
+      update took the SDK `global.json` pins, dotnet exited before building anything, and the only
+      way to a guest run that would have passed was to switch the gate off on the run where it
+      could have answered. So `Ran` is asked first, and it is the summary line and not the code:
+      a build error and an SDK that will not resolve both end here, and neither is about the suite.
+
+      Rendered line by line rather than through Out-String, which is not a nicety: `2>&1` on a
+      native command wraps each stderr line in an ErrorRecord, and Out-String prints those with
+      their position, category and fully qualified error id. What dotnet actually said was four
+      lines inside twenty of PowerShell describing how it said it.
     #>
     param(
         [Parameter(Mandatory)] [string] $Project,
         [Parameter(Mandatory)] [string] $Filter,
         [string] $Configuration = 'Debug')
 
-    $said = & dotnet test $Project --nologo --configuration $Configuration --filter $Filter 2>&1
+    # Run inside a scope that does not stop on it, which is the line that makes the third ending
+    # reachable at all. `2>&1` on a native command wraps each stderr line in an ErrorRecord, and the
+    # runner dot-sources this with `$ErrorActionPreference = 'Stop'` — so on the one host this task
+    # is about, the first line dotnet wrote to stderr ended the run inside this function, before
+    # anything could ask what happened. The refusal WW419 met came from further out.
+    $said = & {
+        $ErrorActionPreference = 'Continue'
+        & dotnet test $Project --nologo --configuration $Configuration --filter $Filter 2>&1
+    }
+
     $code = $LASTEXITCODE
+
+    $lines = @($said | ForEach-Object { "$_" } | Where-Object { $_ -ne 'System.Management.Automation.RemoteException' })
+    $counted = Get-GateSummary -Said $lines
 
     return [pscustomobject]@{
         Ok = $code -eq 0
         Code = $code
-        Output = ($said | Out-String)
+        Output = ($lines -join [Environment]::NewLine)
+        Ran = [bool]$counted
+        Counted = if ($counted) { $counted.Trim() } else { '' }
     }
 }
 
