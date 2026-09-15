@@ -59,6 +59,18 @@ internal static class Checkout
     internal static string Suite => At("tests");
 
     /// <summary>
+    /// The programs this repository builds beside the engine: the runner's arms, the roll call, the
+    /// dump reader, the typing rig. WW437.
+    /// <para>
+    /// This project's code and not an adopter's, which is the line <see cref="Samples" /> draws — and
+    /// it was the tree no whole-repository sweep walked. Found by writing a catalogue entry for a
+    /// thread <c>Winwright.Blame</c> parks on purpose and being told the file sleeps nowhere: the
+    /// sweep never offered it, so the catalogue could not see it from either side.
+    /// </para>
+    /// </summary>
+    internal static string Tools => At("tools");
+
+    /// <summary>
     /// An adopter's repository kept inside this one, which is a tree this checkout carries and code
     /// this project does not own. WW423.
     /// <para>
@@ -129,7 +141,7 @@ internal static class Checkout
     /// </summary>
     internal static IReadOnlyList<(string Named, bool IsProgram)> Projects() =>
         new ReadOnlyCollection<(string, bool)>(
-            new[] { Engine, At("tools") }
+            new[] { Engine, Tools }
                 .SelectMany(one => Directory.EnumerateFiles(one, "*.csproj", SearchOption.AllDirectories))
                 .Where(Written)
                 .Select(one => (
@@ -139,7 +151,20 @@ internal static class Checkout
                 .ToList());
 
     /// <summary>
-    /// Both, for a catalogue whose question is about the whole repository.
+    /// Every tree this project's own code is in, for a catalogue whose question is about the whole
+    /// repository.
+    /// <para>
+    /// Three of them, and it was two. WW437: the name said everything and the list said
+    /// <see cref="Engine" /> and <see cref="Suite" />, so a catalogue of how threads are parked could
+    /// not see the one this repository parks most deliberately — the thread
+    /// <c>Winwright.Blame</c> holds so that a hang dump has a hang in it. A sweep that never offers a
+    /// file reports a clean pass over the files it did offer, which is the reading this project
+    /// refuses everywhere else.
+    /// </para>
+    /// <para>
+    /// The adopter's tree stays out, and by name: <see cref="Samples" /> is code this project does
+    /// not own, and a catalogue of this repository's habits has nothing to say about it.
+    /// </para>
     /// <para>
     /// Computed rather than initialised, and that is not a preference. A static field initialiser
     /// here runs before the one holding the walk, which is declared lower down — so this answered a
@@ -147,7 +172,7 @@ internal static class Checkout
     /// </para>
     /// </summary>
     internal static IReadOnlyList<string> Everything =>
-        new ReadOnlyCollection<string>([Engine, Suite]);
+        new ReadOnlyCollection<string>([Engine, Suite, Tools]);
 
     /// <summary>
     /// Every C# source under those trees, and never what a build left beside them.

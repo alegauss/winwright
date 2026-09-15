@@ -74,6 +74,42 @@ public sealed class SleepTests
     }
 
     [Fact]
+    public void The_third_tree_is_walked_like_the_other_two()
+    {
+        // WW437. This catalogue's own words are that an unseen parking cannot be called right, and
+        // the tree it never offered holds the thread this repository parks most deliberately: the one
+        // Winwright.Blame holds so a dump has a hang in it. The entry written for it was refused as a
+        // file that sleeps nowhere, which is a catalogue blind from both sides at once.
+        var found = Sleeps.Found().Select(one => one.File).ToList();
+
+        Assert.Contains("Parked.cs", found);
+        Assert.Contains("Sweep.cs", found);
+
+        // And the two it always walked, so the widening is a third tree rather than a swap.
+        Assert.Contains("Attempt.cs", found);
+        Assert.Contains("FrameRunTests.cs", found);
+    }
+
+    [Fact]
+    public void The_name_a_catalogue_keys_on_is_one_file()
+    {
+        // WW437, and it is the cost of the third tree. Entries are keyed by file name, and across
+        // these trees `Program.cs` is six files and `Surfaces.cs` is two. None of the repeats parks a
+        // thread today; the day one does, this says so — where the count case would throw on a
+        // duplicate key, which is a crash standing where a sentence belongs.
+        var repeated = Sleeps.Found()
+            .GroupBy(one => one.File, StringComparer.Ordinal)
+            .Where(one => one.Count() > 1)
+            .Select(one => one.Key)
+            .ToList();
+
+        Assert.True(
+            repeated.Count == 0,
+            $"{repeated.Count} file name(s) are two files that both park a thread, and an entry can "
+                + $"only be about one of them: {string.Join(", ", repeated)}");
+    }
+
+    [Fact]
     public void Every_sleep_says_why_it_is_not_a_wait()
     {
         Assert.All(

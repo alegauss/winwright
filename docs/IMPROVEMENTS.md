@@ -240,32 +240,6 @@ worth it is WW430's — what the guest spends on cases that need nothing from it
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW437 the third tree the sleep catalogue does not walk
-
-WW184's catalogue says what it is for in its own words: to see every way of parking a
-thread and then say which is which, because "an unseen one cannot be called right".
-WW198 widened the spellings for exactly that reason, after `FrameRun` parked twice and
-the count said one.
-
-It walks `Checkout.Everything`, which is `src` and `tests`. The repository has three
-trees.
-
-Found by writing an entry and being told the file sleeps nowhere. WW406 put a parked
-thread in `tools/Winwright.Blame/Parked.cs` — deliberately, because the reader of a hang
-dump needs a hang to read — and the catalogue could not see it either way: the sweep
-never offered it, and the entry describing it was refused as one that had stopped
-matching.
-
-What makes this a task rather than a widened constant is that the trees are not the same
-question. A sleep in `src` is the engine waiting, which is what Block C's criterion is
-about. One in `tests` is a case arranging a condition. One in `tools` is neither: those
-are programs a person runs, several measure time on purpose, and `Winwright.Typing` is
-built to take the desk for minutes. A catalogue sweeping them under the same four kinds
-would file most of them under one and say nothing.
-
-So the design is whether `tools` joins the sweep with a kind of its own or gets a
-reading beside it — and the cheap half is that nothing today says it is outside.
-
 ### §WW438 the run that was green before the ship
 
 WW176 holds `Criteria.Known` to the roadmap in both directions: a criterion the roadmap
@@ -316,3 +290,25 @@ precondition must not be wrong in.
 
 What it needs is for the suite to ask the engine rather than repeat it, and the engine
 has no public door for the question.
+
+### §WW446 the other spelling of a wait
+
+WW175 made every deadline visible because one nearly went silently. `Attempt.Until`
+polls until its look answers something other than null, so a look that cannot answer
+null returns on the first poll and the wait is gone — nothing throws, and the sighting
+says it was found, because it was. The catalogue's question is the one that would have
+caught it: what does this look answer when the thing has not arrived.
+
+It matches `Attempt.Until(` and `Attempt.Until<`. The other spelling is
+`Attempt.UntilTrue(`, which takes a look answering a bool and is used 45 times across
+the three trees — Menu, NotificationArea, Pick, Selecting, Traversal, Settled, CaseRun
+and Suite among them. A look that can never answer false collapses that wait exactly as
+a look that can never answer null collapses the other, and C# cannot refuse either at
+the call site.
+
+So the catalogue holds eighteen deadlines and there are sixty-odd. That is worse than a
+shorter list: a reader is shown a catalogue claiming to be every place this project
+waits, and most of them are not in it.
+
+Found while WW437 was checking whether widening the sweep to `tools` changed this twin's
+counts — it does not, because nothing in `tools` opens the one spelling it reads.

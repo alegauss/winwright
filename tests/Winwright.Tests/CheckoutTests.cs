@@ -58,7 +58,7 @@ public sealed class CheckoutTests
         // names is one no sweep knows which side of the line it is on — which is how an adopter's
         // driving half was read as this project's library. The run that adds a second sample, or a
         // project at the root, is the run that has to say whose it is.
-        var named = new[] { Checkout.Engine, Checkout.At("tools"), Checkout.Suite, Checkout.Samples };
+        var named = new[] { Checkout.Engine, Checkout.Tools, Checkout.Suite, Checkout.Samples };
 
         var projects = Directory
             .EnumerateFiles(Checkout.Root, "*.csproj", SearchOption.AllDirectories)

@@ -72,6 +72,22 @@ internal sealed record Sleep(string File, int Sleeps, Sleeping Kind, string Beca
 /// sleeping in prose — this one and <c>Waits</c> — and a scan that counted those would report a
 /// criterion broken by a comment explaining why it is not.
 /// </para>
+/// <para>
+/// WW437 gave it the third tree. It walked <c>src</c> and <c>tests</c>, and the repository has
+/// <c>tools</c> as well — five files of it park a thread, among them the one this project parks most
+/// deliberately: <c>Winwright.Blame</c> holds a thread so that a dump has a hang in it. Found by
+/// writing that entry and being told the file sleeps nowhere, which is this catalogue blind from
+/// both sides at once.
+/// </para>
+/// <para>
+/// No kind of its own for them, and that is the answer to what the design asked. The question this
+/// catalogue puts is what a parking is doing, and reading the eight sites says: three are the
+/// interval between one look and the next, four are the arm or the spacing an experiment is
+/// measuring, and one is a thread held still to be photographed. Every one of those is a kind
+/// already written down — and a kind meaning <em>this file is in tools</em> would say which
+/// directory it is in rather than what its sleeping is for, which is the one thing this list exists
+/// to say.
+/// </para>
 /// </summary>
 internal static class Sleeps
 {
@@ -205,6 +221,30 @@ internal static class Sleeps
                 + "delete the case. The second is the opposite and is why the count is two — the "
                 + "constructor waits on that thread's own signal, with a ten-second deadline, so a "
                 + "window that never opened is a refusal rather than a case parked on its own fixture"),
+
+        // --- the tools, which WW437 brought into the sweep --------------------------------------------
+        new("Parked.cs", 1, Sleeping.UnderTest,
+            "WW406's reader needs a hang to read, and a hang dump cannot be arranged any other way: "
+                + "this thread is held in a method named on purpose so the frame the reader blames is "
+                + "one a case can assert on. The parking is the thing being imaged, and it is released "
+                + "when the tool's own input closes"),
+        new("Disturbance.cs", 2, Sleeping.UnderTest,
+            "the arms of WW355's rig, which is what the numbers in Keyboard's entry above were "
+                + "measured with. `quiet` does nothing for the whole drain, so its sleep is the arm "
+                + "itself; the others poke the window every 25ms for the same 300, which is how hard "
+                + "each arm disturbs — the intervals are the experiment and not a wait for it"),
+        new("FirstRead.cs", 1, Sleeping.UnderTest,
+            "the pause between batches is the variable this arm sweeps: it answers what a first read "
+                + "costs at each spacing, so waiting on a condition instead would delete the reading"),
+        new("Sweep.cs", 4, Sleeping.Machinery,
+            "three are the interval between one look and the next while a control is read or settles, "
+                + "which is what a deadline is made of; the fourth is the spacing between code units "
+                + "and is the thing being swept, taken after each one including the last so no "
+                + "character of a round is the one nothing followed"),
+        new("Transfer.cs", 3, Sleeping.Machinery,
+            "two are the same poll-and-drain intervals; the third is the engine's own guard pause put "
+                + "back at one rung of WW368's ladder, so the two rungs either side of it are the same "
+                + "act with the pause in two places rather than two experiments"),
 
         new("TraversalTests.cs", 1, Sleeping.StillAWait,
             "there is nothing out here to observe: the state a traversal settles into is the one "
