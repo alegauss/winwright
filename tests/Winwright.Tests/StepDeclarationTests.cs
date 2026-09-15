@@ -1,4 +1,4 @@
-using Winwright.Scenarios;
+﻿using Winwright.Scenarios;
 
 using Xunit;
 
@@ -245,5 +245,44 @@ public class StepDeclarationTests
                 Assert.True(setting is not null, $"{one} is not a property of a step any more");
                 Assert.True(setting.IsPrivate, $"{one} can be set from outside the engine");
             });
+    }
+
+    [Fact]
+    public void Each_way_of_claiming_a_declared_string_says_what_it_claims()
+    {
+        // WW434. The third family is a list now, like `covers` and `sameAs` before it, and the
+        // sentence is the row's rather than one ternary chain's: all three used to announce "the
+        // reading is the '...' string", so a step carrying `notLabel` said the opposite of its own
+        // claim. A fourth spelling joins by being a row, and this is what a row has to produce.
+        var said = new (string Field, string Written, string Says)[]
+        {
+            ("label", "stats.live.on", "the reading is the 'stats.live.on' string"),
+            ("notLabel", "stats.live.off", "the reading is not the 'stats.live.off' string"),
+            ("beginsWithLabel", "menu.itemChecked", "the reading begins with the 'menu.itemChecked' string"),
+        };
+
+        Assert.All(
+            said,
+            one =>
+            {
+                var claim = Assert.Single(Wrote.Step("Text", "read", (one.Field, one.Written)).Claims);
+
+                Assert.Equal(one.Field, claim.Field);
+                Assert.Equal(one.Says, claim.Says);
+            });
+    }
+
+    [Fact]
+    public void Two_ways_of_claiming_one_declared_string_are_refused_naming_both()
+    {
+        // The other half the list carries: the refusal built the same three names again, so a fourth
+        // spelling would have been accepted beside one of them. Both are named, because a refusal
+        // that says one is a refusal a reader answers by deleting the wrong field.
+        var refused = Assert.Throws<ScenarioRefusedException>(
+            () => Wrote.Step("Text", "read", ("label", "stats.live.on"), ("notLabel", "stats.live.off")));
+
+        Assert.Contains("'label'", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("'notLabel'", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("one declared string claimed different ways", refused.Because, StringComparison.Ordinal);
     }
 }

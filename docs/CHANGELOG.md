@@ -308,6 +308,7 @@
 - ✅ **WW403** **a criterion a partial ship raises is labelled by its task and the catalogue groups by block, which nothing says** — The field is `Under` now and says a label may be a task's id, with the partial ships kept in a place of their own (design superseded: WW87's criterion was already labelled by its task).
 - ✅ **WW410** **a runner at one round is asserted to have printed and never to have printed something a reader could act on** — No runner concludes below thirty rounds, and the smoke run asserts each of them refuses (design recorded in `tools/Winwright.Typing/Enough.cs`).
 - ✅ **WW426** **the floor a verdict needs is one number for five runners measuring rates that differ by an order** — Each arm declares the rate it is about and needs three over it in rounds, so a short run is refused with that arm's own number (design recorded in `tools/Winwright.Typing/Arms.cs`).
+- ✅ **WW434** **the label family is three properties and two hand-written chains, where the sweep and pointing families are one list** — The three ways of claiming a declared string are one list the claim set and refusal walk, each saying what it claims (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

@@ -66,30 +66,6 @@ its own.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW434 the third family that did not move
-
-A step has three families of fields that are one claim spelled several ways. WW275 and
-WW292 gave `covers` its two relatives; WW308 gave `sameAs` its three; WW83 gave `label`
-its two, `notLabel` and `beginsWithLabel`.
-
-WW391 made the first two a list apiece. `Comparisons` and `Sweepings` each hold the
-spellings in the order the fold takes them, beside what each one means, and everything
-that needs either — the property, the mode, the claim set's naming, the refusal that
-says which key to delete — walks that one list. A fourth spelling joins by being a row
-in it.
-
-The label family did not move, and it is the family with the most places to be told.
-Each spelling is its own property, so three; `Claims` picks the field name out of a
-ternary chain; and `RefusesTwoStringClaims` builds the list again to say which two were
-written. A fourth would join in three of those and would compile without the fourth,
-which is the shape WW323 and WW340 each closed once elsewhere.
-
-What holds it back from being the same change is that these three are not folded.
-`Sweeps` and `PointsAt` each hold one value with a mode beside it; the three label
-fields are three values the run reads separately, and `CaseRun` resolves a different
-string for each. So the list is what they share and the fold is not, which is what a
-design has to answer: whether a family can be one list without being one field.
-
 ### §WW435 the two shapes the walk did not reach
 
 WW58 made the format data and WW66 made the loader ask it: whether a field is text or a

@@ -526,6 +526,49 @@ public sealed record StepDeclaration
     ];
 
     /// <summary>
+    /// The three spellings of one declared-string claim, in the order the fold takes them, each
+    /// beside what it says of the reading. WW434.
+    /// <para>
+    /// The third family, and the one with the most places to be told: WW391 made <c>covers</c> and
+    /// <c>sameAs</c> a list apiece and left this one as three properties, a ternary chain in the
+    /// claim set and the same three names built again by the refusal. A fourth spelling joined in
+    /// three places and compiled without the fourth, which is the shape WW323 and WW340 each closed
+    /// once elsewhere.
+    /// </para>
+    /// <para>
+    /// A list without a fold, which is what this family can have: the three are three values a run
+    /// reads separately — <c>CaseRun</c> resolves a different string for each — so the properties
+    /// stay and the spellings are kept once. What the row carries beside the field is what the claim
+    /// says, because the ternary said the same sentence for all three: a step carrying
+    /// <c>notLabel</c> announced "the reading is the '…' string", which is the claim it makes
+    /// inverted.
+    /// </para>
+    /// </summary>
+    private static readonly (string Field, string Says)[] Stringings =
+    [
+        ("label", "the reading is the '{0}' string"),
+        ("notLabel", "the reading is not the '{0}' string"),
+        ("beginsWithLabel", "the reading begins with the '{0}' string"),
+    ];
+
+    /// <summary>
+    /// The declared-string claim this step wrote: the field the case spelled, the key it names, and
+    /// what it says of the reading. Null where the step claims no declared string. WW434, and
+    /// <see cref="Compared"/>'s third twin.
+    /// </summary>
+    private (string Field, string Key, string Says)? Stringed
+    {
+        get
+        {
+            foreach (var (named, says) in Stringings)
+                if (Wrote.Trimmed(named) is { } key)
+                    return (named, key, says);
+
+            return null;
+        }
+    }
+
+    /// <summary>
     /// The three spellings of one sweep, in the order the fold takes them, each beside how it
     /// compares. WW391, and the same shape as <see cref="Comparisons"/> for the same reason.
     /// </summary>
@@ -762,8 +805,11 @@ public sealed record StepDeclaration
             var sweptAs = Swept?.Field ?? "covers";
             var pointedAs = Compared?.Field ?? "sameAs";
 
-            var stringedAs = Label is not null ? "label"
-                : NotLabel is not null ? "notLabel" : "beginsWithLabel";
+            // WW434. The third family reads off its list like the two above rather than out of a
+            // ternary chain, which is also what lets the sentence be the claim's own: all three used
+            // to announce "the reading is the '…' string", so a step carrying `notLabel` said the
+            // opposite of what it claims.
+            var stringed = Stringed;
 
             Claiming(Absent, "absent", "its locator matches nothing");
             Claiming(Expected is not null, "expect", $"the reading is '{Expected}'");
@@ -776,9 +822,12 @@ public sealed record StepDeclaration
             Claiming(Never is not null, "never", $"'{Never}' is never shown while this waits");
             Claiming(Spoken, "spoken", "everything under the locator that speaks is named");
             Claiming(
-                (Label ?? NotLabel ?? BeginsWithLabel) is not null,
-                stringedAs,
-                $"the reading is the '{Label ?? NotLabel ?? BeginsWithLabel}' string");
+                stringed is not null,
+                stringed?.Field ?? Stringings[0].Field,
+                string.Format(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    stringed?.Says ?? Stringings[0].Says,
+                    stringed?.Key));
             Claiming(
                 ExpectReported is not null,
                 "expectReported",
@@ -1357,13 +1406,13 @@ public sealed record StepDeclaration
     {
         // WW83. Three ways of claiming one declared string — is it, is it not, does it begin with it —
         // and at most one of them, named one by one so the refusal says which field to delete.
-        var strings = new List<string>();
-        if (step.Label is not null)
-            strings.Add("'label'");
-        if (step.NotLabel is not null)
-            strings.Add("'notLabel'");
-        if (step.BeginsWithLabel is not null)
-            strings.Add("'beginsWithLabel'");
+        //
+        // WW434: off the family's own list, so a fourth spelling is refused beside the three by being
+        // a row rather than by somebody remembering this method exists.
+        var strings = Stringings
+            .Where(one => step.Wrote.Trimmed(one.Field) is not null)
+            .Select(one => $"'{one.Field}'")
+            .ToList();
 
         if (strings.Count > 1)
         {
