@@ -393,7 +393,7 @@
 - ✅ **WW416** **the guest answers the host in markers nothing reads back, so one it writes and no arm switches on is silent** — The three words that cross are a catalogue held both ways, cut at the here-strings that tell the writing from the reading (design recorded in `tests/Winwright.Tests/GuestMarkerTests.cs`).
 - ✅ **WW418** **the case proving a wait is skipped asks whether the test host is armed, so another class holding a half decides it** — The two in-process cases say out loud that they hold only while nothing else in the test host is armed, and the out-of-process claim is named as the pair's other half.
 - ✅ **WW419** **every reading the engine takes about an application is driven with one application up, and a run has several** — Two fixtures up at once each report their own surfaces and geometry, and the instance check tells them apart by pid (design recorded in `tests/Winwright.Tests/TwoApplicationsTests.cs`).
-- ✅ **WW420 (the red-run arm)** **the runner's failure arms are read for their shape and run by nothing, and the door that would drive them exists** — tools/runner-arms.ps1 drives a red scratch run through the guest, and the dump and sequence it gathers come back named as the runner says.
+- ✅ **WW420** **the runner's failure arms are read for their shape and run by nothing, and the door that would drive them exists** — runner-arms.ps1 drives the bound, the held tree it leaves and a red run through the guest, and each says what it found (design recorded in `tools/runner-arms.ps1`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

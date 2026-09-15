@@ -332,32 +332,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW420 the refusals of the thing that reports refusals, driven
-
-`tools/runner-arms.ps1` drives the runner against a scratch tree under a `-Name` of its
-own, so nothing it syncs is this repository's guest tree. Its first arm is the one WW406
-proved by hand: a red scratch run whose gather keeps the larger dump and the newer
-sequence and names both. `RunnerArmsTests` holds the driver to the sentences it reads
-out of the runner, so a reworded line is red on the host instead of being read as a run
-that stopped early.
-
-Still run by nothing: the bound, and the held tree the bound leaves behind. They can be
-driven as a pair, and the order is the design. A scratch command that sleeps past
-`-Bound 1` is refused with "did not answer within 1 minute(s)", with a holder named from
-under the tree. A second run under the same name, straight after, meets the sync
-refusing with "the guest tree is held open by", naming that command. The driver then
-waits out the declared sleep and runs the red arm, which also proves the guest was left
-syncable.
-
-Both refusals exit 3, as every refusal does, so each is recognised by its sentence, and
-the driver's exit 2 stays for a refusal it did not provoke. `RunnerArmsTests` gains the
-two sentences.
-
-Not provokable: a guest with no SDK, short of taking the SDK away. The driver already
-says so rather than skipping it.
-
-The pair costs a sleep of about two minutes on top of the red arm's three.
-
 ### §WW430 the third of the suite that runs twice
 
 WW417's gate runs 738 of 2061 cases on the host in four seconds. The guest then runs all
