@@ -1350,6 +1350,69 @@ $first = $script:Bring[0]
 $got = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\$first", (Join-Path $results $first))
 if (-not $got.Ok) { Write-Host "  no $first came back from the guest" -ForegroundColor Yellow }
 
+# WW430. What the gate's half costs in the guest, which nothing had ever measured.
+#
+# The gate answers those cases on the host in seconds and the guest then runs them again, and the
+# saving is not available: WW117's roll call refuses a run where the cases discovered and the cases
+# recorded disagree, and that refusal is why a green here means what it says. A guest told to skip
+# them would have to be told, and a way of telling it is a way of telling it the wrong number.
+#
+# So this is the measurement instead. The suite reports one duration, so nobody could say whether
+# those cases cost the guest twenty seconds or two minutes - and the answer is what decides whether
+# the question is worth reopening. Read out of the results the run already brings back, against the
+# gate's own derivation of which classes need no desk, so the two cannot name different halves.
+#
+# What it answered, on the guest on 2026-09-15: 779 of 2109 cases need no desk and took 25s of the
+# 778s that run spent in cases. Three percent of the case time, and less than that off the clock
+# because they run in parallel - so the saving the skip would buy is not worth the mechanism, and
+# what this line is for now is noticing the day that stops being true.
+$read = Join-Path $results $first
+if ($got.Ok -and (Test-Path -LiteralPath $read) -and $first -like '*.trx') {
+    $gate = Join-Path $PSScriptRoot 'host-gate.ps1'
+    $suiteTree = Join-Path $script:Tree 'tests'
+
+    if ((Test-Path -LiteralPath $gate) -and (Test-Path -LiteralPath $suiteTree)) {
+        # Passed as an expression and held in a name the dot-source cannot reach. `host-gate.ps1`
+        # declares `$Suite` in its own param block, and dot-sourcing brings that into this scope
+        # empty - so a variable called `$suite` here is blanked the moment the gate is loaded, and
+        # the call made with it refuses after the whole suite has run. Measured exactly that way.
+        . $gate -DefineOnly
+        $gated = @(Get-GatedClasses -Suite (Join-Path $script:Tree 'tests'))
+
+        if ($gated.Count -gt 0) {
+            $cases = @(Select-Xml -LiteralPath $read -XPath '//*[local-name()="UnitTestResult"]' |
+                ForEach-Object { $_.Node } |
+                Where-Object { $_.testName -and $_.duration })
+
+            $desks = [TimeSpan]::Zero
+            $free = [TimeSpan]::Zero
+            $many = 0
+
+            foreach ($case in $cases) {
+                # The class is what the collection is declared on, and a case is named for its method
+                # under it: everything up to the last dot, then the last name in that.
+                $named = $case.testName -replace '\(.*$', ''
+                $owner = ($named -split '\.')[-2]
+                $took = [TimeSpan]::Parse($case.duration, [Globalization.CultureInfo]::InvariantCulture)
+
+                if ($gated -contains $owner) {
+                    $free += $took
+                    $many++
+                }
+                else { $desks += $took }
+            }
+
+            # Case time and not the clock, said so: the cases that need no desk run in parallel there,
+            # so what the guest would get back by not running them is less than this and never more.
+            $whole = $free + $desks
+            if ($whole -gt [TimeSpan]::Zero) {
+                Write-Host ("  gated       {0} of {1} case(s) need no desk, and took {2:n0}s of the {3:n0}s this run spent in cases" -f `
+                    $many, $cases.Count, $free.TotalSeconds, $whole.TotalSeconds)
+            }
+        }
+    }
+}
+
 # Everything after the first is only chased on a green run, and that is a fact about this repository
 # rather than about the guest. The roll call hangs off AfterTargets="VSTest", so a failed VSTest never
 # reaches it and writes no discovered.txt - warning about its absence on a red run reports a missing

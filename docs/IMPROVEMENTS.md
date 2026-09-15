@@ -195,29 +195,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW430 the third of the suite that runs twice
-
-WW417's gate runs 738 of 2061 cases on the host in four seconds. The guest then runs all
-2061, including those 738, and they cost it whatever they cost — a minute or two of a
-run that takes ten to seventeen.
-
-The obvious saving is not available. WW117's roll call refuses a run where the cases
-discovered and the cases recorded disagree, and that refusal is the reason a green here
-means what it says: it caught a test host that died with 900 cases never attempted. A
-guest told to skip 738 would have to be told, and a mechanism for telling it is a
-mechanism for telling it the wrong number.
-
-There is also a reason not to want the saving. The gate and the guest run the same cases
-on two machines, and twice this session that has been the finding rather than the waste:
-a case that passes on the host and fails in the guest is what this repository exists to
-notice, and the desk-free half is only desk-free by declaration.
-
-So what is worth having is the measurement rather than the skip. Nobody knows what those
-738 cost in the guest, because the suite reports one duration. If it is twenty seconds
-the question is closed; if it is two minutes, the roll call could carry the gate's own
-reading — the same cases, answered on the host — which is a different claim from
-skipping them and one WW117 could still refuse.
-
 ### §WW431 the case that could have answered here
 
 WW417's gate runs the classes outside the serial collection, and that is the only
