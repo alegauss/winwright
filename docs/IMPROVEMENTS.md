@@ -627,27 +627,3 @@ precondition must not be wrong in.
 
 What it needs is for the suite to ask the engine rather than repeat it, and the engine
 has no public door for the question.
-
-### §WW442 the overflow the tray fixture shuts whatever it found
-
-`TrayPlacementTests.The_fixture_leaves_the_overflow_the_way_it_found_it` reads whether
-the overflow is open, adds an icon through `TrayIconFixture.Add`, and asserts the same
-reading afterwards. WW197 made it read both sides on purpose: a flyout somebody left
-standing had turned the old "it is shut" assertion into a claim about the desk.
-
-The fixture never took the other half. `Placed()` searches with `openingTheOverflow:
-true` and then calls `NotificationArea.CloseOverflow()` whatever it found, so an
-overflow already open before `Add` is shut after it. Measured in a guest run on
-2026-09-14, during WW420: expected open, read shut, on a tree whose only change from a
-green run half an hour earlier was one catalogue entry. The case is red whenever an
-earlier case or the shell left the flyout standing and green otherwise, which reads as a
-flake and is not one.
-
-What to build: `Placed()` reads the overflow before it searches and shuts it only where
-it was shut. Then provoke both sides instead of waiting for a desk to supply one: open
-the overflow with `NotificationArea.OpenOverflow`, add, assert it is still open; shut
-it, add, assert it is still shut. Opening asks the desk, so that side excuses through
-`BusyDesk` like the cases beside it.
-
-Left open: whichever earlier case left the flyout standing has a leftover of its own,
-and this does not find it.

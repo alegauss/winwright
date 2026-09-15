@@ -88,6 +88,12 @@ internal static class DeskDiscards
             "NotificationArea.CloseOverflow(",
             "the same tidiness at the end of the case, after both icons have been found and "
                 + "asserted on"),
+        new("TrayPlacementTests.An_overflow_standing_before_the_fixture_is_still_standing_after_it",
+            "NotificationArea.CloseOverflow(",
+            "WW442. Shutting the flyout this case opened, in a finally, once the one reading it is "
+                + "about has been asserted. A shell that will not shut it leaves it standing for the "
+                + "next case, and the case that would notice reads the flyout either side of its own "
+                + "work rather than assuming it started shut"),
     ]);
 
     /// <summary>Every member of this suite that throws a desk reading away, read out of the sources.</summary>

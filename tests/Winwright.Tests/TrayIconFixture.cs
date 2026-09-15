@@ -307,10 +307,16 @@ internal sealed class TrayIconFixture : IDisposable
         // is what this waits on. Handing Attempt.Until the search would have made every deadline
         // here one look long, since the first look already answers something.
         var last = default(TraySearch);
+
+        // WW442. Whether any of these searches pressed the chevron, which is the only flyout this
+        // fixture has any business shutting. Across every poll and not read off the last one: the
+        // first search opens it, and every search after that finds it standing and says `Already`.
+        var opened = false;
         var found = Attempt.Until(
             () =>
             {
                 last = NotificationArea.Find(Tip, openingTheOverflow: true, settleMs: 1000, pollMs: 25);
+                opened |= last.Overflow is { Held: true, Already: false };
                 return last.Icon;
             },
             PlacedMs,
@@ -324,12 +330,23 @@ internal sealed class TrayIconFixture : IDisposable
         // standing and said so to nobody, and the case asserting this fixture leaves the overflow as
         // it found it went red about the fixture. Answered as what it is: a desk that will not work
         // its own flyout is excusable, exactly as one that would not open it already is.
-        var shut = NotificationArea.CloseOverflow();
-        if (!shut.Held)
+        //
+        // WW442. And only where it opened one. This shut the flyout whatever it found, so one somebody
+        // else had left standing was gone after `Add` — and the case holding this fixture to leaving
+        // the overflow as it found it went red on every run where that happened, which read as a
+        // flake. The engine's own readings already keep this rule (`Placing` shuts only what it
+        // opened); the fixture was the one place that did not. Asked of the searches rather than of a
+        // look at the flyout beforehand, because a single look is the read WW324 measured answering
+        // nothing for a flyout that was standing.
+        if (opened)
         {
-            throw new DeskRefusedException(
-                Precondition.Absent(OverflowState.PreconditionName, shut.Because ?? shut.ToString()),
-                $"the overflow was opened looking for '{Tip}' and would not shut again: {shut}");
+            var shut = NotificationArea.CloseOverflow();
+            if (!shut.Held)
+            {
+                throw new DeskRefusedException(
+                    Precondition.Absent(OverflowState.PreconditionName, shut.Because ?? shut.ToString()),
+                    $"the overflow was opened looking for '{Tip}' and would not shut again: {shut}");
+            }
         }
 
         // WW179. The search already says which of the two it was, and this used to throw either

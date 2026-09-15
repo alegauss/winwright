@@ -1,4 +1,6 @@
 using Winwright.Acting;
+using Winwright.Locating;
+using Winwright.Verdicts;
 
 using Xunit;
 
@@ -75,6 +77,48 @@ public sealed class TrayPlacementTests
 
 
         Assert.Equal(before, NotificationArea.Overflow() is not null);
+    }
+
+    [Fact]
+    public void An_overflow_standing_before_the_fixture_is_still_standing_after_it()
+    {
+        // WW442. The side of the case above that only a desk could supply, and it did: a guest run
+        // read the flyout open before `Add` and shut after it, because the fixture shut whatever it
+        // found. Waiting for an earlier case to leave one standing is how that stayed a flake for a
+        // task and a half, so this leaves one standing itself.
+        var opened = NotificationArea.OpenOverflow();
+        if (BusyDesk.Excused(opened.AsAssertion("the overflow opens")))
+            return;
+
+        try
+        {
+            // WW411's arm, for WW411's reason: the verb held the flyout, and a shell that shut it again
+            // before anything here was added has left nothing standing to be kept — a measurement
+            // that never started, not one that failed.
+            if (!Attempt.UntilTrue(() => NotificationArea.Overflow() is not null, 2000, 25).Happened
+                && BusyDesk.Excused(Precondition.Absent(
+                    OverflowState.PreconditionName,
+                    $"the overflow was opened and had shut again before the fixture added anything: {opened}")))
+            {
+                return;
+            }
+
+            using var icon = BusyDesk.Built(() => TrayIconFixture.Add("winwright placement standing"));
+            if (icon is null)
+                return;
+
+            // To a deadline, because a single look is the read WW324 measured answering nothing for
+            // a flyout that was there. A flyout the fixture shut stays shut for the whole of it.
+            Assert.True(
+                Attempt.UntilTrue(() => NotificationArea.Overflow() is not null, 2000, 25).Happened,
+                $"the overflow was standing before the fixture added '{icon.Tip}' ({opened}) and was "
+                    + "shut after it, so the fixture shut a flyout it never opened");
+        }
+        finally
+        {
+            // This case's own flyout, and nobody else's: it opened it above.
+            NotificationArea.CloseOverflow();
+        }
     }
 
     [Fact]
