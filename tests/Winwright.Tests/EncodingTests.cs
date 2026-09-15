@@ -30,6 +30,11 @@ namespace Winwright.Tests;
 /// being that file.
 /// </para>
 /// <para>
+/// WW425: and a run at a time within the line, for the same reason one level down. A correct dash on
+/// the line cannot round-trip either, so it masked damage beside it exactly as the Portuguese string
+/// masked damage in the file. The finding still prints the line.
+/// </para>
+/// <para>
 /// Every non-ASCII character here is written as an escape, deliberately. A check on encoding that
 /// carried its own non-ASCII would be one more file for the next tool to damage, its own literals
 /// would be findings, and its failure would look exactly like the thing it exists to find.
@@ -118,6 +123,50 @@ public sealed class EncodingTests
         return was.Length < text.Length;
     }
 
+    /// <summary>
+    /// Every run of characters on a line that was encoded twice, each with what it was before.
+    /// <para>
+    /// WW425, and it is WW284's argument one level down. A line is a finding only if every character
+    /// on it survives the round trip, and a genuine em-dash does not - it encodes to 0x97, a lone
+    /// continuation byte - so damage on a line that also carried a correct dash was not a finding.
+    /// WW421's own control showed it: a damaged dash beside a real one passed, and the same damage
+    /// alone was found. This repository's prose is full of em-dashes and the damage is an em-dash.
+    /// </para>
+    /// <para>
+    /// A run is the characters between two ASCII ones, and that is the unit the mistake leaves. Every
+    /// byte of a multi-byte UTF-8 sequence is 0x80 or above, so misread as the codepage each becomes a
+    /// character outside ASCII: the damage is always a run of them, and the correct prose beside it
+    /// is a different run as soon as a single ASCII character stands between. What still hides is
+    /// damage touching a correct character with nothing between them, which is text nobody writes.
+    /// </para>
+    /// </summary>
+    /// <param name="line">The line, decoded as the UTF-8 it is.</param>
+    internal static IReadOnlyList<(string Damaged, string Was)> Damage(string line)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+
+        var found = new List<(string, string)>();
+        var at = 0;
+        while (at < line.Length)
+        {
+            if (line[at] < 0x80)
+            {
+                at++;
+                continue;
+            }
+
+            var began = at;
+            while (at < line.Length && line[at] >= 0x80)
+                at++;
+
+            var run = line[began..at];
+            if (EncodedTwice(run, out var was))
+                found.Add((run, was));
+        }
+
+        return found;
+    }
+
     [Fact]
     public void The_table_holds_one_entry_per_byte_it_stands_for()
     {
@@ -175,6 +224,42 @@ public sealed class EncodingTests
     }
 
     [Fact]
+    public void Damage_beside_a_correct_dash_on_the_same_line_is_found()
+    {
+        // WW425, and the control WW421 ran by accident: the damaged dash and a real one on one line.
+        // Read as a line it cannot round-trip, because the real dash is a lone continuation byte in
+        // the codepage - so the line reading says nothing, which is the green this replaces.
+        var line = $"a real {Dash} and a damaged {Damaged} on one line";
+
+        Assert.False(EncodedTwice(line, out _));
+
+        var (damaged, was) = Assert.Single(Damage(line));
+        Assert.Equal(Damaged, damaged);
+        Assert.Equal(Dash, was);
+    }
+
+    [Fact]
+    public void The_run_reading_refuses_none_of_the_prose_the_line_reading_let_through()
+    {
+        // The half that keeps the narrower reading honest: a run is a smaller window, and a smaller
+        // window is where two correct characters could start to look like one damaged one. The
+        // prose this repository actually writes, together on a line and apart.
+        var tilde = (char)0x00E3;
+        var cedilla = (char)0x00E7;
+        var acute = (char)0x00F3;
+
+        Assert.Empty(Damage($"Vis{tilde}o geral {Dash} Sess{acute}es"));
+        Assert.Empty(Damage($"Configura{cedilla}{tilde}o {Dash}{Dash} Relat{acute}rio"));
+        Assert.Empty(Damage($"{Dash}"));
+        Assert.Empty(Damage("plain ascii"));
+        Assert.Empty(Damage(""));
+
+        // And the damage it must still find with nothing else on the line, which is the line
+        // reading's own case kept.
+        Assert.Single(Damage($"a dash {Damaged} here"));
+    }
+
+    [Fact]
     public void No_tracked_text_file_was_encoded_twice()
     {
         var found = new List<string>();
@@ -186,7 +271,10 @@ public sealed class EncodingTests
             {
                 // The line and its text, because a path alone sends a reader to a file to search it
                 // by eye for a character they cannot see - which is how six of these went unnoticed.
-                if (EncodedTwice(lines[at], out _))
+                //
+                // WW425: read by run and reported by line. The line is what a reader needs; the run is
+                // what keeps a correct dash elsewhere on it from standing in front of the damage.
+                if (Damage(lines[at]).Count > 0)
                     found.Add($"{Path.GetRelativePath(Checkout.Root, path)}:{at + 1}: {lines[at].Trim()}");
             }
         }
