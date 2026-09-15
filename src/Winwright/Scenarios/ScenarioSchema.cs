@@ -296,16 +296,26 @@ public static class ScenarioSchema
     /// </exception>
     public static Field Of(IReadOnlyList<Field> fields, string key, Taking holds)
     {
-        foreach (var field in fields)
-        {
-            if (!string.Equals(field.Name, key, StringComparison.Ordinal))
-                continue;
+        var field = Row(fields, key);
+        return field.Holds == holds
+            ? field
+            : throw new InvalidOperationException(
+                $"the schema says '{key}' holds {field.Holds} and it is being read as {holds}");
+    }
 
-            return field.Holds == holds
-                ? field
-                : throw new InvalidOperationException(
-                    $"the schema says '{key}' holds {field.Holds} and it is being read as {holds}");
-        }
+    /// <summary>
+    /// The row <paramref name="fields"/> calls <paramref name="key"/>, whatever it holds. What
+    /// <see cref="Of"/> looks up before it judges the kind, and what a reader asks where the kind is
+    /// the thing it is about to find out.
+    /// </summary>
+    /// <param name="fields">The shape's rows.</param>
+    /// <param name="key">The field.</param>
+    /// <exception cref="InvalidOperationException">Where the schema has no such field.</exception>
+    internal static Field Row(IReadOnlyList<Field> fields, string key)
+    {
+        foreach (var field in fields)
+            if (string.Equals(field.Name, key, StringComparison.Ordinal))
+                return field;
 
         throw new InvalidOperationException(
             $"the schema has no '{key}', so nothing can read one; there is {Spelled(fields)}");

@@ -58,6 +58,73 @@ public sealed class WrittenTests
     }
 
     [Fact]
+    public void A_field_the_shape_declares_and_nothing_reads_is_refused_naming_it()
+    {
+        // WW435, and the half that makes the walk a gate. The loader reads every row the schema
+        // declares and hands the values to a door that takes them one by one — so a row added to the
+        // schema and not to that door is read, dropped, and never heard of again: a key an author may
+        // write, a tool will publish, and the run will ignore. This is the row nobody asked for,
+        // named at the first load rather than the first case that trusted it.
+        //
+        // Over a shape of this case's own, because the two the loader walks are exactly the ones it
+        // reads every field of — a made-up row is the only one that can stand for the one somebody
+        // adds tomorrow.
+        IReadOnlyList<Field> shape =
+        [
+            new("name", true, Taking.Text, "what it is called", []),
+            new("later", false, Taking.Text, "the row added after the loader was written", []),
+        ];
+
+        var wrote = new Written(shape, [("name", "a shape"), ("later", "something")]);
+        Assert.Equal("a shape", wrote.Text("name"));
+
+        var wrong = Assert.Throws<InvalidOperationException>(() => wrote.Handed("case"));
+
+        Assert.Contains("'later'", wrong.Message, StringComparison.Ordinal);
+        Assert.Contains("a case", wrong.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("'name'", wrong.Message, StringComparison.Ordinal);
+
+        // And the other way, or the check above would pass on a shape that refuses everything.
+        wrote.Text("later");
+        wrote.Handed("case");
+    }
+
+    [Fact]
+    public void The_kinds_a_case_and_a_fixture_hold_are_read_back_as_what_they_are()
+    {
+        // WW435. A step's fields are text or a flag; a case carries arrays of words and an array of
+        // steps, and a fixture an object of text. Each is asked of the schema before it is answered,
+        // so a row saying 'tags' holds text cannot be read here as words.
+        var wrote = new Written(
+            ScenarioSchema.Case,
+            [
+                ("name", "a case"),
+                ("steps", (IReadOnlyList<StepDeclaration>)[Wrote.Step("Edit", "read", ("expect", "b"))]),
+                ("tags", (IReadOnlyList<string>)["smoke"]),
+                ("onlyReads", true),
+            ]);
+
+        Assert.Equal(["smoke"], wrote.Words("tags"));
+        Assert.Empty(wrote.Words("needs"));
+        Assert.True(wrote.Truth("onlyReads"));
+        Assert.Single(wrote.Shaped<StepDeclaration>("steps"));
+
+        var launched = new Written(
+            ScenarioSchema.Fixture,
+            [
+                ("name", "a fixture"),
+                ("variables", (IReadOnlyDictionary<string, string>)new Dictionary<string, string> { ["WW"] = "1" }),
+            ]);
+
+        Assert.Equal("1", launched.Pairs("variables")["WW"]);
+        Assert.Empty(launched.Words("arguments"));
+
+        // The kind is the schema's to say, at both doors.
+        Assert.Throws<InvalidOperationException>(() => wrote.Words("name"));
+        Assert.Throws<InvalidOperationException>(() => wrote.Shaped<StepDeclaration>("tags"));
+    }
+
+    [Fact]
     public void Text_is_what_the_case_wrote_and_trimmed_is_what_every_rule_reads()
     {
         // Blank is nothing and never the empty string: a field a case left as spaces claimed

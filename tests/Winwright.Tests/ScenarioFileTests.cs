@@ -267,6 +267,74 @@ public class ScenarioFileTests
     }
 
     [Fact]
+    public void Every_field_a_case_and_a_fixture_declare_arrives_off_the_walk()
+    {
+        // WW435. The loader read a case's nine fields and a fixture's eight one hand-written line
+        // each, beside a schema row that had already named the key — and nothing but a case held the
+        // two lists together, so a row added to one and not the other was a key an author may write,
+        // a tool will publish, and the run will ignore. It walks the rows now, which is what the step
+        // has done since WW391.
+        //
+        // Both shapes with every field written, because the walk is only as good as its widest row:
+        // 'tags' and 'arguments' are arrays of words, 'variables' is an object of text and 'steps' is
+        // an array of shapes, and each is read by a different verb. A file writing only text would
+        // pass over a walk that had lost all three.
+        var cases = ScenarioFile.Read("all.cases.json", """
+            {
+              "fixtures": [
+                {
+                  "name": "sampled",
+                  "environment": "pt-BR",
+                  "flag": "--language",
+                  "arguments": ["--chromeless"],
+                  "variables": { "WINWRIGHT_ROLE": "reader" },
+                  "shareable": true,
+                  "language": "pt-BR",
+                  "resident": true
+                }
+              ],
+              "cases": [
+                {
+                  "name": "every field a case has",
+                  "tags": ["smoke"],
+                  "needs": ["a display that renders"],
+                  "catches": "a field that stopped arriving because a row was added and nothing read it",
+                  "filed": "WW435",
+                  "fixture": "sampled",
+                  "forEach": "settings.panels",
+                  "onlyReads": true,
+                  "steps": [
+                    { "locator": "Group[name=\"{}\"]", "act": "read", "answers": true }
+                  ]
+                }
+              ]
+            }
+            """);
+
+        var only = Assert.Single(cases);
+
+        Assert.Equal("every field a case has", only.Name);
+        Assert.Equal(["smoke"], only.Tags);
+        Assert.Equal(["a display that renders"], only.Needs);
+        Assert.Equal("a field that stopped arriving because a row was added and nothing read it", only.Catches);
+        Assert.Equal("WW435", only.Filed);
+        Assert.Equal("settings.panels", only.ForEach);
+        Assert.True(only.OnlyReads);
+        Assert.Single(only.Steps);
+
+        var against = only.Fixture;
+
+        Assert.Equal("sampled", against.Name);
+        Assert.Equal("pt-BR", against.Environment);
+        Assert.Equal("--language", against.Flag);
+        Assert.Equal(["--chromeless"], against.Arguments);
+        Assert.Equal("reader", against.Variables["WINWRIGHT_ROLE"]);
+        Assert.True(against.Shareable);
+        Assert.Equal("pt-BR", against.Language);
+        Assert.True(against.Resident);
+    }
+
+    [Fact]
     public void The_three_comparison_keys_no_case_file_ever_used_arrive_on_the_step()
     {
         // WW307. The list above pins the schema against a written-out list, which is the schema

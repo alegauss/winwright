@@ -251,16 +251,18 @@ public sealed class ScenarioFile
 
             Unknown(at, one, ScenarioSchema.Fixture);
 
-            var name = Text(at, one, ScenarioSchema.Fixture, "name");
+            var wrote = Walked(at, one, ScenarioSchema.Fixture);
             var declared = Addressed(at, () => FixtureDeclaration.Of(
-                name!,
-                Text(at, one, ScenarioSchema.Fixture, "environment"),
-                Text(at, one, ScenarioSchema.Fixture, "flag"),
-                Words(at, one, ScenarioSchema.Fixture, "arguments"),
-                Pairs(at, one, ScenarioSchema.Fixture, "variables"),
-                Truth(at, one, ScenarioSchema.Fixture, "shareable"),
-                Text(at, one, ScenarioSchema.Fixture, "language"),
-                Truth(at, one, ScenarioSchema.Fixture, "resident")));
+                wrote.Text("name")!,
+                wrote.Text("environment"),
+                wrote.Text("flag"),
+                wrote.Words("arguments"),
+                wrote.Pairs("variables"),
+                wrote.Truth("shareable"),
+                wrote.Text("language"),
+                wrote.Truth("resident")));
+
+            wrote.Handed("fixture");
 
             if (!seen.Add(declared.Name))
                 throw new ScenarioRefusedException(at, $"'{declared.Name}' is declared twice, so a case naming it names two");
@@ -279,32 +281,46 @@ public sealed class ScenarioFile
 
         Unknown(at, one, ScenarioSchema.Case);
 
-        var name = Text(at, one, ScenarioSchema.Case, "name");
-        ScenarioSchema.Of(ScenarioSchema.Case, ScenarioSchema.Steps, Taking.Steps);
-        if (!one.TryGetProperty(ScenarioSchema.Steps, out var steps))
-            throw new ScenarioRefusedException($"{at}.{ScenarioSchema.Steps}", "a case declares its steps, and this one declares none");
+        var wrote = Walked(at, one, ScenarioSchema.Case, field => Stepped(at, one, field));
+        var against = Against(at, wrote.Text("fixture"), fixtures);
+
+        var declared = Addressed(at, () => CaseDeclaration.Declared(
+            wrote.Text("name")!,
+            wrote.Shaped<StepDeclaration>(ScenarioSchema.Steps),
+            wrote.Words(ScenarioSchema.Tags),
+            wrote.Words(ScenarioSchema.Needs),
+            wrote.Text(ScenarioSchema.Catches),
+            wrote.Text("filed"),
+            against,
+            wrote.Truth("onlyReads"),
+            wrote.Text("forEach")));
+
+        wrote.Handed("case");
+        return declared;
+    }
+
+    /// <summary>
+    /// The steps of one case, which is the field of a case that is not a value. Read here rather
+    /// than in the walk because the walk answers kinds and this answers a shape: a step faces its own
+    /// refusals, at its own address, before the case it belongs to is declared.
+    /// </summary>
+    private static IReadOnlyList<StepDeclaration> Stepped(string at, JsonElement one, Field field)
+    {
+        if (!one.TryGetProperty(field.Name, out var steps))
+            throw new ScenarioRefusedException($"{at}.{field.Name}", "a case declares its steps, and this one declares none");
 
         if (steps.ValueKind != JsonValueKind.Array)
-            throw new ScenarioRefusedException($"{at}.{ScenarioSchema.Steps}", "it is not an array of steps");
+            throw new ScenarioRefusedException($"{at}.{field.Name}", "it is not an array of steps");
 
         var declared = new List<StepDeclaration>();
         var index = 0;
         foreach (var step in steps.EnumerateArray())
         {
-            declared.Add(OneStep($"{at}.{ScenarioSchema.Steps}[{index}]", step));
+            declared.Add(OneStep($"{at}.{field.Name}[{index}]", step));
             index++;
         }
 
-        var tags = Words(at, one, ScenarioSchema.Case, ScenarioSchema.Tags);
-        var needs = Words(at, one, ScenarioSchema.Case, ScenarioSchema.Needs);
-        var catches = Text(at, one, ScenarioSchema.Case, ScenarioSchema.Catches);
-        var filed = Text(at, one, ScenarioSchema.Case, "filed");
-        var against = Against(at, one, fixtures);
-        var onlyReads = Truth(at, one, ScenarioSchema.Case, "onlyReads");
-        var forEach = Text(at, one, ScenarioSchema.Case, "forEach");
-
-        return Addressed(at, () => CaseDeclaration.Declared(
-            name!, declared, tags, needs, catches, filed, against, onlyReads, forEach));
+        return declared;
     }
 
     /// <summary>
@@ -313,9 +329,9 @@ public sealed class ScenarioFile
     /// exist would otherwise silently get the application as it comes, and its expectations describe
     /// an environment nothing put the window into.
     /// </summary>
-    private static FixtureDeclaration? Against(string at, JsonElement one, FixtureSet fixtures)
+    private static FixtureDeclaration? Against(string at, string? named, FixtureSet fixtures)
     {
-        if (Text(at, one, ScenarioSchema.Case, "fixture") is not { } named)
+        if (named is null)
             return null;
 
         return fixtures.Named(named)
@@ -332,29 +348,7 @@ public sealed class ScenarioFile
 
         // Every field is read before anything is declared, so a refusal about a field's kind wears
         // that field's own address and never the step's with the field's in brackets after it.
-        //
-        // WW391. One line per field stood here — twenty-nine of them, each naming a key the schema
-        // row beside it had already named, and then twenty-nine arguments in a fixed order at the
-        // bottom. Nothing but a case held the two lists together, so a field added to one and not
-        // the other was a key that loaded and did nothing, which is the failure this format exists
-        // to refuse. The schema is walked instead, in the order it declares, and what it says a
-        // field holds is what is read.
-        var wrote = new List<(string Field, object? Value)>();
-        foreach (var field in ScenarioSchema.Step)
-        {
-            wrote.Add((field.Name, field.Holds switch
-            {
-                Taking.Text => Text(at, step, ScenarioSchema.Step, field.Name),
-                Taking.Truth => Truth(at, step, ScenarioSchema.Step, field.Name),
-
-                // A harness error and never a refusal: nothing about the author's file is wrong. A
-                // step's fields are text or a flag, and a row saying otherwise is the schema and the
-                // step disagreeing about what a step is.
-                _ => throw new InvalidOperationException(
-                    $"the schema says a step's '{field.Name}' holds {field.Holds}, and a step's fields "
-                        + "are text or true or false"),
-            }));
-        }
+        var wrote = Walked(at, step, ScenarioSchema.Step);
 
         // WW258. Asked of the schema rather than checked here, so the rule and the `oneOf` a tool is
         // published cannot drift: the group is declared on the fields, and a third way of addressing a
@@ -369,7 +363,56 @@ public sealed class ScenarioFile
                 throw new ScenarioRefusedException(at, wrong);
         }
 
-        return Addressed(at, () => StepDeclaration.Of(new Written(wrote)));
+        return Addressed(at, () => StepDeclaration.Of(wrote));
+    }
+
+    /// <summary>
+    /// One shape's fields, read off the rows that declare them.
+    /// <para>
+    /// WW391. One line per field stood in the step's reader — twenty-nine of them, each naming a key
+    /// the schema row beside it had already named, and then twenty-nine arguments in a fixed order at
+    /// the bottom. Nothing but a case held the two lists together, so a field added to one and not
+    /// the other was a key that loaded and did nothing, which is the failure this format exists to
+    /// refuse. The schema is walked instead, in the order it declares, and what it says a field holds
+    /// is what is read.
+    /// </para>
+    /// <para>
+    /// WW435 pointed the same walk at a case and at a fixture, which took seventeen more of those
+    /// lines. What made them a second task rather than a repeat is the kinds: a step's fields are
+    /// text or a flag, and a case carries arrays of words and an array of steps. The value kinds are
+    /// read here; a kind that is not a value is <paramref name="shaped"/>'s, because a shape faces
+    /// its own refusals at its own address and this walk knows nothing about them.
+    /// </para>
+    /// </summary>
+    /// <param name="at">Where in the file this shape is, for the refusals.</param>
+    /// <param name="element">The object it was written as.</param>
+    /// <param name="fields">The rows that say what it may hold.</param>
+    /// <param name="shaped">What reads a row holding shapes rather than a value.</param>
+    /// <exception cref="ScenarioRefusedException">Where a field is absent and required, or of the wrong kind.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// Where a row holds shapes and nothing was handed in to read them. A harness error and never a
+    /// refusal: nothing about the author's file is wrong.
+    /// </exception>
+    private static Written Walked(
+        string at, JsonElement element, IReadOnlyList<Field> fields, Func<Field, object?>? shaped = null)
+    {
+        var wrote = new List<(string Field, object? Value)>();
+        foreach (var field in fields)
+        {
+            wrote.Add((field.Name, field.Holds switch
+            {
+                Taking.Text => Text(at, element, fields, field.Name),
+                Taking.Truth => Truth(at, element, fields, field.Name),
+                Taking.Words => Words(at, element, fields, field.Name),
+                Taking.Pairs => Pairs(at, element, fields, field.Name),
+                _ => shaped is not null
+                    ? shaped(field)
+                    : throw new InvalidOperationException(
+                        $"the schema says '{field.Name}' holds {field.Holds}, and nothing here reads one"),
+            }));
+        }
+
+        return new Written(fields, wrote);
     }
 
     /// <summary>

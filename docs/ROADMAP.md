@@ -17,7 +17,7 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 💭 **WW435** (deps: —) **a case's and a fixture's fields still reach the loader one hand-written line each, where a step's are read off its rows** — WW391 walked the schema for a step and left seventeen lines naming a key beside a row that already named it; a case and a fixture are the shape it just closed. → §WW435
+- 💭 **WW444** (deps: —) **a step's rows are held to its own reader by nothing, so a row no property reads is a key that loads and does nothing** — WW435 refuses a case field nothing reads at the first load; a step's are read lazily by its properties, so the same row on a step is caught by nothing. → §WW444
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
