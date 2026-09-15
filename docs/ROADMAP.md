@@ -31,8 +31,8 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 💭 **WW446** (deps: —) **the deadline catalogue counts `Attempt.Until(` and not `Attempt.UntilTrue(`, so 45 of the waits here are in it nowhere** — WW175's near-miss was a look that could not answer nothing; a look that cannot answer false collapses a deadline the same way, and nothing asks. → §WW446
 - 💭 **WW447** (deps: —) **seven cases that only reflect sit in a serial class, so a verb added to the engine is red eight minutes into a guest run** — WW431 lets a case in a serial class say it needs no desk and be gated; the verb catalogue's half never got the mark, and WW440 paid the eight minutes. → §WW447
+- 💭 **WW448** (deps: —) **twelve cases wait for the fixture's window with the same line, budget and poll, each written out where it is used** — WW193 took eighteen copies of one walk out of this suite for the same reason; WW446 catalogued these twelve and none of them differs. → §WW448
 
 ## Done when — Block A
 

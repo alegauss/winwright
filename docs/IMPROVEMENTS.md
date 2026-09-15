@@ -122,28 +122,6 @@ at all.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW446 the other spelling of a wait
-
-WW175 made every deadline visible because one nearly went silently. `Attempt.Until`
-polls until its look answers something other than null, so a look that cannot answer
-null returns on the first poll and the wait is gone — nothing throws, and the sighting
-says it was found, because it was. The catalogue's question is the one that would have
-caught it: what does this look answer when the thing has not arrived.
-
-It matches `Attempt.Until(` and `Attempt.Until<`. The other spelling is
-`Attempt.UntilTrue(`, which takes a look answering a bool and is used 45 times across
-the three trees — Menu, NotificationArea, Pick, Selecting, Traversal, Settled, CaseRun
-and Suite among them. A look that can never answer false collapses that wait exactly as
-a look that can never answer null collapses the other, and C# cannot refuse either at
-the call site.
-
-So the catalogue holds eighteen deadlines and there are sixty-odd. That is worse than a
-shorter list: a reader is shown a catalogue claiming to be every place this project
-waits, and most of them are not in it.
-
-Found while WW437 was checking whether widening the sweep to `tools` changed this twin's
-counts — it does not, because nothing in `tools` opens the one spelling it reads.
-
 ### §WW447 the catalogue half that waits for a desk it never uses
 
 `NoCooperationTests` is two classes in one file. One half builds a bare Win32 window and
@@ -165,3 +143,28 @@ twenty-nine seconds into a guest run, after a host gate that had been green for 
 seconds. The fix is seven attributes, and what `NoDeskTests` already checks is what
 makes them safe to add: no marked case may reach for the desk, and no class holding one
 may build something that does before its cases run.
+
+### §WW448 the launch wait nobody extracted
+
+`Attempt.UntilTrue(() => TopLevelWindows.Largest(launched.Pid) is not null, 20000, 25)`
+appears in eleven test files and, with a different budget, in a twelfth. Each is
+followed by the same assertion — that the fixture drew no window in the milliseconds it
+waited. Counting them is what WW446 did; nothing had, because the catalogue it widened
+had never seen this spelling.
+
+They are identical, and that is the finding. WW193 pulled eighteen copies of the walk up
+to the solution file out of this suite and argued it in one sentence: the loop was
+spelled with three different variable names, which is how a reader misses that they are
+the same four lines. This is the same shape with the numbers still agreeing — and the
+numbers drift first, because a slow guest is answered by raising one budget where the
+red happened to be.
+
+What it wants is the door the suite already has: `Fixture.Started` and its neighbours
+are where a launch is arranged, and waiting for the window the launch was for belongs
+beside them. What has to be decided is whether the wait joins the launch — so a case
+cannot forget it — or stays a call a case makes, which is what the two off-pattern ones
+need: `SuiteLaunchTests` launches through the suite's own door, and the typing rig
+launches its own fixture.
+
+The saving is small and the reason is not: a wait nobody can find is a wait nobody
+tunes.

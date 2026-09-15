@@ -48,26 +48,110 @@ internal static class Deadlines
     /// <summary>The generic spelling, which one caller needs because its lambda infers nothing.</summary>
     internal const string OpeningTyped = "Attempt.Until<";
 
+    /// <summary>
+    /// The other spelling, which takes a look answering a bool. WW446.
+    /// <para>
+    /// This catalogue matched one of the two for as long as it existed, and the one it matched is
+    /// the rarer: eighteen deadlines were written down and there were sixty-odd. A reader was shown
+    /// a list claiming to be every place this project waits, with most of them missing — which is
+    /// worse than a shorter list, because nothing said it was short.
+    /// </para>
+    /// <para>
+    /// The hazard is the same one read through a different type. <c>Until</c> collapses where the
+    /// look cannot answer null; this collapses where it cannot answer false, and C# refuses neither
+    /// at the call site. What the entries below say for one of these is therefore what makes the
+    /// look false, which is the same question in the words this spelling has.
+    /// </para>
+    /// </summary>
+    internal const string OpeningTrue = "Attempt.UntilTrue(";
+
+    /// <summary>Every way a deadline is opened, matched in the sources exactly as written. WW446.</summary>
+    internal static IReadOnlyList<string> Spellings { get; } = new ReadOnlyCollection<string>(
+        [Opening, OpeningTyped, OpeningTrue]);
+
     internal static IReadOnlyList<Deadline> Known { get; } = new ReadOnlyCollection<Deadline>(
     [
         // --- the engine ---------------------------------------------------------------------------
         new("Keyboard.cs", 1, "null, where the control reads back as something other than what was typed"),
         new("Resolve.cs", 1, "null, from a walk that matched no element under the root"),
-        new("Traversal.cs", 1, "null, where the focused element is absent or is the one it started on"),
+        new("Traversal.cs", 2, "null, where the focused element is absent or is the one it started on. "
+            + "WW446's second is the nudge: false while the slider still reads the range it was on, "
+            + "so a key that moved nothing waits out its budget rather than reporting a move"),
         new("Desk.cs", 1, "null, where the automation root cannot be touched or the reading threw"),
+        new("Menu.cs", 3, "false while the highlight is where it was — the three are opening a menu, "
+            + "walking it and opening a submenu, and each waits for the highlighted entry to become "
+            + "something other than the one it started on, which is what says the key landed"),
+        new("NotificationArea.cs", 8, "false while the shell's flyout is not readable, or while the "
+            + "icon is not in it, or while the menu the icon put up has not arrived — and false the "
+            + "other way round for the one that waits for the flyout to go, where it is the overflow "
+            + "still being there. The eight are the whole of what this surface has to wait for, "
+            + "because the shell draws all of it and answers for none of it"),
+        new("Pick.cs", 3, "false while the picker holds no items, while it is still expanded, and "
+            + "while the selection is the one the walk had already passed — the last is what stops a "
+            + "walk reading the entry it came from as the entry it landed on"),
+        new("Selecting.cs", 1, "false while the item does not read as selected, and where a caller "
+            + "handed a second condition, while that is not true either"),
+        new("Settled.cs", 1, "false while any process this run started is still alive, which is the "
+            + "reading Block B's first criterion is about"),
+        new("Suite.cs", 1, "false while the launched process owns no top-level window above the floor "
+            + "— a launch returns before a window exists, and this is the gap WW374 is inside"),
+        new("CaseRun.cs", 5, "false while the reading a step claims has not arrived: the matches "
+            + "under a locator, the rows whose headers are wrong, the elements that announce nothing "
+            + "and the window a step is about. Each look rebuilds its own list every poll, so what "
+            + "makes it false is the tree as it is now rather than what an earlier look kept"),
 
         // --- the suite ----------------------------------------------------------------------------
         new("AttemptTests.cs", 7, "null on most, and deliberately never on one: a look that is always "
             + "answered is what proves a thing already there costs no sleep"),
         new("FixtureTests.cs", 1, "null, until the fixture has written the dump this is waiting on"),
-        new("NotificationAreaTests.cs", 1, "null, while no Menu on the desktop holds this fixture's "
+        new("NotificationAreaTests.cs", 2, "null, while no Menu on the desktop holds this fixture's "
             + "entries — a menu the verb has reported open is a window the tree may not have caught "
-            + "up with, and nothing found is what that looks like"),
+            + "up with, and nothing found is what that looks like. WW446's second is false while the "
+            + "shell's flyout is not readable, which is the same wait the engine takes and is taken "
+            + "here because the case is about what the fixture did to the tray"),
         new("TrayIconFixture.cs", 1, "null, from the search's own Icon — which is the whole of WW175: "
             + "the search itself is never null and waiting on it would poll once"),
-        new("Waits.cs", 1, "whatever the caller's look answers, since this only supplies the deadline"),
+        new("Waits.cs", 2, "whatever the caller's look answers, since this only supplies the deadline. "
+            + "Both spellings pass through here for the same reason, and neither is this file's to "
+            + "explain: what it owns is the number, and what it is waiting for belongs to whoever asked"),
         new("DeadlineTests.cs", 1, "never nothing, on purpose: the one case here that drives the collapse "
             + "this whole catalogue exists because of, so the behaviour is stated and not discovered"),
+        new("SlowMachineTests.cs", 2, "the two ends, written as the constants they are: one look is "
+            + "always false and one is always true, because what these cases drive is the machinery "
+            + "itself — a deadline spent in full and a deadline answered on the first poll"),
+
+        // --- the suite's launches, which are one wait written twelve times ---------------------------
+        // WW446. Each of these is `TopLevelWindows.Largest(launched.Pid) is not null` at 20000ms and a
+        // 25ms poll, and the only differences between them are the two budgets in the two that are not
+        // a fixture launch. Catalogued a file at a time because that is this list's unit; that it is
+        // one wait spelled twelve times is a finding of its own and is filed rather than folded here.
+        new("ArrivedLateTests.cs", 1, "false while the fixture's process owns no top-level window"),
+        new("DeclaredLocatorTests.cs", 1, "false while the fixture's process owns no top-level window"),
+        new("ForEachTests.cs", 1, "false while the fixture's process owns no top-level window"),
+        new("LabelReadingTests.cs", 1, "false while the fixture's process owns no top-level window"),
+        new("NudgeTests.cs", 1, "false while the fixture's process owns no top-level window"),
+        new("PairedRowTests.cs", 1, "false while the fixture's process owns no top-level window"),
+        new("SettlesLateTests.cs", 1, "false while the fixture's process owns no top-level window"),
+        new("ShutPickerTests.cs", 1, "false while the fixture's process owns no top-level window"),
+        new("SpokenTests.cs", 1, "false while the fixture's process owns no top-level window"),
+        new("TypeUnionTests.cs", 1, "false while the fixture's process owns no top-level window"),
+        new("WpfInputTests.cs", 1, "false while the fixture's process owns no top-level window"),
+        new("SuiteLaunchTests.cs", 1, "false while the fixture's process owns no top-level window, on "
+            + "a shorter budget than the eleven above because this case launches through the door the "
+            + "suite uses rather than through the fixture's own"),
+
+        // --- the rest of the suite, and the tools ----------------------------------------------------
+        new("OwnRenderTests.cs", 1, "false while the application has not said it is answering renders, "
+            + "which is the state WW374 is about: a window that is up and a half that is not hooked yet"),
+        new("PointerTests.cs", 1, "false while the checkbox still reads Off, so a click that landed "
+            + "nowhere spends the budget rather than reading as a click that worked"),
+        new("TrayPlacementTests.cs", 2, "false while the shell's flyout is not readable, both times — "
+            + "once to open it and once to say it was standing before the fixture added an icon, "
+            + "which is how a flyout the fixture never opened is told from one it did"),
+        new("Landing.cs", 1, "false while the control reads back what it read before the keys were "
+            + "sent, which is what the typing rig is measuring the cost of"),
+        new("Program.cs", 1, "false while the fixture's process owns no top-level window — the typing "
+            + "rig's own launch, waiting for the window it is about to type into"),
     ]);
 
     /// <summary>
@@ -96,9 +180,12 @@ internal static class Deadlines
             // WW202, and this is the one that mattered most: Sleeps was repaired for exactly this a
             // task earlier and its twin was left with it. Nothing was miscounted, which is the
             // point — the next entry explaining itself in prose is what would have broken a count.
+            // WW446. Every spelling rather than the one this started with, which is WW198's repair
+            // made to this catalogue's twin: a rule matching one way of writing the thing is answered
+            // by somebody writing it the other way, and then nothing knows about it at all.
             var waits = File.ReadLines(file)
                 .Select(Checkout.Code)
-                .Sum(line => Occurrences(line, Opening) + Occurrences(line, OpeningTyped));
+                .Sum(line => Spellings.Sum(one => Occurrences(line, one)));
             if (waits > 0)
                 found.Add(new Deadline(Path.GetFileName(file), waits, ""));
         }
