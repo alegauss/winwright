@@ -393,12 +393,15 @@ public sealed class DeskProbeTests
         var runner = Runner();
 
         var asking = System.Text.RegularExpressions.Regex
-            .Matches(runner, @"-SessionWithinMinutes\s+(?<given>\S+)")
+            .Matches(runner, @"-SessionWithinMinutes\s+(?<given>[^\r\n]+)")
             .Select(one => one.Groups["given"].Value)
             .ToList();
 
+        // WW428 moved the number into the runner's list of waits, and the claim here is unchanged:
+        // one call asks for the wait, and it asks for the wait that list declares rather than for a
+        // number of its own.
         Assert.Single(asking);
-        Assert.Equal("$script:SessionMinutes", asking[0]);
+        Assert.Contains("Waited 'session'", asking[0], StringComparison.Ordinal);
 
         // The call it is on, so the one wait cannot drift to a different question. `cmd /c exit` is
         // the session probe: the cheapest program that cannot run without a session.
@@ -406,10 +409,17 @@ public sealed class DeskProbeTests
         Assert.Contains("-SessionWithinMinutes", probe, StringComparison.Ordinal);
 
         // And a number that is a wait rather than a nod at one. Bounded for the reason WW386 gives
-        // about the run itself: a wait that cannot end is worse than a refusal.
-        var minutes = Between(runner, "$script:SessionMinutes = ", "\n").Trim();
+        // about the run itself: a wait that cannot end is worse than a refusal. WW428: read off the
+        // row, which is where the number lives now — RunnerWaitsTests holds the list's own shape.
+        var row = System.Text.RegularExpressions.Regex.Match(
+            runner,
+            @"Named = 'session'\s*\r?\n\s*Seconds = (?<seconds>\d+)",
+            System.Text.RegularExpressions.RegexOptions.CultureInvariant,
+            TimeSpan.FromSeconds(1));
 
-        Assert.True(int.TryParse(minutes, out var waiting), $"the session wait is '{minutes}'");
+        Assert.True(row.Success, "the runner's list declares no session wait this case can read");
+
+        var waiting = int.Parse(row.Groups["seconds"].Value, System.Globalization.CultureInfo.InvariantCulture) / 60;
         Assert.InRange(waiting, 1, 10);
     }
 

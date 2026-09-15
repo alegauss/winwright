@@ -144,11 +144,78 @@ $script:GuestRepo = "C:\src\$($script:Name)"
 # chose, which is also what stops two guest runs from colliding.
 $script:RunName = 'vm-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')
 
-# WW412. How long a guest gets to finish logging in before having no session is a refusal. Three,
-# argued the way the tools wait above argues ten: long enough that a machine which is fine is not
-# called broken — the cold run this was measured on reached a desk in ninety seconds — and short,
-# because a login that has not finished in three minutes is a desk to look at rather than wait on.
-$script:SessionMinutes = 3
+# WW428. Every wait this run may take, in one list.
+#
+# There are four and each used to be argued in a paragraph beside itself, with none of them naming
+# another. WW412 wrote the argument out again for the session wait and picked three minutes by
+# reasoning from the tools wait's ten, because there was nowhere to point at - which is how the
+# fifth would be picked too.
+#
+# The arguments are one argument: long enough that a machine which is fine is not called broken,
+# and bounded, because a wait that cannot end is worse than a refusal - it gets killed by hand,
+# which is what leaves a guest tree the next sync cannot delete. What the separate paragraphs cost
+# is not a wrong number. It is that nobody could read them together: a person asking how long a
+# cold run may take before something is wrong had to find four paragraphs and add them up.
+#
+# A row is what the wait is for, how long it has, and the words it gives up with - so the refusal a
+# reader meets stands beside the number that produced it, and the next wait is argued against these
+# rather than beside them.
+#
+# `run` is the one a caller may change, so its row reads -Bound. `desk` is the probe's own twelve
+# looks half a second apart: declared here because the runner spends it, argued in
+# `tools/desk-probe.ps1` because that is the file that decides what a look is worth.
+$script:Waits = @(
+    [pscustomobject]@{
+        Named = 'tools'
+        Seconds = 600
+        For = 'VMware Tools to answer in a guest that is starting'
+        Giving = 'VMware Tools never answered in the guest within'
+    }
+    [pscustomobject]@{
+        Named = 'session'
+        Seconds = 180
+        For = 'a guest to finish logging in, after which having no session is a refusal'
+        Giving = 'the guest has no interactive desktop session'
+    }
+    [pscustomobject]@{
+        Named = 'run'
+        Seconds = $Bound * 60
+        For = 'the guest run itself, which is the only one a caller sets'
+        Giving = 'the guest run did not answer within'
+    }
+    [pscustomobject]@{
+        Named = 'desk'
+        Seconds = 6
+        For = "the desk probe's own looks in the guest, taken once before the run and again after a clear"
+        Giving = 'the desk probe wrote no answer in the guest'
+    }
+)
+
+function Waited {
+    <#
+      One wait, by name. WW428: a name nobody declared is a wait somebody added beside the list
+      rather than in it, so it refuses rather than answering a default.
+    #>
+    param([Parameter(Mandatory)] [string] $Named)
+
+    $found = @($script:Waits | Where-Object { $_.Named -eq $Named })
+    if ($found.Count -ne 1) {
+        Refuse "'$Named' is not a wait this runner declares" 'The waits are $script:Waits, and every one of them is named there.'
+    }
+
+    return $found[0]
+}
+
+# The total, as a reader asks for it: how long a cold run may take before every wait has given up.
+# Said once in the header rather than left to be added up, which is the whole of WW428.
+function Waiting {
+    $whole = ($script:Waits | Measure-Object -Property Seconds -Sum).Sum
+    $named = ($script:Waits | ForEach-Object {
+        if ($_.Seconds -ge 60) { "$($_.Named) $([int]($_.Seconds / 60))m" } else { "$($_.Named) $($_.Seconds)s" }
+    }) -join ', '
+
+    return "$named; a run that spends every one of them is refused after about $([int]($whole / 60))m"
+}
 
 # What the guest runs, and where it leaves what it wrote. WW227: defaulted rather than required, so
 # this repository's own invocation is unchanged and an adopter names the two things that differ.
@@ -647,8 +714,9 @@ function Start-Guest {
         -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$asking`""
 
     # Ten minutes, not five. freewilly measured an agent taking longer than five to come up after a
-    # component install, and gave up on a machine that was fine.
-    $deadline = (Get-Date).AddMinutes(10)
+    # component install, and gave up on a machine that was fine. WW428: the number is the `tools` row.
+    $tools = Waited 'tools'
+    $deadline = (Get-Date).AddSeconds($tools.Seconds)
     $began = Get-Date
     while ((Get-Date) -lt $deadline) {
         Start-Sleep -Seconds 10
@@ -672,7 +740,7 @@ function Start-Guest {
         Write-Host "  starting    ${waited}s waited; $asked, tools: $state"
     }
 
-    Refuse 'VMware Tools never answered in the guest within ten minutes' 'Look at the VM console. A guest stopped at the encryption prompt or the boot menu is waiting for a person, not for this script.'
+    Refuse "VMware Tools never answered in the guest within $([int]($tools.Seconds / 60)) minute(s)" 'Look at the VM console. A guest stopped at the encryption prompt or the boot menu is waiting for a person, not for this script.'
 }
 
 function Started {
@@ -787,6 +855,10 @@ if ($envFile) { Write-Host "  settings    $envFile" }
 Write-Host "  tree        $script:Tree  ->  $script:GuestRepo"
 Write-Host "  running     $script:Run"
 
+# WW428. What this run may spend waiting, said once and where a reader is already looking, rather
+# than left to be added up out of four paragraphs.
+Write-Host "  waits       $(Waiting)"
+
 # WW417. The half of the suite that can answer before a VM is started, asked first.
 #
 # Three times in one session a guest run of seventeen minutes ended on a rule that reads sources
@@ -863,7 +935,7 @@ Write-Host '  guest       running, tools answering'
 # still logging in, and the ten minutes spent above on the tools that reach the desk were spent so
 # that a machine which is fine is not called broken.
 $null = Invoke-OnTheDesk -Vmx $vmxPath -Arguments @('C:\Windows\System32\cmd.exe', '/c', 'exit') `
-    -SessionWithinMinutes $script:SessionMinutes
+    -SessionWithinMinutes ([int]((Waited 'session').Seconds / 60))
 Write-Host '  desk        a session is logged in'
 
 # --- the tree the guest will test ---------------------------------------------------------------
@@ -1247,7 +1319,8 @@ if (-not (Test-Path -LiteralPath $results)) { $null = New-Item -ItemType Directo
 # Through the same door the probe used, so a desk that locked itself between the two is refused with
 # the sentence the probe would have given it rather than with "the guest never finished the run".
 # WW386: and with a bound, which is the one call here that has ever had time to need one.
-$ran = Invoke-OnTheDesk -Vmx $vmxPath -Arguments @("$script:GuestSync\run.cmd") -Minutes $Bound -Stage $results
+$ran = Invoke-OnTheDesk -Vmx $vmxPath -Arguments @("$script:GuestSync\run.cmd") `
+    -Minutes ([int]((Waited 'run').Seconds / 60)) -Stage $results
 if (-not $ran.Ok) {
     Refuse "the guest never finished the run: $($ran.Output)"
 }

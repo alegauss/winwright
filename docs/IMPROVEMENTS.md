@@ -28,27 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW428 four waits and no list
-
-`run-tests-vm.ps1` now waits in four places: ten minutes for VMware Tools, three for a
-session, sixty for the run, and a poll inside the desk probe. Each number is argued in a
-paragraph beside itself and none of them mentions another.
-
-The arguments are the same argument. Long enough that a machine which is fine is not
-called broken; bounded, because a wait that cannot end is worse than a refusal. WW412
-wrote it again because there was nowhere to point at it, and picked three by reasoning
-from the tools wait's ten — which is how the next one will be picked too.
-
-What that costs is not a wrong number. It is that the numbers cannot be read together: a
-person asking how long a cold run can take before something is wrong has to find four
-paragraphs, and the answer is their sum with one of them multiplied by a retry.
-
-The shape this project uses is a list. `$script:Tidied` is one for the desks a run will
-tidy; `Sleeps.Known` is one for what the suite may wait on and why. A row per wait —
-what it is for, how long, and the sentence it prints when it gives up — would make the
-total readable, let a case assert the runner has no wait outside it, and give the fifth
-one a place to be argued against rather than beside.
-
 ### §WW436 the read that waits for a thread this process owns
 
 `TopLevelWindows.OfProcess` walks `EnumWindows`, keeps the windows owned by the process
