@@ -351,6 +351,16 @@ internal static class Cooperating
             "ask the application for the tree one named popup is holding — the surface a copy of the "
                 + "screen cannot photograph open and has nothing to photograph closed, so a preview "
                 + "of a flyout nobody has clicked is a picture only the application can take"),
+
+        // --- WW440, and it is the one verb here that is about the half without needing it ------------
+        // Catalogued as needing nothing, which is not a technicality: it answers against an
+        // application that references this project nowhere, and the answer is false, which is true.
+        // The two above go dark without the half; this is how a harness finds out whether they will,
+        // and an adopter whose captures come back unanswered has no other way to ask.
+        new("OwnRender.ArmedIn", Cooperation.None, false,
+            "whether an application has put up the window its in-app half declares — the reading the "
+                + "engine already took to decide whether a silence it recorded still stands, and the "
+                + "one this suite used to take again with a walk of its own"),
     ]);
 
     /// <summary>The verbs a bare window is enough for, which is what the run drives.</summary>

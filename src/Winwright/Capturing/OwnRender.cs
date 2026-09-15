@@ -437,6 +437,31 @@ public static class OwnRender
     }
 
     /// <summary>
+    /// Whether an application has its in-app half armed: the one reading, asked rather than
+    /// repeated.
+    /// <para>
+    /// WW440. This was private, and the suite walked <c>HWND_MESSAGE</c> a second time with its own
+    /// P/Invokes to answer the same question. Where the window hangs, that only a message-only
+    /// parent finds one, and which process counts as the owner are decisions made here; a copy of
+    /// them elsewhere goes on answering the old way after this moves, and answers confidently,
+    /// because the name it looks for is held to this one by a case and the walk is held by nothing.
+    /// </para>
+    /// <para>
+    /// WW418 is why that mattered enough to publish. The reading had been about its own subject and
+    /// became the stated precondition of three cases — and a precondition that drifts does not fail,
+    /// it says the condition holds when it does not, which is the one direction a precondition must
+    /// not be wrong in.
+    /// </para>
+    /// <para>
+    /// Public because it answers a question an adopter has too, and has no other way to ask: a
+    /// capture that comes back unanswered is either a product with no half or a launch that never
+    /// told it where to write, and this is the half of that the harness can see from outside.
+    /// </para>
+    /// </summary>
+    /// <param name="pid">The process to ask about.</param>
+    public static bool ArmedIn(int pid) => pid > 0 && Armed((uint)pid);
+
+    /// <summary>
     /// Whether that process has put up the window saying its half is armed. WW387.
     /// <para>
     /// Message-only windows are reached through <c>HWND_MESSAGE</c> and through nothing else: they

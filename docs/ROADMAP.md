@@ -36,8 +36,8 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 💭 **WW440** (deps: —) **the suite reads whether a half is armed with its own copy of the walk, and three preconditions now lean on it** — WW418 made that reading load-bearing; the name it looks for is held to the engine's by a case and the walk that finds it is held by nothing. → §WW440
 - 💭 **WW446** (deps: —) **the deadline catalogue counts `Attempt.Until(` and not `Attempt.UntilTrue(`, so 45 of the waits here are in it nowhere** — WW175's near-miss was a look that could not answer nothing; a look that cannot answer false collapses a deadline the same way, and nothing asks. → §WW446
+- 💭 **WW447** (deps: —) **seven cases that only reflect sit in a serial class, so a verb added to the engine is red eight minutes into a guest run** — WW431 lets a case in a serial class say it needs no desk and be gated; the verb catalogue's half never got the mark, and WW440 paid the eight minutes. → §WW447
 
 ## Done when — Block A
 

@@ -216,33 +216,6 @@ worth it is WW430's — what the guest spends on cases that need nothing from it
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW440 the second walk that answers the same question
-
-`OwnRender.Armed` decides whether a silence this run recorded still stands: it walks the
-message-only windows under `HWND_MESSAGE` looking for the presence window, and matches
-the owning process. `OwnRenderTests.Present` does the same walk again, with its own
-P/Invokes and its own spelling of `HWND_MESSAGE`, and its doc says so — "read the way
-the engine reads it".
-
-The name the two look for is held together already: `Renders.PresenceWindow` and
-`OwnRender.PresenceWindow` are two constants because the two packages may not reference
-each other, and `RendersTests` asserts they are the same string. That is the half
-somebody thought about.
-
-The walk is the half nobody did. Where the window hangs, that only a message-only parent
-finds one, and which process counts as the owner are all decisions the engine makes and
-the suite repeats. An engine that started putting the window somewhere else, or matching
-an owner differently, would leave the suite answering the old way — and answering
-confidently, because the name still matches.
-
-WW418 is why it is worth saying now. That reading used to answer one case about its own
-subject; it is now the stated precondition of three, so a copy that drifts does not fail
-— it quietly says the precondition holds when it does not, which is the one direction a
-precondition must not be wrong in.
-
-What it needs is for the suite to ask the engine rather than repeat it, and the engine
-has no public door for the question.
-
 ### §WW446 the other spelling of a wait
 
 WW175 made every deadline visible because one nearly went silently. `Attempt.Until`
@@ -264,3 +237,25 @@ waits, and most of them are not in it.
 
 Found while WW437 was checking whether widening the sweep to `tools` changed this twin's
 counts — it does not, because nothing in `tools` opens the one spelling it reads.
+
+### §WW447 the catalogue half that waits for a desk it never uses
+
+`NoCooperationTests` is two classes in one file. One half builds a bare Win32 window and
+drives every verb a bare window is enough for, which is what the serial collection
+exists for. The other half is reflection and arithmetic: every verb the engine offers is
+in the catalogue, nothing is catalogued that it no longer offers, none is catalogued
+twice, the scope is derived, only the two named verbs need the in-app half, every verb a
+bare window suffices for is driven by a case here, and the rendering reads as counts and
+then a line each. Seven cases that touch no window at all.
+
+They wait for a guest because the class they sit in does. WW431 built the mark for
+exactly this — a case inside a serial class saying it needs no desk, so WW417's gate
+answers it on the host in seconds — and named `DeskProbeTests` as the shape. This is the
+same shape and nobody went back for it.
+
+Measured in WW440, which published one reading on `OwnRender`: the catalogue's first
+case is what says a new verb has not been classified, and it said so eight minutes and
+twenty-nine seconds into a guest run, after a host gate that had been green for nine
+seconds. The fix is seven attributes, and what `NoDeskTests` already checks is what
+makes them safe to add: no marked case may reach for the desk, and no class holding one
+may build something that does before its cases run.

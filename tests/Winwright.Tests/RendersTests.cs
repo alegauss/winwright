@@ -79,6 +79,40 @@ public sealed class RendersTests : IDisposable
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void The_window_that_says_a_half_is_armed_is_looked_for_in_one_place()
+    {
+        // WW440. The case above holds the two halves to one name, which is the part somebody thought
+        // about. The walk is the part nobody did: where the window hangs, that only a message-only
+        // parent finds one, and which process counts as its owner are three decisions the engine
+        // makes — and this suite made all three again, in `OwnRenderTests`, under a doc saying it was
+        // read the way the engine reads it.
+        //
+        // An engine that moved any of them would leave that copy answering the old way, confidently,
+        // because the name still matched. WW418 is why it was worth closing: the reading had become
+        // the stated precondition of three cases, and a precondition that drifts does not fail — it
+        // says the condition holds when it does not.
+        //
+        // So the rule is the name, and where it may appear: the engine declares it, the in-app half
+        // declares it, and outside them only the case above may say it — everything else asks
+        // `OwnRender.ArmedIn`.
+        var naming = new List<string>();
+
+        foreach (var file in Checkout.Sources([Checkout.Suite, Checkout.Tools], except: $"{nameof(RendersTests)}.cs"))
+        {
+            var code = string.Join('\n', File.ReadLines(file).Select(Checkout.Code));
+            if (code.Contains(nameof(OwnRender.PresenceWindow), StringComparison.Ordinal))
+                naming.Add(Path.GetFileName(file));
+        }
+
+        Assert.True(
+            naming.Count == 0,
+            $"{naming.Count} file(s) outside the engine look for the window an armed half puts up, "
+                + "which is the engine's walk written a second time: "
+                + string.Join(", ", naming.Order(StringComparer.Ordinal)));
+    }
+
+    [Fact]
     public void Why_a_render_did_not_happen_is_the_first_check_it_would_have_stopped_at()
     {
         // WW362. The same checks Drawn makes, in the same order, and the order is what makes the

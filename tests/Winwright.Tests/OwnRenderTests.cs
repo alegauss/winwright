@@ -509,27 +509,18 @@ public sealed class OwnRenderTests : IDisposable
     }
 
     /// <summary>
-    /// Whether this process has the window an armed half puts up. WW387, read the way the engine
-    /// reads it: message-only windows hang off HWND_MESSAGE and are enumerated nowhere else.
+    /// Whether this process has the window an armed half puts up — asked of the engine, which is
+    /// the only thing that knows.
+    /// <para>
+    /// WW440, and the deletion is the proof. This walked <c>HWND_MESSAGE</c> itself, with its own
+    /// P/Invokes and its own spelling of the parent, under a doc saying it was "read the way the
+    /// engine reads it" — which is a copy, and a copy that says so is still one. Where the window
+    /// hangs and which process counts as its owner are the engine's decisions, and this would have
+    /// gone on answering the old way after either of them moved, confidently, because the name it
+    /// looked for is held to the engine's by a case and the walk was held by nothing.
+    /// </para>
     /// </summary>
-    private static bool Present()
-    {
-        var found = nint.Zero;
-        while ((found = FindWindowExW(-3, found, null, Winwright.InApp.Renders.PresenceWindow)) != 0)
-        {
-            _ = GetWindowThreadProcessId(found, out var owner);
-            if (owner == Environment.ProcessId)
-                return true;
-        }
-
-        return false;
-    }
-
-    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
-    private static extern nint FindWindowExW(nint parent, nint after, string? className, string? title);
-
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(nint window, out uint processId);
+    private static bool Present() => OwnRender.ArmedIn(Environment.ProcessId);
 
     [Fact]
     public void Nothing_may_be_asked_for_by_passing_nothing()
