@@ -401,6 +401,7 @@
 - ✅ **WW419** **every reading the engine takes about an application is driven with one application up, and a run has several** — Two fixtures up at once each report their own surfaces and geometry, and the instance check tells them apart by pid (design recorded in `tests/Winwright.Tests/TwoApplicationsTests.cs`).
 - ✅ **WW420** **the runner's failure arms are read for their shape and run by nothing, and the door that would drive them exists** — runner-arms.ps1 drives the bound, the held tree it leaves and a red run through the guest, and each says what it found (design recorded in `tools/runner-arms.ps1`).
 - ✅ **WW430** **the gate answers 738 cases on the host and the guest runs the same 738 again, and nothing may skip them** — The runner reports what the desk-free half cost the guest: about a twentieth of the case time, so the skip is not worth its mechanism (design recorded in `tools/run-tests-vm.ps1`).
+- ✅ **WW431** **the host gate takes whole classes, so a case that reads a file inside a serial class waits for the guest** — A case inside a serial class marks itself as needing no desk, the gate answers it, and a mark that lies is red before the guest (design recorded in `tests/Winwright.Tests/NoDesk.cs`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

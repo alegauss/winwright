@@ -1,4 +1,4 @@
-<#
+﻿<#
   The half of the suite that can answer before a VM is started. WW417.
 
   A large part of this suite never touches a desk: the catalogues held both ways, the rules that
@@ -60,17 +60,25 @@ function Get-GatedClasses {
 
 function Get-HostFilter {
     <#
-      Those classes as one VSTest filter.
+      Those classes as one VSTest filter, and the cases inside a serial class that say they need no
+      desk either.
 
       Fully qualified and anchored on the namespace, so a class whose name is a substring of a
       serial one cannot pull that one in - `Sweep` and `SourceSweepTests` are exactly that pair.
+
+      WW431. The collection is the wrong unit for this gate and the right one for itself: it exists
+      to stop two classes fighting over one foreground, and a case that reads a file is in it because
+      of the cases beside it. `DeskProbeTests` holds the ones that read this runner's own source, and
+      twice the guest has reported eleven minutes later what they would have said here. So a case
+      marks itself with the `desk=free` trait and the filter takes it too - marked rather than
+      derived, and on the cases that need nothing, because a case nobody marked stays in the guest.
     #>
     param([Parameter(Mandatory)] [string] $Suite)
 
     $named = Get-GatedClasses -Suite $Suite
     if ($named.Count -eq 0) { return '' }
 
-    return (($named | ForEach-Object { "FullyQualifiedName~Winwright.Tests.$_." }) -join '|')
+    return ((($named | ForEach-Object { "FullyQualifiedName~Winwright.Tests.$_." }) -join '|') + '|desk=free')
 }
 
 function Invoke-HostGate {

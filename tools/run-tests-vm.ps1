@@ -1379,6 +1379,18 @@ if ($got.Ok -and (Test-Path -LiteralPath $read) -and $first -like '*.trx') {
         . $gate -DefineOnly
         $gated = @(Get-GatedClasses -Suite (Join-Path $script:Tree 'tests'))
 
+        # WW431. And the cases inside a serial class that mark themselves as needing no desk, which
+        # the gate answers too - counted here for the same reason they are gated there, or this
+        # reading would call them the guest's and understate the half it is about.
+        $marked = @(Get-ChildItem -LiteralPath (Join-Path $script:Tree 'tests') -Filter *.cs -Recurse -File |
+            Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' } |
+            ForEach-Object {
+                [regex]::Matches(
+                    (Get-Content -LiteralPath $_.FullName -Raw),
+                    '\[Trait\(NoDesk\.Key, NoDesk\.Free\)\]\s*(?:///[^\r\n]*\r?\n\s*)*public void (?<named>\w+)\(') |
+                    ForEach-Object { $_.Groups['named'].Value }
+            })
+
         if ($gated.Count -gt 0) {
             $cases = @(Select-Xml -LiteralPath $read -XPath '//*[local-name()="UnitTestResult"]' |
                 ForEach-Object { $_.Node } |
@@ -1393,9 +1405,10 @@ if ($got.Ok -and (Test-Path -LiteralPath $read) -and $first -like '*.trx') {
                 # under it: everything up to the last dot, then the last name in that.
                 $named = $case.testName -replace '\(.*$', ''
                 $owner = ($named -split '\.')[-2]
+                $method = ($named -split '\.')[-1]
                 $took = [TimeSpan]::Parse($case.duration, [Globalization.CultureInfo]::InvariantCulture)
 
-                if ($gated -contains $owner) {
+                if (($gated -contains $owner) -or ($marked -contains $method)) {
                     $free += $took
                     $many++
                 }

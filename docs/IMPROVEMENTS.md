@@ -195,28 +195,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW431 the case that could have answered here
-
-WW417's gate runs the classes outside the serial collection, and that is the only
-division this project has: a class needs the desk or it does not. It is the right unit
-for the collection, which exists to stop two classes fighting over one foreground.
-
-It is the wrong unit for the gate. `NotificationAreaTests` is serial because most of it
-drives a real tray — and one case in it reads `SKILL.md` and asserts a sentence. WW414
-changed that sentence, the gate passed, and the guest reported it eleven minutes later:
-the exact cost WW417 was filed to remove, met inside the task that removed it.
-
-The same shape is elsewhere. `DeskProbeTests` is serial and holds the cases that read
-the runner's source; `FixtureTests` is serial and holds the ones that read its
-catalogue. Each is a case that could answer on any machine sitting in a class that could
-not.
-
-Splitting by case rather than by class is what the gate wants and xUnit does not offer
-against a collection. A trait would: a case that needs no desk says so, the gate filters
-on it, and the collection goes on meaning what it means. What has to be decided is which
-way round the trait goes — marking the desk-free cases is the smaller edit and the one
-that fails safe, because a case nobody marked stays in the guest.
-
 ### §WW432 the file the second caller assumes is there
 
 `holders.ps1` reaches the guest with `source.zip` and the generated scripts, which is
@@ -311,6 +289,29 @@ matches says which ending it was.
 
 Left open: whether the gate's third ending carries on by default or refuses unless a
 flag says. `DeskProbeTests` already reads both scripts.
+
+### §WW443 the case the mark cannot reach
+
+WW431 let a case inside a serial class say it needs no desk, and the gate answers it.
+The case WW431 was filed about cannot say it: `NotificationAreaTests` builds a tray icon
+in a field, and xUnit builds the class for every case it runs — so the one case in it
+that reads `SKILL.md` would add an icon to the operator's tray before reading a byte.
+
+`NoDeskTests` refuses the mark for that reason, and the refusal is the right answer: a
+marked case whose class acts is a red on the host about the host, which is the one
+failure the gate must never produce.
+
+So that case is still the guest's, and it is the one that cost the eleven minutes WW431
+was filed over — WW414 changed the sentence it pins, the gate passed, and the guest said
+so after the carry, the build and two thousand other cases.
+
+What it wants is to move. A class holding the cases that read the skill needs no tray,
+no window and no collection, and the tray cases keep the fixture they need. The same is
+true of `FixtureTests`, which launches from a register its constructor builds.
+
+What has to be decided is how far to take it: moving one case is an afternoon, and
+moving every case of that shape rearranges the suite. The reading that says which are
+worth it is WW430's — what the guest spends on cases that need nothing from it.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

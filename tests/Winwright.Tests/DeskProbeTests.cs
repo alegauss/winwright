@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 using Xunit;
 
@@ -90,6 +90,7 @@ public sealed class DeskProbeTests
     private const string Desktop = "the desktop";
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void The_probe_answers_the_states_the_runner_switches_on()
     {
         // Both halves in one case, because the failure is always the pair: a state the probe writes
@@ -114,6 +115,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void The_guest_console_is_started_with_handles_of_its_own()
     {
         // WW396. `vmrun start ... gui` launches VMware's own window, which outlives this script by
@@ -153,6 +155,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void Every_desk_the_runner_tidies_is_one_it_declares_it_tidies()
     {
         // WW388. WW371 and WW375 landed an hour apart and answered one desk two ways — a minimised
@@ -272,6 +275,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void What_the_collector_left_is_gathered_to_the_names_the_host_knows_how_to_ask_for()
     {
         // WW406. A test host that stops answering leaves a dump of every thread and a sequence
@@ -328,6 +332,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void A_run_the_collector_left_nothing_for_says_so_rather_than_going_quiet()
     {
         // WW406, the other answer. A host that exited on its own leaves no dump, and that is a
@@ -380,6 +385,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void The_session_probe_is_the_one_call_that_waits_for_a_guest_to_finish_logging_in()
     {
         // WW412. The runner spends ten minutes on VMware Tools answering and used to spend nothing
@@ -424,6 +430,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void The_host_gate_takes_the_classes_that_do_not_need_a_desk_and_only_those()
     {
         // WW417. The gate is derived from the collection this project already uses to say which
@@ -446,8 +453,16 @@ public sealed class DeskProbeTests
         // Anchored on the namespace and closed with a dot, which is not decoration: `SweepTests`
         // and `SourceSweepTests` are a substring pair, and a filter that matched loosely would pull
         // a serial class in behind one that is not.
+        //
+        // WW431 added the one clause that is not a class: the cases inside a serial class that mark
+        // themselves as needing no desk. It is the last of them and it is exactly one, because a
+        // second spelling of that trait is a second half nobody is reading — NoDeskTests holds the
+        // word here against the word the cases carry.
+        var clauses = filter.Split('|');
+
+        Assert.Equal($"{NoDesk.Key}={NoDesk.Free}", clauses[^1]);
         Assert.All(
-            filter.Split('|'),
+            clauses[..^1],
             one => Assert.Matches(@"^FullyQualifiedName~Winwright\.Tests\.\w+\.$", one));
     }
 
@@ -478,6 +493,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void The_shell_is_not_on_the_list_of_things_that_are_the_desktop()
     {
         // The repair that hid the reading. Folding the taskbar in with Progman and WorkerW makes a
@@ -500,6 +516,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void A_question_refuses_the_run_and_a_selected_shell_does_not()
     {
         // The distinction the whole task is about, as the two arms actually do it. A question is
@@ -520,6 +537,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void Every_answer_is_produced_by_running_the_classification_and_not_by_reading_it()
     {
         // WW345, and the case the three above could not be. Every state the runner switches on,
@@ -546,6 +564,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void A_taskbar_that_held_every_look_is_the_shell_and_never_a_question_or_a_quiet_desk()
     {
         // Both defects this reading has had, run rather than read. The first called it a question
@@ -566,6 +585,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void One_window_for_every_look_is_what_separates_a_question_from_a_desk_that_moved()
     {
         // The measurement the whole probe is, and the reason it polls at all: a toast goes and a
@@ -739,6 +759,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void A_minimised_window_holding_the_desk_is_not_a_question_anybody_can_answer()
     {
         // WW375, measured on this guest: an Edge window left focused held the foreground for all
@@ -765,6 +786,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void A_window_with_no_minimise_button_is_the_one_a_run_leaves_alone()
     {
         // WW371, and the whole of the line it draws. The refusal used to have one remedy — a person
@@ -790,6 +812,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void The_runner_reads_the_desk_again_rather_than_believing_the_clearing()
     {
         // The rule that keeps WW311 intact while WW371 relaxes the refusal: a repair is attempted
@@ -813,6 +836,7 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void The_clearer_moves_a_window_and_hands_the_foreground_on()
     {
         // WW371 was filed on a wrong premise and this is the sentence that corrects it. The entry
