@@ -85,6 +85,7 @@ public sealed class NoCooperationTests : IDisposable
         Subject.Unguarded(AutomationElement.FromHandle(frame), Locator.Parse(locator), 2000, pollMs: 20);
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void Every_verb_the_engine_offers_is_in_the_catalogue()
     {
         // The check the criterion was missing: a verb added later fails here until somebody says
@@ -96,6 +97,7 @@ public sealed class NoCooperationTests : IDisposable
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void Nothing_is_catalogued_that_the_engine_no_longer_offers()
     {
         var offered = Cooperating.Named();
@@ -104,6 +106,7 @@ public sealed class NoCooperationTests : IDisposable
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void No_verb_is_catalogued_twice()
     {
         var listed = Cooperating.Known.Select(one => one.Named).ToList();
@@ -112,6 +115,7 @@ public sealed class NoCooperationTests : IDisposable
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void The_scope_is_derived_and_the_namespaces_it_leaves_out_are_measured()
     {
         // WW209. The scope was two namespaces typed into this file, and the case above claims every
@@ -157,6 +161,7 @@ public sealed class NoCooperationTests : IDisposable
     private static readonly string[] Composing = ["Verdicts", "Tracing", "Projects"];
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void No_reading_or_pattern_act_needs_the_in_app_half()
     {
         // True by construction and worth stating: the engine assembly carries no reference to the
@@ -233,6 +238,7 @@ public sealed class NoCooperationTests : IDisposable
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void Every_verb_a_bare_window_is_enough_for_is_driven_by_a_case_here()
     {
         // The coverage claim, said as arithmetic rather than as a promise. What is driven above is
@@ -255,6 +261,7 @@ public sealed class NoCooperationTests : IDisposable
     }
 
     [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void The_catalogue_reads_as_counts_and_then_a_line_each()
     {
         var rendered = Cooperating.Render();

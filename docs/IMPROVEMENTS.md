@@ -122,28 +122,6 @@ at all.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW447 the catalogue half that waits for a desk it never uses
-
-`NoCooperationTests` is two classes in one file. One half builds a bare Win32 window and
-drives every verb a bare window is enough for, which is what the serial collection
-exists for. The other half is reflection and arithmetic: every verb the engine offers is
-in the catalogue, nothing is catalogued that it no longer offers, none is catalogued
-twice, the scope is derived, only the two named verbs need the in-app half, every verb a
-bare window suffices for is driven by a case here, and the rendering reads as counts and
-then a line each. Seven cases that touch no window at all.
-
-They wait for a guest because the class they sit in does. WW431 built the mark for
-exactly this — a case inside a serial class saying it needs no desk, so WW417's gate
-answers it on the host in seconds — and named `DeskProbeTests` as the shape. This is the
-same shape and nobody went back for it.
-
-Measured in WW440, which published one reading on `OwnRender`: the catalogue's first
-case is what says a new verb has not been classified, and it said so eight minutes and
-twenty-nine seconds into a guest run, after a host gate that had been green for nine
-seconds. The fix is seven attributes, and what `NoDeskTests` already checks is what
-makes them safe to add: no marked case may reach for the desk, and no class holding one
-may build something that does before its cases run.
-
 ### §WW448 the launch wait nobody extracted
 
 `Attempt.UntilTrue(() => TopLevelWindows.Largest(launched.Pid) is not null, 20000, 25)`
