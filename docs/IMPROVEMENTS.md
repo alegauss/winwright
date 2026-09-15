@@ -38,29 +38,6 @@ it.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW444 the twenty-nine rows nothing pairs
-
-WW391 pointed the loader at the schema for a step, and WW435 did the same for a case and
-a fixture — and the second shipped a guard the first cannot have. A case's fields are
-handed on in one place, so the bag can say which rows nothing asked for and refuse them
-at the first load: `Handed` names the row somebody added and nobody read.
-
-A step's are not handed on anywhere. `StepDeclaration` reads them off the bag as each
-rule needs them, one property at a time — which is what makes the step's arrangement
-good and what leaves this hole in it. A row added to `ScenarioSchema.Step` that no
-property reads is loaded, dropped and never heard of again: an author may write it,
-`AsJsonSchema` will publish it to every tool carrying the format, and the run will
-ignore it. That is the failure this format exists to refuse, on the shape with
-twenty-nine rows.
-
-Nothing reports it. The suite pins the schema's list against a written-out one, which is
-the schema agreeing with itself, and ClaimsTests pairs the rows marked as claims with
-the refusal that counts them — the rows that are not claims are paired with nothing.
-
-What it wants is the sweep this suite writes everywhere else: for each row, some member
-of `StepDeclaration` reads that name. Read off the source rather than off the type,
-because the name is a string in a property body and never a member name.
-
 ### §WW445 the marked case the mark's own checks cannot see
 
 WW431 let a case inside a serial class say it needs no desk, so the host gate can answer

@@ -16,7 +16,6 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 💭 **WW444** (deps: —) **a step's rows are held to its own reader by nothing, so a row no property reads is a key that loads and does nothing** — WW435 refuses a case field nothing reads at the first load; a step's are read lazily by its properties, so the same row on a step is caught by nothing. → §WW444
 - 💭 **WW445** (deps: —) **the sweep that holds a no-desk mark honest finds cases by `public void`, so a marked async case is checked by nothing** — WW431's mark is what lets the gate run a case on the operator's own machine, and the three checks that keep it honest cannot see half the shapes a case can have. → §WW445
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

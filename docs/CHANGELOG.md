@@ -311,6 +311,7 @@
 - ✅ **WW426** **the floor a verdict needs is one number for five runners measuring rates that differ by an order** — Each arm declares the rate it is about and needs three over it in rounds, so a short run is refused with that arm's own number (design recorded in `tools/Winwright.Typing/Arms.cs`).
 - ✅ **WW434** **the label family is three properties and two hand-written chains, where the sweep and pointing families are one list** — The three ways of claiming a declared string are one list the claim set and refusal walk, each saying what it claims (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 - ✅ **WW435** **a case's and a fixture's fields still reach the loader one hand-written line each, where a step's are read off its rows** — A case's and a fixture's fields are read off the schema's rows, and a row nothing hands on is refused at load (design recorded in `src/Winwright/Scenarios/ScenarioFile.cs`).
+- ✅ **WW444** **a step's rows are held to its own reader by nothing, so a row no property reads is a key that loads and does nothing** — Each of a step's rows is paired with what reads it, so a row nothing reads is red rather than published (design recorded in `tests/Winwright.Tests/StepDeclarationTests.cs`).
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

@@ -213,6 +213,54 @@ public class StepDeclarationTests
     }
 
     [Fact]
+    public void Every_row_a_step_declares_is_read_by_something_that_answers_for_it()
+    {
+        // WW444, and it is the half WW435 could give a case and not a step. A case's fields are
+        // handed on in one place, so the bag refuses a row nobody asked for at the first load. A
+        // step's are read off the bag by whichever rule needs them, one property at a time — which
+        // is what makes the arrangement good and what leaves this hole: a row added to the schema
+        // that no member reads is loaded, dropped and never heard of again. An author may write it,
+        // `AsJsonSchema` publishes it to every tool carrying the format, and the run ignores it.
+        //
+        // Nothing reported it. The list is pinned against a written-out one, which is the schema
+        // agreeing with itself, and `ClaimsTests` pairs the rows marked as claims with the refusal
+        // that counts them — the rows that are not claims were paired with nothing.
+        //
+        // Read off the source and not off the type, because a field's name is a string inside a
+        // property body and never a member's name. Spoken and not Code, for the reason WW202 gave
+        // the flag catalogue: the thing being looked for lives inside the string, so the reading
+        // that drops strings would hand this an empty file.
+        var reading = string.Join(
+            '\n',
+            File.ReadLines(Checkout.At("src", "Winwright", "Scenarios", "StepDeclaration.cs"))
+                .Select(Checkout.Spoken));
+
+        // The verb is the other reader: `locator`, `tray`, `act`, `with` and `reads` are what a step
+        // is addressed and driven by, and they are read where a step is judged rather than where one
+        // is described.
+        var judging = string.Join(
+            '\n',
+            File.ReadLines(Checkout.At("src", "Winwright", "Scenarios", "CaseRun.cs")).Select(Checkout.Spoken));
+
+        var unread = ScenarioSchema.Step
+            .Select(one => one.Name)
+            .Where(one => !reading.Contains($"\"{one}\"", StringComparison.Ordinal)
+                && !judging.Contains($"\"{one}\"", StringComparison.Ordinal))
+            .ToList();
+
+        Assert.True(
+            unread.Count == 0,
+            $"{unread.Count} row(s) of the format are published to every tool and read by nothing, so "
+                + "an author may write one and the run will ignore it: "
+                + string.Join(", ", unread));
+
+        // The control. A sweep that matched nothing would report every row as read, and this is the
+        // only thing that tells that apart from a step that answers for all of them.
+        Assert.Contains("\"locator\"", reading + judging, StringComparison.Ordinal);
+        Assert.True(ScenarioSchema.Step.Count > 25, "the schema has fewer rows than this case was written about");
+    }
+
+    [Fact]
     public void What_a_field_is_set_by_is_shut_to_everyone_but_the_verb_that_judges_a_step()
     {
         // The half that keeps the gate. Of is where a step faces its refusals, so a caller outside
