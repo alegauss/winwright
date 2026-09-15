@@ -332,28 +332,31 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW420 the refusals of the thing that reports refusals
+### §WW420 the refusals of the thing that reports refusals, driven
 
-The fixture exists because a refusal nobody can provoke is a refusal that will quietly
-stop working. Every shape it draws is there to make one of the engine's reds real. The
-runner carries at least four refusals of its own and not one is provoked by anything.
+`tools/runner-arms.ps1` drives the runner against a scratch tree under a `-Name` of its
+own, so nothing it syncs is this repository's guest tree. Its first arm is the one WW406
+proved by hand: a red scratch run whose gather keeps the larger dump and the newer
+sequence and names both. `RunnerArmsTests` holds the driver to the sentences it reads
+out of the runner, so a reworded line is red on the host instead of being read as a run
+that stopped early.
 
-They are the arms that matter most, because each fires on a run that has already gone
-wrong: the sync refusing a held tree and naming who holds it, the bound giving up on a
-guest, the missing SDK, and now the gather that keeps what the collector left. A person
-meets these on their worst afternoon. What the suite holds about them is their source —
-`DeskProbeTests` reads the runner and checks it has an arm per answer — which catches an
-arm that was deleted and nothing about one that stopped working.
+Still run by nothing: the bound, and the held tree the bound leaves behind. They can be
+driven as a pair, and the order is the design. A scratch command that sleeps past
+`-Bound 1` is refused with "did not answer within 1 minute(s)", with a holder named from
+under the tree. A second run under the same name, straight after, meets the sync
+refusing with "the guest tree is held open by", naming that command. The driver then
+waits out the declared sleep and runs the red arm, which also proves the guest was left
+syncable.
 
-WW406 was proved by hand, and how it was proved is the point. WW227 gave the runner
-`-Run` and `-ResultsIn` so an adopter could drive its own cases; pointed at a scratch
-command that writes a fake dump and exits non-zero, they drive the runner's failure path
-instead. Four minutes, no suite, and the whole arm ran in the guest — the gather found
-the larger of two dumps, the sequence came back beside it, and both landed where the trx
-goes.
+Both refusals exit 3, as every refusal does, so each is recognised by its sentence, and
+the driver's exit 2 stays for a refusal it did not provoke. `RunnerArmsTests` gains the
+two sentences.
 
-That is a case, and it was a session's improvisation. What it needs is somewhere to live
-and a way to be cheap enough to keep.
+Not provokable: a guest with no SDK, short of taking the SDK away. The driver already
+says so rather than skipping it.
+
+The pair costs a sleep of about two minutes on top of the red arm's three.
 
 ### §WW430 the third of the suite that runs twice
 
@@ -474,25 +477,26 @@ else may drive the guest.
 
 `Invoke-HostGate` in `tools/host-gate.ps1` answers `Ok` from the exit code of `dotnet
 test` and nothing else, and `run-tests-vm.ps1` turns any non-zero code into one refusal:
-the desk-free half of the suite is red on this host, and the guest would have said the
-same thing seventeen minutes later.
+the desk-free half of the suite is red on this host, and the guest would say the same.
 
-That sentence is true only where cases ran. Measured on 2026-09-14, during WW419: an
-update had removed the host's SDK 10.0.303 five days earlier, `global.json` pins it with
-`latestPatch`, and `dotnet` exited 155 with "A compatible .NET SDK was not found" before
-building anything. The guest carries its own SDK and ran the same tree. So the refusal
-blamed the cases for the host's toolchain, and the only way past it was `-NoGate`, which
-also switches the gate off on the run where it could have answered.
+That is true only where cases ran. Measured on 2026-09-14, during WW419: an update had
+removed the host's SDK 10.0.303, `global.json` pins it with `latestPatch`, and `dotnet`
+exited 155 with "A compatible .NET SDK was not found" before building anything. The
+guest carries its own SDK and ran the same tree. The only way past was `-NoGate`, which
+switches the gate off on the run where it could have answered.
 
-What to build: the gate tells three endings apart. Cases ran and passed. Cases ran and
-some were red, which stays the refusal. Nothing ran: no summary line, a build error, an
-SDK that did not resolve. That one is about the host, so it gets its own sentence naming
-the first line dotnet printed, and the run goes on to the guest. The summary line the
-caller already matches for its count says which ending it was.
+`Show-Blame` in the same runner has the same shape, found during WW420: any non-zero
+exit from `dotnet run` on the reader prints "the dump came back and could not be read",
+so a reader that never started reads as a dump that was bad.
 
-Left open: whether the third ending carries on by default or refuses unless a flag says
-to carry on. `DeskProbeTests` already reads `host-gate.ps1`, so the case belongs beside
-it.
+What to build: both call sites tell the endings apart. The command ran and answered,
+green or red, which stays as it is. Nothing ran: a build error, an SDK that did not
+resolve. That one is about the host, so it gets its own sentence naming the first line
+dotnet printed, and the gate goes on to the guest. The summary line the gate already
+matches says which ending it was.
+
+Left open: whether the gate's third ending carries on by default or refuses unless a
+flag says. `DeskProbeTests` already reads both scripts.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
@@ -623,3 +627,27 @@ precondition must not be wrong in.
 
 What it needs is for the suite to ask the engine rather than repeat it, and the engine
 has no public door for the question.
+
+### §WW442 the overflow the tray fixture shuts whatever it found
+
+`TrayPlacementTests.The_fixture_leaves_the_overflow_the_way_it_found_it` reads whether
+the overflow is open, adds an icon through `TrayIconFixture.Add`, and asserts the same
+reading afterwards. WW197 made it read both sides on purpose: a flyout somebody left
+standing had turned the old "it is shut" assertion into a claim about the desk.
+
+The fixture never took the other half. `Placed()` searches with `openingTheOverflow:
+true` and then calls `NotificationArea.CloseOverflow()` whatever it found, so an
+overflow already open before `Add` is shut after it. Measured in a guest run on
+2026-09-14, during WW420: expected open, read shut, on a tree whose only change from a
+green run half an hour earlier was one catalogue entry. The case is red whenever an
+earlier case or the shell left the flyout standing and green otherwise, which reads as a
+flake and is not one.
+
+What to build: `Placed()` reads the overflow before it searches and shuts it only where
+it was shut. Then provoke both sides instead of waiting for a desk to supply one: open
+the overflow with `NotificationArea.OpenOverflow`, add, assert it is still open; shut
+it, add, assert it is still shut. Opening asks the desk, so that side excuses through
+`BusyDesk` like the cases beside it.
+
+Left open: whichever earlier case left the flyout standing has a leftover of its own,
+and this does not find it.

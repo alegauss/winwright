@@ -267,6 +267,10 @@ internal static class Criteria
                 + "repair ends in Win+D, whose foreground lock then refuses this process everything "
                 + "for minutes — measured twice, at five reds in two other classes each time. What "
                 + "it is owed is a desk the suite may take, and not a case somebody forgot to write"),
+        new("WW420", "The bound and the held tree it leaves are provoked, then synced past", "", Unshown.NotBuilt,
+            "WW420 built the driver and its red-run arm, and the pair is not written yet; when it is, "
+                + "the reading is tools/runner-arms.ps1 run against a VM, which no case in this suite "
+                + "can take - RunnerArmsTests holds only the sentences the driver reads"),
 
         // WW315's own criterion stood here — that two profiles and a transcript exist on the guest as
         // a disposable fixture — and it went with the task: the bench fabricates both, so the roadmap

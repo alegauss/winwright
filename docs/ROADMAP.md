@@ -39,7 +39,7 @@
 - ⏳ **WW87** (deps: Block G, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
-- 💭 **WW420** (deps: —) **the runner's failure arms are read for their shape and run by nothing, and the door that would drive them exists** — WW406's arm only fires on a red run, so proving it meant a scratch command and a hand-built dump; WW227's -Run and -ResultsIn are what made that possible. → §WW420
+- ⏳ **WW420** (deps: —) **the runner's failure arms are read for their shape and run by nothing, and the door that would drive them exists** — The bound and the held tree it leaves are still run by nothing; the driver can provoke them as a pair before its red arm. → §WW420
 - 💭 **WW430** (deps: —) **the gate answers 738 cases on the host and the guest runs the same 738 again, and nothing may skip them** — WW417's gate is a third of the suite by count, and the roll call refuses a run where discovered and recorded disagree — so the saving cannot be taken safely. → §WW430
 - 💭 **WW431** (deps: —) **the host gate takes whole classes, so a case that reads a file inside a serial class waits for the guest** — WW414 broke a pinned sentence in NotificationAreaTests, which reads only the skill; the gate skipped its class and the guest said so eleven minutes later. → §WW431
 - 💭 **WW432** (deps: —) **the bound's holder walk runs only where a sync has already put it in the guest, and nothing says so** — WW415 sends holders.ps1 with the sync, so a bound that fires on a run whose sync did not happen asks a file that is not there and answers that the guest could not be asked. → §WW432
@@ -54,6 +54,7 @@
 - 💭 **WW437** (deps: —) **the catalogue of every way a thread is parked walks src and tests, so a tool that parks one is invisible to it** — WW406 put a parked thread in tools/ and the entry written for it was refused as a file that sleeps nowhere: the sweep never looks there. → §WW437
 - 💭 **WW438** (deps: —) **shipping a task rewrites the roadmap a case reads, so the guest run that proved the work is stale before the commit** — WW391 and WW406 each went red on the criteria catalogue after a green guest run, for the same reason and in the same order, and nothing says the order. → §WW438
 - 💭 **WW440** (deps: —) **the suite reads whether a half is armed with its own copy of the walk, and three preconditions now lean on it** — WW418 made that reading load-bearing; the name it looks for is held to the engine's by a case and the walk that finds it is held by nothing. → §WW440
+- 📋 **WW442** (deps: —) **the tray fixture shuts an overflow it found open, so the case holding it to leaving the overflow as found goes red** — A guest run read expected open, actual shut, on a tree whose only change from a green run was a catalogue entry. → §WW442
 
 ## Done when — Block A
 
@@ -218,6 +219,13 @@
   reads off that desk that the window went down and no longer holds the foreground. Both
   halves off the desk and never off the script's sentence. It cannot be this suite's
   desk: two runs of it cost five reds elsewhere.
+
+## Done when — WW420
+
+- **The bound and the held tree it leaves are provoked, then synced past**
+  tools/runner-arms.ps1 exits 0 on a run that sleeps past -Bound 1 and is refused naming
+  its holder, then meets the next sync refused on a held tree, then syncs its red arm
+  once the sleep ends. The driver needs a VM, so the reading is its output.
 
 ## Non-goals
 
