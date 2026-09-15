@@ -28,8 +28,12 @@ namespace Winwright.Typing;
 /// the one that touches the window without waking its thread has no element to touch.
 /// </param>
 /// <param name="Rounds">How many rounds this run was asked for.</param>
+/// <param name="About">
+/// The rate the arm running this is about, carried down so the runner's verdict is guarded by the
+/// arm's own floor rather than by the shared one. WW426.
+/// </param>
 public sealed record TypingRun(
-    AutomationElement Root, Subject Box, Subject Arrived, Subject Injected, nint Window, int Rounds);
+    AutomationElement Root, Subject Box, Subject Arrived, Subject Injected, nint Window, int Rounds, double About);
 
 /// <summary>
 /// One experiment this tool can run, as data. WW354.
@@ -56,14 +60,33 @@ public sealed record TypingRun(
 /// than in the row that names them — which is what makes the row a name and not a body.
 /// </para>
 /// </param>
+/// <param name="About">
+/// The rate this arm is about, as a fraction of its unit of rounds, and the measurement it comes from
+/// is argued beside the row. WW426.
+/// <para>
+/// WW410's floor was one number for every arm off one argument about 3/n, and each arm already knew
+/// more about itself than that: <c>transfer</c> is about one fault in twelve hundred, so thirty rounds
+/// was a rounding error for it and a run of a hundred passed the floor and concluded nothing worth
+/// reading. The arithmetic stays shared — a clean run of n rounds bounds a rate at about 3/n — and
+/// what an arm declares is the rate it has to be able to rule out, which is a fact about the arm and
+/// sits where <see cref="NeedsRanges" /> does rather than in a branch of its runner.
+/// </para>
+/// <para>
+/// Required, which is WW367's argument applied to one more property: an arm declared without it does
+/// not compile, so the next arm cannot inherit a floor argued for a different rate.
+/// </para>
+/// </param>
 /// <param name="NeedsRanges">
 /// Whether the fixture has to be launched with <c>--ranges</c>. It is a property of the arm rather
 /// than a branch beside the launch: the pane is built when the window is, so a run that asked for it
 /// afterwards would be measuring a window that had just been rebuilt.
 /// </param>
 public sealed record TypingArm(
-    string Name, string Task, string Drives, Action<TypingRun> Run, bool NeedsRanges = false)
+    string Name, string Task, string Drives, Action<TypingRun> Run, double About, bool NeedsRanges = false)
 {
+    /// <summary>How many rounds this arm needs before it concludes anything. WW426.</summary>
+    public int Floor => Enough.Floor(About);
+
     /// <summary>The line a listing shows, which is what a refusal prints and what the .cmd echoes.</summary>
     public override string ToString() => $"{Name,-8} {Task}: {Drives}";
 }
@@ -101,14 +124,19 @@ public static class Arms
             "one SendInput per code unit at six spacings, reading what was injected beside what "
                 + "arrived, so a fault inside WW310's band can be attributed to the send or to what "
                 + "happens after it",
-            Sweep.Run),
+            Sweep.Run,
+            // WW310's band, at its lowest: 7.2% at 48ms. The rounds are per cell, and the band is
+            // what the sweep is about — a cell that cannot rule that out has said nothing about it.
+            About: 0.072),
         new(
             "delay",
             "WW329",
             "the send the engine does have with the pause it did not take — erase and send in one "
                 + "act, then wait 0, 50 or 150ms before looking at the box — reporting the "
                 + "milliseconds a round beside the rate",
-            FirstRead.Run),
+            FirstRead.Run,
+            // WW312 read 1 in 150 on this exact arm, which FirstRead's own comment is argued from.
+            About: 1.0 / 150),
         new(
             "acts",
             "WW341",
@@ -116,6 +144,9 @@ public static class Arms
                 + "against a reading taken afterwards with time to settle, which separates an act "
                 + "read too early from one that never arrived",
             Landing.Run,
+            // WW329's rate for the same provocation on the send, which Landing holds as the rate a
+            // clean run of these verbs has to be able to rule out.
+            About: Landing.Typed,
             NeedsRanges: true),
         new(
             "provoke",
@@ -123,7 +154,9 @@ public static class Arms
             "the read taken apart rather than delayed — quiet, peek, poke and read — so what the "
                 + "fifty milliseconds pay for is attributable to the call out of this process or to "
                 + "the message loop run on the target's thread",
-            Disturbance.Run),
+            Disturbance.Run,
+            // The same rate, on the same shape: which half of WW329's 2.58% the read carries.
+            About: Landing.Typed),
         new(
             "transfer",
             "WW368",
@@ -131,7 +164,10 @@ public static class Arms
                 + "End sent in a call of its own, and the read stopped the moment the box says what "
                 + "was sent — so the rung where a rate appears is what the arm was not doing, and "
                 + "one rung past the act with the pause moved above the send rather than below it",
-            Transfer.Run),
+            Transfer.Run,
+            // WW355 read the act at 1 in 1200, and Transfer's own comment says a rung of a few
+            // hundred expects a fraction of a fault — so its floor is thousands, not thirty.
+            About: 1.0 / 1200),
     ]);
 
     /// <summary>

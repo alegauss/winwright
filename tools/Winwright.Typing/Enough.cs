@@ -26,6 +26,12 @@ namespace Winwright.Typing;
 /// runner turns readings into prose, and the sentence it prints has to be the same words wherever a
 /// reader meets it — which is also what lets one case assert it of every arm at once.
 /// </para>
+/// <para>
+/// WW426: and the floor was the weakest one that would have worked. Every arm is not about one to
+/// three percent — <c>transfer</c> is about one in twelve hundred and <c>sweep</c> about WW310's
+/// band — so the rate is now declared on each arm's row and the floor derived from it here. Thirty
+/// stays for the bare run, and as the least any arm may ask for.
+/// </para>
 /// </summary>
 public static class Enough
 {
@@ -77,7 +83,61 @@ public static class Enough
             + " that stops being true.";
 
     /// <summary>
-    /// The runner's verdict, or the refusal to reach one.
+    /// How many rounds a run needs before a clean one rules out a rate this size, and never fewer than
+    /// <see cref="Rounds" />. WW426.
+    /// <para>
+    /// The shared arithmetic, kept in one place: nothing seen over n rounds puts a rate under about
+    /// 3/n, so the rounds that rule out a rate are three over it. What moves from arm to arm is the
+    /// rate, which each arm declares against its own measurement — the arithmetic does not move, and
+    /// a second spelling of it per runner is how five floors would come to disagree about 3.
+    /// </para>
+    /// </summary>
+    /// <param name="about">The rate, as a fraction of the unit its rounds are counted in.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Where the rate is not a fraction above zero.</exception>
+    public static int Floor(double about)
+    {
+        if (!(about > 0 && about <= 1))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(about), about, "a rate is a fraction above zero, and a floor for none is every round there is");
+        }
+
+        // Less a hair before the ceiling, because a rate declared as one over a count divides back to
+        // a count plus the last bit of a double: three over a hundred-and-fiftieth is 450 and a few
+        // hundred-quadrillionths, and a floor of 451 is a number nobody argued for.
+        return Math.Max(Rounds, (int)Math.Ceiling((3 / about) - 1e-9));
+    }
+
+    /// <summary>
+    /// The runner's verdict, or the refusal to reach one, against the floor its arm's rate sets. WW426.
+    /// <para>
+    /// The sentence names the arm's rate rather than the one-to-three percent the shared one says,
+    /// because that sentence is false of three arms out of five: a refusal telling a reader what would
+    /// have worked has to be about the experiment they ran.
+    /// </para>
+    /// </summary>
+    /// <param name="rounds">How many rounds this run was asked for.</param>
+    /// <param name="about">The rate the arm is about, which sets how many rounds it needs.</param>
+    /// <param name="reading">The verdict, deferred, and not called below the floor.</param>
+    public static string Concluded(int rounds, double about, Func<string> reading)
+    {
+        ArgumentNullException.ThrowIfNull(reading);
+
+        var floor = Floor(about);
+        return rounds < floor
+            ? $"{rounds} round(s) is {TooFew}: nothing seen over this many puts a rate under about"
+                + $" {3.0 / Math.Max(rounds, 1):P0}, and this experiment is about a rate near {about:P1},"
+                + $" which only {floor} rounds can rule out. Run it at {floor} rounds or more for a"
+                + " sentence, or read this one as proof that the runner ran and nothing else."
+            : reading();
+    }
+
+    /// <summary>
+    /// The bare run's verdict, or the refusal to reach one, against the shared floor.
+    /// <para>
+    /// WW426 kept this one for the run with no arm, which is the one experiment with no row to put a
+    /// rate on: it measures the engine's own send, whose repair fires at one to three percent.
+    /// </para>
     /// </summary>
     /// <param name="rounds">How many rounds this run was asked for.</param>
     /// <param name="reading">

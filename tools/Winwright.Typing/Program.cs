@@ -193,7 +193,7 @@ public static class Program
         // not compile.
         if (arm is not null)
         {
-            arm.Run(new TypingRun(root, box, arrived, packets, Handle(fixture), rounds));
+            arm.Run(new TypingRun(root, box, arrived, packets, Handle(fixture), rounds, arm.About));
             return 0;
         }
 

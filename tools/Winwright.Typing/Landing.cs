@@ -72,7 +72,7 @@ internal static class Landing
     /// read on this guest over 1200 rounds before WW329's pause. It is what turns a clean run here
     /// into a bound rather than a shrug — this many rounds could not have missed a rate like that.
     /// </summary>
-    private const double Typed = 0.0258;
+    internal const double Typed = 0.0258;
 
     /// <summary>
     /// Run the arm and print what each verb's own reading was worth.
@@ -107,7 +107,7 @@ internal static class Landing
                 Console.WriteLine($"        {one}");
         }
 
-        Console.WriteLine(Enough.Concluded(rounds, () => Verdict(readings)));
+        Console.WriteLine(Enough.Concluded(rounds, run.About, () => Verdict(readings)));
     }
 
     /// <summary>

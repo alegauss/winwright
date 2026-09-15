@@ -57,6 +57,57 @@ public sealed class EnoughTests
     }
 
     [Fact]
+    public void Every_arm_concludes_nothing_below_the_floor_its_own_rate_sets_and_does_at_it()
+    {
+        // WW426. The floor moved on to the arm, so it is asserted of each arm through the call its
+        // runner makes: one round short of the floor is the refusal, naming the number that would
+        // have worked, and the floor itself is whatever the runner worked out.
+        Assert.All(
+            Arms.All,
+            arm =>
+            {
+                var refused = Enough.Concluded(arm.Floor - 1, arm.About, () => "the confident sentence");
+
+                Assert.Contains(Enough.TooFew, refused, StringComparison.Ordinal);
+                Assert.Contains($"{arm.Floor} rounds or more", refused, StringComparison.Ordinal);
+                Assert.DoesNotContain("one to three percent", refused, StringComparison.Ordinal);
+
+                Assert.Equal("the confident sentence", Enough.Concluded(arm.Floor, arm.About, () => "the confident sentence"));
+            });
+    }
+
+    [Fact]
+    public void An_arms_floor_is_where_a_clean_run_rules_out_the_rate_it_is_about()
+    {
+        // The arithmetic, held rather than restated: at the floor a run of nothing bounds the rate at
+        // or under the one the arm declares, and one round fewer does not - unless the shared floor
+        // is what binds, which no arm may go below.
+        Assert.All(
+            Arms.All,
+            arm =>
+            {
+                Assert.InRange(arm.About, double.Epsilon, 1);
+                Assert.True(arm.Floor >= Enough.Rounds, $"{arm.Name} asks for {arm.Floor}, under the shared floor");
+                // A hair of tolerance for the same reason Enough.Floor takes one: a rate declared as
+                // one over a count divides back to that count and the last bit of a double.
+                Assert.True(
+                    3.0 / arm.Floor <= arm.About * (1 + 1e-9),
+                    $"{arm.Name} at {arm.Floor} rounds bounds {3.0 / arm.Floor:P2}, looser than {arm.About:P2}");
+                Assert.True(
+                    arm.Floor == Enough.Rounds || 3.0 / (arm.Floor - 1) > arm.About,
+                    $"{arm.Name} asks for {arm.Floor} where {arm.Floor - 1} already rules out {arm.About:P2}");
+            });
+
+        // The one the design was filed about. WW410's thirty was a rounding error for transfer,
+        // whose rate is one in twelve hundred - so its floor has to be well past the few hundred its
+        // own prose says expects a fraction of a fault.
+        Assert.True(Arms.Named("transfer")!.Floor > 1200);
+
+        // And a rate that is not one is refused rather than turned into a floor of every round.
+        Assert.Throws<ArgumentOutOfRangeException>(() => Enough.Floor(0));
+    }
+
+    [Fact]
     public void A_difference_resting_on_too_few_faults_is_the_counts_and_not_a_shape()
     {
         var said = Enough.Attributed(2, "whole 2 of 300, quiet 0 of 300", () => "the band survives");

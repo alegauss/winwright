@@ -224,7 +224,7 @@ internal static class Sweep
                 faults[(arm, spacing)] = Measure(box, arrived, packets, rounds, arm, spacing);
         }
 
-        Console.WriteLine(Enough.Concluded(rounds, () => Verdict(faults)));
+        Console.WriteLine(Enough.Concluded(rounds, run.About, () => Verdict(faults)));
     }
 
     /// <summary>

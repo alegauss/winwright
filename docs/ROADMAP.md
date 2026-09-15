@@ -21,7 +21,6 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 💭 **WW426** (deps: —) **the floor a verdict needs is one number for five runners measuring rates that differ by an order** — WW410 put thirty rounds in front of every arm off one argument about 3/n; transfer already reasons about its own length in prose and now has a shared number in front of it. → §WW426
 - 💭 **WW434** (deps: —) **the label family is three properties and two hand-written chains, where the sweep and pointing families are one list** — WW391 folded `covers` and `sameAs` into a list apiece and left this one: a fourth spelling still joins in three places, and the claim set is one of them. → §WW434
 - 💭 **WW435** (deps: —) **a case's and a fixture's fields still reach the loader one hand-written line each, where a step's are read off its rows** — WW391 walked the schema for a step and left seventeen lines naming a key beside a row that already named it; a case and a fixture are the shape it just closed. → §WW435
 

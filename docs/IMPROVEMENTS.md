@@ -134,29 +134,6 @@ on.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW426 the weakest floor that would have worked
-
-WW410's floor is one constant, and its reason is one line of arithmetic: nothing seen in
-n rounds puts a rate under about 3/n, so below thirty the bound is looser than the rates
-every arm is about. That is true of all five and it is the loosest thing true of all
-five.
-
-Each arm knows more about itself. `transfer` says a rung of a few hundred expects a
-fraction of a fault, because WW355 read the act at 1 in 1200 — so thirty rounds is not a
-floor for it, it is a rounding error, and a run of a hundred passes the shared floor and
-still concludes nothing worth reading. `sweep` is eighteen cells and divides its rounds
-between them. `acts` types nothing and measures something else.
-
-So the guard is right and it is the weakest guard that would have worked. What it stops
-is a rate of one in one being ranked and attributed; what it does not stop is a rate of
-three in ninety being read as a shape.
-
-The number each arm wants is already in its own prose, argued against a measurement, and
-that is where it should live: on the row in `Arms.All`, beside the words the .cmd
-prints, the way `NeedsRanges` sits there rather than in a branch. `Enough.Concluded`
-would take it from the arm and keep the shared number for the bare run — which is the
-one experiment with no row to put it on.
-
 ### §WW434 the third family that did not move
 
 A step has three families of fields that are one claim spelled several ways. WW275 and
