@@ -1703,10 +1703,10 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
     [Fact]
     public void The_one_key_carrying_a_placeholder_is_left_out_and_said_out_loud()
     {
-        // WW118, in all three languages the fixture ships. An exact-name read can never match it,
-        // so it is no member of the expectation — and a rule that dropped it silently would be the
-        // green about a control nobody could have checked, which is what the recording prevents.
-        foreach (var culture in new[] { "en", "pt-BR", "de" })
+        // WW118, in every language the fixture ships. An exact-name read can never match it, so it
+        // is no member of the expectation — and a rule that dropped it silently would be the green
+        // about a control nobody could have checked, which is what the recording prevents.
+        foreach (var culture in Shipping)
         {
             var set = DerivedSet.From("the labels", Strings(culture), "labels");
 
@@ -1749,7 +1749,39 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         var (code, said) = Ran("--language=fr");
 
         Assert.Equal(2, code);
-        Assert.Contains("it takes en or pt-BR or de", said);
+        Assert.Contains($"it takes {string.Join(" or ", Shipping)}", said);
+    }
+
+    /// <summary>
+    /// Every language the fixture ships, typed here and never read off the fixture. WW424.
+    /// <para>
+    /// A hand-made list on purpose: the cases above are about what the fixture does in each language,
+    /// and reading the set off the fixture would let a language that shipped broken remove itself
+    /// from the question. What was wrong was that it was spelled twice, in two cases, and nothing
+    /// counted either spelling — so a fourth language would have been checked by the refusal's
+    /// sentence and by nothing else. <see cref="The_languages_this_class_names_are_every_one_the_fixture_ships"/>
+    /// is the count, against the files beside the built article.
+    /// </para>
+    /// </summary>
+    private static readonly string[] Shipping = ["en", "pt-BR", "de"];
+
+    [Fact]
+    public void The_languages_this_class_names_are_every_one_the_fixture_ships()
+    {
+        // WW424, the shape WW409 built for `Undrawn.Known`: the list stays hand-made, and the count
+        // it implies is asserted against the article, both ways. A strings file added beside the
+        // fixture is red here until this class says which cases cover it; one taken away is red
+        // until the list stops naming a language nobody ships.
+        var shipped = Directory
+            .EnumerateFiles(Fixture.StringsDirectory(), "strings.*.json")
+            .Select(one => Path.GetFileNameWithoutExtension(one)["strings.".Length..])
+            .ToList();
+
+        // The control: a directory that had lost its files would agree with an empty list.
+        Assert.NotEmpty(shipped);
+
+        Assert.Empty(shipped.Except(Shipping, StringComparer.Ordinal));
+        Assert.Empty(Shipping.Except(shipped, StringComparer.Ordinal));
     }
 
     /// <summary>The tab headers the window is showing, in order.</summary>

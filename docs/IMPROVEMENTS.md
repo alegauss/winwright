@@ -428,32 +428,6 @@ flag says. `DeskProbeTests` already reads both scripts.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-### §WW424 the list the case keeps to itself
-
-A case that checks a catalogue must not read that catalogue, or it agrees with itself
-whatever the thing under it does. So several here name their subjects by hand, and each
-comment says why — correctly, and each is a list nothing counts.
-
-`The_shapes_that_show_nothing_say_so_where_a_person_reads_them` named six flags against
-a fixture that had eleven. Every line of it was true. Five shapes had simply been added
-since, and the case went on passing about the six it knew, which is the failure mode
-this project usually catches by holding a list against a second source.
-
-The way out is not to drop the independence. WW409's is read off `Undrawn.Known`, which
-is a list built by hand from the same evidence and checked against the fixture in both
-directions — so the case still does not consult the thing it checks, and something else
-does.
-
-What is left is that this was found by reading rather than by anything going red, and
-there are more. `Provocation.Known`, `FixtureArms` and the language lists each hold
-entries typed against a source they deliberately do not read. Each may be complete
-today; none of them would say so if it were not.
-
-So the shape worth having is the one WW409 built, applied where it is missing: a
-hand-made list stays hand-made, and the count it implies is asserted somewhere against
-the article. A list nothing counts is a green about whatever fraction of a set somebody
-last remembered.
-
 ### §WW425 the correct character standing in front of the damaged one
 
 WW284 moved this reading from whole-file to line-at-a-time, and said why: one character

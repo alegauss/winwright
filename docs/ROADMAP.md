@@ -46,7 +46,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 💭 **WW424** (deps: —) **a hand-written list inside the only case about a set is where that set drifts, and three of them are still here** — WW409 found one at six entries against eleven, written deliberately so it would not agree with what it checks; the independence is right and the drift is not. → §WW424
 - 💭 **WW425** (deps: —) **damage on a line that also holds a legitimate non-ascii character is invisible, and this repository writes both** — WW421's own control passed until the real em-dash was taken off the line: the round trip fails for the whole line, so correct prose beside the damage hides it. → §WW425
 - 💭 **WW437** (deps: —) **the catalogue of every way a thread is parked walks src and tests, so a tool that parks one is invisible to it** — WW406 put a parked thread in tools/ and the entry written for it was refused as a file that sleeps nowhere: the sweep never looks there. → §WW437
 - 💭 **WW438** (deps: —) **shipping a task rewrites the roadmap a case reads, so the guest run that proved the work is stale before the commit** — WW391 and WW406 each went red on the criteria catalogue after a green guest run, for the same reason and in the same order, and nothing says the order. → §WW438
