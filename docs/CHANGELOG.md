@@ -407,6 +407,7 @@
 - ✅ **WW431** **the host gate takes whole classes, so a case that reads a file inside a serial class waits for the guest** — A case inside a serial class marks itself as needing no desk, the gate answers it, and a mark that lies is red before the guest (design recorded in `tests/Winwright.Tests/NoDesk.cs`).
 - ✅ **WW432** **the bound's holder walk runs only where a sync has already put it in the guest, and nothing says so** — The holder walk is sent by whoever is about to use it, so a bound fired before any sync asks the guest rather than a file that is not there.
 - ✅ **WW433** **the host gate takes only classes that are sealed, so a quarter of the desk-free suite never runs in the cheap half** — The gate takes a class that needs no desk whether or not it is sealed, and its list is held against the suite's own declarations both ways.
+- ✅ **WW439** **the guest exits 91 and 92 to say which sync failure it hit, and nothing on the host reads either number** — The host switches on the code the guest leaves with, declared once and interpolated into the guest's own program (design recorded in `tools/run-tests-vm.ps1`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

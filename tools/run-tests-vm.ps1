@@ -137,6 +137,24 @@ $script:Name = if ($Name) { $Name } else { Split-Path -Leaf $script:Tree }
 $script:GuestSync = "C:\$($script:Name)-sync"
 $script:GuestRepo = "C:\src\$($script:Name)"
 
+# WW439. What the guest's sync program exits with, and what the host below switches on. One number
+# each, written here and interpolated into the other machine's program, because the two halves are
+# one file: a code spelled at both ends is a second copy of a protocol, and the copy that drifts is
+# the one nobody reads.
+#
+# Nobody read either of them. They were written beside a marker saying the same thing, and the host
+# took whether the code was zero and then decided which failure it was by matching the log - so the
+# number was ceremony and the log was the protocol. Measured before changing it, because "the code
+# crosses" was the part nothing had established: a guest .cmd exiting 92 makes `vmrun` exit 92 on
+# this host, and so does the real shape, a `powershell -File` that exits 91 under `exit /b`.
+#
+# Read rather than dropped, and that is the choice this task had. The log is a second file, fetched
+# after the fact and empty where the copy back fails; the code arrives with the call itself. So the
+# code says which failure it was, and the markers carry what a number cannot - Windows' own sentence
+# about the file that would not delete, and the names of what holds it.
+$script:ExitNoSdk = 91
+$script:ExitHeldTree = 92
+
 # WW150. The suite writes its listing and its results into a directory named for the run, so two
 # runs on one machine cannot read each other's files. The default is a stamp the run picks for
 # itself, which is right for a developer and useless here: the files are copied back out of the
@@ -1175,14 +1193,14 @@ if (Test-Path -LiteralPath '$script:GuestRepo') {
     catch {
         Write-Output ('GUEST-HELD ' + (`$_.Exception.Message -replace '\s+', ' '))
         foreach (`$one in (Get-WhatHolds -Tree '$script:GuestRepo')) { Write-Output "GUEST-HOLDER `$one" }
-        exit 92
+        exit $script:ExitHeldTree
     }
 }
 `$null = New-Item -ItemType Directory -Path '$script:GuestRepo' -Force
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [IO.Compression.ZipFile]::ExtractToDirectory('$script:GuestSync\source.zip', '$script:GuestRepo')
 `$dotnet = Join-Path `$env:LOCALAPPDATA 'Microsoft\dotnet\dotnet.exe'
-if (-not (Test-Path -LiteralPath `$dotnet)) { Write-Output 'GUEST-MISSING dotnet'; exit 91 }
+if (-not (Test-Path -LiteralPath `$dotnet)) { Write-Output "no .NET SDK at `$dotnet"; exit $script:ExitNoSdk }
 Write-Output ('sdk ' + (& `$dotnet --version))
 "@ | Set-Content -LiteralPath (Join-Path $stage 'sync.ps1') -Encoding ascii
 
@@ -1311,20 +1329,39 @@ $null = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$
 $syncSaid = if (Test-Path -LiteralPath $syncLog) { (Read-ConsoleText $syncLog).Trim() } else { '' }
 
 if (-not $synced.Ok) {
-    if ($syncSaid -match 'GUEST-MISSING dotnet') {
-        Refuse 'the guest has no .NET SDK' 'Install it once in the VM. This script does not provision a machine.'
+    # WW439. The code and not the log, which is the whole of that task: the guest says which failure
+    # it hit in its own exit status, and this used to ask the log instead - so a sync whose log did
+    # not come back lost a diagnosis the call had already carried.
+    if ($synced.ExitCode -eq $script:ExitNoSdk) {
+        # A marker stood here and no longer does. WW416's rule is that every capitalised word the
+        # guest writes has an arm on this side, and once the code decides the arm the word carried
+        # nothing the number did not - so the guest writes a plain sentence naming where it looked,
+        # which is what a person opening sync.log at the guest console wanted from it anyway.
+        $looked = if ($syncSaid) { " It said: $syncSaid." } else { '' }
+        Refuse "the guest has no .NET SDK.$looked" 'Install it once in the VM. This script does not provision a machine.'
     }
 
     # WW404. The tree would not delete, and the guest was asked who has it before the answer got
     # this far. An empty list is an answer too, and a different one: it says the walk ran and found
     # nothing running from under the tree, which sends a reader somewhere other than Task Manager.
-    if ($syncSaid -match 'GUEST-HELD') {
+    #
+    # WW439: which failure it is comes from the code; what the markers carry is what a number cannot.
+    # Where the code says so and the log did not arrive, the sentence still names the failure and
+    # says the guest's own words are missing, rather than falling through to "would not sync".
+    if ($synced.ExitCode -eq $script:ExitHeldTree) {
         $said = $syncSaid -split "`r?`n"
         $windows = (($said | Where-Object { $_ -match '^GUEST-HELD ' }) -replace '^GUEST-HELD ', '') -join ' '
         $holders = @(($said | Where-Object { $_ -match '^GUEST-HOLDER ' }) -replace '^GUEST-HOLDER ', '')
+
+        # Three endings and it used to have two. WW404's second one says the walk ran and found
+        # nothing, which is a real answer and sends a reader somewhere other than Task Manager - and
+        # it would be a lie about a sync whose log never came back, where nothing walked anything.
+        # That arm is reachable now because the code says the tree is held without the log's help.
         $by = if ($holders.Count -gt 0) { "held open by $($holders -join '; ')" }
-              else { 'held open by nothing the guest is running, so something outside it has a file there' }
-        Refuse "the guest tree is $by" "Windows said: $windows. End them at the guest console, or revert the VM to a clean snapshot. A run that -Bound gave up on, or one killed by hand, leaves exactly this."
+              elseif ($windows.Length -gt 0) { 'held open by nothing the guest is running, so something outside it has a file there' }
+              else { 'held, and its own account of that did not come back' }
+        $because = if ($windows.Length -gt 0) { "Windows said: $windows. " } else { '' }
+        Refuse "the guest tree is $by" "${because}End them at the guest console, or revert the VM to a clean snapshot. A run that -Bound gave up on, or one killed by hand, leaves exactly this."
     }
 
     Refuse "the guest tree would not sync: $syncSaid $($synced.Output)"

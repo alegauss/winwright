@@ -25,6 +25,14 @@ namespace Winwright.Tests;
 /// together and can tell neither from the other. Cutting the file at those delimiters is what this
 /// needed, and the cut is worth naming on its own: it is the line between the two machines.
 /// </para>
+/// <para>
+/// WW439 brought the numbers under the same rule, and the rule then took a word away. The guest
+/// leaves with an exit code the host now switches on, so <c>GUEST-MISSING</c> — which said the guest
+/// has no SDK, the one thing that code already says — had nothing left to carry and no arm matching
+/// it. It is a plain sentence in the log now, naming where the guest looked, which is what somebody
+/// opening that log at the guest console wanted from it. The two that stayed carry what a number
+/// cannot: Windows' own words about the file that would not delete, and the names of what holds it.
+/// </para>
 /// </summary>
 public sealed class GuestMarkerTests
 {
@@ -34,7 +42,6 @@ public sealed class GuestMarkerTests
     /// </summary>
     private static readonly (string Marker, string Means)[] Markers =
     [
-        ("GUEST-MISSING", "the guest has no .NET SDK, which this script does not install"),
         ("GUEST-HELD", "the tree would not delete, and this is the sentence Windows gave for it"),
         ("GUEST-HOLDER", "one process running from under that tree, named so a reader is not sent to Task Manager"),
     ];
@@ -92,6 +99,69 @@ public sealed class GuestMarkerTests
             strangers.Count == 0,
             $"{strangers.Count} word(s) cross between the machines and nothing here says what they "
                 + $"mean: {string.Join(", ", strangers)}");
+    }
+
+    /// <summary>
+    /// How the guest's program leaves with a code, and how the host asks for one. WW439: the numbers
+    /// are not spelled at either end any more, so what a sweep looks for is the name in between.
+    /// </summary>
+    private static readonly Regex Leaving = new(
+        @"exit \$script:(?<named>\w+)",
+        RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(1));
+
+    [Fact]
+    public void Every_code_the_guest_leaves_with_is_one_the_host_switches_on()
+    {
+        // WW439. The other half of the protocol, and the half nothing read: `sync.ps1` exited 91 for
+        // a guest with no SDK and 92 for a tree that would not delete, and the host took whether the
+        // code was zero and then decided which failure it was by matching the log. The numbers were a
+        // second copy of what the markers already said, asked for by nobody.
+        //
+        // Measured before it was changed, because "the code arrives" was the part nothing had
+        // established: a guest .cmd exiting 92 makes vmrun exit 92, and so does the real shape — a
+        // `powershell -File` that exits 91, under `exit /b %ERRORLEVEL%`.
+        var (host, guest) = Halves();
+
+        var leaving = Leaving.Matches(guest)
+            .Select(one => one.Groups["named"].Value)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        Assert.NotEmpty(leaving);
+
+        Assert.All(
+            leaving,
+            one =>
+            {
+                Assert.True(
+                    host.Contains($"$script:{one} = ", StringComparison.Ordinal),
+                    $"the guest exits with $script:{one} and the host declares no such code, so the "
+                        + "number it leaves with is whatever an empty variable interpolates to");
+
+                Assert.True(
+                    host.Contains($"$synced.ExitCode -eq $script:{one}", StringComparison.Ordinal),
+                    $"nothing on the host switches on $script:{one}, so a guest that exits with it "
+                        + "falls through to the general refusal — which is what this whole task was");
+            });
+    }
+
+    [Fact]
+    public void No_exit_code_is_a_number_written_at_both_ends()
+    {
+        // The half that keeps it one copy. A number spelled in the guest's program and again in the
+        // host's arm is the drift this protocol had: the two ends can disagree and only a sync that
+        // actually fails would ever show it, which is rare enough to be somebody's afternoon.
+        var (host, guest) = Halves();
+
+        var spelled = Regex.Matches(guest, @"exit \d+", RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1))
+            .Select(one => one.Value)
+            .ToList();
+
+        Assert.True(
+            spelled.Count == 0,
+            $"the guest's half leaves with a number written into it: {string.Join(", ", spelled)}. "
+                + "The host generates that program, so a code belongs in one variable both halves read");
     }
 
     [Fact]
