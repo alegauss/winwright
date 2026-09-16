@@ -1085,6 +1085,22 @@ public static class CaseRun
                 Diagnosis.OfWindow(expectation.AsAssertion(), subject.Window, landed.Saw, budget));
         }
 
+        // WW460, and here rather than beside any one expectation. WW456 put the diagnosed miss into
+        // the sentence a never-answered expectation ends with and wired it into `Expect.Of`, which is
+        // the door a case in this suite uses. A scenario step goes through `Expect.That` — nine times
+        // over, in this file alone — so wiring the one a reader happened to be looking at is how the
+        // repair reached an adopter twice and landed neither time.
+        //
+        // This is the funnel, and the line above is the proof of it: every expectation a step builds
+        // arrives here to be explained. Resolved again rather than kept from the poll, for the reason
+        // that line gives — what a reader wants is the tree as it stood when the run gave up.
+        //
+        // Only where nothing ever answered, which is the arm whose sentence ends without a reason.
+        // Where it answered and read the wrong value, the readings are the reason, and a miss would
+        // be a second story about one red.
+        if (!expectation.EverSaw && subject.ResolveOnce().Miss is { } missed)
+            expectation = expectation.Missing(missed);
+
         // WW366. The act read once, the moment it returned; this expectation polled after it to the
         // deadline, and it is the second reading the verdict turned on. Said on the act's own line
         // and not only on this one, because the act's line is where a reader lands when a green
@@ -2010,15 +2026,6 @@ public static class CaseRun
         // Expect.That rather than Expect.Of: the diagnosis is a window dump, and taking one per
         // missed attempt pays for three of them to report the last.
         var saw = acted?.Element;
-
-        // WW456's other half, and it reached nobody until an adopter's run said so. That task put
-        // the diagnosed miss into the sentence a never-answered expectation ends with, and wired it
-        // in `Expect.Of` — which is the door a case in this suite uses and not the one a scenario
-        // step goes through. Measured against claude-tray on `0.1.0-alpha.7`: the step still read
-        // `nothing answered to it in 22 polls over 6028ms` and stopped, which is the sentence the
-        // task existed to finish.
-        var missed = default(LocatorMiss);
-
         var expectation = Expect.That(
             step.Name,
             wanted,
@@ -2026,17 +2033,10 @@ public static class CaseRun
             {
                 var look = subject.ReadOnce();
                 saw = look.Facts ?? saw;
-                missed = look.Miss ?? missed;
                 return look.Found ? step.Reads.Of(look) : null;
             },
             subject.ActMs,
             subject.PollMs);
-
-        // Only where nothing ever answered, which is the arm whose sentence ends without a reason.
-        // Where it answered and read the wrong thing, the readings are the reason and a miss from an
-        // earlier poll would be a second story about one red.
-        if (!expectation.EverSaw && missed is not null)
-            expectation = expectation.Missing(missed);
 
         return new Landed(acted, expectation, saw);
     }

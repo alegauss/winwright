@@ -289,6 +289,39 @@ public sealed class CaseRunTests : IDisposable
     }
 
     [Fact]
+    public void A_read_that_answered_nothing_says_so_whichever_claim_the_step_wrote()
+    {
+        // WW460's real lesson. The first repair wired the expectation a step with `expect` builds,
+        // because that is the one the case above drives — and this file alone builds nine. The step
+        // an adopter had written claims `answers`, which is a different one, so the fix reached
+        // nobody a second time and the guest said the same sentence over again.
+        //
+        // Driven through the claims a case actually writes rather than through one of them, because
+        // what went wrong twice was picking a door and calling it the path.
+        var frame = Dialog();
+
+        var claims = new (string Key, object Value)[]
+        {
+            ("answers", true),
+            ("expect", "Saved"),
+        };
+
+        foreach (var claim in claims)
+        {
+            var declared = CaseDeclaration.Of(
+                $"the status label is read with {claim.Key}",
+                Wrote.Step("""Text[name="Saved"]""", "read", ("reads", "text"), claim));
+
+            var detail = Assert.Single(Run(declared, frame).Verdict.Failures).Detail;
+
+            Assert.Contains("nothing answered to it", detail, StringComparison.Ordinal);
+            Assert.True(
+                detail.Contains("was holding", StringComparison.Ordinal),
+                $"a step claiming '{claim.Key}' says how long it waited and not what was there: {detail}");
+        }
+    }
+
+    [Fact]
     public void A_read_is_attempted_once_however_long_it_waits()
     {
         var frame = Dialog();
