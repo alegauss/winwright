@@ -52,6 +52,34 @@ public sealed class ResidentFixtureTests : IDisposable
     }
 
     [Fact]
+    public void A_step_that_found_nothing_against_the_desktop_says_what_was_there()
+    {
+        if (!Desk.Read().CanObserve)
+            return;
+
+        // WW460, against the shape an adopter actually has — which is the whole of what went wrong
+        // twice. The diagnosed miss was wired into `Expect.Of` first, which is the door a case in
+        // this suite uses, and then into the expectation a step with `expect` builds, which is the
+        // one its own case drove. claude-tray's step claims `answers` and resolves against the
+        // desktop, because a tray draws no window, and neither repair reached it.
+        //
+        // This class already declares that shape: `resident` is true, so the root is the desktop,
+        // and the step claims `answers`. So what is asserted here is the path, not a rehearsal of
+        // it — two published versions went by without anybody able to say that.
+        var verdict = Run(resident: true, "Button#nothingIsCalledThisOnAnyDesktop");
+
+        var detail = Assert.Single(verdict.Ran.SelectMany(one => one.Verdict.Failures)).Detail;
+
+        // The timing half, which is still the only sentence allowed to sound like timing.
+        Assert.Contains("nothing answered to it", detail, StringComparison.Ordinal);
+
+        // And what the desktop held, which is what three guest runs were spent asking by hand. The
+        // count is not named: the desktop holds whatever this machine is running, and a number typed
+        // here would be a claim about somebody's session rather than about the reading.
+        Assert.Contains("was holding", detail, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void The_same_launch_without_the_word_is_still_refused_for_drawing_no_window()
     {
         if (!Desk.Read().CanObserve)
