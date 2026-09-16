@@ -121,6 +121,10 @@ public sealed class AdoptedTrayTests : IDisposable
     public void The_other_kind_s_submenu_opens_the_same_way() =>
         TheSubmenuOpens("win32");
 
+    [Fact]
+    public void The_submenu_of_a_drop_down_that_shuts_itself_opens_too() =>
+        TheSubmenuOpens("shuts");
+
     /// <summary>
     /// WW453's claim: <c>open submenu</c> reaches an entry of a menu this run did not put up.
     /// <para>

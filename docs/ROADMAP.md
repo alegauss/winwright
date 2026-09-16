@@ -2,6 +2,8 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+- 📋 **WW462** (deps: —) **the sweep for verbs that reach the desk walks one file, so a verb reaching it through another is never seen** — `Menu.Enter`, `Expand` and `To` turn on the foreground through `Foreground.Check` and have been invisible to the rule since it was written. → §WW462
+
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
@@ -10,7 +12,7 @@
 
 ## Block D — Act — patterns before pointers
 
-- ⏳ **WW457** (deps: —) **a menu key is refused where the foreground is the shell's flyout or the popup's owner, which is how a tray menu stands** — The drop-down half is still excused: the overflow flyout this engine opened to find the icon holds the foreground. → §WW457
+- 🛠 **WW457** (deps: —) **a menu key is refused where the foreground is the shell's flyout or the popup's owner, which is how a tray menu stands** — A same-thread foreground is not enough: the act then proceeds, Right reaches nothing, and an honest hole becomes a red blaming the menu. → §WW457
 
 ## Block E — Capture — the picture that proves what it photographed
 

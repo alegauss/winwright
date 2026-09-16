@@ -312,6 +312,18 @@ internal sealed class Trayed : IDisposable
         else
             standing = Built(autoClose: true);
 
+        // WW457. The foreground first, exactly as the Win32 arm does — and it is what a real tray
+        // application has to do before showing a menu, not a nicety. A `ContextMenuStrip` raised for
+        // a `NotifyIcon` without it never sees the click that should dismiss it, which is the oldest
+        // documented workaround in the notification area.
+        //
+        // Skipping it is the third time this fixture has modelled an adopter's process and not its
+        // behaviour. It left the desk on whatever had it — the shell's overflow flyout, on a guest —
+        // where a real tray leaves it on a window of its own, one thread away from the menu. So the
+        // reading that admits that arrangement had no case here that could reach it, and
+        // claude-tray's own run was the only place it showed.
+        SetForegroundWindow(owner);
+
         standing.Show(new System.Drawing.Point(where.X, where.Y));
     }
 

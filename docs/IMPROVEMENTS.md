@@ -2,6 +2,32 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+### §WW462 the verbs the desk sweep cannot see
+
+WW208 built this reading because a list typed by hand meant "a reading the list had
+never heard of was one no case was ever asked to excuse". The sweep it replaced that
+list with has the same hole one level down.
+
+It keys on eight primitive names, matched in a member's body, and then walks
+transitively — but only within one file. That scoping is deliberate and the code says
+why: public names were once kept in one set across the engine, so a private helper
+sharing a name with somebody else's public verb was read as public. A sweep whose answer
+depends on which file it read first is not a reading.
+
+What it costs is a verb that reaches the desk through a call into another file.
+`Menu.Enter`, `Menu.Expand` and `Menu.To` each ask `Foreground.Check`, which lives in
+`Foreground.cs` and asks `GetForegroundWindow`. They turn on the foreground as squarely
+as anything in the list, cases excuse them through `MenuWalk.AsAssertion`, and the rule
+has never known they exist.
+
+Found by accident, which is the part worth keeping: WW457 put a primitive directly in
+`Menu.cs` for a moment and the three verbs appeared. Taking the primitive back out — the
+engine has a named reading and a verb should use it — made them vanish again.
+
+The repair is a walk that crosses files without losing the qualification that keeps it
+honest: `Owner.Member` rather than `Member`. Until then, what the rule covers is
+narrower than it reads.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached

@@ -318,17 +318,40 @@ public static class Menu
         return working != 0 && working == mine ? info.MenuOwner : 0;
     }
 
+
+
     /// <summary>
     /// The foreground reading a menu act turns on: the ordinary one, unless the desk says a menu is
     /// up and this is it. WW457.
+    /// <para>
+    /// Two widenings and both are narrow. The first is a Win32 menu being worked, which Windows says
+    /// outright. The second is the same shape one framework over: a <c>ContextMenuStrip</c> is not a
+    /// Win32 menu, so it sets no menu mode — WinForms instead puts the foreground on a hidden window
+    /// of its own before showing the drop-down, which is the documented way a tray menu is raised at
+    /// all. The menu and that window are two windows of one thread, and a synthesised key goes to the
+    /// foreground thread's queue, where the drop-down's own message filter is waiting for it.
+    /// </para>
+    /// <para>
+    /// Measured from the adopter's side. claude-tray's submenu step read `another window of the same
+    /// process owns it: ClaudeTray (pid 6092) (untitled), and the window under test is ClaudeTray
+    /// (pid 6092) (untitled)` — two untitled windows of one application, which is that arrangement
+    /// described from outside.
+    /// </para>
+    /// <para>
+    /// The thread and never the process, which is what keeps this from swallowing the reading it is
+    /// narrowing. `SameProcess` is an application's own dialog taking the desk from its own window,
+    /// and those are two threads or two queues; a key sent then really does land elsewhere, and
+    /// <c>MenuTests</c> holds that arm as a hole. The menu control type is the other half: an
+    /// ordinary window with a sibling on its thread is not a menu and is not admitted here.
+    /// </para>
     /// </summary>
     /// <param name="window">The menu a key is about to be sent at.</param>
     private static Precondition Reaches(nint window)
     {
         var foreground = Foreground.Check(Top(window)).AsPrecondition();
-        if (foreground.Satisfied || MenuOwner(window) == 0)
+        if (foreground.Satisfied)
             return foreground;
 
-        return Precondition.Met(Foreground.PreconditionName);
+        return MenuOwner(window) != 0 ? Precondition.Met(Foreground.PreconditionName) : foreground;
     }
 }
