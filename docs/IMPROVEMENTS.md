@@ -32,30 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW451 the tray menu that belongs to somebody else
-
-`open tray menu` focuses the icon and sends the application key, and the shell forwards
-that to whoever owns the icon. Every case proving it — `NotificationAreaTests`, and the
-scenario one beside it — adds the icon through `TrayIconFixture`, which puts it up from
-inside the test host. So the owner of the icon has always been the process driving it.
-
-WW83's case is the first that is not. Run twice in the guest against claude-tray, the
-step failed the same way both times: `showed no menu: nothing was highlighted within
-6004 ms of the application key; the foreground was explorer 'tray overflow window' and
-the focus was on the icon`. Three cases in that repository fail on it, including one
-migrated and committed long before.
-
-The explanation to test first is the foreground lock. A `ContextMenuStrip` shown for a
-`NotifyIcon` sets the foreground to its own hidden window first, and Windows refuses
-that to a process which neither owns the foreground nor was handed it — never a problem
-when the driving process owns the icon, and always one when it does not.
-`AllowSetForegroundWindow` is what a shell-invoked menu relies on, and nothing here
-grants it.
-
-What it decides is whether this verb is usable by an adopter at all: a tray application
-under test is another process by definition, so a route proven only in-process is proven
-against the one case no adopter has.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

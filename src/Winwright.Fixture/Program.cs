@@ -130,6 +130,25 @@ public static class Program
             return 0;
         }
 
+        // WW451. Beside the shadowed arm and for the same two reasons: a tray application's only
+        // surface is its icon, and the code reaching a shape is the code testing its flag.
+        //
+        // What is new is who owns it. Every case proving `open tray menu` puts its icon up from
+        // inside the test host, so the verb has never answered the question an adopter asks — this
+        // shape is that question, and it is a flag on the fixture because a tray under test is
+        // another process by definition.
+        if (shapes.Value("tray") is string kind)
+        {
+            using var tray = Trayed.Raise(kind);
+
+            // The loop this shape needs, on the same thread the icon was registered from: the shell
+            // delivers the icon's callbacks to the window that owns it, and a drop-down's messages go
+            // to the loop that owns the control. There is no window to run either on, so it is the
+            // application-level one, and the icon is what keeps the process alive.
+            System.Windows.Forms.Application.Run();
+            return 0;
+        }
+
         return shapes.Value("pump") == "none" ? Unpumped(shapes) : Pumped(shapes);
     }
 

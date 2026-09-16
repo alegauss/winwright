@@ -110,6 +110,25 @@ internal static class Fixture
     public const string AnnouncedUnchecked = "Not checked";
 
     /// <summary>
+    /// What the shell calls the icon a <c>--tray</c> launch puts up. WW451.
+    /// <para>
+    /// The tip carries the launched process, which is WW126's rule and matters more across a process
+    /// boundary than it did inside one: a run that was killed leaves its icon registered with the
+    /// shell, nothing can delete somebody else's, and a ghost found by tip would be driven as this
+    /// launch's own. So a case addresses the icon by the process it started rather than by a name.
+    /// </para>
+    /// <para>
+    /// Spelled here as well as in <c>Trayed.TipFor</c>, for the reason <see cref="AnnouncedChecked" />
+    /// gives: this suite references the fixture without its assembly on purpose, so a member over
+    /// there is one this file cannot call. It is the safe direction to drift in — the two disagreeing
+    /// makes the case fail to find an icon that is standing, which is a red about the thing under
+    /// test rather than a green against a tray nobody launched.
+    /// </para>
+    /// </summary>
+    /// <param name="pid">The launched fixture.</param>
+    public static string TrayTip(int pid) => $"winwright tray #{pid}";
+
+    /// <summary>
     /// What a run asking for that shape exits with, read off the catalogue.
     /// <para>
     /// WW161. The suite used to carry the number as a private constant copied out of the fixture,

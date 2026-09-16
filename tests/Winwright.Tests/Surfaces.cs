@@ -90,6 +90,7 @@ internal static class Surfaces
         new("Store", Carrying.AShape, "store"),
         new("Strings", Carrying.AShape, "language"),
         new("Toast", Carrying.AShape, "toast"),
+        new("Trayed", Carrying.AShape, "tray"),
 
         // The plain pane a render is taken of where nothing awkward was asked for, so the reason on
         // --render is the reason it is drawn. Filed as a shape on the first attempt and the check

@@ -65,6 +65,11 @@ internal static class DeskDiscards
                 + "shut the flyout leaves it standing for the next class, and the one case that "
                 + "would notice reads the flyout before and after its own work rather than assuming "
                 + "it started shut — which WW197 made it do for exactly this reason"),
+        new("AdoptedTrayTests.Dispose", "NotificationArea.CloseOverflow(",
+            "WW451. The same tidiness on the way out, and the class asserts nothing after it. The "
+                + "flyout was opened by the search that found the launched tray's icon, so shutting "
+                + "it is putting the taskbar back rather than a precondition for anything here — and "
+                + "a shell that will not shut it leaves it standing for a class that opens it anyway"),
         new("NotificationAreaTests.A_shell_that_will_not_work_the_flyout_is_a_hole_naming_what_it_was",
             "NotificationArea.CloseOverflow(",
             "shutting what this case opened, on the arm where opening worked. The case has already "

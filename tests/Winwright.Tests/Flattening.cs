@@ -115,6 +115,13 @@ internal static class Flattening
             "WW181's own signature, kept and called by nothing. The suite is otherwise clean under "
                 + "this rule, and a rule with nothing to find passes by arithmetic — so the one "
                 + "thing it must find is the defect it was written for"),
+
+        new($"{nameof(AdoptedTrayTests)}.Placed", Flattened.ADoor,
+            "WW451. It waits for the shell to place a launched tray's icon, and the bool is the "
+                + "door and not the answer: every third state it meets is taken as an excuse before "
+                + "it returns — the search's own where the flyout was never read, the desk's where "
+                + "the shell is placing nobody's icon — and a shell that looked everywhere and found "
+                + "nothing fails the case rather than returning at all"),
     ]);
 
     /// <summary>The reading a person gets: the count first, then a line each.</summary>

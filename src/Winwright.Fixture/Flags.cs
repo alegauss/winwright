@@ -326,6 +326,13 @@ public sealed record Flags
             "the largest window a tray process owns is that shadow, so the convenience verb answered the one surface beside a menu that must never be photographed, and no fixture here could be a process whose only windows are those two",
             Draws: false),
         new Flag(
+            "tray",
+            "kind",
+            "a process whose only surface is a notification-area icon, which puts up a menu of either kind when the shell asks it for one",
+            "every case proving `open tray menu` adds its icon from inside the test host, so the verb has never been asked the one question an adopter asks - and WW322 was therefore diagnosed by reading claude-tray's own log rather than by a case here",
+            Draws: false,
+            Choices: Trayed.Kinds),
+        new Flag(
             "profiles",
             "",
             "print the profiles this application has, one per line, and exit - the set a case derives from what the application reports rather than from a strings file",

@@ -10,8 +10,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 💭 **WW451** (deps: —) **every case that opens a tray menu drives an icon this process owns, and the first one that drove another's saw no menu** — claude-tray's icon showed nothing six seconds after the application key, twice in the guest, while the same route against this suite's own icon passes every run. → §WW451
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

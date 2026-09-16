@@ -40,6 +40,13 @@ internal static class Waits
             // A process actually exited, which WW129 measured as well after its last window went.
             ["gone"] = 8000,
 
+            // WW451. A launched tray's icon, published into the tree where a reading can find it.
+            // Longer than `draw` because it is `draw` plus the shell: the process has to cold-start
+            // and register the icon, and then the shell has to place it and build the automation
+            // tree under it — which WW119 measured as a separate schedule, and measured by losing
+            // four full-suite runs to a test that looked the instant the shell took the message.
+            ["placed"] = 15000,
+
             // A file the application under test writes, once its window is up.
             //
             // WW203. "Once its window is up" is the whole of the repair. Both callers waited on this
