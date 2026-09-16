@@ -65,6 +65,12 @@ internal static class DeskDiscards
                 + "shut the flyout leaves it standing for the next class, and the one case that "
                 + "would notice reads the flyout before and after its own work rather than assuming "
                 + "it started shut — which WW197 made it do for exactly this reason"),
+        new("AdoptedTrayTests.A_menu_that_shuts_itself_is_still_standing_for_the_step_that_reads_it",
+            "NotificationArea.CloseOverflow(",
+            "WW461. The same tidy as the helper below, in the one tray case that drives the scenario "
+                + "runner rather than the acts directly: shutting the flyout this case's own search "
+                + "opened, in a finally, once the run has answered. A shell that will not shut it "
+                + "leaves it standing for the class's Dispose, which shuts it again"),
         new("AdoptedTrayTests.WithTheMenuUp", "NotificationArea.CloseOverflow(",
             "WW457. Shutting the flyout this case's own search opened, in a finally, once everything "
                 + "the case is about has been read — and only where it was shut beforehand, which is "

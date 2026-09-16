@@ -199,6 +199,96 @@ public sealed class AdoptedTrayTests : IDisposable
         });
 
     [Fact]
+    public void A_menu_that_shuts_itself_is_still_standing_for_the_step_that_reads_it()
+    {
+        // WW461, and it is the one case that would have caught the defect. Every other tray case
+        // here drives `NotificationArea` directly; this goes through the scenario runner, which is
+        // what an adopter runs and where the tidy lives.
+        //
+        // The runner shut the overflow flyout in a `finally` on the tray step. WW343 asked whether
+        // that dismisses the menu and measured it against `TrayIconFixture`, whose drop-down has
+        // `AutoClose` off — so nothing could dismiss it and the answer was "harmless". A
+        // `ContextMenuStrip` on a `NotifyIcon` goes the moment it loses the desk, and shutting the
+        // flyout is the shell taking the desk. claude-tray's step 2 found no Menu at all on a
+        // desktop holding three windows, one line after step 1 read the menu back.
+        //
+        // So the arm this drives is `shuts`, which is the only one of the three that can be lost
+        // this way — the other two hold themselves open and would pass whatever the runner did.
+        if (BusyDesk.Excused(NotificationArea.Reachable()))
+            return;
+
+        using var register = new ProcessRegister();
+        var flyoutWasUp = NotificationArea.Overflow() is not null;
+
+        var launched = Attachable.Launch(register, Fixture.Started("--tray=shuts"));
+        var tip = Fixture.TrayTip(launched.Pid);
+
+        if (!Placed(tip, launched.Pid))
+            return;
+
+        var declared = Winwright.Scenarios.CaseDeclaration.Of(
+            "the tray menu is opened and then read",
+            Wrote.Step(null, "open tray menu", ("tray", tip), ("named", "the icon shows its menu")),
+
+            // Ordered and not named, which the engine refused the first draft of this for and was
+            // right to: a locator that matched on the name fixes the reading before the act runs, so
+            // claiming that name back is a step that cannot fail. What is claimed instead is that
+            // the entry answers something at all — which is false in exactly the way this case is
+            // about, a menu that went away between the step that opened it and the step that reads.
+            Wrote.Step(
+                "Menu > MenuItem[order=top]",
+                "read",
+                ("reads", "name"),
+                ("answers", true),
+                ("named", "the entry is still there to read")));
+
+        try
+        {
+            var run = Winwright.Scenarios.CaseRun.Of(declared, AutomationElement.RootElement, TrayProject());
+
+            // A desk that would not put the menu up at all is a hole rather than a red, which the
+            // engine already answers — so this stands down rather than asserting about the shell.
+            if (run.Verdict.Unchecked.Count > 0)
+                return;
+
+            Assert.True(
+                run.Verdict.Outcome == RunOutcome.Passed,
+                "the menu was opened and was gone by the step that reads it:"
+                    + $"{Environment.NewLine}{string.Join(Environment.NewLine, run.Verdict.Results.Select(one => one.ToString()))}"
+                    + $"{Environment.NewLine}{string.Join(Environment.NewLine, run.Trace.Select(one => one.ToString()))}");
+        }
+        finally
+        {
+            register.Stop(launched);
+
+            if (!flyoutWasUp)
+                NotificationArea.CloseOverflow();
+        }
+    }
+
+    /// <summary>
+    /// A project for a tray case: this process as the executable, since nothing is launched through
+    /// it, and the deadlines a tray needs. WW461, and the same shape <c>NotificationAreaTests</c>
+    /// builds for the scenario it drives.
+    /// </summary>
+    private static Winwright.Projects.ProjectDeclaration TrayProject()
+    {
+        var into = Directory.CreateTempSubdirectory("winwright-ww461-").FullName;
+        var path = Path.Combine(into, Winwright.Projects.ProjectDeclaration.FileName);
+
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Environment.ProcessPath)}},
+              "timeouts": { "resolve": 4000, "act": 4000, "poll": 40 }
+            }
+            """);
+
+        return Winwright.Projects.ProjectDeclaration.Load(path);
+    }
+
+    [Fact]
     public void A_menu_left_to_shut_itself_is_still_a_window_of_the_process_that_owns_it() =>
         TheMenuBelongsToTheLaunchedProcess("shuts");
 

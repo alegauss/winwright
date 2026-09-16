@@ -776,6 +776,11 @@ public static class CaseRun
         // went red on a flyout this step had opened and walked away from.
         var stood = NotificationArea.Overflow() is not null;
 
+        // WW461. Whether a menu is being handed up, which is what decides who shuts the flyout. The
+        // act's own `PutBack` already shuts the one it opened, at the end of the case — so where a
+        // menu is standing, the close below is both early and duplicated.
+        var standing = false;
+
         // WW258. Asking for the menu is the other act a tray takes, and it answers its own three ways
         // for the same reason the search does — WW174 put the desk apart from the application here,
         // so a shell that would not open the flyout is a hole and not a menu that failed to appear.
@@ -791,7 +796,8 @@ public static class CaseRun
                 // WW343. Handed up only where a menu is actually standing. Every arm that opened
                 // none has already put the desk back itself — the act can, there, because there is
                 // nothing left to lose — and handing those up would put it back twice.
-                return menu.Opened ? menu : null;
+                standing = menu.Opened;
+                return standing ? menu : null;
             }
 
             var search = NotificationArea.Find(icon, openingTheOverflow: true, settleMs, pollMs);
@@ -810,9 +816,24 @@ public static class CaseRun
             // WW343 asked whether this dismisses a menu the step just opened — the chevron takes an
             // invoke, the shell shuts the flyout, and a drop-down standing over it might well go
             // with it. Measured, by taking the line out and watching: the case below reads both
-            // entries of the menu on the step after this one either way. So the flyout close stays
-            // here where it belongs, and it is only the foreground that had nowhere to go.
-            if (!stood && NotificationArea.Overflow() is not null)
+            // entries of the menu on the step after this one either way.
+            //
+            // WW461. That measurement was taken against `TrayIconFixture`, whose drop-down has
+            // `AutoClose` off — the case saying so in as many words, one line from where it dismisses
+            // the menu by hand because nothing else will. No application ships one of those. A
+            // `ContextMenuStrip` on a `NotifyIcon` goes the moment it loses the desk, and shutting
+            // the flyout is the shell taking the desk.
+            //
+            // Measured from the adopter's side at last: claude-tray's step 1 reads back `the menu "a
+            // menu with no name"`, and its step 2 one line later finds no Menu on a desktop holding
+            // three windows. The verb opened a menu and this line took it away before anything could
+            // read it.
+            //
+            // So it goes where WW343 put the other half of the same tidy, for the reason that task
+            // already wrote down: `PutBack` shuts the flyout the act opened, at the end of the case,
+            // once the menu has been read. Where no menu is standing there is nothing to lose and
+            // nobody else to do it, which is every other arm.
+            if (!standing && !stood && NotificationArea.Overflow() is not null)
                 NotificationArea.CloseOverflow(settleMs, pollMs);
         }
     }

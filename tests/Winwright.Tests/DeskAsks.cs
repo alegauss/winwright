@@ -375,6 +375,13 @@ internal static class DeskAsks
             "the intruder is placed well clear, and the case returns where the reading came back "
                 + "covered anyway — a desk holding a window over the fixture has nothing clear to "
                 + "carry, and the receipt would refuse rather than answer"),
+        new("AdoptedTrayTests.A_menu_that_shuts_itself_is_still_standing_for_the_step_that_reads_it",
+            Unaffected.Guarded,
+            "WW461. The only call here that touches the flyout is the tidy in the finally, after "
+                + "everything has been asserted — what the case turns on is the run's own verdict, "
+                + "and it stands down before that on all three readings it does depend on: the "
+                + "notification area being reachable, the icon being placed, and the engine's own "
+                + "unchecked count where the desk would not put the menu up"),
         new("NotificationAreaTests.A_case_reads_the_menu_a_step_opened_and_the_case_hands_the_desk_back",
             Unaffected.Guarded,
             "WW343. The same guard as the case below and for the same reason: the foreground is read "
