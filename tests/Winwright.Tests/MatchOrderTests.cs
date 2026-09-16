@@ -145,6 +145,26 @@ public sealed class MatchOrderTests : IDisposable
     }
 
     [Fact]
+    public void A_miss_is_diagnosed_against_a_parent_the_route_would_really_have_reached()
+    {
+        // WW459. `Walk` carries a frontier since WW458 and the diagnosis did not, so it committed to
+        // whichever parent came first in tree order. Where that one holds nothing and the other holds
+        // most of the route, the sentence described a branch nothing would have taken — and WW456 had
+        // just put the parent's own contents into it, so it was precise about the wrong thing.
+        //
+        // The left pane is first in the tree and empty; the right one holds the button. A route
+        // naming a Slider under them misses either way, and what a reader needs is the parent that
+        // was actually on the way.
+        var miss = Resolve.Once(TwoPanesOneHolding(), Locator.Parse("""Text > Button > Slider""")).Miss!;
+
+        Assert.Equal(2, miss.Reached);
+        Assert.Equal("Publish", miss.Deepest!.Name);
+
+        // And the reading beside it is about that parent rather than about the empty one.
+        Assert.Contains("Publish", miss.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Two_elements_with_the_same_name_are_refused_rather_than_guessed_between()
     {
         var refusal = Assert.Throws<AmbiguousLocatorException>(

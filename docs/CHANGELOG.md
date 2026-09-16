@@ -34,6 +34,7 @@
 - ✅ **WW208** **the list of desk-dependent calls is typed by hand, and a reading missing from it is a case nothing asks to excuse** — The engine's surface is read for verbs that reach the desk and the list must name each: thirteen do, and the reading found a second call missing on the day it was written.
 - ✅ **WW235** **a timing case fails more often as the suite it runs in grows** — The release runs on its own thread instead of the thread pool, and the hold is a checked fraction of the retry budget rather than a multiple of its sleep.
 - ✅ **WW456** **a tray-menu step that resolves nothing says only that, so three runs have gone on ruling out what the desk held** — A miss now says what the thing it stopped under was holding, and the never-answered sentence carries that diagnosis — which is where an adopter reads a red.
+- ✅ **WW459** **a miss is diagnosed down the first branch while resolving walks every one, so it can describe the wrong parent** — A miss walks the frontier its resolution walks, so the parent it names and the contents it prints are on a route something would have taken.
 
 ## Block B — Attach, launch, and leave nothing behind
 

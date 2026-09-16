@@ -287,8 +287,28 @@ public static class Resolve
         return new Resolution(null, null, Diagnose(root, locator), waitedMs, polls);
     }
 
+    /// <summary>
+    /// Why the route stopped, walked the way <see cref="Walk" /> walks it. WW459.
+    /// <para>
+    /// The frontier is the whole of what changed. This used to take one element per step — the first
+    /// match, or the one an index names — and report from there, which was harmless while a step
+    /// matching two threw rather than resolving: there was no second branch to be wrong about. WW458
+    /// made every match go forward, so there is one now, and a diagnosis that committed to whichever
+    /// came first in tree order would describe a parent nothing would have taken.
+    /// </para>
+    /// <para>
+    /// It matters because of what WW456 put in the sentence. `What it looked under was holding 2: …`
+    /// is precise, and precision about the wrong parent is worse than the vaguer line it replaced.
+    /// </para>
+    /// <para>
+    /// <see cref="LocatorMiss.Deepest" /> stays one element, which is right: what a reader wants is
+    /// something they can go and look at. It is the first of the last frontier that had anything —
+    /// a parent that really was on a route the resolver would have taken.
+    /// </para>
+    /// </summary>
     private static LocatorMiss Diagnose(AutomationElement root, Locator locator)
     {
+        var frontier = new List<AutomationElement> { root };
         var here = root;
         ElementFacts? deepest = null;
         var reached = 0;
@@ -296,12 +316,31 @@ public static class Resolve
         while (reached < locator.Steps.Count)
         {
             var step = locator.Steps[reached];
-            var matches = Matching(here, step);
-            var wanted = (step.Index ?? 1) - 1;
-            if (wanted >= matches.Count)
+            var next = new List<AutomationElement>();
+
+            // The same rule `Walk` follows on the way: every match goes forward, and an index picks
+            // one per parent. A branch left out here is a branch the resolver would have walked.
+            foreach (var parent in frontier)
+            {
+                var matches = Matching(parent, step);
+
+                if (step.Index is { } ordinal)
+                {
+                    if (ordinal - 1 < matches.Count)
+                        next.Add(matches[ordinal - 1]);
+
+                    continue;
+                }
+
+                next.AddRange(matches);
+            }
+
+            next = next.Distinct().ToList();
+            if (next.Count == 0)
                 break;
 
-            here = matches[wanted];
+            frontier = next;
+            here = frontier[0];
             deepest = ElementFacts.Of(here);
             reached++;
         }
