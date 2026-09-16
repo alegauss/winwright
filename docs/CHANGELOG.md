@@ -416,6 +416,7 @@
 - ✅ **WW441** **a host that cannot build refuses the guest run as though the desk-free cases were red** — A host that never ran a case says so, prints what dotnet said and goes on to the guest; the dump reader tells the same two endings apart (design recorded in `tools/host-gate.ps1`).
 - ✅ **WW443** **a case that reads a file cannot say it needs no desk while its class builds a tray icon for every case** — A case that reads a file and reaches for nothing moves to a class that needs nothing, and a rule holds the door shut (design recorded in `tests/Winwright.Tests/NoDeskTests.cs`).
 - ✅ **WW454** **the switch case and the store bracket were written against an engine claude-tray could not restore** — The switch case, the read-out it picks with and the suite inside the store comparison are in claude-tray at ff727c1, and nine of its ten tests pass in the guest.
+- ✅ **WW452** **no case reads inside a tray menu another process owns, which is the step claude-tray's own case fails on** — Two cases resolve `Menu > MenuItem[name=...]` against the desktop into a launched tray's menu, both kinds — so the boundary is not what stops claude-tray one step in.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

@@ -120,30 +120,6 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW452 reading inside somebody else's tray menu
-
-WW369 reads both tray menu kinds as a shape — a `Menu` holding two `MenuItem`s, named as
-the adopters name them — and WW382 measured where the kinds differ. Both walk
-`TrayIconFixture`'s menu, which this test host put up, so what they prove is that the
-tree is right when the harness owns it.
-
-WW451 closed the other half of that only as far as the menu window. It launches a tray,
-opens its menu through the verb, and asserts that the process owned no window before the
-key and owns the menu after it. What it never does is walk it: the reading stops at the
-window class.
-
-That is the step an adopter fails on. Against `0.1.0-alpha.6`, claude-tray's first step
-is `Ok` and reads back `the menu "a menu with no name"`; the second resolves `Menu >
-MenuItem` against nothing. The same locator passes here against the same two entries, so
-either the boundary changes what a locator can reach or claude-tray's case names
-something its tray does not have — and nothing here can say which, which is WW451's own
-complaint said one step further in.
-
-What this wants is the walk WW369 takes, taken against the launched tray instead: the
-container is a `Menu`, its entries are `MenuItem`s, and the locator that resolves them
-is the one an adopter writes. `--tray` already puts both kinds up, so the shape costs
-nothing new.
-
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ### §WW453 the submenu no tray here has
@@ -167,3 +143,28 @@ and there is no case here that would say the same thing if the route were right.
 What this wants is an entry that opens something: one of the two carrying a submenu of
 its own, in both kinds, so the difference WW382 measured at the container can be asked
 about a level further down. The flag exists; what it puts up is what changes.
+
+### §WW455 the menu that stays up
+
+`Shadowed`, `TrayIconFixture` and `Trayed` all build their drop-down with `AutoClose`
+off, and each says why: a menu that shut the moment anything else took the desk would be
+gone before a harness had enumerated it. That reasoning is sound and it is also the
+thing under test being arranged away.
+
+WW452 made the cost visible. It launches a tray, opens its menu across a process
+boundary and resolves `Menu > MenuItem[name=...]` against the desktop — the locator an
+adopter writes, at the root a resident fixture's steps are given — and it passes for
+both kinds. claude-tray's equivalent step, against the same engine, polls 22 times over
+6.2 seconds and resolves nothing, and `open submenu` answers `this element is in no
+window a menu key could be sent to`.
+
+So neither the boundary nor the locator is the difference. What is left is the menu's
+own lifetime: a real `ContextMenuStrip` on a `NotifyIcon` closes when it loses
+activation, and every menu this tree puts up has that turned off. The engine has
+therefore never resolved against a menu that could go while it was looking, which is the
+only kind an application ships.
+
+What this wants is an arm that does not hold itself open — the same drop-down with
+`AutoClose` left alone — and the same reading against it. Either it resolves, and
+claude-tray's failure is somewhere else again, or it does not, and the step that reads a
+tray menu has a race nothing here could have found.
