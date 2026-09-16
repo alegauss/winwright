@@ -2,6 +2,31 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+### §WW459 the branch a diagnosis went down
+
+WW458 made `Walk` carry a frontier: every step's matches go forward, and the several are
+counted at the end. `Diagnose` was not changed with it. It still walks one element per
+step — the first match, or the one an index names — so where a step matches two it
+commits to one and reports from there.
+
+Before WW458 that was harmless, because a step matching two threw rather than resolving
+and there was no second branch to be wrong about. Now there is. A route that misses
+through both is diagnosed against whichever came first in tree order, and nothing says
+the other was looked at.
+
+What makes it worth a line is WW456, which put the parent's contents into the sentence a
+reader acts on. `What it looked under was holding 2: ...` is precise and names a parent
+the resolution might never have chosen — so the more useful the diagnosis became, the
+more it matters that it describes the same walk.
+
+The fix is to diagnose over the frontier too: step until it empties, report how many
+steps had one, and name the deepest. `Reached` and `Deepest` are single-element fields
+and keep their meaning, since what a reader wants is a parent that really was on a route
+the resolver would have taken.
+
+Filed rather than folded into WW458 because it is a second claim: that task's evidence
+was a locator that resolves, and this is about one that does not.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
