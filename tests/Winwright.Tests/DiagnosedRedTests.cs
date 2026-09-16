@@ -80,6 +80,43 @@ public sealed class DiagnosedRedTests : IDisposable
     }
 
     [Fact]
+    public void A_subject_that_resolves_to_nothing_says_why_in_the_sentence_and_not_only_in_the_view()
+    {
+        // WW456. The view is attached and the sentence is what a trace prints, so an adopter reading
+        // a red gets `nothing answered to it in 22 polls over 6177ms` and stops there — which sounds
+        // like timing and is usually about the tree. Measured: three tasks each spent a guest run
+        // ruling out one thing this sentence could have said.
+        var watched = Expect.Of(On("Edit#nosuchid"), "the missing box", "alpha", one => one.Value);
+
+        Assert.False(watched.EverSaw, "the locator resolved, so this is not the case it is about");
+        Assert.NotNull(watched.Missed);
+
+        var said = watched.Sentence();
+
+        // The timing half is kept, because a wait that was genuinely too short is a real reading and
+        // this is still the only sentence allowed to sound like one.
+        Assert.Contains("nothing answered to it in", said, StringComparison.Ordinal);
+
+        // And the half that was missing: what the locator stopped at, and what was there instead.
+        Assert.Contains(watched.Missed!.Sentence(), said, StringComparison.Ordinal);
+        Assert.Contains("was holding", said, StringComparison.Ordinal);
+        Assert.Contains("Save", said, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_subject_that_answered_the_wrong_value_carries_no_miss_at_all()
+    {
+        // The arm this must not widen into. Where the subject answered, the readings are the reason
+        // and a miss from some earlier poll would be a second story about the same red — which is
+        // the shape WW339 withdrew when one field held two facts.
+        var watched = Expect.Of(On("Edit"), "the box", "omega", one => one.Value);
+
+        Assert.True(watched.EverSaw);
+        Assert.Null(watched.Missed);
+        Assert.DoesNotContain("was holding", watched.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void The_view_is_the_one_inspect_prints_and_never_a_second_spelling_of_it()
     {
         var watched = Expect.Of(On("Edit"), "the box", "omega", one => one.Value);

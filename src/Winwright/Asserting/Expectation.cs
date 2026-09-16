@@ -96,6 +96,32 @@ public sealed record Expectation
     }
 
     /// <summary>
+    /// Why the subject never answered, where the locator itself was diagnosed. WW456.
+    /// <para>
+    /// The one arm of <see cref="Sentence" /> that used to end without a reason. A subject that was
+    /// never seen at all has no reading to print and no control view worth the room — the tree under
+    /// a window nothing resolved in is not what the reader needs — so the sentence said how long it
+    /// waited and stopped there, which sounds like timing and is usually not.
+    /// </para>
+    /// <para>
+    /// Measured across three tasks and three guest runs. An adopter's step reported <c>nothing
+    /// answered to it in 22 polls over 6177ms</c> one line after the same run had reported the menu
+    /// it read back, and each run afterwards ruled out one thing that sentence could have carried:
+    /// whether anything was standing, whether more than one was, whether it held entries, and what
+    /// type they were. <see cref="LocatorMiss" /> had every one of those and reached nobody.
+    /// </para>
+    /// </summary>
+    public LocatorMiss? Missed { get; private init; }
+
+    /// <summary>The same expectation carrying the diagnosed miss. WW456.</summary>
+    /// <param name="miss">Why the locator found nothing.</param>
+    public Expectation Missing(LocatorMiss miss)
+    {
+        ArgumentNullException.ThrowIfNull(miss);
+        return this with { Missed = miss };
+    }
+
+    /// <summary>
     /// How many of those looks found the subject answering at all. This is the number that
     /// separates "it was never there" from "it was there and it never said what was wanted", and
     /// it is the whole reason this type exists.
@@ -119,10 +145,14 @@ public sealed record Expectation
         if (Held)
             return $"{Name} read '{Wanted}' after {WaitedMs}ms and {Times(Polls)}.";
 
-        // Never answered. This is the only sentence that is genuinely about timing, so it is the
-        // only one allowed to sound like it.
+        // Never answered. This used to be the only sentence that sounds like it is about timing,
+        // and WW456 is why it no longer is left at that: it sounds like timing and it is usually
+        // about the tree, so the miss's own diagnosis follows it where there is one.
         if (!EverSaw)
-            return $"expected {Name} to read '{Wanted}'; nothing answered to it in {Times(Polls)} over {WaitedMs}ms.";
+        {
+            return $"expected {Name} to read '{Wanted}'; nothing answered to it in {Times(Polls)} over {WaitedMs}ms."
+                + (Missed is null ? "" : $" {Missed.Sentence()}");
+        }
 
         // Answered throughout and never said it. The sentence claude-tray needed and did not get.
         if (Readings.Count == 1)
@@ -245,6 +275,7 @@ public static class Expect
         ArgumentNullException.ThrowIfNull(read);
 
         var last = default(ElementFacts);
+        var missed = default(LocatorMiss);
         var watched = That(
             name,
             wanted,
@@ -252,6 +283,7 @@ public static class Expect
             {
                 var look = subject.ReadOnce();
                 last = look.Facts;
+                missed = look.Miss;
                 return look.Found ? read(look.Values) : null;
             },
             subject.DeadlineMs,
@@ -260,10 +292,15 @@ public static class Expect
         if (watched.Held)
             return watched;
 
+        // WW456. The last look's diagnosis, kept only where the subject was never seen — which is
+        // the arm whose sentence ends without a reason. Where it answered and read the wrong thing,
+        // the readings are the reason and a miss from some earlier poll would be a second story.
+        var carrying = !watched.EverSaw && missed is not null ? watched.Missing(missed) : watched;
+
         // Read now rather than kept from the poll: what a reader wants is the window as it stood
         // when the deadline ran out, and a tree captured earlier is a page about a moment that had
         // not failed yet.
-        return watched.Explaining(Diagnosis.OfWindow(watched.AsAssertion(), subject.Window, last, budget));
+        return carrying.Explaining(Diagnosis.OfWindow(carrying.AsAssertion(), subject.Window, last, budget));
     }
 
     /// <summary>The same, with the deadline and the poll interval read from what the project declared.</summary>

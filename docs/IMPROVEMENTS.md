@@ -2,29 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW456 what the miss could have said
-
-claude-tray's step says `nothing answered to it in 22 polls over 6177ms`, one line after
-the same run reports `ReadBack = the menu "a menu with no name"`. Those two sentences
-are about the same desk a moment apart, and between them sits every question the last
-three tasks were spent on: was there a menu at all, was there more than one, did it hold
-entries, were they `MenuItem`s, and was the one that stood the application's or the
-shell's.
-
-`LocatorMiss` diagnoses a miss against a window — a collapsed combo, an unselected page
-— and answers none of that for a step rooted at the desktop, which is what a resident
-fixture's steps are given. So a tray miss reads the same whether the menu closed, never
-opened, opened empty, or opened holding controls of a type nobody named.
-
-WW452's case had to compute the answer itself to be able to assert anything: the menus
-standing on the desktop, and the entries under each. That reading is four lines and it
-is the reading a reader of a red needs, and it lives in a case here rather than in the
-miss an adopter is handed.
-
-What this wants is for the miss to carry it. A step whose first locator is a `Menu` and
-whose root is the desktop says what Menus were there and what each held, so a run
-answers the question instead of a session ruling one thing out per guest run.
-
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached

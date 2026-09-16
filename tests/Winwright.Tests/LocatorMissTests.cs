@@ -164,6 +164,65 @@ public sealed class LocatorMissTests : IDisposable
     }
 
     [Fact]
+    public void A_miss_says_what_the_thing_it_looked_under_was_holding()
+    {
+        // WW456. Every sentence above says what was not found and none of them said what was. That
+        // is tolerable against a window a reader can go and look at, and it is not tolerable against
+        // the desktop — which is the root a resident fixture's steps resolve against, because a tray
+        // application draws no window.
+        //
+        // Measured by a session rather than argued. An adopter's step reported `nothing answered to
+        // it in 22 polls over 6177ms`, one line after the same run reported the menu it had read
+        // back, and three tasks each spent a guest run ruling out one thing that sentence could have
+        // said: whether anything was standing, whether more than one was, whether it held entries,
+        // and what type those entries were.
+        var miss = Resolve.Once(Dialog(), Locator.Parse("""Slider[name="Volume"]""")).Miss!;
+
+        Assert.NotNull(miss.Holding);
+        Assert.NotEmpty(miss.Held);
+
+        // The two controls this dialog shows. The hidden page is out of the tree with everything in
+        // it, which is what the case above this one is about — so a reading that named it would be
+        // reporting a tree nobody can address.
+        Assert.Contains(miss.Held, one => one.Contains("Save", StringComparison.Ordinal));
+        Assert.Contains("was holding", miss.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("Save", miss.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_miss_one_step_in_says_what_that_step_was_holding_rather_than_what_the_window_was()
+    {
+        // The half that answers an adopter's second step. `ComboBox > Button` stops under the combo,
+        // and what a reader needs is what the COMBO held — the window's contents say nothing about
+        // why the chain ended where it did.
+        var miss = Resolve.Once(Dialog(), Locator.Parse("""ComboBox > Button[name="Publish"]""")).Miss!;
+
+        Assert.Equal(1, miss.Reached);
+        Assert.NotNull(miss.Holding);
+
+        // Not the window's own children, which is the whole distinction: Save is a child of the
+        // frame and the walk is nowhere near it by the time it stops.
+        Assert.DoesNotContain(miss.Held, one => one.Contains("Save", StringComparison.Ordinal));
+        Assert.Contains("ComboBox", miss.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_parent_that_really_is_empty_is_said_out_loud_rather_than_left_blank()
+    {
+        // The reading this is for is a menu that opened holding nothing, which is the defect an
+        // adopter's first tray case was written to catch — and it reads identically to a menu that
+        // never opened unless the miss says which. Nullable rather than zero for the same reason
+        // every verdict here has a third state: a walk that was cut short is not an empty parent.
+        var bare = Create("Static", "winwright empty", WsPopup | WsVisible, 200, 120);
+
+        var miss = Resolve.Once(AutomationElement.FromHandle(bare), Locator.Parse("""Button[name="Save"]""")).Miss!;
+
+        Assert.Equal(0, miss.Holding);
+        Assert.Empty(miss.Held);
+        Assert.Contains("was holding nothing", miss.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_collapsed_combo_keeps_its_items_in_the_tree_and_offscreen()
     {
         // The other real shape, and the reason this task and actionability do not overlap: these

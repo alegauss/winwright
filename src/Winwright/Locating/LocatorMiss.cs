@@ -111,8 +111,81 @@ public sealed record LocatorMiss
     /// </summary>
     public IReadOnlyList<ClosedDoor> ClosedDoors { get; }
 
+    /// <summary>
+    /// What the walk stopped under was holding, named the way a locator names one — at most a
+    /// handful, with <see cref="Holding" /> saying how many there were in all. WW456.
+    /// <para>
+    /// Every sentence below says what was <em>not</em> found and nothing said what was. That is
+    /// tolerable against a window a reader can go and look at, and it is not tolerable against the
+    /// desktop, which is the root a resident fixture's steps are given: a tray application draws no
+    /// window, so its case resolves against everything on the desk at once.
+    /// </para>
+    /// <para>
+    /// Measured by a session rather than argued. An adopter's step reported <c>nothing answered to
+    /// it in 22 polls over 6177ms</c>, one line after the same run reported the menu it had read
+    /// back, and three tasks each spent a guest run ruling out one thing that sentence could have
+    /// said: whether a menu was standing at all, whether more than one was, whether it held entries,
+    /// and what type those entries were. The children of the thing the walk stopped under answer all
+    /// four, and are one cheap read on a path that has already given up.
+    /// </para>
+    /// <para>
+    /// Children and not descendants, which is what keeps it cheap and what makes it readable: under
+    /// the desktop they are the top-level windows, and under a menu they are its entries. A
+    /// descendants walk of the desktop is the most expensive question this engine asks, and WW328
+    /// measured it failing outright on a guest.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Held { get; init; } = [];
+
+    /// <summary>
+    /// How many it was holding in all, where <see cref="Held" /> lists fewer — and null where the
+    /// walk was cut short, which is not the same as nothing. WW456.
+    /// <para>
+    /// Nullable rather than zero, for the reason this whole engine has a third verdict: a tree that
+    /// went while it was being read and a parent that really is empty are different facts, and
+    /// "holding nothing" is the more useful of the two to say out loud. A menu that opened empty is
+    /// exactly the defect an adopter's case was written to catch.
+    /// </para>
+    /// </summary>
+    public int? Holding { get; init; }
+
     /// <summary>The whole reading, in the sentence a person acts on.</summary>
-    public string Sentence()
+    public string Sentence() => Diagnosis() + Holdings();
+
+    /// <summary>
+    /// What the walk stopped under held, as the clause that follows the diagnosis. WW456.
+    /// <para>
+    /// Appended rather than folded into each arm, because it is a different kind of statement: the
+    /// arms say why the locator missed and this says what was there instead. Empty where nothing was
+    /// read, so a reading that could not be taken adds no words rather than claiming an empty tree —
+    /// which is the same distinction every verdict in this engine makes about not having looked.
+    /// </para>
+    /// </summary>
+    private string Holdings()
+    {
+        // Nothing read at all, which is a reading that was not taken rather than a parent that was
+        // empty. No words, because the alternative is this sentence claiming an empty tree.
+        if (Holding is null && Held.Count == 0)
+            return "";
+
+        var under = Deepest is null ? "What it looked under" : $"{Deepest}";
+        var named = Held.Count == 0 ? "" : $": {string.Join(", ", Held)}";
+
+        // Cut short, so what is known is a floor. Said as one, because a count that is really a
+        // minimum printed as a total is the kind of number somebody reasons from.
+        if (Holding is null)
+            return $" {under} was holding at least {Held.Count}{named} — the walk was cut short.";
+
+        if (Holding == 0)
+            return $" {under} was holding nothing.";
+
+        var rest = Holding > Held.Count ? $", and {Holding - Held.Count} more" : "";
+        return Held.Count == 0
+            ? $" {under} was holding {Holding}, none of them readable."
+            : $" {under} was holding {Holding}{named}{rest}.";
+    }
+
+    private string Diagnosis()
     {
         var under = Deepest is null ? "the window" : Deepest.ToString();
         return Kind switch

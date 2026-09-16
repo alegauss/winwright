@@ -263,17 +263,85 @@ public static class Resolve
 
         var stopped = locator.Steps[reached];
 
+        // WW456. What the walk stopped under was holding, read once and carried into whichever
+        // ending this takes. Every arm below says what was not found and none of them said what was,
+        // which is tolerable against a window somebody can go and look at and is not tolerable
+        // against the desktop — the root a resident fixture's steps resolve against.
+        var (held, holding) = Holding(here);
+
         // Elsewhere first, and deliberately: if the thing is in this window under some other
         // parent, the chain is wrong, and no amount of expanding what the chain named will help.
         var elsewhere = reached == 0 ? 0 : Matching(root, stopped).Count;
         if (elsewhere > 0)
-            return new LocatorMiss(locator, reached, deepest, MissKind.ElsewhereInTheWindow, null, elsewhere, []);
+        {
+            return new LocatorMiss(locator, reached, deepest, MissKind.ElsewhereInTheWindow, null, elsewhere, [])
+            {
+                Held = held,
+                Holding = holding,
+            };
+        }
 
         var route = LocatorMiss.RouteFrom(reached == 0 ? null : here, deepest);
         if (route is not null)
-            return new LocatorMiss(locator, reached, deepest, MissKind.NavigationNeeded, route, 0, []);
+        {
+            return new LocatorMiss(locator, reached, deepest, MissKind.NavigationNeeded, route, 0, [])
+            {
+                Held = held,
+                Holding = holding,
+            };
+        }
 
-        return new LocatorMiss(locator, reached, deepest, MissKind.Absent, null, 0, ClosedDoors(root));
+        return new LocatorMiss(locator, reached, deepest, MissKind.Absent, null, 0, ClosedDoors(root))
+        {
+            Held = held,
+            Holding = holding,
+        };
+    }
+
+    /// <summary>
+    /// What an element is holding, named the way a locator names one. WW456.
+    /// <para>
+    /// Children and not descendants, which is both what keeps it cheap and what makes it readable:
+    /// under the desktop they are the top-level windows, and under a menu they are its entries. A
+    /// descendants walk of the whole desktop is the most expensive question this engine asks and
+    /// WW328 measured it failing outright on a guest.
+    /// </para>
+    /// <para>
+    /// Capped, for the reason <see cref="ClosedDoors" /> is capped: a list nobody reads to the end
+    /// is a list nobody reads. The total is carried beside it, so a reader is told they were shown
+    /// the first few rather than left to assume they were shown all of them.
+    /// </para>
+    /// </summary>
+    /// <param name="under">What the walk stopped under, which is the root where no step resolved.</param>
+    /// <param name="most">How many to name.</param>
+    /// <returns>
+    /// What it held, and how many — null where the walk was cut short, which is not the same as
+    /// nothing. A parent that really is empty is a finding: a menu that opened with no entries in it
+    /// is the defect an adopter's first tray case was written to catch.
+    /// </returns>
+    private static (IReadOnlyList<string> Named, int? Count) Holding(AutomationElement under, int most = 8)
+    {
+        var named = new List<string>();
+        var count = 0;
+
+        try
+        {
+            foreach (AutomationElement child in under.FindAll(TreeScope.Children, Condition.TrueCondition))
+            {
+                count++;
+                if (named.Count < most && ElementFacts.Of(child) is { } facts)
+                    named.Add(facts.ToString());
+            }
+        }
+        catch (Exception went) when (went is ElementNotAvailableException or System.Runtime.InteropServices.COMException)
+        {
+            // The rule `Diagnose` states in as many words, and the one WW328 paid for: a diagnosis is
+            // a page about a failure and never a second thing that can fail. What was read stands,
+            // and the count goes, because what is left of it is a floor rather than a total.
+            return (named, null);
+        }
+
+        return (named, count);
     }
 
     /// <summary>
