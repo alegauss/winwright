@@ -8,8 +8,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-- 📋 **WW458** (deps: —) **a route unambiguous as a whole is refused where one step matches two, and an act throws reading itself back** — WW457 opened a submenu across a process boundary and the verb threw `Menu matches 2 elements` about the menu it had just opened. → §WW458
-
 ## Block D — Act — patterns before pointers
 
 - ⏳ **WW457** (deps: —) **a menu key is refused where the foreground is the shell's flyout or the popup's owner, which is how a tray menu stands** — The drop-down half is still excused: the overflow flyout this engine opened to find the icon holds the foreground. → §WW457

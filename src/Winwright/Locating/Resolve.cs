@@ -199,26 +199,77 @@ public static class Resolve
         return here;
     }
 
+    /// <summary>
+    /// The route, walked. WW458 made it a route rather than a chain of single elements.
+    /// <para>
+    /// The strictness is the same and it is applied at the end instead of at every step: a locator
+    /// matching several elements and saying nothing about which is a scenario that will one day run
+    /// against the other one and be green. What changed is where "several" is counted. It used to be
+    /// counted per step, so a step matching two was refused whether or not the rest of the route was
+    /// under only one of them — the route was unambiguous and the step was not.
+    /// </para>
+    /// <para>
+    /// Measured by an act that had just succeeded. WW457 made <c>open submenu</c> reach a menu
+    /// another process owns; the submenu it opened is a second top-level <c>Menu</c>, so
+    /// <c>Menu &gt; MenuItem[name="winwright profiles"]</c> — which resolved a moment earlier — threw
+    /// <c>Menu matches 2 elements</c>. Only one of those two held the entry. An adopter's own step is
+    /// spelled that way, and it would have met this the first run its submenu opened.
+    /// </para>
+    /// <para>
+    /// An index on the way still picks one per parent, which is what <see cref="Beneath" /> already
+    /// says about a sweep: <c>[index=2]</c> on an intermediate step is the case saying which of that
+    /// parent's children it meant, and it is not turned into all of them. At the last step it picks
+    /// from the whole set, because that is the set the locator is about.
+    /// </para>
+    /// </summary>
     private static AutomationElement? Walk(AutomationElement root, Locator locator)
     {
-        var here = root;
-        foreach (var step in locator.Steps)
+        var here = new List<AutomationElement> { root };
+
+        for (var index = 0; index < locator.Steps.Count; index++)
         {
-            var matches = Matching(here, step);
+            var step = locator.Steps[index];
+            var last = index == locator.Steps.Count - 1;
+            var next = new List<AutomationElement>();
 
-            // Strict, deliberately: a step matching several elements and saying nothing about
-            // which is a scenario that will one day run against the other one, and be green.
-            if (matches.Count > 1 && !step.Disambiguated)
-                throw new AmbiguousLocatorException(step, matches.Select(Named).ToList());
+            foreach (var parent in here)
+            {
+                var matches = Matching(parent, step);
 
-            var wanted = (step.Index ?? 1) - 1;
-            if (wanted >= matches.Count)
+                // Per parent on the way, and over everything at the end. An ordinal that meant "the
+                // second of this parent's" cannot also mean "the second overall" without the locator
+                // changing meaning depending on how many parents happened to match.
+                if (!last && step.Index is { } ordinal)
+                {
+                    if (ordinal - 1 < matches.Count)
+                        next.Add(matches[ordinal - 1]);
+
+                    continue;
+                }
+
+                next.AddRange(matches);
+            }
+
+            here = next.Distinct().ToList();
+            if (here.Count == 0)
                 return null;
 
-            here = matches[wanted];
+            if (!last)
+                continue;
+
+            // Ordered over the whole set rather than within each parent, because a step saying
+            // `[order=left]` is naming the leftmost of what the locator matches and not the leftmost
+            // of whichever parent it happened to be found under.
+            here = Ordered(here, step.Order).ToList();
+
+            if (here.Count > 1 && !step.Disambiguated)
+                throw new AmbiguousLocatorException(step, here.Select(Named).ToList());
+
+            var wanted = (step.Index ?? 1) - 1;
+            return wanted < here.Count ? here[wanted] : null;
         }
 
-        return here;
+        return here[0];
     }
 
     private static string Named(AutomationElement element)

@@ -57,6 +57,93 @@ public sealed class MatchOrderTests : IDisposable
         return AutomationElement.FromHandle(frame);
     }
 
+    /// <summary>
+    /// Two containers of one type where only one holds what the route names. WW458.
+    /// <para>
+    /// The shape a tray menu takes the moment a submenu opens: a second <c>Menu</c> stands beside the
+    /// first, and only one of them holds the entry. Built out of plain windows here because what the
+    /// rule turns on is the tree and not the framework that drew it.
+    /// </para>
+    /// </summary>
+    private AutomationElement TwoPanesOneHolding()
+    {
+        var frame = Create("Static", "winwright statistics", WsPopup | WsVisible, 20, 20, 600, 400);
+
+        Create("Static", "left pane", WsChild | WsVisible, 10, 10, 280, 380, frame);
+
+        var right = Create("Static", "right pane", WsChild | WsVisible, 300, 10, 280, 380, frame);
+        Create("Button", "Publish", WsChild | WsVisible, 20, 20, 120, 30, right);
+
+        return AutomationElement.FromHandle(frame);
+    }
+
+    [Fact]
+    public void A_route_resolves_where_one_step_matches_two_and_only_one_holds_the_rest()
+    {
+        // WW458. The strictness is about the locator matching several elements, and it used to be
+        // counted per step — so a step matching two was refused whether or not the rest of the route
+        // was under only one of them. The route is unambiguous; the step is not.
+        //
+        // Measured by an act that had just succeeded: `open submenu` opened a submenu across a
+        // process boundary, the submenu is a second top-level Menu, and the verb reading its own
+        // subject back then threw `Menu matches 2 elements` about the menu it had just opened.
+        var resolution = Resolve.Once(TwoPanesOneHolding(), Locator.Parse("""Text > Button[name="Publish"]"""));
+
+        Assert.True(resolution.Found, resolution.Miss?.Sentence());
+        Assert.Equal("Publish", resolution.Facts!.Name);
+    }
+
+    [Fact]
+    public void A_route_under_both_of_them_is_still_refused()
+    {
+        // The half that keeps the rule. Where the whole route resolves under two parents, the locator
+        // really does match two elements and an act on it would one day land on the other one — which
+        // is the green this refusal exists to withdraw. Named at the last step, because that is where
+        // the several are.
+        var frame = Create("Static", "winwright statistics", WsPopup | WsVisible, 20, 20, 600, 400);
+
+        foreach (var at in new[] { 10, 300 })
+        {
+            var pane = Create("Static", $"pane at {at}", WsChild | WsVisible, at, 10, 280, 380, frame);
+            Create("Button", "Publish", WsChild | WsVisible, 20, 20, 120, 30, pane);
+        }
+
+        var refusal = Assert.Throws<AmbiguousLocatorException>(
+            () => Resolve.Once(
+                AutomationElement.FromHandle(frame), Locator.Parse("""Text > Button[name="Publish"]""")));
+
+        Assert.Equal(2, refusal.Candidates.Count);
+        Assert.All(refusal.Candidates, candidate => Assert.Contains("Publish", candidate, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void An_order_on_the_last_step_picks_across_every_parent_rather_than_within_one()
+    {
+        // WW458. The set a step orders is the set the locator matches, and with several parents that
+        // set spans them — so `[order=left]` naming the leftmost of whichever parent it was found
+        // under would make the locator mean something different depending on how many parents matched.
+        var frame = Create("Static", "winwright statistics", WsPopup | WsVisible, 20, 20, 600, 400);
+
+        foreach (var at in new[] { 300, 10 })
+        {
+            var pane = Create("Static", $"pane at {at}", WsChild | WsVisible, at, 10, 280, 380, frame);
+            Create("Button", "Publish", WsChild | WsVisible, 20, 20, 120, 30, pane);
+        }
+
+        var resolution = Resolve.Once(
+            AutomationElement.FromHandle(frame), Locator.Parse("""Text > Button[name="Publish"][order=left]"""));
+
+        Assert.True(resolution.Found, resolution.Miss?.Sentence());
+
+        // The leftmost overall, which is the one in the pane that starts at 10 rather than the first
+        // pane the tree happens to list.
+        var everything = Resolve.Matching(
+            AutomationElement.FromHandle(frame), Locator.Parse("""Button[name="Publish"]""").Steps[0]);
+
+        var leftmost = everything.Min(one => ElementFacts.Of(one)!.Bounds.Left);
+        Assert.Equal(leftmost, resolution.Facts!.Bounds.Left);
+    }
+
     [Fact]
     public void Two_elements_with_the_same_name_are_refused_rather_than_guessed_between()
     {

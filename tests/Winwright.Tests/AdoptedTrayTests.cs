@@ -141,13 +141,13 @@ public sealed class AdoptedTrayTests : IDisposable
         {
             var desktop = AutomationElement.RootElement;
 
-            // One step, which the guest taught twice. `Menu > MenuItem[name=...]` resolves before the
-            // act and is ambiguous after it: a submenu that opened is a second `Menu` on the desktop,
-            // and `Walk` refuses a step matching two whichever of them the rest of the route is under.
-            // The verb reads its own subject back when it reports, so the act threw about a menu it
-            // had just opened correctly. That is WW458, and this names the entry outright rather than
-            // waiting on it.
-            var entry = Locator.Parse("""MenuItem[name="winwright profiles"]""");
+            // Two steps, and spelled the way an adopter spells it — claude-tray's own step is
+            // `Menu > MenuItem[name="{menu.profiles}"]`. It is also what found WW458: this resolves
+            // before the act and used to be refused after it, because a submenu that opened is a
+            // second `Menu` on the desktop and only one of them holds this entry. The verb reads its
+            // own subject back when it reports, so an act that had just done what it was asked threw
+            // about the menu it opened.
+            var entry = Locator.Parse("""Menu > MenuItem[name="winwright profiles"]""");
 
             var resolved = Resolve.Until(desktop, entry, Timeouts.Defaults["resolve"], pollMs: 50);
             Assert.True(
