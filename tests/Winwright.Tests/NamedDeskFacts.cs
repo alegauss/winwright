@@ -74,6 +74,12 @@ internal static class NamedDeskFacts
                 + "so the desk is taken away a second time before the keyboard route is asked — and "
                 + "what is named is that route's own reading at its door, taken with the desk already "
                 + "elsewhere"),
+        new("DeskProbeTests.A_minimised_window_that_still_holds_the_desk_is_read_as_stale_end_to_end",
+            "nothing takes the desk from the case: its own dialog is brought forward and put down, and "
+                + "the foreground is named only for the one outcome the case cannot arrange — another "
+                + "process claiming the desk the moment the dialog went down, which is what GitHub's "
+                + "runner does with its terminal. WW449: that excuse is decided by whose window the "
+                + "probe read, so the name is the desk's fact and never the loop's defect"),
         new("PreambleTests.The_foreground_is_read_where_a_window_is_named",
             "nothing is provoked here: the dialog is the window the preamble is asked about, and the "
                 + "reading named is the measurement the preamble takes for a named window rather than "

@@ -1180,13 +1180,18 @@ public sealed class DeskProbeTests
         var answer = Classified("(Get-DeskLooks -Count 2 -PauseMs 0)").Single();
 
         // Something else taking the desk while the window went down is the desk and not the loop.
-        // `asking` is deliberately not excused: that is the loop reading a minimised window as an
-        // ordinary one, which is the whole of what this case is for.
-        if (!answer.StartsWith("stale|", StringComparison.Ordinal)
-            && !answer.StartsWith("asking|", StringComparison.Ordinal)
+        // `asking` about this case's own window is deliberately not excused: that is the loop
+        // reading a minimised window as an ordinary one, which is the whole of what this case is for.
+        //
+        // WW449. Which of those it is was decided by the reading's first word, and the first word is
+        // not the question — whose window it read is. On GitHub's hosted runner the answer is
+        // `asking|WindowsTerminal|1628|CASCADIA_HOST`: the job's own console took the foreground the
+        // moment the dialog went down, which is exactly the something else this comment excuses,
+        // and it was refused for being called `asking`. Twenty-seven CI runs on main were red for it.
+        if (!AboutThisProcess(answer)
             && BusyDesk.Excused(
                 Winwright.Verdicts.Precondition.Absent(
-                    "the foreground belongs to the window under test",
+                    Winwright.Windowing.Foreground.PreconditionName,
                     $"the probe read the desk as '{answer}' after this case put its window down")))
         {
             return;
@@ -1194,6 +1199,46 @@ public sealed class DeskProbeTests
 
         Assert.StartsWith("stale|testhost|", answer, StringComparison.Ordinal);
         Assert.Contains("|Static|winwright desk stale", answer, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Whether a probe's answer is about a window this process owns. WW449.
+    /// <para>
+    /// An answer is <c>state|process|pid|class|title</c>, and the pid is the question the case
+    /// above has to ask: a reading of this suite's own window is the loop's to be right about, and a
+    /// reading of anybody else's is the desk. The process name would nearly do and is not the same
+    /// question — two test hosts are two processes with one name.
+    /// </para>
+    /// </summary>
+    /// <param name="answer">One line the classification produced.</param>
+    private static bool AboutThisProcess(string answer)
+    {
+        var fields = answer.Split('|');
+        return fields.Length > 2
+            && int.TryParse(fields[2], System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var pid)
+            && pid == Environment.ProcessId;
+    }
+
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void A_desk_another_process_took_is_the_desk_and_a_reading_of_this_one_is_the_loop()
+    {
+        // WW449, driven on the answer the hosted runner produced rather than waited for on a desk
+        // that produces it: the only desk that does is a CI runner, and the run that proves a repair
+        // there is a push this loop does not make. What the end-to-end case decides is which of these
+        // is excused, so that decision is what is run.
+        var ours = Environment.ProcessId;
+
+        // The shape CI read — `asking|WindowsTerminal|1628|CASCADIA_HOST` — with a pid that cannot be
+        // this one, and the shell the guest reads. Somebody else's window, so the desk's.
+        Assert.False(AboutThisProcess($"asking|WindowsTerminal|{ours + 4}|CASCADIA_HOST|"));
+        Assert.False(AboutThisProcess($"shell|explorer|{ours + 4}|Shell_TrayWnd|"));
+        Assert.False(AboutThisProcess("clear"));
+
+        // And the defect this case exists for is still one: this process's own minimised dialog read
+        // as an ordinary window is the loop being wrong, whatever word it chose.
+        Assert.True(AboutThisProcess($"asking|testhost|{ours}|Static|winwright desk stale"));
+        Assert.True(AboutThisProcess($"stale|testhost|{ours}|Static|winwright desk stale"));
     }
 
     [Fact]

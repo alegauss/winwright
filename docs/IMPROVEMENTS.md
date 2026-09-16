@@ -28,6 +28,28 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
+### §WW450 the shadow a desk may never draw
+
+WW358 provokes WW346's skip with a frameless process whose menu has a drop shadow bigger
+than itself, and waits on the declared `draw` deadline for that shadow to appear. Its
+own comment says what happens where Windows draws none: there is nothing to sort wrongly
+and nothing for the case to say. It then goes red anyway — "the fixture drew no shadow
+behind its menu", ten seconds on every CI run since 2026-09-02.
+
+That is a fact about the desk. Menu drop shadows are a system setting,
+`SPI_GETDROPSHADOW`, and a runner tuned for performance has them off; the guest has them
+on, which is why it has never failed there.
+
+What makes it a task rather than a line is where the excuse has to come from. `BusyDesk`
+refuses a hole whose condition the engine does not declare as the desk's — WW183 moved
+that list into the engine precisely so the suite could not grow one — so the suite
+cannot say "shadows are off" by itself. The honest repair is an engine reading of
+whether this desk draws drop shadows, declared in `DeskFacts`, which the case consults
+before it waits.
+
+That adds a public reading, so it also owes the verb catalogue an entry and a case
+provoking both answers.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
