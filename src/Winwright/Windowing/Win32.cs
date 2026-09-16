@@ -108,6 +108,18 @@ internal static class Win32
     internal const uint WmGetText = 0x000D;
 
     /// <summary>
+    /// SPI_GETDROPSHADOW: whether the desk draws the shadow a menu asks for. WW450, and read rather
+    /// than inferred from a shadow turning up: WinForms asks for <c>CS_DROPSHADOW</c> only where this
+    /// answers true, so a desk with it off draws no shadow window behind any menu at all.
+    /// </summary>
+    internal const uint SpiGetDropShadow = 0x1024;
+
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SystemParametersInfoW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SystemParametersInfoBool(
+        uint action, uint uiParam, [MarshalAs(UnmanagedType.Bool)] ref bool pvParam, uint winIni);
+
+    /// <summary>
     /// The same number in every process for the same string, and one nobody else can collide with —
     /// which is the promise a magic constant cannot make. WW349.
     /// </summary>

@@ -217,6 +217,7 @@ just took can be trusted.
 | `Foreground` | what holds the keyboard, read straight from Windows, and whether a named window does |
 | `ForeignInput` | whether anybody but this run touched the machine while a case was working |
 | `Obstruction` | what stands over a region, read off the z order |
+| `DropShadows` | whether this desk draws the shadow a menu asks for — a setting of the machine, off on a runner tuned for speed, so a menu with no shadow behind it is the desk and not the application |
 | `PaintedFrame` | what a window actually paints inside the rectangle it owns |
 | `OwnRender` | ask the application to draw its own tree into a named file, and read back whether it did — the one verb here that needs `Winwright.InApp` on the other end |
 | `Loading` | whether a page has finished computing, against the loading label the project declares |

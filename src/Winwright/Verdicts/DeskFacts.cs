@@ -63,6 +63,9 @@ public static class DeskFacts
         new(Obstruction.PreconditionName,
             "a window somebody else left over the region is on the desk, and no capture of that "
                 + "rectangle is a capture of what was underneath"),
+        new(DropShadows.PreconditionName,
+            "WW450: a menu's shadow is a setting of the machine, and a desk tuned for speed switches it "
+                + "off — so a menu with nothing behind it is the desk and never the application"),
     ]);
 
     /// <summary>The names alone, which is what a caller matching a condition against them wants.</summary>

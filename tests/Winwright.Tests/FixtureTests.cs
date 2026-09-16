@@ -2107,6 +2107,13 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         // the run left standing — so the sort has real windows to put in front of the shadow and
         // those cases pass with the skip deleted. What the fault needs is a process with no frame,
         // which is what a tray application is and what --shadowed is.
+        // WW450. Asked before anything is launched, because the comment below always said what a desk
+        // with no shadow means — nothing to sort wrongly and nothing for this to say — and then the case
+        // waited ten seconds for one anyway and went red. GitHub's runner has drop shadows off, and that
+        // red stood on every CI run from 2026-09-02. A setting of the machine is a hole naming it.
+        if (BusyDesk.Excused(Winwright.Windowing.DropShadows.Reading()))
+            return;
+
         var launched = Attachable.Launch(register, Starting("--shadowed"));
 
         // The shadow and not the menu is what this waits for, because it is the thing under test:

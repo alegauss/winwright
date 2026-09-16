@@ -361,6 +361,17 @@ internal static class Cooperating
             "whether an application has put up the window its in-app half declares — the reading the "
                 + "engine already took to decide whether a silence it recorded still stands, and the "
                 + "one this suite used to take again with a walk of its own"),
+
+        // --- WW450, a reading of the machine rather than of any application --------------------------
+        // Needs nothing and no desk in the sense this list means: it asks Windows for a setting, which
+        // answers the same with no window up at all. That is why it can be a desk fact — it is the one
+        // thing here no application could have arranged differently.
+        new("DropShadows.Reading", Cooperation.None, false,
+            "whether this desk draws the shadow a menu asks for — a system setting, off on a runner tuned "
+                + "for speed, and the fact that turns a case waiting for a shadow into a hole naming it"),
+        new("DropShadows.Of", Cooperation.None, false,
+            "the answer a reading already taken turns into, which is the half a case can drive without "
+                + "switching a setting of the machine off in the middle of a run"),
     ]);
 
     /// <summary>The verbs a bare window is enough for, which is what the run drives.</summary>

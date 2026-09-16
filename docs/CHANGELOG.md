@@ -83,6 +83,7 @@
 - ✅ **WW428** **the runner waits for four things and each wait was argued alone, so the numbers agree with nothing** — The runner's waits are one list of rows the deadlines are built from, and the header prints them with the total they imply (design recorded in `tools/run-tests-vm.ps1`).
 - ✅ **WW436** **listing a process's windows calls GetWindowTextW on each, which never returns for a window of this very process** — A window of this process gets 500ms to answer for its title; another process's is still read from the cached caption (design recorded in `src/Winwright/Windowing/Win32.cs`).
 - ✅ **WW449** **a minimised dialog whose desk another process took reads as asking, and the case refuses the excuse it has for that** — The excuse is decided by whose window the probe read, so a desk another process took is a hole on CI's runner too (design recorded in `tests/Winwright.Tests/DeskProbeTests.cs`).
+- ✅ **WW450** **a desk that draws no menu shadows turns the shadow-skip case red, and no desk fact the engine declares can excuse it** — A desk with drop shadows off is a hole naming the setting, where the case waited ten seconds and went red (design recorded in `src/Winwright/Windowing/DropShadows.cs`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
