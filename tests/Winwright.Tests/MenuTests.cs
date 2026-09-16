@@ -76,6 +76,37 @@ public sealed class MenuTests : IDisposable
     }
 
     [Fact]
+    public void Nothing_is_working_a_menu_until_one_is_open()
+    {
+        // WW457's control, and it is the half that keeps the reading narrow. What this must never do
+        // is answer "a menu is up" about an ordinary window, because the act it gates would then
+        // send keys at a desk somebody else owns and call it delivered.
+        Assert.Equal(0, Menu.MenuOwner(dialog.Frame));
+    }
+
+    [Fact]
+    public void An_open_menu_says_which_window_is_working_it()
+    {
+        // WW457. The foreground reading is right about a window and wrong about a menu: a
+        // `TrackPopupMenu` requires the foreground on its OWNER before it will track, so a tray menu
+        // that is up and working has the desk on a different window of the same process — which
+        // `SameProcess` calls an intruder, correctly for every other act and wrongly for this one.
+        //
+        // Asked of Windows and never inferred from ownership. `GUI_INMENUMODE` is the system saying
+        // a menu is being worked right now and `hwndMenuOwner` is which window is working it, so an
+        // owned popup that is not a menu answers nothing and nothing else widens by this.
+        var entered = Menu.Enter(dialog.Frame);
+        if (BusyDesk.Excused(entered.AsAssertion("the menu bar is entered")))
+            return;
+
+        Assert.NotEqual(0, Menu.MenuOwner(dialog.Frame));
+
+        // And it names this window rather than only saying that some menu somewhere is open, which
+        // is the difference between a reading and a global flag.
+        Assert.Equal(dialog.Frame, Menu.MenuOwner(dialog.Frame));
+    }
+
+    [Fact]
     public void Walking_down_reaches_an_entry_and_reports_what_it_passed()
     {
         Menu.Enter(dialog.Frame);

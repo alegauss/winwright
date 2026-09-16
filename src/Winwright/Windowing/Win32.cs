@@ -44,6 +44,36 @@ internal static class Win32
     [DllImport("user32.dll", SetLastError = true)]
     internal static extern nint GetWindow(nint window, uint command);
 
+    /// <summary>
+    /// What the desk's input state is, which is the one place Windows says a menu is up. WW457.
+    /// <para>
+    /// Laid out whole rather than trimmed to the two fields read: <c>cbSize</c> is what the call
+    /// validates itself against, and a short structure is a call that fails rather than a call that
+    /// answers less.
+    /// </para>
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct GuiThreadInfo
+    {
+        public int Size;
+        public uint Flags;
+        public nint Active;
+        public nint Focus;
+        public nint Capture;
+        public nint MenuOwner;
+        public nint MoveSize;
+        public nint Caret;
+        public Rect CaretRect;
+    }
+
+    /// <summary>The thread's input state. Thread zero is the foreground thread's. WW457.</summary>
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetGUIThreadInfo(uint thread, ref GuiThreadInfo info);
+
+    /// <summary>The flag that says a menu is being worked right now. WW457.</summary>
+    internal const uint GuiInMenuMode = 0x00000004;
+
     [DllImport("user32.dll")]
     internal static extern nint GetForegroundWindow();
 

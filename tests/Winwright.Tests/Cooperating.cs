@@ -372,6 +372,9 @@ internal static class Cooperating
         new("DropShadows.Of", Cooperation.None, false,
             "the answer a reading already taken turns into, which is the half a case can drive without "
                 + "switching a setting of the machine off in the middle of a run"),
+        new("Menu.MenuOwner", Cooperation.None, false,
+            "which window is working a menu right now, read from the desk's own input state — the fact "
+                + "that tells a tracked popup's owner holding the foreground from an intruder holding it"),
     ]);
 
     /// <summary>The verbs a bare window is enough for, which is what the run drives.</summary>

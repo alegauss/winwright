@@ -30,6 +30,30 @@ it.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+### §WW458 the step that matched two and the route that did not
+
+`Walk` refuses a step matching several and saying nothing about which, because an act
+that landed on the other one would be green. That rule is right and it is applied one
+step at a time, which is not the same thing: `Menu > MenuItem[name="winwright
+profiles"]` is refused the moment a second `Menu` is on the desktop, whether or not that
+one holds anything the rest of the route names. The route is unambiguous; the step is
+not.
+
+Measured on the guest, and by the act that had just succeeded. WW457 made `open submenu`
+reach a menu another process owns; the submenu it opened is a second top-level `Menu`,
+and the verb then read its own subject back to say what moved — through the same `Walk`,
+which threw. So an act that did exactly what it was asked reported `Menu matches 2
+elements` and failed.
+
+Two halves, and the second stands on its own. A read-back taken after an act, only to
+say what moved, has no business refusing what an act resolving its subject must go on
+refusing — and `ActResult` has no word for an after-reading that could not be taken, so
+nothing can currently say so honestly.
+
+This matters to an adopter rather than only here: claude-tray's own step is spelled
+`Menu > MenuItem[name="{menu.profiles}"]`, and it will meet this the first run its
+submenu opens.
+
 ## Block D — Act — patterns before pointers
 
 ### §WW457 the foreground a tray menu actually has

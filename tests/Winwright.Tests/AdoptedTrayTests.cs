@@ -140,7 +140,14 @@ public sealed class AdoptedTrayTests : IDisposable
         WithTheMenuUp(kind, (pid, menu) =>
         {
             var desktop = AutomationElement.RootElement;
-            var entry = Locator.Parse("""Menu > MenuItem[name="winwright profiles"]""");
+
+            // One step, which the guest taught twice. `Menu > MenuItem[name=...]` resolves before the
+            // act and is ambiguous after it: a submenu that opened is a second `Menu` on the desktop,
+            // and `Walk` refuses a step matching two whichever of them the rest of the route is under.
+            // The verb reads its own subject back when it reports, so the act threw about a menu it
+            // had just opened correctly. That is WW458, and this names the entry outright rather than
+            // waiting on it.
+            var entry = Locator.Parse("""MenuItem[name="winwright profiles"]""");
 
             var resolved = Resolve.Until(desktop, entry, Timeouts.Defaults["resolve"], pollMs: 50);
             Assert.True(
@@ -176,7 +183,13 @@ public sealed class AdoptedTrayTests : IDisposable
             // What is under it, which is the claim rather than the gesture landing. A Right that
             // dismissed the whole menu is what WW259 is about, and it reads as a landed act until
             // something asks for the thing the submenu was supposed to show.
-            var under = Locator.Parse("""Menu > MenuItem[name="winwright one"]""");
+            //
+            // One step and not `Menu > MenuItem`, which the guest taught: a submenu that opened is a
+            // second Menu on the desktop, so the two-step locator is ambiguous at its first step and
+            // `Walk` refuses it — correctly, and the refusal is the proof the act worked. Naming the
+            // container instead would pin a name the two kinds need not agree on, and only one of
+            // them can be driven today.
+            var under = Locator.Parse("""MenuItem[name="winwright one"]""");
             var showing = Resolve.Until(desktop, under, Timeouts.Defaults["resolve"], pollMs: 50);
 
             Assert.True(
@@ -272,6 +285,16 @@ public sealed class AdoptedTrayTests : IDisposable
 
         using var register = new ProcessRegister();
 
+        // WW442's rule, kept by this class rather than borrowed from it: shut only a flyout this
+        // case opened. `Placed` opens one to find the icon and `PutBack` shuts only the one the act
+        // opened, so without this the flyout stands from the first case here to the class's own
+        // Dispose — eight cases of it, and then whatever runs next.
+        //
+        // Measured: a guest run failed `NotificationAreaTests` with `the flyout is standing and
+        // holds nothing, which is neither of the two states this measures`, which is a case about
+        // the shell going red about this class's leftovers.
+        var flyoutWasUp = NotificationArea.Overflow() is not null;
+
         var launched = Attachable.Launch(register, Fixture.Started($"--tray={kind}"));
         var tip = Fixture.TrayTip(launched.Pid);
 
@@ -304,6 +327,11 @@ public sealed class AdoptedTrayTests : IDisposable
             // case's standing on it.
             register.Stop(launched);
             menu.PutBack();
+
+            // And the flyout the search opened, which `PutBack` does not answer for: it shuts the
+            // one the act opened, and the one found here was opened a step earlier.
+            if (!flyoutWasUp)
+                NotificationArea.CloseOverflow();
         }
     }
 

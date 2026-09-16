@@ -170,6 +170,7 @@
 - ✅ **WW427** **a case asserting which desk fact a run degraded on is asserting where the intruder landed, which it cannot arrange** — Every case that provokes the desk and names a reading says what pins it, read back against the sources both ways (design superseded: the four it names are not the seven there are).
 - ✅ **WW429** **the floor a verdict refuses under is this guest's, measured once, and written into a tool an adopter runs** — An attribution clears the floor the run's own control measured, and says whose floor refused it where there is no control (design recorded in `tools/Winwright.Typing/Enough.cs`).
 - ✅ **WW451** **no case here opens the tray menu of another process, which is an adopter's only shape and the one WW322 was fixed from** — --tray is a launched process whose only surface is an icon, and two cases open its menu, both kinds, across the boundary WW322 had to be diagnosed from an adopter's log for want of.
+- ✅ **WW457 (the tracked popup's owner)** **a menu key is refused where the foreground is the shell's flyout or the popup's owner, which is how a tray menu stands** — The menu acts read the desk's own menu mode now, so a tracked popup's owner holding the foreground is not an intruder, and the win32 submenu case runs.
 
 ## Block E — Capture — the picture that proves what it photographed
 

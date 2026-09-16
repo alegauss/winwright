@@ -153,7 +153,7 @@ public static class Menu
     /// <summary>Enter the menu bar, the way F10 does for a keyboard user.</summary>
     public static MenuWalk Enter(nint window, int settleMs = 2000, int pollMs = 25)
     {
-        var foreground = Foreground.Check(Top(window)).AsPrecondition();
+        var foreground = Reaches(window);
         if (!foreground.Satisfied)
             return new MenuWalk("enter the menu", null, Highlighted(window), [], foreground, Focus.In(window));
 
@@ -179,7 +179,7 @@ public static class Menu
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entry);
 
-        var foreground = Foreground.Check(Top(window)).AsPrecondition();
+        var foreground = Reaches(window);
         if (!foreground.Satisfied)
             return new MenuWalk("walk to", entry, Highlighted(window), [], foreground, Focus.In(window));
 
@@ -225,7 +225,7 @@ public static class Menu
     /// </summary>
     public static MenuWalk Expand(nint window, int settleMs = 2000, int pollMs = 25)
     {
-        var foreground = Foreground.Check(Top(window)).AsPrecondition();
+        var foreground = Reaches(window);
         var opening = Highlighted(window);
         if (!foreground.Satisfied)
             return new MenuWalk("expand", opening, opening, [], foreground, Focus.In(window));
@@ -258,4 +258,77 @@ public static class Menu
     }
 
     private static nint Top(nint window) => window == 0 ? 0 : Win32.GetAncestor(window, Win32.GaRoot);
+
+    /// <summary>
+    /// Whether a key would reach this menu, asked of the desk rather than of the foreground alone.
+    /// WW457.
+    /// <para>
+    /// The foreground reading is right about a window and wrong about a tracked popup. A
+    /// <c>TrackPopupMenu</c> requires the foreground on its <em>owner</em> before it will track at
+    /// all, so a menu that is up and working has the desk on a different window of the same process
+    /// — which <see cref="ForegroundState.SameProcess" /> calls an intruder, correctly for every
+    /// other act and wrongly for this one.
+    /// </para>
+    /// <para>
+    /// Measured rather than reasoned. WW453 drove <c>open submenu</c> against a launched tray and
+    /// the Win32 arm was excused reading <c>another window of the same process owns it: 'winwright
+    /// tray owner'</c> — which is the window the shell had just been told to put the foreground on,
+    /// and the reason the menu was on the screen at all.
+    /// </para>
+    /// <para>
+    /// Asked of Windows and never inferred from ownership, which is the whole of why this is narrow:
+    /// <c>GUI_INMENUMODE</c> is the system saying a menu is being worked right now, and
+    /// <c>hwndMenuOwner</c> is which window is working it. An owned popup that is not a menu answers
+    /// false, so nothing else widens by this.
+    /// </para>
+    /// <para>
+    /// The foreground thread's and never a thread this engine picked: a menu is worked by whoever
+    /// holds the desk, so the state worth reading is the state of the thread that holds it. A
+    /// process that is not in the foreground can have a menu standing and no key would reach it,
+    /// which is the same thing the reading being corrected here already says.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The menu a key is about to be sent at.</param>
+    /// <returns>The owner working a menu, or zero where the desk is not in one.</returns>
+    public static nint MenuOwner(nint window)
+    {
+        if (window == 0)
+            return 0;
+
+        var info = new Win32.GuiThreadInfo { Size = System.Runtime.InteropServices.Marshal.SizeOf<Win32.GuiThreadInfo>() };
+        if (!Win32.GetGUIThreadInfo(0, ref info) || (info.Flags & Win32.GuiInMenuMode) == 0 || info.MenuOwner == 0)
+            return 0;
+
+        // The menu being worked is this one, or another window of the same process is working it.
+        //
+        // The second half is the repair and the first is what it replaced. A `#32768` popup is created
+        // by the system, and the window `TrackPopupMenu` was handed is not its `GW_OWNER` — measured
+        // on the guest, where this answered zero for a tray menu that was up and being worked, and
+        // the case went on being excused on the absence it was written to remove.
+        //
+        // The process is what links them, and it is the same link the refusal itself draws: the
+        // reading being corrected is `SameProcess`, which is another window of this process holding
+        // the desk. Where that window is working a menu, the key reaches the menu.
+        if (info.MenuOwner == window)
+            return info.MenuOwner;
+
+        Win32.GetWindowThreadProcessId(info.MenuOwner, out var working);
+        Win32.GetWindowThreadProcessId(window, out var mine);
+
+        return working != 0 && working == mine ? info.MenuOwner : 0;
+    }
+
+    /// <summary>
+    /// The foreground reading a menu act turns on: the ordinary one, unless the desk says a menu is
+    /// up and this is it. WW457.
+    /// </summary>
+    /// <param name="window">The menu a key is about to be sent at.</param>
+    private static Precondition Reaches(nint window)
+    {
+        var foreground = Foreground.Check(Top(window)).AsPrecondition();
+        if (foreground.Satisfied || MenuOwner(window) == 0)
+            return foreground;
+
+        return Precondition.Met(Foreground.PreconditionName);
+    }
 }

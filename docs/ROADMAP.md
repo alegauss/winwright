@@ -8,9 +8,11 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+- 📋 **WW458** (deps: —) **a route unambiguous as a whole is refused where one step matches two, and an act throws reading itself back** — WW457 opened a submenu across a process boundary and the verb threw `Menu matches 2 elements` about the menu it had just opened. → §WW458
+
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW457** (deps: —) **a menu key is refused where the foreground is the shell's flyout or the popup's owner, which is how a tray menu stands** — WW453 drove `open submenu` against a launched tray and both kinds were excused on a foreground that is exactly where a tray menu leaves it. → §WW457
+- ⏳ **WW457** (deps: —) **a menu key is refused where the foreground is the shell's flyout or the popup's owner, which is how a tray menu stands** — The drop-down half is still excused: the overflow flyout this engine opened to find the icon holds the foreground. → §WW457
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -196,6 +198,14 @@
   reads off that desk that the window went down and no longer holds the foreground. Both
   halves off the desk and never off the script's sentence. It cannot be this suite's
   desk: two runs of it cost five reds elsewhere.
+
+## Done when — WW457
+
+- **A tray menu takes a key wherever it stands** Both kinds of a launched tray's menu
+  open a submenu in a run that excuses neither. The Win32 popup does, through its owner
+  working the menu; the drop-down does not, because the overflow flyout this engine
+  opened to find the icon still holds the foreground — one of two excuses left in
+  `AdoptedTrayTests`.
 
 ## Non-goals
 
