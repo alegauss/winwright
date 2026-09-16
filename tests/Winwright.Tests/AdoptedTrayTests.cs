@@ -38,6 +38,14 @@ namespace Winwright.Tests;
 /// reading and a drop-down does not, and the drop-down is the one both adopters put up — so a route
 /// proven against the first alone is proven against the kind nobody ships.
 /// </para>
+/// <para>
+/// WW455 added the third, and it is the one that behaves like a shipped application's. The other two
+/// hold themselves open — <c>AutoClose</c> off, or a popup tracked on a thread blocked inside it —
+/// which every menu in this tree has done since the first one, each for the same good reason: a menu
+/// that shut the moment anything took the desk would be gone before a harness in another process had
+/// enumerated it. What that argument never established is that a real menu stands, and a real one
+/// does not. So the readings above are taken again against one that shuts itself.
+/// </para>
 /// </summary>
 [Collection(WindowFixture.Serial)]
 public sealed class AdoptedTrayTests : IDisposable
@@ -103,6 +111,14 @@ public sealed class AdoptedTrayTests : IDisposable
     [Fact]
     public void The_other_kind_s_entries_answer_the_same_locator() =>
         TheEntriesResolve("win32");
+
+    [Fact]
+    public void A_menu_left_to_shut_itself_is_still_a_window_of_the_process_that_owns_it() =>
+        TheMenuBelongsToTheLaunchedProcess("shuts");
+
+    [Fact]
+    public void A_menu_left_to_shut_itself_still_answers_the_locator_an_adopter_writes() =>
+        TheEntriesResolve("shuts");
 
     /// <summary>
     /// WW452's claim: a locator resolves the entries of a menu this run did not put up.

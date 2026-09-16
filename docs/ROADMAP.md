@@ -2,6 +2,8 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+- 📋 **WW456** (deps: —) **a tray-menu step that resolves nothing says only that, so three runs have gone on ruling out what the desk held** — WW451, WW452 and WW455 each cost a guest run to rule one thing out, and every one of them was a question the miss could have answered itself. → §WW456
+
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
@@ -22,7 +24,7 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- ⏳ **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, WW455) **the switch case drives the one path that rewrites a real setting** — Everything around it is committed and passing against alpha.6; the switch stops one step in, and WW452 ruled the boundary out. → §WW83
+- ⏳ **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, WW456) **the switch case drives the one path that rewrites a real setting** — Everything around it is committed and passing; the switch stops one step in, and the boundary, the locator and the menu's lifetime are all ruled out. → §WW83
 - 📋 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅) **the environment sweep walks a submenu per sampled mode** — Its own claims need the same three fields, and the submenu it walks is the one WW322 says will not open. → §WW85
 - 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - ⏳ **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
@@ -32,7 +34,6 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 - 📋 **WW453** (deps: —) **no menu this fixture puts up has a submenu, so the verb an adopter's next step calls is driven against nothing** — WW85 is blocked on a submenu WW322 says will not open, and WW451 built the process a submenu would have to be measured in. → §WW453
-- 📋 **WW455** (deps: —) **every menu this fixture puts up holds itself open, which no application's does, so no case meets one that shuts** — WW452 read inside a launched tray's menu and passed while claude-tray's step still finds nothing, and AutoClose is the difference left. → §WW455
 
 ## Done when — Block A
 

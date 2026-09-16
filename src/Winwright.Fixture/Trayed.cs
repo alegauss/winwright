@@ -33,8 +33,20 @@ namespace Winwright.Fixture;
 /// </summary>
 internal sealed class Trayed : IDisposable
 {
-    /// <summary>The two menus a real tray puts up, as this flag spells them.</summary>
-    public static IReadOnlyList<string> Kinds { get; } = ["dropdown", "win32"];
+    /// <summary>
+    /// The menus a real tray puts up, as this flag spells them.
+    /// <para>
+    /// WW455 added the third, and it is the first one here that behaves like a shipped application's.
+    /// The other two hold themselves open — <c>AutoClose</c> off, or a <c>TrackPopupMenu</c> tracked
+    /// on a thread that is blocked inside it — which every menu in this tree has done since the first
+    /// one, each for the same good reason and with the same cost: the engine has never taken a reading
+    /// against a menu that could go while it was looking, and that is the only kind an application has.
+    /// </para>
+    /// </summary>
+    public static IReadOnlyList<string> Kinds { get; } = ["dropdown", "shuts", "win32"];
+
+    /// <summary>The kind whose drop-down is left to close itself, as an application's does. WW455.</summary>
+    private const string Shuts = "shuts";
 
     private const uint WsPopup = 0x80000000;
     private const uint NimAdd = 0;
@@ -172,6 +184,18 @@ internal sealed class Trayed : IDisposable
     private const string Quit = "winwright quit";
 
     private readonly bool dropDown;
+
+    /// <summary>
+    /// Whether this run's drop-down is left to close itself. WW455.
+    /// <para>
+    /// Carried rather than folded into <see cref="dropDown" />, because the two say different things
+    /// and one of them is what an adopter has: which framework draws the menu, and whether the menu
+    /// survives losing the desk. A Win32 popup answers the second by being tracked on a blocked
+    /// thread, so it is a drop-down question and not a menu one.
+    /// </para>
+    /// </summary>
+    private readonly bool holdsOpen;
+
     private readonly Subclassed answering;
     private readonly nint owner;
     private readonly nint wasAnswering;
@@ -179,7 +203,8 @@ internal sealed class Trayed : IDisposable
 
     private Trayed(string kind)
     {
-        dropDown = string.Equals(kind, "dropdown", StringComparison.Ordinal);
+        dropDown = !string.Equals(kind, "win32", StringComparison.Ordinal);
+        holdsOpen = !string.Equals(kind, Shuts, StringComparison.Ordinal);
 
         owner = CreateWindowExW(0, "Static", "winwright tray owner", WsPopup, 0, 0, 10, 10, 0, 0, 0, 0);
         if (owner == 0)
@@ -235,7 +260,7 @@ internal sealed class Trayed : IDisposable
     }
 
     /// <summary>
-    /// The kind both adopters put up: a WinForms drop-down, shown and left standing.
+    /// The kind both adopters put up: a WinForms drop-down.
     /// <para>
     /// WW356's two halves, kept. A <c>ToolStripDropDownMenu</c> holding <c>ToolStripMenuItem</c>s —
     /// <c>Items.Add(string)</c> asks the container what a default item is and <c>ToolStripDropDown</c>
@@ -243,22 +268,35 @@ internal sealed class Trayed : IDisposable
     /// with no name and a locator proven here would find nothing in an adopter's tree.
     /// </para>
     /// <para>
-    /// <c>AutoClose</c> off, and here it is load-bearing rather than convenient: the harness is another
-    /// process, so the menu has to stand while a tree is walked across a boundary by something that
-    /// has just taken the desk to press a key.
+    /// WW455 gave it the other lifetime. <c>AutoClose</c> off is what every menu in this tree has
+    /// had, and the argument for it is real: the harness is another process, so the menu has to
+    /// stand while a tree is walked by something that has just taken the desk to press a key. What
+    /// that argument does not establish is that a real menu does stand, and a real one does not —
+    /// a <c>ContextMenuStrip</c> on a <c>NotifyIcon</c> closes when it loses activation. So the flag
+    /// picks, and the case that needs the harder one can ask for it.
+    /// </para>
+    /// <para>
+    /// Rebuilt rather than kept where it shuts, which is not tidiness. A drop-down that closed itself
+    /// is a control whose handle the framework may already have let go, and reusing it is how a
+    /// second ask silently shows nothing.
     /// </para>
     /// </summary>
     private void Drop()
     {
         _ = GetCursorPos(out var where);
 
-        standing ??= Built();
+        if (holdsOpen)
+            standing ??= Built(autoClose: false);
+        else
+            standing = Built(autoClose: true);
+
         standing.Show(new System.Drawing.Point(where.X, where.Y));
     }
 
-    private static ToolStripDropDown Built()
+    /// <param name="autoClose">Whether the menu shuts itself when it loses the desk, as a real one does.</param>
+    private static ToolStripDropDown Built(bool autoClose)
     {
-        var strip = new ToolStripDropDownMenu { AutoClose = false };
+        var strip = new ToolStripDropDownMenu { AutoClose = autoClose };
         strip.Items.Add(new ToolStripMenuItem(Open));
         strip.Items.Add(new ToolStripMenuItem(Quit));
         return strip;

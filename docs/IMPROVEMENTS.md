@@ -2,6 +2,29 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+### §WW456 what the miss could have said
+
+claude-tray's step says `nothing answered to it in 22 polls over 6177ms`, one line after
+the same run reports `ReadBack = the menu "a menu with no name"`. Those two sentences
+are about the same desk a moment apart, and between them sits every question the last
+three tasks were spent on: was there a menu at all, was there more than one, did it hold
+entries, were they `MenuItem`s, and was the one that stood the application's or the
+shell's.
+
+`LocatorMiss` diagnoses a miss against a window — a collapsed combo, an unselected page
+— and answers none of that for a step rooted at the desktop, which is what a resident
+fixture's steps are given. So a tray miss reads the same whether the menu closed, never
+opened, opened empty, or opened holding controls of a type nobody named.
+
+WW452's case had to compute the answer itself to be able to assert anything: the menus
+standing on the desktop, and the entries under each. That reading is four lines and it
+is the reading a reader of a red needs, and it lives in a case here rather than in the
+miss an adopter is handed.
+
+What this wants is for the miss to carry it. A step whose first locator is a `Menu` and
+whose root is the desktop says what Menus were there and what each held, so a run
+answers the question instead of a session ruling one thing out per guest run.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached
@@ -143,28 +166,3 @@ and there is no case here that would say the same thing if the route were right.
 What this wants is an entry that opens something: one of the two carrying a submenu of
 its own, in both kinds, so the difference WW382 measured at the container can be asked
 about a level further down. The flag exists; what it puts up is what changes.
-
-### §WW455 the menu that stays up
-
-`Shadowed`, `TrayIconFixture` and `Trayed` all build their drop-down with `AutoClose`
-off, and each says why: a menu that shut the moment anything else took the desk would be
-gone before a harness had enumerated it. That reasoning is sound and it is also the
-thing under test being arranged away.
-
-WW452 made the cost visible. It launches a tray, opens its menu across a process
-boundary and resolves `Menu > MenuItem[name=...]` against the desktop — the locator an
-adopter writes, at the root a resident fixture's steps are given — and it passes for
-both kinds. claude-tray's equivalent step, against the same engine, polls 22 times over
-6.2 seconds and resolves nothing, and `open submenu` answers `this element is in no
-window a menu key could be sent to`.
-
-So neither the boundary nor the locator is the difference. What is left is the menu's
-own lifetime: a real `ContextMenuStrip` on a `NotifyIcon` closes when it loses
-activation, and every menu this tree puts up has that turned off. The engine has
-therefore never resolved against a menu that could go while it was looking, which is the
-only kind an application ships.
-
-What this wants is an arm that does not hold itself open — the same drop-down with
-`AutoClose` left alone — and the same reading against it. Either it resolves, and
-claude-tray's failure is somewhere else again, or it does not, and the step that reads a
-tray menu has a race nothing here could have found.
