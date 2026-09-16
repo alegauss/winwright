@@ -32,6 +32,29 @@ it.
 
 ## Block D — Act — patterns before pointers
 
+### §WW457 the foreground a tray menu actually has
+
+`Menu.Expand` asks that the foreground belong to the window the key is going to, and for
+a window that is right: a key lands on whatever holds the foreground, so sending one
+anywhere else is sending it to somebody else.
+
+A tray menu never has it. WW453 drove the verb against a launched tray with a submenu
+and the guest excused both kinds, on two absences and neither a busy desk. The drop-down
+arm read `the foreground belongs to explorer 'Janela de estouro da bandeja do sistema'`
+— the overflow flyout, which the search opened to find the icon and which is still up.
+The Win32 arm read `another window of the same process owns it: 'winwright tray owner'`,
+the window `TrackPopupMenu` requires the foreground on before it will track.
+
+The arms are opposite and both are correct behaviour. The second is too strict: a
+tracked popup and its owner are one menu mode on one thread, and a key sent at the owner
+reaches the menu. The first is a truer refusal — a synthesised key would land on the
+flyout — and what it exposes is that this engine opens the flyout to find an icon and
+then cannot work the menu it opened.
+
+What this wants is a reading that knows what a menu is: the owner of a tracked popup
+counts, and a flyout the act opened is a state it should leave before pressing anything.
+Both are measurable now, which they were not before WW451.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
@@ -121,25 +144,3 @@ line of style bits, and it is the arm that decides whether an unattended run can
 at all.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW453 the submenu no tray here has
-
-`open submenu` is the third step of claude-tray's own case and the second of
-freewilly's, and WW85's line says what it costs: the environment sweep walks a submenu
-per sampled mode, and the submenu it walks is the one WW322 says will not open.
-
-Nothing here can reproduce that. `--absences` carries an unopened submenu, and it is a
-WPF menu on a window — which is the right shape for "a control on a page that is not
-showing" and the wrong one for this. The three menus this tree puts up are `Shadowed`'s
-drop-down, `TrayIconFixture`'s two kinds and now `Trayed`'s two, and every one of them
-is flat: two entries, `winwright open` and `winwright quit`, and nothing under either.
-
-So the verb has been driven against a menu with no submenu in it, and the guest run that
-matters ends one step earlier than the case it is standing in for. Against
-`0.1.0-alpha.6` claude-tray answers `this element is in no window a menu key could be
-sent to`, which is a sentence about where the key went rather than about the submenu —
-and there is no case here that would say the same thing if the route were right.
-
-What this wants is an entry that opens something: one of the two carrying a submenu of
-its own, in both kinds, so the difference WW382 measured at the container can be asked
-about a level further down. The flag exists; what it puts up is what changes.

@@ -238,9 +238,13 @@ public static class Synthesised
 
         var before = subject.Read();
 
+        // WW453. Read once into a local, because the subject resolves to answer it: a property that
+        // walks the tree is one a member should ask for once, and this member used to ask four times.
+        var window = subject.Window;
+
         // The same hole `Press` answers with, and for the same reason: an element in no window is an
         // element no key could be sent at, which is a fact about the tree and not a menu that refused.
-        if (subject.Window == 0)
+        if (window == 0)
         {
             return Landed(
                 subject,
@@ -262,12 +266,12 @@ public static class Synthesised
         // for a name no entry has would press Down at every entry there is and then expand whichever
         // one it stopped on. Skipped too where the locator named what is already highlighted.
         if (before.Facts is { ControlType: "MenuItem", Says: { } wanted }
-            && Menu.Highlighted(subject.Window) != wanted)
+            && Menu.Highlighted(window) != wanted)
         {
-            Menu.To(subject.Window, wanted, subject.ActMs, subject.PollMs);
+            Menu.To(window, wanted, subject.ActMs, subject.PollMs);
         }
 
-        var walk = Menu.Expand(subject.Window, subject.ActMs, subject.PollMs);
+        var walk = Menu.Expand(window, subject.ActMs, subject.PollMs);
 
         // What the menu landed on where it landed anywhere, and what the locator matched otherwise.
         // A walk the desk refused read nothing, so its own reading is not one to hand back.

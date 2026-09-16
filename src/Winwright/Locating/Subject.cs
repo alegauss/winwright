@@ -173,17 +173,54 @@ public sealed class Subject
     {
         get
         {
-            try
+            var found = WindowOf(ResolveOnce().Element);
+            return found != 0 ? found : WindowOf(root);
+        }
+    }
+
+    /// <summary>
+    /// The top-level window an element is drawn in, walking up until something owns one. WW453.
+    /// <para>
+    /// This used to ask the root and nothing else, which is right for every case that has a window
+    /// and wrong for the one shape an adopter has. A tray application draws none, so its cases
+    /// resolve against the desktop — and the desktop answers no handle, so a step that needed one
+    /// was told there was no window a key could be sent to. Measured against a launched tray whose
+    /// menu was standing, holding the entry the step had just resolved.
+    /// </para>
+    /// <para>
+    /// The walk is what makes it work rather than the change of root. A <c>MenuItem</c> is not a
+    /// window — a <c>ToolStripMenuItem</c> owns no handle at all — and the thing that is one is the
+    /// menu above it, so asking the element alone would have answered zero just as surely. Bounded,
+    /// because a walk up a tree that is being rebuilt is a loop nobody wants in a diagnosis.
+    /// </para>
+    /// <para>
+    /// Nothing changes for a case that already worked: an element inside an application's window
+    /// walks up to that window, which is what the root would have answered. What changes is the case
+    /// that was answered zero.
+    /// </para>
+    /// </summary>
+    /// <param name="element">Where to start, or null where nothing resolved.</param>
+    /// <param name="levels">How far up to look before giving up.</param>
+    private static nint WindowOf(AutomationElement? element, int levels = 8)
+    {
+        var walker = TreeWalker.ControlViewWalker;
+
+        try
+        {
+            for (var here = element; here is not null && levels > 0; here = walker.GetParent(here), levels--)
             {
-                var handle = (nint)root.Current.NativeWindowHandle;
-                return handle == 0 ? 0 : Winwright.Windowing.Win32.GetAncestor(handle, Winwright.Windowing.Win32.GaRoot);
-            }
-            catch (Exception gone)
-                when (gone is System.Windows.Automation.ElementNotAvailableException or InvalidOperationException)
-            {
-                return 0;
+                var handle = (nint)here.Current.NativeWindowHandle;
+                if (handle != 0)
+                    return Winwright.Windowing.Win32.GetAncestor(handle, Winwright.Windowing.Win32.GaRoot);
             }
         }
+        catch (Exception gone)
+            when (gone is ElementNotAvailableException or InvalidOperationException)
+        {
+            return 0;
+        }
+
+        return 0;
     }
 
     /// <summary>

@@ -78,6 +78,9 @@ internal sealed class Trayed : IDisposable
     private const uint TpmReturnCmd = 0x0100;
     private const uint TpmNonNotify = 0x0080;
 
+    /// <summary>An entry that opens a submenu rather than sending a command. WW453.</summary>
+    private const uint MfPopup = 0x0010;
+
     private delegate nint Subclassed(nint window, uint message, nint wParam, nint lParam);
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -182,6 +185,25 @@ internal sealed class Trayed : IDisposable
     /// <summary>The two entries, the same two every other menu in this tree has.</summary>
     private const string Open = "winwright open";
     private const string Quit = "winwright quit";
+
+    /// <summary>
+    /// The entry that opens something, and what is under it. WW453.
+    /// <para>
+    /// Every menu in this tree was flat until now — two commands and nothing under either — and
+    /// `open submenu` is the third step of claude-tray's own case and the second of freewilly's. So
+    /// the verb has only ever been driven against a menu with no submenu in it.
+    /// </para>
+    /// <para>
+    /// Filled rather than left empty, which is WW259's measurement and not a preference: a WinForms
+    /// submenu that is empty when the menu opens exposes no ExpandCollapse at all and draws no arrow,
+    /// and the shell then handles Right as <em>activate a plain command</em> — which dismisses the
+    /// whole menu. An empty one is a different defect and would need a flag of its own to be honest
+    /// about which is being reproduced.
+    /// </para>
+    /// </summary>
+    private const string More = "winwright profiles";
+    private const string First = "winwright one";
+    private const string Second = "winwright two";
 
     private readonly bool dropDown;
 
@@ -298,6 +320,16 @@ internal sealed class Trayed : IDisposable
     {
         var strip = new ToolStripDropDownMenu { AutoClose = autoClose };
         strip.Items.Add(new ToolStripMenuItem(Open));
+
+        // WW453. Between the two commands rather than at the end, which is the position that matters:
+        // a menu opens highlighting its first entry, so an entry that is not the first is the only
+        // one that asks whether a step naming it walked there before pressing Right. claude-tray's
+        // profile entry is the fourth of its menu, and WW83 is where that was measured.
+        var more = new ToolStripMenuItem(More);
+        more.DropDownItems.Add(new ToolStripMenuItem(First));
+        more.DropDownItems.Add(new ToolStripMenuItem(Second));
+        strip.Items.Add(more);
+
         strip.Items.Add(new ToolStripMenuItem(Quit));
         return strip;
     }
@@ -309,9 +341,26 @@ internal sealed class Trayed : IDisposable
         if (menu == 0)
             return;
 
+        // WW453. The submenu, built first because the entry that opens it names its handle. Destroyed
+        // with its parent rather than here: `DestroyMenu` takes a popup's submenus with it, and
+        // destroying one twice is how a tidy-up becomes the defect.
+        var under = CreatePopupMenu();
+
         try
         {
             AppendMenuW(menu, 0, 1, Open);
+
+            if (under != 0)
+            {
+                AppendMenuW(under, 0, 3, First);
+                AppendMenuW(under, 0, 4, Second);
+
+                // MF_POPUP, which is what makes the entry a door rather than a command. The item id
+                // slot carries the submenu's handle in this arm, which is the one place in this file
+                // where a Win32 flag changes what the next field means.
+                AppendMenuW(menu, MfPopup, (nuint)under, More);
+            }
+
             AppendMenuW(menu, 0, 2, Quit);
 
             // Where the cursor is, which is where a tray menu goes. The keyboard route puts no

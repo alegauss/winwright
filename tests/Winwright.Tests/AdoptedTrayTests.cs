@@ -1,6 +1,7 @@
 using System.Windows.Automation;
 
 using Winwright.Acting;
+using Winwright.Asserting;
 using Winwright.Locating;
 using Winwright.Processes;
 using Winwright.Projects;
@@ -111,6 +112,78 @@ public sealed class AdoptedTrayTests : IDisposable
     [Fact]
     public void The_other_kind_s_entries_answer_the_same_locator() =>
         TheEntriesResolve("win32");
+
+    [Fact]
+    public void The_submenu_of_a_launched_tray_s_menu_opens_to_the_verb_an_adopter_calls() =>
+        TheSubmenuOpens("dropdown");
+
+    [Fact]
+    public void The_other_kind_s_submenu_opens_the_same_way() =>
+        TheSubmenuOpens("win32");
+
+    /// <summary>
+    /// WW453's claim: <c>open submenu</c> reaches an entry of a menu this run did not put up.
+    /// <para>
+    /// Every menu in this tree was flat until WW453 — two commands and nothing under either — so the
+    /// verb has only ever been driven against a menu with no submenu in it. It is the third step of
+    /// claude-tray's own case and the second of freewilly's, and WW85 is blocked on it.
+    /// </para>
+    /// <para>
+    /// The entry is the second of three and not the first, which is the position that carries the
+    /// claim: a menu opens highlighting its first entry, so naming any other one is what asks whether
+    /// the step walked there before it pressed Right. WW83 measured that from the other side, where a
+    /// step naming the fourth entry expanded the first.
+    /// </para>
+    /// </summary>
+    /// <param name="kind">Which menu the launched fixture answers with.</param>
+    private static void TheSubmenuOpens(string kind) =>
+        WithTheMenuUp(kind, (pid, menu) =>
+        {
+            var desktop = AutomationElement.RootElement;
+            var entry = Locator.Parse("""Menu > MenuItem[name="winwright profiles"]""");
+
+            var resolved = Resolve.Until(desktop, entry, Timeouts.Defaults["resolve"], pollMs: 50);
+            Assert.True(
+                resolved.Found,
+                $"the tray ({pid}) holds no entry that opens anything: {menu}{Environment.NewLine}{resolved.Miss}");
+
+            var subject = Subject.Unguarded(desktop, entry, Timeouts.Defaults["act"], pollMs: 50);
+
+            // Asserted before the act, and not excused, which is the whole of what this case is for.
+            // `ExpandMenu` reports an element it can find no window for as a foreground it could not
+            // take — a desk fact — and the desk is fine here: a tray draws no window, so the root is
+            // the desktop, and the window a menu key belongs at is the one the entry resolved in. A
+            // case that took the desk door would go green on the state claude-tray is stuck in.
+            Assert.True(
+                subject.Window != 0,
+                $"the entry resolved and the subject is in no window a key could be sent to: "
+                    + $"{resolved.Facts} — which is what an adopter's third step reports.");
+
+            var acted = Synthesised.ExpandMenu(subject);
+
+            // And the desk door stays open for what it is really for: a foreground Windows would not
+            // grant is a fact about the machine, and this class has no business failing over one.
+            //
+            // WW457 is what goes through it today, and it is worth saying so here rather than leaving
+            // a reader to find an excuse in the ledger and wonder. Both kinds are excused on the
+            // guest and on two opposite absences: the drop-down on the overflow flyout holding the
+            // foreground, which the search opened to find the icon, and the Win32 popup on its own
+            // owner holding it — which is the window `TrackPopupMenu` requires it on. So what this
+            // case proves today is the half above, and the half below is what WW457 is for.
+            if (acted.Needed is { Satisfied: false } refused && BusyDesk.Excused(refused))
+                return;
+
+            // What is under it, which is the claim rather than the gesture landing. A Right that
+            // dismissed the whole menu is what WW259 is about, and it reads as a landed act until
+            // something asks for the thing the submenu was supposed to show.
+            var under = Locator.Parse("""Menu > MenuItem[name="winwright one"]""");
+            var showing = Resolve.Until(desktop, under, Timeouts.Defaults["resolve"], pollMs: 50);
+
+            Assert.True(
+                showing.Found,
+                $"the submenu opened and holds nothing a locator reaches: {acted}"
+                    + $"{Environment.NewLine}{showing.Miss}");
+        });
 
     [Fact]
     public void A_menu_left_to_shut_itself_is_still_a_window_of_the_process_that_owns_it() =>
