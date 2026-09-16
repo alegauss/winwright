@@ -35,6 +35,7 @@
 - ✅ **WW235** **a timing case fails more often as the suite it runs in grows** — The release runs on its own thread instead of the thread pool, and the hold is a checked fraction of the retry budget rather than a multiple of its sleep.
 - ✅ **WW456** **a tray-menu step that resolves nothing says only that, so three runs have gone on ruling out what the desk held** — A miss now says what the thing it stopped under was holding, and the never-answered sentence carries that diagnosis — which is where an adopter reads a red.
 - ✅ **WW459** **a miss is diagnosed down the first branch while resolving walks every one, so it can describe the wrong parent** — A miss walks the frontier its resolution walks, so the parent it names and the contents it prints are on a route something would have taken.
+- ✅ **WW460** **the diagnosed miss reaches a case in this suite and not a scenario step, which is the door an adopter reads** — A scenario step's never-answered detail carries the miss now, and the case asserts on the detail a trace prints rather than on an expectation in hand.
 
 ## Block B — Attach, launch, and leave nothing behind
 

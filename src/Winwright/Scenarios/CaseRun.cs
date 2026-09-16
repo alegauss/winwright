@@ -2010,6 +2010,15 @@ public static class CaseRun
         // Expect.That rather than Expect.Of: the diagnosis is a window dump, and taking one per
         // missed attempt pays for three of them to report the last.
         var saw = acted?.Element;
+
+        // WW456's other half, and it reached nobody until an adopter's run said so. That task put
+        // the diagnosed miss into the sentence a never-answered expectation ends with, and wired it
+        // in `Expect.Of` — which is the door a case in this suite uses and not the one a scenario
+        // step goes through. Measured against claude-tray on `0.1.0-alpha.7`: the step still read
+        // `nothing answered to it in 22 polls over 6028ms` and stopped, which is the sentence the
+        // task existed to finish.
+        var missed = default(LocatorMiss);
+
         var expectation = Expect.That(
             step.Name,
             wanted,
@@ -2017,10 +2026,17 @@ public static class CaseRun
             {
                 var look = subject.ReadOnce();
                 saw = look.Facts ?? saw;
+                missed = look.Miss ?? missed;
                 return look.Found ? step.Reads.Of(look) : null;
             },
             subject.ActMs,
             subject.PollMs);
+
+        // Only where nothing ever answered, which is the arm whose sentence ends without a reason.
+        // Where it answered and read the wrong thing, the readings are the reason and a miss from an
+        // earlier poll would be a second story about one red.
+        if (!expectation.EverSaw && missed is not null)
+            expectation = expectation.Missing(missed);
 
         return new Landed(acted, expectation, saw);
     }

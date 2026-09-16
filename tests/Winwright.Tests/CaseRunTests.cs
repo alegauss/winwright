@@ -263,6 +263,32 @@ public sealed class CaseRunTests : IDisposable
     }
 
     [Fact]
+    public void A_read_that_answered_nothing_says_what_the_window_held_instead()
+    {
+        // WW456 put the diagnosed miss into the sentence a never-answered expectation ends with, and
+        // wired it where a case in this suite reads one. A scenario step goes through a different
+        // door, so the half that was supposed to reach an adopter reached nobody — measured against
+        // claude-tray on `0.1.0-alpha.7`, whose step still read `nothing answered to it in 22 polls
+        // over 6028ms` and stopped there.
+        //
+        // Asserted on the verdict's own detail rather than on an expectation in hand, because the
+        // detail is what a trace prints and what an adopter is actually handed.
+        var frame = Dialog();
+        var declared = CaseDeclaration.Of(
+            "the status label says Saved",
+            Wrote.Step("""Text[name="Saved"]""", "read", ("expect", "Saved"), ("reads", "text")));
+
+        var detail = Assert.Single(Run(declared, frame).Verdict.Failures).Detail;
+
+        // The timing half is kept: a wait that really was too short is a real reading, and this is
+        // still the only sentence allowed to sound like one.
+        Assert.Contains("nothing answered to it", detail, StringComparison.Ordinal);
+
+        // And the half that was missing — what the locator stopped at, and what was there instead.
+        Assert.Contains("was holding", detail, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_read_is_attempted_once_however_long_it_waits()
     {
         var frame = Dialog();
