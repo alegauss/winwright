@@ -120,4 +120,50 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
+### §WW452 reading inside somebody else's tray menu
+
+WW369 reads both tray menu kinds as a shape — a `Menu` holding two `MenuItem`s, named as
+the adopters name them — and WW382 measured where the kinds differ. Both walk
+`TrayIconFixture`'s menu, which this test host put up, so what they prove is that the
+tree is right when the harness owns it.
+
+WW451 closed the other half of that only as far as the menu window. It launches a tray,
+opens its menu through the verb, and asserts that the process owned no window before the
+key and owns the menu after it. What it never does is walk it: the reading stops at the
+window class.
+
+That is the step an adopter fails on. Against `0.1.0-alpha.6`, claude-tray's first step
+is `Ok` and reads back `the menu "a menu with no name"`; the second resolves `Menu >
+MenuItem` against nothing. The same locator passes here against the same two entries, so
+either the boundary changes what a locator can reach or claude-tray's case names
+something its tray does not have — and nothing here can say which, which is WW451's own
+complaint said one step further in.
+
+What this wants is the walk WW369 takes, taken against the launched tray instead: the
+container is a `Menu`, its entries are `MenuItem`s, and the locator that resolves them
+is the one an adopter writes. `--tray` already puts both kinds up, so the shape costs
+nothing new.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW453 the submenu no tray here has
+
+`open submenu` is the third step of claude-tray's own case and the second of
+freewilly's, and WW85's line says what it costs: the environment sweep walks a submenu
+per sampled mode, and the submenu it walks is the one WW322 says will not open.
+
+Nothing here can reproduce that. `--absences` carries an unopened submenu, and it is a
+WPF menu on a window — which is the right shape for "a control on a page that is not
+showing" and the wrong one for this. The three menus this tree puts up are `Shadowed`'s
+drop-down, `TrayIconFixture`'s two kinds and now `Trayed`'s two, and every one of them
+is flat: two entries, `winwright open` and `winwright quit`, and nothing under either.
+
+So the verb has been driven against a menu with no submenu in it, and the guest run that
+matters ends one step earlier than the case it is standing in for. Against
+`0.1.0-alpha.6` claude-tray answers `this element is in no window a menu key could be
+sent to`, which is a sentence about where the key went rather than about the submenu —
+and there is no case here that would say the same thing if the route were right.
+
+What this wants is an entry that opens something: one of the two carrying a submenu of
+its own, in both kinds, so the difference WW382 measured at the container can be asked
+about a level further down. The flag exists; what it puts up is what changes.
