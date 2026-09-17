@@ -145,6 +145,19 @@ the deduplication rule, by counting one absent assertion three times and reading
 three holes. Migrating it last means the fixture machinery is already in place and this
 is a use of it rather than the reason to build it.
 
+What it waits for is one release and nothing else. The three fields its claims need went
+out in `0.1.0-alpha.5`, and the adopter already restores past it. The submenu did not:
+opening one on a tray menu is WW457, which landed after `0.1.0-alpha.10` was cut, and
+claude-tray restores from nuget.org alone — so the four walks this case makes are four
+holes until an engine carrying it is published. Cutting that release is a `chore:
+release` commit of its own and never part of this task.
+
+The shape to write is already decided by the cases beside it: a case per sampled mode,
+the mode passed to the launch the way the script passes it, and the entry named by a
+label this project derives rather than a word typed into the file. What the script
+asserts per mode is the environment mark on the profile entry the variable selects —
+which is the claim the three fields were added for.
+
 ### §WW86 claude-tray loses both scripts
 
 451 lines of capture and 2,732 lines of interaction, and the argument for this framework
