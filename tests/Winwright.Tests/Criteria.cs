@@ -215,8 +215,9 @@ internal static class Criteria
         // migration has happened and every number the block asks for was measured; all of them are
         // in freewilly, and nothing here can read a file this checkout does not have.
         new("J", "The proof is a deletion", "", Unshown.NotYet,
-            "WW87 removed freewilly's 354-line page probe, and claude-tray and pportal still carry "
-                + "theirs — so the count exists for one adopter of three and lives in its repository"),
+            "WW87 removed freewilly's 354-line page probe and then its 382-line capture script, and "
+                + "claude-tray and pportal still carry theirs — so the count exists for one adopter "
+                + "of three and lives in its repository"),
         new("J", "Nothing was lost in the move", "", Unshown.NotYet,
             "WW87 names both halves — the four hand-rolled geometry checks became the four faults a "
                 + "layout reading has, and the claims about what the page says stayed beside them — "
@@ -261,11 +262,10 @@ internal static class Criteria
                 + "published package does not, so the case that would read this back refuses to load "
                 + "in the repository it lives in — and nothing here can drive claude-tray's menu"),
 
-        // --- WW87, the same shape a third time ---------------------------------------------------------------
-        new("WW87", "The capture script goes the way the probe did", "",
-            Unshown.NotBuilt, "the route that reaches a drop-down nothing owns shipped here and the "
-                + "published package does not carry it, so the case that would read this back cannot "
-                + "be written in the repository it belongs in — and nothing here can open freewilly's menu"),
+        // WW87's criterion stood here and went with the line: the route reached nuget.org in
+        // 0.1.0-alpha.10, freewilly's case photographs the menu against it, and the 382-line script
+        // is deleted. Read back where the migration is, which is the whole of why it could never be
+        // read here.
 
         // --- what a partial ship left open --------------------------------------------------------
         //

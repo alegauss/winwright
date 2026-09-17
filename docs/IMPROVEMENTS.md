@@ -105,6 +105,29 @@ at once: the case writes the locator the reference argues against, and passes.
 
 ## Block E — Capture — the picture that proves what it photographed
 
+### §WW465 the picture that proves nothing it was asked
+
+Measured while shipping WW87's second half, against freewilly's tray menu on a guest.
+The capture answered clean and the file was a photograph of the desktop wallpaper.
+
+Every question this block asks passed: the right process, a popup route that said why,
+nothing over the region either side of the take, no glass, and far more than one colour
+— wallpaper being a photograph. What none of them asks is whether the window's own
+pixels were in the rectangle yet. A `ContextMenuStrip` gets its window at its final size
+and a default position, and `Show` moves it afterwards, so a copy taken in that gap
+reads whatever the desktop has there.
+
+The case guarded it itself, by waiting until the menu reported an entry before copying,
+and that guard is a locator an adopter has to know to write. The refusals are the
+engine's and this one is not, which is the asymmetry: this block's claim is that a
+picture proves what it photographed.
+
+`Containment` is the shape of the answer and reaches half the cases — it compares the
+copied rectangle against a surface the application reports, so it needs the in-app half,
+and a window that reports nothing leaves a copy nobody can hold to its subject. Two
+candidates: a window that has not painted answers nothing to the tree under it, and two
+copies a beat apart differ while one is still arriving.
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
@@ -164,14 +187,6 @@ which is the claim the three fields were added for.
 is that neither should exist inside a product repository. They go once every assertion
 in them is a case, and the line count removed is reported rather than described - a
 saving nobody measured is a saving nobody can check.
-
-### §WW87 freewilly loses its copy and its probe
-
-Its capture script is 382 lines sharing most of their reasoning with claude-tray's 451,
-and differing in two real ways - the backdrop refusal and the flat-colour refusal - both
-of which belong in the engine and neither of which the other project has. The page probe
-is the geometry dump this framework already owns, pointed at an installer surface
-instead of at a window.
 
 ### §WW88 pportal loses the harness and the runner
 

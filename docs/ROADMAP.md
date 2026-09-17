@@ -17,6 +17,8 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
+- 📋 **WW465** (deps: —) **a screen copy of a window whose pixels are not in the rectangle yet passes every question a capture is asked** — Measured: right process, popup route, nothing over it, no glass, far from flat — and the file was a photograph of the desktop wallpaper. → §WW465
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
@@ -29,8 +31,7 @@
 
 - ⏳ **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, an engine release on nuget.org) **the switch case drives the one path that rewrites a real setting** — Three explanations are ruled out, and the diagnosis that would name the fourth is in the engine and not yet published. → §WW83
 - 📋 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, an engine release on nuget.org) **the environment sweep walks a submenu per sampled mode** — The three fields its claims need are published; the submenu it walks opens only on an engine newer than the one nuget.org carries. → §WW85
-- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
-- ⏳ **WW87** (deps: Block G ✅, Block E ✅, WW77 ✅, WW319 ✅, WW320 ✅) **freewilly carries its own copy of the capture script and a layout probe** — The capture case is written and waits on the engine reaching nuget.org: routing freewilly's drop-down needs the popup this taught the route. → §WW87
+- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
 
@@ -184,13 +185,6 @@
   engine. What says it landed is the two that fail on this desk today: a controller
   nobody plugged in and a window that would not come are absences the run names, not
   failures it reports.
-
-## Done when — WW87
-
-- **The capture script goes the way the probe did** scripts\Capture-Window.ps1 is
-  deleted and its five assertions are readings CaptureReceipt.Taking takes, driven from
-  freewilly's own case project against the engine as nuget.org publishes it. Until then
-  the count is one script of two, and the line says which.
 
 ## Done when — WW384
 
