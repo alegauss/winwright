@@ -284,14 +284,10 @@ internal static class Criteria
                 + "for minutes — measured twice, at five reds in two other classes each time. What "
                 + "it is owed is a desk the suite may take, and not a case somebody forgot to write"),
 
-        new("WW457", "A tray menu takes a key wherever it stands", "", Unshown.NotYet,
-            "WW457 landed the half a reading could settle: the menu acts ask the desk's own menu mode "
-                + "now, so a tracked popup's owner holding the foreground is not an intruder, and "
-                + "`AdoptedTrayTests.The_other_kind_s_submenu_opens_the_same_way` runs instead of "
-                + "being excused. The drop-down arm beside it is still excused, and not on a busy "
-                + "desk: the overflow flyout this engine opened to find the icon holds the foreground, "
-                + "and a synthesised key really would land on it. What is owed is an act that can "
-                + "leave the flyout it opened, which is a change to the act and not to a reading"),
+        // WW457's criterion stood here and went with the line: a tray menu takes a key wherever it
+        // stands now, read back against both kinds by `AdoptedTrayTests` and checked at the ship.
+        // Deleted rather than restated, which is what this pair of checks is for — the roadmap no
+        // longer declares the lead, and an entry for one is a lead pointing nowhere.
 
         // WW315's own criterion stood here — that two profiles and a transcript exist on the guest as
         // a disposable fixture — and it went with the task: the bench fabricates both, so the roadmap

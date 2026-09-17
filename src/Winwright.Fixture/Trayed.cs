@@ -298,6 +298,13 @@ internal sealed class Trayed : IDisposable
     /// picks, and the case that needs the harder one can ask for it.
     /// </para>
     /// <para>
+    /// WW457 measured what the standing arm costs, and it is more than a lifetime: a menu held open
+    /// takes no keyboard at all. WinForms routes an arrow key to a drop-down through the modal filter
+    /// it installs for a modal one, and <c>AutoClose</c> off is what makes this one not modal — so on
+    /// the guest, with the desk admitted and the key delivered, it reads as highlighting nothing and
+    /// nothing moves. A case that walks a menu of this fixture asks for the arm that shuts itself.
+    /// </para>
+    /// <para>
     /// Rebuilt rather than kept where it shuts, which is not tidiness. A drop-down that closed itself
     /// is a control whose handle the framework may already have let go, and reusing it is how a
     /// second ask silently shows nothing.

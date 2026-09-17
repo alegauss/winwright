@@ -275,7 +275,17 @@ public static class Synthesised
 
         // What the menu landed on where it landed anywhere, and what the locator matched otherwise.
         // A walk the desk refused read nothing, so its own reading is not one to hand back.
-        return Landed(subject, ExpandsMenu, ByKeyboard, walk.Focus.Held ?? before.Facts, before, walk.Foreground);
+        //
+        // WW457. The walk's own entry before the focus it was read against: a drop-down leaves the
+        // focus on the window it was raised from, so the focus handed a step that window — measured
+        // on the guest as `Text 'winwright tray owner'`, against an `expect` naming a menu entry.
+        return Landed(
+            subject,
+            ExpandsMenu,
+            ByKeyboard,
+            walk.Entry ?? walk.Focus.Held ?? before.Facts,
+            before,
+            walk.Foreground);
     }
 
     /// <summary>

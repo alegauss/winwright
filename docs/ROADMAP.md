@@ -12,7 +12,8 @@
 
 ## Block D — Act — patterns before pointers
 
-- 🛠 **WW457** (deps: —) **a menu key is refused where the foreground is the shell's flyout or the popup's owner, which is how a tray menu stands** — A same-thread foreground is not enough: the act then proceeds, Right reaches nothing, and an honest hole becomes a red blaming the menu. → §WW457
+- 📋 **WW463** (deps: —) **nothing says whether the entry a submenu step hands back is the submenu's or the parent it was expanded from** — A step's expectation names the entry under the one it expanded, so a read-back that stopped at the parent fails a step whose act landed. → §WW463
+- 📋 **WW464** (deps: —) **the reference tells an author a submenu locator may name any element of the window, which the walk stopped honouring** — An author who names the window gets Right pressed at whichever entry the menu opened on, which is the defect WW83 measured from the other side. → §WW464
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -198,14 +199,6 @@
   reads off that desk that the window went down and no longer holds the foreground. Both
   halves off the desk and never off the script's sentence. It cannot be this suite's
   desk: two runs of it cost five reds elsewhere.
-
-## Done when — WW457
-
-- **A tray menu takes a key wherever it stands** Both kinds of a launched tray's menu
-  open a submenu in a run that excuses neither. The Win32 popup does, through its owner
-  working the menu; the drop-down does not, because the overflow flyout this engine
-  opened to find the icon still holds the foreground — one of two excuses left in
-  `AdoptedTrayTests`.
 
 ## Non-goals
 

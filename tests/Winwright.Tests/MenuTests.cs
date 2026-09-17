@@ -85,6 +85,20 @@ public sealed class MenuTests : IDisposable
     }
 
     [Fact]
+    public void An_ordinary_window_is_not_a_menu_the_desk_is_raising()
+    {
+        // WW457's other control, and it guards the second widening the way the case above guards the
+        // first. A drop-down is admitted because the desk is on the menu's own thread; a window whose
+        // thread holds the desk and is not a menu must not be, or the act sends keys at whatever that
+        // thread has focused and calls them delivered.
+        //
+        // True whoever holds the desk, which is why nothing is arranged here: this dialog is a
+        // `Window` in the tree, and the reading stops at the control type before it asks about a
+        // thread at all.
+        Assert.Equal(0, Menu.RaisedFrom(dialog.Frame));
+    }
+
+    [Fact]
     public void An_open_menu_says_which_window_is_working_it()
     {
         // WW457. The foreground reading is right about a window and wrong about a menu: a

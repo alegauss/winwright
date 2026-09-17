@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows.Automation;
 
 using Winwright.Locating;
 using Winwright.Tracing;
@@ -34,6 +35,13 @@ public sealed record MenuWalk
 
     /// <summary>What is highlighted now.</summary>
     public string? Highlighted { get; }
+
+    /// <summary>
+    /// The entry itself, where the walk read one. WW457, and it is what a step compares against: the
+    /// verb used to hand back whatever held the focus, which for a drop-down is the window the menu
+    /// was raised from and never an entry at all.
+    /// </summary>
+    public ElementFacts? Entry { get; init; }
 
     /// <summary>Every entry highlighted on the way, in order.</summary>
     public IReadOnlyList<string> Passed { get; }
@@ -147,8 +155,72 @@ public static class Menu
     /// </para>
     /// </summary>
     /// <param name="window">Any window of the application whose menu this is about.</param>
-    public static string? Highlighted(nint window) =>
-        Focus.Held(window)?.Name is { Length: > 0 } name ? name : null;
+    public static string? Highlighted(nint window) => Entry(window)?.Says;
+
+    /// <summary>
+    /// The entry a menu is highlighting: the focus where the focus is an entry, and the menu's own
+    /// reading of itself where it is not. WW457.
+    /// <para>
+    /// Every Win32 menu answers the first. A drop-down answers none of it — the window it was
+    /// raised from keeps the focus — and this read that window's name as the highlight: measured on
+    /// the guest as <c>Text 'winwright tray owner'</c>, a Static window in the menu's own process,
+    /// which the process-scoped focus reading is right to admit and which is not an entry. The walk
+    /// then had one name that never changed, so it stopped after one Down and Right expanded
+    /// whichever entry the menu had opened on.
+    /// </para>
+    /// <para>
+    /// So the focus counts only where it is an entry, and where it is not the menu is asked about
+    /// itself. Selected or focused, because the two frameworks answer different halves of the same
+    /// question: a Win32 popup's entry takes the focus, and a <c>ToolStripMenuItem</c> reports the
+    /// selection its own container keeps.
+    /// </para>
+    /// <para>
+    /// The last match and not the first, which is what a submenu needs: a menu whose submenu is open
+    /// still shows the parent entry as selected, and the walk is inside the deeper one.
+    /// </para>
+    /// </summary>
+    /// <param name="window">Any window of the application whose menu this is about.</param>
+    private static ElementFacts? Entry(nint window)
+    {
+        if (Focus.Held(window) is { ControlType: MenuEntry } focused && focused.Says is not null)
+            return focused;
+
+        return Selected(window);
+    }
+
+    /// <summary>What UI Automation calls a menu's entries, spelled once. WW457.</summary>
+    private const string MenuEntry = "MenuItem";
+
+    /// <summary>
+    /// The entry this menu shows as its own, read out of its subtree rather than off the desk.
+    /// WW457.
+    /// </summary>
+    /// <param name="window">The window the menu is drawn in.</param>
+    private static ElementFacts? Selected(nint window)
+    {
+        if (window == 0)
+            return null;
+
+        try
+        {
+            var entries = AutomationElement.FromHandle(window).FindAll(
+                TreeScope.Descendants,
+                new AndCondition(
+                    new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.MenuItem),
+                    new OrCondition(
+                        new PropertyCondition(AutomationElement.HasKeyboardFocusProperty, true),
+                        new PropertyCondition(SelectionItemPattern.IsSelectedProperty, true))));
+
+            return entries.Count == 0 ? null : ElementFacts.Of(entries[entries.Count - 1]);
+        }
+        catch (Exception unreachable)
+            when (unreachable is ElementNotAvailableException or ArgumentException)
+        {
+            // A menu that went away while it was being read is not an entry, which is the same
+            // direction the walk's own stopping rule already falls in.
+            return null;
+        }
+    }
 
     /// <summary>Enter the menu bar, the way F10 does for a keyboard user.</summary>
     public static MenuWalk Enter(nint window, int settleMs = 2000, int pollMs = 25)
@@ -161,13 +233,21 @@ public static class Menu
         Keys.SendMenuBar();
         Attempt.UntilTrue(() => Highlighted(window) is { } now && now != before, settleMs, pollMs);
 
-        // Read once at the end and carried, so the answer and the reading behind it cannot be two
+        // Read at the end and carried, so the answer and the reading behind it cannot be two
         // different moments — which is the whole shape of the defect this fixed.
+        //
+        // WW457: two readings rather than one, because they answer two questions. The focus says
+        // whether this run is entitled to talk about what it found; the highlight says what the menu
+        // is showing, which a drop-down does not answer through the focus at all.
         var focus = Focus.In(window);
-        var landed = focus.Held?.Name is { Length: > 0 } name ? name : null;
+        var entry = Entry(window);
+        var landed = entry?.Says;
 
         return new MenuWalk(
-            "enter the menu", null, landed, landed is null ? [] : [landed], foreground, focus);
+            "enter the menu", null, landed, landed is null ? [] : [landed], foreground, focus)
+        {
+            Entry = entry,
+        };
     }
 
     /// <summary>
@@ -233,8 +313,12 @@ public static class Menu
         Keys.Send(TraversalKey.Right);
         Attempt.UntilTrue(() => Highlighted(window) is { } now && now != opening, settleMs, pollMs);
 
+        // WW457. The highlight and not the focus, for the reason `Entry` gives: the window a
+        // drop-down was raised from holds the focus the whole time, so reading the answer off it
+        // reported that window's own name as the entry this expanded onto.
         var focus = Focus.In(window);
-        var landed = focus.Held?.Name is { Length: > 0 } name ? name : null;
+        var entry = Entry(window);
+        var landed = entry?.Says;
         var moved = landed is not null && landed != opening;
 
         return new MenuWalk(
@@ -243,7 +327,10 @@ public static class Menu
             landed,
             moved ? [opening ?? "", landed!] : [],
             foreground,
-            focus);
+            focus)
+        {
+            Entry = entry,
+        };
     }
 
     /// <summary>
@@ -318,31 +405,83 @@ public static class Menu
         return working != 0 && working == mine ? info.MenuOwner : 0;
     }
 
+    /// <summary>
+    /// The window holding the desk while this menu stands, where the two are one thread's. WW457.
+    /// <para>
+    /// The same arrangement <see cref="MenuOwner" /> reads, one framework over and invisible to it. A
+    /// <c>ContextMenuStrip</c> is not a Win32 menu and sets no menu mode, so Windows says nothing
+    /// about it at all; what WinForms does instead is put the foreground on a window of its own
+    /// before showing the drop-down, which is the documented way a tray menu is raised. The menu and
+    /// that window are two windows of one thread, and a synthesised key goes to the foreground
+    /// thread's queue — the queue the drop-down's own message filter is reading.
+    /// </para>
+    /// <para>
+    /// The thread and never the process, which is the whole of what keeps this narrow. An
+    /// application's own dialog taking the desk from its own window is two threads or two queues, and
+    /// a key sent then really does land elsewhere: <c>MenuTests</c> drives that arm with a second
+    /// pumped dialog and holds it as a hole.
+    /// </para>
+    /// <para>
+    /// And the control type is the other half of it, asked of the tree rather than of the class name:
+    /// a drop-down's window class is its framework's and only the tree calls it a menu. An ordinary
+    /// window with a sibling on its thread is not a menu and is not admitted here.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The menu a key is about to be sent at.</param>
+    /// <returns>The window holding the foreground on this menu's own thread, or zero.</returns>
+    public static nint RaisedFrom(nint window)
+    {
+        if (window == 0 || !AMenu(window))
+            return 0;
 
+        // The engine's own reading and not the primitive, which is what keeps the desk sweep honest:
+        // a verb of this class reaches the foreground through `Foreground`, where every other one does.
+        var holder = Foreground.Now().Window;
+        if (holder == 0)
+            return 0;
+
+        var raising = Win32.GetWindowThreadProcessId(holder, out _);
+        var drawn = Win32.GetWindowThreadProcessId(window, out _);
+
+        return raising != 0 && raising == drawn ? holder : 0;
+    }
+
+    /// <summary>
+    /// Whether the window a key is aimed at is a menu at all. WW457, and asked of UI Automation
+    /// because that is the one reading both kinds answer: <c>#32768</c> and a framework's own
+    /// drop-down share no window class and are both a <c>Menu</c> in the tree.
+    /// </summary>
+    /// <param name="window">The window to ask about.</param>
+    private static bool AMenu(nint window)
+    {
+        try
+        {
+            return AutomationElement.FromHandle(window).Current.ControlType == ControlType.Menu;
+        }
+        catch (Exception unreachable)
+            when (unreachable is ElementNotAvailableException or ArgumentException)
+        {
+            // A handle the tree cannot reach is not a menu this run may send a key into, which is
+            // the same direction every other reading here falls in.
+            return false;
+        }
+    }
 
     /// <summary>
     /// The foreground reading a menu act turns on: the ordinary one, unless the desk says a menu is
     /// up and this is it. WW457.
     /// <para>
-    /// Two widenings and both are narrow. The first is a Win32 menu being worked, which Windows says
-    /// outright. The second is the same shape one framework over: a <c>ContextMenuStrip</c> is not a
-    /// Win32 menu, so it sets no menu mode — WinForms instead puts the foreground on a hidden window
-    /// of its own before showing the drop-down, which is the documented way a tray menu is raised at
-    /// all. The menu and that window are two windows of one thread, and a synthesised key goes to the
-    /// foreground thread's queue, where the drop-down's own message filter is waiting for it.
+    /// Two widenings and both are narrow, each with its reason where it is read:
+    /// <see cref="MenuOwner" /> is a Win32 menu being worked, which Windows says outright, and
+    /// <see cref="RaisedFrom" /> is the same arrangement one framework over, which it says nothing
+    /// about at all. Neither is inferred from ownership, and a window that is not a menu is admitted
+    /// by neither.
     /// </para>
     /// <para>
     /// Measured from the adopter's side. claude-tray's submenu step read `another window of the same
     /// process owns it: ClaudeTray (pid 6092) (untitled), and the window under test is ClaudeTray
-    /// (pid 6092) (untitled)` — two untitled windows of one application, which is that arrangement
-    /// described from outside.
-    /// </para>
-    /// <para>
-    /// The thread and never the process, which is what keeps this from swallowing the reading it is
-    /// narrowing. `SameProcess` is an application's own dialog taking the desk from its own window,
-    /// and those are two threads or two queues; a key sent then really does land elsewhere, and
-    /// <c>MenuTests</c> holds that arm as a hole. The menu control type is the other half: an
-    /// ordinary window with a sibling on its thread is not a menu and is not admitted here.
+    /// (pid 6092) (untitled)` — two untitled windows of one application, which is a drop-down raised
+    /// from its own hidden window described from outside.
     /// </para>
     /// </summary>
     /// <param name="window">The menu a key is about to be sent at.</param>
@@ -352,6 +491,8 @@ public static class Menu
         if (foreground.Satisfied)
             return foreground;
 
-        return MenuOwner(window) != 0 ? Precondition.Met(Foreground.PreconditionName) : foreground;
+        return MenuOwner(window) != 0 || RaisedFrom(window) != 0
+            ? Precondition.Met(Foreground.PreconditionName)
+            : foreground;
     }
 }

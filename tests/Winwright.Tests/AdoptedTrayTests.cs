@@ -115,15 +115,108 @@ public sealed class AdoptedTrayTests : IDisposable
 
     [Fact]
     public void The_submenu_of_a_launched_tray_s_menu_opens_to_the_verb_an_adopter_calls() =>
-        TheSubmenuOpens("dropdown");
+        TheSubmenuOpens("shuts");
 
     [Fact]
     public void The_other_kind_s_submenu_opens_the_same_way() =>
         TheSubmenuOpens("win32");
 
+    /// <summary>
+    /// WW457, and the arm that cannot carry the claim beside it. The <c>dropdown</c> arm is a
+    /// <c>ContextMenuStrip</c> with <c>AutoClose</c> off, which is what lets a harness in another
+    /// process walk a menu that stands still — and the same flag takes its keyboard away: WinForms
+    /// routes arrow keys to a drop-down through the modal filter it installs for a modal one, and a
+    /// menu that will not close is not modal. Measured on the guest, with the desk admitted and the
+    /// key sent: the menu reads as highlighting nothing and nothing moves.
+    /// <para>
+    /// So what this arm proves is the half that is true of it, and it is the half WW457 is about: the
+    /// act <em>ran</em>. It was excused on every run from the day it was written until the desk a tray
+    /// leaves was admitted, which is to say it claimed nothing at all — and a menu that takes the key
+    /// and does nothing is a failure this engine reports rather than a hole it hides behind.
+    /// </para>
+    /// <para>
+    /// The submenu claim itself is carried by the two arms whose menus a keyboard can work: the Win32
+    /// popup, and the drop-down with the lifetime a real tray's has. Both are the kinds WW322 was
+    /// about, so nothing is proven against one framework alone.
+    /// </para>
+    /// </summary>
     [Fact]
-    public void The_submenu_of_a_drop_down_that_shuts_itself_opens_too() =>
-        TheSubmenuOpens("shuts");
+    public void A_menu_held_open_for_the_harness_takes_no_key_and_the_verb_ran_all_the_same() =>
+        WithTheMenuUp("dropdown", (pid, menu) =>
+        {
+            var desktop = AutomationElement.RootElement;
+            var entry = Locator.Parse("""Menu > MenuItem[name="winwright profiles"]""");
+
+            var resolved = Resolve.Until(desktop, entry, Timeouts.Defaults["resolve"], pollMs: 50);
+            Assert.True(
+                resolved.Found,
+                $"the tray ({pid}) holds no entry that opens anything: {menu}{Environment.NewLine}{resolved.Miss}");
+
+            var subject = Subject.Unguarded(desktop, entry, Timeouts.Defaults["act"], pollMs: 50);
+            var acted = Synthesised.ExpandMenu(subject);
+
+            // The desk a tray leaves is one this act may use, which is the whole of what WW457
+            // widened. A hole here is the state this arm sat in for every run before it.
+            Assert.True(
+                acted.Attempted,
+                $"the menu is standing and the act was not attempted: {acted.Needed?.Absence}");
+
+            // And the reason it can claim no more than that, stated rather than left to a reader
+            // wondering why the arm beside it asserts a submenu. A menu that shows no entry is one
+            // no walk can aim, which is why the submenu claim is made where the menu is modal.
+            Assert.Null(Menu.Highlighted(subject.Window));
+        });
+
+    [Fact]
+    public void The_desk_a_drop_down_leaves_is_one_a_menu_key_reaches_it_from() =>
+        TheDeskIsOnTheMenusOwnThread("dropdown");
+
+    [Fact]
+    public void A_drop_down_that_shuts_itself_leaves_the_same_desk() =>
+        TheDeskIsOnTheMenusOwnThread("shuts");
+
+    /// <summary>
+    /// WW457's claim about the arrangement rather than about the act: a tray raises its menu from a
+    /// window of its own, and the engine reads that as a desk a menu key reaches the menu from.
+    /// <para>
+    /// The reading and not the gesture, because the two fail differently and only one of them is
+    /// about this. <c>TheSubmenuOpens</c> above presses Right and asserts what the submenu holds, so
+    /// a menu that took the key and did nothing and a key that never arrived read the same there.
+    /// This one names the half underneath: the foreground is on a window that is not the menu, on the
+    /// menu's own thread, which is what a <c>ContextMenuStrip</c> on a <c>NotifyIcon</c> leaves behind
+    /// and what the ordinary foreground reading calls an intruder.
+    /// </para>
+    /// <para>
+    /// Both drop-down arms and not the Win32 one, which is the other widening's: a tracked popup is a
+    /// menu mode Windows reports outright, and <c>MenuTests</c> reads it there against a menu this
+    /// process owns.
+    /// </para>
+    /// </summary>
+    /// <param name="kind">Which menu the launched fixture answers with.</param>
+    private static void TheDeskIsOnTheMenusOwnThread(string kind) =>
+        WithTheMenuUp(kind, (pid, menu) =>
+        {
+            var window = Waits.Until(
+                "draw",
+                $"the verb opened a menu and the launched tray ({pid}) owns no window",
+                () => TopLevelWindows.Largest(pid));
+
+            // A desk that went to somebody else entirely is the machine, and this class has no
+            // business failing over one. What is left after it is the arrangement being asserted on:
+            // the menu's own process holds the desk, which is the state a tray leaves and the state
+            // the ordinary reading refuses.
+            var holding = Foreground.Check(window.Handle);
+            if (holding.State is ForegroundState.Elsewhere or ForegroundState.Nobody
+                && BusyDesk.Excused(holding.AsPrecondition()))
+            {
+                return;
+            }
+
+            Assert.True(
+                Menu.RaisedFrom(window.Handle) != 0,
+                $"the menu {window} is standing and the desk is not on its thread: {holding.Sentence()}"
+                    + $"{Environment.NewLine}{menu}");
+        });
 
     /// <summary>
     /// WW453's claim: <c>open submenu</c> reaches an entry of a menu this run did not put up.
@@ -137,6 +230,12 @@ public sealed class AdoptedTrayTests : IDisposable
     /// claim: a menu opens highlighting its first entry, so naming any other one is what asks whether
     /// the step walked there before it pressed Right. WW83 measured that from the other side, where a
     /// step naming the fourth entry expanded the first.
+    /// </para>
+    /// <para>
+    /// WW457: driven against the two arms whose menus a keyboard can work, which is the Win32 popup
+    /// and the drop-down with a real tray's lifetime. The third — a drop-down held open for the
+    /// harness — takes no key at all, and the case below says so rather than claiming a submenu from
+    /// a menu that cannot open one.
     /// </para>
     /// </summary>
     /// <param name="kind">Which menu the launched fixture answers with.</param>
@@ -175,12 +274,12 @@ public sealed class AdoptedTrayTests : IDisposable
             // And the desk door stays open for what it is really for: a foreground Windows would not
             // grant is a fact about the machine, and this class has no business failing over one.
             //
-            // WW457 is what goes through it today, and it is worth saying so here rather than leaving
-            // a reader to find an excuse in the ledger and wonder. Both kinds are excused on the
-            // guest and on two opposite absences: the drop-down on the overflow flyout holding the
-            // foreground, which the search opened to find the icon, and the Win32 popup on its own
-            // owner holding it — which is the window `TrackPopupMenu` requires it on. So what this
-            // case proves today is the half above, and the half below is what WW457 is for.
+            // WW457 is what used to go through it, and it is worth saying so here rather than
+            // leaving a reader to wonder why the door is still open. Both kinds were excused on the
+            // guest and on two opposite absences — the Win32 popup on the owner `TrackPopupMenu`
+            // requires the foreground on, the drop-down on the window it raises itself from — and
+            // both are arrangements a menu key reaches the menu through, which `Menu` now reads.
+            // What is left behind the door is the desk this run never owned at all.
             if (acted.Needed is { Satisfied: false } refused && BusyDesk.Excused(refused))
                 return;
 
@@ -196,9 +295,14 @@ public sealed class AdoptedTrayTests : IDisposable
             var under = Locator.Parse("""MenuItem[name="winwright one"]""");
             var showing = Resolve.Until(desktop, under, Timeouts.Defaults["resolve"], pollMs: 50);
 
+            // The highlight beside the act, because the two reds are different repairs. A menu the
+            // engine cannot read is a walk that pressed Right at whichever entry the menu opened on;
+            // a menu it can read, with nothing under the entry, is the gesture itself.
             Assert.True(
                 showing.Found,
                 $"the submenu opened and holds nothing a locator reaches: {acted}"
+                    + $"{Environment.NewLine}the menu reads as highlighting "
+                    + $"{Menu.Highlighted(subject.Window) ?? "nothing"}"
                     + $"{Environment.NewLine}{showing.Miss}");
         });
 

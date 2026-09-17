@@ -375,6 +375,9 @@ internal static class Cooperating
         new("Menu.MenuOwner", Cooperation.None, false,
             "which window is working a menu right now, read from the desk's own input state — the fact "
                 + "that tells a tracked popup's owner holding the foreground from an intruder holding it"),
+        new("Menu.RaisedFrom", Cooperation.None, false,
+            "the same fact for the kind Windows says nothing about: which window of the menu's own "
+                + "thread holds the desk, which is what a drop-down raised for a tray icon leaves behind"),
     ]);
 
     /// <summary>The verbs a bare window is enough for, which is what the run drives.</summary>

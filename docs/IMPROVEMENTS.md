@@ -58,28 +58,50 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW457 the foreground a tray menu actually has
+### §WW463 the read-back a submenu leaves behind
 
-`Menu.Expand` asks that the foreground belong to the window the key is going to, and for
-a window that is right: a key lands on whatever holds the foreground, so sending one
-anywhere else is sending it to somebody else.
+WW457 made `open submenu` work against a tray's drop-down, and the walk that gets there
+is the half that was measured: the menu's own selected entry, read out of its subtree,
+is what let the walk reach the second entry of three before Right was pressed.
 
-A tray menu never has it. WW453 drove the verb against a launched tray with a submenu
-and the guest excused both kinds, on two absences and neither a busy desk. The drop-down
-arm read `the foreground belongs to explorer 'Janela de estouro da bandeja do sistema'`
-— the overflow flyout, which the search opened to find the icon and which is still up.
-The Win32 arm read `another window of the same process owns it: 'winwright tray owner'`,
-the window `TrackPopupMenu` requires the foreground on before it will track.
+What nothing measured is the reading taken after Right. `Menu.Expand` asks that same
+subtree for the entry highlighted now, and a submenu is a window of its own — so whether
+its entry is a descendant of the menu that opened it, or a second top-level menu the
+reading never looks at, decides what the verb hands back. Where it is not seen, the
+parent entry is still selected, the walk reports that it did not reach, and the element
+a step compares against is the entry above the one it expanded.
 
-The arms are opposite and both are correct behaviour. The second is too strict: a
-tracked popup and its owner are one menu mode on one thread, and a key sent at the owner
-reaches the menu. The first is a truer refusal — a synthesised key would land on the
-flyout — and what it exposes is that this engine opens the flyout to find an icon and
-then cannot work the menu it opened.
+The case that would settle it exists in every other form. `AdoptedTrayTests` drives both
+kinds and asserts against the desktop, which answers whether the submenu opened and not
+what the act read. What is owed is the assertion beside it — the act's own read-back —
+and, where that stops at the parent, a reading scoped to the menus this process owns
+rather than to the one window the key was sent at.
 
-What this wants is a reading that knows what a menu is: the owner of a tracked popup
-counts, and a flyout the act opened is a state it should leave before pressing anything.
-Both are measurable now, which they were not before WW451.
+That is WW83's shape from the inside: a step naming an entry, answered about a different
+one.
+
+### §WW464 the locator the reference still argues against
+
+The reference's paragraph on `open submenu` ends on the contract the verb had before
+WW83: the locator names any element of the window, because a menu popup is its own
+window and its entries are not reliably addressable. The verb's own source says the
+opposite in the paragraph WW83 added — they are addressable, a popup is a top-level
+`Menu` window of its own, and the walk goes to the entry the locator names before Right
+is pressed.
+
+What the stale sentence costs is not confusion, it is a wrong step. An author who reads
+it names the window, or any element in it; the walk then has no entry to walk to, and
+Right expands whichever entry the menu opened on. That is WW83's own defect described
+from the author's side: a step naming the fourth entry expanded the first, and the
+answer read as a submenu that had opened.
+
+So the correction is one sentence and its consequence rather than a rewrite: the locator
+names the entry whose submenu is wanted, and the walk reaches it first. The sentence
+beside it — that what comes back is the entry the menu landed on rather than what the
+locator matched — is still right, and is what makes the pair readable.
+
+Found while shipping WW457, which drove the verb against a launched tray from both sides
+at once: the case writes the locator the reference argues against, and passes.
 
 ## Block E — Capture — the picture that proves what it photographed
 
