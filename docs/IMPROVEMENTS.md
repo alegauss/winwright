@@ -4,29 +4,30 @@
 
 ### §WW462 the verbs the desk sweep cannot see
 
-WW208 built this reading because a list typed by hand meant "a reading the list had
-never heard of was one no case was ever asked to excuse". The sweep it replaced that
-list with has the same hole one level down.
+WW208 built this reading because a hand-typed list meant "a reading the list had never
+heard of was one no case was ever asked to excuse". The sweep that replaced it has the
+same hole one level down: it keys on eight primitives and walks transitively, but within
+one file. The scoping is deliberate — public names were once kept in one set across the
+engine, so a private helper sharing a name with another file's public verb read as
+public.
 
-It keys on eight primitive names, matched in a member's body, and then walks
-transitively — but only within one file. That scoping is deliberate and the code says
-why: public names were once kept in one set across the engine, so a private helper
-sharing a name with somebody else's public verb was read as public. A sweep whose answer
-depends on which file it read first is not a reading.
+What it costs is a verb reaching the desk through another file. `Menu.Enter`,
+`Menu.Expand` and `Menu.To` ask `Foreground.Check`, which lives in `Foreground.cs`;
+cases excuse them through `MenuWalk.AsAssertion`, and the rule has never known they
+exist.
 
-What it costs is a verb that reaches the desk through a call into another file.
-`Menu.Enter`, `Menu.Expand` and `Menu.To` each ask `Foreground.Check`, which lives in
-`Foreground.cs` and asks `GetForegroundWindow`. They turn on the foreground as squarely
-as anything in the list, cases excuse them through `MenuWalk.AsAssertion`, and the rule
-has never known they exist.
+Measured before building, and the repair is larger than the walk. Crossing files on a
+qualified name takes the sweep from 24 public verbs to 46, and 19 are in neither
+catalogue: the synthesised acts, the menu walk, and the composites `Suite.Run`,
+`CaseRun.Of`, `Preamble.Of` and `CaptureReceipt.Taking`. Each needs a judgement, and
+every one filed under `DeskAsks.Calls` then asks each case calling it for an excuse or a
+written reason — `Suite.Run` alone is called at 32 sites in 15 files.
 
-Found by accident, which is the part worth keeping: WW457 put a primitive directly in
-`Menu.cs` for a moment and the three verbs appeared. Taking the primitive back out — the
-engine has a named reading and a verb should use it — made them vanish again.
-
-The repair is a walk that crosses files without losing the qualification that keeps it
-honest: `Owner.Member` rather than `Member`. Until then, what the rule covers is
-narrower than it reads.
+Two things the qualification needs first. `SourceMember.Owner` is the file and not the
+type, so `Throughout.cs` keys `RegionThroughout.Around` — which `DeskAsks` spells by its
+type — as `Throughout.Around`; and `Checkout.Owner` reads `class` and not `record`, so
+the declaring type is unreachable until it does. The match must also be bounded:
+`Menu.Enter(` sits inside `TrayMenu.Enter(`.
 
 ## Block B — Attach, launch, and leave nothing behind
 
