@@ -243,8 +243,8 @@ public sealed class CaptureRouteTests
         {
             // Entering the bar is not enough: the popup window only exists once an entry is
             // expanded, and that popup is the thing no render can reach.
-            Menu.Enter(dialog.Frame);
-            Menu.To(dialog.Frame, "New");
+            Menu.Enter(dialog.Frame, DeskWait.Once);
+            Menu.To(dialog.Frame, "New", DeskWait.Once);
 
             using var self = Process.GetCurrentProcess();
             var windows = TopLevelWindows.OfProcess(self.Id, smallest: 0);

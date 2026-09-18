@@ -1,4 +1,5 @@
 using Winwright.Acting;
+using Winwright.Windowing;
 
 using Xunit;
 
@@ -31,13 +32,13 @@ public sealed class RetryOnAMenuTests : IDisposable
     {
         // WW172: everything after this needs the desk, so a menu that was never entered has
         // nothing to say about what a retry took.
-        if (BusyDesk.Excused(Menu.Enter(dialog.Frame).AsAssertion("the menu bar is entered")))
+        if (BusyDesk.Excused(Menu.Enter(dialog.Frame, DeskWait.Once).AsAssertion("the menu bar is entered")))
             return;
 
-        Menu.To(dialog.Frame, "Recent");
+        Menu.To(dialog.Frame, "Recent", DeskWait.Once);
 
         var attempted = Retry.Bounded(
-            () => Menu.Expand(dialog.Frame, settleMs: 800, pollMs: 20),
+            () => Menu.Expand(dialog.Frame, DeskWait.Once, settleMs: 800, pollMs: 20),
             walk => walk.Reached);
 
         Assert.True(attempted.Succeeded);
@@ -51,15 +52,15 @@ public sealed class RetryOnAMenuTests : IDisposable
     [Fact]
     public void An_entry_that_never_expands_still_goes_red_after_the_cap()
     {
-        if (BusyDesk.Excused(Menu.Enter(dialog.Frame).AsAssertion("the menu bar is entered")))
+        if (BusyDesk.Excused(Menu.Enter(dialog.Frame, DeskWait.Once).AsAssertion("the menu bar is entered")))
             return;
 
-        Menu.To(dialog.Frame, "New");
+        Menu.To(dialog.Frame, "New", DeskWait.Once);
 
         // "New" has no submenu, so Right walks on to the next top-level menu instead. The point
         // is what happens at the end of the attempts: it is red, and it says how many it had.
         var attempted = Retry.Bounded(
-            () => Menu.Expand(dialog.Frame, settleMs: 300, pollMs: 20),
+            () => Menu.Expand(dialog.Frame, DeskWait.Once, settleMs: 300, pollMs: 20),
             walk => walk.Highlighted == "one.txt",
             cap: 2);
 

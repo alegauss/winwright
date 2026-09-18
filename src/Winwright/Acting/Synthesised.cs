@@ -146,7 +146,9 @@ public static class Synthesised
                 Precondition.Absent(Windowing.Desk.ForegroundToTake, "this element is in no window a key could be sent to"));
         }
 
-        var pressed = Traversal.Press(window, key, subject.ActMs, subject.PollMs);
+        var pressed = Traversal.Press(
+            window, key, Windowing.DeskWait.Of(subject.DeadlineMs, subject.PollMs), subject.ActMs, subject.PollMs);
+
         return Landed(subject, $"press {key}", ByKeyboard, before.Facts, before, pressed.Foreground);
     }
 
@@ -190,7 +192,13 @@ public static class Synthesised
         }
 
         var top = Windowing.Win32.GetAncestor(subject.Window, Windowing.Win32.GaRoot);
-        var foreground = Windowing.Foreground.Check(top).AsPrecondition();
+
+        // WW470. Waited for rather than read once: a window that is still coming forward is not a
+        // desk somebody else holds, and one look cannot tell them apart.
+        var foreground = Windowing.Foreground
+            .Waited(top, Windowing.DeskWait.Of(subject.DeadlineMs, subject.PollMs))
+            .AsPrecondition();
+
         if (!foreground.Satisfied)
             return Landed(subject, named, ByKeyboard, before.Facts, before, foreground);
 
@@ -265,13 +273,28 @@ public static class Synthesised
         // it: the old contract took any element of the window the menu belongs to, and a walk looking
         // for a name no entry has would press Down at every entry there is and then expand whichever
         // one it stopped on. Skipped too where the locator named what is already highlighted.
+        // WW470. The walk and the expansion are one gesture, so the desk is waited for once: the
+        // second call would otherwise wait the whole budget out again on the one desk that never
+        // arrives, and spend two of them to say what the first already said.
+        var desk = Windowing.DeskWait.Of(subject.DeadlineMs, subject.PollMs);
+
         if (before.Facts is { ControlType: "MenuItem", Says: { } wanted }
             && Menu.Highlighted(window) != wanted)
         {
-            Menu.To(window, wanted, subject.ActMs, subject.PollMs);
+            var walked = Menu.To(window, wanted, desk, subject.ActMs, subject.PollMs);
+
+            // A walk the desk refused never reached the menu, so Right would be pressed at whatever
+            // did have it. Handed back as the hole it is rather than pressed on from.
+            if (!walked.Foreground.Satisfied)
+            {
+                return Landed(
+                    subject, ExpandsMenu, ByKeyboard, before.Facts, before, walked.Foreground);
+            }
+
+            desk = Windowing.DeskWait.Once;
         }
 
-        var walk = Menu.Expand(window, subject.ActMs, subject.PollMs);
+        var walk = Menu.Expand(window, desk, subject.ActMs, subject.PollMs);
 
         // What the menu landed on where it landed anywhere, and what the locator matched otherwise.
         // A walk the desk refused read nothing, so its own reading is not one to hand back.

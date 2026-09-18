@@ -173,6 +173,9 @@ internal static class DeskAsks
             "the same reading twice, either side of a take"),
         new("Foreground.Check(", Winwright.Windowing.Foreground.PreconditionName,
             "whether a named window holds the keyboard, which on a locked session nothing does"),
+        new("Foreground.Waited(", Winwright.Windowing.Foreground.PreconditionName,
+            "the same question waited out, which WW470 gave the acts — a desk that never comes is "
+                + "the same absence arrived at later, so a case asking this owes the same excuse"),
 
         // --- the shell, which is another process and always there until it is not ------------------
         new("NotificationArea.Tray(", Winwright.Acting.TraySearch.PreconditionName,
@@ -346,6 +349,15 @@ internal static class DeskAsks
             Unaffected.Shape,
             "the window is created hidden and never activated, so it cannot be the foreground on any "
                 + "desk — what is asserted is a negative that holds whoever does hold it"),
+        new("ForegroundTests.Once_is_the_single_look_this_type_has_always_taken",
+            Unaffected.Shape,
+            "WW470. The same hidden window, and the same negative: whoever holds the desk, this one "
+                + "does not — what is asserted is that asking with `Once` cost no wait at all"),
+        new("ForegroundTests.A_desk_that_never_comes_still_holes_and_the_absence_says_how_long_it_waited",
+            Unaffected.Shape,
+            "WW470. The hidden window again, so the wait is certain to run out whoever is at the "
+                + "machine — which is the arm this case is about: a wait that turned that hole into "
+                + "a pass would be the defect, and the absence says how long it stood"),
         new("NotificationAreaTests.Whether_this_desk_places_icons_at_all_is_a_different_question_from_whether_one_is_there",
             Unaffected.Shape,
             "WW217. The reading itself is what this case is about, and both arms are written out: a "

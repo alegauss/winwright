@@ -1,5 +1,6 @@
 using System.Diagnostics;
 
+using Winwright.Locating;
 using Winwright.Verdicts;
 
 namespace Winwright.Windowing;
@@ -47,6 +48,43 @@ public readonly record struct WindowOwner(nint Window, int Pid, string Process, 
 }
 
 /// <summary>
+/// How long an act waits for the desk to reach the window under test, and how often it looks
+/// again while it does. WW470.
+/// <para>
+/// A type rather than two more integers, because every call that takes one already carries a
+/// settling deadline and a poll of its own — and four bare numbers in a row is a pair a caller
+/// binds to the wrong parameters with nothing to say so.
+/// </para>
+/// <para>
+/// Required wherever it is taken, and never defaulted, for the reason <see cref="Attempt" /> gives
+/// about its own deadline: a wait nobody chose is one nobody can price. <see cref="Once" /> is how
+/// a caller says it wants the single look, by name rather than by a zero.
+/// </para>
+/// </summary>
+/// <param name="DeadlineMs">How long to wait for it. Zero is a single look.</param>
+/// <param name="PollMs">How often to look again while waiting.</param>
+public readonly record struct DeskWait(int DeadlineMs, int PollMs)
+{
+    /// <summary>One look and no wait, which is what a reading about this instant asks for.</summary>
+    public static DeskWait Once => default;
+
+    /// <summary>Whether this waits at all, or is <see cref="Once" />.</summary>
+    public bool Waits => DeadlineMs > 0;
+
+    /// <summary>A wait of <paramref name="deadlineMs"/>, looking again every <paramref name="pollMs"/>.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Where either number is not positive. A deadline of nothing is <see cref="Once" />, reached
+    /// by its name.
+    /// </exception>
+    public static DeskWait Of(int deadlineMs, int pollMs)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(deadlineMs);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pollMs);
+        return new DeskWait(deadlineMs, pollMs);
+    }
+}
+
+/// <summary>
 /// Whether the window a step is about to type into is the one that will receive it.
 /// <para>
 /// Windows refuses the foreground to a process that does not already own it, so a run started
@@ -55,9 +93,23 @@ public readonly record struct WindowOwner(nint Window, int Pid, string Process, 
 /// of stashing the code under test.
 /// </para>
 /// <para>
-/// It is asked once and answered as a hole with the intruder named, and there is deliberately no
-/// wait, no poll and no retry on this type — a case that passes on the second attempt cannot tell
-/// a busy desktop from a broken build, which is the whole reason those three runs disagreed.
+/// It is answered as a hole with the intruder named, and it is never retried: a case that passes on
+/// the second attempt cannot tell a busy desktop from a broken build, which is the whole reason
+/// those three runs disagreed.
+/// </para>
+/// <para>
+/// WW470. Waiting is not retrying, and this type held them to be one rule until a window that was
+/// still coming forward was reported as a desk somebody else held. Measured in the guest: the
+/// desktop had it, <c>ClaudeTray 'Settings'</c> took it at 1453ms, and the engine looked once at
+/// 69ms — a true sentence about that instant and a false one about the run. So <see cref="Waited"
+/// /> polls until the window has it, over the resolve budget, which is what a read waits for,
+/// rather than the attempt cap, which is about a flaky act.
+/// </para>
+/// <para>
+/// What the wait cannot do is turn a hole into a pass. The act still runs only where the desk
+/// belongs to the window under test at the moment it runs, which is a stronger claim than one look
+/// made rather than a weaker one — and a desk genuinely held still holes, later, and saying how
+/// long it waited.
 /// </para>
 /// </summary>
 public sealed record Foreground
@@ -81,6 +133,12 @@ public sealed record Foreground
     /// <summary>The window the step was about to type into.</summary>
     public WindowOwner Wanted { get; }
 
+    /// <summary>
+    /// How long this reading waited for the desk before answering. Zero where it looked once, which
+    /// is every reading but <see cref="Waited" />'s.
+    /// </summary>
+    public int WaitedMs { get; private init; }
+
     /// <summary>Whether synthesized input would land where it was meant to.</summary>
     public bool Ours => State == ForegroundState.Ours;
 
@@ -88,10 +146,41 @@ public sealed record Foreground
     public static WindowOwner Now() => Describe(Win32.GetForegroundWindow());
 
     /// <summary>
-    /// Ask, once, whether <paramref name="window"/> has the foreground. There is no overload that
-    /// waits: see the type's own note on why retrying is the defect rather than the fix.
+    /// Ask, once, whether <paramref name="window"/> has the foreground. A reading about this
+    /// instant, which is what everything asking who holds the desk <em>now</em> wants.
     /// </summary>
     public static Foreground Check(nint window) => Between(Now(), Describe(window));
+
+    /// <summary>
+    /// The same question, waiting for the answer to become yes. WW470.
+    /// <para>
+    /// The reading handed back is the last one taken, so a wait that ran out answers about the
+    /// moment it gave up rather than about the moment it started — and it carries how long that
+    /// was, which is the difference between a desk somebody holds and a window still arriving.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The window an act is about to be sent at.</param>
+    /// <param name="wait">How long to wait, or <see cref="DeskWait.Once" /> for a single look.</param>
+    public static Foreground Waited(nint window, DeskWait wait)
+    {
+        if (!wait.Waits)
+            return Check(window);
+
+        // False while anything but the window under test has it, which is the whole of what this
+        // waits out. The reading is kept from inside the look rather than taken again after it: one
+        // more Check below would be a different instant from the one that ended the wait.
+        Foreground? held = null;
+        var waited = Attempt.UntilTrue(
+            () =>
+            {
+                held = Check(window);
+                return held.Ours;
+            },
+            wait.DeadlineMs,
+            wait.PollMs);
+
+        return held! with { WaitedMs = waited.WaitedMs };
+    }
 
     /// <summary>The same judgement over two sightings, which is the rule stated in one place.</summary>
     public static Foreground Between(WindowOwner holder, WindowOwner wanted)
@@ -130,17 +219,27 @@ public sealed record Foreground
     {
         ForegroundState.Ours => Precondition.Met(PreconditionName),
         ForegroundState.Nobody => Precondition.Absent(
-            PreconditionName, $"nothing owns the foreground, and the window under test is {Wanted}"),
+            PreconditionName, $"nothing owns the foreground, and the window under test is {Wanted}{Stood}"),
         ForegroundState.SameProcess => Precondition.Absent(
-            PreconditionName, $"another window of the same process owns it: {Holder}, and the window under test is {Wanted}"),
+            PreconditionName, $"another window of the same process owns it: {Holder}, and the window under test is {Wanted}{Stood}"),
         _ => Precondition.Absent(
-            PreconditionName, $"the foreground belongs to {Holder}, and the window under test is {Wanted}"),
+            PreconditionName, $"the foreground belongs to {Holder}, and the window under test is {Wanted}{Stood}"),
     };
 
     /// <summary>Who had the keyboard when this was asked, said either way.</summary>
     public string Sentence() => Ours
-        ? $"the foreground belongs to the window under test, {Wanted}."
-        : $"the foreground belongs to {Holder}, and the window under test is {Wanted}.";
+        ? $"the foreground belongs to the window under test, {Wanted}{Took}."
+        : $"the foreground belongs to {Holder}, and the window under test is {Wanted}{Stood}.";
+
+    /// <summary>
+    /// What a wait that ran out adds to an absence, and nothing at all where nothing waited. WW470:
+    /// a desk held for the whole budget is a different fact from a desk read once, and a hole that
+    /// did not say which is one a reader has to guess at.
+    /// </summary>
+    private string Stood => WaitedMs > 0 ? $", and that was still true {WaitedMs}ms later" : "";
+
+    /// <summary>The other half of the same sentence: how long the window took to come forward.</summary>
+    private string Took => WaitedMs > 0 ? $", which took it after {WaitedMs}ms" : "";
 
     private static WindowOwner Describe(nint window)
     {

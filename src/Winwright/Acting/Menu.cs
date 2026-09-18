@@ -223,9 +223,16 @@ public static class Menu
     }
 
     /// <summary>Enter the menu bar, the way F10 does for a keyboard user.</summary>
-    public static MenuWalk Enter(nint window, int settleMs = 2000, int pollMs = 25)
+    /// <param name="window">The window whose menu bar F10 is sent at.</param>
+    /// <param name="desk">
+    /// How long to wait for that window to hold the foreground, or <see cref="DeskWait.Once" />.
+    /// WW470.
+    /// </param>
+    /// <param name="settleMs">How long to wait for the highlight to move, which says the key landed.</param>
+    /// <param name="pollMs">How often to look again while waiting for it.</param>
+    public static MenuWalk Enter(nint window, DeskWait desk, int settleMs = 2000, int pollMs = 25)
     {
-        var foreground = Reaches(window);
+        var foreground = Reaches(window, desk);
         if (!foreground.Satisfied)
             return new MenuWalk("enter the menu", null, Highlighted(window), [], foreground, Focus.In(window));
 
@@ -255,11 +262,19 @@ public static class Menu
     /// first, and the walk stops when an entry comes round again rather than when a counter says
     /// so — a menu that has been walked once has shown everything it holds.
     /// </summary>
-    public static MenuWalk To(nint window, string entry, int settleMs = 2000, int pollMs = 25)
+    /// <param name="window">The window whose open menu is walked.</param>
+    /// <param name="entry">The entry to stop on.</param>
+    /// <param name="desk">
+    /// How long to wait for that window to hold the foreground, or <see cref="DeskWait.Once" />.
+    /// WW470.
+    /// </param>
+    /// <param name="settleMs">How long to wait for the highlight to move, which says the key landed.</param>
+    /// <param name="pollMs">How often to look again while waiting for it.</param>
+    public static MenuWalk To(nint window, string entry, DeskWait desk, int settleMs = 2000, int pollMs = 25)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entry);
 
-        var foreground = Reaches(window);
+        var foreground = Reaches(window, desk);
         if (!foreground.Satisfied)
             return new MenuWalk("walk to", entry, Highlighted(window), [], foreground, Focus.In(window));
 
@@ -303,9 +318,16 @@ public static class Menu
     /// is not an error here: the deadline passes, the highlight has not moved, and the answer says
     /// which entry it was.
     /// </summary>
-    public static MenuWalk Expand(nint window, int settleMs = 2000, int pollMs = 25)
+    /// <param name="window">The window whose highlighted entry is expanded.</param>
+    /// <param name="desk">
+    /// How long to wait for that window to hold the foreground, or <see cref="DeskWait.Once" />.
+    /// WW470.
+    /// </param>
+    /// <param name="settleMs">How long to wait for the submenu to arrive.</param>
+    /// <param name="pollMs">How often to look again while waiting for it.</param>
+    public static MenuWalk Expand(nint window, DeskWait desk, int settleMs = 2000, int pollMs = 25)
     {
-        var foreground = Reaches(window);
+        var foreground = Reaches(window, desk);
         var opening = Highlighted(window);
         if (!foreground.Satisfied)
             return new MenuWalk("expand", opening, opening, [], foreground, Focus.In(window));
@@ -483,16 +505,31 @@ public static class Menu
     /// (pid 6092) (untitled)` — two untitled windows of one application, which is a drop-down raised
     /// from its own hidden window described from outside.
     /// </para>
+    /// <para>
+    /// WW470. The widenings are asked before the wait and again after it, and the order is the whole
+    /// of what keeps a menu walk affordable: a drop-down being worked is the case they exist for, so
+    /// a wait in front of them would spend the resolve budget on every submenu step before arriving
+    /// at an answer that was already true — twice per step, since a walk and the expansion after it
+    /// are two calls. Asked again afterwards because the wait is time in which a menu can be raised.
+    /// </para>
     /// </summary>
     /// <param name="window">The menu a key is about to be sent at.</param>
-    private static Precondition Reaches(nint window)
+    /// <param name="desk">How long to wait for it to come forward before concluding. WW470.</param>
+    private static Precondition Reaches(nint window, DeskWait desk)
     {
-        var foreground = Foreground.Check(Top(window)).AsPrecondition();
+        if (Widened(window))
+            return Precondition.Met(Foreground.PreconditionName);
+
+        var foreground = Foreground.Waited(Top(window), desk).AsPrecondition();
         if (foreground.Satisfied)
             return foreground;
 
-        return MenuOwner(window) != 0 || RaisedFrom(window) != 0
-            ? Precondition.Met(Foreground.PreconditionName)
-            : foreground;
+        return Widened(window) ? Precondition.Met(Foreground.PreconditionName) : foreground;
     }
+
+    /// <summary>
+    /// Whether the desk says a menu is up and this is it, which is the reading WW457 added beside
+    /// the ordinary one.
+    /// </summary>
+    private static bool Widened(nint window) => MenuOwner(window) != 0 || RaisedFrom(window) != 0;
 }

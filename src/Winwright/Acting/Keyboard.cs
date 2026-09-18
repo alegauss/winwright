@@ -220,7 +220,12 @@ public static class Keyboard
         var before = reading.Values.Value ?? reading.Values.Text;
         var readOnly = reading.Values.IsReadOnly ?? false;
 
-        var foreground = Foreground.Check(admitted.Window).AsPrecondition();
+        // WW470. Waited for rather than read once: a window that is still coming forward is not a
+        // desk somebody else holds, and one look cannot tell them apart.
+        var foreground = Foreground
+            .Waited(admitted.Window, DeskWait.Of(subject.DeadlineMs, subject.PollMs))
+            .AsPrecondition();
+
         if (!foreground.Satisfied)
             return new TypedResult(act, facts, foreground, Precondition.Met(FocusPreconditionName), before, before, readOnly);
 

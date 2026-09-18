@@ -108,14 +108,80 @@ public sealed class ForegroundTests : IDisposable
     }
 
     [Fact]
-    public void There_is_no_way_to_wait_for_it_because_retrying_is_the_defect()
+    public void Waiting_for_the_desk_is_offered_and_retrying_the_act_is_not()
     {
-        var waiting = typeof(Foreground).GetMethods()
-            .Where(method => method.Name.Contains("Wait", StringComparison.OrdinalIgnoreCase)
-                || method.Name.Contains("Retry", StringComparison.OrdinalIgnoreCase)
-                || method.Name.Contains("Poll", StringComparison.OrdinalIgnoreCase));
+        // WW470 turned half of this over and the half it left is the load-bearing one. The rule
+        // used to be one sentence — no wait, no poll, no retry — and a window that was still coming
+        // forward was reported as a desk somebody else held because of it. A precondition polled
+        // towards arriving is a read; an act sent twice is the defect, and this type still offers
+        // nobody a second send.
+        var named = typeof(Foreground).GetMethods().Select(method => method.Name).ToList();
 
-        Assert.Empty(waiting);
+        Assert.Contains("Waited", named, StringComparer.Ordinal);
+        Assert.DoesNotContain(named, name => name.Contains("Retry", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Once_is_the_single_look_this_type_has_always_taken()
+    {
+        var mine = CreateHidden("winwright statistics");
+
+        var looked = Foreground.Waited(mine, DeskWait.Once);
+
+        Assert.NotEqual(ForegroundState.Ours, looked.State);
+        Assert.Equal(0, looked.WaitedMs);
+        Assert.DoesNotContain("later", looked.AsPrecondition().Absence, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_desk_that_never_comes_still_holes_and_the_absence_says_how_long_it_waited()
+    {
+        var mine = CreateHidden("winwright statistics");
+
+        var waited = Foreground.Waited(mine, DeskWait.Of(200, 25));
+
+        // WW470's other half. A wait that turned a hole into a pass would be the thing this
+        // project exists to prevent, so what is asserted is that it did not — and that the sentence
+        // now says which of the two absences this is.
+        Assert.NotEqual(ForegroundState.Ours, waited.State);
+        Assert.False(waited.AsPrecondition().Satisfied);
+        Assert.True(
+            waited.WaitedMs >= 200,
+            $"the wait gave up after {waited.WaitedMs}ms, which is less than the 200ms it was given");
+
+        Assert.Contains($"{waited.WaitedMs}ms later", waited.AsPrecondition().Absence, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_window_still_coming_forward_is_waited_for_rather_than_named_an_intruder()
+    {
+        using var arriving = PumpedDialog.Open("winwright late arrival");
+        using var holding = PumpedDialog.Open("winwright desk holder");
+
+        // The second window opened onto the desk, so at the moment the wait starts the first does
+        // not have it — which is the whole of what the measurement in §WW470 describes.
+        holding.BringToFront();
+        if (BusyDesk.Excused(Foreground.Check(holding.Frame).AsPrecondition()))
+            return;
+
+        var late = new Thread(() =>
+        {
+            Thread.Sleep(300);
+            arriving.BringToFront();
+        });
+
+        late.Start();
+        var waited = Foreground.Waited(arriving.Frame, DeskWait.Of(5000, 25));
+        late.Join();
+
+        // A pass with nothing waited would be this case observing a desk that was already right,
+        // which proves the old behaviour rather than the new one.
+        Assert.True(
+            waited.WaitedMs > 0,
+            $"the window held the desk on the first look, so nothing about waiting was measured: {waited.Sentence()}");
+
+        Assert.Equal(ForegroundState.Ours, waited.State);
+        Assert.True(waited.AsPrecondition().Satisfied);
     }
 
     [Fact]

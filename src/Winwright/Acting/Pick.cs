@@ -379,8 +379,12 @@ public static class Pick
         if (!byKeyboard && TryThePattern(items[index].Element, out refused))
             return new PickResult(wanted, facts, PickRoute.Pattern, [wanted], Selected(element), null, met);
 
-        // The keyboard route needs the desktop; the pattern one never did.
-        var foreground = Windowing.Foreground.Check(admitted.Window).AsPrecondition();
+        // The keyboard route needs the desktop; the pattern one never did. WW470: waited for rather
+        // than read once, since a window still coming forward is not a desk somebody else holds.
+        var foreground = Windowing.Foreground
+            .Waited(admitted.Window, Windowing.DeskWait.Of(container.DeadlineMs, container.PollMs))
+            .AsPrecondition();
+
         if (!foreground.Satisfied)
             return new PickResult(wanted, facts, PickRoute.Keyboard, [], Selected(element), refused, foreground);
 

@@ -60,7 +60,10 @@ says is that nothing answered.
 **A pattern act needs no foreground.** `Act.Invoke`, `Act.Toggle`, `Act.SetValue` ask the control
 through its own accessibility peer. Only the verbs that synthesise input — `Pointer`, `Keyboard`,
 `Traversal`, `Menu` — need the window in front, and those are the ones another person at the same
-desk can break. If a check went red on foreground contention, that is the desk and not the code.
+desk can break. The window is **waited for** over `timeouts.resolve` before an act concludes it does
+not have the desk, so an application still coming forward after a launch is not reported as a desk
+somebody else holds — and one genuinely held still comes back as a hole, saying how long it waited.
+If a check went red on foreground contention, that is the desk and not the code.
 
 **A check that could not run is a third verdict and never a pass.** A desk with no interactive
 session, no display or no automation cannot observe anything, so the run says *hole* rather than

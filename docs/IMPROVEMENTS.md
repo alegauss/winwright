@@ -28,6 +28,54 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
+### §WW471 A desk the preamble missed and every act had
+
+WW470 made every act poll for the desk over the resolve budget and left the one reading
+taken before any act runs exactly where it was: the preamble asks `Foreground.Check`
+once, at the moment the run starts.
+
+That moment is the one WW470 measured as wrong. A window the run launched is often still
+coming forward — 1453ms in the case that task was filed over — so the preamble is read
+while the desktop still holds the foreground and prints `absent the foreground belongs
+to the window under test` about a run in which every act then owned it. A reader is told
+the run was degraded by a desk it in fact had.
+
+Waiting here too is not the fix. A preamble is a snapshot of the machine the run found,
+and its neighbours — the running binary, the staleness — are deliberately about that
+instant. What is wanted is the distinction: a foreground the window never got is a fact
+about the desk, and one it got a second later is a fact about launching.
+
+The cheapest shape that says so is to read it again at the end. `Preamble.Closing`
+already pairs a before with an after for the fingerprint store, so the foreground can be
+the second pair — absent at the start and held at the close is a window that arrived,
+absent at both is a desk somebody else had all along. Neither reading waits, and the
+pair says which happened.
+
+### §WW472 A taskbar that held the desk for two whole runs
+
+Measured twice while shipping WW470, at 24 and 30 minutes a time. The guest's taskbar
+held the foreground before either run started; `desk-probe.ps1` classified it `shell`,
+which `desk-clear.ps1` deliberately never touches — WW330's rule that a run may not put
+the shell away — and the runner printed *the first case to take the foreground clears
+it* and went on.
+
+It did not clear. `PumpedDialog.TakeTheDesktop` polls `SetForegroundWindow` and Windows
+refused it for the whole of both runs, so 136 and then 137 checks were excused where a
+healthy run excuses nine, and five cases that cannot excuse a lost desk went red about
+nothing. The exit code says the tree is broken; the same suite passed 2187 of 2187 the
+moment the shell was restarted from the host.
+
+The premise is wrong, not the refusal to touch the shell. A `Shell_TrayWnd` merely
+holding the foreground on an empty desktop is ordinary and clears on the first window
+opened. One that is keyboard-*activated* — this reading also had `Button #StartButton`
+holding the focus, and no chevron on the taskbar — is a stuck foreground lock nothing
+inside the guest clears.
+
+So tell the two apart and let only the second stop the run: read the focus beside the
+foreground, and where the shell holds both, refuse before the tree is carried. Half an
+hour spent reporting a healthy suite as a failed one is the expensive outcome; the cheap
+one is a sentence naming what holds the desk.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

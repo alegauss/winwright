@@ -64,7 +64,7 @@ public sealed class MenuTests : IDisposable
     [Fact]
     public void The_menu_bar_is_entered_the_way_a_keyboard_user_enters_it()
     {
-        var entered = Menu.Enter(dialog.Frame);
+        var entered = Menu.Enter(dialog.Frame, DeskWait.Once);
 
         // WW133: a menu is walked with keys, so a desk this run could not have is a hole about the
         // machine rather than a claim about this window's menu bar.
@@ -109,7 +109,7 @@ public sealed class MenuTests : IDisposable
         // Asked of Windows and never inferred from ownership. `GUI_INMENUMODE` is the system saying
         // a menu is being worked right now and `hwndMenuOwner` is which window is working it, so an
         // owned popup that is not a menu answers nothing and nothing else widens by this.
-        var entered = Menu.Enter(dialog.Frame);
+        var entered = Menu.Enter(dialog.Frame, DeskWait.Once);
         if (BusyDesk.Excused(entered.AsAssertion("the menu bar is entered")))
             return;
 
@@ -123,9 +123,9 @@ public sealed class MenuTests : IDisposable
     [Fact]
     public void Walking_down_reaches_an_entry_and_reports_what_it_passed()
     {
-        Menu.Enter(dialog.Frame);
+        Menu.Enter(dialog.Frame, DeskWait.Once);
 
-        var walked = Menu.To(dialog.Frame, "Recent");
+        var walked = Menu.To(dialog.Frame, "Recent", DeskWait.Once);
 
         if (BusyDesk.Excused(walked.AsAssertion("the walk reaches Recent")))
             return;
@@ -138,10 +138,10 @@ public sealed class MenuTests : IDisposable
     [Fact]
     public void Right_expands_the_submenu_and_the_arrival_is_waited_for()
     {
-        Menu.Enter(dialog.Frame);
-        Menu.To(dialog.Frame, "Recent");
+        Menu.Enter(dialog.Frame, DeskWait.Once);
+        Menu.To(dialog.Frame, "Recent", DeskWait.Once);
 
-        var expanded = Menu.Expand(dialog.Frame);
+        var expanded = Menu.Expand(dialog.Frame, DeskWait.Once);
 
         if (BusyDesk.Excused(expanded.AsAssertion("right expands the submenu")))
             return;
@@ -158,8 +158,8 @@ public sealed class MenuTests : IDisposable
         // verb existed nothing a data file could write got to `Menu.Expand` at all, and a case naming
         // 'expand' against this menu would have asked ExpandCollapse — which an empty WinForms
         // submenu does not offer, so the red would have been about a control and not about the walk.
-        Menu.Enter(dialog.Frame);
-        Menu.To(dialog.Frame, "Recent");
+        Menu.Enter(dialog.Frame, DeskWait.Once);
+        Menu.To(dialog.Frame, "Recent", DeskWait.Once);
 
         var acted = Synthesised.ExpandMenu(On());
 
@@ -244,10 +244,10 @@ public sealed class MenuTests : IDisposable
     [Fact]
     public void Expanding_something_with_no_submenu_says_which_entry_it_was()
     {
-        Menu.Enter(dialog.Frame);
-        Menu.To(dialog.Frame, "Open");
+        Menu.Enter(dialog.Frame, DeskWait.Once);
+        Menu.To(dialog.Frame, "Open", DeskWait.Once);
 
-        var expanded = Menu.Expand(dialog.Frame, settleMs: 400, pollMs: 20);
+        var expanded = Menu.Expand(dialog.Frame, DeskWait.Once, settleMs: 400, pollMs: 20);
 
         // WW172: the walk before this one needed the desk too, so where it never got it there is no
         // highlight to be anywhere and nothing here is a statement about the menu.
@@ -277,9 +277,9 @@ public sealed class MenuTests : IDisposable
     [Fact]
     public void Walking_past_a_destructive_entry_highlights_it_and_nothing_more()
     {
-        Menu.Enter(dialog.Frame);
+        Menu.Enter(dialog.Frame, DeskWait.Once);
 
-        var walked = Menu.To(dialog.Frame, "Quit");
+        var walked = Menu.To(dialog.Frame, "Quit", DeskWait.Once);
 
         if (BusyDesk.Excused(walked.AsAssertion("walking past a destructive entry only highlights it")))
             return;
@@ -295,9 +295,9 @@ public sealed class MenuTests : IDisposable
     [Fact]
     public void A_walk_that_finds_nothing_leaves_the_menu_open_rather_than_resetting_it()
     {
-        Menu.Enter(dialog.Frame);
+        Menu.Enter(dialog.Frame, DeskWait.Once);
 
-        var walked = Menu.To(dialog.Frame, "Nonexistent");
+        var walked = Menu.To(dialog.Frame, "Nonexistent", DeskWait.Once);
 
         // WW172, and the arm easiest to get wrong: this case wants a walk that ran and found
         // nothing. A walk that was never sent also answers Reached false, and asserting the
@@ -317,9 +317,9 @@ public sealed class MenuTests : IDisposable
     [Fact]
     public void The_walk_is_bounded_by_the_menu_coming_round_rather_than_by_a_counter()
     {
-        Menu.Enter(dialog.Frame);
+        Menu.Enter(dialog.Frame, DeskWait.Once);
 
-        var walked = Menu.To(dialog.Frame, "Nonexistent");
+        var walked = Menu.To(dialog.Frame, "Nonexistent", DeskWait.Once);
 
         if (BusyDesk.Excused(walked.AsAssertion("the menu coming round is what bounds the walk")))
             return;
@@ -333,7 +333,7 @@ public sealed class MenuTests : IDisposable
     {
         Decoy();
 
-        var entered = Menu.Enter(dialog.Frame);
+        var entered = Menu.Enter(dialog.Frame, DeskWait.Once);
 
         Assert.False(entered.Sent);
         Assert.True(BusyDesk.Excused(entered.AsAssertion("the menu bar is entered")));
@@ -343,9 +343,9 @@ public sealed class MenuTests : IDisposable
     [Fact]
     public void A_walk_that_reached_its_entry_is_a_clean_step()
     {
-        Menu.Enter(dialog.Frame);
+        Menu.Enter(dialog.Frame, DeskWait.Once);
 
-        var walked = Menu.To(dialog.Frame, "Open");
+        var walked = Menu.To(dialog.Frame, "Open", DeskWait.Once);
         if (BusyDesk.Excused(walked.AsAssertion("a walk that reached its entry is clean")))
             return;
 

@@ -169,6 +169,10 @@ internal static class Sleeps
                 + "milliseconds because the thing holding the file is a poll"),
 
         // --- the suite ----------------------------------------------------------------------------
+        new("ForegroundTests.cs", 1, Sleeping.UnderTest,
+            "WW470. The fixture is a window that comes forward late, so the interval before it takes "
+                + "the desk is the thing being reproduced and not a way of waiting for it — what the "
+                + "case measures against it is the engine's own wait, which is a deadline"),
         new("FixtureTests.cs", 1, Sleeping.Resolution,
             "the sampler that watches an animation, where the interval is again the resolution of "
                 + "what is being measured rather than a wait for it"),

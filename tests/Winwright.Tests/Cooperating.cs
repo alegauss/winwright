@@ -254,6 +254,9 @@ internal static class Cooperating
             "whether a window class is one the shell draws on an application's behalf, which is how the drop shadow behind a menu stops being the largest window a tray process owns"),
         new("Foreground.Now", Cooperation.None, false, "who holds the keyboard, read straight from Windows"),
         new("Foreground.Check", Cooperation.None, false, "whether a named window holds it"),
+        new("Foreground.Waited", Cooperation.None, false,
+            "the same, waited for over a budget the caller declares — WW470, for a window that is "
+                + "still coming forward rather than one somebody else is holding"),
         new("Foreground.Between", Cooperation.None, false, "the same judgement over two sightings a caller already has"),
         new("ForeignInput.Watch", Cooperation.None, false, "start a window in which this run owns the machine"),
         new("ForeignInput.Read", Cooperation.None, false, "whether anybody else used it in that window"),

@@ -81,7 +81,7 @@ public sealed class TraversalTests : IDisposable
     {
         Focus("Edit[order=top]");
 
-        var traversed = Traversal.Press(dialog.Root, TraversalKey.Tab);
+        var traversed = Traversal.Press(dialog.Root, TraversalKey.Tab, DeskWait.Once);
 
         // WW133: a key that could not be sent is a hole about the desk and never a claim about
         // this window's tab order.
@@ -99,7 +99,7 @@ public sealed class TraversalTests : IDisposable
     {
         Focus("Edit[order=bottom]");
 
-        var traversed = Traversal.Press(dialog.Root, TraversalKey.ShiftTab);
+        var traversed = Traversal.Press(dialog.Root, TraversalKey.ShiftTab, DeskWait.Once);
         if (!BusyDesk.Excused(traversed.AsAssertion("shift-tab goes back")))
             Assert.Equal("alpha", traversed.After!.Name);
     }
@@ -111,8 +111,8 @@ public sealed class TraversalTests : IDisposable
 
         // Tab twice: the second lands on the slider, so the answer names it rather than saying
         // that focus is "not on bravo", which is what a boolean would have said.
-        Traversal.Press(dialog.Root, TraversalKey.Tab);
-        var second = Traversal.Press(dialog.Root, TraversalKey.Tab);
+        Traversal.Press(dialog.Root, TraversalKey.Tab, DeskWait.Once);
+        var second = Traversal.Press(dialog.Root, TraversalKey.Tab, DeskWait.Once);
 
         if (BusyDesk.Excused(second.AsAssertion("the second tab lands on the slider")))
             return;
@@ -143,7 +143,7 @@ public sealed class TraversalTests : IDisposable
         Focus("Edit[order=top]");
         Decoy();
 
-        var traversed = Traversal.Press(dialog.Root, TraversalKey.Tab);
+        var traversed = Traversal.Press(dialog.Root, TraversalKey.Tab, DeskWait.Once);
 
         Assert.False(traversed.Sent);
         Assert.False(traversed.Moved);
@@ -162,7 +162,7 @@ public sealed class TraversalTests : IDisposable
         // window taking no keyboard input.
         Focus("Edit[order=top]");
 
-        var traversed = Traversal.Press(dialog.Root, TraversalKey.Right, settleMs: 300, pollMs: 20);
+        var traversed = Traversal.Press(dialog.Root, TraversalKey.Right, DeskWait.Once, settleMs: 300, pollMs: 20);
 
         if (BusyDesk.Excused(traversed.AsAssertion("right leaves the focus where it was")))
             return;

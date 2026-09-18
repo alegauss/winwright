@@ -78,6 +78,9 @@ internal static class Deadlines
             + "WW446's second is the nudge: false while the slider still reads the range it was on, "
             + "so a key that moved nothing waits out its budget rather than reporting a move"),
         new("Desk.cs", 1, "null, where the automation root cannot be touched or the reading threw"),
+        new("Foreground.cs", 1, "false while anything but the window under test holds the keyboard — "
+            + "WW470's wait, which runs out where the desk is genuinely somebody else's and answers "
+            + "the reading taken on the last poll rather than the one it started from"),
         new("Menu.cs", 3, "false while the highlight is where it was — the three are opening a menu, "
             + "walking it and opening a submenu, and each waits for the highlighted entry to become "
             + "something other than the one it started on, which is what says the key landed"),

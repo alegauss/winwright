@@ -4,6 +4,7 @@ using System.Windows.Automation;
 
 using Winwright.Acting;
 using Winwright.Locating;
+using Winwright.Windowing;
 
 namespace Winwright.Typing;
 
@@ -167,7 +168,10 @@ internal static class Landing
                 continue;
             }
 
-            var pressed = Traversal.Press(root, TraversalKey.Tab, settleMs: SettleMs, pollMs: PollMs);
+            // WW470. `Once`, because this arm holds the desk for the whole sweep: a wait here would
+            // be one paid per round for a foreground that was taken before the first of them.
+            var pressed = Traversal.Press(
+                root, TraversalKey.Tab, DeskWait.Once, settleMs: SettleMs, pollMs: PollMs);
             if (!pressed.Sent)
             {
                 reading.Unread();

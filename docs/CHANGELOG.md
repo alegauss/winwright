@@ -178,6 +178,7 @@
 - ✅ **WW461** **the tray step shuts the flyout it opened while the menu stands, which dismisses every menu but this fixture's** — The flyout close moved to where WW343 put the foreground restore, and the one tray case that drives the scenario runner reads an entry of a menu that shuts itself.
 - ✅ **WW463** **nothing says whether the entry a submenu step hands back is the submenu's or the parent it was expanded from** — Measured and held by a case: both kinds hand back the entry under the one they expanded, so a step's expectation is compared against the entry it named.
 - ✅ **WW464** **the reference tells an author a submenu locator may name any element of the window, which the walk stopped honouring** — The reference names the entry whose submenu is wanted and says what a step naming the window expands instead, which is the walk WW83 built and the sentence that argued against it.
+- ✅ **WW470** **the desk precondition is read once, so a window still coming forward is reported as a desk somebody else holds** — An act waits for the desk over the resolve budget: a window still arriving is driven, and a desk truly held still holes (design recorded in `src/Winwright/Windowing/Foreground.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

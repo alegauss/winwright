@@ -173,7 +173,10 @@ public sealed class RefusedForegroundTests : IDisposable
     {
         Decoy();
 
-        var result = Traversal.Press(dialog.Root, TraversalKey.Tab).AsAssertion("tab moves the focus");
+        // WW470. `Once`, and that is the assertion: this case takes the desk away on purpose, so a
+        // wait here would spend the resolve budget proving what the first look already says.
+        var result = Traversal.Press(dialog.Root, TraversalKey.Tab, DeskWait.Once)
+            .AsAssertion("tab moves the focus");
 
         Assert.Equal(AssertionOutcome.Unchecked, result.Outcome);
         Assert.Equal(Foreground.PreconditionName, result.Missing!.Name);

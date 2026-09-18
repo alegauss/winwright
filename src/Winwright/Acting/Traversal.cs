@@ -66,9 +66,10 @@ public sealed record TraversalResult
     /// <summary>
     /// Whether the focus was still this application's when it was read.
     /// <para>
-    /// WW155. The foreground is read once before the key is sent, and the focus is then polled for
-    /// up to two seconds — during which the desk is free to change hands. A tab that lands on
-    /// another application's window is not this application's tab order being wrong.
+    /// WW155. The foreground is settled before the key is sent — waited for, since WW470 — and the
+    /// focus is then polled for up to two seconds, during which the desk is free to change hands. A
+    /// tab that lands on another application's window is not this application's tab order being
+    /// wrong.
     /// </para>
     /// </summary>
     public FocusReading Focus { get; }
@@ -250,13 +251,26 @@ public static class Traversal
     /// is a deadline on the focus changing; a key that legitimately moves nothing costs all of it
     /// and then says what still holds the focus, which is the useful half of that answer.
     /// </summary>
+    /// <param name="window">The window the key is sent at.</param>
+    /// <param name="key">Which traversal key.</param>
+    /// <param name="desk">
+    /// How long to wait for that window to hold the foreground, or <see cref="DeskWait.Once" />.
+    /// WW470.
+    /// </param>
+    /// <param name="settleMs">How long to wait for the focus to move.</param>
+    /// <param name="pollMs">How often to look again while waiting for it.</param>
     public static TraversalResult Press(
-        AutomationElement window, TraversalKey key, int settleMs = 2000, int pollMs = 25)
+        AutomationElement window, TraversalKey key, DeskWait desk, int settleMs = 2000, int pollMs = 25)
     {
         ArgumentNullException.ThrowIfNull(window);
 
         var handle = (nint)window.Current.NativeWindowHandle;
-        var foreground = Foreground.Check(handle == 0 ? 0 : Win32.GetAncestor(handle, Win32.GaRoot)).AsPrecondition();
+
+        // WW470. Waited for rather than read once: a window that is still coming forward is not a
+        // desk somebody else holds, and one look cannot tell them apart.
+        var foreground = Foreground
+            .Waited(handle == 0 ? 0 : Win32.GetAncestor(handle, Win32.GaRoot), desk)
+            .AsPrecondition();
         var before = FocusedElement();
         if (!foreground.Satisfied)
         {
@@ -322,7 +336,12 @@ public static class Traversal
             _ => TraversalKey.Right,
         };
 
-        var foreground = Foreground.Check(admitted.Window).AsPrecondition();
+        // WW470. Waited for rather than read once: a window that is still coming forward is not a
+        // desk somebody else holds, and one look cannot tell them apart.
+        var foreground = Foreground
+            .Waited(admitted.Window, DeskWait.Of(slider.DeadlineMs, slider.PollMs))
+            .AsPrecondition();
+
         if (!foreground.Satisfied)
             return new NudgeResult(facts, pressed, value, value, atTheTop, foreground);
 

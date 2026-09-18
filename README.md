@@ -676,6 +676,13 @@ never attempted comes back as a hole naming the absence rather than as a reading
 Those two are indistinguishable from the outside, and reporting the first as the second is a red about
 the application on a fact about the desk.
 
+The desk is **waited for**, over `timeouts.resolve`. An application that has just been launched is
+often still coming forward when the first step asks — measured against claude-tray at 1453 ms — and a
+single look at that moment names the desktop as an intruder, which is true about the instant and false
+about the run. A desk somebody else is genuinely holding still comes back as the same hole, arrived at
+when the budget runs out and saying how long it stood. Nothing is retried: what waits is the
+precondition, and the act itself is sent once.
+
 `click` requires its reason in `with`, out of `NoAutomationPeer`, `NotificationArea`, `CustomTemplate`,
 `PointerIsTheAct` and the escalation. That is not ceremony: a click whose justification defaults is a
 click nobody had to justify, and then every act quietly escalates and the suite is driving the desktop

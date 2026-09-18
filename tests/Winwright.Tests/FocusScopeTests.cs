@@ -134,7 +134,7 @@ public sealed class FocusScopeTests : IDisposable
         var elsewhere = Focus.In(GetDesktopWindow());
         Assert.False(elsewhere.Inside, "the desktop window turned out to be this process's");
 
-        var walk = Menu.To(dialog.Frame, "Nonexistent");
+        var walk = Menu.To(dialog.Frame, "Nonexistent", Winwright.Windowing.DeskWait.Once);
         if (BusyDesk.Excused(walk.AsAssertion("the menu reached it")))
             return;
 

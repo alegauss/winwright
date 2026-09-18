@@ -290,7 +290,12 @@ public static class Pointer
         var admitted = Admitted.To(subject);
         var facts = admitted.Facts;
 
-        var foreground = Foreground.Check(admitted.Window).AsPrecondition();
+        // WW470. Waited for rather than read once: a window that is still coming forward is not a
+        // desk somebody else holds, and one look cannot tell them apart.
+        var foreground = Foreground
+            .Waited(admitted.Window, DeskWait.Of(subject.DeadlineMs, subject.PollMs))
+            .AsPrecondition();
+
         if (!foreground.Satisfied)
             return new PointerResult(act, facts, foreground, default, PatternValues.None);
 
