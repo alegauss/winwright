@@ -11,9 +11,23 @@ namespace Winwright.Tests;
 /// <param name="IsPublic">Whether an adopter can call it.</param>
 internal sealed record SourceMember(string Owner, string Name, string Body, bool IsPublic)
 {
+    /// <summary>
+    /// The type that declares it, where the walk read one. WW462, and it is not always the file:
+    /// <c>Throughout.cs</c> declares <c>RegionThroughout</c>, and a call to it is written with the
+    /// type on it. Empty where nothing above the member declared a type, and then the file stands in.
+    /// </summary>
+    public string Declaring { get; init; } = "";
+
     /// <summary>How anything outside its file spells a call to it.</summary>
-    public string Named => $"{Owner}.{Name}";
+    public string Named => $"{(Declaring.Length > 0 ? Declaring : Owner)}.{Name}";
 }
+
+/// <summary>
+/// One member that reaches a primitive, directly or through another member. WW462.
+/// </summary>
+/// <param name="Named">The member, as <c>Owner.Member</c>.</param>
+/// <param name="IsPublic">Whether an adopter can call it, which is what a catalogue of verbs holds.</param>
+internal sealed record SourceReach(string Named, bool IsPublic);
 
 /// <summary>
 /// The checkout this suite is running out of: where it is, and what source files are in it.
@@ -395,11 +409,23 @@ internal static class Checkout
         var owner = Path.GetFileNameWithoutExtension(file);
         var found = new List<SourceMember>();
         var named = "";
+        var declaring = "";
         var visible = false;
         var body = new List<string>();
 
         foreach (var line in File.ReadLines(file).Select(read))
         {
+            // WW462. Read before the member, because a declaration closes the one above it: the
+            // type a member belongs to is the last one declared over it, and a file declares
+            // several. Nothing else changes — `Owner` is still the file, which is what the sweeps
+            // that attribute a member to its file already read.
+            if (Declares(line) is { } type)
+            {
+                Close();
+                declaring = type;
+                continue;
+            }
+
             if (Member(line) is { } next)
             {
                 Close();
@@ -419,12 +445,55 @@ internal static class Checkout
         void Close()
         {
             if (named.Length > 0)
-                found.Add(new SourceMember(owner, named, string.Join('\n', body), visible));
+            {
+                found.Add(
+                    new SourceMember(owner, named, string.Join('\n', body), visible)
+                    {
+                        Declaring = declaring,
+                    });
+            }
 
             named = "";
             visible = false;
             body = [];
         }
+    }
+
+    /// <summary>
+    /// The type a top-level line declares, of any of the four kinds. WW462.
+    /// <para>
+    /// Beside <see cref="Owner" /> rather than inside it: that one answers a <c>class</c> and is
+    /// read by two sweeps that attribute a member to a class, and widening it would change what
+    /// they see. This is the same question asked for the qualified name a call is written with,
+    /// where a record counts exactly as much — <c>RegionThroughout</c> is one, and
+    /// <c>RegionThroughout.Around(</c> is how every caller spells it.
+    /// </para>
+    /// </summary>
+    /// <param name="line">The line, already read as code.</param>
+    private static string? Declares(string line)
+    {
+        if (!line.StartsWith("public ", StringComparison.Ordinal)
+            && !line.StartsWith("internal ", StringComparison.Ordinal))
+            return null;
+
+        foreach (var kind in new[] { "class ", "record ", "struct ", "interface " })
+        {
+            var at = line.IndexOf(kind, StringComparison.Ordinal);
+            if (at < 0)
+                continue;
+
+            var rest = line[(at + kind.Length)..].Trim();
+
+            // `record struct Foo` names the kind twice, so the word after the first is not the type.
+            if (rest.StartsWith("struct ", StringComparison.Ordinal) || rest.StartsWith("class ", StringComparison.Ordinal))
+                rest = rest[(rest.IndexOf(' ', StringComparison.Ordinal) + 1)..].Trim();
+
+            var end = rest.IndexOfAny([' ', ':', '(', '{', '<']);
+            var name = end < 0 ? rest : rest[..end];
+            return name.Length == 0 ? null : name;
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -439,6 +508,89 @@ internal static class Checkout
         var separator = Path.DirectorySeparatorChar;
         return !path.Contains($"{separator}bin{separator}", StringComparison.Ordinal)
             && !path.Contains($"{separator}obj{separator}", StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Every member of a tree that reaches one of <paramref name="primitives"/>, directly or through
+    /// another member, all the way down and across files. WW462.
+    /// <para>
+    /// The walk and never the question, which is WW193's rule and WW210's one level down: what a
+    /// sweep is looking for stays its own, and this answers only what reaches it. Two sweeps asked
+    /// the same question of the same sources and only one of them crossed files —
+    /// <c>Synthesising</c> did and <c>DeskVerbs</c> did not — so <c>Menu.Enter</c> was a verb that
+    /// reaches the foreground in one reading and not in the other. Written once, the two cannot
+    /// disagree about that again.
+    /// </para>
+    /// <para>
+    /// An edge is taken on <c>Owner.Member(</c> anywhere, and on a bare <c>Member(</c> only inside
+    /// the file that declares it: a call to another type is written with the type on it and a call
+    /// inside a file is not. A bare name matched across the whole engine would let any private helper
+    /// called <c>Run</c> stand in for <c>Pointer.Run</c>, and the sweep would report verbs that reach
+    /// nothing — which is the scoping <c>DeskVerbs</c> kept its walk inside one file for.
+    /// </para>
+    /// </summary>
+    /// <param name="tree">The tree to walk.</param>
+    /// <param name="primitives">What a member has to reach, matched in its body.</param>
+    /// <param name="except">A file to leave out — the primitives' own declarations, usually.</param>
+    internal static IReadOnlyList<SourceReach> Reaching(
+        string tree, IEnumerable<string> primitives, string? except = null)
+    {
+        ArgumentNullException.ThrowIfNull(primitives);
+
+        var marks = primitives.ToList();
+
+        // Grouped and not indexed, because a name in a file can be two overloads. Keeping the last
+        // one threw the rest away, so an overload that touched the desk was invisible whenever a
+        // quieter one was declared below it — WW210, measured on `TopLevelWindows.OfProcess`.
+        var members = SourcesIn(tree, except)
+            .SelectMany(one => Members(one))
+            .GroupBy(one => one.Named, StringComparer.Ordinal)
+            .ToDictionary(
+                one => one.Key,
+                one => (
+                    Owner: one.First().Owner,
+                    Body: string.Join('\n', one.Select(each => each.Body)),
+                    IsPublic: one.Any(each => each.IsPublic)),
+                StringComparer.Ordinal);
+
+        var touching = members
+            .Where(one => marks.Any(mark => one.Value.Body.Contains(mark, StringComparison.Ordinal)))
+            .Select(one => one.Key)
+            .ToHashSet(StringComparer.Ordinal);
+
+        for (var grew = true; grew;)
+        {
+            grew = false;
+            foreach (var one in members.Where(one => !touching.Contains(one.Key)).ToList())
+            {
+                if (!touching.Any(deep => Calls(one.Value.Body, one.Value.Owner, deep)))
+                    continue;
+
+                touching.Add(one.Key);
+                grew = true;
+            }
+        }
+
+        return new ReadOnlyCollection<SourceReach>(
+            touching
+                .OrderBy(one => one, StringComparer.Ordinal)
+                .Select(one => new SourceReach(one, members[one].IsPublic))
+                .ToList());
+    }
+
+    /// <summary>Whether a body calls <paramref name="named"/>, which is spelled two ways. WW462.</summary>
+    /// <param name="body">The calling member's lines, as code.</param>
+    /// <param name="owner">The file the calling member is in.</param>
+    /// <param name="named">The called member, as <c>Owner.Member</c>.</param>
+    private static bool Calls(string body, string owner, string named)
+    {
+        var dot = named.IndexOf('.', StringComparison.Ordinal);
+        var type = named[..dot];
+        var member = named[(dot + 1)..];
+
+        return body.Contains($"{type}.{member}(", StringComparison.Ordinal)
+            || (string.Equals(type, owner, StringComparison.Ordinal)
+                && body.Contains($"{member}(", StringComparison.Ordinal));
     }
 
     private static readonly Lazy<string> root = new(Walk);

@@ -110,6 +110,70 @@ internal static class DeskDiscards
                 + "about has been asserted. A shell that will not shut it leaves it standing for the "
                 + "next case, and the case that would notice reads the flyout either side of its own "
                 + "work rather than assuming it started shut"),
+
+        // --- WW462, and every one of these was here before the sweep could see it ------------------
+        //
+        // The menu walk reaches the desk through `Foreground.Check`, one file over, so `DeskAsks`
+        // passed these calls over and this catalogue was never asked about them. They are all one
+        // shape: getting into the menu is the setup, and what the case is about is the walk or the
+        // expansion below it — each of which is excused on its own reading. A desk that refused the
+        // entry leaves nothing highlighted, so the reading the case does assert on answers the
+        // absence rather than a menu that misbehaved.
+        new("MenuTests.Walking_down_reaches_an_entry_and_reports_what_it_passed", "Menu.Enter(",
+            "the entry into the menu bar, thrown away because the subject is the walk under it — and "
+                + "`Menu.To` below is excused through `BusyDesk`, which is where a refused desk is "
+                + "answered for both"),
+        new("MenuTests.Right_expands_the_submenu_and_the_arrival_is_waited_for", "Menu.Enter(",
+            "the same entry as setup, with the expansion below it excused on its own reading"),
+        new("MenuTests.Right_expands_the_submenu_and_the_arrival_is_waited_for", "Menu.To(",
+            "and the walk to the entry Right is pressed at, which is setup for the same reason: a "
+                + "walk the desk refused highlights nothing, and the expansion then reports the "
+                + "absence rather than a submenu that would not open"),
+        new("MenuTests.A_case_can_name_the_walk_that_presses_right_rather_than_only_the_pattern",
+            "Menu.Enter(",
+            "setup for the act this case names, which carries its own precondition and is excused "
+                + "through it"),
+        new("MenuTests.A_case_can_name_the_walk_that_presses_right_rather_than_only_the_pattern",
+            "Menu.To(",
+            "the walk that puts the highlight where the named act expects it, answered for by that "
+                + "act's own `Needed`"),
+        new("MenuTests.Expanding_something_with_no_submenu_says_which_entry_it_was", "Menu.Enter(",
+            "the entry into the menu bar as setup, with the expansion this case is about excused "
+                + "below it — a desk that refused the entry leaves the expansion nothing to move, "
+                + "which is the reading that stands down"),
+        new("MenuTests.Expanding_something_with_no_submenu_says_which_entry_it_was", "Menu.To(",
+            "the walk to the entry with no submenu, which is the arrangement rather than the claim — "
+                + "and the claim is a walk that is excused where the desk refused it"),
+        new("MenuTests.Walking_past_a_destructive_entry_highlights_it_and_nothing_more", "Menu.Enter(",
+            "setup for the walk past Terminal and Quit, and that walk is excused on its own reading"),
+        new("MenuTests.A_walk_that_finds_nothing_leaves_the_menu_open_rather_than_resetting_it",
+            "Menu.Enter(",
+            "setup for a walk that is meant to find nothing, and WW172's door below is what tells a "
+                + "walk that ran and found nothing from one that was never sent"),
+        new("MenuTests.The_walk_is_bounded_by_the_menu_coming_round_rather_than_by_a_counter",
+            "Menu.Enter(",
+            "setup for the same walk, whose hop count is what this case asserts and whose excuse is "
+                + "taken before the count is read"),
+        new("MenuTests.A_walk_that_reached_its_entry_is_a_clean_step", "Menu.Enter(",
+            "setup for the walk whose trace step this case reads, excused before the step is built"),
+        new("CaptureRouteTests.A_real_menu_on_a_real_window_routes_to_the_copy_that_can_reach_it",
+            "Menu.Enter(",
+            "this case needs a real popup on the screen and not a reading of how it got there. A "
+                + "desk that refused the keys puts no `#32768` window up, and the case excuses that "
+                + "directly a few lines later — naming the foreground, with the highlight and every "
+                + "window this process owns in the sentence"),
+        new("CaptureRouteTests.A_real_menu_on_a_real_window_routes_to_the_copy_that_can_reach_it",
+            "Menu.To(",
+            "the expansion that makes the popup exist at all, answered by the same excuse: what the "
+                + "case looks for is the window, and there being none is the absence it reports"),
+        new("RetryOnAMenuTests.Expanding_a_real_submenu_through_the_cap_reports_what_it_took",
+            "Menu.To(",
+            "the walk to the entry the retry expands, with `Menu.Enter` on the line above it excused "
+                + "through `BusyDesk` — so a desk this run never had returns before this, and what "
+                + "is discarded here is a walk on a desk the case has already been granted"),
+        new("RetryOnAMenuTests.An_entry_that_never_expands_still_goes_red_after_the_cap", "Menu.To(",
+            "the same, for the entry that has no submenu: the case is about what the cap reports "
+                + "after the attempts, and the desk it needs was excused one line above"),
     ]);
 
     /// <summary>Every member of this suite that throws a desk reading away, read out of the sources.</summary>

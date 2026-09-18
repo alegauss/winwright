@@ -153,6 +153,20 @@ public sealed class AdoptedTrayTests : IDisposable
                 $"the tray ({pid}) holds no entry that opens anything: {menu}{Environment.NewLine}{resolved.Miss}");
 
             var subject = Subject.Unguarded(desktop, entry, Timeouts.Defaults["act"], pollMs: 50);
+
+            // Before the act, and this is the difference between the two ways it can not be
+            // attempted. A desk that went to somebody else entirely is the machine, and excusing
+            // that is right; the arrangement a tray leaves — its own window holding the desk on the
+            // menu's thread — is what WW457 admitted, and excusing THAT would make a regression of
+            // it read as a hole and pass. So the machine is excused here, where it can still be told
+            // apart, and what the act answers below is asserted.
+            var holding = Foreground.Check(subject.Window);
+            if (holding.State is ForegroundState.Elsewhere or ForegroundState.Nobody
+                && BusyDesk.Excused(holding.AsPrecondition()))
+            {
+                return;
+            }
+
             var acted = Synthesised.ExpandMenu(subject);
 
             // The desk a tray leaves is one this act may use, which is the whole of what WW457

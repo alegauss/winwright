@@ -26,6 +26,15 @@ internal enum Touching
     /// have decided.
     /// </summary>
     PuttingItBack,
+
+    /// <summary>
+    /// It answers a verdict that reports the desk itself. WW462: the runner's own answer is where a
+    /// hole is written down — an assertion nothing could evaluate comes back <em>unchecked</em> with
+    /// the absence on it — so asking a case to excuse the desk around one of these is asking it to
+    /// excuse the thing that does the excusing. What a case still owes is to read the verdict it was
+    /// given rather than only its outcome, which is a different rule and not this list's.
+    /// </summary>
+    AnsweredInTheVerdict,
 }
 
 /// <summary>One engine verb that reaches the desk and is not in <see cref="DeskAsks.Calls" />.</summary>
@@ -102,13 +111,51 @@ internal static class DeskVerbs
             "the same walk, answering the largest of them. It reaches the desk only through "
                 + "OfProcess and inherits the whole of its argument"),
 
-        new("NotificationArea.PutBack", Touching.PuttingItBack,
+        // WW462 gave this its right name. It is declared on `TrayMenu` and called as
+        // `menu.PutBack()`, and the sweep keyed it to the file it sits in — `NotificationArea` —
+        // which is a type that has no such member. The reading answers the declaring type now, so
+        // the two agree and a reader looking this up finds it.
+        new("TrayMenu.PutBack", Touching.PuttingItBack,
             "WW330. It shuts the flyout the act it belongs to opened and gives the desktop back to "
                 + "whatever held it, which is housekeeping and not a reading: the verb that took "
                 + "both is the one a case excuses, and this one is called after the case has "
                 + "asserted everything it came for. A shell that refuses either leaves the taskbar "
                 + "the way it already was, which is the state this exists to improve on rather than "
                 + "a verdict it could get wrong"),
+
+        // --- WW462, the composites the one-file sweep could not see -------------------------------
+        //
+        // Each of these reaches the desk through the verbs above it, and each answers a verdict
+        // rather than a reading: the run says which assertions could not be evaluated and why, in
+        // the shape a report and a trace both carry. That is the third verdict doing its job, and
+        // a case excusing the desk around it would be excusing the mechanism that reports it.
+        new("Suite.Run", Touching.AnsweredInTheVerdict,
+            "it runs the cases a scenario declares and answers a suite verdict, where every hole is "
+                + "already named against the assertion that could not run — which is the whole of "
+                + "what a run of this engine is for, and is reported whether or not a case reads it"),
+        new("Suite.Launch", Touching.AnsweredInTheVerdict,
+            "the same run with the launch in front of it, and the launch's own refusals reach the "
+                + "verdict the same way"),
+        new("CaseRun.Of", Touching.AnsweredInTheVerdict,
+            "one case rather than a suite of them, answering the verdict the suite collects"),
+        new("Preamble.Of", Touching.AnsweredInTheVerdict,
+            "WW170's composition: the five readings a run takes before it claims anything, kept in "
+                + "one place so a sixth is this file rather than an audit of every runner. It is the "
+                + "reading a report prints, and a run whose desk was refused says so through it"),
+        new("Preamble.Around", Touching.AnsweredInTheVerdict,
+            "the same composition taken either side of a run, which is how a report says what "
+                + "changed on the machine while the cases were going"),
+        new("CaptureReceipt.Taking", Touching.AnsweredInTheVerdict,
+            "it takes the three readings a screen copy owes around the take and refuses where any of "
+                + "them answers wrongly — so the desk fact does not reach a caller as a picture that "
+                + "passed, it reaches it as a WrongCaptureException naming which question failed"),
+
+        new("InstanceCheck.Of", Touching.FilteredToWhatTheCallerNamed,
+            "it walks the processes running one executable the caller named and reads what each is "
+                + "showing. A desk crowded with somebody else's windows answers the same list, and "
+                + "the only thing that changes the answer is another copy of the application under "
+                + "test — which is a finding about the machine the run was asked to drive, not about "
+                + "what happens to be open on it"),
     ]);
 
     /// <summary>Every public verb of the engine that reaches a desk primitive.</summary>
@@ -124,61 +171,31 @@ internal static class DeskVerbs
 
     private static readonly Lazy<IReadOnlyList<string>> reaching = new(Sweep);
 
-    private static IReadOnlyList<string> Sweep() => Checkout
-        .SourcesIn(Checkout.Engine)
-
-        // The primitives themselves live here, and every one of them touches the desk by definition.
-        // Excusing eight declarations one at a time would be writing down that a P/Invoke is a
-        // P/Invoke; what a case calls is always the verb above them.
-        .Where(one => Path.GetFileName(one) != "Win32.cs")
-        .SelectMany(InFile)
-        .Distinct(StringComparer.Ordinal)
-        .OrderBy(one => one, StringComparer.Ordinal)
-        .ToList();
-
-    private static IEnumerable<string> InFile(string file)
-    {
-        var owner = Path.GetFileNameWithoutExtension(file);
-        // Grouped and not indexed, because a name in a file can be two overloads. The old copy of
-        // this kept the last one and threw the rest away, so an overload that touched the desk was
-        // invisible whenever a quieter one was declared below it.
-        var bodies = Checkout.Members(file)
-            .GroupBy(one => one.Name, StringComparer.Ordinal)
-            .ToDictionary(
-                one => one.Key,
-                one => (Body: string.Join('\n', one.Select(each => each.Body)), IsPublic: one.Any(each => each.IsPublic)),
-                StringComparer.Ordinal);
-
-        // All the way down and not one level. A verb rarely calls the primitive itself, and rarely
-        // calls something that does: NotificationArea.Find asks OpenOverflow, which asks Chevron,
-        // which asks Tray, which asks FindWindowW. One level found Tray and stopped, and the verb a
-        // case actually writes down is the one at the top.
-        var touching = bodies.Where(one => Touches(one.Value.Body)).Select(one => one.Key).ToHashSet(StringComparer.Ordinal);
-
-        for (var grew = true; grew;)
-        {
-            grew = false;
-            foreach (var one in bodies.Where(one => !touching.Contains(one.Key)))
-            {
-                if (!touching.Any(deep => one.Value.Body.Contains($"{deep}(", StringComparison.Ordinal)))
-                    continue;
-
-                touching.Add(one.Key);
-                grew = true;
-            }
-        }
-
-        return bodies
-            .Where(one => one.Value.IsPublic && touching.Contains(one.Key))
-            .Select(one => $"{owner}.{one.Key}");
-    }
-
-    private static bool Touches(string text) =>
-        Primitives.Any(one => text.Contains(one, StringComparison.Ordinal));
-
-    // The walk that reads a file member by member moved to Checkout under WW210, where a second
-    // sweep needed the same one. The reading here stays per file on purpose: the public names were
-    // once kept in one set across the whole engine, so a private helper sharing a name with
-    // somebody else's public verb was read as public, and a sweep whose answer depends on which
-    // file it read first is not a reading.
+    /// <summary>
+    /// Every public verb that reaches one of the primitives, all the way down and across files.
+    /// <para>
+    /// WW462. This walked one file at a time, and the scoping was deliberate: a bare <c>Member(</c>
+    /// matched across the whole engine would let any private helper called <c>Run</c> stand in for
+    /// <c>Pointer.Run</c>. What it cost is a verb reaching the desk through a call into another
+    /// file — <c>Menu.Enter</c>, <c>Menu.Expand</c> and <c>Menu.To</c> each ask
+    /// <c>Foreground.Check</c>, which lives in <c>Foreground.cs</c>, and the rule never knew they
+    /// exist. Found by accident: WW457 put a primitive directly in <c>Menu.cs</c> for a moment and
+    /// all three appeared.
+    /// </para>
+    /// <para>
+    /// The walk moved to <see cref="Checkout.Reaching" /> rather than growing a second copy here,
+    /// which is WW210's argument one sweep over: <c>Synthesising</c> had already written the
+    /// cross-file rule and shipped it, so two sweeps over the same sources answered differently
+    /// about the same member. The qualification is what makes crossing safe — an edge on
+    /// <c>Owner.Member(</c> anywhere, and on a bare <c>Member(</c> only inside the declaring file.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<string> Sweep() =>
+        // The primitives themselves live in Win32.cs, and every one of them touches the desk by
+        // definition. Excusing eight declarations one at a time would be writing down that a
+        // P/Invoke is a P/Invoke; what a case calls is always the verb above them.
+        Checkout.Reaching(Checkout.Engine, Primitives, except: "Win32.cs")
+            .Where(one => one.IsPublic)
+            .Select(one => one.Named)
+            .ToList();
 }

@@ -2,33 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW462 the verbs the desk sweep cannot see
-
-WW208 built this reading because a hand-typed list meant "a reading the list had never
-heard of was one no case was ever asked to excuse". The sweep that replaced it has the
-same hole one level down: it keys on eight primitives and walks transitively, but within
-one file. The scoping is deliberate — public names were once kept in one set across the
-engine, so a private helper sharing a name with another file's public verb read as
-public.
-
-What it costs is a verb reaching the desk through another file. `Menu.Enter`,
-`Menu.Expand` and `Menu.To` ask `Foreground.Check`, which lives in `Foreground.cs`;
-cases excuse them through `MenuWalk.AsAssertion`, and the rule has never known they
-exist.
-
-Measured before building, and the repair is larger than the walk. Crossing files on a
-qualified name takes the sweep from 24 public verbs to 46, and 19 are in neither
-catalogue: the synthesised acts, the menu walk, and the composites `Suite.Run`,
-`CaseRun.Of`, `Preamble.Of` and `CaptureReceipt.Taking`. Each needs a judgement, and
-every one filed under `DeskAsks.Calls` then asks each case calling it for an excuse or a
-written reason — `Suite.Run` alone is called at 32 sites in 15 files.
-
-Two things the qualification needs first. `SourceMember.Owner` is the file and not the
-type, so `Throughout.cs` keys `RegionThroughout.Around` — which `DeskAsks` spells by its
-type — as `Throughout.Around`; and `Checkout.Owner` reads `class` and not `record`, so
-the declaring type is unreachable until it does. The match must also be bounded:
-`Menu.Enter(` sits inside `TrayMenu.Enter(`.
-
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW158 A display that renders is not a display that is attached

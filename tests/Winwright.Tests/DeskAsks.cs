@@ -28,6 +28,15 @@ internal enum Unaffected
     /// <summary>The case returns where the desk was not what it needed, before asserting anything
     /// about it — through a reading of its own rather than through <c>BusyDesk</c>.</summary>
     Guarded,
+
+    /// <summary>
+    /// The second fact is the same act's, asked a line later. WW462: a case that excuses a menu walk
+    /// and then reads what it highlighted is asking about the focus where it excused the foreground,
+    /// and WW197 is right that those are two facts — what makes the second safe is that the excuse it
+    /// already has covers the act both of them come from. A desk lost between the two lines is
+    /// WW155's window, which the walk's own second guard is for and which no excuse here would close.
+    /// </summary>
+    TheSameReading,
 }
 
 /// <summary>
@@ -102,8 +111,48 @@ internal static class DeskAsks
         new("Pick.Value(", Winwright.Windowing.Foreground.PreconditionName,
             "the keyboard route walks the list with real keystrokes, so it needs the desktop the "
                 + "pattern route does not"),
+        new("Pick.At(", Winwright.Windowing.Foreground.PreconditionName,
+            "the same walk counted by position rather than by value, and the same keystrokes under it"),
+        new("Selecting.Confirmed(", Winwright.Windowing.Foreground.PreconditionName,
+            "it may escalate to a click, which its own parameter makes a caller say yes to — and a "
+                + "declared act needing a real desktop is one the desk can refuse"),
+
+        // --- WW462, and the reason this whole block was short by fifteen. The sweep that keeps this
+        // list honest walked one file at a time, so every verb below reached the desk through a call
+        // into another file and was invisible to it: the synthesised acts go through `Keys` and
+        // `Pointer`, and the menu walk asks `Foreground.Check`. Each is the same claim as the six
+        // above — input lands where the desk says it lands — arrived at one indirection later.
+        new("Synthesised.Type(", Winwright.Acting.Keyboard.FocusPreconditionName,
+            "typing through the act a case names, which is the keyboard route with a read-back on it"),
+        new("Synthesised.Press(", Winwright.Acting.Keyboard.FocusPreconditionName,
+            "a chord sent at whatever holds the focus, which is the desk's to give"),
+        new("Synthesised.Nudge(", Winwright.Acting.Keyboard.FocusPreconditionName,
+            "an arrow key at the focused control, and an arrow key is a real keystroke"),
+        new("Synthesised.Click(", Winwright.Windowing.Foreground.PreconditionName,
+            "the pointer act a case names, carrying the reason the pattern route was not taken"),
+        new("Synthesised.Pick(", Winwright.Windowing.Foreground.PreconditionName,
+            "picking by value, which walks the list with keys where the pattern will not answer"),
+        new("Synthesised.PickAt(", Winwright.Windowing.Foreground.PreconditionName,
+            "the same by position, and the same walk under it"),
+        new("Synthesised.ExpandMenu(", Winwright.Windowing.Foreground.PreconditionName,
+            "Right at an open menu, which goes to whoever holds the foreground — and WW457 widened "
+                + "what counts as holding it for a menu without widening who grants it"),
+        new("Traversal.Nudge(", Winwright.Acting.Keyboard.FocusPreconditionName,
+            "a traversal key by another name, and `Traversal.Press` beside it has said so since WW208"),
+        new("Menu.Enter(", Winwright.Windowing.Foreground.PreconditionName,
+            "F10 at the window under test, which is the keystroke a menu bar opens to"),
+        new("Menu.To(", Winwright.Windowing.Foreground.PreconditionName,
+            "Down until an entry is highlighted, each one a key the desk has to deliver"),
+        new("Menu.Expand(", Winwright.Windowing.Foreground.PreconditionName,
+            "Right at the highlighted entry, and the walk answers a hole where the desk refused"),
 
         // --- the readings that are about the desk itself ------------------------------------------
+        new("Menu.Highlighted(", Winwright.Acting.FocusReading.Named,
+            "what a menu is showing as highlighted, which WW457 made the menu's own reading and is "
+                + "still the focus where the focus is an entry"),
+        new("Menu.RaisedFrom(", Winwright.Windowing.Foreground.PreconditionName,
+            "which window of a menu's own thread holds the desk, which is a reading of the desk "
+                + "however narrow the question"),
         new("Foreground.Now(", Winwright.Windowing.Foreground.PreconditionName,
             "who holds the keyboard right now, which on a locked or blank session is nobody"),
         new("Focus.In(", Winwright.Acting.FocusReading.Named,
@@ -398,6 +447,120 @@ internal static class DeskAsks
                 + "took, and asserting on it would report the desk as the defect. Its other two "
                 + "facts are excused rather than reasoned about, which is the half a reader checks "
                 + "first"),
+
+        // --- WW462, and none of these is new: the sweep that keys this list walked one file, so the
+        // synthesised acts and the menu walk were in no catalogue and no case was ever asked about
+        // them. Each was reasoned about once here, at the moment the question first arrived.
+
+        // The verb refuses at the door, and the refusal is the assertion.
+        new("NudgeTests.A_range_with_no_room_at_all_is_refused_rather_than_reported_as_unmoved",
+            Unaffected.Refused,
+            "a range that accepts three values and holds three is one no nudge could prove anything "
+                + "about, so the verb throws before a key is anywhere near the desk — and the "
+                + "sentence it throws with is the whole of what this case reads"),
+        new("PickVerbTests.A_value_the_picker_does_not_hold_is_refused_by_the_verb_too",
+            Unaffected.Refused,
+            "the picker is asked for a value it does not have and the verb refuses at the door, with "
+                + "the count in the sentence. Nothing is sent, so there is no desk in it"),
+        new("TraversalTests.Nudging_something_with_no_range_is_refused", Unaffected.Refused,
+            "a text box offers no range pattern, so the act is refused for the pattern rather than "
+                + "attempted and missed — which is the claim, and it is made before any key exists"),
+        new("ShutPickerTests.A_position_the_picker_does_not_have_is_refused_with_how_many_it_holds",
+            Unaffected.Refused,
+            "position five of a five-value picker, refused with how many it holds — the arithmetic is "
+                + "done on what the control reports and no route to the desk is opened"),
+        new("SelectingTests.Selecting_something_that_is_not_there_is_refused_before_any_of_this",
+            Unaffected.Refused,
+            "an item no picker holds, refused before the pattern route is tried and long before the "
+                + "pointer is allowed to be considered — which is what 'before any of this' names"),
+        new("SynthesisedActTests.An_act_whose_locator_matched_nothing_reports_it_rather_than_throwing",
+            Unaffected.Refused,
+            "the locator matched nothing, so the act is in no window a key could be sent to and says "
+                + "so through `Needed`. WW321: it reports rather than throwing, and the report is the "
+                + "assertion — a desk that was fine would answer the same"),
+        new("SynthesisedActTests.The_trace_line_for_an_act_against_nothing_says_so_instead_of_throwing",
+            Unaffected.Refused,
+            "the same act against nothing, read as a trace step: unchecked, resolving nothing, and "
+                + "naming what it did not find. No desk decides any of those three"),
+        new("MenuTests.An_element_in_no_window_is_a_hole_rather_than_a_menu_that_refused",
+            Unaffected.Refused,
+            "an element in no window is one no menu key could be aimed at, and the absence says that "
+                + "rather than naming the foreground. What this asserts is which absence came back, "
+                + "which is the same on any desk"),
+
+        // The route under test asks the control, and nothing is read off the desk.
+        new("SelectingTests.The_pattern_route_confirms_and_no_pointer_is_reached_for",
+            Unaffected.NoDesk,
+            "the claim is that the pattern route confirmed and the pointer was never reached for — "
+                + "asserted on the route and on `PointerTried`, both of which are false of a case "
+                + "that touched the desk at all"),
+        new("SelectingTests.A_confirmation_that_cannot_pass_is_a_red_and_never_a_quiet_green",
+            Unaffected.NoDesk,
+            "the pointer is refused by the caller, so the only route open is the pattern's and the "
+                + "sentence it comes back with says the pointer was not allowed. A desk this run "
+                + "never had would change nothing about that"),
+        new("SelectingTests.The_second_condition_is_what_says_the_application_agreed_and_not_only_the_control",
+            Unaffected.NoDesk,
+            "both halves are the pattern's: the first refuses the pointer outright, and the second "
+                + "lands because the condition it was given is now true — which the pattern route "
+                + "confirms without a pointer being reached for"),
+        new("SelectingTests.Nothing_here_reports_a_landing_it_did_not_confirm", Unaffected.NoDesk,
+            "both arms assert that nothing landed and that the route was not the pattern's, which is "
+                + "a claim about what the verb refuses to say rather than about what a desk allowed"),
+        new("ShutPickerTests.A_position_is_reached_without_the_case_naming_what_is_there",
+            Unaffected.NoDesk,
+            "the route is asserted to be the pattern's and the picker is asserted to have stayed "
+                + "collapsed, which is the whole point: a position reached without opening anything "
+                + "is a position reached without a desk"),
+        new("MenuTests.An_ordinary_window_is_not_a_menu_the_desk_is_raising", Unaffected.NoDesk,
+            "WW457's control. The reading stops at the control type before it asks about a thread at "
+                + "all, so a window that is not a menu answers zero whoever holds the desk — and zero "
+                + "is what this asserts"),
+
+        // The assertion holds for whatever came back.
+        new("SynthesisedActTests.A_synthesised_act_always_carries_what_it_needed_whichever_way_it_went",
+            Unaffected.Shape,
+            "what it asserts is the agreement between two fields — `Needed.Satisfied` and `Attempted` "
+                + "— and the trace verdict that follows from them. Both arms are written out, and a "
+                + "desk that refused is the arm this case exists to keep honest"),
+        new("SelectingTests.The_pointer_is_reached_for_only_after_the_confirmation_did_not_pass",
+            Unaffected.Shape,
+            "the claim is the order: the pointer was tried, and nothing landed. Whatever the click "
+                + "then met — a shut picker, or a desktop held elsewhere — the case asserts a route "
+                + "of neither and a sentence, which is what the comment beside it already says"),
+        new("AdoptedTrayTests.A_menu_held_open_for_the_harness_takes_no_key_and_the_verb_ran_all_the_same",
+            Unaffected.Shape,
+            "the highlight is asserted to be nothing, and a focus this run does not have answers "
+                + "nothing too — so the desk cannot make this claim false. The act's own attempt is "
+                + "the half that could, and the case reads the foreground and stands down first"),
+
+        // The case takes the desk away itself.
+        new("SelectingTests.A_click_with_the_desktop_elsewhere_says_so_rather_than_claiming_a_landing",
+            Unaffected.Provoked,
+            "a decoy takes the desktop and the case asserts that no landing is claimed — the refused "
+                + "desk is the condition under test, and excusing it would excuse the subject"),
+        new("RefusedForegroundTests.A_nudge_that_could_not_be_sent_is_a_hole", Unaffected.Provoked,
+            "the same decoy, and the claim is the verdict's shape: unchecked, naming the foreground "
+                + "as what was missing. A desk that had been granted would fail this case"),
+        new("TraversalTests.A_nudge_with_the_desktop_elsewhere_sends_nothing", Unaffected.Provoked,
+            "the decoy again, read off the act rather than off a verdict: nothing sent, nothing "
+                + "moved, and a sentence that says which"),
+
+        // The second fact is the same act's, asked a line later.
+        new("MenuTests.A_walk_that_finds_nothing_leaves_the_menu_open_rather_than_resetting_it",
+            Unaffected.TheSameReading,
+            "the walk is excused through `BusyDesk` on the line above, and what the highlight is read "
+                + "for is that the menu survived a miss — a walk that never ran returns before it"),
+        new("MenuTests.Walking_past_a_destructive_entry_highlights_it_and_nothing_more",
+            Unaffected.TheSameReading,
+            "the same shape, and the highlight read at the end is the claim that highlighting is not "
+                + "invoking: the run is still here and Quit is still only highlighted. The walk that "
+                + "put it there is excused above"),
+        new("CaptureRouteTests.A_real_menu_on_a_real_window_routes_to_the_copy_that_can_reach_it",
+            Unaffected.TheSameReading,
+            "the highlight is read inside the sentence this case excuses WITH — a shell that put no "
+                + "menu window up is named as the absence, with what was highlighted in it. The "
+                + "reading is part of the excuse rather than something asserted past one"),
     ]);
 
     /// <summary>Every case in this suite that makes one of those calls, whether or not it excuses.</summary>
@@ -591,7 +754,16 @@ internal static class DeskAsks
     /// </summary>
     private static IEnumerable<string> Reading(string line)
     {
-        foreach (var answer in (string[])["AsAssertion", "AsPrecondition", "AsFinding"])
+        // WW462 added the fourth, and it is WW197's finding one shape over: an act carries what it
+        // needed in `Needed`, so `BusyDesk.Excused(typed.Needed!)` is how every synthesised act in
+        // this suite is excused — and this could not see it. The identifier before `)` is `Needed`
+        // where the null-forgiving `!` does not stop the walk first, and either way what came back
+        // was never the variable the assignment is under.
+        //
+        // It cost nothing until the sweep that keys this list crossed files: the acts were in no
+        // catalogue, so no case was asked about them, and twenty-two cases that plainly excuse the
+        // desk were about to be written down as cases that do not.
+        foreach (var answer in (string[])["AsAssertion", "AsPrecondition", "AsFinding", "Needed"])
         {
             if (Before(line, $".{answer}") is { } named)
                 yield return named;

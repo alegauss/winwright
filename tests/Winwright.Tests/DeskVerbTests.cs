@@ -71,7 +71,16 @@ public sealed class DeskVerbTests
         Assert.DoesNotContain("Inspect.Render", reaching, StringComparer.Ordinal);
         Assert.DoesNotContain("PaintedFrame.Of", reaching, StringComparer.Ordinal);
 
-        Assert.True(reaching.Count < 30, $"{reaching.Count} verbs reach the desk, which is more than expected");
+        // WW462 moved this number and the reason is the measurement beside it. The sweep crossed
+        // files, which is what the task was, and a verb reaching the desk through a call into
+        // another file counts now: 24 became 51. That is 8% of the 636 public members this engine
+        // exports, so the reading still discriminates — and what says so is the four assertions
+        // above rather than the arithmetic, which is why they are the ones that name members.
+        //
+        // The bar is half as much again, so a change that doubles what the sweep names is red here
+        // and somebody has to say why. It is not a budget to spend: every one of the 51 is in a
+        // catalogue with a sentence on it, which is the thing this guard exists to keep true.
+        Assert.True(reaching.Count < 80, $"{reaching.Count} verbs reach the desk, which is more than expected");
     }
 
     [Fact]

@@ -2,8 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW462** (deps: —) **the sweep for verbs that reach the desk walks one file, so a verb reaching it through another is never seen** — `Menu.Enter`, `Expand` and `To` turn on the foreground through `Foreground.Check` and have been invisible to the rule since it was written. → §WW462
-
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158

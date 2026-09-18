@@ -194,56 +194,19 @@ internal static class Synthesising
     /// <summary>
     /// The reach, all the way down and across files.
     /// <para>
-    /// A call to another type is written with the type on it and a call inside a file is not, so an
-    /// edge is taken on <c>Owner.Member(</c> anywhere, and on a bare <c>Member(</c> only within the
-    /// file that declares it. A bare name matched across the whole engine would let any private
-    /// helper called <c>Run</c> stand in for <c>Pointer.Run</c>, and the sweep would report verbs
-    /// that synthesise nothing.
+    /// WW462 moved the walk to <see cref="Checkout.Reaching" />, where <c>DeskVerbs</c> reads it too.
+    /// This one crossed files and that one did not, so the two disagreed about whether
+    /// <c>Menu.Enter</c> reaches the desk — and the argument for crossing, that a call to another
+    /// type is written with the type on it, was written down here and true of both. What stays here
+    /// is the question: which primitives count as synthesised input.
     /// </para>
     /// </summary>
     private static (List<string> Public, List<string> Reaching) Sweep()
     {
-        var members = Checkout.SourcesIn(Checkout.Engine)
-            .SelectMany(one => Checkout.Members(one))
-            .GroupBy(one => one.Named, StringComparer.Ordinal)
-            .ToDictionary(
-                one => one.Key,
-                one => (
-                    Owner: one.First().Owner,
-                    Body: string.Join('\n', one.Select(each => each.Body)),
-                    IsPublic: one.Any(each => each.IsPublic)),
-                StringComparer.Ordinal);
+        var reaching = Checkout.Reaching(Checkout.Engine, Primitives);
 
-        var touching = members
-            .Where(one => Primitives.Any(mark => one.Value.Body.Contains(mark, StringComparison.Ordinal)))
-            .Select(one => one.Key)
-            .ToHashSet(StringComparer.Ordinal);
-
-        for (var grew = true; grew;)
-        {
-            grew = false;
-            foreach (var one in members.Where(one => !touching.Contains(one.Key)).ToList())
-            {
-                if (!touching.Any(deep => Calls(one.Value.Body, one.Value.Owner, deep)))
-                    continue;
-
-                touching.Add(one.Key);
-                grew = true;
-            }
-        }
-
-        var all = touching.OrderBy(one => one, StringComparer.Ordinal).ToList();
-        return (all.Where(one => members[one].IsPublic).ToList(), all);
-    }
-
-    private static bool Calls(string body, string owner, string named)
-    {
-        var dot = named.IndexOf('.', StringComparison.Ordinal);
-        var type = named[..dot];
-        var member = named[(dot + 1)..];
-
-        return body.Contains($"{type}.{member}(", StringComparison.Ordinal)
-            || (string.Equals(type, owner, StringComparison.Ordinal)
-                && body.Contains($"{member}(", StringComparison.Ordinal));
+        return (
+            reaching.Where(one => one.IsPublic).Select(one => one.Named).ToList(),
+            reaching.Select(one => one.Named).ToList());
     }
 }
