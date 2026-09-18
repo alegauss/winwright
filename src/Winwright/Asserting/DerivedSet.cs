@@ -223,6 +223,22 @@ public sealed record DerivedSet
         IReadOnlyList<Provenance> origins,
         IReadOnlyList<LeftOut> excluded)
     {
+        // WW466. The invariant `Origins` documents, enforced where a set is built rather than trusted
+        // where one is read. A well that supplied fewer origins than values sent `Whence` off the end
+        // of the shorter list, and it did so inside the sentence a red is written with — so the only
+        // sweep that could reach it was a failing one, and what the reader got instead of the names
+        // the window was missing was a stack trace about a collection.
+        //
+        // An invariant violation and not a scenario's mistake, so it throws here: nothing a case or a
+        // project declares can produce it, and a well that breaks it is a defect in this file.
+        if (origins.Count != expected.Count)
+        {
+            throw new InvalidOperationException(
+                $"{named}: the set was built with {expected.Count} value(s) and {origins.Count} "
+                    + "origin(s); every value carries where it came from, including the ones that "
+                    + "came from nowhere nameable");
+        }
+
         Named = named;
         Source = source;
         Keys = keys;
@@ -556,8 +572,14 @@ public sealed record DerivedSet
             // Unknown, and nothing left out. A reported value has no line in a file to point at, and
             // the two reasons a declared string is excluded — a placeholder, a note — are both facts
             // about a strings file, so claiming either here would be inventing one.
+            //
+            // WW466. One unknown per value rather than none at all: `Origins` is read by position
+            // against `Expected`, and an empty list here was not "no provenance" but a shorter list
+            // that the first missing value indexed past the end of. Unknown repeated is the truth
+            // about a printed value — it came from the application, which has no lines — where the
+            // empty list was a claim about the set's shape that nothing else in this file believed.
             Provenance.Unknown,
-            new ReadOnlyCollection<Provenance>([]),
+            new ReadOnlyCollection<Provenance>(values.Select(_ => Provenance.Unknown).ToList()),
             new ReadOnlyCollection<LeftOut>([]));
     }
 

@@ -222,4 +222,57 @@ public sealed class ReportedSetTests : IDisposable
 
         Assert.Equal(wrote, set.Expected);
     }
+
+    /// <summary>
+    /// WW466. The red this well can produce, written out. Everything above compares and reads the
+    /// answer off the comparison — which is the reason the defect lived here: the sentence is where
+    /// a missing value is looked up, so a sweep that held never touched it and a sweep that did not
+    /// threw about a collection instead of naming what the window was missing.
+    /// </summary>
+    [Fact]
+    public void A_reported_set_that_finds_something_missing_can_say_which()
+    {
+        var set = DerivedSet.Reported("the profiles", Declaring("profiles", "\"--profiles\""), "profiles");
+        var said = set.Against(["alpha"]).Sentence();
+
+        Assert.Contains("'bravo'", said, StringComparison.Ordinal);
+        Assert.Contains("was not read", said, StringComparison.Ordinal);
+
+        // And no line pretended to. The strings well points at a file, this one has no file to point
+        // at, and a trace invented for a printed value would send a reader looking for a declaration
+        // nobody wrote.
+        Assert.DoesNotContain("'bravo' (", said, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// WW466, the other end. `Origins` is read by position against <c>Expected</c>, so a reported set
+    /// carries one per value — unknown, which is what is true of a value the application printed.
+    /// </summary>
+    [Fact]
+    public void Every_reported_value_carries_a_provenance_that_says_it_came_from_nowhere_nameable()
+    {
+        var set = DerivedSet.Reported("the profiles", Declaring("profiles", "\"--profiles\""), "profiles");
+
+        Assert.Equal(set.Expected.Count, set.Origins.Count);
+        Assert.False(set.Whence("alpha").Known);
+        Assert.False(set.Whence("bravo").Known);
+
+        // The one answer that is not about the set's shape: a value that is not a member at all.
+        Assert.False(set.Whence("charlie").Known);
+    }
+
+    /// <summary>
+    /// WW466 as a containment claim, which is the shape claude-tray's submenu sweep makes: the
+    /// entries are decorated — <c>alpha — used 41%</c> — so equality is false of every one of them,
+    /// and a value in no name at all is the red that has to be printable.
+    /// </summary>
+    [Fact]
+    public void A_containment_claim_over_reported_values_says_which_one_is_in_nothing()
+    {
+        var set = DerivedSet.Reported("the profiles", Declaring("profiles", "\"--profiles\""), "profiles");
+        var said = set.Against(["alpha — used 41%  · active now"], SetMatch.Within).Sentence();
+
+        Assert.Contains("'bravo'", said, StringComparison.Ordinal);
+        Assert.Contains("is in nothing that was read", said, StringComparison.Ordinal);
+    }
 }
