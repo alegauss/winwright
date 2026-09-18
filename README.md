@@ -582,10 +582,23 @@ vocabulary. For those the project says how to ask the application itself:
 and a step names it exactly as it names a strings key — `"covers": "profiles"`. Which well the set
 comes out of is the project's business, for the same reason which strings file it is has always been:
 a case naming the flag would be a case that runs on one checkout. The application prints one value per
-line, and an empty report or a non-zero exit is **broken and not failed**, since an empty expected set
-is met by an empty window. A name declared in both wells derives from the application and says so —
-the set's source names the strings key it shadowed, because a collision is not necessarily a mistake
-and a silent one is.
+line **in UTF-8**, and an empty report or a non-zero exit is **broken and not failed**, since an empty
+expected set is met by an empty window. A name declared in both wells derives from the application and
+says so — the set's source names the strings key it shadowed, because a collision is not necessarily a
+mistake and a silent one is.
+
+Where the read-out answers a translation rather than this machine's data, write `{language}` into the
+arguments and the run fills it in with the language it resolved:
+
+```json
+"reportedSets": { "headers": ["--print-headers", "--lang", "{language}"] }
+```
+
+The project says *how* its application is asked and the run says *which* — the same language the
+strings are read in. Without it the application answers in whatever the desk is set to while the
+window under test was launched in the fixture's language, and a sweep whose whole purpose is that the
+two agree reports a value missing from the window it was on. Writing `--lang en` into the declaration
+instead holds exactly as long as every fixture launches in English.
 
 Most of what an application knows about itself is **not** a set, so `reportedValues` is the scalar
 beside it and `expectReported` names one:

@@ -339,6 +339,12 @@ public sealed record Flags
             "the menu case counts profile entries against the application's own read-out, and profiles are the machine's data rather than the product's vocabulary - so there was no strings file to derive the expected set from and the number would have been typed into the case",
             Draws: false),
         new Flag(
+            "tab-names",
+            "",
+            "print this application's tab headers in the language it was asked for, one per line, and exit - a read-out whose answer is a translation rather than this machine's data",
+            "every read-out here answered the same thing in every language, so a set derived from the application and a window launched in another language could not be made to disagree - which is exactly what they did in claude-tray, where a menu drew `Personal` and the read-out beside it printed `Pessoal`",
+            Draws: false),
+        new Flag(
             "profile",
             "",
             "print the one profile this application is currently using, and exit - the single value a case compares against, where the set flag prints them all",

@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 
 namespace Winwright.Fixture;
 
@@ -87,6 +87,30 @@ public static class Program
         {
             foreach (var profile in Store.Profiles)
                 Console.Out.WriteLine(profile);
+
+            return 0;
+        }
+
+        // WW468. The read-out whose answer is a translation. Everything above answers this machine's
+        // data, which reads the same in every language — so no case here could make a set derived
+        // from the application disagree with a window launched in another one, and the defect was
+        // only ever reachable in claude-tray, where a menu drew `Personal` beside a read-out printing
+        // `Pessoal`.
+        //
+        // The tab headers, because they are already the set the strings well derives from: asked in
+        // the same language the two wells must answer identically, and asked in different ones they
+        // must not. That is the whole claim, and neither half of it can be written by typing a word.
+        if (shapes.Has("tab-names"))
+        {
+            // WW469. The half of the contract an application owes, in the place an adopter copies
+            // from. Without it this printed its ANSI code page, the harness decoded the console's
+            // OEM one, and `Relatório` came back as `Relat¾rio` over the single byte they spell
+            // differently — a set disagreeing with the window about a name they both held.
+            Console.OutputEncoding = new System.Text.UTF8Encoding(false);
+
+            var speaking = Strings.Load(shapes.Value("language") ?? Strings.Cultures[0]);
+            foreach (var header in speaking.Under("tabs"))
+                Console.Out.WriteLine(header);
 
             return 0;
         }

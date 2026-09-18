@@ -284,6 +284,8 @@
 - ✅ **WW323** **a step naming label and expectReported loads, and the report then prints the key against the other well's value** — The eleven lists are one set a step declares itself into, so a pair nobody enumerated is refused by the same rule as every other and the refusal names both fields.
 - ✅ **WW329** **the engine's own read-back poll is what provokes the substitution it then repairs** — The first look waits 50ms: 31 substitutions of 1200 became none, at 7ms a round, and the engine's own path then read 0 of 600 where 15 were due.
 - ✅ **WW466** **A sweep over a reported set that finds anything missing throws instead of reporting the red** — A reported set carries one origin per value, so a sweep that finds something missing names it instead of throwing.
+- ✅ **WW468** **a set read out of the application is derived in the machine's language and compared against a window in the fixture's** — A read-out's arguments take `{language}`, so it answers in the language the window under test was launched in.
+- ✅ **WW469** **a read-out carrying anything but ASCII reaches the expectation as mojibake and reads as missing from the window** — Both ends of the read-out's pipe declare UTF-8, so an accented value arrives as what the application printed.
 
 ## Block G — The scenario — a case is a data file
 

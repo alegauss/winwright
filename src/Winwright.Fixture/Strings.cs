@@ -94,6 +94,40 @@ public sealed class Strings
         return element.ValueKind == JsonValueKind.String ? element.GetString() ?? key : key;
     }
 
+    /// <summary>
+    /// Every string under one key, in the order the file spells them.
+    /// <para>
+    /// WW468. What a read-out needs to answer a <em>set</em> in the language it was asked for, and
+    /// deliberately the same key the strings well derives from: asked the same language the two must
+    /// agree, and asked different ones they must not — which is the whole of the claim and neither
+    /// half of it can be written by typing a word.
+    /// </para>
+    /// <para>
+    /// Strings only, and a key that is not an object answers nothing. The placeholder and note rules
+    /// belong to the derivation and never here: this is what the application says it has, and a
+    /// fixture that pre-filtered its own answer would be agreeing with the rule under test.
+    /// </para>
+    /// </summary>
+    /// <param name="key">The dotted key the values sit under.</param>
+    public IReadOnlyList<string> Under(string key)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+        var element = root;
+        foreach (var step in key.Split('.', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (element.ValueKind != JsonValueKind.Object || !element.TryGetProperty(step, out element))
+                return [];
+        }
+
+        return element.ValueKind != JsonValueKind.Object
+            ? []
+            : element.EnumerateObject()
+                .Where(one => one.Value.ValueKind == JsonValueKind.String)
+                .Select(one => one.Value.GetString()!)
+                .ToList();
+    }
+
     /// <summary>The one line a run prints about which language it is in.</summary>
     public string Sentence() => string.Create(
         CultureInfo.InvariantCulture, $"showing {Culture} from {Path.GetFileName(File)}");

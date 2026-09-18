@@ -1042,7 +1042,7 @@ public static class CaseRun
         {
             try
             {
-                declared = DerivedSet.ReportedValue(step.Name, project, reported);
+                declared = DerivedSet.ReportedValue(step.Name, project, reported, speaking);
             }
             catch (UnderivableSetException underivable)
             {
@@ -1240,7 +1240,7 @@ public static class CaseRun
             // the profiles would be a case that runs on one checkout. A name the project declares as
             // reported is asked of the application; anything else is a key in its strings.
             derived = project.ReportedSets.ContainsKey(key)
-                ? DerivedSet.Reported(step.Name, project, key)
+                ? DerivedSet.Reported(step.Name, project, key, speaking)
                 : DerivedSet.From(step.Name, project, key, speaking);
         }
         catch (UnderivableSetException underivable)
@@ -1326,7 +1326,7 @@ public static class CaseRun
             // per profile is the shape the environment sweep already needs. An asymmetry where one
             // field could reach the reported well and the other could not is one a reader trips on.
             derived = project.ReportedSets.ContainsKey(key)
-                ? DerivedSet.Reported(declared.Name, project, key)
+                ? DerivedSet.Reported(declared.Name, project, key, speaking)
                 : DerivedSet.From(declared.Name, project, key, speaking);
         }
         catch (UnderivableSetException underivable)
@@ -1603,7 +1603,11 @@ public static class CaseRun
         // something the next one does not.
         if (!reported.TryGetValue(name, out var value))
         {
-            value = DerivedSet.ReportedValue(step.Name, project, name);
+            // WW468. The language this substitution was resolved under and not the project's own
+            // reading of it: a locator naming `{report:iconFollows}` and a step claiming a label are
+            // one case, and a run that asked the application in one language and read the strings in
+            // another compares two windows that were never the same one.
+            value = DerivedSet.ReportedValue(step.Name, project, name, language.Culture);
             reported[name] = value;
         }
 

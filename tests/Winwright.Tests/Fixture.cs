@@ -44,6 +44,19 @@ internal static class Fixture
         return strings;
     }
 
+    /// <summary>
+    /// One of those files, by its language tag. WW468: a case comparing the two wells needs the same
+    /// file the application reads, and finding it by the tag is what keeps the comparison honest — a
+    /// path typed here would be a third transcription agreeing with neither.
+    /// </summary>
+    /// <param name="tag">The language tag, as the fixture spells its file names.</param>
+    public static string StringsFor(string tag)
+    {
+        var file = Path.Combine(StringsDirectory(), $"strings.{tag}.json");
+        Assert.True(File.Exists(file), $"the fixture ships no strings for {tag}: {file}");
+        return file;
+    }
+
     /// <summary>The fixture's start info, with whatever flags a case wants.</summary>
     public static ProcessStartInfo Started(params string[] flags)
     {

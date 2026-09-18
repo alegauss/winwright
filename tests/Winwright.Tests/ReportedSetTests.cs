@@ -275,4 +275,86 @@ public sealed class ReportedSetTests : IDisposable
         Assert.Contains("'bravo'", said, StringComparison.Ordinal);
         Assert.Contains("is in nothing that was read", said, StringComparison.Ordinal);
     }
+
+    /// <summary>
+    /// WW468. The claim, and it is one neither half of can be typed: the two wells derive the same
+    /// key, and the language they are asked in is the only thing that can make them disagree.
+    /// </summary>
+    [Fact]
+    public void A_read_out_asked_for_the_runs_language_answers_what_the_strings_for_it_declare()
+    {
+        var project = Declaring("headers", "\"--tab-names\", \"--language={language}\"");
+
+        foreach (var tag in new[] { "en", "pt-BR", "de" })
+        {
+            var speaking = System.Globalization.CultureInfo.GetCultureInfo(tag);
+
+            var reported = DerivedSet.Reported("the headers", project, "headers", speaking);
+            var declared = DerivedSet.From("the headers", Fixture.StringsFor(tag), "tabs");
+
+            Assert.Equal(declared.Expected, reported.Expected);
+
+            // The substitution is answered and not passed on. A reader of a green has to be able to
+            // see which language it was derived in, and `{language}` where the answer goes says
+            // nothing about the run that produced it.
+            Assert.Contains($"--language={tag}", reported.Source, StringComparison.Ordinal);
+            Assert.DoesNotContain("{language}", reported.Source, StringComparison.Ordinal);
+        }
+    }
+
+    /// <summary>
+    /// WW468, and the half that makes the other one mean something. This is the defect as claude-tray
+    /// met it: the window in one language and the read-out in another, and a sweep whose whole
+    /// purpose is that the two agree reporting a value missing from the window it was on.
+    /// </summary>
+    [Fact]
+    public void A_read_out_asked_for_another_language_disagrees_with_the_window_it_is_compared_against()
+    {
+        var project = Declaring("headers", "\"--tab-names\", \"--language={language}\"");
+
+        var drawn = DerivedSet.From("the headers", Fixture.StringsFor("en"), "tabs").Expected;
+        var elsewhere = DerivedSet.Reported(
+            "the headers", project, "headers", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
+
+        var compared = elsewhere.Against(drawn);
+
+        Assert.False(compared.Held);
+        Assert.Contains("Relatório", compared.Missing);
+        Assert.Contains("Report", compared.Unexpected);
+    }
+
+    /// <summary>
+    /// WW469. The claim on its own, because WW468's cases would go green over it: they compare two
+    /// readings of one file, and a corruption on the pipe that is not in the file makes them differ
+    /// without saying why. This names a character and reads it back.
+    /// </summary>
+    [Fact]
+    public void A_read_out_answering_outside_ASCII_arrives_as_what_the_application_printed()
+    {
+        var set = DerivedSet.Reported(
+            "the headers",
+            Declaring("headers", "\"--tab-names\", \"--language={language}\""),
+            "headers",
+            System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
+
+        // The one the two code pages spell differently: 0xF3 is `ó` in Windows-1252 and `¾` in CP850,
+        // which is the whole of the defect in one byte.
+        Assert.Contains("Relatório", set.Expected);
+        Assert.DoesNotContain(set.Expected, one => one.Contains('�', StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// WW468. A declaration naming no substitution is run exactly as it was written, which is every
+    /// project that has ever used this well — the profile read-outs above included.
+    /// </summary>
+    [Fact]
+    public void A_read_out_that_names_no_language_is_run_with_what_the_project_wrote()
+    {
+        var project = Declaring("profiles", "\"--profiles\"");
+
+        Assert.Equal(
+            DerivedSet.Reported("the profiles", project, "profiles").Expected,
+            DerivedSet.Reported(
+                "the profiles", project, "profiles", System.Globalization.CultureInfo.GetCultureInfo("de")).Expected);
+    }
 }

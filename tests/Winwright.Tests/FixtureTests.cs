@@ -2569,8 +2569,17 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         var said = running.StandardOutput.ReadToEnd();
         Assert.True(running.WaitForExit(30_000), "the catalogue never finished printing");
 
+        // WW468. The hyphen is in both patterns or in neither, and it used to be in neither — which
+        // is not the same as agreeing. This one has no closing anchor, so `--tab-names` came back as
+        // `tab`; the one below needs the quote straight after the name, so the same flag matched
+        // nothing at all. The rule then reported a catalogued shape nobody reads, about a shape that
+        // is read and was catalogued, and the name in the sentence was in neither file.
+        //
+        // Widened rather than renamed around. An adopter's read-outs are spelled `--profile-names`
+        // and `--menu-state`, and a proving ground that cannot write one cannot prove the reader
+        // takes one.
         var catalogue = System.Text.RegularExpressions.Regex
-            .Matches(said, "^ *--([A-Za-z]+)", System.Text.RegularExpressions.RegexOptions.Multiline)
+            .Matches(said, "^ *--([A-Za-z][A-Za-z-]*)", System.Text.RegularExpressions.RegexOptions.Multiline)
             .Select(one => one.Groups[1].Value)
             .ToHashSet(StringComparer.Ordinal);
 
@@ -2584,7 +2593,7 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
             var text = string.Join('\n', File.ReadLines(file).Select(Checkout.Spoken));
 
             foreach (System.Text.RegularExpressions.Match one in System.Text.RegularExpressions.Regex
-                .Matches(text, "hapes\\.(?:Has|Value)\\(\"([A-Za-z]+)\""))
+                .Matches(text, "hapes\\.(?:Has|Value)\\(\"([A-Za-z][A-Za-z-]*)\""))
             {
                 read.Add(one.Groups[1].Value);
             }

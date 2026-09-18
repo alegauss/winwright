@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text.Json;
 
 using Winwright.Projects;
@@ -461,8 +461,13 @@ public sealed record DerivedSet
     /// <param name="named">What the value is, as a report names it.</param>
     /// <param name="declaration">The project, for the executable and what it declared.</param>
     /// <param name="under">The name of the reported value, as the project declares it.</param>
+    /// <param name="speaking">The language the run resolved, for <c>{language}</c>. WW468.</param>
     /// <exception cref="UnderivableSetException">Where the project declares no such value, or it cannot be read.</exception>
-    public static string ReportedValue(string named, ProjectDeclaration declaration, string under)
+    public static string ReportedValue(
+        string named,
+        ProjectDeclaration declaration,
+        string under,
+        System.Globalization.CultureInfo? speaking = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(named);
         ArgumentNullException.ThrowIfNull(declaration);
@@ -479,7 +484,7 @@ public sealed record DerivedSet
                 $"{named} is derived from what the application reports under '{key}', and {declaration.Path}: {has}");
         }
 
-        var lines = Printed(named, declaration, key, arguments);
+        var lines = Printed(named, declaration, key, Asking(arguments, declaration, speaking));
 
         return lines.Count switch
         {
@@ -517,8 +522,13 @@ public sealed record DerivedSet
     /// <param name="named">What the set is, as a report names it.</param>
     /// <param name="declaration">The project, for the executable and what it declared.</param>
     /// <param name="under">The name of the reported set, as the project declares it.</param>
+    /// <param name="speaking">The language the run resolved, for <c>{language}</c>. WW468.</param>
     /// <exception cref="UnderivableSetException">Where the project declares no such set, or it cannot be read.</exception>
-    public static DerivedSet Reported(string named, ProjectDeclaration declaration, string under)
+    public static DerivedSet Reported(
+        string named,
+        ProjectDeclaration declaration,
+        string under,
+        System.Globalization.CultureInfo? speaking = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(named);
         ArgumentNullException.ThrowIfNull(declaration);
@@ -535,9 +545,11 @@ public sealed record DerivedSet
                 $"{named} is derived from what the application reports under '{key}', and {declaration.Path}: {has}");
         }
 
+        var asked = Asking(arguments, declaration, speaking);
+
         // Distinct here and not in the reader: a value well reading two identical lines has been asked
         // for one thing and answered twice, which is a refusal rather than a set of one.
-        var values = Printed(named, declaration, key, arguments).Distinct(StringComparer.Ordinal).ToList();
+        var values = Printed(named, declaration, key, asked).Distinct(StringComparer.Ordinal).ToList();
 
         if (values.Count == 0)
         {
@@ -546,8 +558,11 @@ public sealed record DerivedSet
                     + "set is met by an empty window — which is the hole this set exists to close");
         }
 
+        // What was asked and not what was declared, so a reader of the source sees the language this
+        // set was derived in. WW468 is a defect nobody could see in a passing sentence that printed
+        // `{language}` where the answer went.
         var how = $"reported by {System.IO.Path.GetFileName(declaration.Executable)} "
-            + $"{string.Join(" ", arguments)}";
+            + $"{string.Join(" ", asked)}";
 
         // WW290. A name declared in both wells resolves here and shadowed the strings key in silence.
         // Which one wins is not the problem — a rule has to pick — the silence is: the reader of a
@@ -717,6 +732,18 @@ public sealed record DerivedSet
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true,
+
+            // WW469. Named, because neither end named one and they disagreed: the application wrote
+            // its ANSI page and this decoded the console's OEM page — two code pages on one machine,
+            // and `Relatório` arrived as `Relat¾rio` over the single byte 0xF3, which is `ó` in one
+            // and `¾` in the other. The set then disagreed with the window over a name they both
+            // held, and the red said the value was missing.
+            //
+            // UTF-8 and not a guess at the child's. An engine that infers an encoding is one that
+            // corrupts a name quietly, which is the defect rather than the repair — so this is the
+            // one thing a read-out owes, it costs nothing to an application whose values are ASCII,
+            // and an application whose values are not is already being read wrong.
+            StandardOutputEncoding = new System.Text.UTF8Encoding(false),
         };
 
         foreach (var argument in arguments)
@@ -750,6 +777,55 @@ public sealed record DerivedSet
         }
 
         return printed.Split('\n').Select(one => one.Trim()).Where(one => one.Length > 0).ToList();
+    }
+
+    /// <summary>What a project writes in a read-out's arguments to be handed the run's language.</summary>
+    private const string Spoken = "{language}";
+
+    /// <summary>
+    /// The arguments with <c>{language}</c> answered, which is the language this run resolved.
+    /// <para>
+    /// WW468. The two wells were asymmetric and it cost a red that named the wrong thing: the strings
+    /// well derives from the file for the language the run is in, and this one ran the application
+    /// with whatever the desk was set to. Measured in claude-tray, where a read-out printed
+    /// <c>Pessoal</c> on a pt-BR machine and the window it was compared against had been launched
+    /// with <c>--lang en</c> and drew <c>Personal</c> — one label, one key, two files, and a sweep
+    /// whose whole purpose is that the two agree reporting a profile missing from the menu it was on.
+    /// </para>
+    /// <para>
+    /// The project says <em>how</em> its application is asked and this says <em>which</em>. That
+    /// division is the point: an argument list is the one thing the engine cannot guess, and the
+    /// language is the one thing the project cannot know. Writing <c>--lang en</c> into the
+    /// declaration instead would hold exactly as long as every fixture launched in English, which is
+    /// WW240's guess that agreed with an answer written one line above it.
+    /// </para>
+    /// <para>
+    /// One spelling and nothing else. An argument list is a command line rather than a template, and
+    /// braces are ordinary in one, so anything else is passed through untouched — an application
+    /// handed a <c>{lang}</c> somebody meant as this refuses the argument and exits non-zero, which
+    /// this well already reports as an answer it will not take.
+    /// </para>
+    /// </summary>
+    /// <param name="arguments">What the project declared the application is run with.</param>
+    /// <param name="declaration">The project, for the language it resolves where no fixture said.</param>
+    /// <param name="speaking">The language the run resolved, or null where nothing did.</param>
+    private static IReadOnlyList<string> Asking(
+        IReadOnlyList<string> arguments,
+        ProjectDeclaration declaration,
+        System.Globalization.CultureInfo? speaking)
+    {
+        if (!arguments.Any(one => one.Contains(Spoken, StringComparison.Ordinal)))
+            return arguments;
+
+        // The fixture's word where it gave one, and the way the application resolves it where nothing
+        // did — the same two arms a declared string is read under, so a read-out and a label in one
+        // case can never be answered in two languages.
+        var language = speaking is null
+            ? ResolvedLanguage.Resolve(declaration)
+            : ResolvedLanguage.Speaking(speaking);
+
+        return new ReadOnlyCollection<string>(
+            arguments.Select(one => one.Replace(Spoken, language.Culture.Name, StringComparison.Ordinal)).ToList());
     }
 
     /// <summary>
