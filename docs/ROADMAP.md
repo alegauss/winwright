@@ -23,8 +23,8 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, an engine release on nuget.org) **the switch case drives the one path that rewrites a real setting** — Three explanations are ruled out, and the diagnosis that would name the fourth is in the engine and not yet published. → §WW83
-- 📋 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, an engine release on nuget.org) **the environment sweep walks a submenu per sampled mode** — The three fields its claims need are published; the submenu it walks opens only on an engine newer than the one nuget.org carries. → §WW85
-- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
+- ⏳ **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, an engine release on nuget.org) **the environment sweep walks a submenu per sampled mode** — The four sampled modes are written against an engine only this machine has, so they wait on the release that carries `endsWithLabel`. → §WW85
+- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85 ⏳, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
 
@@ -186,6 +186,14 @@
   reads off that desk that the window went down and no longer holds the foreground. Both
   halves off the desk and never off the script's sentence. It cannot be this suite's
   desk: two runs of it cost five reds elsewhere.
+
+## Done when — WW85
+
+- **The four sampled modes run against the engine an adopter restores** Each of agrees,
+  other, outside and unset is a case in claude-tray launched with --sample-env, and the
+  submenu's environment mark is read back where the mode draws one — against a published
+  package rather than the one this machine packs, which is what makes the green an
+  adopter's.
 
 ## Non-goals
 

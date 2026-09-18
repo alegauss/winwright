@@ -29,6 +29,17 @@ public static class AnnouncesPane
     /// <summary>And what one announces while it does not.</summary>
     public const string Unchecked = "Not checked";
 
+    /// <summary>
+    /// What a row appends to its own name while it is the one being followed. WW85.
+    /// <para>
+    /// The second state one row carries, and the one the prefix cannot reach: the mark in front is
+    /// announced in the sentence beside the name, and this is written into the name itself, at the
+    /// end. claude-tray's Profile submenu has both at once — the environment's mark is appended
+    /// where the checked mark is announced in front — so an entry needs a claim about each end.
+    /// </para>
+    /// </summary>
+    public const string Appended = "· active now";
+
     /// <summary>Build the pane and add it to the tab control, selected.</summary>
     /// <param name="panes">The tab control to add it to.</param>
     public static TabItem AddTo(TabControl panes)
@@ -49,7 +60,7 @@ public static class AnnouncesPane
         // the one being followed.
         rows.Children.Add(Row(
             "pessoalRow",
-            "Pessoal — used 41%  · active now",
+            $"Pessoal — used 41%  {Appended}",
             Checked + " · C:\\Users\\someone\\.claude · the tray only"));
 
         // The other one. Same shape, no mark, and a label that begins with the first one's would be
@@ -65,6 +76,16 @@ public static class AnnouncesPane
             "followRow",
             "Follow the active profile",
             Unchecked + " · Checked, the icon moves on its own to whichever profile just had a turn"));
+
+        // WW85's trap, which is the row above it turned around. The appended state is matched at the
+        // end of a name for the same reason the announced one is matched at the front: what stands
+        // beside it is free text. This row carries those words where they are not the state — a
+        // profile whose own label reads that way — so anything matching inside the name rather than
+        // at its end reports this row as the one being followed.
+        rows.Children.Add(Row(
+            "appendedRow",
+            $"{Appended} — used 2%",
+            Unchecked + " · C:\\Users\\someone\\.claude-odd · the tray only"));
 
         // And one that announces nothing at all, so "this row says something beside its name" stays a
         // claim that can be false.

@@ -100,6 +100,83 @@ public sealed class AnnouncedStateTests : IDisposable
         Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
     }
 
+    /// <summary>
+    /// WW85. The second state one entry carries, and it is written into the name rather than
+    /// announced beside it — so the claim is about the end of the reading and the three pieces above
+    /// cannot reach it.
+    /// </summary>
+    [Fact]
+    public void A_state_written_into_the_end_of_a_name_is_claimed_there()
+    {
+        var verdict = Run(
+            """
+            {
+              "locator": "Button[nameStarts=\"Pessoal \"]",
+              "act": "read",
+              "reads": "name",
+              "endsWithLabel": "menu.itemFollowing",
+              "named": "the entry being followed says so at the end of its name"
+            }
+            """);
+
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void The_entry_that_is_not_followed_fails_the_same_claim()
+    {
+        var verdict = Run(
+            """
+            {
+              "locator": "Button[nameStarts=\"Work \"]",
+              "act": "read",
+              "reads": "name",
+              "endsWithLabel": "menu.itemFollowing",
+              "named": "the entry nothing follows says so at the end of its name"
+            }
+            """);
+
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
+
+        // The key and the string both, for the reason the prefix's own red carries them: a state
+        // read in the wrong language and a state nothing is in look the same without them.
+        Assert.Contains("menu.itemFollowing", Said(verdict), StringComparison.Ordinal);
+        Assert.Contains(Fixture.AnnouncedAppended, Said(verdict), StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// WW85, and the reason the claim is a suffix. This row carries those words at the front of its
+    /// own label, where they are not the state — so anything matching inside the name reports a row
+    /// as followed because of what it is called.
+    /// </summary>
+    [Fact]
+    public void A_state_named_at_the_front_of_a_name_rather_than_at_its_end_is_not_that_state()
+    {
+        // By its id and not by the front of its name, which is the one row here where that would be
+        // typing the state's own words into the case.
+        var verdict = Run(
+            """
+            {
+              "locator": "Button#appendedRow",
+              "act": "read",
+              "reads": "name",
+              "endsWithLabel": "menu.itemFollowing",
+              "named": "the entry whose own label reads like the state"
+            }
+            """);
+
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
+    }
+
     [Fact]
     public void An_element_that_says_nothing_beside_its_name_answers_nothing()
     {
@@ -195,7 +272,8 @@ public sealed class AnnouncedStateTests : IDisposable
             $$"""
             {
               "menu.itemChecked": {{System.Text.Json.JsonSerializer.Serialize(Fixture.AnnouncedChecked)}},
-              "menu.itemUnchecked": {{System.Text.Json.JsonSerializer.Serialize(Fixture.AnnouncedUnchecked)}}
+              "menu.itemUnchecked": {{System.Text.Json.JsonSerializer.Serialize(Fixture.AnnouncedUnchecked)}},
+              "menu.itemFollowing": {{System.Text.Json.JsonSerializer.Serialize(Fixture.AnnouncedAppended)}}
             }
             """);
 

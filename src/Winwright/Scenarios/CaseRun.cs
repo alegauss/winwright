@@ -1012,7 +1012,7 @@ public static class CaseRun
         // application that is: the refusal names the key and the file, and it arrives before anything
         // is compared rather than as a reading that answered nothing.
         string? declared = null;
-        if ((step.Label ?? step.NotLabel ?? step.BeginsWithLabel) is { } declaring)
+        if ((step.Label ?? step.NotLabel ?? step.BeginsWithLabel ?? step.EndsWithLabel) is { } declaring)
         {
             try
             {
@@ -2036,7 +2036,7 @@ public static class CaseRun
         // negative says so through the same trick `discloses` uses to state a negative to a machine
         // that compares for equality.
         if (step.Label is not null || step.NotLabel is not null || step.BeginsWithLabel is not null
-            || step.ExpectReported is not null)
+            || step.EndsWithLabel is not null || step.ExpectReported is not null)
         {
             return Against(step, subject, acted, declared);
         }
@@ -2154,7 +2154,7 @@ public static class CaseRun
     private static Landed Against(StepDeclaration step, Subject subject, ActResult? acted, string? declared)
     {
         var saw = acted?.Element;
-        var key = step.Label ?? step.NotLabel ?? step.BeginsWithLabel ?? step.ExpectReported;
+        var key = step.Label ?? step.NotLabel ?? step.BeginsWithLabel ?? step.EndsWithLabel ?? step.ExpectReported;
 
         // WW294 joins the positive arm: it is `expect` with the value read from the application, so
         // the comparison is the one `label` already makes and only where the value came from differs.
@@ -2163,11 +2163,14 @@ public static class CaseRun
         //
         // WW83 joins it too, and only the comparison below differs: it is the same declared string,
         // claimed of the front of the reading rather than of the whole of it.
-        var wanted = (step.NotLabel, step.BeginsWithLabel, step.ExpectReported) switch
+        // WW85 joins the same arm at the other end: a state an application appends rather than
+        // announces in front, which is the second mark one entry can carry.
+        var wanted = (step.NotLabel, step.BeginsWithLabel, step.EndsWithLabel, step.ExpectReported) switch
         {
-            (not null, _, _) => $"anything but '{key}' — {declared}",
-            (_, not null, _) => $"a reading beginning with '{key}' — {declared}",
-            (_, _, not null) => $"the '{key}' this application reports — {declared}",
+            (not null, _, _, _) => $"anything but '{key}' — {declared}",
+            (_, not null, _, _) => $"a reading beginning with '{key}' — {declared}",
+            (_, _, not null, _) => $"a reading ending with '{key}' — {declared}",
+            (_, _, _, not null) => $"the '{key}' this application reports — {declared}",
             _ => $"'{key}' — {declared}",
         };
 
@@ -2201,6 +2204,17 @@ public static class CaseRun
                         && now.StartsWith(declared, StringComparison.Ordinal);
 
                     return begins ? wanted : now;
+                }
+
+                // WW85, and the empty string is refused here for the reason it is above: a key
+                // declaring nothing ends every reading there is, so answering the claim would buy the
+                // same unearned green a prefix of nothing would.
+                if (step.EndsWithLabel is not null)
+                {
+                    var ends = !string.IsNullOrEmpty(declared)
+                        && now.EndsWith(declared, StringComparison.Ordinal);
+
+                    return ends ? wanted : now;
                 }
 
                 var same = string.Equals(now, declared, StringComparison.Ordinal);

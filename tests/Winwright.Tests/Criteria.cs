@@ -279,6 +279,14 @@ internal static class Criteria
         // Kept apart rather than sorted into the blocks they sit in, because they answer a different
         // question. A block's criterion decides whether the block is finished; these say how much of
         // one task is left, and a reader counting a block's is not counting these.
+        new("WW85", "The four sampled modes run against the engine an adopter restores", "",
+            Unshown.NotBuilt,
+            "WW85 landed the half this suite can hold: `endsWithLabel`, the claim about the end of a "
+                + "reading, driven on the announcing pane. The four cases are claude-tray's and the "
+                + "engine they need is packed on one machine rather than published — so what would "
+                + "read this back cannot be written in the repository it belongs in, and nothing "
+                + "here can drive that tray's submenu"),
+
         new("WW384","The minimising arm is run against a real window, on a desk it may take", "", Unshown.NotYet,
             "WW384 made the arm reachable and wrote the case, and the case cannot live here: the "
                 + "repair ends in Win+D, whose foreground lock then refuses this process everything "

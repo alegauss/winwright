@@ -384,6 +384,23 @@ public sealed record StepDeclaration
     public string? BeginsWithLabel => Wrote.Trimmed("beginsWithLabel");
 
     /// <summary>
+    /// The key whose declared string this step claims the reading ends with. WW85.
+    /// <para>
+    /// The same claim as <see cref="BeginsWithLabel"/>, at the other end, because an application
+    /// that announces one state in front announces another behind. Measured in claude-tray: a
+    /// profile entry carries the checked mark as a word in front of its sentence and the
+    /// environment's mark as a suffix — <c>Pessoal — used 41%  · set in Windows</c> — so the two
+    /// states on one entry need the two ends.
+    /// </para>
+    /// <para>
+    /// A suffix and never a containment, which is the prefix's own argument unchanged: what stands
+    /// before the mark is a name and a figure this run cannot predict, and a containment would
+    /// report the state as set because the free text happened to hold the word.
+    /// </para>
+    /// </summary>
+    public string? EndsWithLabel => Wrote.Trimmed("endsWithLabel");
+
+    /// <summary>
     /// Whether this step claims its locator matches nothing.
     /// <para>
     /// WW318. Every other claim reads a subject, and a locator matching nothing has no subject to
@@ -549,6 +566,7 @@ public sealed record StepDeclaration
         ("label", "the reading is the '{0}' string"),
         ("notLabel", "the reading is not the '{0}' string"),
         ("beginsWithLabel", "the reading begins with the '{0}' string"),
+        ("endsWithLabel", "the reading ends with the '{0}' string"),
     ];
 
     /// <summary>

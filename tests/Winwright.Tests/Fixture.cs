@@ -110,6 +110,13 @@ internal static class Fixture
     public const string AnnouncedUnchecked = "Not checked";
 
     /// <summary>
+    /// What it appends to the name of the row being followed. WW85, duplicated for the same reason
+    /// as the two above and safe in the same direction: the two disagreeing fails the claim about
+    /// the end of a name, which is the claim under test.
+    /// </summary>
+    public const string AnnouncedAppended = "· active now";
+
+    /// <summary>
     /// What the shell calls the icon a <c>--tray</c> launch puts up. WW451.
     /// <para>
     /// The tip carries the launched process, which is WW126's rule and matters more across a process

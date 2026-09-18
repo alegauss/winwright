@@ -423,7 +423,11 @@ family: the reading must **begin** with the declared string, for a state announc
 of a sentence. A prefix and never a containment, and that is the announcing application's own rule
 rather than a convenience — the word goes in front precisely because the sentence behind it is free
 text that may contain either word, so a containment would report a switch as on because its
-explanation says what turning it on would do.
+explanation says what turning it on would do. `endsWithLabel` is the fourth and the same claim at the
+other end, for a state an application **appends**: a menu entry reading `Pessoal — used 41% · set in
+Windows` carries one mark in front and another behind, and the two ends is what reading both takes.
+The suffix is as exact as the prefix and for the same reason — what stands before it is a name and a
+figure no case can predict.
 
 `spoken` is the tenth and is about the tree under the locator rather than about any one reading: that
 everything under it which announces anything announces a **name** — never a font glyph, a template
