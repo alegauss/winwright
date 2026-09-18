@@ -157,8 +157,9 @@ internal static class Criteria
         new("E", "Every arm of a capture refusal has something that provokes it",
             "CaptureArmTests.Every_arm_the_engine_declares_is_paired_with_something",
             null, "WW199: at the arm, and 'something' rather than 'a fixture' — the check under the "
-                + "old wording asserted that named flags exist, never that every refusal names one, "
-                + "and three of the six name a defect no proving ground can be"),
+                + "old wording asserted that named flags exist, never that every refusal names one. "
+                + "Three of the eight have a shape and the rest name a defect no proving ground can "
+                + "be, WW465's among them: the take moves the window itself"),
 
         // --- F, assert ------------------------------------------------------------------------------
         new("F", "No expectation is typed twice",

@@ -116,6 +116,10 @@ internal static class Deadlines
             + "explain: what it owns is the number, and what it is waiting for belongs to whoever asked"),
         new("DeadlineTests.cs", 1, "never nothing, on purpose: the one case here that drives the collapse "
             + "this whole catalogue exists because of, so the behaviour is stated and not discovered"),
+        new("ThroughoutTests.cs", 1, "false while the window is still where its frame was read from. "
+            + "WW465: the case moves it inside the take and then waits for the move to be observable, "
+            + "so what the deadline buys is a compositor that has not caught up yet — and spending it "
+            + "in full would mean the move did not happen, which fails the case on the line after"),
         new("SlowMachineTests.cs", 2, "the two ends, written as the constants they are: one look is "
             + "always false and one is always true, because what these cases drive is the machinery "
             + "itself — a deadline spent in full and a deadline answered on the first poll"),

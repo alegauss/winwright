@@ -93,6 +93,21 @@ public enum WrongCapture
 
     /// <summary>The picture is one flat colour, which is not a picture of a window.</summary>
     OneFlatColour,
+
+    /// <summary>
+    /// The window was not where the copy read by the time it was read. WW465, and it is
+    /// <see cref="DeskChanged" />'s question asked about the subject rather than about an intruder:
+    /// the rectangle comes from the window before the take, and a window that moves inside it leaves
+    /// a copy of whatever the desktop has there.
+    /// <para>
+    /// Measured against a tray menu on a guest. A <c>ContextMenuStrip</c> gets its window at its
+    /// final size and a default position and <c>Show</c> moves it afterwards, so the copy was of the
+    /// desktop — and it passed every other question this type asks: the right process, a popup route
+    /// that said why, nothing over the region either side, no glass, and far more than one colour,
+    /// wallpaper being a photograph.
+    /// </para>
+    /// </summary>
+    WindowMoved,
 }
 
 /// <summary>
@@ -138,6 +153,16 @@ public sealed record CaptureReceipt
     /// other reading here is null rather than reassuring.
     /// </summary>
     public SeeThrough? Layers { get; init; }
+
+    /// <summary>
+    /// Where the window was when the take finished, where a caller read it. WW465.
+    /// <para>
+    /// <see cref="Frame" /> is where it was when the rectangle was chosen, and a copy is of a
+    /// rectangle rather than of a window — so the two together are what says the picture is of the
+    /// thing it names. Null where nobody looked, like every other reading here.
+    /// </para>
+    /// </summary>
+    public PaintedFrame? Settled { get; init; }
 
     /// <summary>
     /// What counting the picture's colours said, where a caller counted. Null where nobody did,
@@ -258,12 +283,18 @@ public sealed record CaptureReceipt
         else
             take(path);
 
+        // WW465. Where the window is now, against where it was when the rectangle was chosen. The
+        // readings above ask what else was in the frame; this one asks whether the subject still is,
+        // and nothing did — measured on a tray menu that got its window at its final size, in a
+        // default position, and was moved by `Show` before the copy ran.
+        var settled = copied ? PaintedFrame.Of(window.Handle) : null;
+
         // And after, because this one is about the file. A capture that was never written is not a
         // flat one, and Colours refuses rather than answering — so the absence reaches the caller
         // as itself instead of as a picture of one colour.
         var colours = File.Exists(path) ? Capturing.Colours.In(path) : null;
 
-        return Of(path, window, target, frame, route, over, glass, colours, layers, surface);
+        return Of(path, window, target, frame, route, over, glass, colours, layers, surface, settled);
     }
 
     /// <summary>
@@ -321,6 +352,16 @@ public sealed record CaptureReceipt
     /// the three above are.
     /// </para>
     /// </param>
+    /// <param name="settled">
+    /// Where the window was when the take finished, where a caller read it.
+    /// <para>
+    /// WW465. Every other reading here asks what else was in the frame; this one asks whether the
+    /// subject still was. A copy is of a rectangle and the rectangle comes from the window before the
+    /// take, so a window that moves inside it leaves a picture of the desktop — which passed every
+    /// question this type asks, measured. Left null by a caller that did not read it, and a caller
+    /// that passed no <paramref name="frame" /> has nothing to compare it against.
+    /// </para>
+    /// </param>
     public static CaptureReceipt Of(
         string path,
         TopLevelWindow window,
@@ -331,7 +372,8 @@ public sealed record CaptureReceipt
         Glass? glass = null,
         ColourCheck? colours = null,
         SeeThrough? layers = null,
-        bool surface = false)
+        bool surface = false,
+        PaintedFrame? settled = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(window);
@@ -395,6 +437,28 @@ public sealed record CaptureReceipt
                 WrongCapture.LayerTransmits,
                 $"the capture is of {window}, and {layers.Sentence()}{CaptureRoute.StillReachable(window)}");
 
+        // WW465, and before the colour count because it is the cause of the shape that count would
+        // report. A copy is of a rectangle, and the rectangle was read off the window before the
+        // take — so a window that moved inside it leaves a picture of the desktop, which is a
+        // perfectly good photograph and passes everything above.
+        //
+        // Measured against a tray menu on a guest: a `ContextMenuStrip` gets its window at its final
+        // size and a default position and `Show` moves it afterwards, so the file was the guest's
+        // wallpaper and the receipt was clean. The case that met it had to guard the gap itself, with
+        // a locator an adopter would have to know to write — which is the asymmetry this closes: the
+        // refusals are the engine's, and this one was not.
+        //
+        // Both rectangles named, the way WW245 insists an absence names both sides: a reader handed
+        // "the window moved" with nowhere to compare has to go and look.
+        if (frame is not null && settled is not null && settled.Painted != frame.Painted)
+        {
+            throw new WrongCaptureException(
+                WrongCapture.WindowMoved,
+                $"the capture is of {window}, and the rectangle copied is not where the window is: "
+                    + $"{frame.Painted} when the frame was read and {settled.Painted} when the take "
+                    + "finished, so the picture is of whatever the desktop has there.");
+        }
+
         // WW42. A flat rectangle is not a picture of a window, and the session that produced one
         // had everything present and nothing rendering — so the file was written and the run exited
         // zero. Counted rather than scanned for ink: a screen copy has no alpha channel, and the
@@ -418,7 +482,11 @@ public sealed record CaptureReceipt
             throw new WrongCaptureException(
                 WrongCapture.OneFlatColour, $"the capture is of {window}, and {colours.Sentence()}");
 
-        return new CaptureReceipt(path, window, target, frame, route, over, glass, colours) { Layers = layers };
+        return new CaptureReceipt(path, window, target, frame, route, over, glass, colours)
+        {
+            Layers = layers,
+            Settled = settled,
+        };
     }
 
     /// <summary>

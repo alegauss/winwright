@@ -74,6 +74,12 @@ internal static class CaptureArms
             "a picture of one colour is a file, and no window has to exist for one — the session "
                 + "this was measured on is a display rendering nothing, which no fixture can be",
             "FixtureTests.A_capture_that_is_one_flat_colour_is_refused_rather_than_reported_as_a_picture"),
+        new(WrongCapture.WindowMoved, "", Without.NoShape,
+            "WW465: the take itself moves the window off the rectangle its frame was read from, "
+                + "which is the defect performed rather than a race waited for — a dialog this "
+                + "process owns is enough, and the shape that produced it in the wild is a menu "
+                + "created in one place and shown in another",
+            "ThroughoutTests.A_window_that_moved_inside_the_take_is_refused_because_the_copy_is_of_where_it_was"),
     ]);
 
     /// <summary>Every arm the engine declares, read off the enum rather than off the list above.</summary>

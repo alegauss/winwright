@@ -69,6 +69,58 @@ public sealed class ThroughoutTests
         }
     }
 
+    /// <summary>
+    /// WW465, and the same instant read about the subject rather than about an intruder. The
+    /// rectangle a copy reads comes off the window before the take, so a window that moves inside it
+    /// leaves a picture of the desktop — which passed every other question this type asks, measured
+    /// against a tray menu whose window is created in one place and shown in another.
+    /// </summary>
+    [Fact]
+    public void A_window_that_moved_inside_the_take_is_refused_because_the_copy_is_of_where_it_was()
+    {
+        using var dialog = PumpedDialog.Open("winwright statistics");
+        var window = Found(dialog);
+
+        var frame = PaintedFrame.Of(window.Handle);
+        Assert.NotNull(frame);
+
+        // The take writes nothing, which is honest here for the reason the case above gives: this is
+        // about the two readings either side of it. What it does is move the window off the
+        // rectangle, and then wait for the move to be observable — performed rather than raced, so a
+        // slow compositor is a longer case and never a different verdict.
+        var refused = Assert.Throws<WrongCaptureException>(() => CaptureReceipt.Taking(
+            Path.Combine(Path.GetTempPath(), "winwright-moved-never-written.png"),
+            window,
+            AppTarget.AttachTo(Environment.ProcessId),
+            _ => MoveOff(dialog.Frame, frame),
+            frame));
+
+        Assert.Equal(WrongCapture.WindowMoved, refused.Arm);
+        Assert.Contains("is not where the window is", refused.Message, StringComparison.Ordinal);
+
+        // Both rectangles, which is what a reader handed this needs: where the copy read, and where
+        // the window went.
+        Assert.Contains(frame.Painted.ToString(), refused.Message, StringComparison.Ordinal);
+    }
+
+    /// <summary>Move it somewhere else and wait until the frame says so.</summary>
+    /// <param name="window">The window to move.</param>
+    /// <param name="was">Where it was when the rectangle was read.</param>
+    private static void MoveOff(nint window, PaintedFrame was)
+    {
+        SetWindowPos(window, 0, was.Painted.Left + 120, was.Painted.Top + 120, 0, 0, MoveOnly);
+
+        Winwright.Locating.Attempt.UntilTrue(
+            () => PaintedFrame.Of(window) is { } now && now.Painted != was.Painted, 2000, 25);
+    }
+
+    /// <summary>SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE: a move and nothing else.</summary>
+    private const uint MoveOnly = 0x0001 | 0x0004 | 0x0010;
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool SetWindowPos(nint window, nint after, int x, int y, int cx, int cy, uint flags);
+
     [Fact]
     public void A_region_nothing_arrived_over_is_clear_at_both_ends()
     {
