@@ -5,7 +5,7 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-- 📋 **WW472** (deps: —) **the runner says a shell holding the desk clears itself, and carries the tree anyway when it does not** — Two runs were spent on a guest whose taskbar held the foreground: 136 and 137 checks excused where nine is healthy, five reds about nothing, and an hour. → §WW472
+- ⏳ **WW472** (deps: —) **the runner says a shell holding the desk clears itself, and carries the tree anyway when it does not** — Refusing before the tree is carried: no reading tells the two desks apart, and a window a vmrun-launched program puts up is refused the foreground even on a clear desk. → §WW472
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -195,6 +195,14 @@
   submenu's environment mark is read back where the mode draws one — against a published
   package rather than the one this machine packs, which is what makes the green an
   adopter's.
+
+## Done when — WW472
+
+- **A desk no fixture could take refuses the run before the tree is carried** Something
+  the runner can run before the carry answers what a fixture would: taken where a
+  fixture takes the desk, refused where the guest's shell holds it. Both arms measured
+  rather than argued — the two mechanisms tried so far were refuted on the first of
+  them.
 
 ## Non-goals
 

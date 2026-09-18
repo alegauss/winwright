@@ -31,27 +31,31 @@ it.
 ### §WW472 A taskbar that held the desk for two whole runs
 
 Measured twice while shipping WW470, at 24 and 30 minutes a time. The guest's taskbar
-held the foreground before either run started; `desk-probe.ps1` classified it `shell`,
-which `desk-clear.ps1` deliberately never touches — WW330's rule that a run may not put
-the shell away — and the runner printed *the first case to take the foreground clears
-it* and went on.
+held the foreground before either run started; `desk-probe.ps1` called it `shell`, which
+`desk-clear.ps1` deliberately never touches — WW330's rule that a run may not put the
+shell away — and the runner printed *the first case to take the foreground clears it*
+and went on.
 
 It did not clear. `PumpedDialog.TakeTheDesktop` polls `SetForegroundWindow` and Windows
-refused it for the whole of both runs, so 136 and then 137 checks were excused where a
-healthy run excuses nine, and five cases that cannot excuse a lost desk went red about
-nothing. The exit code says the tree is broken; the same suite passed 2187 of 2187 the
-moment the shell was restarted from the host.
+refused it for both runs, so 136 and then 137 checks were excused where a healthy run
+excuses nine, and five cases that cannot excuse a lost desk went red about nothing. Both
+exit codes said the tree was broken; the same suite passed 2187 of 2187 once the shell
+was restarted.
 
-The premise is wrong, not the refusal to touch the shell. A `Shell_TrayWnd` merely
-holding the foreground on an empty desktop is ordinary and clears on the first window
-opened. One that is keyboard-*activated* — this reading also had `Button #StartButton`
-holding the focus, and no chevron on the taskbar — is a stuck foreground lock nothing
-inside the guest clears.
+The sentence beside the failure landed. What is left is refusing before the carry, and
+two mechanisms were measured and refuted:
 
-So tell the two apart and let only the second stop the run: read the focus beside the
-foreground, and where the shell holds both, refuse before the tree is carried. Half an
-hour spent reporting a healthy suite as a failed one is the expensive outcome; the cheap
-one is a sentence naming what holds the desk.
+**The focus is not the discriminator.** This section proposed reading it beside the
+foreground. `GetGUIThreadInfo` on the guest's idle desktop answers a focus of its own —
+`Progman` with a `SysListView32` focused — so refusing on a foreground thread that holds
+one would refuse every healthy run.
+
+**A window the runner puts up is not a fixture.** A script carried in and run through
+`runProgramInGuest -interactive` was refused the foreground on a desk reading `clear`,
+where every fixture takes it. So it predicts nothing about the test host and cannot
+stand in for the premise.
+
+What is wanted is a stand-in that behaves as a fixture does.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

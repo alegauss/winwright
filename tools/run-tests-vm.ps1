@@ -1185,6 +1185,22 @@ switch ($desk.State) {
     }
 }
 
+# WW472. What the desk read when this run went ahead, kept for the words at the end.
+#
+# The arms above proceed on `shell` and on `stale`, each for a reason that is right: the shell asks
+# nothing, and a minimised window is nothing anybody can answer. What neither of them establishes is
+# that a fixture will be given the foreground, and twice on 2026-09-18 it was not — the guest's
+# taskbar held the desk, `SetForegroundWindow` was refused to every fixture for two whole runs, and
+# they came back with 136 and then 137 checks excused against a healthy nine, plus five cases that
+# cannot excuse a lost desk going red about nothing. Both exit codes blamed the tree. The same suite
+# passed 2187 of 2187 the moment the guest's shell was restarted.
+#
+# So the line the reader needs is at the end and not sixty lines of build output above it. Refusing
+# before the carry is the better answer and is not this: no reading tells the two desks apart, and a
+# window put up by a program vmrun launched is refused the foreground even on a desk that reads
+# clear, so it predicts nothing about what a fixture inside the test host can do.
+$script:DeskWhenItStarted = $desk.State
+
 Push-Location $script:Tree
 try {
     # -c and -o together, minus what .gitignore covers: tracked files plus the untracked ones that
@@ -1607,6 +1623,20 @@ if ($Screenshot) {
     $capture = Invoke-VmRun -Guest -Arguments @('captureScreen', $vmxPath, $shot)
     if ($capture.Ok) { Write-Host "  desk        $shot" }
     else { Write-Host "  captureScreen failed: $($capture.Output)" -ForegroundColor Yellow }
+}
+
+# WW472. Said beside the failure and never instead of reading it: a run carried onto a desk
+# something was holding can be red about that desk, and the exit code says nothing about which.
+# Only where it failed, because a run that passed on such a desk has already answered the question.
+if ($code -ne 0 -and $script:DeskWhenItStarted -in @('shell', 'stale')) {
+    Write-Host (
+        "  desk        this run was carried onto a desk that read '$script:DeskWhenItStarted' " +
+        'rather than clear, and the foreground was never this run''s to start with. A shell or a ' +
+        'window that keeps it refuses it to every fixture, so the run excuses its desk checks and ' +
+        'reds the few that cannot excuse one — which reads as a broken tree and is not. Read the ' +
+        'excused count above against the runs before it; a number several times theirs is this. ' +
+        'Restarting the guest shell is what cleared it when WW472 measured this twice.'
+    ) -ForegroundColor Yellow
 }
 
 Write-Host ''

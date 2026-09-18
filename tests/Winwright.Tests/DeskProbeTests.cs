@@ -669,6 +669,35 @@ public sealed class DeskProbeTests
 
     [Fact]
     [Trait(NoDesk.Key, NoDesk.Free)]
+    public void A_run_carried_onto_a_desk_something_was_holding_says_so_beside_its_failure()
+    {
+        // WW472. The two arms that proceed are right to — the shell asks nothing and a minimised
+        // window is nothing anybody can answer — and neither establishes that a fixture will be
+        // given the foreground. Measured twice: a guest whose taskbar held the desk refused it to
+        // every fixture for two whole runs, which came back with 136 and 137 checks excused against
+        // a healthy nine, and both exit codes blamed the tree.
+        //
+        // So the reader gets the sentence beside the failure rather than sixty lines of build
+        // output above it. Read here rather than trusted to whoever writes the next arm: a line
+        // that only the runner's author knows about is the one that stops being printed.
+        var runner = Runner();
+
+        Assert.Contains("DeskWhenItStarted", runner, StringComparison.Ordinal);
+
+        // Only where it failed, and only for the two states a run is carried onto. A desk that read
+        // clear has nothing to explain, and a run that passed has already answered the question.
+        Assert.Contains(
+            "if ($code -ne 0 -and $script:DeskWhenItStarted -in @('shell', 'stale'))",
+            runner,
+            StringComparison.Ordinal);
+
+        // And it points at the count that settles it rather than asserting the desk was to blame,
+        // which is a thing this file cannot know and the reader can.
+        Assert.Contains("excused count above against the runs before it", runner, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void Every_answer_is_produced_by_running_the_classification_and_not_by_reading_it()
     {
         // WW345, and the case the three above could not be. Every state the runner switches on,

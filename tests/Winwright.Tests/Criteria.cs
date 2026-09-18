@@ -293,6 +293,15 @@ internal static class Criteria
                 + "for minutes — measured twice, at five reds in two other classes each time. What "
                 + "it is owed is a desk the suite may take, and not a case somebody forgot to write"),
 
+        new("WW472", "A desk no fixture could take refuses the run before the tree is carried", "",
+            Unshown.NotBuilt,
+            "the half that landed is the sentence beside the failure, which `DeskProbeTests` reads "
+                + "out of the runner. The refusal itself is not built, and the two mechanisms tried "
+                + "were measured and refuted: the foreground thread's focus is non-empty on an idle "
+                + "desktop, and a window a vmrun-launched program puts up is refused the foreground "
+                + "on a desk that reads clear. What it is owed is a stand-in that behaves as a "
+                + "fixture does, and until there is one there is nothing to read back"),
+
         // WW457's criterion stood here and went with the line: a tray menu takes a key wherever it
         // stands now, read back against both kinds by `AdoptedTrayTests` and checked at the ship.
         // Deleted rather than restated, which is what this pair of checks is for — the roadmap no
