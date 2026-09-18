@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'The version to publish. Leave empty to raise the last number of what the tree declares.'
+        description: 'The version to publish. Leave empty to take what the tree declares if nuget.org has not got it, and to raise the last number if it has.'
         required: false
         type: string
 
@@ -89,11 +89,43 @@ jobs:
           if ($asked) {
             $now = $asked
           }
-          elseif ($was -match '^(.*?)(\d+)$') {
-            $now = $Matches[1] + ([int]$Matches[2] + 1)
-          }
           else {
-            throw "'$was' ends in no number to raise; name a version in the workflow input instead"
+            # WW467. Raising is right only while the tree declares what is already out, and the local
+            # package loop leaves it declaring what is not: `pack-local.cmd` packs whatever this file
+            # says, so the number goes up before packing and stays unpublished until a release spends
+            # it. Raising that tree spends the number after it, and the version somebody packed,
+            # restored and drove an adopter against is never published at all.
+            #
+            # So the tree is not asked what was published — nuget.org is. The two answers differ for
+            # exactly one reason and it is the reason this clause exists.
+            #
+            # Refused rather than guessed where the index cannot be read: a publish that assumed the
+            # wrong half here spends a number, and a number is the one thing this workflow cannot take
+            # back. The listing is versions only, so 404 is a package that has never been published —
+            # which is the first release and a real answer rather than a failure.
+            $listing = 'https://api.nuget.org/v3-flatcontainer/winwright/index.json'
+            try {
+              $published = (Invoke-RestMethod -Uri $listing -MaximumRetryCount 3 -RetryIntervalSec 5).versions
+            }
+            catch [System.Net.WebException], [Microsoft.PowerShell.Commands.HttpResponseException] {
+              if ($_.Exception.Response.StatusCode -ne 404) {
+                throw "could not read $listing to find out whether '$was' is published: $($_.Exception.Message)"
+              }
+
+              $published = @()
+            }
+
+            if ($published -notcontains $was) {
+              # Packed locally and not yet out. Publishing it is the whole point of having raised it.
+              Write-Host "nuget.org has not got $was, so this publishes what the tree declares"
+              $now = $was
+            }
+            elseif ($was -match '^(.*?)(\d+)$') {
+              $now = $Matches[1] + ([int]$Matches[2] + 1)
+            }
+            else {
+              throw "'$was' ends in no number to raise; name a version in the workflow input instead"
+            }
           }
 
           Write-Host "$was -> $now"

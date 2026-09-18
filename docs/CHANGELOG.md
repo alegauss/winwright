@@ -429,6 +429,7 @@
 - ✅ **WW454** **the switch case and the store bracket were written against an engine claude-tray could not restore** — The switch case, the read-out it picks with and the suite inside the store comparison are in claude-tray at ff727c1, and nine of its ten tests pass in the guest.
 - ✅ **WW452** **no case reads inside a tray menu another process owns, which is the step claude-tray's own case fails on** — Two cases resolve `Menu > MenuItem[name=...]` against the desktop into a launched tray's menu, both kinds — so the boundary is not what stops claude-tray one step in.
 - ✅ **WW85 (the claim about a name's end)** **the environment sweep walks a submenu per sampled mode** — The engine claims the end of a reading now: `endsWithLabel`, for a state an application appends rather than announces in front, driven against a row whose own label reads like the state.
+- ✅ **WW467** **publishing from a tree that declares an unpublished version spends a second number on the same release** — An empty input publishes what the tree declares when nuget.org has not got it, so a locally packed version is the one that ships.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
