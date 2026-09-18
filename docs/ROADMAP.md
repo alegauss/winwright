@@ -10,7 +10,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW463** (deps: —) **nothing says whether the entry a submenu step hands back is the submenu's or the parent it was expanded from** — A step's expectation names the entry under the one it expanded, so a read-back that stopped at the parent fails a step whose act landed. → §WW463
 - 📋 **WW464** (deps: —) **the reference tells an author a submenu locator may name any element of the window, which the walk stopped honouring** — An author who names the window gets Right pressed at whichever entry the menu opened on, which is the defect WW83 measured from the other side. → §WW464
 
 ## Block E — Capture — the picture that proves what it photographed

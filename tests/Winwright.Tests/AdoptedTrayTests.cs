@@ -318,6 +318,16 @@ public sealed class AdoptedTrayTests : IDisposable
                     + $"{Environment.NewLine}the menu reads as highlighting "
                     + $"{Menu.Highlighted(subject.Window) ?? "nothing"}"
                     + $"{Environment.NewLine}{showing.Miss}");
+
+            // WW463, and it is the claim the assertion above cannot make. That one asks the desktop
+            // whether the submenu is standing; this asks what the ACT read, which is the element an
+            // adopter's `expect` is compared against. A read-back that stopped at the entry it
+            // expanded fails a step whose act landed — WW83's shape from the inside — and the two
+            // look identical from a case that only asks the desktop.
+            Assert.True(
+                acted.Element?.Says == "winwright one",
+                $"the submenu is standing and the act hands back {acted.Element?.Says ?? "nothing"}, "
+                    + $"which is not the entry under the one it expanded: {acted}");
         });
 
     [Fact]

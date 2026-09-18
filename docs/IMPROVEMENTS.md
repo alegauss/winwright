@@ -32,28 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW463 the read-back a submenu leaves behind
-
-WW457 made `open submenu` work against a tray's drop-down, and the walk that gets there
-is the half that was measured: the menu's own selected entry, read out of its subtree,
-is what let the walk reach the second entry of three before Right was pressed.
-
-What nothing measured is the reading taken after Right. `Menu.Expand` asks that same
-subtree for the entry highlighted now, and a submenu is a window of its own — so whether
-its entry is a descendant of the menu that opened it, or a second top-level menu the
-reading never looks at, decides what the verb hands back. Where it is not seen, the
-parent entry is still selected, the walk reports that it did not reach, and the element
-a step compares against is the entry above the one it expanded.
-
-The case that would settle it exists in every other form. `AdoptedTrayTests` drives both
-kinds and asserts against the desktop, which answers whether the submenu opened and not
-what the act read. What is owed is the assertion beside it — the act's own read-back —
-and, where that stops at the parent, a reading scoped to the menus this process owns
-rather than to the one window the key was sent at.
-
-That is WW83's shape from the inside: a step naming an entry, answered about a different
-one.
-
 ### §WW464 the locator the reference still argues against
 
 The reference's paragraph on `open submenu` ends on the contract the verb had before

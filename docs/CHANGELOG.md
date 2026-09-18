@@ -176,6 +176,7 @@
 - ✅ **WW451** **no case here opens the tray menu of another process, which is an adopter's only shape and the one WW322 was fixed from** — --tray is a launched process whose only surface is an icon, and two cases open its menu, both kinds, across the boundary WW322 had to be diagnosed from an adopter's log for want of.
 - ✅ **WW457** **a menu key is refused where the foreground is the shell's flyout or the popup's owner, which is how a tray menu stands** — A tray menu takes a key wherever it stands, and the walk reads the entry the menu shows rather than the window that raised it (design recorded in `src/Winwright/Acting/Menu.cs`).
 - ✅ **WW461** **the tray step shuts the flyout it opened while the menu stands, which dismisses every menu but this fixture's** — The flyout close moved to where WW343 put the foreground restore, and the one tray case that drives the scenario runner reads an entry of a menu that shuts itself.
+- ✅ **WW463** **nothing says whether the entry a submenu step hands back is the submenu's or the parent it was expanded from** — Measured and held by a case: both kinds hand back the entry under the one they expanded, so a step's expectation is compared against the entry it named.
 
 ## Block E — Capture — the picture that proves what it photographed
 
