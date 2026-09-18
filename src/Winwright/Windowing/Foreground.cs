@@ -117,6 +117,17 @@ public sealed record Foreground
     /// <summary>The name every scenario refers to this condition by.</summary>
     public const string PreconditionName = "the foreground belongs to the window under test";
 
+    /// <summary>
+    /// What the closing reading of the same condition is called. WW471.
+    /// <para>
+    /// A finding and never a precondition, for the reason the store's own pair is one: nothing may
+    /// be excused by it. What it says is whether the preamble's single look was still true when the
+    /// run ended — a window the desk reached a second later is a fact about launching, and a desk
+    /// somebody else had at both ends is a fact about the machine.
+    /// </para>
+    /// </summary>
+    public const string ArrivedName = "the desk the preamble read is the desk the run ran on";
+
     private Foreground(ForegroundState state, WindowOwner holder, WindowOwner wanted)
     {
         State = state;

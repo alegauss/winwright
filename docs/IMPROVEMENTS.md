@@ -28,29 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW471 A desk the preamble missed and every act had
-
-WW470 made every act poll for the desk over the resolve budget and left the one reading
-taken before any act runs exactly where it was: the preamble asks `Foreground.Check`
-once, at the moment the run starts.
-
-That moment is the one WW470 measured as wrong. A window the run launched is often still
-coming forward — 1453ms in the case that task was filed over — so the preamble is read
-while the desktop still holds the foreground and prints `absent the foreground belongs
-to the window under test` about a run in which every act then owned it. A reader is told
-the run was degraded by a desk it in fact had.
-
-Waiting here too is not the fix. A preamble is a snapshot of the machine the run found,
-and its neighbours — the running binary, the staleness — are deliberately about that
-instant. What is wanted is the distinction: a foreground the window never got is a fact
-about the desk, and one it got a second later is a fact about launching.
-
-The cheapest shape that says so is to read it again at the end. `Preamble.Closing`
-already pairs a before with an after for the fingerprint store, so the foreground can be
-the second pair — absent at the start and held at the close is a window that arrived,
-absent at both is a desk somebody else had all along. Neither reading waits, and the
-pair says which happened.
-
 ### §WW472 A taskbar that held the desk for two whole runs
 
 Measured twice while shipping WW470, at 24 and 30 minutes a time. The guest's taskbar

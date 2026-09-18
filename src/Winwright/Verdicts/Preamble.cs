@@ -85,13 +85,15 @@ public sealed record Preamble
         IReadOnlyList<Measured> measurements,
         IReadOnlyList<Finding> findings,
         StoreFingerprint? store,
-        string storeAbsence)
+        string storeAbsence,
+        nint window)
     {
         Machine = machine;
         Measurements = measurements;
         Findings = findings;
         Store = store;
         StoreAbsence = storeAbsence;
+        Window = window;
     }
 
     /// <summary>
@@ -128,6 +130,13 @@ public sealed record Preamble
 
     /// <summary>Why no fingerprint was taken, where none was. Empty where one was.</summary>
     public string StoreAbsence { get; }
+
+    /// <summary>
+    /// The window the foreground was read against, or zero where there was none. WW471: kept so the
+    /// closing reading asks about the same window the opening one did, which is the whole of what
+    /// makes the two a pair rather than two readings that happen to be near each other.
+    /// </summary>
+    public nint Window { get; }
 
     /// <summary>The findings the application disagrees with.</summary>
     public IReadOnlyList<Finding> Differing => new ReadOnlyCollection<Finding>(
@@ -186,7 +195,8 @@ public sealed record Preamble
             Measurements,
             new ReadOnlyCollection<Finding>([.. Findings, .. findings.Where(one => one is not null)]),
             Store,
-            StoreAbsence);
+            StoreAbsence,
+            Window);
     }
 
     /// <summary>
@@ -289,7 +299,12 @@ public sealed record Preamble
         var (store, absence) = Fingerprinted(declaration);
 
         return new Preamble(
-            machine, new ReadOnlyCollection<Measured>(taken), new ReadOnlyCollection<Finding>([]), store, absence);
+            machine,
+            new ReadOnlyCollection<Measured>(taken),
+            new ReadOnlyCollection<Finding>([]),
+            store,
+            absence,
+            window);
     }
 
     /// <summary>
@@ -315,6 +330,56 @@ public sealed record Preamble
     }
 
     /// <summary>
+    /// Read the foreground again and answer whether the preamble's look at it survived the run, as
+    /// a finding to be joined with <see cref="Including" />. WW471.
+    /// <para>
+    /// The opening reading is a single look, and WW470 measured what that is worth on its own: a
+    /// window the run has just launched is often still coming forward — 1453ms in the case that task
+    /// was filed over — so the preamble reads the desktop holding the desk and prints the condition
+    /// absent about a run whose every act then owned it. Since WW470 the acts wait, so that sentence
+    /// is now routinely false about the run it heads.
+    /// </para>
+    /// <para>
+    /// Not waiting here, and that is the point rather than an omission. A preamble is a snapshot of
+    /// the machine the run found, and its neighbours — the running binary, the staleness — are
+    /// deliberately about that instant. What was missing is the second half: absent at the start and
+    /// held at the close is a window that arrived, and absent at both is a desk somebody else had
+    /// all along. Two looks tell those apart; one look cannot, however long it waits.
+    /// </para>
+    /// <para>
+    /// A finding and never a precondition, for the reason <see cref="LeftAsFound" /> gives: nothing
+    /// may be excused by it, and nothing failed — the run is being described, not judged.
+    /// </para>
+    /// </summary>
+    public Finding CameForward()
+    {
+        var opened = Find(Foreground.PreconditionName);
+        if (Window == 0 || opened is not { Was: true })
+            return new Finding(Foreground.ArrivedName, null, "no window was under test when the preamble was read");
+
+        // Read once, like the opening half. What makes the pair worth having is that the two looks
+        // are at different moments, not that either of them polled.
+        var closing = Foreground.Check(Window);
+        if (opened.Held == closing.Ours)
+        {
+            return new Finding(
+                Foreground.ArrivedName,
+                true,
+                closing.Ours
+                    ? $"the window under test held the desk at both ends of the run: {closing.Wanted}."
+                    : $"the desk was not the window under test's at either end, so it never arrived: {closing.Sentence()}");
+        }
+
+        return new Finding(
+            Foreground.ArrivedName,
+            false,
+            closing.Ours
+                ? $"the preamble read the desk as somebody else's and the window under test held it at the close, "
+                    + $"so it was still coming forward rather than kept out: {closing.Wanted}."
+                : $"the window under test held the desk when the preamble was read and had lost it by the close: {closing.Sentence()}");
+    }
+
+    /// <summary>
     /// The same reading with the store read again and what moved joined into it — the reading a run
     /// ends with rather than the one it started with.
     /// <para>
@@ -328,8 +393,13 @@ public sealed record Preamble
     /// joins two findings, which is a report saying the same thing twice rather than a wrong one.
     /// <see cref="Around" /> is the spelling that cannot be called twice by accident.
     /// </para>
+    /// <para>
+    /// WW471. Two closing readings now, for the same reason there was one: the foreground's other
+    /// half falls due when the run is over, which is exactly when nobody calls it. They close
+    /// together because they are the same kind of claim — what the run found against what it left.
+    /// </para>
     /// </summary>
-    public Preamble Closing() => Including(LeftAsFound());
+    public Preamble Closing() => Including(LeftAsFound(), CameForward());
 
     /// <summary>
     /// Whether the closing reading has been taken — the store read again and what moved joined in.

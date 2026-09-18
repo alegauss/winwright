@@ -145,6 +145,12 @@ internal static class DeskVerbs
         new("Preamble.Around", Touching.AnsweredInTheVerdict,
             "the same composition taken either side of a run, which is how a report says what "
                 + "changed on the machine while the cases were going"),
+        new("Preamble.Closing", Touching.AnsweredInTheVerdict,
+            "the second half of that composition, called on its own where a runner opened the "
+                + "reading itself. WW471 gave it a desk to reach: the foreground is read again and "
+                + "joined as a finding, so what the report prints about the desk is a pair rather "
+                + "than one look — and a case excusing the desk around it would be excusing the "
+                + "thing that reports it"),
         new("CaptureReceipt.Taking", Touching.AnsweredInTheVerdict,
             "it takes the three readings a screen copy owes around the take and refuses where any of "
                 + "them answers wrongly — so the desk fact does not reach a caller as a picture that "

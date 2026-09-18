@@ -5,7 +5,6 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-- 📋 **WW471** (deps: —) **the preamble reads the foreground once, so it reports absent a desk every act in the run then waited for and had** — WW470 made the acts wait and left this reading where it was, so a run whose every step owned the desk can still print it as missing. → §WW471
 - 📋 **WW472** (deps: —) **the runner says a shell holding the desk clears itself, and carries the tree anyway when it does not** — Two runs were spent on a guest whose taskbar held the foreground: 136 and 137 checks excused where nine is healthy, five reds about nothing, and an hour. → §WW472
 
 ## Block C — Locate — the locator grammar and the tree an agent reads

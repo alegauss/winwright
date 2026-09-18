@@ -321,17 +321,78 @@ public sealed class PreambleTests : IDisposable
     }
 
     [Fact]
-    public void The_closing_reading_is_the_opening_one_with_the_store_joined_and_nothing_else_moved()
+    public void A_window_that_came_forward_during_the_run_is_told_from_one_that_never_did()
     {
-        // Closing is Including(LeftAsFound()) and must stay that: a second spelling of the join
-        // would be a preamble whose measurements differ depending on which half a runner asked for.
+        // WW471, and the whole of what the second look buys. WW470 made every act wait for the desk
+        // because a launched window is often still coming forward; the preamble was left reading
+        // once, so it prints the condition absent about a run whose every act then owned it.
+        using var arriving = PumpedDialog.Open("winwright statistics");
+        using var holding = PumpedDialog.Open("winwright decoy");
+
+        holding.BringToFront();
+        if (BusyDesk.Excused(Foreground.Check(holding.Frame).AsPrecondition()))
+            return;
+
+        var closed = Preamble.Around(Attached(), () => arriving.BringToFront(), window: arriving.Frame);
+
+        // Absent when the preamble looked and held at the close, which is a window that arrived —
+        // and the opening measurement still says what it saw, because the pair is what tells them
+        // apart rather than either half being rewritten.
+        var desk = Assert.Single(closed.Findings, one => one.Named == Foreground.ArrivedName);
+
+        Assert.False(closed.Find(Foreground.PreconditionName)!.Held);
+        Assert.False(desk.Holds, desk.Sentence);
+        Assert.Contains("still coming forward", desk.Sentence, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_desk_the_window_never_had_says_so_at_both_ends_rather_than_only_the_first()
+    {
+        // The other arm, and the one a reader needs most: absent at both ends is a desk somebody
+        // else had all along, which is a fact about the machine and not about launching.
+        using var arriving = PumpedDialog.Open("winwright statistics");
+        using var holding = PumpedDialog.Open("winwright decoy");
+
+        holding.BringToFront();
+        if (BusyDesk.Excused(Foreground.Check(holding.Frame).AsPrecondition()))
+            return;
+
+        var closed = Preamble.Around(Attached(), () => { }, window: arriving.Frame);
+
+        var desk = Assert.Single(closed.Findings, one => one.Named == Foreground.ArrivedName);
+
+        Assert.True(desk.Holds, desk.Sentence);
+        Assert.Contains("never arrived", desk.Sentence, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void With_no_window_under_test_the_closing_desk_reading_is_not_taken_rather_than_clean()
+    {
+        // A run with nothing to say and a run with something to say are not reported the same way,
+        // which is the rule the store's own half already holds to.
+        var closed = Preamble.Of(Attached()).Closing();
+
+        var desk = Assert.Single(closed.Findings, one => one.Named == Foreground.ArrivedName);
+
+        Assert.False(desk.Was);
+        Assert.Contains("no window was under test", desk.Sentence, StringComparison.Ordinal);
+        Assert.Contains(closed.Render(), one => one.StartsWith("  not read " + Foreground.ArrivedName, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void The_closing_reading_is_the_opening_one_with_both_closing_findings_joined()
+    {
+        // Closing is Including(LeftAsFound(), CameForward()) and must stay that: a second spelling
+        // of the join would be a preamble whose findings differ depending on which half a runner
+        // asked for. WW471 made it two rather than one — the store's other half and the desk's —
+        // and the measurements still do not move, because neither of them is a precondition.
         var declaration = Declared();
         var opened = Preamble.Of(Attached(), declaration);
 
         var closed = opened.Closing();
 
         Assert.Equal(opened.Measurements.Count, closed.Measurements.Count);
-        Assert.Equal(opened.Findings.Count + 1, closed.Findings.Count);
+        Assert.Equal(opened.Findings.Count + 2, closed.Findings.Count);
         Assert.Same(opened.Store, closed.Store);
     }
 

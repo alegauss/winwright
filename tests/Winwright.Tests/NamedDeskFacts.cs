@@ -80,6 +80,12 @@ internal static class NamedDeskFacts
                 + "process claiming the desk the moment the dialog went down, which is what GitHub's "
                 + "runner does with its terminal. WW449: that excuse is decided by whose window the "
                 + "probe read, so the name is the desk's fact and never the loop's defect"),
+        new("PreambleTests.A_window_that_came_forward_during_the_run_is_told_from_one_that_never_did",
+            "WW471. Both ends are arranged and neither is timed. The decoy is brought forward and "
+                + "proved to hold the desk before the preamble is opened, so the opening measurement "
+                + "cannot be anything but absent; the subject's own `BringToFront` polls until it "
+                + "holds, and only then does the run return and the closing reading get taken. What "
+                + "is named is that opening measurement, which is what the arrangement pins"),
         new("PreambleTests.The_foreground_is_read_where_a_window_is_named",
             "nothing is provoked here: the dialog is the window the preamble is asked about, and the "
                 + "reading named is the measurement the preamble takes for a named window rather than "

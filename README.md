@@ -917,6 +917,13 @@ so "nothing else is running this application" is never a claim about a candidate
 reported as measured, absent, or **not read** — an absent line and a missing line read the same to
 somebody skimming, and only one of them is a statement.
 
+Two of those readings are taken again when the run ends, and reported as **findings** rather than
+preconditions — nothing is excused by either. The store is read back to say whether the run left the
+machine as it found it. The foreground is read back because the opening look is a single one: an
+application the run has just launched is often still coming forward, so the preamble can report a
+desk that every act then had. Absent at the start and held at the close is a window that arrived;
+absent at both is a desk somebody else had all along, and only the pair says which.
+
 That reading is on the same page as the verdict, and above it. `VerdictSummary.Render(verdict,
 reading)` prints what the run read first and what it concluded second, because a reader who has just
 been told four assertions never ran wants the absent precondition before the tally rather than

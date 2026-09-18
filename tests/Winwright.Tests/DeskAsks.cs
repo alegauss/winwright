@@ -173,6 +173,9 @@ internal static class DeskAsks
             "the same reading twice, either side of a take"),
         new("Foreground.Check(", Winwright.Windowing.Foreground.PreconditionName,
             "whether a named window holds the keyboard, which on a locked session nothing does"),
+        new("Preamble.CameForward(", Winwright.Windowing.Foreground.PreconditionName,
+            "WW471. The closing look at the same condition, which is a reading and not a "
+                + "composition: what it answers is whose the desk was when the run ended"),
         new("Foreground.Waited(", Winwright.Windowing.Foreground.PreconditionName,
             "the same question waited out, which WW470 gave the acts — a desk that never comes is "
                 + "the same absence arrived at later, so a case asking this owes the same excuse"),
