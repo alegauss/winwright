@@ -645,8 +645,13 @@ opens exposes no ExpandCollapse at all and draws no arrow, and the shell then ha
 why it went unnoticed until something drove it from the keyboard. A case naming `expand` there asks
 a pattern that is not present and reports a control rather than the gesture. What comes back is the
 entry the menu **landed on** rather than what the locator matched, so `reads: name` compares against
-the submenu entry; the locator names any element of the window, because a menu popup is its own
-window and its entries are not reliably addressable.
+the submenu entry.
+
+The locator names **the entry whose submenu is wanted**, and the walk goes there before Right is
+pressed. A menu opens highlighting its first entry, so a step that named the window — or any element
+in it — would expand whichever entry that happens to be: a step naming the fourth entry expanded the
+first, which is how this was found. The entries are addressable because a popup is a top-level `Menu`
+window of its own, and the step an adopter writes is the shape `Menu > MenuItem[name="…"]`.
 
 They cost something the other eight do not. A synthesised act needs the window in the foreground,
 which Windows does not always grant — so its result carries **what it needed**, and a step that was

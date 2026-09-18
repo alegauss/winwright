@@ -32,29 +32,6 @@ it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW464 the locator the reference still argues against
-
-The reference's paragraph on `open submenu` ends on the contract the verb had before
-WW83: the locator names any element of the window, because a menu popup is its own
-window and its entries are not reliably addressable. The verb's own source says the
-opposite in the paragraph WW83 added — they are addressable, a popup is a top-level
-`Menu` window of its own, and the walk goes to the entry the locator names before Right
-is pressed.
-
-What the stale sentence costs is not confusion, it is a wrong step. An author who reads
-it names the window, or any element in it; the walk then has no entry to walk to, and
-Right expands whichever entry the menu opened on. That is WW83's own defect described
-from the author's side: a step naming the fourth entry expanded the first, and the
-answer read as a submenu that had opened.
-
-So the correction is one sentence and its consequence rather than a rewrite: the locator
-names the entry whose submenu is wanted, and the walk reaches it first. The sentence
-beside it — that what comes back is the entry the menu landed on rather than what the
-locator matched — is still right, and is what makes the pair readable.
-
-Found while shipping WW457, which drove the verb against a launched tray from both sides
-at once: the case writes the locator the reference argues against, and passes.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW465 the picture that proves nothing it was asked

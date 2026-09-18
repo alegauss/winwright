@@ -10,8 +10,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW464** (deps: —) **the reference tells an author a submenu locator may name any element of the window, which the walk stopped honouring** — An author who names the window gets Right pressed at whichever entry the menu opened on, which is the defect WW83 measured from the other side. → §WW464
-
 ## Block E — Capture — the picture that proves what it photographed
 
 - 📋 **WW465** (deps: —) **a screen copy of a window whose pixels are not in the rectangle yet passes every question a capture is asked** — Measured: right process, popup route, nothing over it, no glass, far from flat — and the file was a photograph of the desktop wallpaper. → §WW465
