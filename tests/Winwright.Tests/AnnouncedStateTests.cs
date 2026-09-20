@@ -177,6 +177,84 @@ public sealed class AnnouncedStateTests : IDisposable
         Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
     }
 
+    /// <summary>
+    /// WW479. The claim above negated, and the reason it exists: without it a state written at the
+    /// end of a name can be claimed present and never claimed absent, so a window drawing the mark
+    /// unconditionally would pass every claim about it that could be written.
+    /// </summary>
+    [Fact]
+    public void A_state_the_end_of_a_name_does_not_carry_is_claimed_absent_there()
+    {
+        var verdict = Run(
+            """
+            {
+              "locator": "Button[nameStarts=\"Work \"]",
+              "act": "read",
+              "reads": "name",
+              "notEndsWithLabel": "menu.itemFollowing",
+              "named": "the entry nothing follows does not say so at the end of its name"
+            }
+            """);
+
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void The_entry_that_does_carry_it_fails_the_negated_claim()
+    {
+        // The pair that makes the one above worth having: the same claim against the row that is in
+        // the state reds, so a pass up there is the reading and not the claim being unfalsifiable.
+        var verdict = Run(
+            """
+            {
+              "locator": "Button[nameStarts=\"Pessoal \"]",
+              "act": "read",
+              "reads": "name",
+              "notEndsWithLabel": "menu.itemFollowing",
+              "named": "the entry being followed does not say so at the end of its name"
+            }
+            """);
+
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
+
+        // The key and the string both, the way the positive's red carries them — and the sentence
+        // has to say the claim was the negative one, or a reader meets "a reading ending with" for
+        // a step that asked for the opposite.
+        Assert.Contains("menu.itemFollowing", Said(verdict), StringComparison.Ordinal);
+        Assert.Contains("not ending with", Said(verdict), StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// WW479, and the row that says the negation is a suffix's and not a containment's. This one
+    /// carries the state's own words at the FRONT of its label, where they are not the state — so a
+    /// negation written as "the name does not hold these words" would call it followed and red.
+    /// </summary>
+    [Fact]
+    public void A_name_holding_the_state_words_somewhere_else_still_does_not_end_with_them()
+    {
+        var verdict = Run(
+            """
+            {
+              "locator": "Button#appendedRow",
+              "act": "read",
+              "reads": "name",
+              "notEndsWithLabel": "menu.itemFollowing",
+              "named": "the entry whose own label reads like the state"
+            }
+            """);
+
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
     [Fact]
     public void An_element_that_says_nothing_beside_its_name_answers_nothing()
     {

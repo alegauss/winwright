@@ -401,6 +401,26 @@ public sealed record StepDeclaration
     public string? EndsWithLabel => Wrote.Trimmed("endsWithLabel");
 
     /// <summary>
+    /// The key whose declared string this step claims the reading does <em>not</em> end with. WW479.
+    /// <para>
+    /// <see cref="Label"/> has <see cref="NotLabel"/> and the two ends had nothing, so a state an
+    /// application writes at the end of free text could be claimed present and never claimed absent
+    /// — and a mark drawn unconditionally passes every claim about it that can be written.
+    /// </para>
+    /// <para>
+    /// Measured on claude-tray's Profile submenu. The environment's mark is a suffix, and the case
+    /// for the state where no mark is drawn could say nothing at all about it: no locator addresses
+    /// a suffix, <c>never</c> asks about the whole window and for a tray case the window is the
+    /// desktop, and <see cref="Matches"/> would carry the English into the file.
+    /// </para>
+    /// <para>
+    /// This end only. A <c>notBeginsWithLabel</c> has nothing measured behind it, and a field
+    /// nothing drives is a field no case proves.
+    /// </para>
+    /// </summary>
+    public string? NotEndsWithLabel => Wrote.Trimmed("notEndsWithLabel");
+
+    /// <summary>
     /// Whether this step claims its locator matches nothing.
     /// <para>
     /// WW318. Every other claim reads a subject, and a locator matching nothing has no subject to
@@ -567,6 +587,7 @@ public sealed record StepDeclaration
         ("notLabel", "the reading is not the '{0}' string"),
         ("beginsWithLabel", "the reading begins with the '{0}' string"),
         ("endsWithLabel", "the reading ends with the '{0}' string"),
+        ("notEndsWithLabel", "the reading does not end with the '{0}' string"),
     ];
 
     /// <summary>

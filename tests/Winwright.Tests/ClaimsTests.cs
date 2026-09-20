@@ -63,6 +63,7 @@ public class ClaimsTests
         ("notLabel", () => Wrote.Step("Text", "read", ("notLabel", "stats.live.off"))),
         ("beginsWithLabel", () => Wrote.Step("Button", "read", ("beginsWithLabel", "menu.itemChecked"))),
         ("endsWithLabel", () => Wrote.Step("Button", "read", ("endsWithLabel", "menu.itemChecked"))),
+        ("notEndsWithLabel", () => Wrote.Step("Button", "read", ("notEndsWithLabel", "menu.itemChecked"))),
         ("absent", () => Wrote.Step("Button#gone", "read", ("absent", true))),
         ("ownHeader", () => Wrote.Step("Group", "read", ("ownHeader", true))),
         ("eachSpoken", () => Wrote.Step("Group", "read", ("eachSpoken", true))),

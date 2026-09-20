@@ -253,7 +253,7 @@ public class ScenarioFileTests
             [
                 "locator", "tray", "act", "with", "expect", "reads", "moves", "answers", "matches", "discloses",
                 "sameAs", "unlike", "sameCountdownAs", "contains", "label", "expectReported", "notLabel", "beginsWithLabel",
-                "endsWithLabel", "absent",
+                "endsWithLabel", "notEndsWithLabel", "absent",
                 "ownHeader", "eachSpoken", "spoken", "never", "covers",
                 "coversAtLeast", "coversWithin", "meansIt", "popup", "named",
             ],

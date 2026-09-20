@@ -438,9 +438,21 @@ Windows` carries one mark in front and another behind, and the two ends is what 
 The suffix is as exact as the prefix and for the same reason — what stands before it is a name and a
 figure no case can predict.
 
-**Those two read past a placeholder; the other two never will.** A declared string carrying one is
-otherwise refused before the run, because a tree holding it already filled in can never *equal* a
-format string — which is right for `label` and `notLabel` and was too wide for these. Where the
+`notEndsWithLabel` is the fifth and the one that closes the family: the reading must **not** end with
+the declared string. Without it a state an application appends could be claimed present and never
+claimed absent, so a mark a window drew unconditionally would pass every claim that could be written
+about it. Measured on the same submenu: the case for the state where no mark is drawn had nothing to
+say. A locator cannot stand in — `nameStarts` addresses the front and no predicate addresses a suffix
+— and `never` asks about the whole window, which for a tray case is the desktop. This end only:
+`notBeginsWithLabel` has nothing measured behind it, and a field nothing drives is a field no case
+proves.
+
+**The three end-anchored claims read past a placeholder; `label` and `notLabel` never will.** A
+declared string carrying one is otherwise refused before the run, because a tree holding it already
+filled in can never *equal* a format string — which is right for equality and was too wide for a
+claim about one end. `notEndsWithLabel` reads the same end its positive does, and a negative against
+the fixed part is the stronger claim rather than the weaker one: a reading that does not end with the
+fixed part cannot end with the whole label either. Where the
 placeholder is the whole of one end, the fixed part is the label as far as a prefix or a suffix is
 concerned: `beginsWithLabel` against `"CLAUDE_CONFIG_DIR points outside these profiles — {0}"`
 compares everything up to the `{0}`, and `endsWithLabel` against `"{name} is using it"` compares

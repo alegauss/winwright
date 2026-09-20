@@ -1022,7 +1022,8 @@ public static class CaseRun
         // application that is: the refusal names the key and the file, and it arrives before anything
         // is compared rather than as a reading that answered nothing.
         string? declared = null;
-        if ((step.Label ?? step.NotLabel ?? step.BeginsWithLabel ?? step.EndsWithLabel) is { } declaring)
+        if ((step.Label ?? step.NotLabel ?? step.BeginsWithLabel ?? step.EndsWithLabel
+            ?? step.NotEndsWithLabel) is { } declaring)
         {
             try
             {
@@ -1036,8 +1037,12 @@ public static class CaseRun
                 // end resolves to the fixed part instead of refusing. `label` and `notLabel` are
                 // equality and ask for the whole of it, which is what a placeholder makes
                 // unmatchable — the refusal they get is the one that was always right.
+                //
+                // WW479: the negative reads the same end as its positive, and a negative against
+                // the fixed part is the stronger claim rather than the weaker one — a reading that
+                // does not end with the fixed part cannot end with the whole label either.
                 var anchored = step.BeginsWithLabel is not null ? Anchored.Front
-                    : step.EndsWithLabel is not null ? Anchored.Back
+                    : (step.EndsWithLabel ?? step.NotEndsWithLabel) is not null ? Anchored.Back
                     : Anchored.Whole;
 
                 declared = Labels.For(declaring, project, language, anchored).Text;
@@ -2078,7 +2083,8 @@ public static class CaseRun
         // negative says so through the same trick `discloses` uses to state a negative to a machine
         // that compares for equality.
         if (step.Label is not null || step.NotLabel is not null || step.BeginsWithLabel is not null
-            || step.EndsWithLabel is not null || step.ExpectReported is not null)
+            || step.EndsWithLabel is not null || step.NotEndsWithLabel is not null
+            || step.ExpectReported is not null)
         {
             return Against(step, subject, acted, declared);
         }
@@ -2196,7 +2202,8 @@ public static class CaseRun
     private static Landed Against(StepDeclaration step, Subject subject, ActResult? acted, string? declared)
     {
         var saw = acted?.Element;
-        var key = step.Label ?? step.NotLabel ?? step.BeginsWithLabel ?? step.EndsWithLabel ?? step.ExpectReported;
+        var key = step.Label ?? step.NotLabel ?? step.BeginsWithLabel ?? step.EndsWithLabel
+            ?? step.NotEndsWithLabel ?? step.ExpectReported;
 
         // WW294 joins the positive arm: it is `expect` with the value read from the application, so
         // the comparison is the one `label` already makes and only where the value came from differs.
@@ -2207,12 +2214,18 @@ public static class CaseRun
         // claimed of the front of the reading rather than of the whole of it.
         // WW85 joins the same arm at the other end: a state an application appends rather than
         // announces in front, which is the second mark one entry can carry.
-        var wanted = (step.NotLabel, step.BeginsWithLabel, step.EndsWithLabel, step.ExpectReported) switch
+        // WW479 is that one negated, and the sentence has to say so: a failure reading "a reading
+        // ending with 'x'" when the claim was that it must not would send a reader to the wrong
+        // half of the file.
+        var wanted = (
+            step.NotLabel, step.BeginsWithLabel, step.EndsWithLabel, step.NotEndsWithLabel,
+            step.ExpectReported) switch
         {
-            (not null, _, _, _) => $"anything but '{key}' — {declared}",
-            (_, not null, _, _) => $"a reading beginning with '{key}' — {declared}",
-            (_, _, not null, _) => $"a reading ending with '{key}' — {declared}",
-            (_, _, _, not null) => $"the '{key}' this application reports — {declared}",
+            (not null, _, _, _, _) => $"anything but '{key}' — {declared}",
+            (_, not null, _, _, _) => $"a reading beginning with '{key}' — {declared}",
+            (_, _, not null, _, _) => $"a reading ending with '{key}' — {declared}",
+            (_, _, _, not null, _) => $"a reading not ending with '{key}' — {declared}",
+            (_, _, _, _, not null) => $"the '{key}' this application reports — {declared}",
             _ => $"'{key}' — {declared}",
         };
 
@@ -2257,6 +2270,20 @@ public static class CaseRun
                         && now.EndsWith(declared, StringComparison.Ordinal);
 
                     return ends ? wanted : now;
+                }
+
+                // WW479, and the empty string is written out here rather than shared with the arm
+                // above because inverting that line would invert the refusal with it. The positive
+                // arms get theirs for free — nothing ends with nothing, so the claim does not hold
+                // and the step reds naming the key. Negated, that same reading makes the claim hold
+                // of every reading there is: the unearned green, arriving through the door the
+                // positive had already shut.
+                if (step.NotEndsWithLabel is not null)
+                {
+                    var ends = string.IsNullOrEmpty(declared)
+                        || now.EndsWith(declared, StringComparison.Ordinal);
+
+                    return ends ? now : wanted;
                 }
 
                 var same = string.Equals(now, declared, StringComparison.Ordinal);

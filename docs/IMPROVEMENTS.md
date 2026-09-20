@@ -135,28 +135,4 @@ The claim cannot be `never` over the whole submenu, which would pass on a submen
 failed to draw. `absent` is refused where the region is not there either, and that guard
 is what makes an absence worth asserting.
 
-### §WW479 The end of a reading, claimed absent
-
-`label` has `notLabel` and the two ends have nothing. So a state an application writes
-at the end of free text can be claimed present and never claimed absent, and a mark
-drawn unconditionally passes every claim about it that can be written.
-
-Measured on WW478. claude-tray's profile entry carries the environment's mark as a
-suffix — `bench-one — 12%  · set in Windows` — and the case for the agreeing state,
-where no mark is drawn, could make no claim about it at all. Three shapes were tried and
-each fails for its own reason. A locator addressing the entry by suffix does not exist
-and is not wanted: `nameStarts` is the front and a `nameEnds` would need the same
-placeholder argument WW477 just made, for no second use. `never` says a string is not
-showing anywhere in the window, and for a tray case the window is the desktop — it walks
-every window on the desk, reports the walk truncated and answers Unchecked about an
-absence rather than asserting one. `matches` would carry the English into the file.
-
-`notEndsWithLabel` is the one that fits: the same key, the same end, the claim negated.
-It joins the family where `notLabel` already is, and it reads past a placeholder the way
-its positive does — a negative against the fixed part is the stronger claim, not the
-weaker one.
-
-Only that end. `notBeginsWithLabel` has nothing measured behind it, and a field nothing
-drives is a field no case proves.
-
 ## Block K — The proving ground — a fixture app built to be hard to test
