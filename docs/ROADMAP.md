@@ -15,6 +15,8 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
+- 📋 **WW475** (deps: —) **a label carrying a placeholder is refused for every claim, including the two that only read the part it does not move** — The refusal argues about equality, and a begins-with claim against a label whose placeholder sits at the far end is the one form that could have matched. → §WW475
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
@@ -23,7 +25,7 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- ⏳ **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, an engine release on nuget.org) **the environment sweep walks a submenu per sampled mode** — WW473 gave the engine what a sampled mode needs and the published package predates it, so the case waits on the release after it. → §WW85
+- ⏳ **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, WW475) **the environment sweep walks a submenu per sampled mode** — The first mode landed as WW476; the other's submenu line is a format string, which the engine refuses a claim against. → §WW85
 - 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ⏳, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384

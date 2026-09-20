@@ -65,6 +65,34 @@ What is wanted is a stand-in that behaves as a fixture does.
 
 ## Block F — Assert — the expectation is derived, never typed
 
+### §WW475 A placeholder that refuses the claim it does not block
+
+`Labels.For` refuses a value carrying a placeholder, and the reason is equality: an
+exact read of a tree holding `Bem-vindo, Alexandre` can never match `Bem-vindo, {0}`, so
+asking for one is asking for something that cannot pass. That is right, and it is the
+whole argument.
+
+`beginsWithLabel` and `endsWithLabel` are not equality. A label whose placeholder sits
+at one end has a fixed part at the other, which is exactly what those two claims read —
+`CLAUDE_CONFIG_DIR points outside these profiles — C:\somewhere` begins with every
+character of `menu.profileEnvOutside` up to its `{0}`. The refusal fires before the run
+and takes the claim with it, so the one form that could have matched is the one nobody
+can write.
+
+Measured migrating WW85 on 2026-09-20. claude-tray's `--sample-env outside` draws that
+line and the case for it cannot be written: a `beginsWithLabel` on the key is refused at
+declaration, and naming the fixed text instead is the hardcoded string this shape exists
+to refuse. That mode stayed out of the file, with the reason written where the case
+would have been.
+
+What is wanted is narrow. A placeholder at the far end from the claim is a label these
+two can use; one in the middle, or at the same end, still cannot be matched and is still
+refused. The refusal stays for `label` and `notLabel`, which have no fixed part to lean
+on.
+
+The proving ground has no such label, so this needs one before it can be claimed either
+way.
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
