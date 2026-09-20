@@ -59,6 +59,33 @@ What is wanted is a stand-in that behaves as a fixture does.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+### §WW477 The prefix a locator cannot ask for
+
+WW475 let `beginsWithLabel` and `endsWithLabel` read the fixed part a placeholder at the
+far end leaves, on the argument that those two are not equality. `nameStarts` is that
+argument in a locator: it matches the FRONT of a name, and a label whose placeholder
+ends it has exactly the front such a locator wants.
+
+It never reached it. A brace in a locator goes through the substitution, which asks for
+the whole label and meets the equality refusal — correctly, because a locator looking
+for the literal `{0}` would match nothing. So the fix and the gap are one sentence a
+field apart.
+
+Measured closing WW85 on 2026-09-20, against claude-tray's submenu line for a variable
+naming no profile. With alpha.14 the claim is writable and the step still refuses, at
+`Menu > MenuItem[nameStarts="{menu.profileEnvOutside}"]`, before any window: *carries
+the placeholder '{0}': a tree holding it already filled in can never match this
+exactly*. The case cannot be written, which is what WW475 was filed to allow and did not
+finish.
+
+The work is knowing which attribute a brace lands in. Substitution is textual and
+happens before the locator parses, so nothing there tells `name="{k}"` from
+`nameStarts="{k}"` — and the two want different halves of one label. Parsing first, or
+substituting per attribute, is the decision.
+
+Narrow the same way: one placeholder, at the end, for `nameStarts` alone. `name` is
+equality and keeps its refusal.
+
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed

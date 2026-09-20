@@ -9,6 +9,8 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+- 📋 **WW477** (deps: —) **a locator substituting a label asks for the whole of it, so nameStarts cannot take the one whose end moves** — WW475 let the two claims read the fixed part a placeholder leaves and never reached the locator field that is the same begins-with. → §WW477
+
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed
@@ -23,8 +25,8 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- ⏳ **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, WW475 ✅) **the environment sweep walks a submenu per sampled mode** — The first mode landed as WW476; the other's submenu line is a format string, which the engine refuses a claim against. → §WW85
-- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ⏳, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
+- 🛠 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, WW477) **the environment sweep walks a submenu per sampled mode** — The first mode landed as WW476; the other's line cannot be addressed at all, its locator asking for a label whose end moves. → §WW85
+- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 🛠, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
 
