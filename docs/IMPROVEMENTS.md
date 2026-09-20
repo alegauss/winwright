@@ -111,28 +111,52 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW478 The two sampled modes that prove a silence
+### §WW478 The sampled mode that proves a silence
 
-WW85's own criterion asked for four cases, one per sampled mode, and it shipped with
-two. `other` draws T172's mark and `outside` draws T172's line; `agrees` and `unset`
-draw neither, and that is exactly why they were the two left out and exactly why they
-are worth writing.
+WW85's own criterion asked for four cases, one per sampled mode, and shipped with two.
+It asked for more than the script ever did: `Invoke-EnvFixtureSweep` walks `other` and
+`outside` and nothing else. So nothing was lost in the move, and what is missing is
+coverage neither the script nor the cases ever had.
 
-A case that asserts an absence is the negative control the other two need. Every claim
-in that file so far is that a mark appears where the environment and the icon disagree —
-and nothing anywhere says it stays away when they agree. A mark drawn on every machine
-would pass both cases that exist. It is also the failure with the worse shape: a false
-alarm about a profile state is read by somebody who then goes looking for a
-misconfiguration that is not there.
+`agrees` is the half worth adding. It is the negative control the two that exist need:
+every claim in that file is that a mark appears where the environment and the icon
+disagree, and nothing says it stays away when they agree. A mark drawn unconditionally
+would pass both. It is also the failure with the worse shape — a false alarm about a
+profile state sends somebody looking for a misconfiguration that is not there.
 
-`unset` is not a repeat of `agrees`. One pins the variable to the profile the icon
-follows and the other removes it, so the application resolves the default `~/.claude`
-instead of reading anything — two paths through `EnvironmentProfile.Selected`, one of
-which never takes the variable at all.
+`unset` is not writable, and that is a finding rather than a shortfall. It samples no
+variable, so the application resolves `~/.claude`, and whether that is a registered
+profile is a property of the desk. The guest has none, so the submenu draws the
+`outside` line; a developer's machine has one, and draws a mark or nothing. One file,
+three renderings — a case for it would be green here and red there, the
+machine-dependence every other case here avoids.
 
-What the claim cannot be is `never` against the whole submenu, which would pass on a
-submenu that failed to draw. It has to say the entries are there and carry no mark:
-address the profile entries, read what they say, and claim the mark's label is absent
-from a reading that answered something.
+The claim cannot be `never` over the whole submenu, which would pass on a submenu that
+failed to draw. `absent` is refused where the region is not there either, and that guard
+is what makes an absence worth asserting.
+
+### §WW479 The end of a reading, claimed absent
+
+`label` has `notLabel` and the two ends have nothing. So a state an application writes
+at the end of free text can be claimed present and never claimed absent, and a mark
+drawn unconditionally passes every claim about it that can be written.
+
+Measured on WW478. claude-tray's profile entry carries the environment's mark as a
+suffix — `bench-one — 12%  · set in Windows` — and the case for the agreeing state,
+where no mark is drawn, could make no claim about it at all. Three shapes were tried and
+each fails for its own reason. A locator addressing the entry by suffix does not exist
+and is not wanted: `nameStarts` is the front and a `nameEnds` would need the same
+placeholder argument WW477 just made, for no second use. `never` says a string is not
+showing anywhere in the window, and for a tray case the window is the desktop — it walks
+every window on the desk, reports the walk truncated and answers Unchecked about an
+absence rather than asserting one. `matches` would carry the English into the file.
+
+`notEndsWithLabel` is the one that fits: the same key, the same end, the claim negated.
+It joins the family where `notLabel` already is, and it reads past a placeholder the way
+its positive does — a negative against the fixed part is the stronger claim, not the
+weaker one.
+
+Only that end. `notBeginsWithLabel` has nothing measured behind it, and a field nothing
+drives is a field no case proves.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
