@@ -73,27 +73,6 @@ What is wanted is a stand-in that behaves as a fixture does.
 
 ## Block J — Adoption — the proof is the deletion
 
-### §WW85 The environment sweep, last
-
-It walks one submenu per sampled mode, and it is the case that proves a fixture reaches
-every launch a case makes rather than only the first. It is also the case that produced
-the deduplication rule, by counting one absent assertion three times and reading as
-three holes. Migrating it last means the fixture machinery is already in place and this
-is a use of it rather than the reason to build it.
-
-What it waits for is one release and nothing else. The three fields its claims need went
-out in `0.1.0-alpha.5`, and the adopter already restores past it. The submenu did not:
-opening one on a tray menu is WW457, which landed after `0.1.0-alpha.10` was cut, and
-claude-tray restores from nuget.org alone — so the four walks this case makes are four
-holes until an engine carrying it is published. Cutting that release is a `chore:
-release` commit of its own and never part of this task.
-
-The shape to write is already decided by the cases beside it: a case per sampled mode,
-the mode passed to the launch the way the script passes it, and the entry named by a
-label this project derives rather than a word typed into the file. What the script
-asserts per mode is the environment mark on the profile entry the variable selects —
-which is the claim the three fields were added for.
-
 ### §WW86 claude-tray loses both scripts
 
 451 lines of capture and 2,732 lines of interaction, and the argument for this framework
@@ -131,5 +110,29 @@ The other half needs a window this suite does not build: one with `WS_MINIMIZEBO
 up, cleared, and read back as gone from the foreground. That is a fixture window and a
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
+
+### §WW478 The two sampled modes that prove a silence
+
+WW85's own criterion asked for four cases, one per sampled mode, and it shipped with
+two. `other` draws T172's mark and `outside` draws T172's line; `agrees` and `unset`
+draw neither, and that is exactly why they were the two left out and exactly why they
+are worth writing.
+
+A case that asserts an absence is the negative control the other two need. Every claim
+in that file so far is that a mark appears where the environment and the icon disagree —
+and nothing anywhere says it stays away when they agree. A mark drawn on every machine
+would pass both cases that exist. It is also the failure with the worse shape: a false
+alarm about a profile state is read by somebody who then goes looking for a
+misconfiguration that is not there.
+
+`unset` is not a repeat of `agrees`. One pins the variable to the profile the icon
+follows and the other removes it, so the application resolves the default `~/.claude`
+instead of reading anything — two paths through `EnvironmentProfile.Selected`, one of
+which never takes the variable at all.
+
+What the claim cannot be is `never` against the whole submenu, which would pass on a
+submenu that failed to draw. It has to say the entries are there and carry no mark:
+address the profile entries, read what they say, and claim the mark's label is absent
+from a reading that answered something.
 
 ## Block K — The proving ground — a fixture app built to be hard to test

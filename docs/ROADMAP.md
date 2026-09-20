@@ -23,10 +23,10 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- 🛠 **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, WW477 ✅) **the environment sweep walks a submenu per sampled mode** — The first mode landed as WW476; the other's line cannot be addressed at all, its locator asking for a label whose end moves. → §WW85
-- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 🛠, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
+- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ✅, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
+- 📋 **WW478** (deps: WW85 ✅, WW476 ✅) **two of the four sampled modes have no case, and they are the ones a mark drawn for nothing would show up in** — WW85 closed on the two modes that draw something; agrees and unset draw nothing, and a mark appearing there is a false alarm no case looks for. → §WW478
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
@@ -178,14 +178,6 @@
   reads off that desk that the window went down and no longer holds the foreground. Both
   halves off the desk and never off the script's sentence. It cannot be this suite's
   desk: two runs of it cost five reds elsewhere.
-
-## Done when — WW85
-
-- **The four sampled modes run against the engine an adopter restores** Each of agrees,
-  other, outside and unset is a case in claude-tray launched with --sample-env, and the
-  submenu's environment mark is read back where the mode draws one — against a published
-  package rather than the one this machine packs, which is what makes the green an
-  adopter's.
 
 ## Done when — WW472
 
