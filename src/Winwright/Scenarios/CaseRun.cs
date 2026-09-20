@@ -223,12 +223,18 @@ public static class CaseRun
         // one file a project had to pretend was the only one it ships.
         var speaking = declared.Fixture.Speaking;
 
+        // WW473. The fixture's other word, travelling beside the language it said its window is in,
+        // because it is the same kind of fact: what the application was put on, which every read-out
+        // this case asks has to be put on too. Empty where the fixture samples nothing, which is
+        // every fixture but claude-tray's environment ones.
+        var sampling = declared.Fixture.Sampling;
+
         // WW263. The steps as they will actually be run: once as declared, or once per member of the
         // set the case repeats over, with the member substituted into every locator that names it.
         // Derived before the first act for the reason the precondition below is — a set that cannot be
         // derived is a case that is wrong, and finding that out halfway through is a window driven for
         // nothing.
-        var members = Members(declared, project, speaking);
+        var members = Members(declared, project, speaking, sampling);
         var running = new List<StepDeclaration>();
 
         // WW295. One per run, so a locator asking the application what to select costs one launch
@@ -237,7 +243,7 @@ public static class CaseRun
         foreach (var member in members)
         {
             foreach (var step in declared.Steps)
-                running.Add(Naming(member is null ? step : step.For(member), project, speaking, reported));
+                running.Add(Naming(member is null ? step : step.For(member), project, speaking, sampling, reported));
         }
 
         // WW61. Before the first act, not after the first red: a case whose precondition is absent
@@ -269,7 +275,7 @@ public static class CaseRun
         {
             Stepping(
                 running, root, project, budget, pictures, trace, results, broke, claims,
-                pointedAt, recalled, speaking, opened, out stopped);
+                pointedAt, recalled, speaking, sampling, opened, out stopped);
         }
         finally
         {
@@ -363,6 +369,7 @@ public static class CaseRun
     /// <param name="pointedAt">Which steps a later one reads again.</param>
     /// <param name="recalled">What those steps read.</param>
     /// <param name="speaking">What language the window is in.</param>
+    /// <param name="sampling">What the fixture put the application on, or empty. WW473.</param>
     /// <param name="opened">Where a tray menu this case opened is kept, for the restore.</param>
     /// <param name="stopped">The index of the step that stopped the case, or -1.</param>
     private static void Stepping(
@@ -378,6 +385,7 @@ public static class CaseRun
         HashSet<string> pointedAt,
         Dictionary<string, string?> recalled,
         System.Globalization.CultureInfo? speaking,
+        string sampling,
         List<TrayMenu> opened,
         out int stopped)
     {
@@ -414,7 +422,7 @@ public static class CaseRun
                 // claude-tray, where a click that was never delivered left the case red about a text
                 // box on a page that had never been opened.
                 var went = Perform(
-                step, subject, project, budget, pictures, trace, results, root, pointedAt, recalled, speaking);
+                step, subject, project, budget, pictures, trace, results, root, pointedAt, recalled, speaking, sampling);
                 while (claims.Count < results.Count)
                     claims.Add(step.Claimed);
 
@@ -927,9 +935,10 @@ public static class CaseRun
         AutomationElement root,
         HashSet<string> pointedAt,
         Dictionary<string, string?> recalled,
-        System.Globalization.CultureInfo? speaking)
+        System.Globalization.CultureInfo? speaking,
+        string sampling)
     {
-        var went = Performing(step, subject, project, budget, pictures, trace, results, root, recalled, speaking);
+        var went = Performing(step, subject, project, budget, pictures, trace, results, root, recalled, speaking, sampling);
 
         // WW255. Read after the step rather than kept from inside it, and only for a step something
         // points back at. What a later step compares against is what this one left the window reading,
@@ -952,7 +961,8 @@ public static class CaseRun
         List<AssertionResult> results,
         AutomationElement root,
         Dictionary<string, string?> recalled,
-        System.Globalization.CultureInfo? speaking)
+        System.Globalization.CultureInfo? speaking,
+        string sampling)
     {
         // WW336. A capture is an act on the window the locator is inside rather than on the element,
         // and its claim is the receipt — so it goes the way the sweeps go and not through the attempt
@@ -968,7 +978,7 @@ public static class CaseRun
         // it has its own wait, over the resolve budget, which WW241 gave it.
         if (step.Sweeps is { } key)
         {
-            Swept(step, key, subject, project, root, trace, results, speaking);
+            Swept(step, key, subject, project, root, trace, results, speaking, sampling);
             return true;
         }
 
@@ -1042,7 +1052,7 @@ public static class CaseRun
         {
             try
             {
-                declared = DerivedSet.ReportedValue(step.Name, project, reported, speaking);
+                declared = DerivedSet.ReportedValue(step.Name, project, reported, speaking, sampling);
             }
             catch (UnderivableSetException underivable)
             {
@@ -1230,7 +1240,8 @@ public static class CaseRun
         AutomationElement root,
         List<TraceStep> trace,
         List<AssertionResult> results,
-        System.Globalization.CultureInfo? speaking)
+        System.Globalization.CultureInfo? speaking,
+        string sampling)
     {
         DerivedSet derived;
         try
@@ -1240,7 +1251,7 @@ public static class CaseRun
             // the profiles would be a case that runs on one checkout. A name the project declares as
             // reported is asked of the application; anything else is a key in its strings.
             derived = project.ReportedSets.ContainsKey(key)
-                ? DerivedSet.Reported(step.Name, project, key, speaking)
+                ? DerivedSet.Reported(step.Name, project, key, speaking, sampling)
                 : DerivedSet.From(step.Name, project, key, speaking);
         }
         catch (UnderivableSetException underivable)
@@ -1314,7 +1325,10 @@ public static class CaseRun
     /// </summary>
     /// <exception cref="ScenarioRefusedException">Where the set cannot be derived, or is empty.</exception>
     private static IReadOnlyList<string?> Members(
-        CaseDeclaration declared, ProjectDeclaration project, System.Globalization.CultureInfo? speaking)
+        CaseDeclaration declared,
+        ProjectDeclaration project,
+        System.Globalization.CultureInfo? speaking,
+        string sampling)
     {
         if (declared.ForEach is not { } key)
             return [null];
@@ -1326,7 +1340,7 @@ public static class CaseRun
             // per profile is the shape the environment sweep already needs. An asymmetry where one
             // field could reach the reported well and the other could not is one a reader trips on.
             derived = project.ReportedSets.ContainsKey(key)
-                ? DerivedSet.Reported(declared.Name, project, key, speaking)
+                ? DerivedSet.Reported(declared.Name, project, key, speaking, sampling)
                 : DerivedSet.From(declared.Name, project, key, speaking);
         }
         catch (UnderivableSetException underivable)
@@ -1540,12 +1554,19 @@ public static class CaseRun
     /// <param name="step">The step, already carrying its member where its case repeats.</param>
     /// <param name="project">The project, which is where the strings files are declared.</param>
     /// <param name="speaking">What the fixture said its window is in, or null where nothing did.</param>
+    /// <param name="sampling">
+    /// The argument putting a read-out on the fixture's sampled environment, or empty where it
+    /// samples nothing. WW473: it travels beside the language for the same reason the language
+    /// travels at all — both are what the fixture said, and a read-out asked without either is a
+    /// question about a different machine.
+    /// </param>
     /// <param name="reported">What this run has already asked the application, so it is asked once.</param>
     /// <exception cref="ScenarioRefusedException">Where a key cannot be read, or the result will not parse.</exception>
     private static StepDeclaration Naming(
         StepDeclaration step,
         ProjectDeclaration project,
         System.Globalization.CultureInfo? speaking,
+        string sampling,
         Dictionary<string, string> reported)
     {
         if (step.Declares().Count == 0)
@@ -1559,7 +1580,7 @@ public static class CaseRun
 
         try
         {
-            return step.Naming(key => Substituted(step, project, language, key, reported));
+            return step.Naming(key => Substituted(step, project, language, sampling, key, reported));
         }
         catch (UnusableLabelException unusable)
         {
@@ -1575,12 +1596,14 @@ public static class CaseRun
     /// <param name="step">The step, for the refusals.</param>
     /// <param name="project">The project, which declares both wells.</param>
     /// <param name="language">What the window is in, for the strings well.</param>
+    /// <param name="sampling">What the fixture put the application on, for the read-out well. WW473.</param>
     /// <param name="key">The brace's content, prefix and all.</param>
     /// <param name="reported">What this run has already asked the application, so it is asked once.</param>
     private static string Substituted(
         StepDeclaration step,
         ProjectDeclaration project,
         ResolvedLanguage language,
+        string sampling,
         string key,
         Dictionary<string, string> reported)
     {
@@ -1607,7 +1630,7 @@ public static class CaseRun
             // reading of it: a locator naming `{report:iconFollows}` and a step claiming a label are
             // one case, and a run that asked the application in one language and read the strings in
             // another compares two windows that were never the same one.
-            value = DerivedSet.ReportedValue(step.Name, project, name, language.Culture);
+            value = DerivedSet.ReportedValue(step.Name, project, name, language.Culture, sampling);
             reported[name] = value;
         }
 

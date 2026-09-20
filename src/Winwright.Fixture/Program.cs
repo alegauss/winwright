@@ -121,7 +121,14 @@ public static class Program
         // on a submenu is actually about.
         if (shapes.Has("profile"))
         {
-            Console.Out.WriteLine(Store.Profiles[0]);
+            // WW473. The sampled answer where the launch carried one, which is what makes this
+            // read-out able to prove anything about a fixture that samples. A fixture's
+            // `environment` reaches the application as `--sample=<value>` — the same argument
+            // `Launching()` puts on the window — and until WW473 a read-out was composed out of the
+            // project alone, so it answered about the real machine while the window drew the
+            // sampled one. A read-out that ignored the flag could not tell the two apart, and the
+            // defect would have stayed invisible in the one place built to expose it.
+            Console.Out.WriteLine(shapes.Value("sample") ?? Store.Profiles[0]);
             return 0;
         }
 

@@ -463,11 +463,17 @@ public sealed record DerivedSet
     /// <param name="under">The name of the reported value, as the project declares it.</param>
     /// <param name="speaking">The language the run resolved, for <c>{language}</c>. WW468.</param>
     /// <exception cref="UnderivableSetException">Where the project declares no such value, or it cannot be read.</exception>
+    /// <param name="sampling">
+    /// The argument putting this read-out on the fixture's sampled environment, or empty where it
+    /// samples nothing. WW473: without it the window is drawn on one machine and asked about
+    /// another.
+    /// </param>
     public static string ReportedValue(
         string named,
         ProjectDeclaration declaration,
         string under,
-        System.Globalization.CultureInfo? speaking = null)
+        System.Globalization.CultureInfo? speaking = null,
+        string sampling = "")
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(named);
         ArgumentNullException.ThrowIfNull(declaration);
@@ -484,7 +490,7 @@ public sealed record DerivedSet
                 $"{named} is derived from what the application reports under '{key}', and {declaration.Path}: {has}");
         }
 
-        var lines = Printed(named, declaration, key, Asking(arguments, declaration, speaking));
+        var lines = Printed(named, declaration, key, Asking(arguments, declaration, speaking, sampling));
 
         return lines.Count switch
         {
@@ -524,11 +530,16 @@ public sealed record DerivedSet
     /// <param name="under">The name of the reported set, as the project declares it.</param>
     /// <param name="speaking">The language the run resolved, for <c>{language}</c>. WW468.</param>
     /// <exception cref="UnderivableSetException">Where the project declares no such set, or it cannot be read.</exception>
+    /// <param name="sampling">
+    /// The argument putting this read-out on the fixture's sampled environment, or empty where it
+    /// samples nothing. WW473.
+    /// </param>
     public static DerivedSet Reported(
         string named,
         ProjectDeclaration declaration,
         string under,
-        System.Globalization.CultureInfo? speaking = null)
+        System.Globalization.CultureInfo? speaking = null,
+        string sampling = "")
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(named);
         ArgumentNullException.ThrowIfNull(declaration);
@@ -545,7 +556,7 @@ public sealed record DerivedSet
                 $"{named} is derived from what the application reports under '{key}', and {declaration.Path}: {has}");
         }
 
-        var asked = Asking(arguments, declaration, speaking);
+        var asked = Asking(arguments, declaration, speaking, sampling);
 
         // Distinct here and not in the reader: a value well reading two identical lines has been asked
         // for one thing and answered twice, which is a refusal rather than a set of one.
@@ -809,13 +820,28 @@ public sealed record DerivedSet
     /// <param name="arguments">What the project declared the application is run with.</param>
     /// <param name="declaration">The project, for the language it resolves where no fixture said.</param>
     /// <param name="speaking">The language the run resolved, or null where nothing did.</param>
+    /// <param name="sampling">
+    /// The one argument putting this process on the fixture's sampled environment, or empty where it
+    /// samples nothing. WW473.
+    /// </param>
     private static IReadOnlyList<string> Asking(
         IReadOnlyList<string> arguments,
         ProjectDeclaration declaration,
-        System.Globalization.CultureInfo? speaking)
+        System.Globalization.CultureInfo? speaking,
+        string sampling = "")
     {
-        if (!arguments.Any(one => one.Contains(Spoken, StringComparison.Ordinal)))
-            return arguments;
+        // WW473. Appended before the language is substituted, so a project that spells `{language}`
+        // in the flag's own value is answered the same way every other argument is. WW60 decided
+        // that one declaration settles both what the application is launched with and what the
+        // expectations are read from; this well came later and was composing its arguments out of
+        // the project alone, so a window drawn on a sampled environment was compared against an
+        // application asked about the real machine.
+        var asked = sampling.Length == 0
+            ? arguments
+            : new ReadOnlyCollection<string>([.. arguments, sampling]);
+
+        if (!asked.Any(one => one.Contains(Spoken, StringComparison.Ordinal)))
+            return asked;
 
         // The fixture's word where it gave one, and the way the application resolves it where nothing
         // did — the same two arms a declared string is read under, so a read-out and a label in one
@@ -825,7 +851,7 @@ public sealed record DerivedSet
             : ResolvedLanguage.Speaking(speaking);
 
         return new ReadOnlyCollection<string>(
-            arguments.Select(one => one.Replace(Spoken, language.Culture.Name, StringComparison.Ordinal)).ToList());
+            asked.Select(one => one.Replace(Spoken, language.Culture.Name, StringComparison.Ordinal)).ToList());
     }
 
     /// <summary>

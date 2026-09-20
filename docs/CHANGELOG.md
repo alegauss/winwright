@@ -332,6 +332,7 @@
 - ✅ **WW435** **a case's and a fixture's fields still reach the loader one hand-written line each, where a step's are read off its rows** — A case's and a fixture's fields are read off the schema's rows, and a row nothing hands on is refused at load (design recorded in `src/Winwright/Scenarios/ScenarioFile.cs`).
 - ✅ **WW444** **a step's rows are held to its own reader by nothing, so a row no property reads is a key that loads and does nothing** — Each of a step's rows is paired with what reads it, so a row nothing reads is red rather than published (design recorded in `tests/Winwright.Tests/StepDeclarationTests.cs`).
 - ✅ **WW445** **the sweep that holds a no-desk mark honest finds cases by `public void`, so a marked async case is checked by nothing** — A marked case is found by its own declaration, whatever shape it has, and a written sample proves the sweep sees both (design recorded in `tests/Winwright.Tests/NoDeskTests.cs`).
+- ✅ **WW473** **a read-out is launched without the fixture's arguments, so it answers about a machine the window is not showing** — A read-out carries the argument its fixture's environment reaches the application through, so a window drawn on a sampled machine is asked about that one.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

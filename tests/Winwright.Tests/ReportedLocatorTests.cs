@@ -52,7 +52,13 @@ public sealed class ReportedLocatorTests : IDisposable
     }
 
     /// <summary>One step's locator, as the run would have substituted it.</summary>
-    private static string Substituted(ProjectDeclaration project, string locator)
+    /// <param name="project">The project declaring the wells.</param>
+    /// <param name="locator">The locator, braces and all.</param>
+    /// <param name="sampling">
+    /// What a fixture put the application on, or empty for one that samples nothing. WW473, and the
+    /// default is what every case here but that task's own passes.
+    /// </param>
+    private static string Substituted(ProjectDeclaration project, string locator, string sampling = "")
     {
         var declared = ScenarioFile.Read(
             "reported.cases.json",
@@ -89,7 +95,7 @@ public sealed class ReportedLocatorTests : IDisposable
 
         var step = Assert.Single(Assert.Single(declared).Steps);
         var named = (StepDeclaration)naming!.Invoke(
-            null, [step, project, null, new Dictionary<string, string>(StringComparer.Ordinal)])!;
+            null, [step, project, null, sampling, new Dictionary<string, string>(StringComparer.Ordinal)])!;
 
         return named.Addressed;
     }
@@ -135,6 +141,46 @@ public sealed class ReportedLocatorTests : IDisposable
             Winwright.Asserting.DerivedSet.ReportedValue("the profile", project, "inUse"),
             reported,
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_read_out_is_asked_about_the_machine_the_fixture_put_the_window_on()
+    {
+        // WW473, and it is WW60's rule reaching the well that came after it. That task decided one
+        // declaration settles both what the application is launched with and what the expectations
+        // are read from, so a sampled menu is never compared against a real environment — and it is
+        // enforced by there being one field. The read-out well was built later and composed its
+        // arguments out of the project alone, so it asked about the real machine while the window
+        // drew the sampled one.
+        //
+        // Measured in claude-tray before it was a case here: a tray launched on `--sample-env other`
+        // against `{report:envSelects}` answering `-`, which is what that read-out says about the
+        // real variable. The step became a locator naming `-` and matched nothing, against a submenu
+        // that was rendering the sampled state correctly.
+        var project = Both();
+
+        var real = Substituted(project, """MenuItem[name="{report:inUse}"]""");
+        var sampled = Substituted(project, """MenuItem[name="{report:inUse}"]""", "--sample=a-sampled-profile");
+
+        // The fixture answers its first real profile unsampled and the sampled value where the
+        // launch carried one, so the two readings differ exactly when the argument reaches it.
+        Assert.Contains("a-sampled-profile", sampled, StringComparison.Ordinal);
+        Assert.DoesNotContain("a-sampled-profile", real, StringComparison.Ordinal);
+        Assert.NotEqual(real, sampled);
+    }
+
+    [Fact]
+    public void A_fixture_that_samples_nothing_asks_exactly_what_it_always_did()
+    {
+        // The other arm, and the one that keeps this from being a change to every project: a fixture
+        // with no environment adds no argument at all, so a read-out is the launch it has always
+        // been. Written out rather than assumed, because "nothing changed" is the half a reader
+        // cannot see in the case above.
+        var project = Both();
+
+        Assert.Equal(
+            Substituted(project, """MenuItem[name="{report:inUse}"]"""),
+            Substituted(project, """MenuItem[name="{report:inUse}"]""", ""));
     }
 
     [Fact]
@@ -185,8 +231,8 @@ public sealed class ReportedLocatorTests : IDisposable
 
         var step = Assert.Single(Assert.Single(declared).Steps);
 
-        naming!.Invoke(null, [step, project, null, asked]);
-        naming.Invoke(null, [step, project, null, asked]);
+        naming!.Invoke(null, [step, project, null, "", asked]);
+        naming.Invoke(null, [step, project, null, "", asked]);
 
         // One entry, whatever the run asked for: the second substitution read what the first learnt.
         Assert.Equal(["inUse"], asked.Keys);

@@ -468,6 +468,13 @@ per run however many braces name it, so a locator carrying one costs a launch an
 step. A name the project declares in neither well is refused where it was written, because a locator
 that matched nothing would send the reader to the application for something the file got wrong.
 
+**A read-out is asked about the machine the fixture put the window on.** Where a fixture declares an
+`environment`, the argument that carries it is on the read-out's launch too — the same one the window
+got. Without that the case compares a window drawn on a sampled environment against an application
+answering about the real one, which is what the single `environment` field exists to prevent: it is
+one declaration precisely so the two cannot be given different modes. A fixture that samples nothing
+adds nothing, so every other project's read-outs are the launches they always were.
+
 says nothing. A pointer at the step's own name is refused too — `sameAs` would hold whatever the
 window did and `unlike` would fail whatever it did, and neither is a reading. And an earlier step
 that read nothing settles neither: an element that says nothing is not evidence a value changed, it

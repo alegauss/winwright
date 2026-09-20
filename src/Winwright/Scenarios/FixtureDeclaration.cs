@@ -243,14 +243,27 @@ public sealed record FixtureDeclaration
     }
 
     /// <summary>
+    /// The one argument that puts a process on this fixture's sampled environment, or empty where it
+    /// samples nothing. WW473.
+    /// <para>
+    /// Named rather than spelled twice, because the launch is no longer the only thing that has to
+    /// carry it. A read-out is a launch of the application too, and until WW473 it was composed out
+    /// of what the project declares and nothing the fixture said — so a window drawn on a sampled
+    /// environment was compared against an application asked about the real machine, which is the
+    /// failure this type's own note says the one field exists to prevent.
+    /// </para>
+    /// </summary>
+    public string Sampling => Flag.Length > 0 ? $"{Flag}={Environment}" : "";
+
+    /// <summary>
     /// Every argument the launch carries, the sampled environment among them. Derived rather than
     /// stored, so the launch and <see cref="Environment"/> cannot come apart.
     /// </summary>
     public IReadOnlyList<string> Launching()
     {
         var all = new List<string>(Arguments);
-        if (Flag.Length > 0)
-            all.Add($"{Flag}={Environment}");
+        if (Sampling.Length > 0)
+            all.Add(Sampling);
 
         return new ReadOnlyCollection<string>(all);
     }

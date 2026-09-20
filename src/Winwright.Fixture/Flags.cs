@@ -351,6 +351,12 @@ public sealed record Flags
             "the states a tray submenu marks - which profile the icon follows, which one the environment selects - are single facts about this machine rather than a list, and a case naming one passes on the desk it was written on and fails on every other",
             Draws: false),
         new Flag(
+            "sample",
+            "profile",
+            "answer as if this value were the profile in use, rather than reading the real one - the argument a fixture's declared environment reaches this application through",
+            "WW60 decided one declaration settles both what the application is launched with and what the expectations are read from, and the read-out well built after it composed its arguments out of the project alone - so a window drawn on a sampled environment was compared against an application asked about the real machine, and no read-out here could tell the two apart",
+            Draws: false),
+        new Flag(
             "dies",
             "",
             "a launch that exits on startup, drawing nothing and leaving nothing for a step to find",
