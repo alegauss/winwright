@@ -17,15 +17,17 @@
 
 ## Block G — The scenario — a case is a data file
 
+- 📋 **WW473** (deps: —) **a read-out is launched without the fixture's arguments, so it answers about a machine the window is not showing** — A fixture launched in a sampled mode is compared against a read-out answering about the real one, and the case reads as a locator that matches nothing. → §WW473
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
 
-- ⏳ **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, an engine release on nuget.org) **the environment sweep walks a submenu per sampled mode** — The four sampled modes are written against an engine only this machine has, so they wait on the release that carries `endsWithLabel`. → §WW85
+- ⏳ **WW85** (deps: Block G, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, WW473) **the environment sweep walks a submenu per sampled mode** — The mode is a launch argument a read-out does not carry, so the expectation describes the real machine while the menu renders a sampled one. → §WW85
 - 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ⏳, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
-- ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
+- ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
 
 ## Block K — The proving ground — a fixture app built to be hard to test

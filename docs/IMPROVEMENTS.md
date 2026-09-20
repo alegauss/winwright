@@ -67,6 +67,33 @@ What is wanted is a stand-in that behaves as a fixture does.
 
 ## Block G — The scenario — a case is a data file
 
+### §WW473 A read-out that answers about another machine
+
+A read-out is a launch of the application, declared once under `reportedSets` and
+`reportedValues`. A fixture is a launch too, and it may carry arguments that change what
+the application answers — claude-tray's `--sample-env <mode>` is the case in point: it
+puts the process on an environment the machine is not in, which is the whole reason the
+flag exists.
+
+The two never meet. The fixture launches with the mode, the read-out launches without
+it, and the comparison is between a window drawn on a sampled environment and an answer
+about the real one.
+
+Measured while migrating WW85 on 2026-09-20. The case launched a tray with `--sample-env
+other`, and `{report:envSelects}` substituted to `-`, which is what that read-out says
+when the real variable selects no profile. The step became `MenuItem[nameStarts="-"]`
+and matched nothing, against a submenu that was rendering the sampled state correctly.
+The script this replaces solved it by holding the mode in a variable every launch reads:
+*the same --sample-env the tray was launched with, or the expectations would describe
+the real environment while the menu renders a sampled one*.
+
+So a read-out needs the fixture's own launch arguments, or the fixture needs to say
+which of its arguments a read-out inherits. The second is narrower and says more: most
+launch arguments are about the window, and only some are about what the application
+would answer.
+
+Until then a sampled mode cannot be claimed at all, which is what WW85 waits on.
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
