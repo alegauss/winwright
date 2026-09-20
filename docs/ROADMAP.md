@@ -23,9 +23,8 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- ⏳ **WW83** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, an engine release on nuget.org) **the switch case drives the one path that rewrites a real setting** — Three explanations are ruled out, and the diagnosis that would name the fourth is in the engine and not yet published. → §WW83
 - ⏳ **WW85** (deps: Block G ✅, WW291 ✅, WW294 ✅, WW295 ✅, WW230 ✅, WW315 ✅, WW322 ✅, an engine release on nuget.org) **the environment sweep walks a submenu per sampled mode** — The four sampled modes are written against an engine only this machine has, so they wait on the release that carries `endsWithLabel`. → §WW85
-- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ⏳, WW84 ✅, WW85 ⏳, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
+- 📋 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ⏳, Block E ✅) **claude-tray still carries two harness scripts nobody should extend** — Both are deleted once every assertion in them is a case, and the run reports the line count removed so the saving is a measurement. → §WW86
 - ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
 
@@ -163,14 +162,6 @@
   against a real session that reports everything present and renders nothing - the WW42
   desk - and stays met on an ordinary one. A rendering check verified only against a
   substitute has been verified against the one desk that was never the problem.
-
-## Done when — WW83
-
-- **The switch runs in the adopter, and the store beside it does not move**
-  claude-tray's run drives the profile entry and reads the mark back off the menu,
-  inside the fingerprint bracket around the suite. What says it landed is the pair: the
-  mark on the entry that was picked and off the one it came from, with every file under
-  the declared store unchanged and named where one is not.
 
 ## Done when — WW88
 

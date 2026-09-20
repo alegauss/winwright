@@ -258,10 +258,16 @@ internal static class Criteria
                 + "which nothing in this suite can drive"),
 
         // --- WW83, whose remaining half is an adopting project's rather than this suite's -------------------
-        new("WW83", "The switch runs in the adopter, and the store beside it does not move", "",
-            Unshown.NotBuilt, "the engine carries the three fields the case is written out of and the "
-                + "published package does not, so the case that would read this back refuses to load "
-                + "in the repository it lives in — and nothing here can drive claude-tray's menu"),
+        // WW83's criterion stood here and went with the line, and it went checked. The engine
+        // reached nuget.org in 0.1.0-alpha.12, claude-tray restores it, and the switch case drives
+        // the pick while the store bracket around the whole suite reports the machine unchanged —
+        // 10 of 10 in the guest. Read back where the migration is, which is the whole of why it
+        // could never be read here: nothing in this repository can drive claude-tray's menu.
+        //
+        // The bracket's first real run earned its keep. It came back naming `session-index.json`,
+        // and neither half was wrong: a run that is not observing keeps its cache, and the bracket
+        // asks one question about the whole directory. What was missing was the sentence telling
+        // the application which kind of run it is in, which `--observing` now is.
 
         // WW87's criterion stood here and went with the line: the route reached nuget.org in
         // 0.1.0-alpha.10, freewilly's case photographs the menu against it, and the 382-line script

@@ -73,28 +73,6 @@ What is wanted is a stand-in that behaves as a fixture does.
 
 ## Block J — Adoption — the proof is the deletion
 
-### §WW83 The switch case rewrites a real setting
-
-Until that case exists, the path that rewrites the setting, re-keys the stores and takes
-the other account's token runs under no check at all. It is refused against a resident
-process, because a pick there would repoint the real icon for real. Running it inside
-the store comparison asserts the promise that a run touches nothing at the one place
-most likely to break it.
-
-The engine half has landed. Three things had to exist first, and each was measured
-missing on this menu: a locator matching the front of a name, because an entry reads
-`Pessoal — used 41%  · active now` and equality addresses it on no machine; a reading of
-the sentence an element says beside its name, because the accessible object carrying
-that sentence at all costs the entry its toggle pattern; and a claim about the front of
-that sentence, because the state is announced as a word in front of free text that may
-contain the word again. `open submenu` learned which entry it is about at the same time
-— it pressed Right at whatever the menu opened on, which is never the fourth entry.
-
-What is left is the adopter's, and waits on a publish rather than on a decision. The
-case, the `other-profile` read-out that names an end no case may type, and the store
-bracket around the suite are written; the cases project restores the engine from
-nuget.org, and the three fields are not in the published version.
-
 ### §WW85 The environment sweep, last
 
 It walks one submenu per sampled mode, and it is the case that proves a fixture reaches
