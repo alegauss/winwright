@@ -164,9 +164,16 @@ public sealed class TemplatedMemberTests : IDisposable
 
         Assert.Contains("winwright fixture", set.Expected);
         Assert.DoesNotContain(set.Expected, one => one.Contains('{', StringComparison.Ordinal));
-        Assert.Equal("labels.profileName", Assert.Single(set.Templated).Key);
 
-        // WW139: and the two notes beside it, which this file writes the way JSON makes you.
-        Assert.Equal(["labels.//", "labels.//2"], set.Notes.Select(one => one.Key));
+        // Two since WW475, and the pair is the point: the placeholder sits at the end of one and at
+        // the start of the other, so the rule letting a begins-with and an ends-with read the fixed
+        // part has a label for each direction rather than one and an assumption about the mirror.
+        // Both are still excluded from the derived set, which is what this case is about.
+        Assert.Equal(
+            ["labels.profileName", "labels.inUseBy"],
+            set.Templated.Select(one => one.Key));
+
+        // WW139: and the notes beside them, which this file writes the way JSON makes you.
+        Assert.Equal(["labels.//", "labels.//2", "labels.//3", "labels.//4"], set.Notes.Select(one => one.Key));
     }
 }

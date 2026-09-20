@@ -429,6 +429,16 @@ Windows` carries one mark in front and another behind, and the two ends is what 
 The suffix is as exact as the prefix and for the same reason — what stands before it is a name and a
 figure no case can predict.
 
+**Those two read past a placeholder; the other two never will.** A declared string carrying one is
+otherwise refused before the run, because a tree holding it already filled in can never *equal* a
+format string — which is right for `label` and `notLabel` and was too wide for these. Where the
+placeholder is the whole of one end, the fixed part is the label as far as a prefix or a suffix is
+concerned: `beginsWithLabel` against `"CLAUDE_CONFIG_DIR points outside these profiles — {0}"`
+compares everything up to the `{0}`, and `endsWithLabel` against `"{name} is using it"` compares
+everything after it. Anything looser is still refused, and the refusal names which end had nothing
+to read: a placeholder at the same end as the claim leaves it nothing, and one in the middle would
+have the claim comparing a fragment while the file it names looks much longer than what was checked.
+
 `spoken` is the tenth and is about the tree under the locator rather than about any one reading: that
 everything under it which announces anything announces a **name** — never a font glyph, a template
 nobody filled in, or an automation id handed back — and that something does. `eachSpoken` is the

@@ -102,6 +102,79 @@ public sealed class LabelTests : IDisposable
     }
 
     [Fact]
+    public void A_claim_that_reads_one_end_gets_the_fixed_part_the_placeholder_left()
+    {
+        // WW475. The refusal above argues about equality and two claims are not equality. `Bem-vindo,
+        // {0}` has a fixed front, and every tree drawing it filled in begins with exactly that — so a
+        // begins-with claim is the one form that could have matched, and it was the one nobody could
+        // write.
+        var label = Labels.For("tray.greeting", Bilingual(), Speaking("pt"), Anchored.Front);
+
+        Assert.Equal("Bem-vindo,", label.Text);
+
+        // And it says what it did, because a reader comparing this against the strings file would
+        // otherwise find a longer value there and nothing explaining which part was compared.
+        Assert.Equal("Bem-vindo, {0}", label.Cut);
+        Assert.Contains("read past its placeholder", label.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_mirror_reads_the_other_side_and_each_refuses_the_end_the_placeholder_took()
+    {
+        // The other direction, and the two refusals that keep this narrow. A placeholder at the end
+        // leaves nothing for an ends-with to read, and one at the front leaves nothing for a
+        // begins-with — so each claim is refused by exactly the label the other one can use.
+        var project = Project(
+            """{ "languageFiles": ["strings.en.json"] }""",
+            ("strings.en.json", """{ "tray": { "trailing": "Profile: {name}", "leading": "{name} is using it" } }"""));
+
+        Assert.Equal("is using it", Labels.For("tray.leading", project, Speaking("en"), Anchored.Back).Text);
+
+        var noFront = Assert.Throws<UnusableLabelException>(
+            () => Labels.For("tray.leading", project, Speaking("en"), Anchored.Front));
+        Assert.Contains("reads the text in front of it, and there is none", noFront.Message);
+
+        var noBack = Assert.Throws<UnusableLabelException>(
+            () => Labels.For("tray.trailing", project, Speaking("en"), Anchored.Back));
+        Assert.Contains("reads the text after it, and there is none", noBack.Message);
+    }
+
+    [Fact]
+    public void Equality_still_refuses_a_placeholder_whichever_end_it_is_at()
+    {
+        // The arm WW475 does not touch, written out because it is the one that was always right: a
+        // filled-in tree can never equal a format string, and a `label` claim asking for one is
+        // asking for something that cannot pass — from either end.
+        var project = Project(
+            """{ "languageFiles": ["strings.en.json"] }""",
+            ("strings.en.json", """{ "tray": { "trailing": "Profile: {name}", "leading": "{name} is using it" } }"""));
+
+        foreach (var key in new[] { "tray.trailing", "tray.leading" })
+        {
+            var refused = Assert.Throws<UnusableLabelException>(
+                () => Labels.For(key, project, Speaking("en")));
+
+            Assert.Equal(UnusableLabel.CarriesAPlaceholder, refused.Arm);
+            Assert.Contains("could ever pass", refused.Message, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void A_placeholder_in_the_middle_is_refused_from_both_ends()
+    {
+        // The third shape, and the reason this is a rule about ends rather than about placeholders.
+        // A label with fixed text on both sides of something that moves has a front a begins-with
+        // could read — and reading it would make the claim about a shape rather than about a string,
+        // which is a different thing from what the field says it does.
+        var project = Project(
+            """{ "languageFiles": ["strings.en.json"] }""",
+            ("strings.en.json", """{ "tray": { "middle": "Profile {name} is in use" } }"""));
+
+        foreach (var anchored in new[] { Anchored.Front, Anchored.Back, Anchored.Whole })
+            Assert.Throws<UnusableLabelException>(() => Labels.For("tray.middle", project, Speaking("en"), anchored));
+    }
+
+    [Fact]
     public void A_language_the_project_ships_nothing_for_is_refused_rather_than_answered_in_english()
     {
         // The whole symptom in one call: the application is in Japanese, the project ships en and

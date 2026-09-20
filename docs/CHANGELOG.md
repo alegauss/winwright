@@ -289,6 +289,7 @@
 - ✅ **WW466** **A sweep over a reported set that finds anything missing throws instead of reporting the red** — A reported set carries one origin per value, so a sweep that finds something missing names it instead of throwing.
 - ✅ **WW468** **a set read out of the application is derived in the machine's language and compared against a window in the fixture's** — A read-out's arguments take `{language}`, so it answers in the language the window under test was launched in.
 - ✅ **WW469** **a read-out carrying anything but ASCII reaches the expectation as mojibake and reads as missing from the window** — Both ends of the read-out's pipe declare UTF-8, so an accented value arrives as what the application printed.
+- ✅ **WW475** **a label carrying a placeholder is refused for every claim, including the two that only read the part it does not move** — A begins-with or ends-with claim reads the fixed part a placeholder at the far end leaves, and each is refused by the label the other can use.
 
 ## Block G — The scenario — a case is a data file
 

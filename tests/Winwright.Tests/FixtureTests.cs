@@ -1701,19 +1701,29 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
             var set = DerivedSet.From("the labels", Strings(culture), "labels");
 
             Assert.DoesNotContain(set.Expected, Labels.CarriesAPlaceholder);
-            Assert.Equal("labels.profileName", Assert.Single(set.Templated).Key);
-            Assert.True(Labels.CarriesAPlaceholder(set.Templated[0].Value));
-            Assert.Contains("less 1 carrying a placeholder", set.Source);
+
+            // Two since WW475, and the second is the mirror of the first: the placeholder ends one
+            // value and starts the other, so a begins-with claim has a label to read and an
+            // ends-with claim has one too. Both are still no member of the expectation, which is
+            // what this case is about — reading past a placeholder is a claim's business and never
+            // a derived set's.
+            Assert.Equal(
+                ["labels.profileName", "labels.inUseBy"],
+                set.Templated.Select(one => one.Key));
+
+            Assert.All(set.Templated, one => Assert.True(Labels.CarriesAPlaceholder(one.Value)));
+            Assert.Contains("less 2 carrying a placeholder", set.Source);
 
             // WW139: only the English file carries the notes, which is the ordinary way a strings
             // file ends up — the comment is written once beside the key it explains and nobody
-            // translates it. Both are left out, and the source says how many of each.
-            var notes = culture == "en" ? 2 : 0;
+            // translates it. They are left out, and the source says how many of each. Four since
+            // WW475: two notes apiece for the two templated keys, written where each is.
+            var notes = culture == "en" ? 4 : 0;
             Assert.Equal(notes, set.Notes.Count);
             Assert.DoesNotContain(set.Expected, one => one.StartsWith("The pathological key", StringComparison.Ordinal));
 
             if (notes > 0)
-                Assert.Contains("2 a note and not a string", set.Source);
+                Assert.Contains($"{notes} a note and not a string", set.Source);
         }
     }
 

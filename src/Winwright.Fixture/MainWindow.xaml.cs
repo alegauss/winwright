@@ -107,6 +107,13 @@ public partial class MainWindow : Window
         close.Content = said.Says("buttons.close");
         localizedLabel.Text = said.Says(Strings.PlaceholderKey);
 
+        // WW475. Filled in with a profile this fixture already has, so the reading is the shape a
+        // real window draws: fixed text on one side of something that moves. The front one is what
+        // `beginsWithLabel` reads and the back one what `endsWithLabel` does, and having both is
+        // what keeps the rule from being proved in one direction and assumed in the other.
+        filledFrontLabel.Text = said.Says(Strings.PlaceholderKey).Replace("{name}", Store.Profiles[0], StringComparison.Ordinal);
+        filledBackLabel.Text = said.Says(Strings.MirroredPlaceholderKey).Replace("{name}", Store.Profiles[0], StringComparison.Ordinal);
+
         // WW43: the loading note is a declared string like every other caption here, so a check
         // reading the project's language files finds it rather than matching a hard-coded phrase.
         loadingNote.Text = said.Says(Strings.LoadingKey);

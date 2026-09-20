@@ -1032,7 +1032,15 @@ public static class CaseRun
                     ? ResolvedLanguage.Resolve(project)
                     : ResolvedLanguage.Speaking(speaking);
 
-                declared = Labels.For(declaring, project, language).Text;
+                // WW475. Which end the claim reads, so a label whose placeholder sits at the far
+                // end resolves to the fixed part instead of refusing. `label` and `notLabel` are
+                // equality and ask for the whole of it, which is what a placeholder makes
+                // unmatchable — the refusal they get is the one that was always right.
+                var anchored = step.BeginsWithLabel is not null ? Anchored.Front
+                    : step.EndsWithLabel is not null ? Anchored.Back
+                    : Anchored.Whole;
+
+                declared = Labels.For(declaring, project, language, anchored).Text;
             }
             catch (UnusableLabelException unusable)
             {

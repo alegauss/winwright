@@ -12,6 +12,7 @@
     "loading": "Ainda carregando",
 
     "heading": "winwright fixture",
-    "profileName": "Perfil: {name}"
+    "profileName": "Perfil: {name}",
+    "inUseBy": "{name} está usando"
   }
 }

@@ -15,6 +15,10 @@
 
     "//": "The pathological key. An exact-name read can never match this, and a rule that skipped",
     "//2": "it would report a green about a control nobody could have checked.",
-    "profileName": "Profile: {name}"
+    "profileName": "Profile: {name}",
+
+    "//3": "WW475. The same placeholder at the other end, so the mirror claim has something to read:",
+    "//4": "a begins-with reads the front of profileName and an ends-with reads the back of this.",
+    "inUseBy": "{name} is using it"
   }
 }

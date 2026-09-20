@@ -35,6 +35,14 @@ public sealed class Strings
     public const string PlaceholderKey = "labels.profileName";
 
     /// <summary>
+    /// The same placeholder at the other end of the value. WW475: a begins-with claim reads the
+    /// fixed front of <see cref="PlaceholderKey" /> and an ends-with claim reads the fixed back of
+    /// this one, so the rule that lets those two past a placeholder has a label for each direction
+    /// rather than one and an assumption about the mirror.
+    /// </summary>
+    public const string MirroredPlaceholderKey = "labels.inUseBy";
+
+    /// <summary>
     /// The key the loading note carries. WW43: a check that a page is still computing reads the
     /// loading strings out of the project's own language files, so the note has to be one of them
     /// rather than a caption typed into the markup — a fixture whose text nothing declares cannot
