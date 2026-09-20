@@ -58,6 +58,36 @@ public sealed class GatedCostTests
     }
 
     [Fact]
+    public void CI_asks_the_gates_own_half_rather_than_the_whole_suite()
+    {
+        // WW474. WW417's split applied to the one machine it was never applied to. A GitHub runner
+        // has a desk in the sense that windows draw and not in the sense the other half needs, and
+        // running those there asks a question it cannot answer: red since 2026-09-17 on two cases
+        // that each assert one desk-dependent answer where that machine gives another which is also
+        // correct. A permanently red badge is one nobody reads.
+        //
+        // The filter and not a list, for the reason the runner asks the gate rather than naming
+        // classes: a class added tomorrow lands on whichever side its own declaration puts it on.
+        var workflow = File.ReadAllText(Checkout.At(".github", "workflows", "ci.yml"));
+
+        Assert.Contains("host-gate.ps1", workflow, StringComparison.Ordinal);
+
+        // Every run of the suite carries the filter. One without it is the whole suite back, which
+        // is the state this task is about — and it would arrive as a red about the desk rather than
+        // as a line anybody notices in a diff.
+        var unfiltered = Regex
+            .Matches(workflow, @"dotnet test[^\r\n]*", RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1))
+            .Select(one => one.Value)
+            .Where(one => !one.Contains("--filter", StringComparison.Ordinal))
+            .ToList();
+
+        Assert.True(
+            unfiltered.Count == 0,
+            $"{unfiltered.Count} `dotnet test` line(s) in CI run the suite unfiltered, which is the "
+                + $"desk half back on a runner that promises no desk: {string.Join(" / ", unfiltered)}");
+    }
+
+    [Fact]
     public void The_gate_still_derives_that_split_from_the_collection_the_suite_declares()
     {
         // The other half of the same claim, and the control on it: the reading above is worth

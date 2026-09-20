@@ -436,6 +436,7 @@
 - ✅ **WW452** **no case reads inside a tray menu another process owns, which is the step claude-tray's own case fails on** — Two cases resolve `Menu > MenuItem[name=...]` against the desktop into a launched tray's menu, both kinds — so the boundary is not what stops claude-tray one step in.
 - ✅ **WW85 (the claim about a name's end)** **the environment sweep walks a submenu per sampled mode** — The engine claims the end of a reading now: `endsWithLabel`, for a state an application appends rather than announces in front, driven against a row whose own label reads like the state.
 - ✅ **WW467** **publishing from a tree that declares an unpublished version spends a second number on the same release** — An empty input publishes what the tree declares when nuget.org has not got it, so a locally packed version is the one that ships.
+- ✅ **WW474** **CI runs the desk half on a runner that promises no desk, so it has been red about nothing since September** — CI asks the desk-free half the gate derives, so a red there is about the tree again and the desk half stays where it is proved.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

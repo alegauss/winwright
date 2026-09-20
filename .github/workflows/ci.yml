@@ -41,11 +41,34 @@ jobs:
       # step beside it. A host that dies mid-run takes its remaining tests with it and the runner
       # still prints a pass — measured here at 352 of 374, a green covering twenty-two tests that
       # never ran. This used to be three steps, and the middle one is what every developer types.
+      #
+      # WW474. The desk-free half and not the whole suite, which is WW417's split applied to the one
+      # machine it was never applied to. A runner has a desk in the sense that windows draw and not
+      # in the sense the other half needs: nothing promises what is on it, what holds the foreground,
+      # or that a region stays uncovered for a take. Running those here asks a question the runner
+      # cannot answer, and it answered wrongly for three weeks — red since 2026-09-17 on two cases
+      # that each assert one desk-dependent answer where this machine gives another that is also
+      # correct. A permanently red badge is one nobody reads, so the run that catches a real break
+      # arrives beside two that mean nothing.
+      #
+      # The filter is derived rather than listed, by the same script a developer runs before a guest
+      # run: the classes outside the serial collection, which is the only division this project has
+      # and the one `WindowFixture.Serial` already declares. A class added tomorrow lands on whichever
+      # side its own declaration puts it on, with nothing here to keep in step.
+      #
+      # What this does NOT do is let the other half go unrun. It is gated on the guest before any
+      # commit — `run-tests-vm.cmd`, the desk this project actually promises — and WW430's rule that
+      # the guest runs the gate's cases again is what keeps the two from drifting apart.
+      # `powershell` and not `pwsh`, which is the runner's default: this script is the one every
+      # developer here runs before a guest run, under Windows PowerShell 5.1, and that is the edition
+      # it is proved on. A gate that derives what to run is the wrong place to also be the first
+      # thing asking whether it runs on another edition.
       - name: Test
-        run: >
-          dotnet test tests/Winwright.Tests/Winwright.Tests.csproj
-          --configuration Release
-          --no-build
+        shell: powershell
+        run: |
+          $filter = & ./tools/host-gate.ps1 -Suite tests/Winwright.Tests
+          Write-Host "the desk-free half, derived from the serial collection: $filter"
+          dotnet test tests/Winwright.Tests/Winwright.Tests.csproj --configuration Release --no-build --filter $filter
 
       # WW122: the two halves are packages or they are a path into this repository, and a path is
       # unpinnable by construction. Packing here is what makes the claim checkable rather than
