@@ -129,6 +129,116 @@ public sealed class PlaceholderClaimTests : IDisposable
         Assert.Contains("could ever pass", Said(verdict), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void A_locator_addresses_by_the_fixed_part_of_a_label_whose_placeholder_ends_it()
+    {
+        // WW477. The same argument a field over. `nameStarts` is a begins-with, so the front a
+        // trailing placeholder leaves is exactly what it wants — and until this it was the one
+        // attribute that could not be filled from such a label, because a substitution knew only
+        // the key inside the brace and asked for the whole label every time.
+        //
+        // The id is here because the window draws the label twice on purpose: raw, so the equality
+        // refusal stays developable, and filled in, which is what a real application shows. Both
+        // begin with `Profile:`, so addressing by the prefix alone is genuinely ambiguous here —
+        // and that ambiguity is itself the reading being right about where the fixed part ends.
+        var verdict = Run(
+            """
+            {
+              "locator": "Text#filledFrontLabel[nameStarts=\"{labels.profileName}\"]",
+              "act": "read",
+              "reads": "name",
+              "beginsWithLabel": "labels.profileName",
+              "named": "the filled label is addressed by the fixed part of the one it was drawn from"
+            }
+            """);
+
+        if (verdict is null)
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void A_locator_asking_for_the_whole_of_that_label_is_refused_as_it_always_was()
+    {
+        // `name` is equality and keeps the refusal, which is the half WW477 must not widen: a
+        // locator hunting the literal `{name}` would match nothing on any machine, and one quietly
+        // given the prefix instead would address more than it says.
+        //
+        // A throw and not a verdict, which is where a locator's refusal differs from the claims
+        // above: a locator is resolved before the case has run a step, so it leaves the suite
+        // rather than landing inside it as something the run concluded.
+        if (!Desk.Read().CanObserve)
+            return;
+
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => Run(
+            """
+            {
+              "locator": "Text[name=\"{labels.profileName}\"]",
+              "act": "read",
+              "reads": "name",
+              "beginsWithLabel": "labels.profileName",
+              "named": "a locator asking for the label whole"
+            }
+            """));
+
+        Assert.Contains("labels.profileName", refusal.Because, StringComparison.Ordinal);
+        Assert.Contains("could ever pass", refusal.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_locator_reading_the_front_of_a_label_that_begins_with_its_placeholder_is_refused()
+    {
+        // The narrowing. `labels.inUseBy` opens with its placeholder, so a begins-with has nothing
+        // fixed in front of it — and a locator answered anyway would address every name there is.
+        //
+        // The step claims an ends-with of the same key, which resolves perfectly well. So the
+        // sentence asserted on can only have come from the locator, and this cannot pass by the
+        // claim happening to refuse for its own reasons.
+        if (!Desk.Read().CanObserve)
+            return;
+
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => Run(
+            """
+            {
+              "locator": "Text[nameStarts=\"{labels.inUseBy}\"]",
+              "act": "read",
+              "reads": "name",
+              "endsWithLabel": "labels.inUseBy",
+              "named": "a locator reading the front of a label that has none"
+            }
+            """));
+
+        Assert.Contains("labels.inUseBy", refusal.Because, StringComparison.Ordinal);
+        Assert.Contains(
+            "reads the text in front of it, and there is none", refusal.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_prefix_the_key_is_only_part_of_is_refused_rather_than_stitched_together()
+    {
+        // The other bound, and the one that is easy to miss. A cut label filled into a longer value
+        // would address `Profile: — something`, which no window draws in one piece: the run would be
+        // looking for a prefix assembled out of two places while the file reads as though it named
+        // one. So the front is only taken where the brace IS the value.
+        if (!Desk.Read().CanObserve)
+            return;
+
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => Run(
+            """
+            {
+              "locator": "Text#filledFrontLabel[nameStarts=\"{labels.profileName} — \"]",
+              "act": "read",
+              "reads": "name",
+              "beginsWithLabel": "labels.profileName",
+              "named": "a locator whose prefix is the label and more"
+            }
+            """));
+
+        Assert.Contains("labels.profileName", refusal.Because, StringComparison.Ordinal);
+        Assert.Contains("could ever pass", refusal.Because, StringComparison.Ordinal);
+    }
+
     /// <summary>
     /// The whole reading, which is what a red here is about — and what a refusal is in: `Render()`
     /// alone answers `Broken: all 1 case, 0 assertions` and names nothing, so a case asserting on

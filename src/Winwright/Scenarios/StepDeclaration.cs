@@ -1760,27 +1760,52 @@ public sealed record StepDeclaration
     /// about. The key stays in the case file, one line away, for the reader who wants to know why.
     /// </para>
     /// </summary>
-    /// <param name="reading">What a key declares, or a throw saying why it cannot be read.</param>
+    /// <param name="reading">
+    /// What a key declares, or a throw saying why it cannot be read. Asked with which end of the
+    /// label the predicate holding the brace is about — WW477.
+    /// </param>
     /// <exception cref="ScenarioRefusedException">
     /// Where a key declares nothing, or the substituted locator does not parse. Both are the scenario
     /// being wrong rather than the application, so both arrive before anything is driven.
     /// </exception>
-    public StepDeclaration Naming(Func<string, string> reading)
+    public StepDeclaration Naming(Func<string, Asserting.Anchored, string> reading)
     {
         ArgumentNullException.ThrowIfNull(reading);
         if (Declares().Count == 0)
             return this;
 
         // Not null here: `Declares()` answers empty for a tray step, so the return above took it.
-        var text = Braced.Replace(Locator!.Text, one => one.Groups[1].Value.Length == 0
+        var locator = Locator!;
+        var text = Braced.Replace(locator.Text, one => one.Groups[1].Value.Length == 0
             ? one.Value
-            : reading(one.Groups[1].Value));
+            : reading(one.Groups[1].Value, Anchoring(locator, one)));
 
         if (!Locator.TryParse(text, out var parsed, out var because))
             throw new ScenarioRefusedException(Name, $"'{text}' does not parse: {because}");
 
         return this with { Locator = parsed };
     }
+
+    /// <summary>
+    /// Which end of a label this brace may be filled from, out of the predicate it is written in.
+    /// <para>
+    /// WW477. <c>nameStarts</c> matches the front of a name, so a label whose placeholder ends it
+    /// has exactly the fixed part such a predicate wants — the same argument WW475 made for
+    /// <c>beginsWithLabel</c>, a field away. Every other predicate is equality or a value of its
+    /// own, and equality is what the refusal is right about.
+    /// </para>
+    /// <para>
+    /// Only where the brace is the <em>whole</em> of the value. <c>nameStarts="Where {a.key}"</c>
+    /// filled from a cut label would address a prefix no window draws in one piece, which is the
+    /// claim-that-looks-longer-than-it-is this rule exists to refuse.
+    /// </para>
+    /// </summary>
+    /// <param name="locator">The locator as it was written, which is what the positions are in.</param>
+    /// <param name="brace">The brace being filled.</param>
+    private static Asserting.Anchored Anchoring(Locator locator, System.Text.RegularExpressions.Match brace) =>
+        locator.Held(brace.Index) is { Key: "nameStarts" } held && held.Whole(brace.Index, brace.Length)
+            ? Asserting.Anchored.Front
+            : Asserting.Anchored.Whole;
 
     /// <summary>
     /// The declared string this step's locator was built out of, or null where it was built out of none.

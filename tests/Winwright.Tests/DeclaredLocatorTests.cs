@@ -113,7 +113,7 @@ public sealed class DeclaredLocatorTests : IDisposable
         // returned as it was, so nothing about it can change on a machine that reads a different file.
         var plain = Wrote.Step("Group#interval", "read", ("eachSpoken", true));
 
-        Assert.Same(plain, plain.Naming(_ => throw new InvalidOperationException("nothing to resolve")));
+        Assert.Same(plain, plain.Naming((_, _) => throw new InvalidOperationException("nothing to resolve")));
     }
 
     /// <summary>Everything the run said, so a red here carries its own explanation.</summary>

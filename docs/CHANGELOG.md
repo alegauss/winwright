@@ -118,6 +118,7 @@
 - ✅ **WW364** **Locator.TryParse is not null-annotated, so a caller that refused on false still carries a bang to use what it parsed** — TryParse now says which out is null on which answer, so the four bangs are gone and reading a refused parse's locator warns (design recorded in `src/Winwright/Locating/Locator.cs`).
 - ✅ **WW398** **a case wanting the tree without the rectangle wrote a second walk of it, beside the one renderer that says it is the one** — The shape is a projection over the one renderer now, and the second recursion is gone (design superseded: the two walks had not drifted; both indented alike).
 - ✅ **WW458** **a route unambiguous as a whole is refused where one step matches two, and an act throws reading itself back** — A route resolves where one step matches two and only one holds the rest, and the tray case drives the locator an adopter writes rather than one written around it.
+- ✅ **WW477** **a locator substituting a label asks for the whole of it, so nameStarts cannot take the one whose end moves** — A nameStarts locator takes the fixed part a trailing placeholder leaves, so a label whose end moves can be addressed; `name` stays equality and the brace must be the whole value.
 
 ## Block D — Act — patterns before pointers
 

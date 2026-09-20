@@ -159,6 +159,15 @@ key that declares nothing is refused before the first act, naming the key and th
 records is the substituted locator: the words the run actually looked for are what a red is about,
 and the key is one line away in the case file.
 
+**A `nameStarts` brace reads past a trailing placeholder, and a `name` brace never will.** It is the
+same argument `beginsWithLabel` makes below, in the field that addresses rather than the one that
+claims: a label spelt `"CLAUDE_CONFIG_DIR points outside these profiles — {0}"` has a front that every
+filled-in tree drawing it begins with, and that front is what the locator is filled from. `name` is
+equality and keeps the refusal, because a locator hunting the literal `{0}` matches nothing. Narrow
+the same way — one placeholder, at the end, and the brace must be the *whole* of the value:
+`nameStarts="{a.key} — "` is refused rather than stitched together, a prefix assembled out of two
+places being one no window draws in one piece.
+
 `|` at the type position means **any one of these**, and it is there because a rule under test governs
 a family of controls as often as it governs one. claude-tray's settings rows name every control with
 no content of its own to derive a name from — a ComboBox, a Slider, a TextBox — and exclude the rest

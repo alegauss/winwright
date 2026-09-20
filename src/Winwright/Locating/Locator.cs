@@ -5,6 +5,20 @@ using System.Text;
 namespace Winwright.Locating;
 
 /// <summary>
+/// One predicate's value, and where it sits in the locator as it was written. WW477.
+/// </summary>
+/// <param name="Key">The predicate's key, as it was spelt: <c>name</c>, <c>nameStarts</c>, and so on.</param>
+/// <param name="At">Where its value begins, quotes excluded.</param>
+/// <param name="Length">How many characters the value is, quotes excluded.</param>
+public readonly record struct Holding(string Key, int At, int Length)
+{
+    /// <summary>Whether a span is the whole of this value rather than part of it.</summary>
+    /// <param name="at">Where the span begins.</param>
+    /// <param name="length">How long it is.</param>
+    public bool Whole(int at, int length) => at == At && length == Length;
+}
+
+/// <summary>
 /// How this project addresses an element, in one grammar written once and read the same way by
 /// every verb. The same three automation conditions were being rebuilt at every call site — in
 /// PowerShell in one project and in C# in another — so this is also what a scenario file writes,
@@ -46,10 +60,11 @@ public sealed record Locator
 {
     private const string Keys = "name, nameStarts, class, pattern, order, index";
 
-    private Locator(string text, IReadOnlyList<LocatorStep> steps)
+    private Locator(string text, IReadOnlyList<LocatorStep> steps, IReadOnlyList<Holding> holds)
     {
         Text = text;
         Steps = steps;
+        Holds = holds;
     }
 
     /// <summary>The locator as it was written, which is what a trace records.</summary>
@@ -58,6 +73,34 @@ public sealed record Locator
     /// <summary>Its steps, outermost first. Never empty.</summary>
     public IReadOnlyList<LocatorStep> Steps { get; }
 
+    /// <summary>
+    /// Where each predicate's value sits in <see cref="Text"/>, under the key that predicate names.
+    /// Quotes excluded, so the span is the value's own characters.
+    /// <para>
+    /// WW477. A brace is filled in before the substituted text is parsed, so the filling knows only
+    /// the key inside it and never which predicate it landed in — and <c>name</c> and
+    /// <c>nameStarts</c> want different halves of one label. This is what tells them apart without
+    /// the substitution having to re-implement the grammar.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<Holding> Holds { get; }
+
+    /// <summary>
+    /// Which predicate's value covers a position in <see cref="Text"/>, or null where none does —
+    /// a control type, an automation id, or anywhere between the steps. WW477.
+    /// </summary>
+    /// <param name="at">A position in the text as it was written.</param>
+    public Holding? Held(int at)
+    {
+        foreach (var one in Holds)
+        {
+            if (at >= one.At && at < one.At + one.Length)
+                return one;
+        }
+
+        return null;
+    }
+
     /// <summary>Parse one, or refuse with the position and the reason.</summary>
     /// <exception cref="LocatorSyntaxException">Where it does not parse.</exception>
     public static Locator Parse(string text)
@@ -65,10 +108,11 @@ public sealed record Locator
         ArgumentNullException.ThrowIfNull(text);
 
         var steps = new List<LocatorStep>();
+        var holding = new List<Holding>();
         var at = 0;
         while (true)
         {
-            steps.Add(Step(text, ref at));
+            steps.Add(Step(text, ref at, holding));
             SkipSpace(text, ref at);
             if (at >= text.Length)
                 break;
@@ -79,7 +123,10 @@ public sealed record Locator
             at++;
         }
 
-        return new Locator(text, new ReadOnlyCollection<LocatorStep>(steps));
+        return new Locator(
+            text,
+            new ReadOnlyCollection<LocatorStep>(steps),
+            new ReadOnlyCollection<Holding>(holding));
     }
 
     /// <summary>
@@ -117,7 +164,7 @@ public sealed record Locator
     /// <summary>The canonical spelling, which parses back to an equal locator.</summary>
     public override string ToString() => string.Join(" > ", Steps.Select(step => step.ToString()));
 
-    private static LocatorStep Step(string text, ref int at)
+    private static LocatorStep Step(string text, ref int at, List<Holding> holds)
     {
         SkipSpace(text, ref at);
         var began = at;
@@ -169,7 +216,12 @@ public sealed record Locator
                 throw new LocatorSyntaxException(LocatorFault.PredicateMalformed, text, at, $"a predicate reads [key=value], with key one of {Keys}");
 
             at++;
+            var valued = at;
             var value = Value(text, ref at);
+
+            // WW477: before the closing bracket is read, so the span is the value's own characters
+            // and a substitution can ask which key it is filling.
+            var held = Spanned(text, key, valued, at);
             if (at >= text.Length || text[at] != ']')
                 throw new LocatorSyntaxException(LocatorFault.PredicateNotClosed, text, at, "this predicate is not closed");
 
@@ -237,6 +289,8 @@ public sealed record Locator
                     throw new LocatorSyntaxException(
                         LocatorFault.UnknownKey, text, opened + 1, $"'{key}' is no predicate here; the keys are {Keys}");
             }
+
+            holds.Add(held);
         }
 
         if (controlTypes.Count == 0 && automationId is null && name is null && nameStarts is null
@@ -298,6 +352,32 @@ public sealed record Locator
 
         SkipSpace(text, ref at);
         return word;
+    }
+
+    /// <summary>
+    /// One predicate's value as a span of the text it was written in, quotes and the surrounding
+    /// space excluded — which is the same slice <see cref="Value"/> read. WW477.
+    /// </summary>
+    /// <param name="text">The whole locator.</param>
+    /// <param name="key">The predicate's key.</param>
+    /// <param name="from">Where the value started, opening quote included.</param>
+    /// <param name="to">Where reading stopped, closing quote included.</param>
+    private static Holding Spanned(string text, string key, int from, int to)
+    {
+        // A quoted value is its own characters. Escapes are decoded into the value and not out of
+        // the text, so the span stays the span and never the decoded length.
+        if (from < text.Length && text[from] == '"')
+            return new Holding(key, from + 1, Math.Max(0, to - from - 2));
+
+        // A bare one runs to the bracket and is trimmed, and the span is trimmed with it: a brace
+        // written with space around it is still the whole of what the predicate holds.
+        while (from < to && char.IsWhiteSpace(text[from]))
+            from++;
+
+        while (to > from && char.IsWhiteSpace(text[to - 1]))
+            to--;
+
+        return new Holding(key, from, to - from);
     }
 
     private static void Once(string text, int at, string? already, string key)

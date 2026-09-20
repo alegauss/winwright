@@ -1588,7 +1588,8 @@ public static class CaseRun
 
         try
         {
-            return step.Naming(key => Substituted(step, project, language, sampling, key, reported));
+            return step.Naming(
+                (key, anchored) => Substituted(step, project, language, sampling, key, anchored, reported));
         }
         catch (UnusableLabelException unusable)
         {
@@ -1606,6 +1607,11 @@ public static class CaseRun
     /// <param name="language">What the window is in, for the strings well.</param>
     /// <param name="sampling">What the fixture put the application on, for the read-out well. WW473.</param>
     /// <param name="key">The brace's content, prefix and all.</param>
+    /// <param name="anchored">
+    /// Which end of the label the predicate holding this brace is about. WW477: <c>nameStarts</c> is
+    /// a begins-with and may be filled from the fixed part a trailing placeholder leaves, which is
+    /// WW475's argument arriving at the field beside the one it was made for.
+    /// </param>
     /// <param name="reported">What this run has already asked the application, so it is asked once.</param>
     private static string Substituted(
         StepDeclaration step,
@@ -1613,6 +1619,7 @@ public static class CaseRun
         ResolvedLanguage language,
         string sampling,
         string key,
+        Anchored anchored,
         Dictionary<string, string> reported)
     {
         // WW295. Two wells and two spellings, and the prefix is what keeps them apart. `{a.key}` is
@@ -1624,7 +1631,7 @@ public static class CaseRun
         // because a name happened to exist in the other well is the drift WW290 is about, and here it
         // would change when a selector resolves rather than only what it resolves to.
         if (!key.StartsWith(Reports, StringComparison.Ordinal))
-            return Labels.For(key, project, language).Text;
+            return Labels.For(key, project, language, anchored).Text;
 
         var name = key[Reports.Length..].Trim();
 
