@@ -428,7 +428,16 @@ public static class Pointer
         return new ReasonsChecked(disputed, unchecked_, agreed);
     }
 
-    private static void Send(int x, int y, MouseButton button, int clicks)
+    /// <summary>
+    /// The input itself, at a point on the virtual screen and with nothing checked first.
+    /// <para>
+    /// Internal and not private for one caller, <see cref="NotificationArea.Click" /> (WW483). A tray
+    /// icon is a rectangle in the shell's tree with no clickable point and no window of its own that
+    /// could hold the foreground, so <see cref="Run" />'s admission would refuse it on the first
+    /// question every time. That caller asks the questions a tray has instead.
+    /// </para>
+    /// </summary>
+    internal static void Send(int x, int y, MouseButton button, int clicks)
     {
         var (down, up) = button switch
         {

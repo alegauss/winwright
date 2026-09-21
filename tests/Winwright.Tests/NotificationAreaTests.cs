@@ -1340,17 +1340,6 @@ public sealed class NotificationAreaTests : IDisposable
     }
 
     [Fact]
-    public void Nothing_here_reaches_for_a_synthesised_right_click()
-    {
-        var clicking = typeof(NotificationArea).GetMethods()
-            .Select(method => method.Name)
-            .Where(name => name.Contains("Click", StringComparison.OrdinalIgnoreCase)
-                || name.Contains("RightClick", StringComparison.OrdinalIgnoreCase));
-
-        Assert.Empty(clicking);
-    }
-
-    [Fact]
     public void An_icon_says_which_it_is_and_where_in_one_line()
     {
         if (!Placed)

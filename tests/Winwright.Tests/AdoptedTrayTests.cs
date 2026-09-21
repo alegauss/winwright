@@ -398,6 +398,79 @@ public sealed class AdoptedTrayTests : IDisposable
         }
     }
 
+    [Fact]
+    public void A_click_on_a_launched_tray_s_icon_opens_the_window_the_next_step_reads()
+    {
+        // WW483, and it goes through the scenario runner for the reason the case above does: that is
+        // what an adopter runs. claude-tray made a left-click on its icon the application's main entry
+        // point in T158, and its script drove that with a pointer at the icon's centre. No case could.
+        //
+        // Two steps, and the claim is split the way `invoke` splits it: the first says the click was
+        // sent at the icon and landed on it, and the second reads what the application did with it.
+        // A tray whose click did nothing passes the first and fails the second, which is the one
+        // reading worth a red here.
+        if (BusyDesk.Excused(NotificationArea.Reachable()))
+            return;
+
+        using var register = new ProcessRegister();
+        var flyoutWasUp = NotificationArea.Overflow() is not null;
+
+        var launched = Attachable.Launch(register, Fixture.Started("--tray=shuts"));
+        var tip = Fixture.TrayTip(launched.Pid);
+
+        if (!Placed(tip, launched.Pid))
+            return;
+
+        // Before the click, and it is what makes the second step mean anything: a label already
+        // standing would make "the click opened it" true of a desk nobody had acted on.
+        var before = TopLevelWindows.OfProcess(launched.Pid);
+        Assert.True(
+            before.Count == 0,
+            $"the launched tray owns {before.Count} window(s) before anything clicked it: " + string.Join("; ", before));
+
+        var declared = Winwright.Scenarios.CaseDeclaration.Of(
+            "the tray icon is clicked and its window read",
+            Wrote.Step(null, "click tray icon", ("tray", tip), ("named", "the icon is clicked")),
+
+            // The window is a top-level one of its own, so a resident case finds it from the desktop
+            // it resolves against. What it says is typed here, which a test may do and a case in an
+            // adopter never should: this is the fixture's own constant, spelled a second time for
+            // the reason the icon's tip is.
+            Wrote.Step(
+                "Text#opened",
+                "read",
+                ("reads", "name"),
+                ("expect", "winwright opened by a click"),
+                ("named", "the window the click opened is there to read")));
+
+        try
+        {
+            var run = Winwright.Scenarios.CaseRun.Of(declared, AutomationElement.RootElement, TrayProject());
+
+            // A desk that would not let the click reach the icon is a hole, which the engine answers.
+            if (run.Verdict.Unchecked.Count > 0)
+                return;
+
+            Assert.True(
+                run.Verdict.Outcome == RunOutcome.Passed,
+                "the icon was clicked and no window it opened could be read:"
+                    + $"{Environment.NewLine}{string.Join(Environment.NewLine, run.Verdict.Results.Select(one => one.ToString()))}"
+                    + $"{Environment.NewLine}{string.Join(Environment.NewLine, run.Trace.Select(one => one.ToString()))}");
+
+            // And the window is the launched tray's own, which the read alone cannot say: a label
+            // with those words in some other window would have answered it too.
+            var after = TopLevelWindows.OfProcess(launched.Pid);
+            Assert.Contains(after, one => one.Title == "winwright tray window");
+        }
+        finally
+        {
+            register.Stop(launched);
+
+            if (!flyoutWasUp)
+                NotificationArea.CloseOverflow();
+        }
+    }
+
     /// <summary>
     /// A project for a tray case: this process as the executable, since nothing is launched through
     /// it, and the deadlines a tray needs. WW461, and the same shape <c>NotificationAreaTests</c>

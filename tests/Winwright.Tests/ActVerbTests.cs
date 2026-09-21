@@ -22,11 +22,13 @@ public class ActVerbTests
         // keyboard act, and this list is ordered by which door a verb takes, not by what it pairs with.
         // WW336 added 'capture' last, and it takes a door of its own: it acts on the window its
         // subject is in rather than on a control, and it is the only one that produces a file.
+        // WW483 put 'click tray icon' beside the other tray act, since the door is the same one: an
+        // icon in the shell's tree rather than a control in the application's.
         Assert.Equal(
             [
                 "read", "invoke", "toggle", "set value", "set range", "select", "expand", "collapse",
                 "type", "click", "nudge", "press", "pick", "pick at", "open submenu", "open tray menu",
-                "capture",
+                "click tray icon", "capture",
             ],
             ActVerb.All.Select(verb => verb.Name));
 

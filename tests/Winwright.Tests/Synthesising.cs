@@ -141,6 +141,10 @@ internal static class Synthesising
         new("Menu.Dismiss", Asking.ItIsTheAct, "and closing it, which is Escape"),
         new("NotificationArea.OpenMenu", Asking.ItIsTheAct,
             "an icon's context menu, reached by key because the shell offers no pattern for it"),
+        new("NotificationArea.Click", Asking.ItIsTheAct,
+            "WW483. An icon clicked at its centre, because every taskbar button refuses a clickable "
+                + "point and the rectangle is the only address one has. The click is the whole act, "
+                + "and what the application did with it is the next step's reading"),
 
         // The two that are pattern routes first. These are what this task was filed about.
         new("Selecting.Confirmed", Asking.TheCallerOptedIn,

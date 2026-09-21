@@ -345,11 +345,30 @@ and a tooltip, it has no patterns to read, and a search that could not open the 
 naming the desk rather than an application that placed no icon. Naming both a `locator` and a `tray`
 is refused, and so is naming neither.
 
-A tray step takes two acts and no others, because an icon is not an element: `read` asks whether the
-shell is showing it, and `open tray menu` asks for its menu — by focus and the application key, which
-is the only route that reaches one on this shell. Every other act asks a control through its patterns,
-and a step naming one against a `tray` is refused where it was written. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `capture`.
+A tray step takes three acts and no others, because an icon is not an element: `read` asks whether the
+shell is showing it, `open tray menu` asks for its menu — by focus and the application key, which
+is the only route that reaches one on this shell — and `click tray icon` clicks it with the primary
+button, which is how a person opens what a tray application opens on a left-click. Every other act asks
+a control through its patterns, and a step naming one against a `tray` is refused where it was written;
+the two tray acts named against a `locator` are refused the same way, since there is no control to hand
+them. `act` is one of `read`, `invoke`, `toggle`,
+`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
+
+`click tray icon` is a pointer at the icon's centre, and on purpose: every taskbar button refuses a
+clickable point, so the rectangle is the only address an icon has. What it claims is the click — sent
+at the icon, with the icon the thing standing at that point — and what the application did with it is
+the next step's to read, as it is after an `invoke`. A window it opened is a top-level window, so a
+resident fixture's next step finds it from the desktop it resolves against:
+
+```json
+{ "tray": "[check]", "act": "click tray icon", "named": "the icon is clicked" },
+{ "locator": "Text[name=\"{main.nav.statistics}\"]", "act": "read", "reads": "name", "answers": true }
+```
+
+It is attempted once, like every act a second go of which is a second request: whether a second click
+brings a window back or toggles a flyout shut is the application's business. A flyout that would not
+open, an icon that moved away, and something standing over the icon's centre are holes naming the
+desk; an icon that is on neither the taskbar nor the overflow is a failure.
 
 `capture` is the one act that produces a file, and the one that acts on a window rather than on a
 control: it photographs the window its locator is inside, and its argument is what to **call** the

@@ -241,6 +241,77 @@ public sealed record TrayMenu
 }
 
 /// <summary>
+/// What clicking a tray icon did. WW483.
+/// <para>
+/// The same three endings as <see cref="TrayMenu" />, for the same reason: an icon that is not there
+/// having looked everywhere is a failure about the application, and a desk that would not let the
+/// click reach the icon (a flyout that would not open, an icon that moved away, something standing
+/// over it) is a hole. What it does not carry is what the click made the application do. That is
+/// the next step's reading, the way an <c>invoke</c> leaves it.
+/// </para>
+/// </summary>
+public sealed record TrayClick
+{
+    internal TrayClick(TrayIcon icon, bool delivered, string? because, Precondition? missing = null)
+    {
+        Icon = icon;
+        Delivered = delivered;
+        Because = because;
+        Missing = missing;
+    }
+
+    /// <summary>The icon it was aimed at.</summary>
+    public TrayIcon Icon { get; }
+
+    /// <summary>Whether the click was sent at the icon, with the icon the thing standing there.</summary>
+    public bool Delivered { get; }
+
+    /// <summary>Why it was not, where it was not.</summary>
+    public string? Because { get; }
+
+    /// <summary>The desk fact that stopped it, where one did. Null where it was sent, and null where
+    /// it was not for a reason about the application.</summary>
+    public Precondition? Missing { get; }
+
+    /// <summary>The rectangle the click was sent into, where one was.</summary>
+    public WindowBounds? At { get; init; }
+
+    /// <summary>Whether this act opened the overflow flyout, so the shutting of it is this act's.</summary>
+    internal bool OpenedTheOverflow { get; init; }
+
+    /// <summary>What happened, said either way.</summary>
+    public override string ToString() => Delivered
+        ? $"{Icon} was clicked at its centre."
+        : $"{Icon} was not clicked: {Because}.";
+
+    /// <summary>The result a verdict counts: the click sent, a hole about the desk, or a failure.</summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public AssertionResult AsAssertion(string named)
+    {
+        if (Delivered)
+            return AssertionResult.Pass(named, ToString());
+
+        return Missing is not null
+            ? AssertionResult.Unchecked(named, Missing)
+            : AssertionResult.Fail(named, ToString());
+    }
+
+    /// <summary>The step a trace records.</summary>
+    /// <param name="named">What the scenario called the step.</param>
+    public TraceStep AsTraceStep(string named) => new()
+    {
+        Verb = "click the tray icon",
+        Locator = Icon.Name.Split('\n')[0].Trim(),
+        Resolved = Icon.ToString(),
+        Pattern = "a synthesised pointer at its centre (NotificationArea)",
+        ReadBack = Delivered ? "the click was sent" : null,
+        Verdict = Delivered ? StepVerdict.Ok : Missing is not null ? StepVerdict.Unchecked : StepVerdict.Failed,
+        Detail = Delivered ? null : ToString(),
+        Asserted = named,
+    };
+}
+
+/// <summary>
 /// What asking the overflow flyout to open or shut turned out to do.
 /// <para>
 /// WW165. These two verbs answered a bare bool, so a run that could not work the flyout said only
@@ -1036,6 +1107,177 @@ public static class NotificationArea
             },
             settleMs,
             pollMs);
+    }
+
+    /// <summary>
+    /// Click an icon with the primary button, the way a person opens what a tray application opens
+    /// on a left-click. WW483.
+    /// <para>
+    /// A pointer at the icon's centre, and it is the one route here that is a pointer on purpose.
+    /// WW31 measured that every taskbar button refuses a clickable point, so the rectangle is the
+    /// only address an icon has, and claude-tray's own script drove its T158 entry point exactly
+    /// this way. The shell turns the press into the message the icon's owner registered for.
+    /// The icon button's own Invoke is the untried alternative, and nothing here depends on
+    /// what it does.
+    /// </para>
+    /// <para>
+    /// What the act claims is the click, sent at the icon and landing on it. What the application
+    /// did with it is the next step's to read, as it is after an <c>invoke</c>: a tray may open a
+    /// window, toggle a flyout or do nothing a person can see, and the act cannot know which. So
+    /// it waits for nothing afterwards, not even the pause <see cref="Pointer.Run" /> takes: that one
+    /// reads straight after its send, and this reads nothing. The next step polls to its own deadline.
+    /// </para>
+    /// <para>
+    /// Nothing is retried. A second click is a second request, and what an application does with
+    /// one is as much its business as the first: claude-tray brings its window back, and another
+    /// tray toggles its flyout shut again.
+    /// </para>
+    /// </summary>
+    /// <param name="named">What the shell calls the icon, matched the way <see cref="Find"/> matches.</param>
+    /// <param name="settleMs">How long finding the icon and working the flyout may take.</param>
+    /// <param name="pollMs">How often those waits look again.</param>
+    public static TrayClick Click(string named, int settleMs = 2000, int pollMs = 25)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(named);
+
+        var search = Find(named, openingTheOverflow: true, settleMs, pollMs);
+
+        // Whether the flyout standing now is this act's doing, read once and carried to every
+        // ending, for the reason OpenMenu gives: an ending that forgets it leaks a flyout.
+        var mine = search.Overflow is { Held: true, Already: false };
+
+        if (!search.Found)
+        {
+            // WW168's split, kept: not found having looked everywhere is a failure about the
+            // application, and a flyout that would not open is a hole about the desk.
+            return Clicked(
+                new TrayClick(
+                    new TrayIcon(new ElementFacts(named, "", "Button", "", false, true, default, new HashSet<string>()), false),
+                    false,
+                    search.Because,
+                    search.Everywhere ? null : Precondition.Absent(TraySearch.PreconditionName, search.Because))
+                {
+                    OpenedTheOverflow = mine,
+                },
+                settleMs,
+                pollMs);
+        }
+
+        var icon = search.Icon!;
+        var element = Live(icon);
+        if (element is null)
+        {
+            const string vanished = "the icon went away between finding it and clicking it";
+            return Clicked(
+                new TrayClick(icon, false, vanished, Precondition.Absent(TrayMenu.PreconditionName, vanished))
+                {
+                    OpenedTheOverflow = mine,
+                },
+                settleMs,
+                pollMs);
+        }
+
+        // Read again at the moment of the click rather than taken from the search, because the shell
+        // moves icons about as others come and go, and a rectangle from a moment ago is an address
+        // that may now be a neighbour's.
+        var at = ElementFacts.Of(element)?.Bounds ?? icon.Rectangle;
+        if (at.Width <= 0 || at.Height <= 0)
+        {
+            var nowhere = $"the icon has no area on screen to click: {at}";
+            return Clicked(
+                new TrayClick(icon, false, nowhere, Precondition.Absent(TrayMenu.PreconditionName, nowhere))
+                {
+                    OpenedTheOverflow = mine,
+                },
+                settleMs,
+                pollMs);
+        }
+
+        var x = at.Left + (at.Width / 2);
+        var y = at.Top + (at.Height / 2);
+
+        // Whatever stands over the icon's centre is what a click there reaches, and a click on a
+        // window somebody left over the taskbar is a click on that window. Asked of the tree at that
+        // point rather than assumed from z order, because the flyout and the bar are the shell's own
+        // windows and a z-order walk would call them intruders.
+        if (Covering(element, x, y) is { } over)
+        {
+            var covered = $"the icon's centre ({x}, {y}) is under {over}, so a click there would land on it";
+            return Clicked(
+                new TrayClick(icon, false, covered, Precondition.Absent(TrayMenu.PreconditionName, covered))
+                {
+                    OpenedTheOverflow = mine,
+                },
+                settleMs,
+                pollMs);
+        }
+
+        Pointer.Send(x, y, MouseButton.Left, 1);
+
+        return Clicked(new TrayClick(icon, true, null) { At = at, OpenedTheOverflow = mine }, settleMs, pollMs);
+    }
+
+    /// <summary>
+    /// What stands at a point instead of the icon, or null where the icon is what is there.
+    /// </summary>
+    /// <param name="icon">The icon's live element.</param>
+    /// <param name="x">The point, across.</param>
+    /// <param name="y">The point, down.</param>
+    /// <returns>The element found there, named, where it is neither the icon nor inside it.</returns>
+    private static string? Covering(AutomationElement icon, int x, int y)
+    {
+        AutomationElement? there;
+        try
+        {
+            there = AutomationElement.FromPoint(new System.Windows.Point(x, y));
+        }
+        catch (Exception refused) when (refused is ElementNotAvailableException or InvalidOperationException)
+        {
+            // The tree would not say what is at the point. That is not evidence of anything over the
+            // icon, and refusing on it would make every busy desk a hole about a question nobody
+            // could answer.
+            return null;
+        }
+
+        // The icon or anything inside it: a button may answer a point with a child of its own.
+        for (var at = there; at is not null; at = TreeWalker.RawViewWalker.GetParent(at))
+        {
+            try
+            {
+                if (Automation.Compare(at, icon))
+                    return null;
+            }
+            catch (ElementNotAvailableException)
+            {
+                return null;
+            }
+
+            if (Automation.Compare(at, AutomationElement.RootElement))
+                break;
+        }
+
+        var facts = there is null ? null : ElementFacts.Of(there);
+        return facts is null
+            ? "an element that would not describe itself"
+            : $"{facts.ControlType} '{facts.Name}'";
+    }
+
+    /// <summary>
+    /// A click's reading, with the flyout this act opened shut again where it still stands. WW483.
+    /// <para>
+    /// On every ending and not only the refused ones, which is where this differs from
+    /// <see cref="Refused" />: a click leaves nothing standing that a later step reads from the
+    /// flyout, so there is nothing to lose by shutting it, and a flyout left open is the next case's
+    /// flake. The shell usually shuts it itself when one of its icons is clicked, and then this finds
+    /// nothing to do.
+    /// </para>
+    /// </summary>
+    private static TrayClick Clicked(TrayClick click, int settleMs, int pollMs)
+    {
+        if (click.OpenedTheOverflow && Overflow() is not null)
+            CloseOverflow(settleMs, pollMs);
+
+        return click;
     }
 
     /// <summary>

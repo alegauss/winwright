@@ -70,6 +70,12 @@ internal sealed class Trayed : IDisposable
 
     private const uint WmContextMenu = 0x007B;
     private const uint WmRButtonUp = 0x0205;
+
+    /// <summary>
+    /// A left-click, in the legacy protocol this icon speaks. WW483. It opens a window rather than a
+    /// menu, which is what claude-tray made its main entry point in T158, and nothing here answered it.
+    /// </summary>
+    private const uint WmLButtonUp = 0x0202;
     private const uint NinSelect = 0x0400;
     private const uint NinKeySelect = 0x0403;
     private const int GwlpWndProc = -4;
@@ -187,6 +193,15 @@ internal sealed class Trayed : IDisposable
     private const string Quit = "winwright quit";
 
     /// <summary>
+    /// The window a left-click opens, and what it says. WW483. Both are spellings a harness in another
+    /// process writes again, for the reason <see cref="TipFor" /> gives about the icon's own.
+    /// </summary>
+    public const string WindowTitle = "winwright tray window";
+
+    /// <summary>What the one label in that window says, under the automation id <c>opened</c>.</summary>
+    public const string Opened = "winwright opened by a click";
+
+    /// <summary>
     /// The entry that opens something, and what is under it. WW453.
     /// <para>
     /// Every menu in this tree was flat until now — two commands and nothing under either — and
@@ -222,6 +237,10 @@ internal sealed class Trayed : IDisposable
     private readonly nint owner;
     private readonly nint wasAnswering;
     private ToolStripDropDown? standing;
+
+    /// <summary>The window a left-click opened, kept so a second click brings it back rather than
+    /// stacking another, which is T158's own rule in claude-tray. WW483.</summary>
+    private Form? shown;
 
     private Trayed(string kind)
     {
@@ -270,6 +289,16 @@ internal sealed class Trayed : IDisposable
             return CallWindowProcW(wasAnswering, window, message, wParam, lParam);
 
         var asked = (uint)(lParam & 0xFFFF);
+
+        // WW483. The primary click opens the window, the way a tray whose icon is its entry point
+        // does. The button coming up and not going down, which is what a click is to WinForms'
+        // NotifyIcon, so this answers the message claude-tray's own handler would.
+        if (asked == WmLButtonUp)
+        {
+            OpenWindow(WindowTitle);
+            return 0;
+        }
+
         if (asked is WmContextMenu or WmRButtonUp or NinKeySelect or NinSelect)
         {
             if (dropDown)
@@ -399,6 +428,36 @@ internal sealed class Trayed : IDisposable
         }
     }
 
+    /// <summary>
+    /// The window a left-click opens, or the one it already opened brought forward. WW483.
+    /// <para>
+    /// Given the foreground as it comes up, because that is what an application does with the window
+    /// a person just asked for, and a window that opened behind everything is a different defect.
+    /// </para>
+    /// </summary>
+    /// <param name="title">What the window is called.</param>
+    private void OpenWindow(string title)
+    {
+        if (shown is null || shown.IsDisposed)
+        {
+            shown = new Form
+            {
+                Name = "trayWindow",
+                Text = title,
+                Width = 360,
+                Height = 160,
+                StartPosition = FormStartPosition.CenterScreen,
+                ShowInTaskbar = true,
+            };
+
+            shown.Controls.Add(new Label { Name = "opened", Text = Opened, AutoSize = true, Left = 16, Top = 16 });
+        }
+
+        shown.Show();
+        SetForegroundWindow(shown.Handle);
+        shown.Activate();
+    }
+
     /// <summary>Take the icon away, and the window that owned it.</summary>
     public void Dispose()
     {
@@ -406,6 +465,7 @@ internal sealed class Trayed : IDisposable
         Shell_NotifyIconW(NimDelete, ref going);
 
         standing?.Dispose();
+        shown?.Dispose();
         DestroyWindow(owner);
     }
 

@@ -328,7 +328,7 @@ public sealed record Flags
         new Flag(
             "tray",
             "kind",
-            "a process whose only surface is a notification-area icon, showing whichever kind of menu it was asked for - including one that shuts itself, as a shipped one does",
+            "a process whose only surface is a notification-area icon, showing whichever kind of menu it was asked for - including one that shuts itself, as a shipped one does - and opening a window of its own on a left-click, as claude-tray's does (WW483)",
             "every case proving `open tray menu` adds its icon from inside the test host, so the verb has never been asked the one question an adopter asks - and WW322 was therefore diagnosed by reading claude-tray's own log rather than by a case here",
             Draws: false,
             Choices: Trayed.Kinds),

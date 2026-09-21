@@ -794,6 +794,17 @@ public static class CaseRun
         // so a shell that would not open the flyout is a hole and not a menu that failed to appear.
         try
         {
+            // WW483. A click hands nothing up: what it opened is the next step's to read, and the
+            // flyout it may have opened is shut by the act itself or by the finally below.
+            if (step.ClicksTheTrayIcon)
+            {
+                var click = NotificationArea.Click(icon, settleMs, pollMs);
+
+                trace.Add(click.AsTraceStep(step.Name) with { Step = trace.Count + 1 });
+                results.Add(click.AsAssertion(step.Name).At(trace.Count));
+                return null;
+            }
+
             if (step.OpensTheTrayMenu)
             {
                 var menu = NotificationArea.OpenMenu(icon, settleMs, pollMs);

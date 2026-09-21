@@ -156,7 +156,21 @@ public sealed record ActVerb
         // the route is focus and the application key — a synthesised right-click opens nothing at all
         // on this shell, which is why there is no pointer half of this pair to name.
         new(
-            "open tray menu",
+            OpensTrayMenu,
+            Takes.Nothing,
+            repeatable: false,
+            null,
+            synthesises: true,
+            onATray: true),
+
+        // WW483. The third a tray icon takes, and the one a person makes most: a left-click, which
+        // claude-tray made its main entry point in T158. No delegate for the reason the menu act has
+        // none, and a pointer on purpose rather than as an escalation: WW31 measured that every
+        // taskbar button refuses a clickable point, so the rectangle is the icon's only address.
+        // Not repeatable, because a second click is a second request and what an application does
+        // with it (bring its window back, or toggle a flyout shut) is not the engine's to guess.
+        new(
+            ClicksTrayIcon,
             Takes.Nothing,
             repeatable: false,
             null,
@@ -182,6 +196,12 @@ public sealed record ActVerb
             captures: true,
             needs: "captures"),
     ];
+
+    /// <summary>The verb that asks a tray icon for its menu. WW258.</summary>
+    public const string OpensTrayMenu = "open tray menu";
+
+    /// <summary>The verb that clicks a tray icon with the primary button. WW483.</summary>
+    public const string ClicksTrayIcon = "click tray icon";
 
     private readonly Func<Subject, string?, ActResult>? doing;
     private readonly bool onATray;
@@ -343,6 +363,17 @@ public sealed record ActVerb
     /// </para>
     /// </summary>
     public bool OnATray => onATray || Reads;
+
+    /// <summary>
+    /// Whether this verb acts on a tray icon and on nothing else. WW483.
+    /// <para>
+    /// The other half of <see cref="OnATray" />, which says what a tray step may name and never
+    /// what a locator step may not. A locator step naming one of these loaded and then threw at the
+    /// run that reached it, because there is no delegate to hand a control to: the linter-shaped
+    /// failure this format refuses everywhere else, found when the second tray act was added.
+    /// </para>
+    /// </summary>
+    public bool OnlyOnATray => onATray;
 
     /// <summary>
     /// The verb of that name, or a refusal listing the ones there are.

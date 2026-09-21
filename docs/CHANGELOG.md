@@ -335,6 +335,7 @@
 - ✅ **WW444** **a step's rows are held to its own reader by nothing, so a row no property reads is a key that loads and does nothing** — Each of a step's rows is paired with what reads it, so a row nothing reads is red rather than published (design recorded in `tests/Winwright.Tests/StepDeclarationTests.cs`).
 - ✅ **WW445** **the sweep that holds a no-desk mark honest finds cases by `public void`, so a marked async case is checked by nothing** — A marked case is found by its own declaration, whatever shape it has, and a written sample proves the sweep sees both (design recorded in `tests/Winwright.Tests/NoDeskTests.cs`).
 - ✅ **WW473** **a read-out is launched without the fixture's arguments, so it answers about a machine the window is not showing** — A read-out carries the argument its fixture's environment reaches the application through, so a window drawn on a sampled machine is asked about that one.
+- ✅ **WW483** **a case cannot click a tray icon, so the window an application opens on a left-click is claimed by nothing** — A tray step clicks its icon with `click tray icon`, a pointer at the icon's centre that lands on it or is a hole naming the desk, and the next step reads the window it opened.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

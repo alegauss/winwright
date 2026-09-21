@@ -933,6 +933,7 @@ public sealed record StepDeclaration
         // reader would then delete. It stood at the top of a verb of its own until this task, and
         // the order is what this suite asserts rather than where the code sat.
         RefusesTrayVerb(subject, tray, act);
+        RefusesTrayOnlyVerb(subject, tray, act);
 
         // Null for a tray step, which has no locator to parse, and never null for the other kind:
         // the guard above threw for a step that named neither. Parsed before the argument is judged,
@@ -1634,6 +1635,32 @@ public sealed record StepDeclaration
     }
 
     /// <summary>
+    /// A step whose subject is a locator naming a verb that acts on a tray icon and nothing else.
+    /// WW483.
+    /// <para>
+    /// The mirror of <see cref="RefusesTrayVerb" />, and missing until a second tray act made the gap
+    /// easy to fall into. <c>open tray menu</c> against a locator loaded, passed a check, and threw at
+    /// the run that reached it, because there is no control to hand a verb that has no delegate. That is
+    /// a refusal found halfway through a run, which is what a data file refused at the door exists to
+    /// replace.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="tray">The icon it is about, or null where it is about a locator.</param>
+    /// <param name="act">The verb it named.</param>
+    private static void RefusesTrayOnlyVerb(string subject, string? tray, ActVerb act)
+    {
+        if (tray is not null || !act.OnlyOnATray)
+            return;
+
+        throw new ScenarioRefusedException(
+            subject,
+            $"it names '{act.Name}', which acts on a notification-area icon and on nothing else; "
+                + "a step that does it names the icon in 'tray', by what the shell calls it, and "
+                + "carries no locator");
+    }
+
+    /// <summary>
     /// Every claim a tray step may not make, refused by name. WW258, read off the step since WW391.
     /// <para>
     /// The list used to be written here — twenty-one field names in a fixed order, added to by hand
@@ -1680,7 +1707,14 @@ public sealed record StepDeclaration
     /// and asked off the verb rather than stored: the vocabulary is the one place a tray act is
     /// declared, and a second flag would be a second answer about the same word.
     /// </summary>
-    public bool OpensTheTrayMenu => Tray is not null && !Verb.Reads;
+    public bool OpensTheTrayMenu => Tray is not null && Verb.Name == ActVerb.OpensTrayMenu;
+
+    /// <summary>
+    /// Whether this step clicks a tray icon with the primary button. WW483, asked off the verb for the
+    /// reason <see cref="OpensTheTrayMenu" /> is, and why that one stopped being "any tray step that is
+    /// not a read": with a third tray act that definition answered yes about a click.
+    /// </summary>
+    public bool ClicksTheTrayIcon => Tray is not null && Verb.Name == ActVerb.ClicksTrayIcon;
 
     /// <summary>What a locator writes where the member of a repeated case belongs.</summary>
     public const string Member = "{}";

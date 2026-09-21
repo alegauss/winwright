@@ -242,6 +242,7 @@ internal static class Cooperating
         new("NotificationArea.OpenOverflow", Cooperation.None, true, "open the flyout"),
         new("NotificationArea.CloseOverflow", Cooperation.None, true, "shut it again"),
         new("NotificationArea.OpenMenu", Cooperation.None, true, "an icon's context menu, by key"),
+        new("NotificationArea.Click", Cooperation.None, true, "an icon clicked with the primary button, at its centre (WW483)"),
 
         // --- WW209, and the whole of what widening the scope found -----------------------------------
         // Eighteen verbs an adopter can call that this catalogue had never been shown. Every one of

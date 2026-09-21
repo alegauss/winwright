@@ -67,31 +67,6 @@ What is wanted is a stand-in that behaves as a fixture does.
 
 ## Block G — The scenario — a case is a data file
 
-### §WW483 A tray step that clicks the icon
-
-Found migrating claude-tray (WW86). T158 made a left-click on the icon that
-application's main entry point, opening its one window. The script clicked the icon's
-centre, three bounded attempts because the shell drops synthesised input, then asked the
-window for its nav strip's three destinations. No case can say it. A tray step takes
-`read` and `open tray menu`, and the second is WW31's route: focus and the application
-key.
-
-So the step is `click` on a `tray`, and the pieces mostly exist. WW31 addresses an icon
-by its rectangle, because every taskbar button refuses a clickable point.
-`PointerReason` already has `NotificationArea`, so the reason a case writes in `with` is
-already a word. And `Find` opens the overflow and puts it back.
-
-Two things are open, and both are measurements. Which route reaches a WinForms
-`NotifyIcon`'s click on this shell: a pointer click at the rectangle, or the icon
-button's own Invoke, which needs no desk if the shell turns it into the message the
-application listens for. And where the next step resolves: a resident fixture launches
-with no window, so a locator after the click has to be looked for among the windows that
-process opened since. Without that, the claim cannot be written even once the click
-lands.
-
-The claim itself stays in the next step, as it does for `invoke`: the click is an act,
-and what it opened is read.
-
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness

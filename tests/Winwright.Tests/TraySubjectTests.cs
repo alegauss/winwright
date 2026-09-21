@@ -132,8 +132,57 @@ public sealed class TraySubjectTests
         Assert.True(found.Verb.Reads);
 
         Assert.Equal(
-            ["read", "open tray menu"],
+            ["read", "open tray menu", "click tray icon"],
             ActVerb.All.Where(one => one.OnATray).Select(one => one.Name));
+    }
+
+    [Fact]
+    public void A_step_can_click_a_tray_icon_and_the_verb_alone_says_so()
+    {
+        // WW483. The third tray act, told apart from the menu by the verb and nothing else — which is
+        // why `OpensTheTrayMenu` stopped being "any tray step that is not a read".
+        var step = Assert.Single(Assert.Single(Read("""
+            "tray": "winwright under test", "act": "click tray icon", "named": "the icon is clicked"
+            """)).Steps);
+
+        Assert.Equal("winwright under test", step.Tray);
+        Assert.True(step.ClicksTheTrayIcon);
+        Assert.False(step.OpensTheTrayMenu);
+        Assert.True(step.Checkable);
+    }
+
+    [Fact]
+    public void Clicking_a_tray_icon_is_attempted_once_and_acts_on_nothing_but_an_icon()
+    {
+        // A second click is a second request, and a pointer at the rectangle is the only route there
+        // is: WW31 measured that every taskbar button refuses a clickable point.
+        var verb = ActVerb.Named("click tray icon");
+
+        Assert.False(verb.Repeatable);
+        Assert.True(verb.Synthesises);
+        Assert.False(verb.Reads);
+        Assert.True(verb.OnATray);
+        Assert.True(verb.OnlyOnATray);
+        Assert.Equal(Takes.Nothing, verb.Wants);
+
+        Assert.Equal(
+            ["open tray menu", "click tray icon"],
+            ActVerb.All.Where(one => one.OnlyOnATray).Select(one => one.Name));
+    }
+
+    [Theory]
+    [InlineData("open tray menu")]
+    [InlineData("click tray icon")]
+    public void A_locator_step_naming_a_verb_that_only_a_tray_icon_takes_is_refused_at_the_door(string act)
+    {
+        // WW483. It loaded before this and threw at the run that reached it, because there is no
+        // control to hand a verb with no delegate: a refusal found halfway through a run.
+        var refused = Assert.Throws<ScenarioRefusedException>(() => Read($$"""
+            "locator": "Button#icon", "act": "{{act}}"
+            """));
+
+        Assert.Contains($"'{act}'", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("'tray'", refused.Because, StringComparison.Ordinal);
     }
 
     [Fact]

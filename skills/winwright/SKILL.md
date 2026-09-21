@@ -55,6 +55,9 @@ shell's name and a WinForms drop-down carries none. So write `MenuItem[name="Qui
 starting at the `Menu` — one copied from a Win32 tray matches nothing on a drop-down, and all it
 says is that nothing answered.
 
+**A left-click on a tray icon is `click tray icon`**, and what it opened is the next step's to read.
+A window it opens is top-level, so the next locator finds it from the desktop a tray case runs against.
+
 ## Two things that decide whether an answer can be trusted
 
 **A pattern act needs no foreground.** `Act.Invoke`, `Act.Toggle`, `Act.SetValue` ask the control

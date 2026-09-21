@@ -214,6 +214,10 @@ internal static class DeskAsks
         new("NotificationArea.OpenMenu(", Winwright.Acting.TrayMenu.PreconditionName,
             "the route to a tray menu is focus and then the application key, and a desk that gives "
                 + "neither stops the act before it starts"),
+        new("NotificationArea.Click(", Winwright.Acting.TrayMenu.PreconditionName,
+            "WW483. A click reaches the icon only where the icon is what stands at its centre, so a "
+                + "window left over the taskbar, an icon that moved away and a flyout that would not "
+                + "open each stop the act before anything is sent"),
     ]);
 
     /// <summary>Every case that asks and does not excuse, with why the desk cannot reach it.</summary>
@@ -446,6 +450,13 @@ internal static class DeskAsks
                 + "and it stands down before that on all three readings it does depend on: the "
                 + "notification area being reachable, the icon being placed, and the engine's own "
                 + "unchecked count where the desk would not put the menu up"),
+        new("AdoptedTrayTests.A_click_on_a_launched_tray_s_icon_opens_the_window_the_next_step_reads",
+            Unaffected.Guarded,
+            "WW483. The same shape as the menu case above it: the flyout is touched only by the tidy "
+                + "in the finally, after everything is asserted, and the case stands down before "
+                + "that on each reading it depends on — the notification area reachable, the icon "
+                + "placed, and the engine's own unchecked count where the desk would not let the "
+                + "click reach the icon"),
         new("NotificationAreaTests.A_case_reads_the_menu_a_step_opened_and_the_case_hands_the_desk_back",
             Unaffected.Guarded,
             "WW343. The same guard as the case below and for the same reason: the foreground is read "

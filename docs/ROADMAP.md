@@ -17,16 +17,14 @@
 
 ## Block G — The scenario — a case is a data file
 
-- 📋 **WW483** (deps: —) **a case cannot click a tray icon, so the window an application opens on a left-click is claimed by nothing** — A tray step reads an icon or opens its menu, and claude-tray's own entry point is the left-click that opens its window, which its script drove and no case can. → §WW483
-
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
 
-- ⏳ **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ✅, Block E ✅, WW483, an engine release on nuget.org) **claude-tray still carries a 3,004-line interaction harness, and one of its claims has no case** — The icon's left-click waits on WW483 and a release, then the script goes. → §WW86
-- ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
+- ⏳ **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ✅, Block E ✅, WW483 ✅, an engine release on nuget.org) **claude-tray still carries a 3,004-line interaction harness, and one of its claims has no case** — The icon's left-click waits on WW483 and a release, then the script goes. → §WW86
+- ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
 - 📋 **WW480** (deps: Block E ✅, a decision on claude-tray taking Winwright.InApp) **the preview loop is a 451-line screen copy wired into four documents, and deleting it is not a migration** — Every preview case needs the app to render itself, and claude-tray's strategy bundles no dependency. → §WW480
 
