@@ -1,0 +1,48 @@
+---
+// Every condition a hole can name, off the engine's own catalogue.
+//
+// `DeskFacts.Known` is the judgement about which of them are the machine's rather than the
+// application's, and it lives beside the readings for the reason WW183 gives: a condition
+// classified somewhere else is one classified by whoever next has a red they cannot explain.
+// Everything the engine declares and that list does not name is a fact about the thing under
+// test, which is the same subtraction `Holes.Of` makes.
+import holes from "../data/holes.generated.json";
+
+interface Props {
+  /** "desk" for the machine's, "underTest" for the application's. */
+  whose: "desk" | "underTest";
+}
+
+const { whose } = Astro.props;
+
+// A condition is a sentence, so it makes a poor anchor. The index is stable in catalogue order,
+// and the order is the engine's own.
+const anchor = (at: number): string => `condition-${whose}-${at + 1}`;
+---
+
+{
+  whose === "desk" ? (
+    <table>
+      <thead>
+        <tr>
+          <th>The reading that was absent</th>
+          <th>Why it is the desk's and not yours</th>
+        </tr>
+      </thead>
+      <tbody>
+        {holes.desk.map((one, at) => (
+          <tr id={anchor(at)}>
+            <td>{one.named}</td>
+            <td>{one.because}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ) : (
+    <ul class="ww-conditions">
+      {holes.underTest.map((one, at) => (
+        <li id={anchor(at)}>{one}</li>
+      ))}
+    </ul>
+  )
+}

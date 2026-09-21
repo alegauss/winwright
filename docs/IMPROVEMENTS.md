@@ -65,26 +65,6 @@ read.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW491 A page for the third verdict, and for every hole that earns it
-
-An adopter's first surprising run answers `2`. Nothing failed, nothing passed, and the
-summary names an assertion that never ran. That is the whole argument of this project
-arriving at the worst possible moment to have to go looking for it — and today it is
-spread over four separate parts of the README, none of them titled anything a person
-would search for.
-
-The page collects it: what a hole is, why it is neither a pass nor a failure, and every
-condition that produces one. The four about the desk first, because they are the ones an
-adopter meets and none of them is their code being wrong — a foreground Windows would
-not grant, a focus that left while a walk was polling, a flyout the shell would not
-open, a window standing over the region a capture was about. Then the ones about the
-declaration: a reading whose key the project never declared, a capture step in a project
-declaring no `captures`.
-
-Beside each, what to do about it, because a verdict a reader cannot act on is a verdict
-they learn to ignore. And the precedence, which is not the enum's order: broken outranks
-failed, failed outranks degraded, and a run of no cases is degraded rather than passed.
-
 ### §WW492 The in-app half, argued as a shipping decision
 
 `Winwright.InApp` is the only thing this project asks an adopter to put inside an
@@ -304,3 +284,24 @@ The repair is the move rather than a comment explaining the difference. Whicheve
 paragraph rule survives becomes the argument the shared reader already takes, and
 `grammar.test.mjs` is the case that says the predicate table did not change while it
 happened.
+
+### §WW504 The generator list, spelled twice
+
+Six generators now read this repository's C# to build the documentation area, and the
+list of them is written twice: `generate` in `site/package.json` and `prebuild` in
+`site/docs/package.json`. Both are hand-chained `&&` sequences, and nothing compares
+them. WW491 added the sixth and had to remember two places to do it.
+
+The failure is asymmetric, which is what makes it worth a line rather than a comment. A
+generator missing from `prebuild` is loud on a clean checkout — the area imports a
+payload that was never written and the build stops — and silent on the machine of
+whoever added it, because their `docs/src/data/` still holds the file from the last time
+they ran it by hand. So the author sees green, CI sees red, and the distance between
+those two is a push.
+
+`docs-area.test.mjs` already holds the joins of this shape: the base, the output
+directory, the build order. This is the same kind of fact — two spellings of one list —
+and the same case can hold it, by reading the `.mjs` files that write into
+`docs/src/data/` and asserting each is named in both scripts. That reading is worth more
+than the equality: a generator nobody chained at all would be a file in `scripts/` that
+runs nowhere, and neither list would say so.

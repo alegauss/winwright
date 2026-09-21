@@ -59,6 +59,7 @@ export default defineConfig({
         { label: "What this is", link: "/" },
         { label: "Installing it", link: "/installing/" },
         { label: "Your first case", link: "/first-case/" },
+        { label: "Reading the verdict", link: "/verdicts/" },
         { label: "Declaring a project", link: "/project/" },
         { label: "Addressing an element", link: "/locators/" },
         { label: "The case format", link: "/case-format/" },

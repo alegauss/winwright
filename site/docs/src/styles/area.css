@@ -127,6 +127,16 @@
   background: var(--sl-color-gray-6);
 }
 
+/* A condition a hole can name. Each is a sentence rather than a term, so they are set as lines
+   of prose with a marker, not as a table with one column. */
+.ww-conditions {
+  padding-inline-start: 1.2em;
+}
+
+.ww-conditions li {
+  margin-block: 0.15em;
+}
+
 /* A seeded default, read off the engine. Laid out across the line rather than down it: these
    are short pairs, and a column of five of them is a page somebody has to scroll past. */
 .ww-seeded {

@@ -98,4 +98,31 @@ public sealed class DeskFactTests
         Assert.False(DeskFacts.Names("the foreground"));
         Assert.False(DeskFacts.Names(""));
     }
+
+    [Fact]
+    public void The_sources_declare_exactly_the_conditions_the_assembly_carries()
+    {
+        // WW491. The documentation area publishes every condition that can earn a hole, and it is
+        // built by Node with no assembly to reflect over — so its generator sweeps these sources
+        // for the two spellings `Holes.Declared` selects on. That sweep is only as good as this
+        // equality: a condition declared some third way would be missing from the page, and a
+        // page that is silently short is the shape of answer this project refuses everywhere else.
+        // Read with `Spoken` and not raw: the conditions are string literals, so the reading that
+        // keeps strings and drops comments is the one this wants — and a doc comment quoting a
+        // declaration would otherwise be swept as a second one.
+        var swept = Checkout.SourcesIn(Checkout.At("src", "Winwright"))
+            .SelectMany(file => File.ReadLines(file)
+                .Select(Checkout.Spoken)
+                .Select(line => System.Text.RegularExpressions.Regex.Match(
+                    line,
+                    """public const string (?:[A-Za-z]*PreconditionName|Named) = "([^"]+)";"""))
+                .Where(match => match.Success)
+                .Select(match => match.Groups[1].Value))
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(one => one, StringComparer.Ordinal)
+            .ToList();
+
+        Assert.NotEmpty(swept);
+        Assert.Equal(Holes.Declared.OrderBy(one => one, StringComparer.Ordinal), swept);
+    }
 }

@@ -27,7 +27,6 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW491** (deps: —) **what earns a hole rather than a red is spread over the README, so a reader who met a 2 cannot look it up** — Degraded is the finding this project exists for and the verdict an adopter meets without understanding it, which is the moment a scattered explanation is worth nothing. → §WW491
 - 📋 **WW492** (deps: —) **the in-app half is described as a list of types, so nobody can tell what shipping it costs their users** — It is the one package that goes into an application real people run, and that decision needs what it writes, when, and what a release does with no harness attached. → §WW492
 - 📋 **WW493** (deps: —) **every example in the area was written rather than run, so no page shows one real adoption end to end** — A walkthrough pasted from memory misleads at the first message whose wording changed, and the refusals are where somebody decides a tool is not worth the trouble. → §WW493
 - 📋 **WW494** (deps: —) **a first run's refusals are written up by cause, and a stuck reader has only the words on their screen** — CS0579 naming a wpftmp project, a desk that grants no foreground and a guard nobody built are what stop an adoption, and none of the three is searchable today. → §WW494
@@ -38,6 +37,7 @@
 - 📋 **WW500** (deps: —) **the site bakes the version at build time, so a release leaves the page offering the version before it** — The deploy is manual and the version is the figure a reader copies rather than reads, so a release opens a window where the page hands out a reference a version behind. → §WW500
 - 📋 **WW501** (deps: —) **the twelve readings a step may name are published as bare words, so nothing tells 'picked' from 'selected'** — An expectation names one reading, and one the element does not offer answers null forever — reported as nothing answering rather than as the wrong choice. → §WW501
 - 📋 **WW502** (deps: —) **one of the four page generators keeps its own C# reader, and it already disagrees with the shared one** — Two readings of a doc comment sit in one repository with nothing pairing them, so a rendering fixed in either is fixed in the wrong half. → §WW502
+- 📋 **WW504** (deps: —) **the six page generators are chained by hand in two package.json scripts, and nothing holds the lists equal** — One missing from the area's own chain is silent on the machine that still holds yesterday's payload and red only on a clean checkout. → §WW504
 
 ## Done when — Block A
 

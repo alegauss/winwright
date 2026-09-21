@@ -7,9 +7,11 @@
 // So they are read out of both files and compared here.
 import { test, before } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { code } from "./csharp.mjs";
 
 const siteDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = join(siteDir, "..");
@@ -248,6 +250,36 @@ test("the built project page carries a row per key, and the defaults the engine 
     assert.ok(
       rendered.includes(Number(milliseconds).toLocaleString("en-GB")),
       `the project page does not show ${milliseconds} for '${name}'`,
+    );
+  }
+});
+
+test("the built verdict page shows every condition a hole can name", () => {
+  // WW491. The page an adopter reaches for after their first `2`. A condition missing from it is
+  // one they met and cannot look up, which is the symptom the page exists to close — and it is
+  // invisible on a page that otherwise reads complete.
+  const page = join(builtDir, "verdicts", "index.html");
+  assert.ok(existsSync(page), "dist/docs/verdicts/index.html is missing — run `npm run build` first");
+  const rendered = readFileSync(page, "utf8");
+
+  const engine = join(repoDir, "src", "Winwright");
+  const declared = new Set(
+    readdirSync(engine, { recursive: true, withFileTypes: true })
+      .filter((one) => one.isFile() && one.name.endsWith(".cs"))
+      .filter((one) => !/[\\/](bin|obj)[\\/]/.test(one.parentPath ?? one.path))
+      .flatMap((one) =>
+        [...code(readFileSync(join(one.parentPath ?? one.path, one.name), "utf8"))
+          .matchAll(/public const string (?:[A-Za-z]*PreconditionName|Named) = "([^"]+)";/g)]
+          .map((m) => m[1]),
+      ),
+  );
+  assert.ok(declared.size > 10, `only ${declared.size} conditions could be swept out of the engine`);
+
+  for (const condition of declared) {
+    // Rendered as prose, so an apostrophe in one arrives as its entity.
+    assert.ok(
+      rendered.includes(condition.replace(/'/g, "&#39;")) || rendered.includes(condition),
+      `the verdict page never shows the condition "${condition}"`,
     );
   }
 });

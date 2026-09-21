@@ -1,0 +1,108 @@
+---
+title: Reading the verdict
+description: What each exit code means, why a hole is neither a pass nor a failure, and every condition that can produce one — the desk's on one side, your application's on the other.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+import Conditions from "../../components/Conditions.astro";
+import Verdicts from "../../components/Verdicts.astro";
+import holes from "../../data/holes.generated.json";
+import product from "../../data/product.generated.json";
+
+If you are here because a run answered **`2`** and you are not sure what you did wrong: probably
+nothing. Read on.
+
+## The four readings
+
+The enum's member values **are** the process exit codes. CI reads the number rather than the
+word, and a mapping written twice is a mapping that drifts.
+
+<Verdicts />
+
+## They do not rank in that order
+
+A run is folded to one reading, and the order is **not** the enum's:
+
+<p class="ww-figures">
+  {holes.precedence.join(" outranks ")}.
+</p>
+
+Taking the largest member value would rank a hole above a failure, which is the one comparison
+the numbers happen to get backwards. `3` outranks everything because a reader told the build
+failed opens the wrong repository, and nothing after a throw was observed at all.
+
+A run that produced **no readings at all** is `{holes.empty}` rather than a pass. A run of no
+cases has no failure in it, so it would otherwise read as a green about nothing — and before it
+gets that far, a suite with nothing to run and a selector matching no case are both **refused**,
+naming what there was to choose from.
+
+## A hole is an assertion that never ran
+
+Not one that failed. The precondition it needed was absent, so the check was never made, and the
+summary names it — by name, in the line, before the tally.
+
+```
+Passed: 1 of 9 cases, 8 not run, 3 assertions over case 'renaming a profile writes it back'.
+```
+
+Collapsing that into a pass is the defect this project was started over: a suite reported a pass
+with no failures over a total of 352 where the run before it had 374, twenty-two tests gone,
+because the host had died partway through. Collapsing it into a failure is the other half of the
+same mistake — it sends you to read code that is fine.
+
+So the run says **whose** the hole was, which is what decides what you do next.
+
+<dl class="ww-cooperation">
+  {holes.kinds.map((one) => (
+    <>
+      <dt>
+        <span class="ww-holds">{one.kind}</span>
+      </dt>
+      <dd>{one.means}</dd>
+    </>
+  ))}
+</dl>
+
+This engine declares **{holes.counts.conditions}** conditions an assertion can be held up by.
+**{holes.counts.desk}** of them are the desk's and **{holes.counts.underTest}** are about the
+thing under test, and both lists below are read off the engine on every build.
+
+## The desk's — nothing to fix in any repository
+
+These are the ones an adopter meets first, and none of them is your code being wrong. A run that
+could not get what it needed of the machine says so instead of guessing.
+
+<Conditions whose="desk" />
+
+**What to do:** give the run a desk of its own. A VM with an interactive session, a dedicated
+runner, or any machine nobody is sitting at. Re-running on the same busy desk is the one response
+that changes nothing — and if you are working alongside the run, your own typing is landing in
+the application under test.
+
+## Your application's — a repository to open
+
+Everything else the engine declares. Re-running changes nothing about these: a stale binary is
+stale on the second run too.
+
+<Conditions whose="underTest" />
+
+**What to do:** read the condition. Most of them name exactly what was not true — a binary built
+from this source, a page that has finished computing, an application in the language the case was
+written for. Several are answered by a key `winwright.json` does not declare yet, which is the
+last column of [Declaring a project](/winwright/docs/project/).
+
+<Aside title="A third bucket, and it is not politeness">
+A hole whose condition this engine has never classified is counted as **unclassified** rather
+than rounded into either side. Rounding it towards the desk would excuse a defect; rounding it
+towards your code would send you to the wrong repository. It is named in the line so somebody can
+go and classify it — which is a task in this repository, not in yours.
+</Aside>
+
+## Where to go next
+
+- [What this is](/winwright/docs/) — why the third verdict exists at all.
+- [The verbs](/winwright/docs/verbs/) — which verbs need a desk, so you can tell before a run
+  rather than after it.
+- [Declaring a project](/winwright/docs/project/) — the keys whose absence is recorded as a
+  reading not taken.
