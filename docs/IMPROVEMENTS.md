@@ -99,14 +99,6 @@ the script (its case list against AGENTS.md, and every id it drives) are retarge
 
 The capture script left with WW480.
 
-### §WW88 pportal loses the harness and the runner
-
-The interaction file becomes scenarios and the twenty-seven copies of the
-single-threaded runner become one package reference, which is the largest single
-deletion the whole adoption produces. It is also the hardest, because a thousand other
-tests sit around it and the migration must not disturb the parallelism setting the
-runner config exists to hold in place.
-
 ### §WW384 the repair nothing has watched
 
 WW371 put a second guest-side script beside the probe, and it arrived in the state the

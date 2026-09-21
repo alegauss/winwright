@@ -24,7 +24,6 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ✅, Block E ✅, WW483 ✅, an engine release on nuget.org) **claude-tray still carries a 3,004-line interaction harness, and one of its claims has no case** — The icon's left-click waits on WW483 and a release, then the script goes. → §WW86
-- ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
 
 ## Block K — The proving ground — a fixture app built to be hard to test
@@ -161,14 +160,6 @@
   against a real session that reports everything present and renders nothing - the WW42
   desk - and stays met on an ordinary one. A rendering check verified only against a
   substitute has been verified against the one desk that was never the problem.
-
-## Done when — WW88
-
-- **The interaction harness is cases, and its desk reasons are holes not reds**
-  Interaction.cs is deleted and MappingInteractionTests runs as scenarios through the
-  engine. What says it landed is the two that fail on this desk today: a controller
-  nobody plugged in and a window that would not come are absences the run names, not
-  failures it reports.
 
 ## Done when — WW384
 

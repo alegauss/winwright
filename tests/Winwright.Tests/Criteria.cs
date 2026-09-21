@@ -251,11 +251,12 @@ internal static class Criteria
             "the condition is asserted against an ordinary desk by DeskGateTests, and the desk that "
                 + "reports everything present and renders nothing has never been driven here"),
 
-        // --- WW88, the same shape and a different adopter ----------------------------------------------------
-        new("WW88", "The interaction harness is cases, and its desk reasons are holes not reds", "",
-            Unshown.NotBuilt, "the runner half landed and the harness half has not, so there are no "
-                + "cases to read this back off yet — and when there are they will be in pportal, "
-                + "which nothing in this suite can drive"),
+        // WW88's criterion stood here and went with the line. pportal's `Interaction.cs` is deleted,
+        // its three claims are cases, and the reading that says it landed was taken where the
+        // migration is: one assertion ran and two cases were left alone naming `a controller SDL can
+        // map`, which is the absence that used to be a red about the code. Read back there, which is
+        // the whole of why it could never be read here — nothing in this repository can drive that
+        // application, and its cases need a pad this desk does not have.
 
         // --- WW83, whose remaining half is an adopting project's rather than this suite's -------------------
         // WW83's criterion stood here and went with the line, and it went checked. The engine
