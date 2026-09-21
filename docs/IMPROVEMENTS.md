@@ -65,27 +65,6 @@ read.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW497 A gate on the links the area does not own the other end of
-
-The area is deliberately thin about the long form: it links the README rather than
-holding a second copy, and several of those links carry an anchor — `#writing-a-case`,
-`#what-needs-the-application-to-cooperate`. An anchor is a heading spelled as a slug,
-and this repository renames headings whenever the argument under one changes.
-
-Nothing notices. The link still resolves, GitHub lands the reader at the top of a
-thousand-line file, and the page that sent them there reads exactly as it did when it
-worked. It is the quietest kind of rot, and it lands on the reader who was already being
-sent somewhere else for the detail.
-
-The gate is small because both ends are in this repository: read every link the built
-area emits at this repository's own README, take the headings the README actually
-declares, and fail the build where an anchor names one that is not there. It runs with
-the site's other tests, which already read the built output rather than the source.
-
-External links are out of scope — nuget.org and github.com are not this project's to
-keep — and so is the reverse direction: a heading with no page pointing at it is not a
-defect.
-
 ### §WW498 The words, defined once, before the pages that use them
 
 The area is written in a vocabulary it never defines. A *case* is a data file and not a
