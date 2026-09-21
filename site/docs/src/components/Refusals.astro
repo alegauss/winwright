@@ -1,0 +1,30 @@
+---
+// Every way a locator can fail to parse, which is half of what the grammar is worth.
+//
+// `LocatorFault` names them and `Locator.Parse` throws them, and `scripts/grammar.mjs` holds
+// the two against each other: an arm declared and never thrown would be a refusal this page
+// describes and the parser cannot produce. The arm is named because it is what a caller
+// collecting refusals branches on, and what a reader searching this area will have on screen.
+import grammar from "../data/grammar.generated.json";
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Refusal</th>
+      <th>What it is about</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      grammar.refusals.map((refusal) => (
+        <tr id={`refusal-${refusal.arm}`}>
+          <td>
+            <code class="ww-locator">{refusal.arm}</code>
+          </td>
+          <td>{refusal.meaning}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

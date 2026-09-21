@@ -521,3 +521,4 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
+- ✅ **WW487** **the locator grammar lives in a section of a 1,000-line README, so learning it means reading the file** — The locator grammar is its own page, read out of the parser on every build, with every form parsed by the suite and every refusal it can answer with (design recorded in `site/scripts/grammar.mjs`).

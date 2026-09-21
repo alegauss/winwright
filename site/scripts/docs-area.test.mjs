@@ -107,6 +107,36 @@ test("the built area carries the version this tree declares", () => {
   );
 });
 
+test("the built grammar page publishes every predicate and every refusal the parser has", () => {
+  // WW487. `grammar.test.mjs` holds the generated payload against the C#; this is the other
+  // end, and it is a different claim: a payload can be right while the page never renders it.
+  // Both halves of the table, because a key with no sentence beside it is a key nobody can use.
+  const page = join(builtDir, "locators", "index.html");
+  assert.ok(existsSync(page), "dist/docs/locators/index.html is missing — run `npm run build` first");
+  const rendered = readFileSync(page, "utf8");
+
+  const locator = read(repoDir, "src", "Winwright", "Locating", "Locator.cs");
+  const keys = /private const string Keys = "([^"]+)"/.exec(locator);
+  assert.ok(keys, "Locator.cs no longer declares Keys");
+
+  for (const key of keys[1].split(",").map((one) => one.trim())) {
+    assert.match(
+      rendered,
+      new RegExp(`id="predicate-${key}"`),
+      `the grammar page publishes no row for [${key}=...]`,
+    );
+  }
+
+  const thrown = new Set([...locator.matchAll(/LocatorFault\.([A-Za-z]+)/g)].map((m) => m[1]));
+  for (const arm of thrown) {
+    assert.match(
+      rendered,
+      new RegExp(`id="refusal-${arm}"`),
+      `the grammar page never names ${arm}, which Locator.Parse throws`,
+    );
+  }
+});
+
 test("the built area names every outcome the enum declares, with its code", () => {
   const src = read(repoDir, "src", "Winwright", "Verdicts", "RunOutcome.cs");
   const body = /enum\s+RunOutcome\s*\{([\s\S]*)\}/.exec(src);

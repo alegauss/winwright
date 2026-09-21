@@ -68,3 +68,10 @@
   font-weight: 600;
   color: var(--ww-code-colour, var(--sl-color-white));
 }
+
+/* A locator, a predicate key or a refusal arm in a generated table. It is a literal somebody
+   will copy, so it does not wrap: a form broken across two lines is one that is pasted with a
+   space in it, and the table already scrolls inside its own box. */
+.ww-locator {
+  white-space: nowrap;
+}

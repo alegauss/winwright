@@ -1,0 +1,29 @@
+---
+// Every form of the grammar, one per row, off the block `Locator` states it in.
+//
+// `scripts/grammar.mjs` reads that block and `LocatorTests` parses every row of it, so a form
+// here is one the suite ran rather than one an author remembered. A table typed onto this page
+// would be wrong at the first predicate added, and wrong in the direction nothing reports.
+import grammar from "../data/grammar.generated.json";
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Written as</th>
+      <th>What it addresses</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      grammar.forms.map((form) => (
+        <tr>
+          <td>
+            <code class="ww-locator">{form.locator}</code>
+          </td>
+          <td>{form.addresses}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

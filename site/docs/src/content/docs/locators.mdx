@@ -1,0 +1,187 @@
+---
+title: Addressing an element
+description: The locator grammar every case is written in — what each form addresses, what each predicate matches, and every way a locator is refused before it runs.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+import Forms from "../../components/Forms.astro";
+import Predicates from "../../components/Predicates.astro";
+import Refusals from "../../components/Refusals.astro";
+import grammar from "../../data/grammar.generated.json";
+
+A locator is a string, and it is the whole of how this project addresses an element. The same
+string means the same thing to a step in a case file, to an assertion, to the tool that checks
+the file before it exists, and to `inspect` printing a tree — so there is one grammar to learn
+rather than one per verb.
+
+Every table here is read out of the parser on every build, and the suite parses each form in
+the first one — so what this page says is true of the version you are looking at rather than of
+the day somebody wrote it down.
+
+<Forms />
+
+## The control type, and the automation id
+
+A step may say what kind of control it is, what its automation id is, or both. Neither is
+required on its own; a step that says **nothing at all** is refused, because it addresses
+every element there is.
+
+```
+Button                  a control type
+#saveButton             an automation id
+Button#saveButton       both
+#"Item 1"               an id that is not an identifier, so it is quoted
+```
+
+The id is the field your application controls, and a locator should prefer it: it is the one
+thing about an element that no translation and no restyling changes. Quote it where it is not
+an identifier — Windows gives a window's own system menu the id `Item 1`, and `inspect` writes
+ids back in the spelling the grammar reads.
+
+Control types are spelled as UI Automation spells them, and the list is read off UI Automation
+itself rather than kept in this repository — so it cannot drift from the thing it describes,
+and this page cannot publish it. A word that is no control type is refused at parse time, with
+the three nearest spellings. The same is true of `pattern`.
+
+## The predicates
+
+Everything else is `[key=value]`, and these are the keys.
+
+<Predicates />
+
+A value is bare or quoted. A bare one runs to the `]` and is trimmed, so it may hold spaces —
+`[name=Save as]` is the name `Save as`. Quote it where it carries a `]` or a quotation mark of
+its own. Inside quotes, `\n`, `\r` and `\t` are the characters they name and a backslash before
+anything else leaves it as itself, which matters for a notification-area icon: its name is a
+tooltip, and a real one runs to several lines.
+
+`order` is how matches are put in order before `index` counts them, and it takes one of four
+words:
+
+<ul>
+  {grammar.orders.map((one) => (
+    <li>
+      <code>{one.order}</code> — {one.meaning}
+    </li>
+  ))}
+</ul>
+
+`index` counts from **one**. A step that matches more than one element and says neither
+`order` nor `index` is refused rather than answered with whichever the tree happened to walk
+first. The refusal lists what it matched, each written as the step that would address it, so
+the choice gets made in the file rather than by the tree.
+
+<Aside type="caution" title="`nameStarts` is a prefix, and never a containment">
+`name` matches by equality, which is right for a control whose whole label a case can name and
+useless for one carrying its own state in its text: a tray entry reading
+`Pessoal — used 41%  · active now` is a label, a reading and a suffix that comes and goes, so
+equality is false of it on every machine.
+
+The decoration is written behind the label and never in front, so a prefix addresses the entry
+for **one** account — where a containment would let a profile called `one` address the entry
+for `twenty-one`. An empty prefix is refused, because every name begins with nothing, and a
+step naming `name` and `nameStarts` both is refused, because a name equal to something already
+begins with it.
+</Aside>
+
+## Any one of several control types
+
+`|` at the type position means **any one of these**, and the predicates after it apply to the
+whole union:
+
+```
+ComboBox|Slider|Edit[pattern=Value]
+```
+
+It is there because a rule under test governs a family of controls as often as it governs one.
+A settings panel's rows may be a combo box, a slider and a text box, and what the rule is about
+is that each of them reads back what was set — excluded by *what they are* rather than by a
+list of ids somebody keeps current. Written as one step per type, most of the steps match
+nothing on any given panel, each of those is a hole, and the run is a page of holes.
+
+A type named twice in one union is refused. That is a step written twice rather than a wider
+set, and the reader of one is looking for a difference between the halves that is not there.
+
+## A descendant of, at any depth
+
+```
+Window#main > Pane > Button#save
+```
+
+`>` is **a descendant of**, not a direct child, and that is a decision rather than a shorthand:
+UI Automation wraps controls in panes that differ between frameworks, between versions of one
+framework, and between a maximised window and a restored one. A direct-child locator is the one
+that breaks on somebody else's machine. Whitespace around the operator is optional.
+
+## A brace is a hole the run fills
+
+```
+Text[name="{settings.nav.about}"]     what your project's strings call it
+Group[name="{}"]                      the member, in a case that repeats
+```
+
+A locator naming an element in words is a hardcoded set at its smallest: it goes stale the day
+somebody edits the strings file, and it is wrong in every language the application ships but
+one from the moment it is written. `{a.key}` is read out of the `languageFiles` your project
+declares, in the language the fixture says the window is in, so a case addressing an element by
+the words on it stops being a case about one language. `{}` is the member of the set a
+repeating case walks.
+
+The grammar itself does not resolve either, and that is deliberate — what a key declares is a
+property of *your* project, and a grammar that resolved it could not be read without it. A
+locator with a brace in it parses as the literal text; the run substitutes and re-parses before
+the first act, and the trace records the **substituted** locator, because the words the run
+actually looked for are what a red is about.
+
+A key none of your `languageFiles` declares is refused before the first act, naming the key and
+the file. A brace that would leave the locator unparseable is refused at declaration.
+
+<Aside title="A `nameStarts` brace reads past a trailing placeholder, and a `name` brace never will">
+A label your application declares as `"Signed in as {0}"` has a front that every filled-in
+window begins with, and that front is what a `nameStarts` brace is filled from. `name` is
+equality and keeps the refusal, because a locator hunting the literal `{0}` matches nothing.
+
+One placeholder, at the end, and the brace must be the **whole** of the value:
+`nameStarts="{a.key} — "` is refused rather than stitched together, a prefix assembled out of
+two places being one no window draws in one piece.
+</Aside>
+
+## What it refuses
+
+Half of what a grammar is worth is in what it will not parse. A refusal carries the position as
+well as the reason, because one saying only *bad locator* sends you back to count characters —
+and the text came out of a case file, where the next thing you will do is find the column.
+
+```
+Button[name=Save
+                ^ this predicate is not closed
+```
+
+These are the ways a locator can fail to parse. Each is its own arm of `LocatorFault`, so a
+caller collecting refusals can tell them apart:
+
+<Refusals />
+
+`Locator.Parse` throws a `LocatorSyntaxException` carrying the arm, the position and the
+sentence. `Locator.TryParse` answers without throwing, for a caller collecting refusals rather
+than stopping at the first.
+
+## Reading one back before the file exists
+
+A locator is parsed when the case is **loaded**, not when the step runs — one that does not
+parse is wrong on every machine, and the reader of a red about one is opening the wrong
+repository. So the refusal names the step and what is wrong with it, before anything is
+launched.
+
+If you drive your application from Claude Code, `winwright_check` gets you that answer before
+the file exists. `inspect` is the other direction: it prints a tree with a locator per element,
+written in this grammar and quoted so that a line it printed can be pasted into a case.
+
+## Where to go next
+
+- [Your first case](/winwright/docs/first-case/) — the file these locators go in, and the four
+  calls that run it.
+- [What this is](/winwright/docs/) — the verdicts, and what a hole is.
+- [The README](https://github.com/alegauss/winwright#readme) — every verb a step may name,
+  every field a case may carry, and the reasoning behind each refusal.

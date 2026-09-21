@@ -5,7 +5,7 @@
   "type": "module",
   "description": "The documentation area, at /winwright/docs/. Its own npm project, building into the site's dist/docs.",
   "scripts": {
-    "prebuild": "node ../scripts/product.mjs",
+    "prebuild": "node ../scripts/product.mjs && node ../scripts/grammar.mjs",
     "dev": "npm run prebuild && astro dev",
     "build": "astro build",
     "preview": "astro preview"

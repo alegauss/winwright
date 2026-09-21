@@ -20,29 +20,30 @@
 
 ## Block J — Adoption — the proof is the deletion
 
+### §WW499 The README's grammar table, held to the parser like everything else it states
+
+`ReadmeTests` holds this file to the engine on four counts — the exit codes off the
+enum, the verb families off the catalogue, the non-goals off the governed list, the
+project keys off the schema — and the locator grammar is not one of them. It is a fenced
+block somebody typed, and WW487 found it has already drifted from the block in
+`Locator`'s own remarks: fourteen rows against thirteen, the extra one being the
+reported-name brace.
+
+Which of the two is right is the part worth deciding, and neither is obviously wrong.
+The README's extra row documents a form that really parses; the parser's block is the
+one the documentation area now publishes and the one the suite parses row by row. So the
+repair is not a deletion but a direction — one block is the source and the other is held
+to it.
+
+The check is the shape of the four already there, and most of it is written.
+`LocatorTests.Forms()` reads the parser's block and `site/scripts/grammar.mjs` reads it
+again for the page; a case asserting that every form it yields appears in the README
+lets that file carry extra prose around a form and never a form the grammar does not
+have.
+
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ## Block L — The documentation area — written for a reader who has installed nothing
-
-### §WW487 The grammar as a page, derived from the parser
-
-Every case file in every adopting repository is written in the locator grammar, and the
-only place it is written down is a section of a README a thousand lines long. A reader
-learning it has no page to be sent to, no anchor per form, and no search — and the forms
-they most need are the ones a skim passes over: the brace that reads the project's own
-strings, the union at the type position, and `nameStarts` for a control carrying its own
-state in its text.
-
-The page is a form per row: what it addresses, what it matches, and what it refuses. The
-refusals belong on it rather than in a footnote, because half of what the grammar is
-worth is in what it will not parse — `name` and `nameStarts` named together, an empty
-prefix, a type repeated inside a union, a brace whose key the project declares nowhere.
-
-Derived and not typed. `Locator.Parse` is the one authority on what parses, and a table
-retyped beside it is wrong at the first predicate added. The generator reads the parser
-the way `scripts/product.mjs` reads the enum, and the suite already holds a case per
-form, so an example can come off the case that proves it rather than off an author's
-memory.
 
 ### §WW488 The case format, generated from the loader's own schema
 
@@ -273,3 +274,28 @@ read that makes the other pages parse — and it is short on purpose, since a gl
 long enough to need its own navigation is one nobody reaches the end of.
 
 It is also the page to link a word from, once the area is more than three pages deep.
+
+### §WW500 The published version, read from the feed rather than baked into the build
+
+The version on the page comes from `Directory.Build.props` through
+`scripts/product.mjs`, which is the right source at build time and the wrong one an hour
+later. The site deploys on `workflow_dispatch` and a release does not trigger it, so
+publishing spends a version number and the page goes on stating the one before.
+
+Measured on the 1.0.0 release: both halves were indexed on nuget.org while the landing
+page went on offering `0.1.0-alpha.18` in the badge, in the release band and in the two
+`PackageReference` lines a reader copies rather than reads. Nothing reported the gap —
+the site build was green, faithfully rendering a file that was itself a version behind.
+
+The feed is the authority and can be asked from the page: `api.nuget.org` answers the
+flat-container index with `Access-Control-Allow-Origin: *`. The number is fetched after
+hydration, and the highest published release wins, prereleases skipped unless nothing
+else has ever shipped.
+
+The generated number stays, and stays first. It is what the prerender writes, so a
+reader with no JavaScript gets a real published version rather than a blank, and the
+first client render matches the served markup rather than tearing it. A fetch that fails
+changes nothing, which makes today's behaviour the floor.
+
+The rule is the one the README states about its own badges: trust the badge over the
+typed line where the two disagree. This makes the page say the same thing.

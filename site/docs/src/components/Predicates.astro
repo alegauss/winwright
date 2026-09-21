@@ -1,0 +1,33 @@
+---
+// The keys a `[key=value]` may carry, and what each one matches.
+//
+// Both halves are derived: the keys are the arms of the switch in `Locator.Parse`, which is
+// what actually parses, and the sentence is the summary of the field the arm fills. A key the
+// parser accepts therefore cannot be missing from this table, and one it does not accept
+// cannot appear in it.
+//
+// The row carries an id so a page — or a refusal somebody is reading — can link one predicate
+// rather than the table.
+import grammar from "../data/grammar.generated.json";
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>What it matches</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      grammar.predicates.map((predicate) => (
+        <tr id={`predicate-${predicate.key}`}>
+          <td>
+            <code class="ww-locator">{predicate.key}</code>
+          </td>
+          <td>{predicate.matches}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

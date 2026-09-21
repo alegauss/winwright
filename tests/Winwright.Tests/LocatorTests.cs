@@ -240,4 +240,73 @@ public class LocatorTests
     {
         Assert.Equal("  Button#save  ", Locator.Parse("  Button#save  ").Text);
     }
+
+    [Fact]
+    public void Every_form_the_grammar_states_is_one_that_parses()
+    {
+        // WW487. The documentation area publishes this block as its table of forms —
+        // `site/scripts/grammar.mjs` reads it out of this file on every build — so a row here is a
+        // row somebody writes cases from. Nothing about a doc comment is compiled, so a form that
+        // stopped parsing would go on being published exactly as before.
+        var forms = Forms();
+        Assert.True(forms.Count > 10, $"the grammar's own summary states only {forms.Count} form(s)");
+
+        foreach (var (written, addresses) in forms)
+        {
+            var parsed = Locator.Parse(written);
+
+            Assert.NotEqual("", addresses);
+
+            // Accepted is not enough: what it parsed to has to spell back to the same thing, or the
+            // page is showing a form that means one locator on the way in and another on the way
+            // out. A brace parses as the literal text, which round-trips like any other value.
+            Assert.Equal(parsed.Steps, Locator.Parse(parsed.ToString()).Steps);
+        }
+    }
+
+    [Fact]
+    public void Every_predicate_the_grammar_accepts_is_shown_by_a_form_it_states()
+    {
+        // The page publishes the keys off the parser and the forms off this block, and the two are
+        // read separately. A key with no form on it is a word in a table whose spelling a reader
+        // has nowhere to see — which is the state the README section was in for `order`.
+        var keys = (string)typeof(Locator)
+            .GetField("Keys", BindingFlags.NonPublic | BindingFlags.Static)!
+            .GetRawConstantValue()!;
+
+        var forms = Forms();
+        foreach (var key in keys.Split(',', StringSplitOptions.TrimEntries))
+        {
+            Assert.Contains(forms, form => form.Written.Contains($"[{key}=", StringComparison.Ordinal));
+        }
+    }
+
+    /// <summary>
+    /// The forms the grammar's own summary states, read the way the site's generator reads them:
+    /// the locator and what it addresses, two columns of the <c>code</c> block in
+    /// <see cref="Locator" />'s remarks, aligned by two spaces or more.
+    /// </summary>
+    private static IReadOnlyList<(string Written, string Addresses)> Forms()
+    {
+        var source = File.ReadAllText(Checkout.At("src", "Winwright", "Locating", "Locator.cs"));
+        var opened = source.IndexOf("<code>", StringComparison.Ordinal);
+        var closed = source.IndexOf("</code>", StringComparison.Ordinal);
+        Assert.True(opened >= 0 && closed > opened, "Locator's remarks no longer state the grammar in a code block");
+
+        var found = new List<(string, string)>();
+        foreach (var raw in source[(opened + "<code>".Length)..closed].Split('\n'))
+        {
+            var line = raw.Trim().TrimStart('/').Trim();
+            if (line.Length == 0)
+                continue;
+
+            var columns = line.Split("  ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            Assert.Equal(2, columns.Length);
+
+            // The one entity the block needs, since a descendant operator inside XML is escaped.
+            found.Add((columns[0].Replace("&gt;", ">", StringComparison.Ordinal), columns[1]));
+        }
+
+        return found;
+    }
 }
