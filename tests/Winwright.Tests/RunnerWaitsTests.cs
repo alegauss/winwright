@@ -56,10 +56,12 @@ public sealed class RunnerWaitsTests
     {
         var rows = Rows();
 
-        // The four the task counted, and the control on the reading: a regex that matched nothing
-        // would make every check below pass about an empty list.
+        // The four the task counted plus WW472's, and the control on the reading: a regex that
+        // matched nothing would make every check below pass about an empty list.
         Assert.True(rows.Count >= 4, $"only {rows.Count} wait(s) were read out of the runner's list");
-        Assert.Equal(["desk", "run", "session", "tools"], rows.Select(one => one.Named).Order(StringComparer.Ordinal));
+        Assert.Equal(
+            ["desk", "run", "session", "take", "tools"],
+            rows.Select(one => one.Named).Order(StringComparer.Ordinal));
 
         Assert.All(
             rows,

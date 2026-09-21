@@ -28,35 +28,6 @@ count is not a claim about a coordinate. WW42 stays where it is: the capture kee
 own refusal, because a desk that renders can still be photographed while nothing is on
 it.
 
-### §WW472 A taskbar that held the desk for two whole runs
-
-Measured twice while shipping WW470, at 24 and 30 minutes a time. The guest's taskbar
-held the foreground before either run started; `desk-probe.ps1` called it `shell`, which
-`desk-clear.ps1` deliberately never touches — WW330's rule that a run may not put the
-shell away — and the runner printed *the first case to take the foreground clears it*
-and went on.
-
-It did not clear. `PumpedDialog.TakeTheDesktop` polls `SetForegroundWindow` and Windows
-refused it for both runs, so 136 and then 137 checks were excused where a healthy run
-excuses nine, and five cases that cannot excuse a lost desk went red about nothing. Both
-exit codes said the tree was broken; the same suite passed 2187 of 2187 once the shell
-was restarted.
-
-The sentence beside the failure landed. What is left is refusing before the carry, and
-two mechanisms were measured and refuted:
-
-**The focus is not the discriminator.** This section proposed reading it beside the
-foreground. `GetGUIThreadInfo` on the guest's idle desktop answers a focus of its own —
-`Progman` with a `SysListView32` focused — so refusing on a foreground thread that holds
-one would refuse every healthy run.
-
-**A window the runner puts up is not a fixture.** A script carried in and run through
-`runProgramInGuest -interactive` was refused the foreground on a desk reading `clear`,
-where every fixture takes it. So it predicts nothing about the test host and cannot
-stand in for the premise.
-
-What is wanted is a stand-in that behaves as a fixture does.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

@@ -67,6 +67,16 @@ namespace Winwright.Tests;
 /// default filter leaves that trait out, and <c>run-desk.cmd</c> is what asks for it.
 /// </para>
 /// <para>
+/// WW472 is the third file, and it is a different question from the first two. They read which
+/// window is holding the desk and decide what may be done about it; that reading was right on the
+/// day it cost two runs, and the word it produced — <c>shell</c> — is one the runner goes on with
+/// for a good reason. What nothing established is whether a fixture would be given the foreground
+/// at all, and no reading of who holds a desk separates the taskbar that clears from the taskbar
+/// that does not. <c>desk-take.ps1</c> asks instead, and the cases here are the same pair as the
+/// others: the classification with results they made up, and the asking run against a desk a case
+/// is holding.
+/// </para>
+/// <para>
 /// Serial since WW345, and WW125's rule is why: running the classification means starting a real
 /// PowerShell, and a process this suite launches is a process that can take the foreground away from
 /// whatever case is measuring it. The console is suppressed below as well — both, because one is the
@@ -85,8 +95,14 @@ public sealed class DeskProbeTests
     /// <summary>The clearer, which decides what a run may put away. WW371.</summary>
     private static string Clearer() => File.ReadAllText(Checkout.At("tools", "desk-clear.ps1"));
 
+    /// <summary>The asking, which decides whether anything may take a desk at all. WW472.</summary>
+    private static string Asking() => File.ReadAllText(Checkout.At("tools", "desk-take.ps1"));
+
     /// <summary>Every answer the probe can write, and the runner has an arm for each.</summary>
     private static readonly string[] States = ["clear", "busy", "asking", "shell", "stale", "broken"];
+
+    /// <summary>Every answer the asking can write, and the runner has an arm for each. WW472.</summary>
+    private static readonly string[] Takings = ["takeable", "held"];
 
     /// <summary>What <see cref="Looked" /> prints for a look the probe skipped. WW357.</summary>
     private const string Desktop = "the desktop";
@@ -1363,6 +1379,180 @@ public sealed class DeskProbeTests
         Assert.Equal("clear||||nothing but the desktop held the foreground", answer);
     }
 
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void The_asking_answers_the_two_states_the_runner_switches_on()
+    {
+        // WW472, and the pair The_probe_answers_the_states_the_runner_switches_on checks one file
+        // over: a word the asking writes and the runner has no arm for falls through to a refusal
+        // about a probe that answered, and an arm for a word nothing writes is an arm nobody runs.
+        var runner = Runner();
+        var asking = Asking();
+
+        Assert.All(
+            Takings,
+            one => Assert.True(
+                runner.Contains($"'{one}' {{", StringComparison.Ordinal),
+                $"the runner has no arm for '{one}', so that answer would read as an asking it could not read"));
+
+        Assert.All(
+            Takings,
+            one => Assert.True(
+                asking.Contains($"\"{one}|", StringComparison.Ordinal),
+                $"nothing in the asking writes '{one}', so the runner has an arm for an answer it never gets"));
+    }
+
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void A_desk_that_will_not_be_given_up_refuses_the_run_before_the_tree_is_carried()
+    {
+        // WW472's own criterion, read off the runner: the refusal has to be a refusal, it has to
+        // name the window holding the desk — a reader sent to a guest console is being sent to look
+        // at something — and it has to happen before the carry, which is the whole point. A refusal
+        // after the tree is copied and the suite has run is the sentence that already landed.
+        var runner = Runner();
+
+        var held = Arm(runner, "held", Takings);
+        var takeable = Arm(runner, "takeable", Takings);
+
+        Assert.Contains("Refuse (", held, StringComparison.Ordinal);
+        Assert.Contains("$($taking.Process)", held, StringComparison.Ordinal);
+
+        // And the other arm is not a refusal, which is the pair `A_question_refuses_the_run_and_a
+        // _selected_shell_does_not` checks one switch up: an asking that refused both answers would
+        // be a runner nothing could run, and it would pass every check about the refusing one.
+        Assert.DoesNotContain("Refuse", takeable, StringComparison.Ordinal);
+
+        var asked = runner.IndexOf("$taking = Read-GuestTake", StringComparison.Ordinal);
+        var carried = runner.IndexOf("$zip = Join-Path $stage 'source.zip'", StringComparison.Ordinal);
+
+        Assert.True(asked > 0, "nothing in the runner asks the guest desk for the foreground");
+        Assert.True(
+            carried > asked,
+            "the tree is carried before the desk is asked for the foreground, so the refusal costs "
+                + "the twenty minutes it exists to save");
+    }
+
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void A_desk_that_granted_the_foreground_is_the_one_a_run_may_be_carried_onto()
+    {
+        // The granted arm says how long it took and names nobody, which is the point: what the
+        // runner needs from a takeable desk is the number, because the number is the argument for
+        // the deadline. Every desk measured answered inside 103ms.
+        var answer = Taking("Read-DeskTake -Took $true -ElapsedMs 31");
+
+        Assert.Equal("takeable||||the foreground was granted after 31ms", answer);
+    }
+
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void A_desk_that_refused_is_named_by_the_window_that_would_not_let_go()
+    {
+        // The refusing arm names the window in the fields the reading probe names one in, because a
+        // reader meeting this refusal has to know where to look — and because the runner parses one
+        // shape for both files. The holder here is the desk that produced this answer on the guest:
+        // the Start menu up, which refused for the whole deadline.
+        var answer = Taking(
+            "$held = [pscustomobject]@{ Process = 'SearchHost'; Pid = 5236; "
+                + "Class = 'Windows.UI.Core.CoreWindow'; Title = 'Pesquisar' }",
+            "Read-DeskTake -Took $false -ElapsedMs 4016 -Holder $held");
+
+        Assert.Equal("held|SearchHost|5236|Windows.UI.Core.CoreWindow|Pesquisar", answer);
+    }
+
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void A_refusal_with_nothing_holding_the_desk_says_what_was_asked_and_names_no_window()
+    {
+        // The combination the reading probe calls `broken`, arriving here: nothing held the
+        // foreground and it was refused anyway. Said rather than folded into either word — a desk
+        // with no shell already has an answer, and this file inventing a second one would tell a
+        // reader two different things about one desk.
+        var answer = Taking("Read-DeskTake -Took $false -ElapsedMs 4000 -Holder $null");
+
+        Assert.Equal(
+            "held||||nothing held the foreground and it was refused for 4000ms anyway",
+            answer);
+    }
+
+    [Fact]
+    public void The_asking_takes_a_desk_a_case_is_holding_and_says_how_long_it_waited()
+    {
+        // WW472's acting half, and it is here for the reason `Get-DeskLooks` and `Clear-TheDesk` are:
+        // a half run by nothing but a real guest is a half where a mistake reads as an answer. The
+        // nudge sending no input, the window never pumping, a poll that reads its own handle wrong —
+        // each would answer `held` on every desk, and a refusal nobody can distinguish from a
+        // genuinely held desk is twenty minutes a run costs for nothing.
+        //
+        // A desk this case is holding is the arrangeable premise: a window this process put up and
+        // was granted the foreground for is by definition a desk something can take, so the asking
+        // must take it too — from a real window that is holding it, which is the case the guest's
+        // own incident was about.
+        using var dialog = PumpedDialog.Open("winwright desk take");
+        dialog.BringToFront();
+
+        if (BusyDesk.Excused(Winwright.Windowing.Foreground.Check(dialog.Frame).AsPrecondition()))
+            return;
+
+        // Its own process, which is what the runner sends to the guest and the only way the nudge
+        // means anything: input this process synthesised for itself would be answering a different
+        // question, and the asking is about what a process that has just arrived can do.
+        // Separated by something the answer cannot contain, which this case learned by failing in
+        // the guest: the line itself carries four empty fields, so a pipe between the readings and
+        // the line splits inside the line and reports the wrong field as the wrong answer.
+        var said = Taking(
+            "$asked = Get-DeskTake -WaitMs 4000 -PollMs 50",
+            "\"$($asked.Took) :: $($asked.Nudged) :: $($asked.ElapsedMs) :: \" + "
+                + "(Read-DeskTake -Took $asked.Took -ElapsedMs $asked.ElapsedMs -Holder $asked.Holder)");
+
+        var fields = said.Split(" :: ", 4, StringSplitOptions.None);
+
+        Assert.True(fields.Length == 4, $"the asking answered something this cannot read: {said}");
+        Assert.True(bool.Parse(fields[1]), $"the asking sent no input event, so it asked as nothing a run has: {said}");
+        Assert.True(bool.Parse(fields[0]), $"a desk this case was holding refused the asking: {said}");
+        Assert.StartsWith("takeable|", fields[3], StringComparison.Ordinal);
+
+        // The number and not only the word, because the deadline is argued from it: an asking that
+        // took the desk on its last look is a measurement the four seconds were nearly too short for.
+        Assert.True(
+            int.Parse(fields[2], System.Globalization.CultureInfo.InvariantCulture) < 2000,
+            $"the desk was granted, and only just: {said}");
+    }
+
+    [Fact]
+    public void An_asking_with_no_time_to_ask_names_the_window_that_is_holding_the_desk()
+    {
+        // The refusing arm of the acting half, and what a case can honestly arrange of it. What the
+        // runner refuses on is a desk Windows will not give anybody — and no case can build one:
+        // measured on the guest, `LockSetForegroundWindow` held by another process does not produce
+        // it (the asking took the desk in 47ms through the lock), and the one desk that did is the
+        // shell's own, the Start menu up, which refused for 4016ms. A case cannot ask the shell to
+        // put a menu up and be told what happened, and one that asserted it did would be reporting
+        // the desk as a defect in the code.
+        //
+        // So what is arranged here is the deadline rather than the desk: with none, the asking puts
+        // its window up, is granted no chance to ask, and answers about the window that holds the
+        // foreground — which is this case's own. That runs every line of the refusing path, the
+        // finally that takes the window away and the naming a reader of the refusal depends on, and
+        // it claims nothing about Windows that this case did not arrange.
+        using var dialog = PumpedDialog.Open("winwright desk holder");
+        dialog.BringToFront();
+
+        if (BusyDesk.Excused(Winwright.Windowing.Foreground.Check(dialog.Frame).AsPrecondition()))
+            return;
+
+        var said = Taking(
+            "$asked = Get-DeskTake -WaitMs 0 -PollMs 0",
+            "Read-DeskTake -Took $asked.Took -ElapsedMs $asked.ElapsedMs -Holder $asked.Holder");
+
+        // The window under test, in the fields the reading probe names one in: the class it was
+        // created with and the title this case gave it, so a refusal names something a reader can
+        // go and look at rather than a handle.
+        Assert.StartsWith("held|", said, StringComparison.Ordinal);
+        Assert.EndsWith("|Static|winwright desk holder", said, StringComparison.Ordinal);
+    }
+
     /// <summary>SW_MINIMIZE, which puts a window down without activating what is behind it. WW400.</summary>
     private const int Minimise = 6;
 
@@ -1503,6 +1693,49 @@ public sealed class DeskProbeTests
         }
     }
 
+    /// <summary>
+    /// Dot-source the asking and run what a caller asked, answering the one line it wrote. WW472.
+    /// <para>
+    /// Through PowerShell for the reason <see cref="Classified" /> and <see cref="Cleared" /> are: a
+    /// copy of the rule in C# would agree with itself forever while the file the guest runs drifted
+    /// away from it. One line and not a line per instruction, because the acting half is arranged
+    /// over several and says one thing at the end of them.
+    /// </para>
+    /// </summary>
+    /// <param name="lines">The PowerShell to run once the asking is defined.</param>
+    private static string Taking(params string[] lines)
+    {
+        var script = Path.Combine(Path.GetTempPath(), $"winwright-ww472-{Guid.NewGuid():N}.ps1");
+        var asking = Checkout.At("tools", "desk-take.ps1");
+
+        File.WriteAllText(
+            script,
+            $$"""
+            Set-StrictMode -Version Latest
+            $ErrorActionPreference = 'Stop'
+            . '{{asking}}' -DefineOnly
+            {{string.Join(Environment.NewLine, lines)}}
+            """);
+
+        try
+        {
+            var said = Answered(script);
+
+            // The count first, for the reason the clearer's runner checks it: a script that threw
+            // halfway answers fewer lines than it was asked for, and reading the survivors as the
+            // answer reports the wrong thing about the wrong desk.
+            Assert.True(
+                said.Count == 1,
+                $"the asking answered {said.Count} line(s) instead of one: {string.Join(" / ", said)}");
+
+            return said[0];
+        }
+        finally
+        {
+            File.Delete(script);
+        }
+    }
+
     /// <summary>The text between two markers, or empty where either is missing.</summary>
     /// <param name="text">The whole file.</param>
     /// <param name="opens">What the region starts after.</param>
@@ -1528,12 +1761,23 @@ public sealed class DeskProbeTests
     /// </summary>
     /// <param name="runner">The whole file.</param>
     /// <param name="state">Which arm.</param>
-    private static string Arm(string runner, string state)
+    private static string Arm(string runner, string state) => Arm(runner, state, States);
+
+    /// <summary>
+    /// One arm of a named switch, read among the words that switch has. WW472, and the parameter is
+    /// what the second switch made necessary: the arms of one are all before the arms of the other,
+    /// so an arm read among the wrong list runs past its own closing brace and answers about the
+    /// arm below it.
+    /// </summary>
+    /// <param name="runner">The whole file.</param>
+    /// <param name="state">Which arm.</param>
+    /// <param name="among">The words that switch turns on.</param>
+    private static string Arm(string runner, string state, IReadOnlyList<string> among)
     {
         var from = runner.IndexOf($"'{state}' {{", StringComparison.Ordinal);
         Assert.True(from >= 0, $"the runner has no arm for '{state}'");
 
-        var next = States
+        var next = among
             .Select(one => runner.IndexOf($"'{one}' {{", from + 1, StringComparison.Ordinal))
             .Where(at => at > 0)
             .DefaultIfEmpty(runner.Length)

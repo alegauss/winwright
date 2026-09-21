@@ -181,7 +181,9 @@ $script:RunName = 'vm-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')
 #
 # `run` is the one a caller may change, so its row reads -Bound. `desk` is the probe's own twelve
 # looks half a second apart: declared here because the runner spends it, argued in
-# `tools/desk-probe.ps1` because that is the file that decides what a look is worth.
+# `tools/desk-probe.ps1` because that is the file that decides what a look is worth. `take` is the
+# same arrangement one file over — WW472's asking, argued in `tools/desk-take.ps1`, and spent only
+# on a desk this run was about to be carried onto.
 $script:Waits = @(
     [pscustomobject]@{
         Named = 'tools'
@@ -206,6 +208,12 @@ $script:Waits = @(
         Seconds = 6
         For = "the desk probe's own looks in the guest, taken once before the run and again after a clear"
         Giving = 'the desk probe wrote no answer in the guest'
+    }
+    [pscustomobject]@{
+        Named = 'take'
+        Seconds = 4
+        For = 'asking the guest desk for the foreground the way a fixture asks, once, before the carry'
+        Giving = 'nothing may take the foreground on the guest desk'
     }
 )
 
@@ -692,6 +700,61 @@ function Clear-GuestDesk {
     if (-not (Test-Path -LiteralPath $answerFile)) { return 'the desk clearer wrote no answer in the guest' }
 
     return (Read-ConsoleText $answerFile).Trim()
+}
+
+function Read-GuestTake {
+    <#
+      WW472. Ask the guest desk for the foreground the way a fixture asks, and bring back what it
+      said. What the two answers mean and why the asking has to send an input event first is in
+      `tools/desk-take.ps1`, which decides them.
+
+      This function's own is the carrying, and it is `Read-GuestDesk`'s shape deliberately: the same
+      five fields, the same refusal for an answer that never came back, and the same rule that a
+      probe which wrote nothing is a probe that did not run rather than a desk that said yes. A
+      missing answer here may not read as permission to spend twenty minutes.
+    #>
+    param([Parameter(Mandatory)] [string] $Vmx, [Parameter(Mandatory)] [string] $Stage)
+
+    $asking = Join-Path $PSScriptRoot 'desk-take.ps1'
+    if (-not (Test-Path -LiteralPath $asking)) { Refuse "the desk asking is missing: $asking" }
+
+    $null = Invoke-VmRun -Guest -Arguments @('deleteFileInGuest', $Vmx, "$script:GuestSync\take.txt")
+
+    $sent = Invoke-VmRun -Guest -Arguments @(
+        'copyFileFromHostToGuest', $Vmx, $asking, "$script:GuestSync\take.ps1")
+    if (-not $sent.Ok) { Refuse "could not copy the desk asking into the guest: $($sent.Output)" }
+
+    # On the desk and never beside it, which for this one is the whole measurement: a program run
+    # outside the session has no foreground to be granted, so out there every desk reads as refusing.
+    $null = Invoke-OnTheDesk -Vmx $Vmx -Arguments @(
+        'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe',
+        '-NoProfile', '-ExecutionPolicy', 'Bypass',
+        '-File', "$script:GuestSync\take.ps1",
+        '-WaitMs', ((Waited 'take').Seconds * 1000))
+
+    $answerFile = Join-Path $Stage 'take.txt'
+    $null = Invoke-VmRun -Guest -Arguments @(
+        'copyFileFromGuestToHost', $Vmx, "$script:GuestSync\take.txt", $answerFile)
+
+    if (-not (Test-Path -LiteralPath $answerFile)) {
+        return [pscustomobject]@{
+            State = 'unread'; Process = ''; Pid = ''; Class = ''
+            Detail = 'the desk asking wrote no answer in the guest'
+        }
+    }
+
+    $said = (Read-ConsoleText $answerFile).Trim()
+    $fields = $said -split '\|', 5
+    if ($fields.Count -lt 5) {
+        return [pscustomobject]@{
+            State = 'unread'; Process = ''; Pid = ''; Class = ''
+            Detail = "the desk asking answered something this cannot read: $said"
+        }
+    }
+
+    return [pscustomobject]@{
+        State = $fields[0]; Process = $fields[1]; Pid = $fields[2]; Class = $fields[3]; Detail = $fields[4]
+    }
 }
 
 function Start-Guest {
@@ -1185,20 +1248,52 @@ switch ($desk.State) {
     }
 }
 
-# WW472. What the desk read when this run went ahead, kept for the words at the end.
+# WW472. The reading said who is holding the desk. This asks whether anything may have it.
 #
-# The arms above proceed on `shell` and on `stale`, each for a reason that is right: the shell asks
-# nothing, and a minimised window is nothing anybody can answer. What neither of them establishes is
-# that a fixture will be given the foreground, and twice on 2026-09-18 it was not — the guest's
-# taskbar held the desk, `SetForegroundWindow` was refused to every fixture for two whole runs, and
-# they came back with 136 and then 137 checks excused against a healthy nine, plus five cases that
+# The arms above proceed on `clear`, `busy`, `shell` and `stale`, each for a reason that is right,
+# and not one of them establishes what the next twenty minutes are bet on. Twice on 2026-09-18 the
+# guest's taskbar held the desk, the reading called it `shell`, this script printed *the first case
+# to take the foreground clears it* — and `SetForegroundWindow` was then refused to every fixture
+# for two whole runs: 136 and then 137 checks excused against a healthy nine, plus five cases that
 # cannot excuse a lost desk going red about nothing. Both exit codes blamed the tree. The same suite
 # passed 2187 of 2187 the moment the guest's shell was restarted.
 #
-# So the line the reader needs is at the end and not sixty lines of build output above it. Refusing
-# before the carry is the better answer and is not this: no reading tells the two desks apart, and a
-# window put up by a program vmrun launched is refused the foreground even on a desk that reads
-# clear, so it predicts nothing about what a fixture inside the test host can do.
+# No word for a desk separates those two, because the difference is not in who holds it. So it is
+# asked instead: a window is put up on that desk and asks for the foreground, which is the premise
+# WW472 was filed without. What the first attempt was missing is one input event — measured on this
+# guest's idle desktop, the same script refused for 4039ms with none and granted in 31ms with one,
+# since Windows hands the foreground to the process that received the last input. The asking sends a
+# mouse move of zero pixels, and `tools/desk-take.ps1` is where that is argued.
+$taking = Read-GuestTake -Vmx $vmxPath -Stage $stage
+
+switch ($taking.State) {
+    'takeable' {
+        Write-Host "  foreground  $($taking.Detail), so a fixture may have this desk"
+    }
+    'held' {
+        Refuse (
+            "nothing may take the foreground on the guest desk: $($taking.Process) (pid " +
+            "$($taking.Pid), $($taking.Class)) '$($taking.Detail)' is holding it, and a window put " +
+            'up on that desk was refused for the whole deadline — after making itself the last ' +
+            'thing to send input, which is the one advantage every fixture in this suite has.'
+        ) (
+            'Restart the guest shell and run again. This is the desk that cost two runs of 24 and ' +
+            '30 minutes: no case here can take a foreground Windows is refusing, so the suite ' +
+            'would excuse its desk checks wholesale and red the few that cannot — which reads as a ' +
+            'broken tree and is a held desk.'
+        )
+    }
+    default {
+        Refuse (
+            "the guest desk could not be asked for the foreground: $($taking.Detail)"
+        ) 'The asking runs in the guest session and writes one line beside itself. Check the guest console is reachable.'
+    }
+}
+
+# What the desk read when this run went ahead, kept for the words at the end. The refusal above is
+# about the desk this run starts on; that sentence is about the one it ended on, and they are two
+# things: a desk takeable at the asking can be lost to something that arrives in the next twenty
+# minutes, and the reader meeting reds from that still needs to be told where to look.
 $script:DeskWhenItStarted = $desk.State
 
 Push-Location $script:Tree

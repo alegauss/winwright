@@ -303,14 +303,18 @@ internal static class Criteria
                 + "deleted, and the deletion will be in claude-tray, where nothing in this suite can "
                 + "read it"),
 
-        new("WW472", "A desk no fixture could take refuses the run before the tree is carried", "",
-            Unshown.NotBuilt,
-            "the half that landed is the sentence beside the failure, which `DeskProbeTests` reads "
-                + "out of the runner. The refusal itself is not built, and the two mechanisms tried "
-                + "were measured and refuted: the foreground thread's focus is non-empty on an idle "
-                + "desktop, and a window a vmrun-launched program puts up is refused the foreground "
-                + "on a desk that reads clear. What it is owed is a stand-in that behaves as a "
-                + "fixture does, and until there is one there is nothing to read back"),
+        // WW472's criterion stood here and went with the line. The stand-in it was owed is
+        // `tools/desk-take.ps1`: a window put up on the guest desk, asking for the foreground the
+        // way a fixture does, run before the tree is carried — and what the third mechanism had
+        // that the two refuted ones did not is one input event, since Windows grants the desk to
+        // the process that received the last one. Measured both ways on the same idle desktop:
+        // refused for 4039ms without, granted in 31ms with.
+        //
+        // Read back where the others are: `DeskProbeTests` runs the classification with results it
+        // made up, runs the asking against a desk a case is holding, and reads the refusing arm out
+        // of the runner beside the line that carries the tree. What no case arranges is a desk
+        // Windows refuses to everybody — that one was measured by hand, the shell's own, the Start
+        // menu up, at 4016ms, and it is the whole reason this entry stood here as long as it did.
 
         // WW457's criterion stood here and went with the line: a tray menu takes a key wherever it
         // stands now, read back against both kinds by `AdoptedTrayTests` and checked at the ship.
