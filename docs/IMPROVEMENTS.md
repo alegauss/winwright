@@ -104,25 +104,23 @@ and what it opened is read.
 case, and the count removed is reported rather than described: a saving nobody measured
 is a saving nobody can check.
 
-Surveyed on 2026-09-20, about nineteen claims short. Eleven have landed: the linking
-plan's five, the profile round trip's three, a sessions row read as text, and the names
-of the two Statistics controls T165 found unnamed. Eight are left, of three kinds.
+Surveyed on 2026-09-20, about nineteen claims short. Every one is now a case or dropped
+with its reason written where it would have been, except one: T158's left-click on the
+icon, which opens the window. A tray step reads an icon or opens its menu and cannot
+click it, which is WW483, and claude-tray restores the engine from nuget.org alone, so
+the claim lands after a release that carries it. The script stays until then, because
+deleting it first would leave the one gesture most users make driven by nothing.
 
-Settings. Both switches announcing their position, the scope sentence on the icon's
-entry, and Open Claude Code expanding or staying a command (T146) all depend on
-`FollowActiveProfile` or `SyncEnvironmentProfile`, and the guest holds their defaults
-where a developer's desk need not. The script read them off `--profiles`. A case wants
-the fixture to fix them, the way `--sample-env` fixes the variable: an observing flag in
-the application that samples the two settings, so each position gets a fixture rather
-than whichever one the desk is in.
+Two were dropped. The note naming the directory two profiles share needs a junction on
+the bench every case runs against, and the tooltip naming a switched-to profile needs a
+live reading only a signed-in account has. The script reported both unchecked on every
+guest run.
 
-Machine. A pin needs follow on and a hand pick, which the switch case already makes, so
-a sampled fixture can drive the marker and its undo. A junction between two config dirs,
-and a live reading for the tooltip, cannot be fabricated honestly. Those become `needs`
-under T161's rule, and the note's other direction, no note where nothing is shared, is
-claimed on the bench.
-
-Engine. The left-click that opens the window is WW483.
+The deletion itself is the rest of the task. Check-Interaction.ps1 goes. The CI job
+running its Keyboard case runs the cases instead. AGENTS.md's interaction section, the
+preview-ui, dev-flags and roadmap-docs skills, and `--selftest`'s two checks that read
+the script (its case list against AGENTS.md, and every id it drives) are retargeted at
+`cases/`. The lines removed are counted in the commit, beside the time both suites take.
 
 The capture script left with WW480.
 
