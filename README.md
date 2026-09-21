@@ -2,6 +2,17 @@
 
 Driving a Windows desktop application from a test, and reporting what was actually observed.
 
+[![Winwright on nuget.org](https://img.shields.io/nuget/v/Winwright?label=Winwright)](https://www.nuget.org/packages/Winwright)
+[![Winwright.InApp on nuget.org](https://img.shields.io/nuget/v/Winwright.InApp?label=Winwright.InApp)](https://www.nuget.org/packages/Winwright.InApp)
+[![Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE)
+
+Both halves are published on nuget.org under the Apache-2.0 licence, and neither carries an
+external dependency. The badges are read from the feed; the version in the reference lines below is
+typed, so trust the badge where the two disagree.
+[**alegauss.github.io/winwright**](https://alegauss.github.io/winwright/) is the short version of
+the argument, and this file is the long form — every verb family, every field a case may carry, and
+the reason behind each refusal.
+
 It exists because of one measurement. A suite reported a pass with no failures and a total of 352
 where the run before it had 374 — twenty-two tests gone, the host had died partway through, and the
 only sign was a number nobody had a reason to read. Everything here follows from refusing that: a
@@ -1019,18 +1030,14 @@ machine of whoever ran it, a verdict assembled wrongly, and a trace that is not 
 - No service, no daemon, no database.
 - A green never covers an assertion that did not run.
 
-## Not built yet
+### And what a run deliberately does not keep
 
-Written against what has shipped, so it does not promise a line that is still a line:
+A run answers its caller and stops. It writes no report file, keeps no history and has no watch
+mode, so a second run tells you nothing about the first — the pictures a `capture` step asks for are
+the only files it leaves, and they go where the project declares under `captures`.
 
-- **A case runs; a suite does not.** `CaseRun.Of` walks one case end to end and owns the loop, the
-  waits, the attempts and the verdict. What is still missing is above it: nothing selects a case by
-  name or a file by path, nothing declares the fixture a case needs, and nothing lends one window
-  to the several cases that only read it.
-- **A suite runs; a suite does not report to anywhere but the caller.** `winwright_run` launches,
-  runs and answers, and what it answers is the verdict — there is no file it writes, no watch mode and
-  no history. A second run tells you nothing about the first. There are no slash commands either, and
-  none are planned: a verb reachable from a tool does not also need a name typed with a slash.
+There are no slash commands either, and none are planned: a verb reachable from a tool does not also
+need a name typed with a slash.
 
 ## Building it here
 
@@ -1047,12 +1054,14 @@ the run whose reading is hardest. The first goes through a target that reaches i
 is why it is the command rather than a convenience over one — a run short of what discovery found is
 not reported as a pass, and a red run still says what it excused.
 
-The third exists only until the engine is published, and it is a trap rather than a convenience.
-The version in `packages\` never changes, and NuGet extracts a package once per version — so a plain
-`dotnet pack` over the same number leaves an adopting clone restoring exactly what it already had.
-What that looks like from over there is every case file refusing to load, naming a field of the case
-that is perfectly correct. Measured three times in one session. `pack-local.cmd` packs and evicts
-together so the sequence cannot be half-done.
+The third is for testing an **unpublished** change against a side-by-side adopting clone; adoption
+itself restores from nuget.org and needs no path into this repository. It is a trap rather than a
+convenience, which is why it is one command and not two. The version in `packages\` never changes
+between two local packs, and NuGet extracts a package once per version — so a plain `dotnet pack`
+over the same number leaves the adopting clone restoring exactly what it already had. What that
+looks like from over there is every case file refusing to load, naming a field of the case that is
+perfectly correct. Measured three times in one session. `pack-local.cmd` packs and evicts together
+so the sequence cannot be half-done.
 
 ### Running an adopting project's cases off the desk
 
@@ -1075,3 +1084,15 @@ and until this took a tree they had nowhere to run but the machine they were wor
 `docs/` holds the roadmap, the ledger and the rationale behind each decision. They are written for
 whoever is building winwright, and they are governed — the files are written through `roadkeep`
 rather than by hand.
+
+## Licence, and saying something is wrong
+
+Apache-2.0, in [`LICENSE`](LICENSE), and both packages declare it. What has shipped is in
+[`docs/CHANGELOG.md`](docs/CHANGELOG.md), one line per task with the reason it existed.
+
+A report worth more than most is a refusal you think is wrong — a locator that should have parsed,
+a capture refused over a window that was not there, a hole where your code was genuinely at fault.
+The refusals are where the value is concentrated, so a false one is the defect worth hearing about
+first. [Open an issue](https://github.com/alegauss/winwright/issues) with the verdict the run
+printed: it names the condition, whose the absence was, and the step it belongs to, which is most
+of the diagnosis already.

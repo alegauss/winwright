@@ -24,7 +24,7 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW487** (deps: —) **the locator grammar lives in a section of a 1,000-line README, so learning it means reading the file** — Every case in every adopting repository is written in that grammar, and a section of a README is not a page anybody can be sent to or search. → §WW487
+- 🛠 **WW487** (deps: —) **the locator grammar lives in a section of a 1,000-line README, so learning it means reading the file** — Every case in every adopting repository is written in that grammar, and a section of a README is not a page anybody can be sent to or search. → §WW487
 - 📋 **WW488** (deps: —) **the case format answers only to an installed plugin, so a reader deciding has no field list to read** — Evaluation comes before installation, and the schema winwright_format serves an agent is the one a person weighing the format needs first. → §WW488
 - 📋 **WW489** (deps: —) **the verb catalogue is a README table, so no row can be linked and no verb says what it needs of the desk** — The suite already checks that catalogue against the engine in both directions, so publishing it costs a generator rather than a second list to keep. → §WW489
 - 📋 **WW490** (deps: —) **winwright.json is described by an example, so a reader cannot tell which keys this build accepts** — It is the first file an adopter writes, and an example with nine keys says nothing about the tenth or about what each one refuses. → §WW490
