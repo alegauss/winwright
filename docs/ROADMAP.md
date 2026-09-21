@@ -5,7 +5,7 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-- ⏳ **WW472** (deps: a guest desk that reproduces a stuck foreground lock on demand) **the runner says a shell holding the desk clears itself, and carries the tree anyway when it does not** — No reading tells the two desks apart, and a candidate's negative arm needs a desk that refuses the foreground on cue. → §WW472
+- 🛠 **WW472** (deps: a guest desk that reproduces a stuck foreground lock on demand) **the runner says a shell holding the desk clears itself, and carries the tree anyway when it does not** — No reading tells the two desks apart, and a candidate's negative arm needs a desk that refuses the foreground on cue. → §WW472
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

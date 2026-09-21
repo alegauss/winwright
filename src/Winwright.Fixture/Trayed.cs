@@ -57,6 +57,17 @@ internal sealed class Trayed : IDisposable
     private const nint IdiApplication = 32512;
 
     /// <summary>
+    /// The application's own icon, as the resource id the compiler files <c>ApplicationIcon</c>
+    /// under — which is the same number IDI_APPLICATION wears, and not the same icon: one is asked
+    /// for with this module's handle and the other with none.
+    /// </summary>
+    private const nint AppIcon = 32512;
+
+    private const uint ImageIcon = 1;
+    private const int SmCxSmIcon = 49;
+    private const int SmCySmIcon = 50;
+
+    /// <summary>
     /// The callback the shell sends this icon's messages as, and the four that mean "show your menu".
     /// <para>
     /// Four and not one, which is WW332's measurement rather than caution. This icon registers no
@@ -100,6 +111,15 @@ internal sealed class Trayed : IDisposable
 
     [DllImport("user32.dll")]
     private static extern nint LoadIconW(nint instance, nint name);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint LoadImageW(nint instance, nint name, uint kind, int cx, int cy, uint flags);
+
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int index);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern nint GetModuleHandleW(string? name);
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern nint SetWindowLongPtrW(nint window, int index, Subclassed replacement);
@@ -469,6 +489,32 @@ internal sealed class Trayed : IDisposable
         DestroyWindow(owner);
     }
 
+    /// <summary>
+    /// The product mark at the size the notification area draws, or the generic executable icon
+    /// where this build carries none.
+    /// <para>
+    /// Asked for at <c>SM_CXSMICON</c> rather than loaded and scaled: the .ico holds a 16 drawn for
+    /// 16, and a 32 squeezed into that space is the blur this fixture would then photograph.
+    /// </para>
+    /// <para>
+    /// The fallback is the icon this used to pass unconditionally, and it is here because a tray
+    /// entry with no icon is a fixture the tray cases cannot find — an icon that failed to load
+    /// should cost an ugly square and never a run.
+    /// </para>
+    /// </summary>
+    private static nint Marked()
+    {
+        var mark = LoadImageW(
+            GetModuleHandleW(null),
+            AppIcon,
+            ImageIcon,
+            GetSystemMetrics(SmCxSmIcon),
+            GetSystemMetrics(SmCySmIcon),
+            0);
+
+        return mark != 0 ? mark : LoadIconW(0, IdiApplication);
+    }
+
     private NotifyIconData Describe() => new()
     {
         Size = Marshal.SizeOf<NotifyIconData>(),
@@ -476,7 +522,7 @@ internal sealed class Trayed : IDisposable
         Id = 1,
         Flags = NifMessage | NifIcon | NifTip,
         CallbackMessage = TrayCallback,
-        Icon = LoadIconW(0, IdiApplication),
+        Icon = Marked(),
         Tip = TipFor(Environment.ProcessId),
         Info = "",
         InfoTitle = "",

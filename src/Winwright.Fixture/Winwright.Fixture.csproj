@@ -14,6 +14,14 @@
     <UseWindowsForms>true</UseWindowsForms>
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+
+    <!-- The product mark, which is what a run looks like on the desk: without it every window this
+         fixture puts up wears the generic executable icon, in its title bar, on the taskbar, in
+         alt-tab and in every capture taken of one. Drawn from the same geometry as
+         `site/public/logo.svg` — the window, the tree under it, the element a locator matched and
+         the amber disc for the reading that was not taken — at 16, 32, 48 and 256, so the shell
+         picks a size rather than scaling one. The tray icon loads this same resource. -->
+    <ApplicationIcon>winwright.ico</ApplicationIcon>
   </PropertyGroup>
 
   <!-- There is no App.xaml, and that is the point: an ApplicationDefinition generates its own
