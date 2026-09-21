@@ -71,7 +71,7 @@ test("nothing after the area's build empties what it wrote", () => {
 
   // Named rather than pattern-matched: a step allowed to run after the area's build is a
   // judgement about what that step does to dist/, and it is made here, once, by somebody.
-  const allowed = new Set(["node scripts/docs-twins.mjs"]);
+  const allowed = new Set(["node scripts/docs-twins.mjs", "node scripts/docs-sitemap.mjs"]);
   for (const step of after) {
     assert.ok(
       allowed.has(step),

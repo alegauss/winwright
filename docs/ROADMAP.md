@@ -27,7 +27,6 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW496** (deps: —) **the site ships two sitemaps under one base, and the one robots.txt names lists no page of the area** — A crawler is handed the pitch routes and never the pages an adoption is decided on, which are the reads the area was built to publish. → §WW496
 - 📋 **WW497** (deps: —) **the area links README anchors by hand, so a renamed heading breaks them with nothing going red** — Those links carry every reader the area sends to the long form, and they point into a file this repository owns and renames freely. → §WW497
 - 📋 **WW498** (deps: —) **every page assumes the vocabulary, so a first-time reader meets case, hole, desk and reading undefined** — These words carry the design and none of them means here what it means elsewhere, so a reader guessing at one misreads every page that uses it. → §WW498
 - 📋 **WW501** (deps: —) **the twelve readings a step may name are published as bare words, so nothing tells 'picked' from 'selected'** — An expectation names one reading, and one the element does not offer answers null forever — reported as nothing answering rather than as the wrong choice. → §WW501

@@ -5,7 +5,7 @@
 // invisible until somebody reads the page against the product.
 import { test, before } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -93,17 +93,40 @@ test("the locator grammar survives the twin as a list of forms", () => {
   assert.match(md, /- `Window#main > Pane > Button#save`/);
 });
 
-test("the sitemap lists every route exactly once, and nothing else", () => {
+test("the sitemap lists every page under this base exactly once, and nothing else", () => {
   const xml = readFileSync(join(distDir, "sitemap.xml"), "utf8");
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 
-  // Exactly once and in both directions: a route missing from the sitemap is one a crawler
-  // finds only if something links inward, and a URL with no route is an address that 404s.
-  assert.equal(locs.length, manifest.routes.length, "sitemap URL count differs from the routes");
+  // WW496: the area's pages too. The site published two sitemaps under one base and the one
+  // robots.txt names listed the pitch routes alone, so the reads an adoption is decided on were
+  // the half a crawler never saw. There is one file now and this is what keeps it whole.
+  const published = [...manifest.routes, ...(manifest.area ?? [])];
+  assert.ok(Array.isArray(manifest.area) && manifest.area.length > 0, "the manifest lists no area pages");
+
+  // Exactly once and in both directions: a page missing from the sitemap is one a crawler
+  // finds only if something links inward, and a URL with no page is an address that 404s.
+  assert.equal(locs.length, published.length, "sitemap URL count differs from what the site published");
   assert.equal(new Set(locs).size, locs.length, "the sitemap lists a URL twice");
-  for (const r of manifest.routes) {
-    assert.ok(locs.includes(r.url), `sitemap missing ${r.url}`);
+  for (const one of published) {
+    assert.ok(locs.includes(one.url), `sitemap missing ${one.url}`);
   }
+});
+
+test("the site publishes one sitemap under its base, and robots names it", () => {
+  // The area's own build writes one too, and nothing ever pointed at it. A second sitemap under
+  // one base is a file that will one day be found and believed.
+  const stray = [...readdirSync(join(distDir, "docs"), { recursive: true })]
+    .map((one) => String(one))
+    .filter((one) => /sitemap[^/\\]*\.xml$/i.test(one));
+  assert.deepEqual(stray, [], `the area still publishes ${stray.join(", ")}, which nothing points at`);
+
+  const robots = readFileSync(join(distDir, "robots.txt"), "utf8");
+  const named = [...robots.matchAll(/^Sitemap:\s*(\S+)/gm)].map((m) => m[1]);
+  assert.deepEqual(
+    named,
+    [`https://alegauss.github.io${manifest.base}sitemap.xml`],
+    "robots.txt names something other than the one sitemap",
+  );
 });
 
 test("every sitemap URL carries the base prefix", () => {
@@ -125,11 +148,15 @@ test("the sitemap states no lastmod it cannot derive, and never the build clock"
     assert.match(s, /^\d{4}-\d{2}-\d{2}$/, `lastmod ${s} is not a plain date`);
   }
 
-  // Either every URL carries one or none does — a sitemap where some routes look fresher
-  // for want of a source, rather than for having changed, is the misleading half.
+  // Either every URL carries one or none does — a sitemap where some pages look fresher for
+  // want of a source, rather than for having changed, is the misleading half. WW496 put the
+  // area's pages in this file too, and they take the same date: one date over the authored tree
+  // is a weaker claim than one per page and a true one, and two date rules in one file is a
+  // file two readers parse differently.
+  const published = manifest.routes.length + (manifest.area?.length ?? 0);
   assert.ok(
-    stamps.length === 0 || stamps.length === manifest.routes.length,
-    "lastmod is on some routes and not others",
+    stamps.length === 0 || stamps.length === published,
+    `lastmod is on ${stamps.length} of ${published} pages, so some look fresher than others`,
   );
 });
 

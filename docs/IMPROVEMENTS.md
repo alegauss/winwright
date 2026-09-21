@@ -65,27 +65,6 @@ read.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW496 One sitemap for one base
-
-The prerender writes `dist/sitemap.xml` from the route table and `robots.txt` names it.
-Starlight writes `dist/docs/sitemap-index.xml` from its own pages, and nothing points at
-it. So the site publishes two sitemaps under one base, and the one a crawler is told
-about lists the pitch routes alone.
-
-That is backwards for what the area is: the pitch page is one scroll designed to be
-arrived at, and the area is where the reads that decide an adoption live — the ones
-somebody arrives at from a search for a message, a field name or a locator form.
-
-Either the site's sitemap gains the area's pages or it points at the area's index; one
-of the two, decided once, with the other turned off rather than left writing a file
-nobody reads. The site's existing test says the sitemap lists every route exactly once
-and nothing else, so whichever way it goes, that test is what has to be taught the new
-rule — and it is the same test that stops the area's pages being added and then quietly
-dropped when a route is renamed.
-
-Small, and it is the difference between the work in this block being found and being
-published.
-
 ### §WW497 A gate on the links the area does not own the other end of
 
 The area is deliberately thin about the long form: it links the README rather than
