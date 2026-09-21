@@ -1,0 +1,58 @@
+---
+// Every key `winwright.json` may carry, off the catalogue `ProjectDeclaration` keeps.
+//
+// `scripts/project.mjs` reads that catalogue, and the suite holds it against the deserialiser's
+// own shape in both directions — a key this build reads and the catalogue does not name is a red
+// before it is a row missing here.
+//
+// Four columns because absence is a column. Every key is optional, which is what makes an
+// incomplete declaration safe to start from, and the consequence of leaving one out is exactly
+// what an adopter needs and what an example cannot say.
+import project from "../data/project.generated.json";
+
+interface Props {
+  /** "" for the top-level keys, or the object whose keys to show. */
+  under?: string;
+}
+
+const { under = "" } = Astro.props;
+
+const keys = project.keys.filter((one) => one.under === under);
+if (keys.length === 0) {
+  throw new Error(`[declaration] the catalogue holds no keys under ${JSON.stringify(under)}`);
+}
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Holds</th>
+      <th>What it declares</th>
+      <th>Left out</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      keys.map((key) => (
+        <tr id={`key-${key.addressed.replace(".", "-")}`}>
+          <td>
+            <code class="ww-field">{key.name}</code>
+          </td>
+          <td>
+            <span class="ww-holds">{key.holds}</span>
+          </td>
+          <td>
+            {key.means}
+            {key.refuses && (
+              <div class="ww-oneof">
+                <span class="ww-tag ww-claim">refuses</span> {key.refuses}
+              </div>
+            )}
+          </td>
+          <td>{key.absent}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

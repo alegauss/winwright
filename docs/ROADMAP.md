@@ -21,12 +21,12 @@
 ## Block J — Adoption — the proof is the deletion
 
 - 📋 **WW499** (deps: —) **the README's table of locator forms is a hand-kept copy of the parser's own, and the two already differ** — Every adopter reads that table on nuget.org before cloning anything, and nothing holds it to the grammar it is describing. → §WW499
+- 📋 **WW503** (deps: —) **the README's project example omits a key this build reads, and the gate over it checks nine names somebody typed** — An adopter writes that block by copying it, so a key missing from it is a key nobody uses — and the check that should have said so names nine of sixteen. → §WW503
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW490** (deps: —) **winwright.json is described by an example, so a reader cannot tell which keys this build accepts** — It is the first file an adopter writes, and an example with nine keys says nothing about the tenth or about what each one refuses. → §WW490
 - 📋 **WW491** (deps: —) **what earns a hole rather than a red is spread over the README, so a reader who met a 2 cannot look it up** — Degraded is the finding this project exists for and the verdict an adopter meets without understanding it, which is the moment a scattered explanation is worth nothing. → §WW491
 - 📋 **WW492** (deps: —) **the in-app half is described as a list of types, so nobody can tell what shipping it costs their users** — It is the one package that goes into an application real people run, and that decision needs what it writes, when, and what a release does with no harness attached. → §WW492
 - 📋 **WW493** (deps: —) **every example in the area was written rather than run, so no page shows one real adoption end to end** — A walkthrough pasted from memory misleads at the first message whose wording changed, and the refusals are where somebody decides a tool is not worth the trouble. → §WW493

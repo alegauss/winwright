@@ -1,0 +1,106 @@
+---
+title: Declaring a project
+description: Every key winwright.json may carry, what each one declares, what happens when it is left out, and the two that refuse a value which looks perfectly reasonable.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+import Declaration from "../../components/Declaration.astro";
+import project from "../../data/project.generated.json";
+
+`{project.file}` is the first file an adopting repository writes. It is found by walking up from
+wherever a run starts, and every relative path in it resolves against its own directory — so a
+case that names what it drives can be moved to another checkout unchanged.
+
+**Every key is optional**, and that matters more than it sounds. A reading that needs a key this
+file does not declare is recorded as **not taken**, never quietly skipped, so an incomplete
+declaration is safe to start from and an unasked question never reads like an answered one. The
+last column below is what each omission actually does.
+
+## The keys
+
+<Declaration />
+
+### `language`
+
+<Declaration under="language" />
+
+## What you get without declaring anything
+
+Three keys have defaults rather than an absence, and they are read off the engine on every
+build rather than written here.
+
+**`attempts`** is **{project.defaults.attempts}**.
+
+**`timeouts`** is seeded with these, in milliseconds. A declared name replaces the seeded one; a
+name nothing seeds is simply this project's own.
+
+<ul class="ww-seeded">
+  {project.defaults.timeouts.map((one) => (
+    <li>
+      <code>{one.name}</code> — {one.milliseconds.toLocaleString("en-GB")} ms
+    </li>
+  ))}
+</ul>
+
+**`sourceIgnore`** is seeded with the directories a staleness walk must not read as source:
+
+<ul class="ww-seeded">
+  {project.defaults.sourceIgnore.map((one) => (
+    <li>
+      <code>{one}</code>
+    </li>
+  ))}
+</ul>
+
+That last default is the one worth understanding rather than copying. With build output counted
+as source, the binary is always newer than itself, nothing is ever stale, and the staleness
+check quietly answers nothing — which is a green about a build from last week.
+
+## The two refusals worth reading before you meet them
+
+<Aside type="caution" title="`loading` takes keys, and `destructive` refuses a bare name">
+**`loading`** names the *keys* of the strings your application shows while a page is still
+computing, never the text. A phrase written here is one a translation rewrites, and a check
+comparing against it starts matching nothing the day somebody ships another language. A key none
+of your `languageFiles` carries **refuses the run**, because a check that silently matches
+nothing reports every page as finished forever.
+
+**`destructive`** names the entries that end the run, and it refuses a bare name where the
+project ships more than one language — a name being exactly the field a translation rewrites.
+Write `{'{"id": …}'}` or `{'{"key": …}'}` instead. A safety check compared against text a person
+sees has an expiry date, and the expiry is whenever somebody translates the application.
+</Aside>
+
+## An example to start from
+
+Every key above, so there is nothing to discover later:
+
+```json
+{
+  "executable": "bin/Debug/net10.0-windows/YourApp.exe",
+  "sourceRoot": "src/YourApp",
+  "sourceIgnore": ["bin", "obj"],
+  "fingerprintStore": "%APPDATA%/YourApp",
+  "captures": "TestResults/captures",
+  "languageFiles": ["strings.en.json", "strings.pt-BR.json"],
+  "loading": ["report.computing", "common.pleaseWait"],
+  "reportedSets": { "profiles": ["--print-profiles"] },
+  "reportedValues": { "activeProfile": ["--print-active-profile"] },
+  "language": { "preferenceFile": "settings.json", "preferenceKey": "ui.language", "fallback": "en" },
+  "timeouts": { "resolve": 5000, "stop": 5000 },
+  "attempts": 3,
+  "destructive": [{ "id": "quitCommand" }, { "key": "menu.exit" }]
+}
+```
+
+An environment variable is expanded, so an installed application can be named without a path
+that only exists on one machine.
+
+## Where to go next
+
+- [Your first case](/winwright/docs/first-case/) — the file this declaration is for, and the
+  four calls that run it.
+- [The case format](/winwright/docs/case-format/) — every field a case may carry, including the
+  ones that read the wells declared here.
+- [The verbs](/winwright/docs/verbs/) — what each verb needs before it can answer.

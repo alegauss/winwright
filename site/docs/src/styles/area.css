@@ -127,6 +127,16 @@
   background: var(--sl-color-gray-6);
 }
 
+/* A seeded default, read off the engine. Laid out across the line rather than down it: these
+   are short pairs, and a column of five of them is a page somebody has to scroll past. */
+.ww-seeded {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em 1.4em;
+  padding-inline-start: 0;
+  list-style: none;
+}
+
 /* What a verb may need of the application, term over definition rather than a two-column
    table: there are two of them and one is a package somebody has to decide to ship. */
 .ww-cooperation dt {

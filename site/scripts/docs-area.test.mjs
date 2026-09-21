@@ -219,6 +219,39 @@ test("the built verbs page carries a row per verb the catalogue enters, and its 
   );
 });
 
+test("the built project page carries a row per key, and the defaults the engine seeds", () => {
+  // WW490. `project.test.mjs` holds the payload to the catalogue and the suite holds the
+  // catalogue to the deserialiser; this is the last hop. The defaults are checked on the page
+  // itself because they are the figures a reader copies rather than reads.
+  const page = join(builtDir, "project", "index.html");
+  assert.ok(existsSync(page), "dist/docs/project/index.html is missing — run `npm run build` first");
+  const rendered = readFileSync(page, "utf8");
+
+  const declaration = read(repoDir, "src", "Winwright", "Projects", "ProjectDeclaration.cs");
+  const at = declaration.indexOf("public static IReadOnlyList<DeclaredKey> Keys");
+  assert.ok(at >= 0, "ProjectDeclaration no longer declares Keys");
+
+  const entries = [...declaration.slice(at).matchAll(/new\(\s*"([A-Za-z]+)",\s*"([A-Za-z]*)",/g)];
+  assert.ok(entries.length > 10, `only ${entries.length} keys could be read out of the catalogue`);
+
+  for (const [, name, under] of entries) {
+    const anchor = under.length > 0 ? `${under}-${name}` : name;
+    assert.match(rendered, new RegExp(`id="key-${anchor}"`), `the project page publishes no row for '${name}'`);
+  }
+
+  // The seeded waits, as the page writes them. A figure typed onto a page is right on the day
+  // it is typed, which is the hazard every generator here exists for.
+  const seeded = [...read(repoDir, "src", "Winwright", "Projects", "Timeouts.cs").matchAll(/\["([a-zA-Z]+)"\]\s*=\s*(\d+)/g)];
+  assert.ok(seeded.length > 0, "Timeouts.cs seeds nothing");
+  for (const [, name, milliseconds] of seeded) {
+    assert.ok(rendered.includes(`>${name}<`), `the project page never names the '${name}' timeout`);
+    assert.ok(
+      rendered.includes(Number(milliseconds).toLocaleString("en-GB")),
+      `the project page does not show ${milliseconds} for '${name}'`,
+    );
+  }
+});
+
 test("the built area names every outcome the enum declares, with its code", () => {
   const src = read(repoDir, "src", "Winwright", "Verdicts", "RunOutcome.cs");
   const body = /enum\s+RunOutcome\s*\{([\s\S]*)\}/.exec(src);

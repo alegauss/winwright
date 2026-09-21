@@ -5,6 +5,46 @@ using System.Text.Json.Serialization;
 namespace Winwright.Projects;
 
 /// <summary>
+/// One key <c>winwright.json</c> may carry: what it declares, what its absence means, and what it
+/// refuses. WW490.
+/// <para>
+/// The file is the first thing an adopting repository writes, and what described it was an example.
+/// An example is a good start and a bad reference: it cannot say which keys exist beside the ones it
+/// shows, what each one falls back to when it is absent, or which of them refuse a value that looks
+/// perfectly reasonable — and two of those refusals cost an afternoon each if they are met rather
+/// than read.
+/// </para>
+/// <para>
+/// A record rather than prose, for the reason <see cref="Scenarios.Field"/> is one: a description a
+/// tool can carry is a description the run enforces, and prose about a key is what a reader reads
+/// and a generator cannot. The site's documentation area publishes this list; nothing there is
+/// typed.
+/// </para>
+/// </summary>
+/// <param name="Name">The key, spelled as the file spells it.</param>
+/// <param name="Under">The object it sits in, or empty where it is at the top level.</param>
+/// <param name="Holds">What kind of value it takes, in the words a reader of JSON uses.</param>
+/// <param name="Means">What declaring it does.</param>
+/// <param name="Absent">What happens when it is not declared, which is never nothing.</param>
+/// <param name="Refuses">The value it turns away, or empty where it turns away none.</param>
+public sealed record DeclaredKey(
+    string Name,
+    string Under,
+    string Holds,
+    string Means,
+    string Absent,
+    string Refuses)
+{
+    /// <summary>How this file addresses it: the key, under its object where it has one.</summary>
+    public string Addressed => Under.Length > 0 ? $"{Under}.{Name}" : Name;
+
+    /// <summary>The one line a listing of the declaration shows.</summary>
+    public override string ToString() =>
+        $"{Addressed} ({Holds}): {Means}. Absent: {Absent}."
+            + (Refuses.Length > 0 ? $" Refuses: {Refuses}." : "");
+}
+
+/// <summary>
 /// What is true of a project rather than of a case: the executable, the source root the staleness
 /// check compares against, the language files, the default timeouts and the store to fingerprint.
 /// A scenario carrying one of these is a scenario that runs on exactly one checkout, which is how
@@ -15,6 +55,159 @@ public sealed class ProjectDeclaration
 {
     /// <summary>The file a project declares itself in, looked for by walking up from a directory.</summary>
     public const string FileName = "winwright.json";
+
+    /// <summary>
+    /// Every key this build reads out of <c>winwright.json</c>, in the order a reader meets them:
+    /// what the application is, what it ships, how long to wait, and what a run must not do quietly.
+    /// <para>
+    /// WW490. Held against <see cref="Shape"/> in both directions by the suite, so a key this build
+    /// reads and this list does not name is a red rather than a row missing from a page — which is
+    /// the same arrangement <c>Cooperating</c> makes for the verbs and for the same reason: a
+    /// catalogue nobody fails over is a catalogue that falls behind.
+    /// </para>
+    /// <para>
+    /// Every key is optional, which is what makes an incomplete declaration safe to start from: a
+    /// reading that needs one this file does not declare is recorded as <em>not taken</em> rather
+    /// than skipped, and the four paths refuse at the moment something asks for them instead of at
+    /// load. So <c>Absent</c> is never "nothing happens" — it is what the run does instead.
+    /// </para>
+    /// </summary>
+    public static IReadOnlyList<DeclaredKey> Keys { get; } = new ReadOnlyCollection<DeclaredKey>(
+    [
+        new(
+            "executable",
+            "",
+            "a path",
+            "the binary a launch starts, resolved against this file's own directory",
+            "asking for it refuses, naming the key and that it was launching the application under "
+                + "test; a run that attaches to a process already running never asks",
+            ""),
+        new(
+            "sourceRoot",
+            "",
+            "a path",
+            "the source a staleness check compares the built binary against",
+            "the staleness reading is recorded as not taken, so a run cannot report on a build from "
+                + "last week and say nothing about it",
+            ""),
+        new(
+            "fingerprintStore",
+            "",
+            "a path",
+            "the region of the machine a run must leave exactly as it found it — where the "
+                + "application keeps the settings and caches it owns",
+            "nothing is fingerprinted, so a run that drove a path writing a real setting finishes "
+                + "quietly",
+            ""),
+        new(
+            "captures",
+            "",
+            "a path to a directory",
+            "where a picture a case asks for is written; the case's own name is the folder inside it, "
+                + "so two cases asking for 'the menu' do not answer each other",
+            "a capture step refuses at the door rather than after launching the application",
+            ""),
+        new(
+            "languageFiles",
+            "",
+            "an array of paths",
+            "the strings this application ships, which is what lets a locator say {a.key} and an "
+                + "expectation derive a label instead of typing words a translation rewrites",
+            "there is no well to derive from, and every claim that reads one is refused where it is "
+                + "written rather than at run time",
+            ""),
+        new(
+            "loading",
+            "",
+            "an array of keys",
+            "the keys of the strings shown while a page is still computing, so a page still saying it "
+                + "is loading is a failure rather than a photograph",
+            "no page is held to having finished computing",
+            "a key none of the languageFiles carries — a check that silently matches nothing reports "
+                + "every page as finished forever"),
+        new(
+            "sourceIgnore",
+            "",
+            "an array of directory names",
+            "what the staleness walk steps past, by simple name at any depth",
+            "the names DefaultSourceIgnore lists stand — build output and tooling state, which is the "
+                + "set that matters: with bin counted as source the binary is always newer than itself",
+            ""),
+        new(
+            "timeouts",
+            "",
+            "an object of names to milliseconds",
+            "how long this project is willing to wait, by name, declared once rather than typed into "
+                + "the case that needed it",
+            "the names Timeouts.Defaults seeds stand, and a declared name nothing seeds is simply "
+                + "this project's own",
+            "a value that is not a positive number"),
+        new(
+            "language",
+            "",
+            "an object",
+            "how the run works out which language the application is actually in",
+            "the display language is the whole of the resolution",
+            ""),
+        new(
+            "attempts",
+            "",
+            "a whole number",
+            "how many times a flaky act may be attempted — a fact about this project rather than "
+                + "about a case",
+            "Retry.DefaultCap stands",
+            "a number outside Retry's own bounds, named against this file rather than thrown once "
+                + "per step about an argument out of range"),
+        new(
+            "destructive",
+            "",
+            "an array of {\"id\"} or {\"key\"} entries",
+            "the entries that end the run, which no step may touch without saying it meant to",
+            "nothing is destructive, and no step has to say it meant it",
+            "a bare name where the project ships more than one language, a name being exactly the "
+                + "field a translation rewrites"),
+        new(
+            "reportedSets",
+            "",
+            "an object of names to argument arrays",
+            "the sets the application reports about itself, each with the arguments that make it "
+                + "print one per line — for a set that is this machine's data rather than a string "
+                + "the product ships",
+            "'covers' has only the language files to derive from",
+            "an entry with no name, or one with no arguments, since nothing would then say how the "
+                + "application is asked"),
+        new(
+            "reportedValues",
+            "",
+            "an object of names to argument arrays",
+            "the single values the application reports about itself, for a fact about this machine "
+                + "that no case may type",
+            "'expectReported' has no well to ask",
+            "an entry with no name, or one with no arguments"),
+        new(
+            "preferenceFile",
+            "language",
+            "a path",
+            "the JSON file this application saves the user's chosen language in",
+            "the display language is the whole of the resolution",
+            ""),
+        new(
+            "preferenceKey",
+            "language",
+            "a key, dotted for a nested one",
+            "where inside that file the chosen language sits",
+            "the preference file is not read",
+            ""),
+        new(
+            "fallback",
+            "language",
+            "a language tag",
+            "the language the application itself falls back to when it ships no strings for the one "
+                + "the machine is in",
+            "there is no fallback to make, and reading a label in a language nobody declared is "
+                + "refused rather than answered in English",
+            ""),
+    ]);
 
     /// <summary>What a project gets without declaring anything: build output and tooling state.</summary>
     public static IReadOnlyList<string> DefaultSourceIgnore { get; } =
