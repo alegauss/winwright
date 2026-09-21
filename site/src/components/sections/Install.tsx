@@ -1,5 +1,6 @@
 import { halves, install, nugetUrl, releasesUrl } from "../../lib/site-content";
 import { harnessPackage } from "../../lib/product";
+import { useVersionText } from "../../lib/published-version";
 import { CopyButton } from "../ui/CopyButton";
 import { Rich } from "../ui/Rich";
 
@@ -12,6 +13,10 @@ import { Rich } from "../ui/Rich";
 // then the two commands that wire the repository for whoever drives the application from a
 // session. The second is optional and reads as optional.
 export function Install() {
+  // WW500. The reference lines are the one thing on this page that leaves it — they are
+  // copied into a csproj — so they carry the published version rather than the built one,
+  // and the button copies the same string the block displays.
+  const withVersion = useVersionText();
   return (
     <section id="install">
       <div className="wrap">
@@ -30,8 +35,11 @@ export function Install() {
                 {actor.sub}
               </p>
               <div className="codeblock copy">
-                <code>{actor.iface}</code>
-                <CopyButton text={actor.iface} label={`Copy the ${actor.who} reference`} />
+                <code>{withVersion(actor.iface)}</code>
+                <CopyButton
+                  text={withVersion(actor.iface)}
+                  label={`Copy the ${actor.who} reference`}
+                />
               </div>
             </div>
           ))}

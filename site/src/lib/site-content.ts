@@ -19,8 +19,17 @@ import {
   spelled,
   verdict,
   verdictCount,
-  version,
 } from "./product";
+
+// WW500. The version is the one figure here that is not settled at build time: the site
+// deploys by hand and a release does not trigger it, so a number baked in now is the number
+// before the next one. The copy carries this token and the page substitutes what nuget.org
+// says is published, falling back to the generated number the prerender wrote.
+//
+// A token rather than the generated string because forgetting to substitute has to be loud:
+// an unsubstituted `{{version}}` is visible on the page and refused by the suite, where a
+// stale version number would have looked like an ordinary version number.
+export const VERSION = "{{version}}";
 
 export type Run =
   | string
@@ -150,7 +159,7 @@ export const sponsor = {
 /* ------------------------------------------------------------------ hero */
 
 export const hero = {
-  badge: `${harnessPackage().id} ${version} · on nuget.org · Windows · .NET 10`,
+  badge: `${harnessPackage().id} ${VERSION} · on nuget.org · Windows · .NET 10`,
   titleLead: "A green never covers",
   titleAccent: "a check that did not run.",
   sub: [
@@ -254,14 +263,14 @@ export const halves = {
     {
       who: harnessPackage().id,
       sub: "the test project",
-      iface: `<PackageReference Include="${harnessPackage().id}" Version="${version}" />`,
+      iface: `<PackageReference Include="${harnessPackage().id}" Version="${VERSION}" />`,
       job: "Locate, act, assert, capture, and assemble the verdict. Referenced by whoever drives the application — never by the application.",
       primary: true,
     },
     {
       who: inAppPackage().id,
       sub: "the application under test, and only if you want it",
-      iface: `<PackageReference Include="${inAppPackage().id}" Version="${version}" />`,
+      iface: `<PackageReference Include="${inAppPackage().id}" Version="${VERSION}" />`,
       job: "Coordinates, render, backgrounds, geometry, popups — the readings that can only be taken from inside. It references the engine not at all, so nothing here ships a test harness to your users.",
       primary: false,
     },
@@ -790,7 +799,7 @@ export const install = {
   heading: "Two package references, and one of them is optional",
   intro: [
     "Both halves are on nuget.org at ",
-    { code: version },
+    { code: VERSION },
     ". The harness half goes in the project that drives the application; the in-app half goes in the application, and only if you want the readings that can only be taken from inside — every verb on this page works without it.",
   ] as Rich,
   facts: [
@@ -831,12 +840,12 @@ export const install = {
 // here is the generated one, so the section cannot state a version the tree does not.
 export const release = {
   eyebrow: "Release",
-  heading: `${harnessPackage().id} ${version}`,
+  heading: `${harnessPackage().id} ${VERSION}`,
   intro: [
     "Both halves are published together and carry the same version, and the release is checked against the version the source declares — so a package and the commit it was built from cannot disagree about which build it is.",
   ] as Rich,
   facts: [
-    { k: "Version", v: version },
+    { k: "Version", v: VERSION },
     { k: "Frameworks", v: "net10.0-windows · Windows only" },
     { k: "Licence", v: "Apache-2.0", href: licenceUrl },
     { k: "Dependencies", v: "none in either half" },

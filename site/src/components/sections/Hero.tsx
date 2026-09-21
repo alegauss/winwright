@@ -1,15 +1,17 @@
 import { hero, heroRun, install, repoUrl } from "../../lib/site-content";
+import { useVersionText } from "../../lib/published-version";
 import { Rich } from "../ui/Rich";
 import { HeroRun } from "../HeroRun";
 import { Lattice } from "../ui/Lattice";
 
 export function Hero() {
+  const withVersion = useVersionText();
   return (
     <header className="hero" id="top">
       <div className="wrap">
         <img className="hero-icon" src="/winwright/logo.svg" alt="winwright logo" />
         <div className="badge">
-          <span className="dot" /> {hero.badge}
+          <span className="dot" /> {withVersion(hero.badge)}
         </div>
         <h1>
           {hero.titleLead}

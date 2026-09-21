@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { componentFor } from "./routes";
+import { PublishedVersionProvider } from "./lib/published-version";
 
 // The client shell. No router: the page is chosen from the route map by the current path,
 // and every cross-route link is a plain full load, because each route is a static file the
@@ -28,6 +29,13 @@ export function App({ path }: { path: string }) {
     return () => io.disconnect();
   }, [path]);
 
+  // WW500. Wrapped here rather than per section so every version on a page is the same one,
+  // and so the server render and the client's first render share it — entry-server renders
+  // this same App, which is what keeps the prerendered number from tearing on hydration.
   const Page = componentFor(path);
-  return <Page />;
+  return (
+    <PublishedVersionProvider>
+      <Page />
+    </PublishedVersionProvider>
+  );
 }

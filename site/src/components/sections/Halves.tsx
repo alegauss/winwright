@@ -1,7 +1,9 @@
 import { halves } from "../../lib/site-content";
+import { useVersionText } from "../../lib/published-version";
 import { Rich } from "../ui/Rich";
 
 export function Halves() {
+  const withVersion = useVersionText();
   return (
     <section id="halves">
       <div className="wrap">
@@ -22,7 +24,7 @@ export function Halves() {
                 <span className="actor-who">{actor.who}</span>
                 <span className="actor-sub">{actor.sub}</span>
               </div>
-              <div className="actor-iface">{actor.iface}</div>
+              <div className="actor-iface">{withVersion(actor.iface)}</div>
               <p className="actor-job">{actor.job}</p>
             </div>
           ))}
