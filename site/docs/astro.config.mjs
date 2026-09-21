@@ -59,6 +59,7 @@ export default defineConfig({
         { label: "What this is", link: "/" },
         { label: "Installing it", link: "/installing/" },
         { label: "One adoption, end to end", link: "/adoption/" },
+        { label: "Refusals, by what they say", link: "/refusals/" },
         { label: "Your first case", link: "/first-case/" },
         { label: "Reading the verdict", link: "/verdicts/" },
         { label: "Declaring a project", link: "/project/" },

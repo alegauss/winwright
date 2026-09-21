@@ -184,3 +184,26 @@
   max-height: 24em;
   overflow: auto;
 }
+
+/* One refusal, addressed by its own words. The message is the heading because a heading is what
+   a search indexes and what the page's contents list — and it is set as code because it is a
+   literal somebody is comparing against what is on their screen, character for character. */
+.ww-message {
+  margin-block: 1.6em;
+  padding-inline-start: 1em;
+  border-inline-start: 3px solid var(--sl-color-gray-5);
+}
+
+.ww-message h3 {
+  margin-block-start: 0;
+}
+
+.ww-message h3 code {
+  font-size: var(--sl-text-sm);
+}
+
+.ww-message-when,
+.ww-message-more {
+  font-size: var(--sl-text-xs);
+  color: var(--sl-color-gray-3);
+}

@@ -1,0 +1,35 @@
+---
+// Every refusal a reader is likely to arrive with, addressed by the words on their screen.
+//
+// Documentation is organised by cause and readers arrive by symptom. So the message comes first
+// and is set as a heading rather than a table cell: a heading is what search indexes, what the
+// page's own contents list, and what a link can point at.
+//
+// `scripts/messages.mjs` reads every one of these out of the file that says it and stops the
+// build where a sentence has moved. The prose under each is the page's own; the message never
+// is, because a paraphrase matches nothing a reader pastes into a search box.
+import messages from "../data/messages.generated.json";
+
+// A slug per message, so a page or a person can link one row.
+const anchor = (id: string): string => `message-${id}`;
+---
+
+{
+  messages.messages.map((one) => (
+    <section class="ww-message" id={anchor(one.id)}>
+      <h3>
+        <code>{one.says}</code>
+      </h3>
+      <p class="ww-message-when">When: {one.when}</p>
+      <p>
+        <strong>What it means.</strong> {one.means}
+      </p>
+      <p>
+        <strong>What clears it.</strong> {one.clears}
+      </p>
+      <p class="ww-message-more">
+        <a href={one.page}>More about this</a>
+      </p>
+    </section>
+  ))
+}

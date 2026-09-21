@@ -341,6 +341,28 @@ test("the built adoption page shows the captured output rather than describing i
   );
 });
 
+test("the built refusals page shows each message as a searchable heading", () => {
+  // WW494. A reader arrives by pasting words off their screen, so the message has to be on the
+  // page character for character and it has to be a heading — that is what the search index and
+  // the page's own contents list are built from.
+  const page = join(builtDir, "refusals", "index.html");
+  assert.ok(existsSync(page), "dist/docs/refusals/index.html is missing — run `npm run build` first");
+  const rendered = readFileSync(page, "utf8");
+
+  const { messages } = JSON.parse(read(siteDir, "docs", "src", "data", "messages.generated.json"));
+  assert.ok(messages.length > 4, `only ${messages.length} refusal(s) reached the page`);
+
+  for (const one of messages) {
+    assert.match(rendered, new RegExp(`id="message-${one.id}"`), `the refusals page has no row for '${one.id}'`);
+
+    // Rendered as prose, so an apostrophe arrives as its entity.
+    assert.ok(
+      rendered.includes(one.says) || rendered.includes(one.says.replace(/'/g, "&#39;")),
+      `the refusals page never shows the words of '${one.id}'`,
+    );
+  }
+});
+
 test("the built area names every outcome the enum declares, with its code", () => {
   const src = read(repoDir, "src", "Winwright", "Verdicts", "RunOutcome.cs");
   const body = /enum\s+RunOutcome\s*\{([\s\S]*)\}/.exec(src);

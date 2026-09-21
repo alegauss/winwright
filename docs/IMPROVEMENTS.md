@@ -65,28 +65,6 @@ read.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW494 Troubleshooting addressed by the message, not by the cause
-
-Documentation is organised by cause and readers arrive by symptom. Somebody stuck has a
-string on their screen and nothing else, and every explanation this project has written
-is filed under the thing they do not yet know is wrong.
-
-The page is a row per message: what it says, what it actually means, and the one edit
-that clears it. The three that stop adoptions outright come first. `CS0579`
-duplicate-attribute errors naming a `<YourApp>_<random>_wpftmp` project, which reads
-like a XAML problem and is a folder the SDK's globs swallowed. A launcher writing a
-missing surface and a build command to stderr, which is the plugin's two commands run
-without the `dotnet build -c Release` that follows them. And a run answering holes about
-a foreground it never got, which is a desk somebody is using rather than a flaky suite.
-
-Then the ones a first case meets: a selector matching nothing, a case name declared
-twice, a fixture naming an environment nothing carries to the launch, a capture asked of
-an application with no in-app half.
-
-Each row is a search term. The value of this page is entirely in whether the words on it
-are the words a reader pastes into a search box, so it is written from real messages
-rather than paraphrased.
-
 ### §WW495 A plain-text twin per page, and the area in llms.txt
 
 The pitch page writes a Markdown twin per route and an `llms.txt` that lists them,

@@ -27,7 +27,6 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW494** (deps: —) **a first run's refusals are written up by cause, and a stuck reader has only the words on their screen** — CS0579 naming a wpftmp project, a desk that grants no foreground and a guard nobody built are what stop an adoption, and none of the three is searchable today. → §WW494
 - 📋 **WW495** (deps: —) **the area publishes HTML alone, so an agent renders three pages to learn what the tool is** — The pitch page already writes a plain-text twin per route and a llms.txt beside it, and the area next door publishes neither. → §WW495
 - 📋 **WW496** (deps: —) **the site ships two sitemaps under one base, and the one robots.txt names lists no page of the area** — A crawler is handed the pitch routes and never the pages an adoption is decided on, which are the reads the area was built to publish. → §WW496
 - 📋 **WW497** (deps: —) **the area links README anchors by hand, so a renamed heading breaks them with nothing going red** — Those links carry every reader the area sends to the long form, and they point into a file this repository owns and renames freely. → §WW497

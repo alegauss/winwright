@@ -1,0 +1,38 @@
+---
+title: Refusals, by what they say
+description: The messages that stop an adoption, each addressed by the words on your screen rather than by the cause you do not know yet — what it means, and the one edit that clears it.
+---
+
+import Messages from "../../components/Messages.astro";
+import messages from "../../data/messages.generated.json";
+
+Everything else in this area is organised by cause. This page is organised by **what is on your
+screen**, because that is all you have when something refuses.
+
+Each message below is read out of the place that says it when this page is built, so a
+sentence somebody reworded fails the build rather than leaving you searching for words that no
+longer exist anywhere. Where a message names a value of yours, the row carries the fixed part —
+nobody searches for their own case name.
+
+<p class="ww-figures">
+  {messages.messages.length} refusals. The first two stop an adoption before anything runs.
+</p>
+
+<Messages />
+
+## Not here?
+
+Two places worth trying before anything else:
+
+- **A run that answered `2`** with assertions named as never run: that is a hole, and
+  [reading the verdict](/winwright/docs/verdicts/) lists every condition that can cause one —
+  the desk's on one side and your application's on the other.
+- **A case the loader turned away**: the refusal names the step it is about and what is wrong
+  with it. Every field it could be talking about is on
+  [the case format](/winwright/docs/case-format/), including which are required and which
+  refuse a value that looks reasonable.
+
+And if the refusal you met is not on either, it is worth
+[opening an issue](https://github.com/alegauss/winwright/issues): a refusal somebody met and
+could not look up is the defect this page exists to close, and it is the kind this project most
+wants to hear about.
