@@ -58,7 +58,7 @@ export default defineConfig({
       sidebar: [
         { label: "What this is", link: "/" },
         { label: "Installing it", link: "/installing/" },
-        { label: "The build that fails first", link: "/adoption/" },
+        { label: "One adoption, end to end", link: "/adoption/" },
         { label: "Your first case", link: "/first-case/" },
         { label: "Reading the verdict", link: "/verdicts/" },
         { label: "Declaring a project", link: "/project/" },

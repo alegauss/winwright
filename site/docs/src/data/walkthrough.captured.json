@@ -1,0 +1,25 @@
+{
+    "declaration":  "{\n  \"executable\": \"app/bin/Debug/net10.0-windows/Walkthrough.App.exe\",\n  \"timeouts\": { \"resolve\": 5000, \"launch\": 15000, \"stop\": 5000 },\n  \"attempts\": 3\n}",
+    "case":  "{\n  \"cases\": [\n    {\n      \"name\": \"pressing the button changes what the label says\",\n      \"catches\": \"a handler wired to nothing, which leaves the label saying it was never pressed\",\n      \"tags\": [\"walkthrough\"],\n      \"steps\": [\n        { \"locator\": \"Text#greeting\", \"act\": \"read\", \"expect\": \"Nothing pressed yet\", \"reads\": \"name\" },\n        { \"locator\": \"Button#press\", \"act\": \"invoke\", \"named\": \"press the button\" },\n        { \"locator\": \"Text#greeting\", \"act\": \"read\", \"expect\": \"The button was pressed\", \"reads\": \"name\" }\n      ]\n    }\n  ]\n}",
+    "sdk":  "10.0.401",
+    "steps":  [
+                  {
+                      "what":  "building the application under test",
+                      "command":  "dotnet build app/Walkthrough.App.csproj --nologo",
+                      "code":  0,
+                      "said":  "  Determining projects to restore...\n  Restored \u003cyour repository\u003e\\app\\Walkthrough.App.csproj (in 72 ms).\n  Walkthrough.App -\u003e \u003cyour repository\u003e\\app\\bin\\Debug\\net10.0-windows\\Walkthrough.App.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:02.46"
+                  },
+                  {
+                      "what":  "building the project that drives it",
+                      "command":  "dotnet build driving/Walkthrough.Run.csproj --nologo",
+                      "code":  0,
+                      "said":  "  Determining projects to restore...\n  Restored \u003cyour repository\u003e\\driving\\Walkthrough.Run.csproj (in 121 ms).\n  Walkthrough.Run -\u003e \u003cyour repository\u003e\\driving\\bin\\Debug\\net10.0-windows\\Walkthrough.Run.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:01.23"
+                  },
+                  {
+                      "what":  "running every case this sample declares",
+                      "command":  "dotnet run --project driving/Walkthrough.Run.csproj --no-build",
+                      "code":  0,
+                      "said":  "Passed: all 1 case, 2 assertions over everything.\n\n  pressing the button changes what the label says\n  PASSED (exit 0) - 2 assertions: 2 passed, 0 failed, 0 unchecked"
+                  }
+              ]
+}

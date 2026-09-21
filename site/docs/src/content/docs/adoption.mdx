@@ -1,16 +1,18 @@
 ---
-title: The build that fails first
-description: The refusal most adoptions meet before they run anything — captured from a real build rather than written from memory, with the one line that repairs it.
+title: One adoption, end to end
+description: The refusal most adoptions meet before they run anything, the one line that repairs it, and a case running against a real window — all captured from real runs rather than written from memory.
 ---
 
 import { Aside } from "@astrojs/starlight/components";
 
 import Captured from "../../components/Captured.astro";
+import Walkthrough from "../../components/Walkthrough.astro";
 import adoption from "../../data/adoption.captured.json";
+import walkthrough from "../../data/walkthrough.captured.json";
 
-Everything below is what a real build printed. It is captured by a command in this repository
-rather than typed onto the page, so a message whose wording changed fails a check here instead
-of misleading you halfway through.
+Everything below is what a real build and a real run printed. Both are captured by commands in
+this repository rather than typed onto the page, so a message whose wording changed fails a
+check here instead of misleading you halfway through.
 
 ## The shape that breaks
 
@@ -73,20 +75,65 @@ taken, so it is the spelling this repository actually depends on rather than one
 page — take it out there and the sample is what fails.
 </Aside>
 
+## Then the run
+
+With the build green there are two files to write and one command to run. This is
+`samples/Walkthrough` in this repository — an application with a label and a button, a case
+written against it, and the four calls an adopting project writes — captured on a desk of its
+own.
+
+The project declaration, which every relative path resolves against:
+
+<Walkthrough file="declaration" />
+
+The case. It reads the label, presses the button, and reads the label again:
+
+<Walkthrough file="case" />
+
+<Aside title="Why `reads` is `name` and not `text`">
+The first capture of this run answered **Failed**, on both assertions, with `reads` set to
+`text`. A label is not a text-editing control, so it offers no text pattern and the reading
+answered nothing — and an expectation about a reading that was never there does not hold.
+
+What a label says is its **name**. That is the sort of thing a page written from memory gets
+wrong quietly; here it was a red run, and the fix is on the page because the failure was.
+</Aside>
+
+Building the two projects:
+
+<Walkthrough step={1} />
+
+<Walkthrough step={2} />
+
+And running every case the sample declares:
+
+<Walkthrough step={3} />
+
+The first line is the claim and the rest is what it rests on. `Sentence()` states what did
+**not** run before it states the outcome, because a pass over two of nine cases is a different
+claim from a pass — and `VerdictSummary.Render` is what names an assertion that failed, or one
+that never ran and the precondition that was absent.
+
 ## What was captured, and how to take it again
 
 <p class="ww-figures">
-  SDK <strong>{adoption.sdk}</strong>, {adoption.steps.length} builds, exit codes{" "}
-  {adoption.steps.map((one) => one.code).join(", ")}.
+  SDK <strong>{adoption.sdk}</strong> for the build, <strong>{walkthrough.sdk}</strong> for the
+  run. {adoption.steps.length + walkthrough.steps.length} commands, exit codes{" "}
+  {[...adoption.steps, ...walkthrough.steps].map((one) => one.code).join(", ")}.
 </p>
 
-`capture-adoption.cmd` at the repository root builds the throwaway tree and rewrites this
-page's data. It needs no desk and no packaged feed, and it answers in seconds.
+`capture-adoption.cmd` builds the throwaway tree and rewrites the first half. It needs no desk
+and no packaged feed, and it answers in seconds.
+
+`capture-walkthrough.cmd` takes the second half, and it needs both: the case creates a real
+window and reads it back, and the sample restores the engine from a packed feed the way an
+adopting repository restores it from nuget.org. Run it the way this repository runs anything
+that needs a desk — in a guest, through `run-tests-vm.cmd`.
 
 ## Where to go next
 
 - [Installing it](/winwright/docs/installing/) — the package references, and the MSBuild line an
   application at a repository root needs.
-- [Your first case](/winwright/docs/first-case/) — what to write once the build is green.
+- [Your first case](/winwright/docs/first-case/) — the same two files, field by field.
 - [Reading the verdict](/winwright/docs/verdicts/) — the other refusal an adoption meets, which
   is a run that could not get the desk it needed.

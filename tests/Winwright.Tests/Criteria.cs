@@ -331,12 +331,13 @@ internal static class Criteria
         // no longer declares the lead and a catalogue entry for one is a lead pointing nowhere. It is
         // deleted rather than restated, which is what this pair of checks is for.
 
-        // --- WW493, raised by its own partial ship and going with the line that finishes it -----------------
-        new("WW493", "One case run and the verdict it answered, captured rather than written", "",
-            Unshown.NotBuilt, "the build half is captured by `capture-adoption.cmd` and held by "
-                + "`site/scripts/adoption.test.mjs`, and the run half has nothing to demonstrate yet: "
-                + "there is no runnable adoption to capture, only a library sample that compiles — so "
-                + "this is not built rather than shipped unread"),
+        // WW493's criterion stood here between its two ships and went with the line, checked.
+        // `samples/Walkthrough` is the runnable adoption the first half said did not exist — an
+        // application with a label and a button, a case written against it, and the four calls an
+        // adopting project writes — and `capture-walkthrough.cmd` ran it in the guest: all 1 case,
+        // 2 assertions, 0 unchecked. `site/scripts/walkthrough.test.mjs` holds that capture to the
+        // sample's own files, so the page cannot go on showing a run of something that changed.
+        // Deleted rather than restated, which is what this pair of checks is for.
     ]);
 
     /// <summary>

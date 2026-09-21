@@ -177,3 +177,10 @@
   max-height: 24em;
   overflow: auto;
 }
+
+/* A file the captured run read, shown as it stood rather than retyped. Same box as a captured
+   command's output and no caption: what it is is said in the sentence above it. */
+.ww-captured-file {
+  max-height: 24em;
+  overflow: auto;
+}

@@ -1,0 +1,14 @@
+{
+  "cases": [
+    {
+      "name": "pressing the button changes what the label says",
+      "catches": "a handler wired to nothing, which leaves the label saying it was never pressed",
+      "tags": ["walkthrough"],
+      "steps": [
+        { "locator": "Text#greeting", "act": "read", "expect": "Nothing pressed yet", "reads": "name" },
+        { "locator": "Button#press", "act": "invoke", "named": "press the button" },
+        { "locator": "Text#greeting", "act": "read", "expect": "The button was pressed", "reads": "name" }
+      ]
+    }
+  ]
+}

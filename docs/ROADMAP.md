@@ -27,7 +27,6 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- ⏳ **WW493** (deps: —) **every example in the area was written rather than run, so no page shows one real adoption end to end** — A case run end to end and the foreground hole are still written rather than captured, and both need a desk and a packed feed. → §WW493
 - 📋 **WW494** (deps: —) **a first run's refusals are written up by cause, and a stuck reader has only the words on their screen** — CS0579 naming a wpftmp project, a desk that grants no foreground and a guard nobody built are what stop an adoption, and none of the three is searchable today. → §WW494
 - 📋 **WW495** (deps: —) **the area publishes HTML alone, so an agent renders three pages to learn what the tool is** — The pitch page already writes a plain-text twin per route and a llms.txt beside it, and the area next door publishes neither. → §WW495
 - 📋 **WW496** (deps: —) **the site ships two sitemaps under one base, and the one robots.txt names lists no page of the area** — A crawler is handed the pitch routes and never the pages an adoption is decided on, which are the reads the area was built to publish. → §WW496
@@ -164,13 +163,6 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
-
-## Done when — WW493
-
-- **One case run and the verdict it answered, captured rather than written** The build
-  half is captured and the run half is still prose, so the page stops short of the thing
-  the line is about: a real run, taken on a desk, with the foreground hole among its
-  steps.
 
 ## Non-goals
 

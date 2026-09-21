@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WW493: the application a captured adoption drives. It exists so the documentation area can
+       show one case running against something real rather than a walkthrough somebody remembered,
+       and it is deliberately the smallest application that can be driven: one window, one label,
+       one button, and an automation id on each.
+
+       Beside samples/Adopter rather than inside it. That one is a library on purpose - it proves
+       an application under test takes the in-app half by one package reference and by nothing
+       else - and giving it an entry point would change what it proves. This tree proves the other
+       half: that the four calls an adopter writes really do launch something and come back with a
+       verdict.
+
+       No project at samples/Walkthrough/, so no glob reaches down and the refusal the adoption
+       page is about cannot happen here. That is the arrangement the page recommends. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>Walkthrough.App</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+</Project>

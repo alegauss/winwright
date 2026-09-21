@@ -1,0 +1,5 @@
+{
+  "executable": "app/bin/Debug/net10.0-windows/Walkthrough.App.exe",
+  "timeouts": { "resolve": 5000, "launch": 15000, "stop": 5000 },
+  "attempts": 3
+}

@@ -65,29 +65,6 @@ read.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW493 One adoption, captured from a run rather than remembered
-
-Every code block in the area today was typed by whoever wrote the page. That is normal
-and it is also the thing this project refuses everywhere else: a figure true on the day
-it was typed and silent about the day it stopped being.
-
-The page is one adoption executed against a real application, with every command and
-every line of output captured. A throwaway repository is built, the driving project is
-added, `winwright.json` is written, one case is run, and the output is what the run
-actually printed. A message whose wording changed then fails the build rather than
-misleading a reader halfway through.
-
-The refusals are the point, not the happy path. Being refused on something that has
-always worked is the moment somebody decides a tool is not worth the trouble, and what
-the refusal *says* is the whole difference. The capture should include at least the two
-an adopter meets first: the build that fails with duplicate-attribute errors naming a
-wpftmp project, and the run that answers a hole because the desk would not grant the
-foreground.
-
-This is what `site/docs/` exists for rather than the README: a captured run is generated
-content, and a file that regenerates it is a build step, not a paragraph somebody keeps
-in step by hand.
-
 ### §WW494 Troubleshooting addressed by the message, not by the cause
 
 Documentation is organised by cause and readers arrive by symptom. Somebody stuck has a

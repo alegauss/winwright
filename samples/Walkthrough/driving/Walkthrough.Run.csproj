@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WW493: the driving half, as a program rather than a library. samples/Adopter proves the
+       shape of an adopting project in four calls that nothing runs; this one runs them, so the
+       documentation area can show what came back rather than what somebody remembered.
+
+       One package reference and no path into the engine's source, which is the claim every
+       adopting project here makes. The restore comes from whatever this repository last packed,
+       through the nuget.config beside it - so a capture proves the package, not the checkout. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>Walkthrough.Run</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Winwright" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>

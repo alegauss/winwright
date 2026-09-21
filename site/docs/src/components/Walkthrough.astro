@@ -1,0 +1,41 @@
+---
+// One captured step of the adoption's run, or one of the files it ran against.
+//
+// `capture-walkthrough.cmd` builds `samples/Walkthrough` and runs it on a desk, keeping what came
+// back. The sample's own `winwright.json` and case file are read at capture time rather than
+// retyped here, so the blocks on the page are the files the run actually used.
+import walkthrough from "../data/walkthrough.captured.json";
+
+interface Props {
+  /** A captured command, counting from one. */
+  step?: number;
+  /** Or one of the files the run read: the project declaration, or the case. */
+  file?: "declaration" | "case";
+}
+
+const { step, file } = Astro.props;
+
+if (file) {
+  const text = walkthrough[file];
+  if (!text) throw new Error(`[walkthrough] the capture holds no ${file}`);
+}
+
+const captured = step ? walkthrough.steps[step - 1] : null;
+if (step && !captured) {
+  throw new Error(`[walkthrough] the capture has no step ${step}`);
+}
+---
+
+{
+  file ? (
+    <pre class="ww-captured-file"><code>{walkthrough[file]}</code></pre>
+  ) : (
+    <figure class="ww-captured">
+      <figcaption>
+        <code>{captured!.command}</code>
+        <span class={captured!.code === 0 ? "ww-tag" : "ww-tag ww-claim"}>exit {captured!.code}</span>
+      </figcaption>
+      <pre><code>{captured!.said}</code></pre>
+    </figure>
+  )
+}
