@@ -111,16 +111,22 @@ public sealed class ReadmeTests
     }
 
     [Fact]
-    public void What_is_not_built_yet_is_said_where_an_adopter_will_look()
+    public void What_a_run_refuses_to_keep_is_said_where_an_adopter_will_look()
     {
         // Written against what shipped rather than against what is planned. This used to assert
         // that the README said there was no scenario file, which was the honest sentence until
         // WW58 wrote one — and the sentence a section is checked by has to move when the section
         // does, or the check outlives what it was about.
+        //
+        // It moved a second time, and for the opposite reason. "Not built yet" named a suite
+        // runner that has since shipped, and WW230 made this file a package page — so the one
+        // section an adopter reads to find the limits was naming absent work that was no longer
+        // absent. What is left there is a refusal rather than a gap: a run answers and keeps
+        // nothing, which is a decision, and a decision does not go stale the way a plan does.
         var said = Text();
 
-        Assert.Contains("Not built yet", said, StringComparison.Ordinal);
-        Assert.Contains("A case runs; a suite does not", said, StringComparison.Ordinal);
+        Assert.Contains("deliberately does not keep", said, StringComparison.Ordinal);
+        Assert.Contains("writes no report file", said, StringComparison.Ordinal);
     }
 
     [Fact]
