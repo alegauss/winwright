@@ -444,6 +444,7 @@
 - ✅ **WW479** **a state an application appends can be claimed present and never claimed absent, so the mark is one-sided** — `notEndsWithLabel` claims a reading does not end with a declared string, so an appended state is falsifiable both ways; the empty key reds rather than holding of everything.
 - ✅ **WW481** **claude-tray's self-check is red on three read-out flags that Block J added and its flag catalogue never named** — claude-tray's flag catalogue names --observing, --profile-names and --menu-state, so its --selftest is 1061 of 1061 in the guest again and its CI gate is about the application.
 - ✅ **WW482** **claude-tray's session row announces its disclosure chevron as a font glyph, which a screen reader reads as nothing** — claude-tray's session-row chevron announces collapsed or expanded in all five languages, so the migrated readable-row claim passes in the guest instead of reading U+E70D.
+- ✅ **WW86 (profile, session and names claims)** **claude-tray still carries a 3,004-line interaction harness, and eight of its claims have no case** — Six more claims are cases: the profile round trip's three, a session row read as text, and two Statistics labels.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

@@ -67,6 +67,31 @@ What is wanted is a stand-in that behaves as a fixture does.
 
 ## Block G — The scenario — a case is a data file
 
+### §WW483 A tray step that clicks the icon
+
+Found migrating claude-tray (WW86). T158 made a left-click on the icon that
+application's main entry point, opening its one window. The script clicked the icon's
+centre, three bounded attempts because the shell drops synthesised input, then asked the
+window for its nav strip's three destinations. No case can say it. A tray step takes
+`read` and `open tray menu`, and the second is WW31's route: focus and the application
+key.
+
+So the step is `click` on a `tray`, and the pieces mostly exist. WW31 addresses an icon
+by its rectangle, because every taskbar button refuses a clickable point.
+`PointerReason` already has `NotificationArea`, so the reason a case writes in `with` is
+already a word. And `Find` opens the overflow and puts it back.
+
+Two things are open, and both are measurements. Which route reaches a WinForms
+`NotifyIcon`'s click on this shell: a pointer click at the rectangle, or the icon
+button's own Invoke, which needs no desk if the shell turns it into the message the
+application listens for. And where the next step resolves: a resident fixture launches
+with no window, so a locator after the click has to be looked for among the windows that
+process opened since. Without that, the claim cannot be written even once the click
+lands.
+
+The claim itself stays in the next step, as it does for `invoke`: the click is an act,
+and what it opened is read.
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
@@ -75,27 +100,31 @@ What is wanted is a stand-in that behaves as a fixture does.
 
 ### §WW86 claude-tray loses its interaction harness
 
-2,732 lines when this was filed and 3,004 now, which is the line running 272 behind its
-own target. The argument for this framework is that it should not exist inside a product
-repository at all. It goes once every assertion in it is a case, and the count removed
-is reported rather than described — a saving nobody measured is a saving nobody can
-check.
+2,732 lines when this was filed and 3,004 now. It goes once every assertion in it is a
+case, and the count removed is reported rather than described: a saving nobody measured
+is a saving nobody can check.
 
-Surveyed against the cases on 2026-09-20. Nine case functions, 45 `Pass`, 81 `Fail` and
-29 `Unchecked`; keyboard and panes are done, and about nineteen claims are short across
-the rest. `Invoke-LinkCase` is the one with nothing at all — five claims about the
-linking card, and no `link.cases.json` to hold them: the plan names `.credentials.json`,
-the plan follows the pickers when the sides swap, and one profile on both sides is
-refused in place with Write disabled. `Assert-ProfileSubmenu` is the other
-concentration, being shared by three callers: the pinned marker and its undo, an entry
-announcing its own state, the scope sentence, and the shared-transcripts note.
+Surveyed on 2026-09-20, about nineteen claims short. Eleven have landed: the linking
+plan's five, the profile round trip's three, a sessions row read as text, and the names
+of the two Statistics controls T165 found unnamed. Eight are left, of three kinds.
 
-Several of the 29 absences are the machine and not the migration — a junction between
-two config dirs, a second profile, a pinned icon. Those become `needs` and never cases,
-which is the rule T161 already wrote.
+Settings. Both switches announcing their position, the scope sentence on the icon's
+entry, and Open Claude Code expanding or staying a command (T146) all depend on
+`FollowActiveProfile` or `SyncEnvironmentProfile`, and the guest holds their defaults
+where a developer's desk need not. The script read them off `--profiles`. A case wants
+the fixture to fix them, the way `--sample-env` fixes the variable: an observing flag in
+the application that samples the two settings, so each position gets a fixture rather
+than whichever one the desk is in.
 
-The capture script left with WW480. It is not a harness: it copies pixels for somebody
-to look at, and deleting it is a different job from migrating an assertion.
+Machine. A pin needs follow on and a hand pick, which the switch case already makes, so
+a sampled fixture can drive the marker and its undo. A junction between two config dirs,
+and a live reading for the tooltip, cannot be fabricated honestly. Those become `needs`
+under T161's rule, and the note's other direction, no note where nothing is shared, is
+claimed on the bench.
+
+Engine. The left-click that opens the window is WW483.
+
+The capture script left with WW480.
 
 ### §WW88 pportal loses the harness and the runner
 

@@ -17,14 +17,16 @@
 
 ## Block G — The scenario — a case is a data file
 
+- 📋 **WW483** (deps: —) **a case cannot click a tray icon, so the window an application opens on a left-click is claimed by nothing** — A tray step reads an icon or opens its menu, and claude-tray's own entry point is the left-click that opens its window, which its script drove and no case can. → §WW483
+
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
 
-- 🛠 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ✅, Block E ✅) **claude-tray still carries a 3,004-line interaction harness, and one of its case functions has no case** — One case function has no case, eight are short, and the count removed is reported. → §WW86
-- ⏳ **WW88** (deps: Block G ✅, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
+- ⏳ **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ✅, Block E ✅) **claude-tray still carries a 3,004-line interaction harness, and eight of its claims have no case** — Eight claims are left: four turn on two settings, three on the machine, and one waits on WW483. → §WW86
+- ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
 - 📋 **WW480** (deps: Block E ✅) **the preview loop is a 451-line screen copy wired into four documents, and deleting it is not a migration** — Its four guards already exist in the engine; the path that produces a picture somebody reads does not. → §WW480
 
@@ -186,6 +188,13 @@
   fixture takes the desk, refused where the guest's shell holds it. Both arms measured
   rather than argued — the two mechanisms tried so far were refuted on the first of
   them.
+
+## Done when — WW86
+
+- **The script is gone and nothing in claude-tray runs or names it**
+  Check-Interaction.ps1 is deleted; the CI job, AGENTS.md, the skills and --selftest's
+  checks over it name the cases instead; each of its claims is a step, a need, or a
+  sentence saying why not; and the lines removed are counted in the commit.
 
 ## Non-goals
 

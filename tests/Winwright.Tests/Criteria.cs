@@ -291,6 +291,11 @@ internal static class Criteria
                 + "for minutes — measured twice, at five reds in two other classes each time. What "
                 + "it is owed is a desk the suite may take, and not a case somebody forgot to write"),
 
+        new("WW86", "The script is gone and nothing in claude-tray runs or names it", "", Unshown.NotBuilt,
+            "eleven of about nineteen claims have landed as cases and eight have not, so the script "
+                + "is still there to be deleted, and the deletion will be in claude-tray, where "
+                + "nothing in this suite can read it"),
+
         new("WW472", "A desk no fixture could take refuses the run before the tree is carried", "",
             Unshown.NotBuilt,
             "the half that landed is the sentence beside the failure, which `DeskProbeTests` reads "
