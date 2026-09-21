@@ -57,6 +57,7 @@ export default defineConfig({
       // alphabetical order, which is an order nobody arrives in.
       sidebar: [
         { label: "What this is", link: "/" },
+        { label: "The words", link: "/vocabulary/" },
         { label: "Installing it", link: "/installing/" },
         { label: "One adoption, end to end", link: "/adoption/" },
         { label: "Refusals, by what they say", link: "/refusals/" },

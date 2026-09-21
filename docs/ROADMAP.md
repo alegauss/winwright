@@ -27,7 +27,6 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW498** (deps: —) **every page assumes the vocabulary, so a first-time reader meets case, hole, desk and reading undefined** — These words carry the design and none of them means here what it means elsewhere, so a reader guessing at one misreads every page that uses it. → §WW498
 - 📋 **WW501** (deps: —) **the twelve readings a step may name are published as bare words, so nothing tells 'picked' from 'selected'** — An expectation names one reading, and one the element does not offer answers null forever — reported as nothing answering rather than as the wrong choice. → §WW501
 - 📋 **WW502** (deps: —) **one of the four page generators keeps its own C# reader, and it already disagrees with the shared one** — Two readings of a doc comment sit in one repository with nothing pairing them, so a rendering fixed in either is fixed in the wrong half. → §WW502
 - 📋 **WW504** (deps: —) **the six page generators are chained by hand in two package.json scripts, and nothing holds the lists equal** — One missing from the area's own chain is silent on the machine that still holds yesterday's payload and red only on a clean checkout. → §WW504

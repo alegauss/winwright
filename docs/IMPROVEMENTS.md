@@ -65,26 +65,6 @@ read.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW498 The words, defined once, before the pages that use them
-
-The area is written in a vocabulary it never defines. A *case* is a data file and not a
-test method. A *hole* is a check that could not be evaluated, which is neither a pass
-nor a failure. The *desk* is the interactive session a run needs to itself. A *reading*
-is what an element reports, and also what a run takes of the machine before it starts. A
-*fixture* is what an application is launched with, and a *project* is the declaration
-and not the csproj.
-
-Every one of those is a word a reader already owns, used here to mean something
-narrower. That is worse than a term they have never seen: a new word is looked up and a
-familiar one is assumed, so the misreading survives the whole page.
-
-The page is a definition per word, one paragraph each, each ending in the page where the
-word does its work. It goes first in the sidebar, before installing, because it is the
-read that makes the other pages parse — and it is short on purpose, since a glossary
-long enough to need its own navigation is one nobody reaches the end of.
-
-It is also the page to link a word from, once the area is more than three pages deep.
-
 ### §WW501 A sentence per reading, which the vocabulary has nowhere to keep
 
 WW488 publishes the closed list `reads` accepts, in full, because a field described as

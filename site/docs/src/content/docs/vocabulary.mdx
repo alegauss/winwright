@@ -1,0 +1,78 @@
+---
+title: The words
+description: Six words this area uses to mean something narrower than you already do — case, hole, desk, reading, fixture and project — defined once, before the pages that lean on them.
+---
+
+import product from "../../data/product.generated.json";
+
+export const degraded = product.verdicts.find((one) => one.name === "Degraded");
+
+Every word below is one you already own. That is the problem with them: a term nobody has
+seen gets looked up, and a familiar one gets assumed — so a misreading here survives the whole
+page it was made on.
+
+Six of them, one paragraph each. It is short on purpose.
+
+## A case
+
+A **data file**, not a test method. A case is a name, some steps, and what each step claims —
+fields the loader reads, refuses and reports on. The loop, the waits, the attempts and the
+verdict are not in it, because none of those is a property of the thing being checked: two
+cases driving the same window do not carry two copies of one loop. Nothing in a case is code,
+so nothing in it can be debugged, and a case that will not load says so before anything is
+launched.
+
+→ [The case format](/winwright/docs/case-format/)
+
+## A hole
+
+A check that **could not be evaluated**. Not a failure, which is a check that ran and did not
+hold, and emphatically not a pass. Something it needed was absent — a foreground, a language,
+a binary built from this source — so it never ran, and the run says so by name rather than
+leaving it out of the count. A run whose only trouble is holes exits
+`{degraded.code}`. Collapsing that into either of the other two answers is the one thing this
+project will not do; it is the defect it was started over.
+
+→ [Reading the verdict](/winwright/docs/verdicts/)
+
+## The desk
+
+The **interactive Windows session** a run drives, and everything on it that is not your
+application. Who holds the foreground, what window is standing over a rectangle, whether the
+shell will open a flyout, whether somebody is typing. Most verbs need nothing of it; the ones
+that synthesise real input need it to themselves, and cannot be promised it. A desk shared
+with a person is not a flaky suite — it is two people using one machine, and the run reports
+that rather than guessing.
+
+→ [The verbs](/winwright/docs/verbs/)
+
+## A reading
+
+What was **observed**, as opposed to what was expected. An element has readings — its name,
+its value, whether it is selected — and a step says which one its claim is about. A run also
+takes a reading of the machine before it starts: the desk, the binary, the language, the
+foreground. Every reading is reported as measured, absent, or *not read*, and the three are
+kept apart because an absent line and a missing line look identical to somebody skimming.
+
+→ [The case format](/winwright/docs/case-format/)
+
+## A fixture
+
+What an application is **launched with**: an environment to sample, the argument that carries
+it, the variables it sets, and which language the resulting window is in. A case names a
+fixture rather than describing a launch, so the same case can be run against several and the
+expectations are read against the one it actually got. A fixture that names an environment
+nothing carries to the launch is refused, because the expectations would then describe a
+setting the launch never applied.
+
+→ [The case format](/winwright/docs/case-format/)
+
+## A project
+
+The **declaration**, not the csproj. `winwright.json` at the root of an adopting repository
+says what is true of every case there: the binary to launch, the strings the application
+ships, how long to wait, what a run must leave as it found it. Every relative path in it
+resolves against its own directory, which is what lets a case be moved to another checkout
+unchanged — it names what it drives, and where that lives is the project's answer.
+
+→ [Declaring a project](/winwright/docs/project/)
