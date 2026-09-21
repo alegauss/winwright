@@ -65,27 +65,6 @@ read.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW495 A plain-text twin per page, and the area in llms.txt
-
-The pitch page writes a Markdown twin per route and an `llms.txt` that lists them,
-because a model reading this project should not have to render a web page to learn what
-it is. The documentation area beside it publishes HTML and a search index, and nothing
-else.
-
-That is the same defect one page at a time, and it lands on the pages an agent most
-needs: the format, the grammar, the verbs. An agent driving an adopting repository has
-the MCP tools, but an agent deciding whether to suggest this tool at all has exactly
-what a search engine has.
-
-Converted from the built HTML, never authored twice. Half these pages will be generated
-— a verb table off the catalogue, a format table off the loader's schema — so a twin
-written from the MDX source would carry the prose and none of it. One render, two
-outputs, so the two cannot disagree. It runs after the Astro build, because Astro
-empties its output directory before it writes.
-
-And the area's pages join the site's `llms.txt` rather than starting a second one: two
-indexes under one base is one answer a crawler takes and one nobody asked for.
-
 ### §WW496 One sitemap for one base
 
 The prerender writes `dist/sitemap.xml` from the route table and `robots.txt` names it.

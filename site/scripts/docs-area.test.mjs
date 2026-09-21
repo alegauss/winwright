@@ -53,15 +53,31 @@ test("the area builds into the directory the deploy uploads", () => {
   );
 });
 
-test("the area's build runs last, after everything that empties dist/", () => {
-  // `vite build` empties dist/ and Astro empties its own outDir before it writes. Reordered,
-  // the area is deleted by the step after it.
+test("nothing after the area's build empties what it wrote", () => {
+  // `vite build` empties dist/ and Astro empties its own outDir before it writes. Reordered, the
+  // area is deleted by the step after it.
+  //
+  // WW495 made this a rule about what follows rather than about position: the twin writer has to
+  // run after the area's build, because Astro would delete a twin written first. So the check is
+  // that everything still to come only writes into what is already there — which is the property
+  // the original "must be last" was a proxy for.
   const build = sitePackage.scripts.build;
   assert.ok(build.includes("npm run build:docs"), "`build` no longer chains the area's build");
-  assert.ok(
-    build.trimEnd().endsWith("npm run build:docs"),
-    "the area's build is not the last step of `build`, so a later step empties what it wrote",
-  );
+
+  const after = build.slice(build.indexOf("npm run build:docs") + "npm run build:docs".length)
+    .split("&&")
+    .map((one) => one.trim())
+    .filter((one) => one.length > 0);
+
+  // Named rather than pattern-matched: a step allowed to run after the area's build is a
+  // judgement about what that step does to dist/, and it is made here, once, by somebody.
+  const allowed = new Set(["node scripts/docs-twins.mjs"]);
+  for (const step of after) {
+    assert.ok(
+      allowed.has(step),
+      `'${step}' runs after the area's build and nothing here says it does not empty dist/`,
+    );
+  }
 });
 
 test("the site links to the area rather than to a file on GitHub", () => {
