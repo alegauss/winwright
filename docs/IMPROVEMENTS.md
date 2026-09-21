@@ -65,29 +65,6 @@ read.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW492 The in-app half, argued as a shipping decision
-
-`Winwright.InApp` is the only thing this project asks an adopter to put inside an
-application their users run. That is a different kind of decision from taking a test
-dependency, and the README answers it with a list of types.
-
-The page answers the question actually being asked: what does this do in a release
-nobody is testing? Nothing — it reports nothing and writes no file unless the run that
-started the application set the variable that asks it to, and that is the property that
-makes the protocol safe to leave in. Saying so plainly is worth more than any feature
-list.
-
-Then what it buys, each with the harness-side failure it prevents. A render, because a
-screen copy carries whatever stood in front of the window and a render cannot. A popup's
-own tree, which is the one surface no copy of the screen can take — a popup is layered
-for the shadow it draws, so the soft edge of a copy is the desktop behind it. The
-coordinates sentence, because a picture drawn by a system-aware process on a scaled
-display has a size that does not mean what it says.
-
-And the failure an adopter meets first: a render asked for on an application with no
-in-app half answers a hole naming the package, which is the message that page should be
-findable by.
-
 ### §WW493 One adoption, captured from a run rather than remembered
 
 Every code block in the area today was typed by whoever wrote the page. That is normal
@@ -305,3 +282,25 @@ and the same case can hold it, by reading the `.mjs` files that write into
 `docs/src/data/` and asserting each is named in both scripts. That reading is worth more
 than the equality: a generator nobody chained at all would be a file in `scripts/` that
 runs nowhere, and neither list would say so.
+
+### §WW505 The task ids the generated sentences carry onto the site
+
+Four sentences on the published area cite a task id. `/verbs/` carries WW317, WW470 and
+WW483, and `/verdicts/` carries WW450. They arrive honestly: the generators publish the
+engine's own sentences, and this repository's prose cites the task the reasoning started
+in — which is right for a reader of the source and resolves to nothing an adopter can
+open.
+
+Stripping them is not one rule, which is why this is a line rather than a patch. Three
+of the four come out cleanly: `(WW483)` is parenthetical, `WW450:` opens a sentence, and
+`— WW470, for a window…` loses a clause marker. The fourth does not: *a traversal key at
+the window, or WW317's chord* reads the id as a noun, and taking it out leaves *or 's
+chord*. So either the stripper knows four shapes and will meet a fifth, or those
+sentences are rewritten where they are declared — which is the same decision
+`DeskFact.Because` and `VerbNeeds.Because` already make about their audience, made once
+rather than per sentence.
+
+WW492 avoided a fifth by taking the first sentence rather than the first paragraph, and
+its own case refuses a task id outright. That case is the shape the others want: the
+page that published one should say so before somebody reads it and looks for a WW483
+they cannot find.

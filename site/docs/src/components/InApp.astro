@@ -1,0 +1,38 @@
+---
+// The in-app half's surfaces, and the variable that arms each one.
+//
+// The column that decides the shipping question is the last one. Every surface is off unless
+// the process that started the application named somewhere to write — so an application with
+// this package in it, running on somebody's machine, answers nothing and writes nothing.
+//
+// Read off the guards rather than off a claim: `scripts/inapp.mjs` takes each surface's
+// `PathVariable` and the summary saying what unset means, which is the code's own statement of
+// the property this table is about.
+import inapp from "../data/inapp.generated.json";
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Surface</th>
+      <th>What it answers</th>
+      <th>Armed by</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      inapp.surfaces.map((one) => (
+        <tr id={`surface-${one.surface}`}>
+          <td>
+            <code class="ww-field">{one.surface}</code>
+          </td>
+          <td>{one.answers}</td>
+          <td>
+            <code class="ww-field">{one.variable}</code>
+            <div class="ww-oneof">{one.unset}</div>
+          </td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

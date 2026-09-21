@@ -284,6 +284,38 @@ test("the built verdict page shows every condition a hole can name", () => {
   }
 });
 
+test("the built in-app page names every guard, and the condition a run without it answers", () => {
+  // WW492. The page an adopter reads before putting this package in a product real people run.
+  // A guard missing from it weakens the one claim the page makes — that the half does nothing
+  // unless somebody armed it — and it weakens it invisibly.
+  const page = join(builtDir, "in-app", "index.html");
+  assert.ok(existsSync(page), "dist/docs/in-app/index.html is missing — run `npm run build` first");
+  const rendered = readFileSync(page, "utf8");
+
+  const half = join(repoDir, "src", "Winwright.InApp");
+  const guarded = readdirSync(half, { withFileTypes: true })
+    .filter((one) => one.isFile() && one.name.endsWith(".cs"))
+    .flatMap((one) =>
+      [...readFileSync(join(half, one.name), "utf8").matchAll(/public const string PathVariable = "([^"]+)"/g)]
+        .map((m) => m[1]),
+    );
+  assert.ok(guarded.length > 0, "the in-app half declares no PathVariable");
+
+  for (const variable of guarded) {
+    assert.ok(rendered.includes(variable), `the in-app page never names ${variable}`);
+  }
+
+  // The message that brought a reader here, spelled as the run spells it.
+  const condition = /public const string PreconditionName = "([^"]+)"/.exec(
+    read(repoDir, "src", "Winwright", "Capturing", "OwnRender.cs"),
+  );
+  assert.ok(condition, "OwnRender no longer declares the condition a run without the half answers");
+  assert.ok(
+    rendered.includes(condition[1]),
+    `the in-app page never shows "${condition[1]}", which is the hole that sends a reader to it`,
+  );
+});
+
 test("the built area names every outcome the enum declares, with its code", () => {
   const src = read(repoDir, "src", "Winwright", "Verdicts", "RunOutcome.cs");
   const body = /enum\s+RunOutcome\s*\{([\s\S]*)\}/.exec(src);

@@ -112,7 +112,12 @@ public sealed record GeometryDumped(IReadOnlyList<DrawnElement> Elements, int El
 /// </summary>
 public static class Geometry
 {
-    /// <summary>The variable naming the file to dump into.</summary>
+    /// <summary>
+    /// The variable naming the file to dump into. Unset means dump nowhere, for the reason
+    /// <see cref="Surfaces.PathVariable" /> means report nothing: an application shipped to its
+    /// users is not under test, and one writing files because it once was is worse than one that
+    /// never dumped at all.
+    /// </summary>
     public const string PathVariable = "WINWRIGHT_GEOMETRY";
 
     /// <summary>How deep a walk goes unless told otherwise.</summary>
