@@ -4,8 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- ⏳ **WW158** (deps: a session that can be disconnected and reconnected) **the display condition counts monitors and measures the virtual screen, which the session that rendered nothing passed** — Its own criterion is unmet: no desk that draws nothing has taken the reading. → §WW158
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -149,13 +147,6 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
-
-## Done when — WW158
-
-- **Proven on a desk that draws nothing, not on a mock** The condition goes absent
-  against a real session that reports everything present and renders nothing - the WW42
-  desk - and stays met on an ordinary one. A rendering check verified only against a
-  substitute has been verified against the one desk that was never the problem.
 
 ## Non-goals
 

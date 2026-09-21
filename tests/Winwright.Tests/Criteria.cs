@@ -246,10 +246,15 @@ internal static class Criteria
             "FixtureTests.No_reason_is_a_restatement_of_what_the_shape_does",
             null, "every justification clears a length bar and is not a restatement of the row above it"),
 
-        // --- WW158, a criterion bound to one task -----------------------------------------------------------
-        new("WW158", "Proven on a desk that draws nothing, not on a mock", "", Unshown.NotYet,
-            "the condition is asserted against an ordinary desk by DeskGateTests, and the desk that "
-                + "reports everything present and renders nothing has never been driven here"),
+        // WW158's criterion stood here and went with the line, and it went checked. The desk that
+        // reports everything present and draws nothing was the guest's own console session,
+        // disconnected by the probe that read it with `WTSDisconnectSession` (what switching user
+        // does) and reconnected by logging in at the console. Connected, all six conditions were
+        // met. Disconnected, the old reading's proxies still said one monitor and 3840x1947, the
+        // display condition answered absent naming the disconnected session, and a copy of the
+        // screen was refused. Reconnected, the display was met again. A reading and not a case:
+        // the guest is Windows 11 Home, which has no Remote Desktop host and no tscon, so nothing
+        // here reconnects a session without somebody at the console.
 
         // WW88's criterion stood here and went with the line. pportal's `Interaction.cs` is deleted,
         // its three claims are cases, and the reading that says it landed was taken where the
@@ -297,11 +302,11 @@ internal static class Criteria
         // a green reporting a claim nothing had read back, which is the admission the bucket exists
         // to keep honest.
 
-        new("WW86","The script is gone and nothing in claude-tray runs or names it", "", Unshown.NotBuilt,
-            "every claim but the left-click on the icon is a case or a drop with its reason written, "
-                + "and that one waits on WW483 and a release, so the script is still there to be "
-                + "deleted, and the deletion will be in claude-tray, where nothing in this suite can "
-                + "read it"),
+        // WW86's criterion stood here and went with the line. Check-Interaction.ps1 is deleted in
+        // claude-tray, its last claim is `cases/icon.cases.json`, and every case passed there against
+        // 0.1.0-alpha.18, which carries WW486's click on a hidden icon. Nothing there runs the script
+        // or tells anyone to; the case files still say which of its claims each one carries. Read
+        // back where the migration is, which is the whole of why it could never be read here.
 
         // WW472's criterion stood here and went with the line. The stand-in it was owed is
         // `tools/desk-take.ps1`: a window put up on the guest desk, asking for the foreground the
@@ -331,7 +336,15 @@ internal static class Criteria
     /// Every criterion the roadmap declares, read out of the governed file rather than out of the
     /// list above. The roadmap is the source of truth and roadkeep is its writer; this only reads.
     /// </summary>
-    internal static IReadOnlyList<(string Under, string Lead)> Declared()
+    internal static IReadOnlyList<(string Under, string Lead)> Declared() => Declared(File.ReadAllLines(Roadmap()));
+
+    /// <summary>
+    /// The same reading over lines handed to it. WW158: a task's own criterion is in the roadmap only
+    /// while a partial ship leaves that task open, so on the day none is, the file has no such line
+    /// for the control to read, and the control asks it of one written for it instead.
+    /// </summary>
+    /// <param name="lines">The roadmap's lines, or a piece of one.</param>
+    internal static IReadOnlyList<(string Under, string Lead)> Declared(IEnumerable<string> lines)
     {
         var declared = new List<(string, string)>();
 
@@ -340,7 +353,7 @@ internal static class Criteria
         // said so, which is how the first task-labelled criterion cost a run to place.
         var block = "";
 
-        foreach (var raw in File.ReadAllLines(Roadmap()))
+        foreach (var raw in lines)
         {
             var line = raw.TrimEnd();
             if (line.StartsWith(Heading, StringComparison.Ordinal))

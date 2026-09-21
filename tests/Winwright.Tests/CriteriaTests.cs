@@ -81,8 +81,12 @@ public sealed class CriteriaTests
 
         // And a label that is not a block letter, which is what WW403 is about: roadkeep files a
         // criterion raised by a partial ship under the task's own id, and this reading has always
-        // taken both. A parser narrowed to letters would drop those silently.
-        Assert.Contains(declared, one => one.Under.StartsWith("WW", StringComparison.Ordinal));
+        // taken both. A parser narrowed to letters would drop those silently. Asked of lines written
+        // here rather than of the file, since WW158: the roadmap holds one only while a partial ship
+        // leaves a task open, and when WW158 shipped it held none.
+        Assert.Contains(
+            Criteria.Declared([$"{Criteria.Heading}WW1", "- **A task's own lead** — and its body."]),
+            one => one is { Under: "WW1", Lead: "A task's own lead" });
 
         // And nothing from the neighbouring list: the non-goals are bullets of the same shape under
         // a different heading, and reading them as criteria would be a count that means nothing.

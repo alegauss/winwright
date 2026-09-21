@@ -249,6 +249,12 @@ public sealed record Desk
     /// not being composed is not being drawn either. Both are asked of the thing itself.
     /// </para>
     /// <para>
+    /// Measured on a guest's console session that disconnected itself and was logged back into.
+    /// While it was disconnected the proxies still reported one monitor and a 3840x1947 virtual
+    /// screen, and the remote-session flag turned on. This reading answered absent, and a copy of
+    /// the screen was refused. Connected before and after, it answered met.
+    /// </para>
+    /// <para>
     /// Never a named pixel. The non-goal about individual pixels binds this as it binds the capture
     /// block, and the capture keeps its own refusal for its own reason: a desk that renders can
     /// still be photographed while nothing is on it.
