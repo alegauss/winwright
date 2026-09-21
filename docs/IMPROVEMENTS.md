@@ -130,30 +130,4 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW480 The preview loop leaves the repository
-
-`Capture-Window.ps1` came out of WW86 because it is not a harness. It asserts nothing
-about a verdict: it launches a window, copies the pixels inside its rectangle and writes
-a PNG for a person or an agent to look at. `AGENTS.md` and three skills, `preview-ui`,
-`dev-flags` and `file-map`, point at it by name.
-
-Its four guards are the engine's already: the capture receipt, the register, an
-off-screen render that makes overlap vacuous, and `winwright.json`'s `"loading"`.
-
-What stops it is not the engine. Taken up on 2026-09-21 and measured against the source:
-a `capture` step on a window of the application always takes the render route
-(`CaptureRoute.For`), and a render is the application drawing its own tree, which only
-`Winwright.InApp` answers. claude-tray references nothing, so every preview case would
-come back a hole. And its STRATEGY.md says "No bundled third-party dependencies", as a
-distribution decision.
-
-So a person decides between two ways out. claude-tray takes `Winwright.InApp`, which is
-Block I's criterion and a reversal of its own strategy, and the loop becomes a case per
-surface under `captures`. Or the loop stays on claude-tray's own off-screen flags
-(`--capture-settings`, `--capture-stats`), which its catalogue already prefers, extended
-to the popup and the shell the script is still used for. Then winwright replaces nothing
-here and this line retires.
-
-The promo pipeline is not in scope either way.
-
 ## Block K — The proving ground — a fixture app built to be hard to test

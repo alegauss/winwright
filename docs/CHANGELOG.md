@@ -447,6 +447,7 @@
 - ✅ **WW482** **claude-tray's session row announces its disclosure chevron as a font glyph, which a screen reader reads as nothing** — claude-tray's session-row chevron announces collapsed or expanded in all five languages, so the migrated readable-row claim passes in the guest instead of reading U+E70D.
 - ✅ **WW86 (profile, session and names claims)** **claude-tray still carries a 3,004-line interaction harness, and eight of its claims have no case** — Six more claims are cases: the profile round trip's three, a session row read as text, and two Statistics labels.
 - ✅ **WW484** **claude-tray's Profile submenu switches were only ever checked in whichever position the guest happened to hold** — A fixture puts claude-tray's switches in either position, so both words, both scope sentences, Open Claude Code's two shapes and the pin and its undo are cases.
+- ✅ **WW480** **the preview loop is a 451-line screen copy wired into four documents, and deleting it is not a migration** — claude-tray draws its preview windows as cases: it took Winwright.InApp by decision, `preview.cmd` reaches one by tag, and the 451-line screen copy is deleted.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
