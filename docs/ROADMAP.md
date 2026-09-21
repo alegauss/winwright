@@ -24,7 +24,6 @@
 ## Block J — Adoption — the proof is the deletion
 
 - ⏳ **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ✅, Block E ✅, WW483 ✅, an engine release on nuget.org) **claude-tray still carries a 3,004-line interaction harness, and one of its claims has no case** — The icon's left-click waits on WW483 and a release, then the script goes. → §WW86
-- ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
@@ -160,14 +159,6 @@
   against a real session that reports everything present and renders nothing - the WW42
   desk - and stays met on an ordinary one. A rendering check verified only against a
   substitute has been verified against the one desk that was never the problem.
-
-## Done when — WW384
-
-- **The minimising arm is run against a real window, on a desk it may take** A case puts
-  up a window carrying WS_MINIMIZEBOX, runs `Clear-TheDesk` at the desk it holds, and
-  reads off that desk that the window went down and no longer holds the foreground. Both
-  halves off the desk and never off the script's sentence. It cannot be this suite's
-  desk: two runs of it cost five reds elsewhere.
 
 ## Done when — WW472
 

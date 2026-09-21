@@ -1187,6 +1187,73 @@ public sealed class DeskProbeTests
     }
 
     [Fact]
+    [Trait("desk", "alone")]
+    public void The_clearer_puts_a_window_with_a_minimise_button_down_and_hands_the_desk_on()
+    {
+        // WW384's other arm, and the one that decides whether an unattended run can start at all: a
+        // window a person could minimise is one the clearer may, and what says it worked is the desk
+        // rather than the sentence. A `ShowWindow` on the wrong handle, a foreground handed nowhere,
+        // or a sentence that says it worked would each leave the desk exactly as it was — and the
+        // runner reads the desk again afterwards, so a reader would meet a refusal under a line
+        // saying the clearing had happened.
+        //
+        // `OpenFramed` is WS_OVERLAPPEDWINDOW, which carries WS_MINIMIZEBOX: the suite could build
+        // this window all along, and what it could not do is run the act beside everything else.
+        //
+        // **It runs alone, and that is what `desk=alone` says.** The clearer ends in Win+D, whose
+        // foreground lock then refuses this process the desktop for minutes: measured twice at five
+        // reds in two other classes each time. So the ordinary run excludes this trait and
+        // `run-desk.cmd` is the run that asks for it — one case, one desk, and the guest's shell
+        // restarted after it.
+        //
+        // One synthesised mouse move of nothing, before the window asks for the desk — and it is what
+        // a run of one case needs that a run of two thousand does not. Windows grants
+        // `SetForegroundWindow` to the process that received the last input event, and in the ordinary
+        // suite some case has always sent one by the time this arrives. Alone, nothing had: measured
+        // on the guest at `the foreground belongs to explorer (pid 9012) 'Program Manager' … and that
+        // was still true 4004ms later`, on a desk the runner had just read as clear.
+        //
+        // Zero pixels, so nothing moves and nothing is pressed. It is the smallest thing that makes
+        // this process the one Windows will hand the desktop to, and it is here rather than in
+        // `PumpedDialog` deliberately: every other case in this suite runs beside others and must go
+        // on reporting a desk it could not take, which is what `BusyDesk` is for.
+        Nudged();
+
+        using var dialog = PumpedDialog.OpenFramed("winwright clearer puts away");
+        dialog.BringToFront();
+
+        // Waited for rather than read once, which is WW470's rule about every other act here: a
+        // window that has just been shown is often still coming forward, and a single look at that
+        // moment reads as a desk somebody else is holding.
+        var holding = Winwright.Windowing.Foreground.Waited(
+            dialog.Frame, Winwright.Windowing.DeskWait.Of(4000, 100));
+
+        // Before the decision, so a run of one case says which of the two it was: the desk refused,
+        // or the clearer acted. Without it a green here is indistinguishable from an excuse.
+        Console.WriteLine($"the desk before the clearer: {holding.Sentence()}");
+
+        if (BusyDesk.Excused(holding.AsPrecondition()))
+            return;
+
+        var said = Clearing();
+
+        Assert.Contains("put 'winwright clearer puts away' (Static) away", said, StringComparison.Ordinal);
+
+        // The two readings the words cannot stand in for. Down, and no longer holding the desk —
+        // which is the pair the runner's own refusal turns on.
+        var down = Iconic(dialog.Frame);
+        var holds = Winwright.Windowing.Foreground.Check(dialog.Frame).Ours;
+
+        // Said out loud, because this case runs alone and a run of one case that excused itself
+        // reads exactly like a run of one case that proved something. The dedicated run prints it.
+        Console.WriteLine($"the clearer said: {said}");
+        Console.WriteLine($"the desk says: iconic={down}, still holds the foreground={holds}");
+
+        Assert.True(down, $"the clearer said it put a window away and the window is up: {said}");
+        Assert.False(holds, $"the clearer put a window down and it still holds the foreground: {said}");
+    }
+
+    [Fact]
     public void A_minimised_window_that_still_holds_the_desk_is_read_as_stale_end_to_end()
     {
         // WW400. `stale` was only ever made of looks somebody typed, and it is the answer whose
@@ -1307,6 +1374,45 @@ public sealed class DeskProbeTests
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
     private static extern bool ShowWindow(nint window, int how);
+
+    /// <summary>
+    /// Move the pointer by nothing, so this process is the one that received the last input event.
+    /// WW384, and only the case that runs alone needs it — see the comment there.
+    /// </summary>
+    private static void Nudged()
+    {
+        var move = new Input
+        {
+            Type = 0,
+            Mouse = new MouseInput { Dx = 0, Dy = 0, Flags = 0x0001 },
+        };
+
+        SendInput(1, [move], System.Runtime.InteropServices.Marshal.SizeOf<Input>());
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+    private static extern uint SendInput(uint count, Input[] inputs, int size);
+
+    /// <summary>The INPUT union as the one member this uses needs it: a mouse event and nothing else.</summary>
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    private struct Input
+    {
+        public uint Type;
+        public MouseInput Mouse;
+    }
+
+    /// <summary>MOUSEINPUT. The union is the widest member, and this is it on 64-bit: five words and
+    /// a pointer, which the runtime aligns to the forty bytes INPUT is read at.</summary>
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    private struct MouseInput
+    {
+        public int Dx;
+        public int Dy;
+        public uint Data;
+        public uint Flags;
+        public uint Time;
+        public nint Extra;
+    }
 
     /// <summary>
     /// Whether a window is down, which is the half of the repair its own sentence cannot show. WW384,

@@ -286,13 +286,18 @@ internal static class Criteria
         // Kept apart rather than sorted into the blocks they sit in, because they answer a different
         // question. A block's criterion decides whether the block is finished; these say how much of
         // one task is left, and a reader counting a block's is not counting these.
-        new("WW384","The minimising arm is run against a real window, on a desk it may take", "", Unshown.NotYet,
-            "WW384 made the arm reachable and wrote the case, and the case cannot live here: the "
-                + "repair ends in Win+D, whose foreground lock then refuses this process everything "
-                + "for minutes — measured twice, at five reds in two other classes each time. What "
-                + "it is owed is a desk the suite may take, and not a case somebody forgot to write"),
+        // WW384's criterion stood here and went with the line. The arm is a case in this suite now —
+        // `DeskProbeTests.The_clearer_puts_a_window_with_a_minimise_button_down_and_hands_the_desk_on`
+        // — and what reads it back is a run rather than a class: `run-desk.cmd` asks for `desk=alone`
+        // in a guest, and the ordinary run leaves that trait out, because the repair ends in Win+D
+        // and the lock after it cost five reds in two other classes, measured twice.
+        //
+        // Deleted rather than paired, which is what this pair of checks is for. The roadmap no longer
+        // declares the lead, and pairing one here would have named a case this run never executes —
+        // a green reporting a claim nothing had read back, which is the admission the bucket exists
+        // to keep honest.
 
-        new("WW86", "The script is gone and nothing in claude-tray runs or names it", "", Unshown.NotBuilt,
+        new("WW86","The script is gone and nothing in claude-tray runs or names it", "", Unshown.NotBuilt,
             "every claim but the left-click on the icon is a case or a drop with its reason written, "
                 + "and that one waits on WW483 and a release, so the script is still there to be "
                 + "deleted, and the deletion will be in claude-tray, where nothing in this suite can "

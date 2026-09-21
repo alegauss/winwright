@@ -78,6 +78,16 @@
   <PropertyGroup>
     <RollCall Condition="'$(RollCall)' == ''">true</RollCall>
 
+    <!-- WW384. The one case this suite may not run beside the others, and the reason is the desk
+         rather than the case: the clearer ends in Win+D, whose foreground lock then refuses this
+         process the desktop for minutes — measured twice, at five reds in two other classes each
+         time. So the ordinary run leaves it out and `run-desk.cmd` is the run that asks for it.
+
+         A trait and not a class, because what has to be alone is an act and not a subject: the
+         cases beside it in `DeskProbeTests` are about the same file and cost nothing. Overridable,
+         which is how the dedicated run reaches it and how a caller naming its own filter keeps it. -->
+    <VSTestTestCaseFilter Condition="'$(VSTestTestCaseFilter)' == ''">desk!=alone</VSTestTestCaseFilter>
+
     <!-- WW150: a directory per run, and never one directory however many runs. Both files used to
          default to TestResults itself, so a developer running the suite while an agent ran it in
          another shell had each roll call reading one run's listing against the other's results -
