@@ -73,12 +73,29 @@ What is wanted is a stand-in that behaves as a fixture does.
 
 ## Block J — Adoption — the proof is the deletion
 
-### §WW86 claude-tray loses both scripts
+### §WW86 claude-tray loses its interaction harness
 
-451 lines of capture and 2,732 lines of interaction, and the argument for this framework
-is that neither should exist inside a product repository. They go once every assertion
-in them is a case, and the line count removed is reported rather than described - a
-saving nobody measured is a saving nobody can check.
+2,732 lines when this was filed and 3,004 now, which is the line running 272 behind its
+own target. The argument for this framework is that it should not exist inside a product
+repository at all. It goes once every assertion in it is a case, and the count removed
+is reported rather than described — a saving nobody measured is a saving nobody can
+check.
+
+Surveyed against the cases on 2026-09-20. Nine case functions, 45 `Pass`, 81 `Fail` and
+29 `Unchecked`; keyboard and panes are done, and about nineteen claims are short across
+the rest. `Invoke-LinkCase` is the one with nothing at all — five claims about the
+linking card, and no `link.cases.json` to hold them: the plan names `.credentials.json`,
+the plan follows the pickers when the sides swap, and one profile on both sides is
+refused in place with Write disabled. `Assert-ProfileSubmenu` is the other
+concentration, being shared by three callers: the pinned marker and its undo, an entry
+announcing its own state, the scope sentence, and the shared-transcripts note.
+
+Several of the 29 absences are the machine and not the migration — a junction between
+two config dirs, a second profile, a pinned icon. Those become `needs` and never cases,
+which is the rule T161 already wrote.
+
+The capture script left with WW480. It is not a harness: it copies pixels for somebody
+to look at, and deleting it is a different job from migrating an assertion.
 
 ### §WW88 pportal loses the harness and the runner
 
@@ -110,5 +127,29 @@ The other half needs a window this suite does not build: one with `WS_MINIMIZEBO
 up, cleared, and read back as gone from the foreground. That is a fixture window and a
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
+
+### §WW480 The preview loop leaves the repository
+
+`Capture-Window.ps1` came out of WW86 because it is not a harness. It asserts nothing
+about a verdict: it launches a window, copies the pixels inside its rectangle and writes
+a PNG for a person or an agent to look at. `AGENTS.md` and three skills — `preview-ui`,
+`dev-flags`, `file-map` — point at it by name and tell the reader to read the picture
+and judge it.
+
+Its four guards are assertions, and the engine already has all four. The window belongs
+to the process the run launched, which is the capture receipt. No second instance is
+open, which is the register. No foreign window overlaps the rectangle, which an
+off-screen render makes vacuous rather than answers. And the page is not still showing
+its own loading text — `winwright.json` already declares `"loading":
+["stats.computing"]` for it.
+
+So the work is not migrating claims. It is giving the engine the loop: a `capture` step
+that writes the file the preview flow reads, `captures` declared in the project, and the
+four documents rewritten to name that instead of a script. The count removed is reported
+the way WW86 reports its own.
+
+The promo pipeline is not in scope. `Capture-Frames.ps1` and `Encode-Clip.ps1` build a
+clip for a README, which is nothing this framework claims to replace, and folding them
+in would be this line growing a second argument.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
