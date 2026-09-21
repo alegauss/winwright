@@ -45,26 +45,6 @@ have.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW488 The case format, generated from the loader's own schema
-
-`winwright_format` already answers every field of a file, a case, a step and a fixture,
-whether it is required, and the closed list of what it accepts. It answers it to an
-agent, in a repository that has installed the plugin. Somebody reading the site to
-decide whether to adopt this has neither, so the most precise description of the format
-is the one they cannot reach.
-
-The page is that payload rendered: a table per shape, required marked as required, and
-every closed list printed in full rather than described as "one of several". The fields
-a first case never touches — `sameCountdownAs`, `notEndsWithLabel`, `discloses` — belong
-on it too, because the reason to read a reference is the field you did not know existed.
-
-Generated, and refusing to build where it cannot be. A page retyping a field name is
-wrong at the first rename and reports nothing when it happens; the loader's schema is
-the same declaration the tool enforces, so the build derives the page from it and fails
-where the two disagree. The prose that says *why* a field exists stays hand-written
-beside the generated table — that reasoning is in the source's own summaries and in the
-README, and it is the half a schema cannot carry.
-
 ### §WW489 The verbs, published from the catalogue the suite already checks
 
 Two tables in the README list the verb families: the ones that drive controls, and the
@@ -299,3 +279,25 @@ changes nothing, which makes today's behaviour the floor.
 
 The rule is the one the README states about its own badges: trust the badge over the
 typed line where the two disagree. This makes the page say the same thing.
+
+### §WW501 A sentence per reading, which the vocabulary has nowhere to keep
+
+WW488 publishes the closed list `reads` accepts, in full, because a field described as
+"one of several" sends a reader back to a tool they have not installed. Twelve words
+came out, and nothing beside them says what any one of them is about. `value`, `text`
+and `name` are guessable; `selected` and `picked` are not, and they are the pair an
+author gets wrong.
+
+The distinction is measured rather than stylistic, and the source already states it:
+`selected` asks whether this element is the chosen one and `picked` asks which one a
+container chose. WW266 found it missing on a profile picker offering no ValuePattern —
+`value` answered nothing, `name` answered the picker's own label, and a round trip
+comparing either would have held on every machine whatever the picker did. Choosing
+wrong is not a red that names the mistake: a reading the element does not offer answers
+null forever, and the failure sentence says nothing answered to it.
+
+So the page needs a sentence per reading, and there is nowhere to read one from.
+`ActVerb` and `ReadBack` are vocabularies of lambdas: the reasoning lives in comments
+above the entries, which a generator cannot take and a rename does not move. Giving each
+entry the sentence it already has in prose is what makes the column derivable — the same
+shape `LocatorStep`'s summaries gave the predicate table.

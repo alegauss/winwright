@@ -1,0 +1,101 @@
+---
+title: The case format
+description: Every field a scenario file, a case, a step and a fixture may carry, generated from the loader's own schema — what each holds, which are required, and the full closed list where there is one.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+import Fields from "../../components/Fields.astro";
+import Kinds from "../../components/Kinds.astro";
+
+A case is a **data file**. Any file ending `.cases.json`, anywhere under the directory a run
+points at, read recursively in path order.
+
+This page is the whole format, and it is not a summary of it. The tables are generated from
+`ScenarioSchema` on every build — the same declaration the loader enforces and the same one
+`winwright_format` serves to an agent — so a field renamed in the engine is renamed here, and a
+field the engine does not have cannot appear.
+
+## A scenario file
+
+<Fields shape="file" />
+
+## A case
+
+<Fields shape="case" />
+
+`name` has to be unique across the whole suite, not just its file: a name declared twice is
+refused, naming both files, before anything runs.
+
+`catches` is optional and worth writing anyway. It is what the case exists to catch, and a run
+counts the cases that passed without saying — a check nobody can justify is one nobody dares
+delete and nobody dares change.
+
+## A step
+
+Every step says **what to do** and **what to do it to**, and at most one thing it claims about
+the result.
+
+- **`act` is required.** What it needs written beside it is the verb's own business: `with` is
+  required exactly where the act takes something and refused where it does not.
+- **Exactly one of `locator` and `tray`.** A tray icon is named by the shell rather than
+  located in a window's tree, so it is a second kind of subject. Naming both addresses two
+  things and is refused; naming neither is refused too.
+- **At most one claim.** The fields marked *claim* below are alternatives — a step makes one of
+  them, or none and simply acts. `reads` is not a claim: it says *which* reading the claim is
+  about.
+
+<Fields shape="step" />
+
+<Aside title="The claims a case cannot type are the ones worth reaching for">
+`expect` is the obvious claim and for most real windows it is the weakest, because the value
+has to be typed into the case — a hardcoded set with one member, wrong the day somebody edits
+the strings file and wrong in every language but one.
+
+Everything from `moves` down exists so a case can be precise about a value it cannot know:
+that the reading changed, that it says something rather than nothing, that it matches a shape,
+that it is back to what an earlier step read, or that it equals a string derived from your
+application's own declarations rather than typed here.
+</Aside>
+
+## A fixture
+
+A fixture says what the application is launched with. Any case in the suite may name one
+declared in any file.
+
+<Fields shape="fixture" />
+
+`environment` is the machine setting the launch samples and `flag` is the argument it reaches
+the application through; `language` says which language the resulting window is **in**, so
+derived expectations read the strings that window is actually showing. A fixture naming an
+environment nothing carries to the launch is refused, and so is one that names it twice — two
+places deciding one thing means whichever the application reads last wins while the
+expectations still describe the other.
+
+## What a value may be
+
+The **Holds** column above is one of these. It is data rather than prose because the loader
+asks it before it reads a field, so the kind published here is the kind the run enforces: a
+schema saying `tags` is text where the loader reads an array is a tool that accepts what the
+run refuses.
+
+<Kinds />
+
+## A key nobody recognises is refused
+
+Every level of the format is closed. `"expects"` beside `"expect"` is a check the author wrote
+and the run never made, and a loader that shrugged at it would hand that green back — so an
+unrecognised key is refused, listing the keys there are.
+
+That is the same list as the tables above, because there is only one. It is also why
+`winwright_check` cannot be sent a misspelled key at all: the tool's input schema **is** this
+schema, so the refusal arrives before the file exists rather than on the first run.
+
+## Where to go next
+
+- [Addressing an element](/winwright/docs/locators/) — the grammar every `locator` field is
+  written in.
+- [Your first case](/winwright/docs/first-case/) — the same fields as a file you can copy, and
+  the four calls that run it.
+- [The README](https://github.com/alegauss/winwright#readme) — every verb `act` accepts, what
+  each needs of the desk, and the reasoning behind each refusal.

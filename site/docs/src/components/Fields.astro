@@ -1,0 +1,67 @@
+---
+// One shape of the scenario format, off the loader's own schema.
+//
+// `scripts/format.mjs` parses `ScenarioSchema`, which is the same declaration the loader
+// enforces and the same one `winwright_format` publishes to an agent. A table typed onto this
+// page would be wrong at the first rename and would report nothing when it happened.
+//
+// The closed list is printed in full rather than summarised. "one of several" is the sentence
+// that sends a reader back to a tool they have not installed, which is the whole reason this
+// page exists.
+import format from "../data/format.generated.json";
+
+interface Props {
+  /** Which shape: "file", "case", "step" or "fixture". */
+  shape: string;
+}
+
+const { shape } = Astro.props;
+
+const found = format.shapes.find((one) => one.shape === shape);
+if (!found) {
+  // The payload comes off the schema, so a shape missing from it is a rename nobody followed
+  // through. Failing the build is the whole reason the page is generated.
+  throw new Error(`[fields] the scenario format declares no ${shape}`);
+}
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Holds</th>
+      <th>What it is for</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      found.fields.map((field) => (
+        <tr id={`${shape}-${field.name}`}>
+          <td>
+            <code class="ww-field">{field.name}</code>
+            {field.required && <span class="ww-tag ww-required">required</span>}
+            {field.instead && <span class="ww-tag">one of the {field.instead}</span>}
+            {field.claims && <span class="ww-tag ww-claim">claim</span>}
+          </td>
+          <td>
+            <span class="ww-holds">{field.holds}</span>
+          </td>
+          <td>
+            {field.means}
+            {field.oneOf.length > 0 && (
+              <div class="ww-oneof">
+                One of:{" "}
+                {field.oneOf.map((one, at) => (
+                  <>
+                    {at > 0 && ", "}
+                    <code>{one}</code>
+                  </>
+                ))}
+              </div>
+            )}
+          </td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

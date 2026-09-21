@@ -72,6 +72,49 @@
 /* A locator, a predicate key or a refusal arm in a generated table. It is a literal somebody
    will copy, so it does not wrap: a form broken across two lines is one that is pasted with a
    space in it, and the table already scrolls inside its own box. */
-.ww-locator {
+.ww-locator,
+.ww-field {
   white-space: nowrap;
+}
+
+/* What a field holds, which is one word of a closed set rather than prose. Set apart from the
+   sentence beside it so the Holds column reads as the vocabulary it is. */
+.ww-holds {
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-xs);
+  color: var(--sl-color-gray-2);
+  white-space: nowrap;
+}
+
+/* Required, one-of-a-group, and claim: the three things true of a field that are not its
+   sentence. A tag rather than a column, because two of the three are true of almost nothing
+   and a column of empty cells is a column a reader learns to skip. */
+.ww-tag {
+  display: inline-block;
+  margin-inline-start: 0.4em;
+  padding: 0.05em 0.45em;
+  border: 1px solid var(--sl-color-gray-4);
+  border-radius: 0.6em;
+  font-size: var(--sl-text-xs);
+  line-height: 1.5;
+  color: var(--sl-color-gray-2);
+  white-space: nowrap;
+}
+
+.ww-required {
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-accent-high);
+}
+
+.ww-claim {
+  border-color: var(--ww-degraded);
+  color: var(--ww-degraded);
+}
+
+/* A closed list, under the sentence it belongs to rather than beside it: `act` accepts
+   eighteen words, and a cell holding all of them on one line is a cell that widens the page. */
+.ww-oneof {
+  margin-block-start: 0.4em;
+  font-size: var(--sl-text-xs);
+  color: var(--sl-color-gray-2);
 }

@@ -522,3 +522,4 @@
 ## Block L — The documentation area — written for a reader who has installed nothing
 
 - ✅ **WW487** **the locator grammar lives in a section of a 1,000-line README, so learning it means reading the file** — The locator grammar is its own page, read out of the parser on every build, with every form parsed by the suite and every refusal it can answer with (design recorded in `site/scripts/grammar.mjs`).
+- ✅ **WW488** **the case format answers only to an installed plugin, so a reader deciding has no field list to read** — Every field of a file, a case, a step and a fixture is a page now, generated from the loader's own schema, with each closed list printed whole (design recorded in `site/scripts/format.mjs`).

@@ -1,0 +1,29 @@
+---
+// What a value may be, off the enum the loader asks before it reads a field.
+//
+// `Taking` exists because the prose beside a field already said this — "as an array", "as an
+// object" — and prose is what a reader reads and a tool cannot. The word in the Holds column of
+// every table on this page is one of these, so the page has to say what each one means.
+import format from "../data/format.generated.json";
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Holds</th>
+      <th>What a value may be</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      format.kinds.map((kind) => (
+        <tr id={`holds-${kind.kind}`}>
+          <td>
+            <span class="ww-holds">{kind.kind}</span>
+          </td>
+          <td>{kind.means}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

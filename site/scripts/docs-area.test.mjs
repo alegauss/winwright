@@ -137,6 +137,57 @@ test("the built grammar page publishes every predicate and every refusal the par
   }
 });
 
+test("the built format page publishes every field of every shape the loader reads", () => {
+  // WW488. The same pairing as the grammar page's, against the other generator: `format.mjs`
+  // is held to the schema by `format.test.mjs`, and this says the page rendered what it read.
+  // A shape whose table never reached the page is the failure that looks like nothing.
+  const page = join(builtDir, "case-format", "index.html");
+  assert.ok(existsSync(page), "dist/docs/case-format/index.html is missing — run `npm run build` first");
+  const rendered = readFileSync(page, "utf8");
+
+  const schema = read(repoDir, "src", "Winwright", "Scenarios", "ScenarioSchema.cs");
+  const consts = new Map(
+    [...schema.matchAll(/public const string ([A-Za-z]+) = "([^"]*)"/g)].map((m) => [m[1], m[2]]),
+  );
+
+  /** One `IReadOnlyList<Field>` property's body, by bracket balance. */
+  const listed = (property) => {
+    const at = schema.indexOf(`public static IReadOnlyList<Field> ${property} { get; }`);
+    assert.ok(at >= 0, `ScenarioSchema no longer declares ${property}`);
+
+    const from = schema.indexOf("[", at);
+    let depth = 0;
+    for (let i = from; i < schema.length; i++) {
+      if (schema[i] === "[") depth++;
+      else if (schema[i] === "]" && --depth === 0) return schema.slice(from + 1, i);
+    }
+    assert.fail(`ScenarioSchema.${property} is never closed`);
+  };
+
+  for (const [property, shape] of [["File", "file"], ["Case", "case"], ["Step", "step"], ["Fixture", "fixture"]]) {
+    // The key each field opens with, written or addressed as a constant of this same file.
+    const keys = [...listed(property).matchAll(/new\(\s*(?:"([^"]+)"|([A-Z][A-Za-z]*))\s*,\s*(?:true|false)\s*,\s*Taking\./g)]
+      .map((m) => m[1] ?? consts.get(m[2]))
+      .filter((one) => one !== undefined);
+
+    // Every field and not merely the ones this regex happened to match: a field written across
+    // several lines is the one it would miss, and a check that skips a field silently is the
+    // shape of green this repository is about. `Taking.` is on every Field and on nothing else.
+    assert.equal(
+      keys.length,
+      [...listed(property).matchAll(/Taking\./g)].length,
+      `the ${shape}'s keys could not all be read back out of the schema`,
+    );
+    for (const key of keys) {
+      assert.match(
+        rendered,
+        new RegExp(`id="${shape}-${key}"`),
+        `the format page publishes no row for the ${shape}'s '${key}'`,
+      );
+    }
+  }
+});
+
 test("the built area names every outcome the enum declares, with its code", () => {
   const src = read(repoDir, "src", "Winwright", "Verdicts", "RunOutcome.cs");
   const body = /enum\s+RunOutcome\s*\{([\s\S]*)\}/.exec(src);

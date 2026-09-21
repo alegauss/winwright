@@ -26,7 +26,6 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW488** (deps: —) **the case format answers only to an installed plugin, so a reader deciding has no field list to read** — Evaluation comes before installation, and the schema winwright_format serves an agent is the one a person weighing the format needs first. → §WW488
 - 📋 **WW489** (deps: —) **the verb catalogue is a README table, so no row can be linked and no verb says what it needs of the desk** — The suite already checks that catalogue against the engine in both directions, so publishing it costs a generator rather than a second list to keep. → §WW489
 - 📋 **WW490** (deps: —) **winwright.json is described by an example, so a reader cannot tell which keys this build accepts** — It is the first file an adopter writes, and an example with nine keys says nothing about the tenth or about what each one refuses. → §WW490
 - 📋 **WW491** (deps: —) **what earns a hole rather than a red is spread over the README, so a reader who met a 2 cannot look it up** — Degraded is the finding this project exists for and the verdict an adopter meets without understanding it, which is the moment a scattered explanation is worth nothing. → §WW491
@@ -38,6 +37,7 @@
 - 📋 **WW497** (deps: —) **the area links README anchors by hand, so a renamed heading breaks them with nothing going red** — Those links carry every reader the area sends to the long form, and they point into a file this repository owns and renames freely. → §WW497
 - 📋 **WW498** (deps: —) **every page assumes the vocabulary, so a first-time reader meets case, hole, desk and reading undefined** — These words carry the design and none of them means here what it means elsewhere, so a reader guessing at one misreads every page that uses it. → §WW498
 - 📋 **WW500** (deps: —) **the site bakes the version at build time, so a release leaves the page offering the version before it** — The deploy is manual and the version is the figure a reader copies rather than reads, so a release opens a window where the page hands out a reference a version behind. → §WW500
+- 📋 **WW501** (deps: —) **the twelve readings a step may name are published as bare words, so nothing tells 'picked' from 'selected'** — An expectation names one reading, and one the element does not offer answers null forever — reported as nothing answering rather than as the wrong choice. → §WW501
 
 ## Done when — Block A
 
