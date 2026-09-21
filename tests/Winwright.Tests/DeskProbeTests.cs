@@ -56,13 +56,15 @@ namespace Winwright.Tests;
 /// one.
 /// </para>
 /// <para>
-/// The other arm cannot be a case here, and that was measured rather than argued. Written, it passed
-/// and took five cases in two other classes down with it and excused four more in this one; written
-/// again with the desktop handed back by the same key that took it, identically. The repair ends in
-/// Win+D, and showing the desktop sets Windows' foreground lock — for the timeout after it nothing
-/// this process asks for is granted, not a restore, not <c>BringToFront</c>, not a window a later
-/// case creates and activates from its own thread. So the price of that reading is every case that
-/// runs in the next few minutes, which is an unrelated red bought with a real one.
+/// The other arm is a case too, and what it cannot do is run beside the others — measured rather
+/// than argued. Written into the ordinary run it passed and took five cases in two other classes
+/// down with it and excused four more in this one; written again with the desktop handed back by the
+/// same key that took it, identically. The repair ends in Win+D, and showing the desktop sets
+/// Windows' foreground lock — for the timeout after it nothing this process asks for is granted, not
+/// a restore, not <c>BringToFront</c>, not a window a later case creates and activates from its own
+/// thread. So the price of that reading is every case that runs in the next few minutes, and what it
+/// bought instead is a run of its own: the case carries <c>desk=alone</c>, the test project's
+/// default filter leaves that trait out, and <c>run-desk.cmd</c> is what asks for it.
 /// </para>
 /// <para>
 /// Serial since WW345, and WW125's rule is why: running the classification means starting a real
