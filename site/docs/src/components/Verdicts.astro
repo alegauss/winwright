@@ -1,0 +1,43 @@
+---
+// The verdicts and their exit codes, off the enum that declares them.
+//
+// `RunOutcome`'s member values *are* the process exit codes — that is the product's own
+// decision, written down in the enum's summary — so a table of codes typed onto a web page
+// would be that mapping written a third time, and a mapping written twice is one that drifts.
+// `scripts/product.mjs` parses the C# and this renders what it found.
+import product from "../data/product.generated.json";
+
+// A colour per verdict, and a fallback for one this file has never heard of: a fifth outcome
+// shipping is a thing the page should render plainly, not a thing it should throw over.
+const colours: Record<string, string> = {
+  Passed: "var(--ww-pass)",
+  Failed: "var(--ww-fail)",
+  Degraded: "var(--ww-degraded)",
+  Broken: "var(--ww-broken)",
+};
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Exit code</th>
+      <th>Verdict</th>
+      <th>What it means</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      product.verdicts.map((verdict) => (
+        <tr style={`--ww-code-colour: ${colours[verdict.name] ?? "var(--sl-color-white)"}`}>
+          <td>
+            <span class="ww-verdict-code">{verdict.code}</span>
+          </td>
+          <td>
+            <span class="ww-verdict-name">{verdict.name}</span>
+          </td>
+          <td>{verdict.meaning}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

@@ -7,6 +7,11 @@ import { App } from "./App";
 // routes.tsx has already checked against the component map.
 export { ROUTE_META, canonicalUrl, outputDir, OG_IMAGE } from "./routes";
 
+// The generated version, re-exported for the one file on this site that is authored rather
+// than rendered: llms.txt is hand-written prose in public/, so the prerender substitutes
+// the version into it instead of leaving two package references to go stale by hand.
+export { version } from "./lib/product";
+
 /** The hydratable render written into the HTML file. */
 export function render(path: string): string {
   return renderToString(<App path={path} />);

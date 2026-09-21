@@ -61,6 +61,14 @@ function fencedFrom(node) {
   return fenced(decode(rawTextAll(node).replace(/<[^>]+>/g, "")));
 }
 
+// Whether a run had whitespace on either side of it, as the pair to put back outside the
+// markers. Markdown reads `** bold **` as literal asterisks, so the content is trimmed and
+// the space it was written with moves outside — otherwise a `<code>` followed by a `<b>`
+// (which the copy composes constantly) comes out of the twin welded together.
+function margin(raw) {
+  return [/^\s/.test(raw) ? " " : "", /\s$/.test(raw) ? " " : ""];
+}
+
 // --- inline: a run with **bold**, *italic*, `code` and [links] ---
 function inline(node) {
   if (node.nodeType === 3) return collapse(decode(node.rawText));
@@ -74,15 +82,19 @@ function inline(node) {
       return "`" + collapse(plainText(node)) + "`";
     case "B":
     case "STRONG": {
-      const t = kids().trim();
-      return t ? `**${t}**` : "";
+      const raw = kids();
+      const t = raw.trim();
+      const [lead, tail] = margin(raw);
+      return t ? `${lead}**${t}**${tail}` : "";
     }
     case "I":
     case "EM": {
-      const t = kids().trim();
+      const raw = kids();
+      const t = raw.trim();
       // a lone decorative glyph (the ✗ before a non-goal) carries nothing in a flat file
       if (!t || (t.length <= 2 && !/[a-z0-9]/i.test(t))) return "";
-      return `*${t}*`;
+      const [lead, tail] = margin(raw);
+      return `${lead}*${t}*${tail}`;
     }
     case "BR":
       return " ";
@@ -150,6 +162,24 @@ function grammarLine(node) {
   return `- \`${collapse(plainText(form)).trim()}\`${gloss ? ` — ${gloss}` : ""}`;
 }
 
+// A definition list is a key and its value, and in a flat file that pairing is the content
+// — so it converts to one bullet per pair rather than recursing into two paragraphs a
+// reader has to re-associate. The pairs are read by descending rather than from `:scope`,
+// because each row is wrapped so the grid can put a border round it.
+function dlToMarkdown(dl) {
+  const terms = dl.querySelectorAll("dt");
+  return terms
+    .map((dt) => {
+      const dd = dt.parentNode?.querySelector("dd");
+      const key = inlineTrim(dt);
+      const value = dd ? inlineTrim(dd) : "";
+      if (!key) return "";
+      return value ? `- **${key}** — ${value}` : `- **${key}**`;
+    })
+    .filter(Boolean)
+    .join("\n");
+}
+
 function blocks(node, out) {
   for (const child of node.childNodes) {
     if (child.nodeType === 3) {
@@ -174,6 +204,9 @@ function blocks(node, out) {
       out.push(fencedFrom(child));
     } else if (tag === "TABLE") {
       const md = tableToMarkdown(child);
+      if (md) out.push(md);
+    } else if (tag === "DL") {
+      const md = dlToMarkdown(child);
       if (md) out.push(md);
     } else if (HEADING[tag]) {
       const t = inlineTrim(child);

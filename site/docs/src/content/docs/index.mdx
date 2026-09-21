@@ -1,0 +1,106 @@
+---
+title: What this is
+description: A Windows UI test framework for .NET 10 that drives a desktop application through UI Automation and Win32, and names anything it could not evaluate instead of leaving it out of the count.
+tableOfContents: false
+---
+
+import Packages from "../../components/Packages.astro";
+import Verdicts from "../../components/Verdicts.astro";
+import product from "../../data/product.generated.json";
+
+{/* The count is derived rather than typed, and spelled rather than set as a figure: a number
+    in the middle of a sentence reads as a quantity somebody measured, and this is a fact about
+    the enum. A fifth verdict would change the word here on the next build. */}
+export const spelled = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight"];
+
+winwright drives a Windows desktop application from a test and reports what was **actually
+observed**. It is a .NET library, not a runner: a case is a data file, the loop and the waits
+and the verdict belong to the engine, and the project you already have is what runs it.
+
+It exists because of one measurement. A suite reported a pass with no failures and a total of
+352, where the run before it had 374 — twenty-two tests gone, the host had died partway
+through, and the only sign was a number nobody had a reason to read. Everything here follows
+from refusing that.
+
+## A green may not cover a check that never ran
+
+So there are {spelled[product.verdicts.length]} verdicts rather than two, and the member values **are**
+the process exit codes — CI reads the number, and a mapping written twice is a mapping that
+drifts.
+
+<Verdicts />
+
+`2` is the reason this project exists. An assertion whose precondition was absent did not pass
+and did not fail: it never ran, it is named in the summary by name, and collapsing it into
+either of the other two is the thing winwright will not do. `3` outranks the rest, because a
+reader told the build failed opens the wrong repository.
+
+What earns a `2` is usually the machine rather than your application — a foreground Windows
+would not grant, a focus that left the application while a menu walk was polling, a
+notification-area flyout the shell would not open, a window somebody else left standing over
+the region a capture was about. None of those is your code being wrong, so none of them goes
+red. The answer names what the desk did instead.
+
+## What it needs
+
+- **Windows.** It is not cross-platform and is not going to be: the whole engine is UI
+  Automation and Win32.
+- **.NET 10**, targeting `net10.0-windows`. The in-app half additionally needs
+  `<UseWPF>true</UseWPF>`.
+- **Two packages**, and an application under test takes at most one of them.
+
+<Packages />
+
+`Winwright.InApp` is optional, and deliberately so: every reading and every pattern act runs
+against an application that references nothing. What the in-app half adds is the small set of
+readings a harness cannot take from outside the process — chiefly a render of the
+application's own visual tree, which is what makes a capture a picture of a window rather than
+a copy of whatever was on the screen.
+
+## An element is addressed the same way by every verb
+
+One grammar, written once. A locator is a string, and the same string means the same thing to
+a step in a case file, to an assertion, and to the tool that checks the file before it exists.
+
+```
+#saveButton                              the automation id
+Button#saveButton                        the control type and the id
+Button[name="Save as..."]                the name
+MenuItem[nameStarts="Pessoal "]          the name, where the rest of it is decoration
+ComboBox|Slider|Edit                     any one of several control types
+Text[name="{settings.nav.about}"]        what the project's strings call it
+Window#main > Pane > Button#save         a descendant of, at any depth
+```
+
+A brace is a hole the run fills, and it is the difference between a case that survives a
+translation and one that does not. `{a.key}` is read out of your project's own strings, in the
+language the fixture says the window is in — so a case addressing an element by the words on it
+stops being wrong in every language but one.
+
+## What is here, and what is elsewhere
+
+This area is for the reads that decide an adoption and the ones that get a first case running.
+Everything narrower already answers from inside a repository that has installed the plugin:
+`winwright_format` describes every field of a case, `winwright_vocabulary` every act, and
+`winwright_check` reads a case back before the file exists. Somebody deciding whether to adopt
+this has none of them.
+
+For everything else, the repository is the source and this area does not hold a second copy:
+
+- [The README](https://github.com/alegauss/winwright#readme) — the full grammar, every verb
+  family, every field a case may carry, and what each refusal says.
+- [The backlog](https://github.com/alegauss/winwright/blob/main/docs/ROADMAP.md) — what is
+  open, including the pages this area does not have yet.
+- [The ledger](https://github.com/alegauss/winwright/blob/main/docs/CHANGELOG.md) — what
+  shipped.
+- [The packages](https://www.nuget.org/packages/Winwright) — what a restore actually reaches,
+  which is the only place a published version is a fact.
+
+## Where to go next
+
+**[Installing it](/winwright/docs/installing/)** — the prerequisites, the two package
+references, the one MSBuild line that an application at a repository root needs, and the
+Claude Code plugin.
+
+**[Your first case](/winwright/docs/first-case/)** — `winwright.json`, a case file, the four
+calls that run it, and how to read what came back.

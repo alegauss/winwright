@@ -1,0 +1,70 @@
+/* The area's own palette, taken from the pitch page next door so the two read as one site.
+   Starlight is themed by overriding its custom properties rather than by restating its rules:
+   what is here is the accent, the greys and the four verdict colours, and every layout
+   decision stays the theme's. */
+
+:root {
+  /* the brand accent, in the ramp Starlight asks for */
+  --sl-color-accent-low: #2a1f6b;
+  --sl-color-accent: #6f5cf0;
+  --sl-color-accent-high: #c3b9ff;
+
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #ece7fb;
+  --sl-color-gray-2: #c5bde4;
+  --sl-color-gray-3: #8a81ab;
+  --sl-color-gray-4: #5b5280;
+  --sl-color-gray-5: #322a5c;
+  --sl-color-gray-6: #181231;
+  --sl-color-black: #0c0918;
+
+  /* The four verdicts, which are the product's own vocabulary rather than four colours
+     somebody liked. A page giving Degraded the same amber as a warning somewhere else would
+     be saying the thing this project exists to deny. */
+  --ww-pass: #2ea043;
+  --ww-fail: #e5484d;
+  --ww-degraded: #d29a00;
+  --ww-broken: #b070e0;
+}
+
+:root[data-theme="light"] {
+  --sl-color-accent-low: #ded8fb;
+  --sl-color-accent: #5546c8;
+  --sl-color-accent-high: #2b1f7a;
+
+  --sl-color-white: #150f2b;
+  --sl-color-gray-1: #211a41;
+  --sl-color-gray-2: #2f2757;
+  --sl-color-gray-3: #4b4468;
+  --sl-color-gray-4: #665e85;
+  --sl-color-gray-5: #ddd8f0;
+  --sl-color-gray-6: #efedf9;
+  --sl-color-gray-7: #f7f6fd;
+  --sl-color-black: #ffffff;
+
+  --ww-pass: #1a7f37;
+  --ww-fail: #c9353a;
+  --ww-degraded: #8a6100;
+  --ww-broken: #7c3fae;
+}
+
+/* A generated table is as wide as what generated it, so it scrolls inside its own box rather
+   than widening the page. */
+.sl-markdown-content table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* The verdict table's first column. The code is the exit code, so it is set as one figure
+   rather than as prose, and coloured by the verdict it belongs to. */
+.ww-verdict-code {
+  font-family: var(--sl-font-mono);
+  font-weight: 700;
+  color: var(--ww-code-colour, var(--sl-color-white));
+}
+
+.ww-verdict-name {
+  font-weight: 600;
+  color: var(--ww-code-colour, var(--sl-color-white));
+}

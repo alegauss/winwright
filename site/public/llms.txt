@@ -1,11 +1,11 @@
 # winwright
 
-> A Windows UI test framework for .NET 10 (`net10.0-windows`). It drives a desktop
-> application through UI Automation and Win32, derives its expectations from the
-> application's own declarations, and answers in four verdicts rather than two — so a check
-> that could not be evaluated is named in the summary rather than left out of the count.
-> The engine has no external dependency, and the application under test references at most
-> one optional package.
+> A Windows UI test framework for .NET 10 (`net10.0-windows`), published on nuget.org at
+> `{{version}}` under the Apache-2.0 licence. It drives a desktop application through UI
+> Automation and Win32, derives its expectations from the application's own declarations,
+> and answers in four verdicts rather than two — so a check that could not be evaluated is
+> named in the summary rather than left out of the count. Neither half has an external
+> dependency, and the application under test references at most one optional package.
 
 It exists because of one measurement. A suite reported a pass with no failures and a total
 of 352 where the run before it had 374 — twenty-two checks gone, the host had died partway
@@ -33,15 +33,23 @@ that drifts, and CI reads the number rather than the word.
 | `2` | `Degraded` | Everything that ran passed, and something could not be evaluated at all. |
 | `3` | `Broken` | The harness threw. What it says is about this tool, not about your application. |
 
-`2` is the reason this project exists. An assertion whose precondition was absent did not
-pass and did not fail — it never ran, it is named in the summary by name, and collapsing it
-into either of the other two is the thing winwright will not do. `3` outranks the rest,
-because a reader told the build failed opens the wrong repository.
+`2` is the one the rest of this framework was built to make possible. An assertion whose
+precondition was absent did not pass and did not fail — it never ran, it is named in the
+summary, and collapsing it into either of the other two is the thing winwright will not do.
+`3` outranks the rest, because a reader told the build failed opens the wrong repository.
 
-Three things a scenario meets often are holes rather than failures, and all of them are
-about the desk rather than about your application: a foreground Windows would not grant, a
-focus that left the application while a menu walk or a traversal was polling, and a
-notification-area flyout the shell would not open.
+Every hole is also reported with **whose** it was — the desk's, the run's, or nobody's yet
+— because a reader told three checks never ran has to know whether to clear a machine or
+open a repository. Three a scenario meets often are the desk's: a foreground Windows would
+not grant, a focus that left the application while a menu walk or a traversal was polling,
+and a notification-area flyout the shell would not open.
+
+The headline a run prints:
+
+```
+DEGRADED (exit 2) - 4 assertions: 3 passed, 0 failed, 1 unchecked (all the desk's)
+  unchecked step 4  report.pt-BR - 'an overflow flyout this run can work' absent (the desk's): ...
+```
 
 Before the assertions, a run takes one reading of the machine: the desk it is on, which
 binary it is driving, whether that binary is stale, the resolved language, the foreground,
@@ -102,22 +110,34 @@ is answered with the nearest name UI Automation actually has.
   one colour is not a picture; a page still computing is not a report. Two renders of
   unchanged code are byte-identical, so no tolerance has to be chosen for a comparison to
   mean anything.
-- **Scenarios** — a case is a data file: steps, locators, acts and expectations as fields,
-  with the loop, the waits and the verdicts owned by the engine. Every field is validated at
-  insertion, so a refusal costs a retry and never a deletion. Run a file, a case or a tag,
-  and be told what was not run. Preconditions, fixtures and sampled environments are declared
-  per case and passed to every launch the case makes. A window can be declared shareable.
-  Each case carries the defect it exists to catch.
+- **Scenarios** — a case is a data file. A scenario file is a `.cases.json`: an object with
+  `cases`, and optionally the `fixtures` they are launched against. Steps, locators, acts and
+  expectations are fields; the loop, the waits, the attempts and the verdict belong to
+  `CaseRun`. Every field is validated against the loader's own schema, so a refusal costs a
+  retry and never a deletion. A run is pointed at a directory and walks it, and selects
+  everything, one case by name, or one tag — a selector matching nothing is refused with the
+  names there are, and the run names every case it left alone. A case may carry `needs` (what
+  the machine must have, by the name the engine gives the condition), `fixture`, `tags`,
+  `catches` (the defect it exists for), `filed`, `forEach` (the key whose every declared
+  string it runs once for) and `onlyReads`; a fixture may carry `environment`, `flag`,
+  `arguments`, `variables`, `language`, `shareable` and `resident`.
 - **The project declaration** — `winwright.json`, found by walking up from where a run
   starts. Every key is optional; a reading that needs one this file does not declare is
   recorded as not taken, never quietly skipped. `destructive` names the entries that end the
   run, and a bare name is refused where the project ships more than one language, because a
   name is the field a translation rewrites.
-- **The Claude Code plugin** — two commands in the repository wire every clone. The MCP
-  tools carry this project's scenario schema as their input schema, so a case an agent
-  writes is refused at insertion rather than at run time; the skill loads when a window is in
-  play rather than on every turn; a hook denies a hand-written harness script and names the
-  verb that replaces it.
+- **The Claude Code plugin** — two commands in the repository wire every clone
+  (`claude plugin marketplace add alegauss/winwright --scope project`, then
+  `claude plugin install winwright@alegauss --scope project`), and the server and guard are
+  .NET processes built once with `dotnet build -c Release` in the plugin's own clone. Four
+  MCP tools: `winwright_format` (every field of a file, a case, a step and a fixture),
+  `winwright_vocabulary` (every act and what each needs said beside it), `winwright_check`
+  (a case read back before the file exists — its input schema **is** the loader's schema, so
+  a misspelt key is not a thing the caller can send) and `winwright_run` (the cases a
+  selection asks for, answering the verdict, the exit code and what outlived the run). The
+  first three launch nothing. The skill loads when a window is in play rather than on every
+  turn, and a `PreToolUse` hook denies a hand-written harness script and names the case file
+  and the tool that replace it. There is no `winwright` executable and no slash commands.
 - **The in-app half (optional)** — `Winwright.InApp`, taken by the application under test
   only if you want the readings a harness cannot take from outside the process: whether this
   process's idea of the display is trustworthy, an element rendered to a PNG (measured,
@@ -137,20 +157,30 @@ is answered with the nearest name UI Automation actually has.
 
 ## Installation
 
-The harness half goes in the project that drives the application:
+Both halves are published on nuget.org at `{{version}}` under the Apache-2.0 licence. The
+harness half goes in the project that drives the application:
 
 ```xml
-<PackageReference Include="Winwright" Version="0.1.0" />
+<PackageReference Include="Winwright" Version="{{version}}" />
 ```
 
 The in-app half goes in the application under test, and only if you want the readings it can
 only take from inside:
 
 ```xml
-<PackageReference Include="Winwright.InApp" Version="0.1.0" />
+<PackageReference Include="Winwright.InApp" Version="{{version}}" />
 ```
 
-Windows, .NET 10, `net10.0-windows`. The in-app half needs `<UseWPF>true</UseWPF>`.
+Windows, .NET 10, `net10.0-windows`. The in-app half needs `<UseWPF>true</UseWPF>`. Neither
+half carries an external dependency.
+
+One line if the application's own `.csproj` sits at the repository root, because every
+default glob the SDK applies walks the whole tree below the project file and would compile
+the driving project into the application:
+
+```xml
+<DefaultItemExcludes>$(DefaultItemExcludes);tests\**</DefaultItemExcludes>
+```
 
 ## Layout
 
@@ -161,10 +191,10 @@ Windows, .NET 10, `net10.0-windows`. The in-app half needs `<UseWPF>true</UseWPF
   refusal in the engine is paired against.
 - `tools/Winwright.RollCall` — the roll call, so a run short of what discovery found is not
   reported as a pass.
+- `tools/Winwright.Mcp` — the MCP server the Claude Code plugin wires; `tools/Winwright.Guard`
+  is the hook.
 - `site/` — this site (Vite + React + Tailwind); its build emits this file, a Markdown twin
   per route and `manifest.json`.
-- `docs/ROADMAP.md`, `docs/CHANGELOG.md`, `docs/IMPROVEMENTS.md` — governed by
-  [roadkeep](https://github.com/alegauss/roadkeep) and written by that tool, not by hand.
 
 ## Data and network
 
@@ -186,9 +216,12 @@ organisations with a lot to publish — run on your own servers, with no per-use
 
 ## Links
 
-- [Website](https://alegauss.github.io/winwright/): project page
+- [Website](https://alegauss.github.io/winwright/): the product page
 - [Manifest](https://alegauss.github.io/winwright/manifest.json): the routes and their Markdown twins
-- [GitHub repository](https://github.com/alegauss/winwright): source code
-- [Roadmap](https://github.com/alegauss/winwright/blob/main/docs/ROADMAP.md): what is open, and why each line exists
+- [Winwright on nuget.org](https://www.nuget.org/packages/Winwright): the harness half
+- [Winwright.InApp on nuget.org](https://www.nuget.org/packages/Winwright.InApp): the optional in-app half
+- [GitHub repository](https://github.com/alegauss/winwright): source code and the full reference
 - [Changelog](https://github.com/alegauss/winwright/blob/main/docs/CHANGELOG.md): what has shipped
+- [Issues](https://github.com/alegauss/winwright/issues): where to say something is wrong
+- [Licence](https://github.com/alegauss/winwright/blob/main/LICENSE): Apache-2.0
 - [Sponsor](https://www.viglet.org): Viglet, open source search and content management

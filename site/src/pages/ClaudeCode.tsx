@@ -3,8 +3,11 @@ import { Footer } from "../components/Footer";
 import { Rich } from "../components/ui/Rich";
 import { CopyButton } from "../components/ui/CopyButton";
 import { claudeCode, friction } from "../lib/site-content";
+import { Spelled } from "../lib/product";
 
-const toolCount = claudeCode.read.length + claudeCode.do.length;
+// Spelled, not a digit: the count is read off the two lists below rather than typed, and
+// the rest of this site states a small count as the word prose wants.
+const toolCount = Spelled(claudeCode.read.length + claudeCode.do.length);
 
 export function ClaudeCode() {
   return (
@@ -109,22 +112,29 @@ export function ClaudeCode() {
               </div>
             </div>
           </div>
+          <p className="allowlist-note">
+            <Rich runs={claudeCode.splitNote} />
+          </p>
         </div>
       </section>
 
-      <section id="allowlist">
+      <section id="setup">
         <div className="wrap narrow">
           <div className="sec-head reveal">
-            <h2>{claudeCode.allowlistHeading}</h2>
+            <h2>{claudeCode.setupHeading}</h2>
           </div>
           <div className="reveal">
-            <p className="allowlist-lead">{claudeCode.allowlistLead}</p>
-            <div className="codeblock copy">
-              <code>{claudeCode.allowlistLine}</code>
-              <CopyButton text={claudeCode.allowlistLine} label="Copy the allowlist entry" />
+            <p className="allowlist-lead">{claudeCode.setupLead}</p>
+            <div className="install-commands">
+              {claudeCode.setupCommands.map((command) => (
+                <div className="codeblock copy" key={command}>
+                  <code>{command}</code>
+                  <CopyButton text={command} label="Copy the command" />
+                </div>
+              ))}
             </div>
             <p className="allowlist-note">
-              <Rich runs={claudeCode.allowlistNote} />
+              <Rich runs={claudeCode.setupNote} />
             </p>
           </div>
         </div>
@@ -137,6 +147,19 @@ export function ClaudeCode() {
             <p>
               <Rich runs={claudeCode.hookBody} />
             </p>
+          </div>
+          <div className="feature-section reveal">
+            <h2>{claudeCode.hookStaysHeading}</h2>
+            <ul className="feat-list">
+              {claudeCode.hookStays.map((runs, i) => (
+                <li key={i}>
+                  <span className="chk">✓</span>
+                  <span>
+                    <Rich runs={runs} />
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
           <div className="feature-section reveal">
             <h2>{claudeCode.skillHeading}</h2>

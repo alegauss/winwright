@@ -1,0 +1,42 @@
+---
+// The package references an adopter pastes, at the version this repository declares.
+//
+// Read out of `docs/src/data/product.generated.json`, which `scripts/product.mjs` writes from
+// `Directory.Build.props` and the two packable csproj files. A version typed onto this page
+// would be right on the day it was typed and would then send every reader after the next
+// release to a package that is a version behind — which is the exact hazard the concordance
+// check exists for, arriving through the documentation instead.
+import { Code } from "@astrojs/starlight/components";
+
+import product from "../data/product.generated.json";
+
+interface Props {
+  /** One half, or both with the comment that says which project each goes in. */
+  half?: "harness" | "app";
+}
+
+const { half } = Astro.props;
+
+const lineFor = (takenBy: "harness" | "app"): string => {
+  const found = product.packages.find((one) => one.takenBy === takenBy);
+  if (!found) {
+    // The payload comes off the csproj files, so a half missing from it is a rename nobody
+    // followed through. Failing the build is the whole reason the figures are generated.
+    throw new Error(`[packages] the product declares no package taken by the ${takenBy}`);
+  }
+  return `<PackageReference Include="${found.id}" Version="${product.version}" />`;
+};
+
+const code = half
+  ? lineFor(half)
+  : [
+      "<!-- In the test project that drives the application. -->",
+      lineFor("harness"),
+      "",
+      "<!-- In the application under test, only if you want the readings it can only take",
+      "     from inside the process. -->",
+      lineFor("app"),
+    ].join("\n");
+---
+
+<Code lang="xml" code={code} />

@@ -8,9 +8,9 @@
 #
 # The gate is the build, and it runs on every push and pull request. `npm run build` already
 # is the gate: it runs the product generation, tsc, the client build, the og image, the SSR
-# build and the prerender — and the prerender's replace-or-throw head patch and the
-# route-pair assertion are the route and head gates. A gate that runs twice is one that can
-# be satisfied by the copy nobody kept current.
+# build, the prerender and then the documentation area — and the prerender's replace-or-throw
+# head patch and the route-pair assertion are the route and head gates. A gate that runs twice
+# is one that can be satisfied by the copy nobody kept current.
 #
 # The two are separate decisions on purpose. If the build only ran when somebody published,
 # a rename in the C# that broke the generator would leave the build red with nothing to say
@@ -54,15 +54,22 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: site/package-lock.json
+          # Two npm projects: the pitch page, and the documentation area it builds into its
+          # own dist/.
+          cache-dependency-path: |
+            site/package-lock.json
+            site/docs/package-lock.json
 
       # Generation runs before the tests below on purpose: they assert the built page
       # against this repository's C#, so a source file changed without regenerating fails
       # here rather than publishing a page that is confidently stale.
+      # `npm run build` chains the documentation area's build last, so both projects'
+      # dependencies have to be there before it starts.
       - name: Build
         working-directory: site
         run: |
           npm ci
+          npm --prefix docs ci
           npm run build
 
       # The site's own claims: the generated figures against the enum they came from, the

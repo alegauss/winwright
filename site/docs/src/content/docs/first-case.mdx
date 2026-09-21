@@ -1,0 +1,222 @@
+---
+title: Your first case
+description: Declare the project, write one case, run it in four calls, and read what the run actually answered — including what it could not evaluate.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+A case is a **data file**, not a script. The steps, their locators, their acts and their
+expectations are fields; the loop, the waits, the attempts and the verdict belong to the
+engine. That is the whole trade: two cases driving the same window do not carry two copies of
+the same loop, and nothing about how long to wait is decided in the file that says what to
+check.
+
+There are three things to write, and two of them you write once per repository.
+
+## 1. Declare the project
+
+`winwright.json`, found by walking up from wherever a run starts. Every key is optional, and
+that matters more than it sounds: a reading that needs a key this file does not declare is
+**recorded as not taken**, never quietly skipped. The reading is still in the report, marked
+absent, which is what stops an unasked question from reading like an answered one.
+
+The smallest useful one:
+
+```json
+{
+  "executable": "bin/Debug/net10.0-windows/YourApp.exe",
+  "timeouts": { "resolve": 5000, "stop": 5000 },
+  "attempts": 3
+}
+```
+
+The keys worth adding early, once you have a case that needs them:
+
+| Key | What it buys |
+| --- | --- |
+| `captures` | Where pictures go. A `capture` step names what to *call* the picture; the folder inside this one is the case's name, so no case carries a path. |
+| `languageFiles` | Your application's own strings. This is what lets a locator say `{settings.nav.about}` instead of typing the words a translation will rewrite. |
+| `loading` | The **keys** of the strings shown while a page is still computing, never the text. A page still saying it is loading becomes a failure rather than a photograph. |
+| `destructive` | The entries that end the run. A step may not touch one without saying it meant to. |
+| `sourceRoot` | The source a staleness check compares the built binary against, so a run cannot report on a build from last week. |
+| `fingerprintStore` | The region of the machine the run must leave exactly as it found it — where your application keeps its settings and caches. |
+
+<Aside type="caution" title="Two keys refuse a value that looks reasonable">
+`loading` takes keys and not phrases, because a phrase is what a translation rewrites — and a
+check comparing against one starts matching nothing on the day another language ships. A key
+none of your `languageFiles` carries **refuses the run**, since a check that silently matches
+nothing reports every page as finished forever. `destructive` refuses a bare name for the same
+reason, where the project ships more than one language: write `{"id": …}` or `{"key": …}`.
+</Aside>
+
+## 2. Write the case
+
+Any file ending `.cases.json`, anywhere under the directory your run points at — they are read
+recursively, in path order. A file is an object with `cases` in it, and optionally the
+`fixtures` those cases are launched against.
+
+```json
+{
+  "cases": [
+    {
+      "name": "renaming a profile writes it back",
+      "catches": "a rename that updates the list and never the file",
+      "tags": ["smoke", "profiles"],
+      "steps": [
+        { "locator": "TabItem[name=\"Profiles\"]", "act": "select" },
+        { "locator": "Edit#profileName", "act": "set value", "with": "Beta", "expect": "Beta", "reads": "value" },
+        { "locator": "CheckBox#autosave", "act": "toggle", "expect": "On", "reads": "toggle" },
+        { "locator": "Button#save", "act": "invoke", "named": "save the profile" },
+        { "locator": "Text#status", "act": "read", "expect": "Saved", "reads": "text" }
+      ]
+    }
+  ]
+}
+```
+
+Reading that file field by field:
+
+- **`name`** selects the case, so it has to be unique across the whole suite. A name declared
+  in two files is refused, naming both, before anything runs.
+- **`catches`** is what the case exists to catch. It is optional, and a run counts the cases
+  that passed without saying — a check nobody can justify is one nobody dares delete and
+  nobody dares change.
+- **`tags`** are the other way to select. `Selection.Tag("smoke")` runs these.
+- **`act`** plus **exactly one of `locator` or `tray`** is what every step is. Naming both is
+  refused; naming neither is refused.
+- **`with`** is required exactly where the act takes something, and refused where it does not.
+- **`expect`** is what the element should read once the act has landed, and **`reads`** says
+  *which* reading that is — `value`, `toggle`, `text`, `name`, `selected`, `enabled` and the
+  rest, defaulting to `anything`.
+- **`named`** renames the step in the report, and is also how a later step points back at this
+  one when it wants to claim the reading came back to what it was.
+
+`expect` is not the only kind of claim, and for most real windows it is not the best one. A
+case that cannot know the value can still say the reading **`moves`**, that it **`answers`**
+something rather than nothing, that it **`matches`** a shape, or — with `label` — that it
+equals a string derived from your application's own declarations rather than typed into the
+case. The full list is in
+[the README](https://github.com/alegauss/winwright#writing-a-case); the rule behind all of
+them is the same, that a value typed into a case is a hardcoded set with one member.
+
+### What the case is launched against
+
+A fixture says what the application is started with, and any case in the suite may name one
+declared in any file:
+
+```json
+{
+  "fixtures": [
+    { "name": "pt-BR", "environment": "pt-BR", "flag": "--language", "shareable": true, "language": "pt-BR" }
+  ]
+}
+```
+
+`environment` is the machine setting the launch samples, reached through `flag`; `language`
+says which language the resulting window is **in**, so derived expectations read the strings
+that window is actually showing. A fixture naming an environment nothing carries to the launch
+is refused, and so is one that names it twice — two places deciding one thing means whichever
+the application reads last wins while the expectations still describe the other.
+
+## 3. Run it
+
+Four calls, and that is the whole of an adopting project's driving half:
+
+```csharp
+using Winwright.Processes;
+using Winwright.Projects;
+using Winwright.Scenarios;
+
+var project = ProjectDeclaration.Find(repository);
+var declared = ScenarioFile.Across(ScenarioFile.LoadAll(Path.Combine(repository, "cases")));
+
+// The register is disposed here, so nothing this run started outlives it — and whatever
+// would not stop is named rather than cleaned up in silence.
+using var register = ProcessRegister.For(project);
+var verdict = Suite.Launch(declared, Selection.All, register, project);
+
+Console.WriteLine(verdict.Sentence());
+return verdict.ExitCode;
+```
+
+`Selection.All` is one of three: `Selection.Case("renaming a profile writes it back")` and
+`Selection.Tag("smoke")` are the others. A selector that matches nothing is **refused**, with
+the names or tags there are — a run of no cases has no failure and no hole in it, so it reads
+as a pass, and the pass is about nothing.
+
+<Aside title="Why this is a method in your project and not a command">
+Everything a runner would have decided for itself — how long to wait, how many attempts an act
+gets, what a missing read-back does to the exit code — is not in that code because it is not a
+property of the run. It is in `winwright.json`, where the project declares it once.
+</Aside>
+
+## 4. Read what came back
+
+`Sentence()` is the one line a report opens with, and it states what did **not** run before it
+states the outcome:
+
+```
+Passed: 1 of 9 cases, 8 not run, 3 assertions over case 'renaming a profile writes it back'.
+```
+
+A pass over two of nine cases is a different claim from a pass, and putting the qualification
+second is how it gets skimmed. `ExitCode` is the outcome itself rather than a second mapping,
+so CI needs nothing translated.
+
+Before the assertions, a run also takes one reading of the machine: the desk it is on, which
+binary it is driving, whether that binary is stale, the resolved language, the foreground, the
+launch arguments, whether anything else is showing the application, and whether the desk is
+this run's alone. Each is reported as measured, absent, or **not read** — because an absent
+line and a missing line read the same to somebody skimming, and only one of them is a
+statement.
+
+That reading is printed *above* the verdict, by `VerdictSummary.Render(verdict, reading)`. A
+reader who has just been told four assertions never ran wants the absent precondition before
+the tally rather than after.
+
+## A run needs a desk it may have to itself
+
+Cases create real windows, take the foreground and synthesise input. On the machine you are
+working at, that means your own typing lands in the application under test and the run reports
+holes about a foreground it never got. It is not a flaky suite; it is two people using one
+desk.
+
+Two ways out, in the order most projects reach them:
+
+<Steps>
+
+1. **Run it somewhere nobody is sitting.** A VM with an interactive session, a dedicated
+   runner, or a second machine — anything where the desk is the run's alone.
+
+2. **Point this repository's guest runner at your tree.** A checkout of winwright carries
+   `tools\run-tests-vm.ps1`, which takes *a* tree rather than its own:
+
+   ```
+   tools\run-tests-vm.ps1 -Tree D:\path\to\yours -Run "run-cases.cmd" -Bring @('yours.trx')
+   ```
+
+   `-Name` defaults to the tree's own folder, so it lands in `C:\src\<name>` and two projects
+   cannot collide in one guest; `-ResultsIn` says where your command left what it wrote. It
+   prints which tree it took, because a runner that can carry two is one where a green is
+   otherwise a green about whichever tree the caller believed they named.
+
+</Steps>
+
+## Check the file before you run it
+
+If you drive your application from Claude Code, `winwright_check` reads a case back **before
+the file exists**. Its input schema *is* the loader's schema, so a misspelled key is not
+something that can be sent; what comes back is either the loader's own refusal, addressed as
+`cases[0].steps[1].act`, or what a run of it would do.
+
+Name a `project` beside the file and it also answers what the **door** of a run would refuse —
+a `capture` step in a project declaring no `captures`, which loads cleanly and then never runs.
+Leave it off and the answer says it read the file alone, rather than letting that read as
+"this would run".
+
+## Where to go from here
+
+- [The README](https://github.com/alegauss/winwright#readme) — the full locator grammar, every
+  verb family, every field a case may carry, and the reasoning behind each refusal.
+- [What this is](/winwright/docs/) — the verdicts, and what a hole is.
+- [Installing it](/winwright/docs/installing/) — if you arrived here first.

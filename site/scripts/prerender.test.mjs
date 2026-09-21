@@ -70,8 +70,20 @@ test("no twin leaks the nav, the footer or the call to action", () => {
 
 test("the landing twin carries the run, which is the whole argument an agent can grep", () => {
   const md = readFileSync(join(distDir, "index.md"), "utf8");
-  assert.ok(md.includes("winwright run cases/report.wwx"), "landing twin missing the run");
+  // The tool the run is actually asked for by, not a command line: there is no `winwright`
+  // executable, and a twin that showed one would send an agent to a shell that has nothing
+  // to run.
+  assert.ok(md.includes("winwright_run"), "landing twin missing the run");
   assert.ok(md.includes("not observed"), "landing twin missing the reading that was not taken");
+});
+
+// The scenario file on the page has to be the extension the loader walks for, and the
+// invented `.wwx` was on this site for as long as it took somebody to try it. Both
+// directions, because the fix is worth nothing if the old spelling can come back.
+test("the landing twin names the real scenario file extension and no invented one", () => {
+  const md = readFileSync(join(distDir, "index.md"), "utf8");
+  assert.ok(md.includes(".cases.json"), "landing twin never names a scenario file");
+  assert.ok(!md.includes(".wwx"), "landing twin names .wwx, which nothing here reads");
 });
 
 test("the locator grammar survives the twin as a list of forms", () => {

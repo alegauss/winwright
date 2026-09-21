@@ -35,7 +35,7 @@ export type Rich = Run[];
 export const meta = {
   title: "winwright — a green never covers a check that did not run",
   description:
-    `A Windows UI test framework that answers in ${spelled(verdictCount)} verdicts rather than two. It drives a desktop application through UI Automation and Win32, derives its expectations from the application's own declarations, and names anything it could not evaluate instead of leaving it out of the count.`,
+    `A Windows UI test framework for .NET 10, on nuget.org. It answers in ${spelled(verdictCount)} verdicts rather than two, drives a desktop application through UI Automation and Win32, derives its expectations from the application's own declarations, and names anything it could not evaluate instead of leaving it out of the count.`,
   og: {
     title: "winwright",
     description:
@@ -53,29 +53,67 @@ export const parentUrl = "https://alegauss.github.io/";
 export const releasesUrl = `${repoUrl}/releases/latest`;
 export const changelogUrl = `${repoUrl}/blob/main/docs/CHANGELOG.md`;
 
+// The documentation area, which is a second build under the same base (site/docs/, an Astro
+// project writing into this one's dist/docs). Written as a path and not as a route: there is
+// no entry for it in routes.tsx because nothing here renders it.
+export const docsUrl = "/winwright/docs/";
+
+// The README is still the long form — every verb family, every field a case may carry — and
+// the area links to it rather than holding a second copy. Named separately so a link meaning
+// "the whole reference" cannot quietly become a link to the area's three pages.
+export const readmeUrl = `${repoUrl}#readme`;
+export const issuesUrl = `${repoUrl}/issues`;
+export const licenceUrl = `${repoUrl}/blob/main/LICENSE`;
+
+/** A package's own page on nuget.org, which is where a version is actually published. */
+export function nugetUrl(id: string): string {
+  return `https://www.nuget.org/packages/${id}`;
+}
+
 // Section anchors (#x) act on the landing page; the page links are base-absolute so they
 // resolve the same from every route. The brand and footer link home the same way.
 export const navLinks = [
+  { href: "#install", label: "Get it" },
   { href: "#verdict", label: "The verdict" },
-  { href: "#locate", label: "Locators" },
-  { href: "#scenario", label: "Scenarios" },
   { href: "/winwright/claude-code/", label: "Claude Code" },
   { href: "/winwright/compare/", label: "Compare" },
+  { href: docsUrl, label: "Docs" },
 ] as const;
 
 export const footer = {
-  links: [
-    { href: "/winwright/claude-code/", label: "Claude Code" },
-    { href: "/winwright/compare/", label: "Compare" },
-    { href: repoUrl, label: "GitHub" },
-    { href: releasesUrl, label: "Releases" },
-    { href: changelogUrl, label: "Changelog" },
+  groups: [
+    {
+      heading: "Take it",
+      links: [
+        { href: nugetUrl(harnessPackage().id), label: `${harnessPackage().id} on nuget.org` },
+        { href: nugetUrl(inAppPackage().id), label: `${inAppPackage().id} on nuget.org` },
+        { href: releasesUrl, label: "Releases" },
+        { href: changelogUrl, label: "Changelog" },
+      ],
+    },
+    {
+      heading: "Read it",
+      links: [
+        { href: docsUrl, label: "Documentation" },
+        { href: readmeUrl, label: "The README" },
+        { href: "/winwright/claude-code/", label: "Claude Code plugin" },
+        { href: "/winwright/compare/", label: "Compare" },
+      ],
+    },
+    {
+      heading: "Ask about it",
+      links: [
+        { href: repoUrl, label: "GitHub" },
+        { href: issuesUrl, label: "Issues" },
+        { href: licenceUrl, label: "Apache-2.0 licence" },
+      ],
+    },
   ],
   // What this is and what it is not, in the shape a reader can check rather than in
-  // adjectives. No licence is named here because naming one is a claim about a file, and a
-  // claim about a file is the kind that goes quietly false.
+  // adjectives. The licence is named because the packages declare it and a reader deciding
+  // whether to take one is entitled to read it without cloning anything.
   disclaimer:
-    "winwright drives applications through Windows UI Automation and Win32 and adds no external dependency to either half. It is not affiliated with, endorsed by, or sponsored by Microsoft; “Windows”, “Win32” and “UI Automation” are Microsoft's. The roadmap, the ledger and the rationale behind each decision live in this repository's docs/, governed by roadkeep and written by that tool rather than by hand. © 2026 Alexandre Oliveira.",
+    "winwright drives applications through Windows UI Automation and Win32 and adds no external dependency to either half. Both packages are published under the Apache-2.0 licence. It is not affiliated with, endorsed by, or sponsored by Microsoft; “Windows”, “Win32” and “UI Automation” are Microsoft's. © 2026 Alexandre Oliveira.",
 } as const;
 
 /* --------------------------------------------------------------- sponsor */
@@ -112,18 +150,18 @@ export const sponsor = {
 /* ------------------------------------------------------------------ hero */
 
 export const hero = {
-  badge: `Windows · .NET 10 · ${harnessPackage().id} ${version}`,
+  badge: `${harnessPackage().id} ${version} · on nuget.org · Windows · .NET 10`,
   titleLead: "A green never covers",
   titleAccent: "a check that did not run.",
   sub: [
-    "winwright drives a Windows desktop application from a test and reports ",
+    "winwright is a UI test framework for Windows desktop applications. It drives one from a test and reports ",
     { b: "what was actually observed" },
-    ". It answers in ",
+    " — answering in ",
     { b: `${spelled(verdictCount)} verdicts rather than two` },
     ", so a check whose precondition was absent is named in the summary instead of disappearing from the count.",
   ] as Rich,
   meta: [
-    "🧩 No external dependency in the engine",
+    "🧩 No external dependency in either half",
     "🪟 UI Automation and Win32, nothing else",
     "✍️ The tool never writes the test",
   ],
@@ -148,50 +186,55 @@ export const heroRun = {
   eyebrow: "What a run says",
   question:
     "check the report pane after the language is switched, on whatever desk this is",
-  command: "winwright run cases/report.wwx --case language-round-trip",
+  // The tool call, because that is what a run is asked for by: the four MCP tools the
+  // plugin wires, and this one takes a project, a directory of cases and a selector. From a
+  // test project the same run is `Suite.Launch`, which the scenario section names.
+  command: 'winwright_run  { "project": ".", "cases": "cases", "case": "language round trip" }',
   // The preamble: one reading of the machine, taken before any assertion. Each line is
-  // measured, absent, or *not read* — and only one of those three is a statement.
+  // measured, absent, or *not read* — and only one of those three is a statement. The
+  // conditions are named the way the engine names them, because that name is what a case's
+  // `needs` refers to and what the summary prints.
   preamble: [
-    "desk        this run's alone      no other session is attached",
-    "binary      bin/Debug/App.exe     built 2m ago, from the tree in hand",
-    "language    pt-BR                 settings.json -> ui.language",
-    "foreground  granted               App — Relatórios",
-    "spectators  none                  nothing else is showing this application",
-    "store       fingerprinted         %APPDATA%/App, compared again at the end",
+    "this run measured 5 conditions, 1 not read.",
+    "  ok      the running instance is the binary this run named",
+    "  ok      a binary built from this source",
+    "  agrees  the application is in the language this scenario is written for",
+    "  ok      the foreground belongs to the window under test",
+    "  not read an application that renders its own tree when asked",
   ],
   steps: [
     {
-      cmd: "resolve  Window#main > Pane#reportHost > Text[order=top]",
+      cmd: "resolve  Window#main > Pane#reportHost > Text",
       mark: "ok" as const,
       out: "1 element  ·  Text “Relatório mensal”  ·  38ms",
     },
     {
-      cmd: "act      invoke  MenuItem[key=menu.language.ptBR]",
+      cmd: "invoke   MenuItem#languagePtBR",
       mark: "ok" as const,
       out: "InvokePattern  ·  no foreground needed  ·  attempt 1 of 3",
     },
     {
-      cmd: "assert   every label matches the app's own pt-BR strings",
+      cmd: "read     Pane#reportHost > Text   covers: report.labels",
       mark: "ok" as const,
-      out: "27 labels derived from strings.pt-BR.json  ·  27 held",
+      out: "27 strings derived from strings.pt-BR.json  ·  27 read, none left over",
     },
     {
-      cmd: "capture  report pane -> artifacts/report.pt-BR.png",
+      cmd: "capture  Pane#reportHost           with: report.pt-BR",
       mark: "unread" as const,
-      out: "not observed — the shell would not open the overflow flyout, so the pane could not be brought to the front. Recorded by name, not dropped.",
+      out: "unchecked — “an overflow flyout this run can work” absent (the desk's): the shell would not open the flyout, so the pane could not be brought to the front. Named, not dropped.",
     },
     {
-      cmd: "verify   the machine is as this run found it",
+      cmd: "close    the machine is as this run found it",
       mark: "ok" as const,
-      out: "store fingerprint unchanged  ·  nothing this run wrote survived it",
+      out: "store fingerprint unchanged  ·  nothing this run launched outlived it",
     },
   ],
   before: "Before: 352 of 374 ran · reported green · nobody had a reason to read the total",
-  after: `After: ${verdict("Degraded").name} (${verdict("Degraded").code}) · everything that ran held · 1 reading named as not observed`,
+  after: `After: ${verdict("Degraded").name} (exit ${verdict("Degraded").code}) · everything that ran held · 1 unchecked, and whose it was`,
   note: [
-    "The last line is the product. An assertion whose precondition was absent did not pass and did not fail — it ",
+    "The last line is the point. An assertion whose precondition was absent did not pass and did not fail — it ",
     { b: "never ran" },
-    ", it is named in the summary, and collapsing it into either of the other two is the thing winwright will not do. The exit code is ",
+    ", it is named in the summary along with whose the absence was, and collapsing it into either of the other two is the thing winwright will not do. The exit code is ",
     { code: `${verdict("Degraded").code}` },
     ", so CI can tell the difference without reading a word.",
   ] as Rich,
@@ -231,16 +274,16 @@ export const halves = {
 /* ------------------------------------------------------------------ the laws */
 
 export const laws = {
-  eyebrow: "The design laws",
+  eyebrow: "What it guarantees",
   heading: "Ten rules, in the order a run meets them",
   intro: [
-    "Binding, in the same sense as the product's own. A feature that breaks one is wrong even if it was asked for, and each names the defect it prevents rather than the value it expresses.",
+    "Every one of these is paired in the engine's own suite with the thing that would break it, and each names the defect it prevents rather than the value it expresses.",
   ] as Rich,
   items: [
     {
       id: "L1",
       title: "A green never covers a check that did not run",
-      body: "The whole project follows from one measurement: a suite reported a pass with a total of 352 where the run before it had 374. Twenty-two checks were gone and the only sign was a number nobody had a reason to read.",
+      body: "All of it follows from one measurement: a suite reported a pass with a total of 352 where the run before it had 374. Twenty-two checks were gone and the only sign was a number nobody had a reason to read.",
     },
     {
       id: "L2",
@@ -280,7 +323,7 @@ export const laws = {
     {
       id: "L9",
       title: "A run leaves the machine as it found it",
-      body: "The store a case writes through is fingerprinted before and compared after, so the promise that a run changed nothing of yours is asserted where it is most likely to be broken rather than stated in a readme.",
+      body: "The store a case writes through is fingerprinted before and compared after, so the promise that a run changed nothing of yours is asserted where it is most likely to be broken rather than stated in a readme. Leftover processes are stopped and named in the same breath.",
     },
     {
       id: "L10",
@@ -295,12 +338,15 @@ export const laws = {
 export const verdictSection = {
   eyebrow: "The answer",
   heading: `${Spelled(verdictCount)} outcomes, and the member values are the exit codes`,
+  // The figure's own title bar: the file a run was over, in the extension the loader walks
+  // for. It sat here as an invented command for as long as the invented command did.
+  terminalTitle: "winwright — report.cases.json",
   intro: [
     "A mapping written twice is a mapping that drifts, and CI reads the number rather than the word — so the enum's values ",
     { b: "are" },
     " the process exit codes rather than being translated into them. ",
     { code: `${verdict("Degraded").code}` },
-    " is the reason this project exists.",
+    " is the one the rest of this framework was built to make possible.",
   ] as Rich,
   // The cards are generated from RunOutcome itself: the name, the number and the first
   // sentence of the member's own summary. What is typed here is the gloss under each — the
@@ -313,7 +359,9 @@ export const verdictSection = {
       "One assertion ran and did not hold. The failing step carries the view the diagnosis built — the tree as it was, the element's facts, what its patterns read — so nobody writes a throwaway script to see what the window had.",
     ] as Rich,
     Degraded: [
-      "The one this project exists for. Each unevaluated reading is named in the summary by name; three of the ones a scenario meets often are about the desk rather than about your application, and none of them is your code being wrong.",
+      "The one the rest of this was built for. Each unevaluated reading is named in the summary, and so is ",
+      { b: "whose the absence was" },
+      " — the desk's, this run's, or nobody's yet. A reader told three checks never ran has to know whether to clear a machine or open a repository.",
     ] as Rich,
     Broken: [
       "It outranks the rest, because a reader told the build failed opens the wrong repository. What the message says is about this tool, and nothing after the throw was observed at all.",
@@ -539,33 +587,59 @@ export const scenario = {
   eyebrow: "The scenario",
   heading: "A case is a data file, not two hundred lines of script",
   intro: [
-    "Steps, locators, acts and expectations are fields. The loop, the waits and the verdicts are the engine's. What is left in the file is the part that is actually about your application — including the defect the case exists to catch.",
+    "A scenario file is a ",
+    { code: ".cases.json" },
+    " — an object with ",
+    { code: "cases" },
+    " in it, and optionally the ",
+    { code: "fixtures" },
+    " they are launched against. A run is pointed at a directory and walks it. Steps, locators, acts and expectations are fields; the loop, the waits, the attempts and the verdict belong to ",
+    { code: "CaseRun" },
+    ". What is left in the file is the part that is actually about your application — including the defect the case exists to catch.",
   ] as Rich,
-  fileTitle: "cases/report.wwx",
+  fileTitle: "cases/report.cases.json",
   list: [
     [
-      { b: "Every field is validated at insertion" },
-      ", so a refusal costs a retry and never a deletion.",
+      { b: "Every field is validated against the loader's own schema" },
+      ", so a refusal costs a retry and never a deletion — which is what matters most to whoever is writing the file a field at a time.",
     ] as Rich,
     [
-      { b: "Run a file, a case or a tag" },
-      " — and it says what it did not run, so a single case is ten seconds when a single act is what changed.",
+      { b: "Run everything, one case by name, or one tag" },
+      " — and the run names every case it left alone, so a pass over two of nine never reads as a pass. A selector matching nothing is refused with the names there are.",
     ] as Rich,
     [
-      { b: "Fixtures and sampled environments are declared per case" },
-      " and passed to every launch it makes, or the expectations describe one environment and the window renders another.",
+      { b: "A fixture carries the launch" },
+      " — its sampled environment, the flag that environment arrives through, the arguments, the variables, and the language the window it opens is in. Every launch a case makes reads the same one.",
     ] as Rich,
     [
-      { b: "Preconditions are declared" },
-      ", so an absent one is named as unchecked rather than going red for a reason about the desk it ran on.",
+      { code: "needs" },
+      " ",
+      { b: "declares what the machine must have" },
+      ", by the name the engine gives the condition — so an absent one is named as unchecked rather than going red for a reason about the desk it ran on.",
     ] as Rich,
     [
-      { b: "A window can be declared shareable" },
-      " and lent to the cases that only read it, while a case run alone still owns its process and its first paint.",
+      { code: "shareable" },
+      " ",
+      { b: "on the fixture and" },
+      " ",
+      { code: "onlyReads" },
+      " ",
+      { b: "on the case" },
+      " are the two halves of lending one window to the cases that merely read it, while the same case run alone still owns its process and its first paint.",
     ] as Rich,
     [
-      { b: "Each case carries the defect it exists to catch" },
-      ", so a case nobody can justify is visible and a case removed by accident is missed.",
+      { code: "forEach" },
+      " ",
+      { b: "runs a case once per string a key declares" },
+      ", derived from the project's own language files, with the member reaching a locator through ",
+      { code: "{}" },
+      " — so twenty-seven panels are one case rather than twenty-seven.",
+    ] as Rich,
+    [
+      { code: "catches" },
+      " ",
+      { b: "is the defect the case exists for" },
+      ". A case that names none is counted in the run's own reading, so a check nobody can justify is visible and one removed by accident is missed.",
     ] as Rich,
   ],
 };
@@ -677,7 +751,7 @@ export const nonGoals = {
   eyebrow: "Scope",
   heading: "What it is not",
   intro: [
-    `${Spelled(nonGoalItems.length)} things this project has decided against, written down where they can be pointed at. A tool with no stated non-goals is a tool that will eventually be asked for all of them.`,
+    `${Spelled(nonGoalItems.length)} things winwright has decided against, written down where they can be pointed at. A tool with no stated non-goals is a tool that will eventually be asked for all of them.`,
   ] as Rich,
   items: nonGoalItems,
 };
@@ -688,11 +762,14 @@ export const agent = {
   eyebrow: "For the agent driving it",
   heading: "It ships as a Claude Code plugin",
   intro: [
-    "Two commands in the repository wire every clone, and nothing is added to any path. The tools carry this project's ",
-    { b: "scenario schema as their input schema" },
-    ", so a case an agent writes is corrected at insertion rather than at run time; the skill loads when a window is in play rather than on every turn; and a hook denies a hand-written harness script and names the verb that replaces it.",
+    "Two commands in the repository wire every clone, and nothing is added to any path. Four MCP tools answer the format, the vocabulary, whether a case would load, and what a run of it did — and the one that reads a case back carries the ",
+    { b: "loader's own schema as its input schema" },
+    ", so a misspelt key is not a thing the caller can send. The skill loads when a window is in play rather than on every turn, and a hook denies a hand-written harness script and names the verb that replaces it.",
   ] as Rich,
-  cta: "What the plugin does, verb by verb →",
+  note: [
+    "Three of the four launch nothing and press nothing, which is the distinction a session needs first: whether a case would load is a claim nothing about the machine can change, and whether it passed is not.",
+  ] as Rich,
+  cta: "What the plugin does, tool by tool →",
 };
 
 /* ------------------------------------------------------------------ feature index */
@@ -709,10 +786,12 @@ export const featureIndex = {
 /* ------------------------------------------------------------------ install */
 
 export const install = {
-  eyebrow: "Take it",
+  eyebrow: "Get it",
   heading: "Two package references, and one of them is optional",
   intro: [
-    "The harness half goes in the project that drives the application. The in-app half goes in the application, and only if you want the readings that can only be taken from inside — every verb on this page works without it.",
+    "Both halves are on nuget.org at ",
+    { code: version },
+    ". The harness half goes in the project that drives the application; the in-app half goes in the application, and only if you want the readings that can only be taken from inside — every verb on this page works without it.",
   ] as Rich,
   facts: [
     "🪟 Windows only — the engine is UI Automation and Win32",
@@ -720,12 +799,59 @@ export const install = {
     "🧩 No external dependency in either half",
   ],
   cta: "⬇ Get the packages",
-  ctaShort: "⬇ Packages",
+  ctaShort: "⬇ Get it",
   secondary: "Release notes",
+  // The one adoption step that is genuinely easy to miss, named here rather than left to be
+  // discovered: a project at the repository root compiles the driving project into itself.
   note: [
-    "The suite that proves this creates real windows, takes the foreground and synthesises input, which is why it ships with a way to run inside a virtual machine so the host stays usable. A bare ",
+    "One line if your application's ",
+    { code: ".csproj" },
+    " sits at the repository root: add ",
+    { code: String.raw`<DefaultItemExcludes>$(DefaultItemExcludes);tests\**</DefaultItemExcludes>` },
+    " to it. Without it the SDK's default globs walk the whole tree below the project file and compile the driving project ",
+    { b: "into the application" },
+    " — and the build stops with duplicate-attribute errors that point at your own generated file rather than at the folder that caused them.",
+  ] as Rich,
+  agentLead: "And in the repository that drives the application, if you use Claude Code:",
+  agentCommands: [
+    "claude plugin marketplace add alegauss/winwright --scope project",
+    "claude plugin install winwright@alegauss --scope project",
+  ],
+  agentNote: [
+    "Both write into that repository's ",
+    { code: ".claude/settings.json" },
+    ", so committing that file wires every clone. There is no per-machine install and nothing added to any path.",
+  ] as Rich,
+};
+
+/* ------------------------------------------------------------------ release */
+
+// The band a finished product owes a reader: which version is published, what it is
+// licensed under, where the notes are, and where to say something is wrong. Every figure
+// here is the generated one, so the section cannot state a version the tree does not.
+export const release = {
+  eyebrow: "Release",
+  heading: `${harnessPackage().id} ${version}`,
+  intro: [
+    "Both halves are published together and carry the same version, and the release is checked against the version the source declares — so a package and the commit it was built from cannot disagree about which build it is.",
+  ] as Rich,
+  facts: [
+    { k: "Version", v: version },
+    { k: "Frameworks", v: "net10.0-windows · Windows only" },
+    { k: "Licence", v: "Apache-2.0", href: licenceUrl },
+    { k: "Dependencies", v: "none in either half" },
+  ],
+  links: [
+    { href: nugetUrl(harnessPackage().id), label: `${harnessPackage().id} on nuget.org` },
+    { href: nugetUrl(inAppPackage().id), label: `${inAppPackage().id} on nuget.org` },
+    { href: changelogUrl, label: "Changelog" },
+    { href: docsUrl, label: "Documentation" },
+    { href: issuesUrl, label: "Report a problem" },
+  ],
+  note: [
+    "The suite that holds every guarantee on this page creates real windows, takes the foreground and synthesises input — so a bare ",
     { code: "dotnet test" },
-    " takes the roll call too: a run short of what discovery found is not reported as a pass.",
+    " over it takes the roll call as part of the run: a suite short of what discovery found is not reported as a pass. The rule this framework exists for is applied to this framework.",
   ] as Rich,
 };
 
@@ -735,7 +861,7 @@ export const claudeCode = {
   meta: {
     title: "winwright for Claude Code — the plugin, the tools, the skill and the hook",
     description:
-      "Two commands wire every clone: MCP tools that carry the scenario schema as their input schema, a skill that loads when a window is in play, and a hook that denies a hand-written harness script and names the verb that replaces it.",
+      "Two commands wire every clone: four MCP tools, one of which carries the scenario loader's own schema as its input schema, a skill that loads when a window is in play, and a hook that denies a hand-written harness script and names the verb that replaces it.",
     ogTitle: "winwright for Claude Code",
     ogDescription:
       "A case an agent writes is refused at insertion rather than at run time, and a hand-rolled harness script is denied with the verb that replaces it.",
@@ -745,40 +871,65 @@ export const claudeCode = {
   intro: [
     "Adoption that depends on somebody remembering a per-machine install is adoption that stops at the person who set it up. winwright ships as a Claude Code plugin: two commands in the repository wire it, every clone is wired, and nothing is added to any path.",
   ] as Rich,
-  statusLead: "tools, and every one of them takes this project's own scenario schema.",
+  statusLead: "tools, arriving as schemas rather than as prose somebody has to read and retype",
   status: [
     "Which is the difference between a refusal and a guess: an agent that writes a case field by field is corrected at insertion, where the fix costs a retry, rather than at run time, where it costs a red run somebody has to read.",
   ] as Rich,
-  allowlistHeading: "The one line that pays for it",
-  allowlistLead: "One entry in .claude/settings.json:",
-  allowlistLine: "Bash(winwright read:*)",
-  allowlistNote: [
-    { code: "read" },
-    " is a promise, not a naming convention: a verb under it that drives the application is a defect. So this single grant removes every prompt on the inspection path — the tree, the facts, the verdict of the last run — while everything that presses a control still asks.",
+  setupHeading: "The two commands, and the one step they do not cover",
+  setupLead: "Run once, in the repository that drives the application:",
+  setupCommands: [
+    "claude plugin marketplace add alegauss/winwright --scope project",
+    "claude plugin install winwright@alegauss --scope project",
+  ],
+  setupNote: [
+    "Both write into that repository's ",
+    { code: ".claude/settings.json" },
+    ", so committing that file wires every clone. The server and the guard are .NET processes the plugin launches, so they are built once — ",
+    { code: "dotnet build -c Release" },
+    " in the plugin's own clone. ",
+    { b: "Skip it and you are told, not left guessing" },
+    ": each is wired through a launcher that looks for its assembly, and where there is none it writes the missing surface and the build command to stderr and exits 1. Never 2 — denying every write because a build is missing would put the guard in front of everything instead of in front of a harness script.",
   ] as Rich,
-  readHeading: "read — inspection (no prompt)",
+  readHeading: "Reading — nothing is launched, nothing is pressed",
   read: [
-    { k: "read tree", d: "the control view under a window or an element, as a tree or as lines a person reads" },
-    { k: "read facts", d: "what UI Automation says about one element, and what each of its patterns reads" },
-    { k: "read locator", d: "parse a locator, or say where and why it did not — before a run spends a minute on it" },
-    { k: "read verdict", d: "the last run's summary: what held, what did not, and what was never evaluated" },
-    { k: "read trace", d: "the step behind any result that answered a verdict, in the order they happened" },
+    { k: "winwright_format", d: "every field of a file, a case, a step and a fixture, whether it is required, and the closed list of what it accepts" },
+    { k: "winwright_vocabulary", d: "every act, what each one needs said beside it, and whether the engine may repeat it" },
+    { k: "winwright_check", d: "a case read back before the file exists — either the loader's own refusal, addressed as cases[0].steps[1].act, or what a run of it would do" },
   ],
-  doHeading: "run — driving the application (still asks)",
+  doHeading: "Running — it launches the application",
   do: [
-    { k: "run case", d: "one case, or one file, or one tag — and it says what it did not run" },
-    { k: "run preflight", d: "what each declared act needs, checked against the tree before anything is pressed" },
-    { k: "run capture", d: "a picture, with every refusal that makes it evidence rather than a file" },
+    { k: "winwright_run", d: "the cases a selection asks for: the verdict, a line per case that ran and per case it left alone, the exit code, and what outlived the run" },
   ],
+  splitNote: [
+    "The split is the whole reason the last one is a separate tool. Whether a file parses is a claim nothing about the machine can change; whether it passed is not — and a desk that cannot observe answers a ",
+    { b: "hole" },
+    ", naming which condition is missing, rather than a red.",
+  ] as Rich,
   hookHeading: "The hook that keeps the shortcut closed",
   hookBody: [
-    "A hand-written harness script is the path of least resistance, and it is how every repository this framework was extracted from ended up with two of them. So a hook denies one and ",
-    { b: "names the verb that replaces it" },
-    " — the same guard roadkeep puts in front of a governed file, pointed at the same failure mode.",
+    "A hand-written harness script is always available and always faster in the moment, and that is exactly how a 2,732-line one happens. So the plugin registers a ",
+    { code: "PreToolUse" },
+    " hook: a write whose content names the engine's acting, locating or asserting namespaces is ",
+    { b: "denied" },
+    ", and the refusal names the case file and the tool that replace it. It arrives before the work rather than after it — the difference between being asked to write the other thing and being asked to delete what you just wrote.",
   ] as Rich,
+  hookStaysHeading: "And it stays out of its own way in three places",
+  hookStays: [
+    [
+      "A scenario-file write is never denied — that is the verb it is pointing at.",
+    ] as Rich,
+    [
+      "A project referencing the engine's ",
+      { b: "source" },
+      " is never denied: a suite that drives windows on purpose is the one place a harness belongs, and a guard you turn off to work on the tool is a guard whose false denials nobody hears about.",
+    ] as Rich,
+    [
+      "Anything it cannot read, it allows. A hook that denies what it did not understand is one that gets removed, after which nothing is guarded at all.",
+    ] as Rich,
+  ],
   skillHeading: "The skill that is not always loaded",
   skillBody: [
-    "It loads when a window is in play rather than on every turn, and what it says is which loop answers which question — which is the whole of what an agent needs in order to reach the right verb instead of the nearest one.",
+    "It loads when a window is in play rather than on every turn, and what it says is which loop answers which question — which is the whole of what an agent needs in order to reach the right tool instead of the nearest one.",
   ] as Rich,
   refusesHeading: "What it deliberately refuses",
   refusesLead: [
@@ -814,9 +965,9 @@ export const friction = {
         ] as Rich,
       },
       here: {
-        cmd: `winwright → ${verdict("Degraded").name} (${verdict("Degraded").code})`,
+        cmd: `${verdict("Degraded").name.toUpperCase()} (exit ${verdict("Degraded").code}) - 1 unchecked (all the desk's)`,
         body: [
-          "The unevaluated reading is named in the summary, and the process exits ",
+          "The unevaluated reading is named in the summary, whose the absence was is named beside it, and the process exits ",
           { code: `${verdict("Degraded").code}` },
           " — a number CI can act on without anybody reading a word of the output.",
         ] as Rich,
@@ -846,7 +997,7 @@ export const friction = {
         ] as Rich,
       },
       here: {
-        cmd: "act.Invoke(subject)",
+        cmd: "Act.Invoke(subject)",
         body: [
           "A pattern act asks the control through its own accessibility peer and ",
           { b: "needs no foreground" },
@@ -863,9 +1014,9 @@ export const friction = {
         ] as Rich,
       },
       here: {
-        cmd: "expect.LabelsFrom(project.Language)",
+        cmd: '"covers": "report.labels"',
         body: [
-          "The expected set is derived from the application's own language files, so switching the resolved language switches the expectation with it, and a key none of the files carries refuses the run rather than matching nothing.",
+          "The expected set is derived from the application's own language files, so switching the resolved language switches the expectation with it — and a key none of the files carries refuses the run rather than matching nothing. Every value in the set carries the file and line it came from.",
         ] as Rich,
       },
     },
@@ -878,9 +1029,9 @@ export const friction = {
         ] as Rich,
       },
       here: {
-        cmd: "capture → refused: “Toast (App.exe) covers 240×64 of the rectangle”",
+        cmd: "1 window(s) stand over 376x166 at 62,90, taking 15360 of its 62416 pixel(s): 'Update available' (pid 14820) over 240x64 at 194,92",
         body: [
-          "Every way the picture can lie is checked, and the refusal names the intruder, its process and the rectangle rather than cropping around it.",
+          "Every way the picture can lie is checked, and the reading names the intruder, its process and the rectangle it covers — rather than cropping around it and writing the file anyway.",
         ] as Rich,
       },
     },
@@ -893,9 +1044,9 @@ export const friction = {
         ] as Rich,
       },
       here: {
-        cmd: "winwright run cases/report.wwx --case language-round-trip",
+        cmd: "report.cases.json",
         body: [
-          "Steps, locators, acts and expectations are fields; the loop, the waits and the verdicts belong to the engine. What is left in the file is the part that is about your application.",
+          "Steps, locators, acts and expectations are fields; the loop, the waits, the attempts and the verdict belong to the engine. What is left in the file is the part that is about your application.",
         ] as Rich,
       },
     },

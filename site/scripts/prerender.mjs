@@ -15,6 +15,7 @@ import {
   canonicalUrl,
   outputDir,
   OG_IMAGE,
+  version,
 } from "../dist-server/entry-server.js";
 import { htmlToMarkdown } from "./markdown.mjs";
 
@@ -186,6 +187,19 @@ writeFileSync(
   join(distDir, "robots.txt"),
   `User-agent: *\nAllow: /\n\nSitemap: ${sitemapUrl}\n`,
 );
+
+// --- llms.txt ---
+// The one public file on this site that is authored rather than rendered, so it is the one
+// place a version could go stale by hand — and it did: it offered 0.1.0 for as long as it
+// took somebody to read it. Vite copies public/ verbatim, so the placeholder is substituted
+// here, after the copy, and a file that stopped carrying one fails the build rather than
+// shipping a number nobody wrote.
+const llmsPath = join(distDir, "llms.txt");
+const llms = readFileSync(llmsPath, "utf8");
+if (!llms.includes("{{version}}")) {
+  throw new Error("prerender: public/llms.txt no longer carries a {{version}} to substitute");
+}
+writeFileSync(llmsPath, llms.replaceAll("{{version}}", version));
 
 console.log(
   `prerender: ${ROUTE_META.length} route(s) + twins + manifest.json`

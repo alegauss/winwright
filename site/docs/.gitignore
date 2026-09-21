@@ -1,0 +1,11 @@
+# What the build downloads and what it caches. The output is not ignored here because it is
+# not written here: it lands in ../dist/docs, which site/.gitignore already keeps out of the
+# tree — a generated tree is published by the workflow that builds it, never committed.
+node_modules
+.astro
+*.local
+
+# What the build reads out of this repository's own source (scripts/product.mjs). Ignored by
+# what generated it and never by directory, so a hand-written payload beside it would still be
+# committed.
+src/data/*.generated.json

@@ -14,6 +14,10 @@ export interface FeatureSection {
   heading: string;
   body?: Rich;
   list?: Rich[];
+  /** Where a reader who wants the next step goes. Declared on the section rather than
+   *  matched on its heading in the page, because a heading match goes silently dead the
+   *  first time the heading is reworded. */
+  onward?: { href: string; label: string };
 }
 
 export interface FeatureRecord {
@@ -217,7 +221,7 @@ export const features: FeatureRecord[] = [
       {
         heading: "Falsifiable, or it is not an assertion",
         body: [
-          "A check that cannot fail is worth exactly as much as the one that never ran — which is the same defect this project's verdict exists to expose, one layer down. So an expectation that no input could falsify is refused rather than counted.",
+          "A check that cannot fail is worth exactly as much as the one that never ran — which is the same defect the verdict exists to expose, one layer down. So an expectation that no input could falsify is refused rather than counted.",
         ],
       },
       {
@@ -303,22 +307,46 @@ export const features: FeatureRecord[] = [
         heading: "What the file owns",
         list: [
           ["Steps, locators, acts and expectations, as fields."],
-          ["The precondition, declared — so its absence is named as unchecked rather than going red for a reason about the desk."],
-          ["The fixture and the sampled environments, passed to every launch the case makes rather than only the first."],
-          ["Whether the window is shareable, so three cases that only read it do not each pay their own launch."],
-          ["The defect the case exists to catch, so a case nobody can justify is visible and a case removed by accident is missed."],
+          [
+            { code: "needs" },
+            " — what the machine must have before anything can be observed, by the name the engine gives the condition, so an absence is named as unchecked rather than going red for a reason about the desk.",
+          ],
+          [
+            { code: "fixtures" },
+            " — the launch each case names: its sampled environment, the flag that environment arrives through, the arguments, the variables, and the language the window it opens is in.",
+          ],
+          [
+            { code: "shareable" },
+            " on the fixture and ",
+            { code: "onlyReads" },
+            " on the case, so three cases that merely read one window do not each pay their own launch.",
+          ],
+          [
+            { code: "forEach" },
+            " — the key whose every declared string the case runs once for, with the member reaching a locator through ",
+            { code: "{}" },
+            ".",
+          ],
+          [
+            { code: "catches" },
+            " — the defect the case exists for, so a case nobody can justify is visible and one removed by accident is missed.",
+          ],
         ],
       },
       {
-        heading: "Validated at insertion",
+        heading: "Validated against the loader's own schema",
         body: [
-          "Every field, as it is written. A refusal costs a retry and never a deletion — which matters most for the caller writing the file a field at a time rather than pasting it whole.",
+          "Every field, as it is written, and by the same schema the loader reads rather than by a second copy of it. A refusal costs a retry and never a deletion — which matters most for the caller writing the file a field at a time rather than pasting it whole.",
         ],
+        onward: {
+          href: "/winwright/claude-code/",
+          label: "The tools that carry that schema →",
+        },
       },
       {
-        heading: "Run one, and be told what you did not run",
+        heading: "Run everything, one case, or one tag",
         body: [
-          "A file, a case or a tag. A single case is ten seconds when a single act is what changed, and the run says what it left out rather than reporting a total that quietly moved.",
+          "A single case is ten seconds when a single act is what changed, and the run names every case it left alone rather than reporting a total that quietly moved. A selector matching nothing is refused with the names there are — a run of no cases has no failure and no hole in it, so it reads as a pass about nothing.",
         ],
       },
     ],

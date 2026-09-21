@@ -40,7 +40,7 @@ export function Verdict() {
               <i />
               <i />
               <i />
-              <span>winwright run cases/report.wwx</span>
+              <span>{verdictSection.terminalTitle}</span>
             </div>
             <pre
               // eslint-disable-next-line react/no-danger

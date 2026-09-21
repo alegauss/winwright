@@ -1,0 +1,164 @@
+---
+title: Installing it
+description: What to add, where to add it, and the one MSBuild line an application whose project sits at the repository root needs before anything will build.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import Packages from "../../components/Packages.astro";
+
+There is nothing to install on the machine. winwright is two NuGet packages and, if you drive
+your application from Claude Code, a plugin that is installed into a repository rather than
+into a user profile. No path is added, no service runs, and nothing differs by whose desk it
+is.
+
+## Before you start
+
+- **Windows**, and a desk you may drive. A run synthesises input and takes the foreground, so a
+  machine somebody is using is a machine that will produce holes rather than results. See
+  [running somewhere other than your own
+  desk](/winwright/docs/first-case/#a-run-needs-a-desk-it-may-have-to-itself).
+- **The .NET 10 SDK.** Everything here targets `net10.0-windows`.
+- **An application you can start from a path**, or one already running that a test may attach
+  to.
+
+## The driving half
+
+<Steps>
+
+1. **Make the project that drives the application a project of its own.**
+
+   It is a `net10.0-windows` project like any other, and it usually goes in a folder underneath
+   the application. It is not the application, and it is not a folder inside the application's
+   own project — which is a distinction MSBuild will make for you in the least helpful way
+   possible if you skip the next step.
+
+   ```xml
+   <Project Sdk="Microsoft.NET.Sdk">
+     <PropertyGroup>
+       <TargetFramework>net10.0-windows</TargetFramework>
+       <Nullable>enable</Nullable>
+       <ImplicitUsings>enable</ImplicitUsings>
+     </PropertyGroup>
+   </Project>
+   ```
+
+2. **Reference the engine.** One package, and no path into anything else.
+
+   <Packages half="harness" />
+
+3. **If your application's `.csproj` sits at the repository root, exclude the folder you just
+   made.**
+
+   ```xml
+   <!-- In the application's own project, not in the driving one. -->
+   <DefaultItemExcludes>$(DefaultItemExcludes);tests\**</DefaultItemExcludes>
+   ```
+
+   Every default glob the SDK applies — `Compile`, and under `UseWPF` also `Page`, `Resource`
+   and `EmbeddedResource` — walks the whole tree below the project file. A project at the
+   repository root therefore reaches the folder you just put beside it, and compiles the
+   driving project's sources and its `obj\` **into the application**.
+
+   <Aside type="caution" title="The failure names something else entirely">
+   Without that line the build stops with a row of `CS0579` duplicate-attribute errors, and
+   every one of them points at your *own* generated `obj\…\AssemblyInfo.cs` — because the
+   duplicate it found is the nested project's copy of the same attributes. Nothing in the
+   message mentions the folder that caused it. Under `UseWPF` it is worse again: the errors
+   arrive attributed to a `<YourApp>_<random>_wpftmp` project, which reads like a XAML problem
+   and is not one. This cost an afternoon the first time it was met, which is why it is a step
+   here rather than a note at the bottom.
+   </Aside>
+
+</Steps>
+
+## The in-app half, and when you do not need it
+
+`Winwright.InApp` goes in the **application under test**, never in the project that drives it,
+and it is optional. Every locator, every reading and every pattern act works against an
+application that references nothing at all.
+
+<Packages half="app" />
+
+Take it when you want the readings only the process itself can take:
+
+- **A render of the application's own visual tree** — which is what turns a capture from a copy
+  of the screen into a picture of a window. A screen copy carries whatever was standing in
+  front of it; a render cannot.
+- **Whether this process's idea of the display is trustworthy**, in a sentence a report prints.
+  A picture drawn by a system-aware process on a scaled display has a size that does not mean
+  what it says, and nothing else about the file would ever say so.
+- **A popup's own tree**, including one nobody has clicked. A popup is layered for the shadow
+  it draws, so the soft edge of a screen copy is the desktop behind it — and a closed popup has
+  no window to copy at all.
+
+It needs `<UseWPF>true</UseWPF>` in the application, and it reports nothing and writes no file
+unless the run that started the application asked it to. That is what makes it safe to leave in
+a release.
+
+<Aside title="It is one package reference and nothing else">
+The application under test never references the engine, never references this repository, and
+takes no second package. `samples/Adopter` in the repository is a project that exists to prove
+exactly that: if the claim stops being true, that sample stops building.
+</Aside>
+
+## Wiring Claude Code
+
+Two commands, run once in the repository that drives the application:
+
+```
+claude plugin marketplace add alegauss/winwright --scope project
+claude plugin install winwright@alegauss --scope project
+```
+
+Both write into that repository's `.claude/settings.json`, so **committing that file wires
+every clone**. There is no per-machine install and no instruction that differs by whose desk it
+is: a clone that has the file has the plugin.
+
+### What the tools answer
+
+The plugin wires an MCP server, so the case format arrives as a schema rather than as prose an
+agent loaded once and then typed a key out of:
+
+| Tool | What it answers |
+| --- | --- |
+| `winwright_format` | Every field of a file, a case, a step and a fixture, whether it is required, and the closed list of what it accepts. |
+| `winwright_vocabulary` | Every act, what each one needs said beside it, and whether the engine may repeat it. |
+| `winwright_check` | A case read back **before the file exists**. Its input schema *is* the loader's schema, so a misspelled key is not something the caller can send. |
+| `winwright_run` | The cases a selection asks for, run: the verdict, a line per case that ran and per case it left alone, the exit code, and what outlived the run. |
+
+It also registers a `PreToolUse` hook that **denies** a write whose content names
+`Winwright.Acting`, `Winwright.Locating` or `Winwright.Asserting`, and names the case file and
+`winwright_check` that replace it. A hand-written harness script is always available and always
+faster in the moment, and that is exactly how a 2,732-line one happens. The refusal arrives
+before the work rather than after it.
+
+### The one step the two commands do not cover
+
+The server and the guard are .NET processes the plugin launches, so they need building once —
+`dotnet build -c Release` in the plugin's own clone.
+
+Skip it and you are told rather than left guessing: both are wired through a launcher that
+looks for its assembly, Release first and then Debug, and where there is none it writes the
+missing surface and the build command to stderr and exits 1. It exits 1 and never 2, because
+denying every write over a missing build would put the guard in front of everything instead of
+in front of a harness script.
+
+## Checking that it took
+
+There is no `--version` to run, because there is no executable to run it on. What you check is
+that the driving project **builds and resolves**:
+
+```
+dotnet build path\to\driving\Driving.csproj
+```
+
+A restore that reached the packages and a build that compiled against them is the whole of the
+installation. The next thing to write is the four calls that load and run a case, which is
+where [your first case](/winwright/docs/first-case/) starts.
+
+<Aside type="tip" title="A plugin a version behind is the hazard worth naming">
+The version the plugin carries is the version the tree it came from declares, and the two are
+read against each other by the same gate that compares the packages. An adopter running a
+plugin a version behind sees nothing go red — the run just answers a question somebody stopped
+asking. Where the packages and the plugin came from different releases, update the plugin.
+</Aside>

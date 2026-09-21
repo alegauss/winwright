@@ -62,67 +62,69 @@ export const captureDiagram = `
 
   <rect x="256" y="182" width="240" height="64" rx="8" fill="#3a2352" stroke="#b070e0" stroke-width="1.6"/>
   <text x="276" y="208" fill="#f0dcff" font-family="Segoe UI Variable Text,Segoe UI,Inter,sans-serif" font-size="12.5">Update available</text>
-  <text x="276" y="228" fill="#c9a6e0" font-family="Segoe UI Variable Text,Segoe UI,Inter,sans-serif" font-size="11">Toast — App.exe</text>
+  <text x="276" y="228" fill="#c9a6e0" font-family="Segoe UI Variable Text,Segoe UI,Inter,sans-serif" font-size="11">a toast — pid 14820</text>
 
   <path d="M508 160 H556" stroke="#e5484d" stroke-width="1.8" fill="none"/>
   <path d="M550 154 L558 160 L550 166 Z" fill="#e5484d"/>
 
   <rect x="572" y="92" width="292" height="156" rx="10" fill="#150f2c" stroke="#e5484d" stroke-width="1.4"/>
-  <text x="592" y="120" fill="#ff6b6f" font-family="JetBrains Mono,monospace" font-size="12.5" font-weight="600">capture refused</text>
-  <text x="592" y="146" fill="#cdc5e6" font-family="JetBrains Mono,monospace" font-size="11.5">intruder   Toast</text>
-  <text x="592" y="166" fill="#cdc5e6" font-family="JetBrains Mono,monospace" font-size="11.5">process    App.exe (14820)</text>
-  <text x="592" y="186" fill="#cdc5e6" font-family="JetBrains Mono,monospace" font-size="11.5">covers     240x64 at 194,92</text>
-  <text x="592" y="212" fill="#8a81ab" font-family="Inter,sans-serif" font-size="11">A copy trimmed around it is</text>
-  <text x="592" y="228" fill="#8a81ab" font-family="Inter,sans-serif" font-size="11">a picture of something else.</text>
+  <text x="592" y="120" fill="#ff6b6f" font-family="JetBrains Mono,monospace" font-size="12.5" font-weight="600">nothing stands over it: absent</text>
+  <text x="592" y="146" fill="#cdc5e6" font-family="JetBrains Mono,monospace" font-size="11.5">1 window(s) stand over</text>
+  <text x="592" y="164" fill="#cdc5e6" font-family="JetBrains Mono,monospace" font-size="11.5">376x166 at 62,90, taking</text>
+  <text x="592" y="182" fill="#cdc5e6" font-family="JetBrains Mono,monospace" font-size="11.5">15360 of its 62416 pixel(s):</text>
+  <text x="592" y="200" fill="#cdc5e6" font-family="JetBrains Mono,monospace" font-size="11.5">'Update available' (pid 14820)</text>
+  <text x="592" y="218" fill="#cdc5e6" font-family="JetBrains Mono,monospace" font-size="11.5">over 240x64 at 194,92</text>
+  <text x="592" y="240" fill="#8a81ab" font-family="Inter,sans-serif" font-size="11">A copy trimmed around it is a picture of something else.</text>
 
   <line x1="40" y1="300" x2="860" y2="300" stroke="#241d47"/>
   <text x="450" y="324" text-anchor="middle" fill="#8a81ab" font-family="Inter,sans-serif" font-size="11.5">The z order above the window is enumerated once and intersected with the rectangle — sampled points cannot answer for an area.</text>
 </svg>`;
 
-// A run's own summary, kept verbatim so the column alignment and the per-line colours render
-// exactly as the hand-written original. Rendered inside a .term <pre>.
-export const verdictTerminal = `winwright — cases/report.wwx
+// A run's own summary, in the shape the engine prints it: the reading of the machine first,
+// then the headline, then one line per assertion that did not pass. Kept verbatim so the
+// column alignment and the per-line colours render exactly as `VerdictSummary.Render`
+// produces them — a figure of the output rather than a redrawing of it.
+export const verdictTerminal = `this run measured 5 conditions, 1 not read: an application that renders its own tree when asked.
+  ok      the running instance is the binary this run named: bin/Debug/App.exe, launched by this run
+  ok      a binary built from this source: sources unchanged since the build
+  <span class="pass">agrees</span>  the application is in the language this scenario is written for: pt-BR, from settings.json
+  ok      the foreground belongs to the window under test: App — Relatorios
+  <span class="c">not read an application that renders its own tree when asked: it does not take Winwright.InApp</span>
+<span class="sum">DEGRADED (exit 2) - 4 assertions: 3 passed, 0 failed, 1 unchecked (all the desk's)</span>
+  <span class="deg">unchecked</span> step 4  report.pt-BR - <span class="rem">'an overflow flyout this run can work' absent
+                          (the desk's): the shell would not open the flyout, so
+                          the pane could not be brought to the front</span>`;
 
-  preamble
-    desk          this run's alone       nothing else is attached
-    binary        bin/Debug/App.exe      built 2m ago, from the tree in hand
-    staleness     current                sources unchanged since the build
-    language      pt-BR                  settings.json -> ui.language
-    foreground    granted                App — Relatorios
-    spectators    none                   nothing else is showing this application
-    <span class="c">display       not read               the application does not take Winwright.InApp</span>
-
-  assertions
-    [<span class="pass">held</span>]  report.title.pt-BR          27 labels derived, 27 matched
-    [<span class="pass">held</span>]  report.totals.rounding      derived from the app's own read-out
-    [<span class="pass">held</span>]  store.unchanged             fingerprint equal, before and after
-    [<span class="deg">----</span>]  capture.report              <span class="rem">not observed — the shell would not open the
-                                       overflow flyout, so the pane could not be
-                                       brought to the front</span>
-
-<span class="sum">Degraded (2). 3 assertions ran and held. 1 was never evaluated, and it is named above.</span>`;
-
-// The case file, as the format a scenario is actually written in. A figure rather than copy:
-// the alignment is the point, and a text node whose column is hand-placed cannot take a
+// The case file, in the format the loader actually reads: an object with `cases`, and
+// optionally the `fixtures` they are launched against. A figure rather than copy, because
+// the alignment is the point and a text node whose column is hand-placed cannot take a
 // string of unknown width.
-export const scenarioFile = `<span class="c"># the defect this case exists to catch — a case that can name none is one</span>
-<span class="c"># nobody can justify, and one removed by accident is one nobody misses</span>
-case:     language-round-trip
-catches:  a translated menu entry that leaves the report pane's labels in English
-
-precondition:
-  language: pt-BR              <span class="c"># absent -&gt; named as unchecked, never red</span>
-
-fixture:
-  app:         bin/Debug/App.exe
-  environment: [ light, dark ] <span class="c"># every launch this case makes, not only the first</span>
-  shareable:   false           <span class="c"># this one writes, so it owns its process</span>
-
-steps:
-  - resolve: Window#main &gt; Pane#reportHost &gt; Text[order=top]
-  - act:     invoke MenuItem[key=menu.language.ptBR]
-  - assert:  labels from strings.pt-BR.json
-  - capture: Pane#reportHost -&gt; artifacts/report.pt-BR.png`;
+export const scenarioFile = `{
+  <span class="g">"fixtures"</span>: [
+    { "name": "report", "environment": "dark", "flag": "--theme",
+      "language": "pt-BR", "shareable": true }
+  ],
+  <span class="g">"cases"</span>: [
+    {
+      <span class="g">"name"</span>:     "the report pane comes back in the resolved language",
+      <span class="g">"catches"</span>:  "a translated menu entry that leaves its labels in English",
+      <span class="g">"filed"</span>:    "WW63",
+      <span class="g">"tags"</span>:     ["smoke", "i18n"],
+      <span class="g">"needs"</span>:    ["the foreground belongs to the window under test"],
+      <span class="g">"fixture"</span>:  "report",
+      <span class="g">"steps"</span>: [
+        { "locator": "MenuItem#languagePtBR", "act": "invoke",
+          "named": "switch to pt-BR" },
+        { "locator": "Pane#reportHost &gt; Text", "act": "read",
+          "covers": "report.labels" }, <span class="c">// every string the key declares</span>
+        { "locator": "Text#total", "act": "read",
+          "expectReported": "monthlyTotal" }, <span class="c">// the app's own read-out</span>
+        { "locator": "Pane#reportHost", "act": "capture",
+          "with": "report.pt-BR" }
+      ]
+    }
+  ]
+}`;
 
 export const projectJson = `{
   <span class="g">"executable"</span>: "bin/Debug/net10.0-windows/YourApp.exe",

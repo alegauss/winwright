@@ -326,6 +326,17 @@ nav .wrap {
     display: none;
   }
 }
+/* And on a phone the second button goes too. Below this the brand, "part of", two buttons
+   and the toggle add up to more than the viewport, and what a bar wider than the page costs
+   is the whole page scrolling sideways — which is the one thing this site says only the
+   reader does. The primary stays, because a reader who cannot reach the package has lost
+   more than one who cannot reach the repository; the footer names it either way. */
+@media (max-width: 620px) {
+  .nav-links .btn-ghost,
+  .parent {
+    display: none;
+  }
+}
 
 /* theme toggle */
 .theme-toggle {
@@ -1133,6 +1144,14 @@ figcaption code {
   font-family: inherit;
   white-space: nowrap;
 }
+/* On a phone the line is wider than the block, so the block scrolls — and the button, being
+   a flex item at the end of it, scrolls away with the line. Which puts Copy out of reach on
+   exactly the screen where selecting a package reference by hand is worst. Sticky keeps it
+   against the right edge while the line moves underneath it. */
+.codeblock.copy .copy-btn {
+  position: sticky;
+  right: 0;
+}
 .copy-btn {
   flex: 0 0 auto;
   display: inline-flex;
@@ -1176,9 +1195,29 @@ footer .wrap {
 .foot-grid {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 24px;
+  align-items: flex-start;
+  gap: 24px 40px;
   flex-wrap: wrap;
+}
+/* Three columns, each headed by what a reader came to do. They wrap to one per row on a
+   phone rather than compressing, because a column of one word over a link is worse than a
+   list. */
+.foot-cols {
+  display: flex;
+  gap: 24px 48px;
+  flex-wrap: wrap;
+}
+.foot-col-head {
+  color: var(--text);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.foot-col .foot-links {
+  flex-direction: column;
+  gap: 8px;
 }
 .foot-brand {
   display: flex;
@@ -1656,6 +1695,10 @@ footer .wrap {
 }
 .allowlist-note code {
   color: var(--accent-strong);
+  /* One of these notes carries an MSBuild property, which is a single unbreakable token
+     wider than a phone. Body copy clips rather than scrolls here, so without this the
+     reader gets the first two thirds of the line they are supposed to paste. */
+  overflow-wrap: anywhere;
 }
 .verbs-split {
   display: grid;
@@ -2052,4 +2095,73 @@ footer .wrap {
 .feature-nav-link.next {
   text-align: right;
   margin-left: auto;
+}
+
+/* ------------------------------------------------------------------ the release band */
+/* What a reader checks before taking a dependency: the version, the frameworks, the
+   licence and whether anything comes with it. A definition list rather than a table,
+   because each row is one key and one value and the Markdown twin converts it cleanly. */
+.release-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+@media (max-width: 620px) {
+  .release-facts {
+    grid-template-columns: 1fr;
+  }
+}
+.release-fact {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(180deg, var(--panel), var(--bg-2));
+}
+.release-fact dt {
+  color: var(--muted-2);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.release-fact dd {
+  margin: 5px 0 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.92rem;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.release-fact dd a {
+  color: var(--accent);
+  font-weight: 600;
+}
+.release-fact dd a:hover {
+  color: var(--accent-strong);
+}
+.release-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 22px;
+  margin: 24px auto 0;
+  max-width: 720px;
+}
+.release-links a {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.release-links a:hover {
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------------ install: the plugin */
+/* The two commands, under the package references. A block rather than a card: it is the
+   same act as the references above it, for the repository rather than for a csproj. */
+.install-commands {
+  display: grid;
+  gap: 8px;
 }

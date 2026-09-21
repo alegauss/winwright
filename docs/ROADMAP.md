@@ -22,6 +22,21 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
+## Block L — The documentation area — written for a reader who has installed nothing
+
+- 📋 **WW487** (deps: —) **the locator grammar lives in a section of a 1,000-line README, so learning it means reading the file** — Every case in every adopting repository is written in that grammar, and a section of a README is not a page anybody can be sent to or search. → §WW487
+- 📋 **WW488** (deps: —) **the case format answers only to an installed plugin, so a reader deciding has no field list to read** — Evaluation comes before installation, and the schema winwright_format serves an agent is the one a person weighing the format needs first. → §WW488
+- 📋 **WW489** (deps: —) **the verb catalogue is a README table, so no row can be linked and no verb says what it needs of the desk** — The suite already checks that catalogue against the engine in both directions, so publishing it costs a generator rather than a second list to keep. → §WW489
+- 📋 **WW490** (deps: —) **winwright.json is described by an example, so a reader cannot tell which keys this build accepts** — It is the first file an adopter writes, and an example with nine keys says nothing about the tenth or about what each one refuses. → §WW490
+- 📋 **WW491** (deps: —) **what earns a hole rather than a red is spread over the README, so a reader who met a 2 cannot look it up** — Degraded is the finding this project exists for and the verdict an adopter meets without understanding it, which is the moment a scattered explanation is worth nothing. → §WW491
+- 📋 **WW492** (deps: —) **the in-app half is described as a list of types, so nobody can tell what shipping it costs their users** — It is the one package that goes into an application real people run, and that decision needs what it writes, when, and what a release does with no harness attached. → §WW492
+- 📋 **WW493** (deps: —) **every example in the area was written rather than run, so no page shows one real adoption end to end** — A walkthrough pasted from memory misleads at the first message whose wording changed, and the refusals are where somebody decides a tool is not worth the trouble. → §WW493
+- 📋 **WW494** (deps: —) **a first run's refusals are written up by cause, and a stuck reader has only the words on their screen** — CS0579 naming a wpftmp project, a desk that grants no foreground and a guard nobody built are what stop an adoption, and none of the three is searchable today. → §WW494
+- 📋 **WW495** (deps: —) **the area publishes HTML alone, so an agent renders three pages to learn what the tool is** — The pitch page already writes a plain-text twin per route and a llms.txt beside it, and the area next door publishes neither. → §WW495
+- 📋 **WW496** (deps: —) **the site ships two sitemaps under one base, and the one robots.txt names lists no page of the area** — A crawler is handed the pitch routes and never the pages an adoption is decided on, which are the reads the area was built to publish. → §WW496
+- 📋 **WW497** (deps: —) **the area links README anchors by hand, so a renamed heading breaks them with nothing going red** — Those links carry every reader the area sends to the long form, and they point into a file this repository owns and renames freely. → §WW497
+- 📋 **WW498** (deps: —) **every page assumes the vocabulary, so a first-time reader meets case, hole, desk and reading undefined** — These words carry the design and none of them means here what it means elsewhere, so a reader guessing at one misreads every page that uses it. → §WW498
+
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine

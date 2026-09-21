@@ -12,7 +12,7 @@
 // process exit codes — that is the product's own decision, written down in its summary —
 // so a table of codes typed onto a web page is the same mapping written a third time, and
 // a mapping written twice is a mapping that drifts.
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -119,7 +119,20 @@ export const product = {
 
 const out = join(siteDir, "src", "lib", "product.generated.ts");
 writeFileSync(out, generated);
+
+// The same three figures again, for the documentation area next door. It is a separate npm
+// project with a separate build, so it cannot import a module out of this one's src/ — and
+// the alternative to a second output is the alternative this generator exists to refuse:
+// a version and an exit code typed into a page, true on the day they were typed.
+//
+// JSON and not TypeScript because Astro imports it directly, and one payload and not three
+// because a page asking for the version and a page asking for the codes must never be able
+// to disagree about which build they came from.
+const docsOut = join(siteDir, "docs", "src", "data", "product.generated.json");
+mkdirSync(dirname(docsOut), { recursive: true });
+writeFileSync(docsOut, `${JSON.stringify({ version, packages, verdicts }, null, 2)}\n`);
+
 console.log(
   `product: version ${version}, ${packages.length} package(s), ${verdicts.length} verdict(s)`
-    + ` -> src/lib/product.generated.ts`,
+    + ` -> src/lib/product.generated.ts, docs/src/data/product.generated.json`,
 );

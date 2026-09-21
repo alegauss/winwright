@@ -16,18 +16,22 @@ import { FeatureIndex } from "../components/sections/FeatureIndex";
 import { Refusals } from "../components/sections/Refusals";
 import { NonGoals } from "../components/sections/NonGoals";
 import { Install } from "../components/sections/Install";
+import { Release } from "../components/sections/Release";
 
 // The landing page. The section order is the argument, not a feature list: the verdict
-// first, because it is the reason the rest exists, then the laws it follows from, then a
-// run in the order a run meets them — locate, act, assert, capture — then the file a case
-// lives in, the project it is declared against, the agent that drives it, the optional
-// half, what it refuses, what it is not, and only then how to take it.
+// first, because it is the reason the rest exists, then how to take it — this is a shipped
+// package and a reader who is already convinced should not have to scroll past the whole
+// case to find the reference line. Then the guarantees, then a run in the order a run meets
+// them — locate, act, assert, capture — then the file a case lives in, the project it is
+// declared against, the agent that drives it, the optional half, what it refuses, what it
+// is not, and last the release: the version, the licence and where to say it is wrong.
 export function Landing() {
   return (
     <>
       <Nav />
       <Hero />
       <Verdict />
+      <Install />
       <Laws />
       <Locate />
       <Act />
@@ -41,7 +45,7 @@ export function Landing() {
       <FeatureIndex />
       <Refusals />
       <NonGoals />
-      <Install />
+      <Release />
       <Footer />
     </>
   );

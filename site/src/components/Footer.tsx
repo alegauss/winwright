@@ -11,11 +11,20 @@ export function Footer() {
             <img src="/winwright/logo.svg" alt="" />
             winwright
           </a>
-          <div className="foot-links">
-            {footer.links.map((link) => (
-              <a key={link.href} href={link.href}>
-                {link.label}
-              </a>
+          {/* Grouped by what a reader came to do — take it, read it, or say something is
+              wrong with it. A single row of nine links is a row nobody scans. */}
+          <div className="foot-cols">
+            {footer.groups.map((group) => (
+              <div className="foot-col" key={group.heading}>
+                <div className="foot-col-head">{group.heading}</div>
+                <div className="foot-links">
+                  {group.links.map((link) => (
+                    <a key={link.href} href={link.href}>
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>

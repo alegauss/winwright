@@ -1,5 +1,4 @@
 import { agent, claudeCode } from "../../lib/site-content";
-import { CopyButton } from "../ui/CopyButton";
 import { Rich } from "../ui/Rich";
 
 export function Agent() {
@@ -15,16 +14,23 @@ export function Agent() {
         </div>
 
         <div className="reveal" style={{ maxWidth: "620px", margin: "0 auto" }}>
-          <p className="allowlist-lead">{claudeCode.allowlistLead}</p>
-          <div className="codeblock copy">
-            <code>{claudeCode.allowlistLine}</code>
-            <CopyButton
-              text={claudeCode.allowlistLine}
-              label="Copy the allowlist entry"
-            />
+          {/* The four tools, read off the same records the depth page lists in full, so a
+              tool cannot appear here and not there. The mark is the distinction that
+              matters before anything else: three of them launch nothing. */}
+          <div className="pills" style={{ marginTop: 0 }}>
+            {claudeCode.read.map((tool) => (
+              <span className="pill" key={tool.k}>
+                <code>{tool.k}</code>
+              </span>
+            ))}
+            {claudeCode.do.map((tool) => (
+              <span className="pill" key={tool.k}>
+                <code>{tool.k}</code>
+              </span>
+            ))}
           </div>
           <p className="allowlist-note">
-            <Rich runs={claudeCode.allowlistNote} />
+            <Rich runs={agent.note} />
           </p>
           <p style={{ textAlign: "center", marginTop: "22px" }}>
             <a className="feature-link" href="/winwright/claude-code/">

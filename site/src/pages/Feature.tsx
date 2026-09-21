@@ -3,16 +3,20 @@ import { Footer } from "../components/Footer";
 import { Rich } from "../components/ui/Rich";
 import { RawSvg } from "../components/ui/RawSvg";
 import { features, type FeatureRecord } from "../lib/features";
+import { scenario, verdictSection } from "../lib/site-content";
 import { treeDiagram, captureDiagram, verdictTerminal, scenarioFile } from "../lib/diagrams";
 
+// The title bars come from the content module rather than being typed here, so the depth
+// page and the landing section cannot name the same figure two different things — which is
+// how an invented file extension survived on one of them after the other was corrected.
 function Figure({ kind }: { kind: FeatureRecord["figure"] }) {
   if (kind === "tree") return <RawSvg className="shot-frame reveal" markup={treeDiagram} />;
   if (kind === "capture") return <RawSvg className="shot-frame reveal" markup={captureDiagram} />;
   if (kind === "verdictTerminal") {
-    return <Terminal title="winwright run cases/report.wwx" markup={verdictTerminal} />;
+    return <Terminal title={verdictSection.terminalTitle} markup={verdictTerminal} />;
   }
   if (kind === "scenarioFile") {
-    return <Terminal title="cases/report.wwx" markup={scenarioFile} />;
+    return <Terminal title={scenario.fileTitle} markup={scenarioFile} />;
   }
   return null;
 }
@@ -81,10 +85,10 @@ export function FeaturePage({ record }: { record: FeatureRecord }) {
                     ))}
                   </ul>
                 )}
-                {record.slug === "scenario" && s.heading === "Validated at insertion" && (
+                {s.onward && (
                   <p>
-                    <a className="feature-link" href="/winwright/claude-code/">
-                      The tools that carry that schema →
+                    <a className="feature-link" href={s.onward.href}>
+                      {s.onward.label}
                     </a>
                   </p>
                 )}
