@@ -455,8 +455,15 @@ internal static class DeskAsks
             "WW483. The same shape as the menu case above it: the flyout is touched only by the tidy "
                 + "in the finally, after everything is asserted, and the case stands down before "
                 + "that on each reading it depends on — the notification area reachable, the icon "
-                + "placed, and the engine's own unchecked count where the desk would not let the "
-                + "click reach the icon"),
+                + "placed, and the engine's own hole where the desk would not let the click reach "
+                + "the icon, written to the ledger since WW486 rather than returned in silence"),
+        new("AdoptedTrayTests.A_click_on_an_icon_in_the_overflow_lands_on_it_and_not_on_the_flyout_that_holds_it",
+            Unaffected.Guarded,
+            "WW486. Every refusal the click can answer is excused but one, and that one is the "
+                + "claim: an icon in the flyout the act has just opened reported as under something. "
+                + "The flyout is topmost, so that sentence is the act misreading the flyout's own "
+                + "answer and never a desk fact. A flyout that would not open, an icon that moved and "
+                + "an icon the shell put on the taskbar each stand the case down through the ledger"),
         new("NotificationAreaTests.A_case_reads_the_menu_a_step_opened_and_the_case_hands_the_desk_back",
             Unaffected.Guarded,
             "WW343. The same guard as the case below and for the same reason: the foreground is read "

@@ -76,6 +76,11 @@ internal static class DeskDiscards
             "WW483. The same tidy as the menu case's, after the run has answered and the window has "
                 + "been read: shutting a flyout this case's own search opened, and only where it was "
                 + "shut beforehand. A shell that will not shut it leaves it for the class's Dispose"),
+        new("AdoptedTrayTests.A_click_on_an_icon_in_the_overflow_lands_on_it_and_not_on_the_flyout_that_holds_it",
+            "NotificationArea.CloseOverflow(",
+            "WW486. The same tidy as the click case's above it, once the click has answered: "
+                + "shutting a flyout this case's own search opened, and only where it was shut "
+                + "beforehand. A shell that will not shut it leaves it for the class's Dispose"),
         new("AdoptedTrayTests.WithTheMenuUp", "NotificationArea.CloseOverflow(",
             "WW457. Shutting the flyout this case's own search opened, in a finally, once everything "
                 + "the case is about has been read — and only where it was shut beforehand, which is "

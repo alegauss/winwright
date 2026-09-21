@@ -447,8 +447,10 @@ public sealed class AdoptedTrayTests : IDisposable
         {
             var run = Winwright.Scenarios.CaseRun.Of(declared, AutomationElement.RootElement, TrayProject());
 
-            // A desk that would not let the click reach the icon is a hole, which the engine answers.
-            if (run.Verdict.Unchecked.Count > 0)
+            // A desk that would not let the click reach the icon is a hole, which the engine answers,
+            // and it is written to the ledger rather than returned in silence. WW486: a bare return
+            // here is how a click refused on every hidden icon passed this test while it did so.
+            if (run.Verdict.Unchecked.Count > 0 && BusyDesk.Excused(run.Verdict.Unchecked[0]))
                 return;
 
             Assert.True(
@@ -470,6 +472,59 @@ public sealed class AdoptedTrayTests : IDisposable
                 NotificationArea.CloseOverflow();
         }
     }
+
+    [Fact]
+    public void A_click_on_an_icon_in_the_overflow_lands_on_it_and_not_on_the_flyout_that_holds_it()
+    {
+        // WW486. At the centre of a hidden icon the tree names the overflow flyout's pane and goes no
+        // deeper, and the click read that pane as something standing over the icon. So every hidden
+        // icon was a hole, and hidden is where Windows puts a new icon. The test above excuses any
+        // hole as a desk that would not let the click through, which is how the refusal shipped.
+        if (BusyDesk.Excused(NotificationArea.Reachable()))
+            return;
+
+        using var register = new ProcessRegister();
+        var flyoutWasUp = NotificationArea.Overflow() is not null;
+
+        var launched = Attachable.Launch(register, Fixture.Started("--tray=shuts"));
+        var tip = Fixture.TrayTip(launched.Pid);
+
+        if (!Placed(tip, launched.Pid))
+            return;
+
+        try
+        {
+            var click = NotificationArea.Click(tip);
+
+            // A promoted icon is on the taskbar, and the flyout is not what was asked. Said to the
+            // ledger rather than returned in silence: a desk that promotes this icon never checks the
+            // claim, and a run should say that it did not.
+            if (!click.Icon.Hidden
+                && BusyDesk.Excused(Precondition.Absent(InTheOverflow, "the shell put the fixture's icon on the taskbar")))
+                return;
+
+            // A flyout that would not open, or an icon that moved between the search and the click,
+            // is the desk's and excused. Something standing over an icon in the flyout the act has
+            // just opened is not: the flyout is topmost, so that sentence is the act misreading the
+            // flyout's own answer. Matched on the engine's own wording, which this repository owns.
+            if (click.Missing is { } missing
+                && click.Because?.Contains(" is under ", StringComparison.Ordinal) != true
+                && BusyDesk.Excused(missing))
+                return;
+
+            Assert.True(click.Delivered, click.ToString());
+        }
+        finally
+        {
+            register.Stop(launched);
+
+            if (!flyoutWasUp)
+                NotificationArea.CloseOverflow();
+        }
+    }
+
+    /// <summary>What the overflow test needs of the shell, which places icons as it likes.</summary>
+    private const string InTheOverflow = "an icon the shell put in the overflow";
 
     /// <summary>
     /// A project for a tray case: this process as the executable, since nothing is launched through

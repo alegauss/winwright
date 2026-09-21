@@ -1219,11 +1219,23 @@ public static class NotificationArea
 
     /// <summary>
     /// What stands at a point instead of the icon, or null where the icon is what is there.
+    /// <para>
+    /// WW486. Two answers mean the icon. One is the icon or something inside it, which is how a
+    /// button with children of its own answers a point. The other is one of the icon's own
+    /// containers short of the desktop, which is how the overflow flyout answers: Windows 11 hosts
+    /// the hidden icons in a XAML island, and asked what stands at the centre of one of them the tree
+    /// names the flyout's pane and goes no deeper. That pane holds the icon, so nothing can be over
+    /// it there. A window somebody left over the taskbar is a top-level window of its own, and never
+    /// one of the icon's ancestors. Refusing on the pane made every hidden icon a hole, and hidden is
+    /// where Windows puts a new icon unless somebody promotes it. claude-tray's left-click case
+    /// reported something over its icon on a desk with nothing on it, and the engine's own test
+    /// excused it as a desk that would not let the click through.
+    /// </para>
     /// </summary>
     /// <param name="icon">The icon's live element.</param>
     /// <param name="x">The point, across.</param>
     /// <param name="y">The point, down.</param>
-    /// <returns>The element found there, named, where it is neither the icon nor inside it.</returns>
+    /// <returns>The element found there, named, where it is neither the icon, inside it, nor what holds it.</returns>
     private static string? Covering(AutomationElement icon, int x, int y)
     {
         AutomationElement? there;
@@ -1239,27 +1251,47 @@ public static class NotificationArea
             return null;
         }
 
-        // The icon or anything inside it: a button may answer a point with a child of its own.
-        for (var at = there; at is not null; at = TreeWalker.RawViewWalker.GetParent(at))
+        try
         {
-            try
-            {
-                if (Automation.Compare(at, icon))
-                    return null;
-            }
-            catch (ElementNotAvailableException)
-            {
+            if (Within(there, icon))
                 return null;
-            }
 
-            if (Automation.Compare(at, AutomationElement.RootElement))
-                break;
+            // The desktop holds every icon too. Answered at a point, it means nothing there would
+            // say what it was, and that is not the icon.
+            if (there is not null && !Automation.Compare(there, AutomationElement.RootElement) && Within(icon, there))
+                return null;
+        }
+        catch (ElementNotAvailableException)
+        {
+            // Gone while the walk was reading it, which is the same unanswered question as above.
+            return null;
         }
 
         var facts = there is null ? null : ElementFacts.Of(there);
         return facts is null
             ? "an element that would not describe itself"
             : $"{facts.ControlType} '{facts.Name}'";
+    }
+
+    /// <summary>
+    /// Whether <paramref name="inner"/> is <paramref name="outer"/> or lies inside it, walking the raw
+    /// view up as far as the desktop.
+    /// </summary>
+    /// <param name="inner">Where the walk starts.</param>
+    /// <param name="outer">What it is looking for on the way up.</param>
+    /// <exception cref="ElementNotAvailableException">Where an element went away during the walk.</exception>
+    private static bool Within(AutomationElement? inner, AutomationElement outer)
+    {
+        for (var at = inner; at is not null; at = TreeWalker.RawViewWalker.GetParent(at))
+        {
+            if (Automation.Compare(at, outer))
+                return true;
+
+            if (Automation.Compare(at, AutomationElement.RootElement))
+                break;
+        }
+
+        return false;
     }
 
     /// <summary>

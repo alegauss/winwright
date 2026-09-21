@@ -22,7 +22,7 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- ⏳ **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ✅, Block E ✅, WW483 ✅, an engine release on nuget.org) **claude-tray still carries a 3,004-line interaction harness, and one of its claims has no case** — The icon's left-click waits on WW483 and a release, then the script goes. → §WW86
+- 🛠 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ✅, Block E ✅, WW483 ✅, an engine release on nuget.org, WW486 ✅) **claude-tray still carries a 3,004-line interaction harness, and one of its claims has no case** — The left-click case waits on a release carrying WW486. → §WW86
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

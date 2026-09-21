@@ -336,6 +336,7 @@
 - ✅ **WW445** **the sweep that holds a no-desk mark honest finds cases by `public void`, so a marked async case is checked by nothing** — A marked case is found by its own declaration, whatever shape it has, and a written sample proves the sweep sees both (design recorded in `tests/Winwright.Tests/NoDeskTests.cs`).
 - ✅ **WW473** **a read-out is launched without the fixture's arguments, so it answers about a machine the window is not showing** — A read-out carries the argument its fixture's environment reaches the application through, so a window drawn on a sampled machine is asked about that one.
 - ✅ **WW483** **a case cannot click a tray icon, so the window an application opens on a left-click is claimed by nothing** — A tray step clicks its icon with `click tray icon`, a pointer at the icon's centre that lands on it or is a hole naming the desk, and the next step reads the window it opened.
+- ✅ **WW486** **a click on an icon in the overflow is refused as covered by the flyout that holds it** — A click on an icon in the overflow lands on it: the flyout's pane that answers at the icon's centre is read as what holds the icon, and never as something over it.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
