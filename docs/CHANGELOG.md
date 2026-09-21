@@ -440,7 +440,7 @@
 - ✅ **WW467** **publishing from a tree that declares an unpublished version spends a second number on the same release** — An empty input publishes what the tree declares when nuget.org has not got it, so a locally packed version is the one that ships.
 - ✅ **WW474** **CI runs the desk half on a runner that promises no desk, so it has been red about nothing since September** — CI asks the desk-free half the gate derives, so a red there is about the tree again and the desk half stays where it is proved.
 - ✅ **WW476** **the mark T172 draws when the variable names another profile is asserted by nothing that has ever run** — The submenu mark for a variable naming another profile is read by a case, on a sampled environment the fixture declares and the read-out is asked of.
-- ✅ **WW478 (the line's absence)** **two of the four sampled modes have no case, and they are the ones a mark drawn for nothing would show up in** — The agreeing mode is a case now: the outside line is claimed absent where the two modes beside it claim it drawn, so the line is falsifiable both ways.
+- ✅ **WW478** **two of the four sampled modes have no case, and they are the ones a mark drawn for nothing would show up in** — The mark is claimed absent on the one entry it would be drawn on, so a mark or a line drawn unconditionally now reds; unset is recorded as not a case rather than missing.
 - ✅ **WW479** **a state an application appends can be claimed present and never claimed absent, so the mark is one-sided** — `notEndsWithLabel` claims a reading does not end with a declared string, so an appended state is falsifiable both ways; the empty key reds rather than holding of everything.
 
 ## Block K — The proving ground — a fixture app built to be hard to test

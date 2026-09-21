@@ -111,28 +111,4 @@ up, cleared, and read back as gone from the foreground. That is a fixture window
 line of style bits, and it is the arm that decides whether an unattended run can start
 at all.
 
-### §WW478 The sampled mode that proves a silence
-
-WW85's own criterion asked for four cases, one per sampled mode, and shipped with two.
-It asked for more than the script ever did: `Invoke-EnvFixtureSweep` walks `other` and
-`outside` and nothing else. So nothing was lost in the move, and what is missing is
-coverage neither the script nor the cases ever had.
-
-`agrees` is the half worth adding. It is the negative control the two that exist need:
-every claim in that file is that a mark appears where the environment and the icon
-disagree, and nothing says it stays away when they agree. A mark drawn unconditionally
-would pass both. It is also the failure with the worse shape — a false alarm about a
-profile state sends somebody looking for a misconfiguration that is not there.
-
-`unset` is not writable, and that is a finding rather than a shortfall. It samples no
-variable, so the application resolves `~/.claude`, and whether that is a registered
-profile is a property of the desk. The guest has none, so the submenu draws the
-`outside` line; a developer's machine has one, and draws a mark or nothing. One file,
-three renderings — a case for it would be green here and red there, the
-machine-dependence every other case here avoids.
-
-The claim cannot be `never` over the whole submenu, which would pass on a submenu that
-failed to draw. `absent` is refused where the region is not there either, and that guard
-is what makes an absence worth asserting.
-
 ## Block K — The proving ground — a fixture app built to be hard to test
