@@ -44,30 +44,4 @@ it.
 
 ## Block J — Adoption — the proof is the deletion
 
-### §WW86 claude-tray loses its interaction harness
-
-2,732 lines when this was filed and 3,004 now. It goes once every assertion in it is a
-case, and the count removed is reported rather than described: a saving nobody measured
-is a saving nobody can check.
-
-Surveyed on 2026-09-20, about nineteen claims short. Every one is now a case or dropped
-with its reason written where it would have been, except one: T158's left-click on the
-icon, which opens the window. A tray step reads an icon or opens its menu and cannot
-click it, which is WW483, and claude-tray restores the engine from nuget.org alone, so
-the claim lands after a release that carries it. The script stays until then, because
-deleting it first would leave the one gesture most users make driven by nothing.
-
-Two were dropped. The note naming the directory two profiles share needs a junction on
-the bench every case runs against, and the tooltip naming a switched-to profile needs a
-live reading only a signed-in account has. The script reported both unchecked on every
-guest run.
-
-The deletion itself is the rest of the task. Check-Interaction.ps1 goes. The CI job
-running its Keyboard case runs the cases instead. AGENTS.md's interaction section, the
-preview-ui, dev-flags and roadmap-docs skills, and `--selftest`'s two checks that read
-the script (its case list against AGENTS.md, and every id it drives) are retargeted at
-`cases/`. The lines removed are counted in the commit, beside the time both suites take.
-
-The capture script left with WW480.
-
 ## Block K — The proving ground — a fixture app built to be hard to test

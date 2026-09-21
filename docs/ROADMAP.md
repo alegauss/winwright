@@ -22,8 +22,6 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- 🛠 **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ✅, Block E ✅, WW483 ✅, an engine release on nuget.org, WW486 ✅) **claude-tray still carries a 3,004-line interaction harness, and one of its claims has no case** — The left-click case waits on a release carrying WW486. → §WW86
-
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ## Done when — Block A
@@ -158,13 +156,6 @@
   against a real session that reports everything present and renders nothing - the WW42
   desk - and stays met on an ordinary one. A rendering check verified only against a
   substitute has been verified against the one desk that was never the problem.
-
-## Done when — WW86
-
-- **The script is gone and nothing in claude-tray runs or names it**
-  Check-Interaction.ps1 is deleted; the CI job, AGENTS.md, the skills and --selftest's
-  checks over it name the cases instead; each of its claims is a step, a need, or a
-  sentence saying why not; and the lines removed are counted in the commit.
 
 ## Non-goals
 
