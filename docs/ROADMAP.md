@@ -28,7 +28,7 @@
 - ⏳ **WW86** (deps: WW78 ✅, WW79 ✅, WW80 ✅, WW81 ✅, WW82 ✅, WW83 ✅, WW84 ✅, WW85 ✅, Block E ✅, WW483, an engine release on nuget.org) **claude-tray still carries a 3,004-line interaction harness, and one of its claims has no case** — The icon's left-click waits on WW483 and a release, then the script goes. → §WW86
 - ⏳ **WW88** (deps: Block G, WW76 ✅, WW318 ✅, WW325 ✅, WW326 ✅, pportal PP619 ✅) **pportal carries an interaction harness and twenty-seven copies of one runner** — Every claim its cases make now exists, and pportal restores the engine from nuget.org. → §WW88
 - ⏳ **WW384** (deps: a desk this suite may take the foreground away from) **the clearer's acting half is run by nothing but a guest, so a repair that moved no window would read as one that worked** — The minimising arm ends in Win+D, whose foreground lock cost five reds elsewhere and four excuses here, twice. → §WW384
-- 📋 **WW480** (deps: Block E ✅) **the preview loop is a 451-line screen copy wired into four documents, and deleting it is not a migration** — Its four guards already exist in the engine; the path that produces a picture somebody reads does not. → §WW480
+- 📋 **WW480** (deps: Block E ✅, a decision on claude-tray taking Winwright.InApp) **the preview loop is a 451-line screen copy wired into four documents, and deleting it is not a migration** — Every preview case needs the app to render itself, and claude-tray's strategy bundles no dependency. → §WW480
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

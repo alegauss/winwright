@@ -159,24 +159,26 @@ at all.
 
 `Capture-Window.ps1` came out of WW86 because it is not a harness. It asserts nothing
 about a verdict: it launches a window, copies the pixels inside its rectangle and writes
-a PNG for a person or an agent to look at. `AGENTS.md` and three skills — `preview-ui`,
-`dev-flags`, `file-map` — point at it by name and tell the reader to read the picture
-and judge it.
+a PNG for a person or an agent to look at. `AGENTS.md` and three skills, `preview-ui`,
+`dev-flags` and `file-map`, point at it by name.
 
-Its four guards are assertions, and the engine already has all four. The window belongs
-to the process the run launched, which is the capture receipt. No second instance is
-open, which is the register. No foreign window overlaps the rectangle, which an
-off-screen render makes vacuous rather than answers. And the page is not still showing
-its own loading text — `winwright.json` already declares `"loading":
-["stats.computing"]` for it.
+Its four guards are the engine's already: the capture receipt, the register, an
+off-screen render that makes overlap vacuous, and `winwright.json`'s `"loading"`.
 
-So the work is not migrating claims. It is giving the engine the loop: a `capture` step
-that writes the file the preview flow reads, `captures` declared in the project, and the
-four documents rewritten to name that instead of a script. The count removed is reported
-the way WW86 reports its own.
+What stops it is not the engine. Taken up on 2026-09-21 and measured against the source:
+a `capture` step on a window of the application always takes the render route
+(`CaptureRoute.For`), and a render is the application drawing its own tree, which only
+`Winwright.InApp` answers. claude-tray references nothing, so every preview case would
+come back a hole. And its STRATEGY.md says "No bundled third-party dependencies", as a
+distribution decision.
 
-The promo pipeline is not in scope. `Capture-Frames.ps1` and `Encode-Clip.ps1` build a
-clip for a README, which is nothing this framework claims to replace, and folding them
-in would be this line growing a second argument.
+So a person decides between two ways out. claude-tray takes `Winwright.InApp`, which is
+Block I's criterion and a reversal of its own strategy, and the loop becomes a case per
+surface under `captures`. Or the loop stays on claude-tray's own off-screen flags
+(`--capture-settings`, `--capture-stats`), which its catalogue already prefers, extended
+to the popup and the shell the script is still used for. Then winwright replaces nothing
+here and this line retires.
+
+The promo pipeline is not in scope either way.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
