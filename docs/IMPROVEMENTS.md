@@ -193,31 +193,6 @@ long enough to need its own navigation is one nobody reaches the end of.
 
 It is also the page to link a word from, once the area is more than three pages deep.
 
-### §WW500 The published version, read from the feed rather than baked into the build
-
-The version on the page comes from `Directory.Build.props` through
-`scripts/product.mjs`, which is the right source at build time and the wrong one an hour
-later. The site deploys on `workflow_dispatch` and a release does not trigger it, so
-publishing spends a version number and the page goes on stating the one before.
-
-Measured on the 1.0.0 release: both halves were indexed on nuget.org while the landing
-page went on offering `0.1.0-alpha.18` in the badge, in the release band and in the two
-`PackageReference` lines a reader copies rather than reads. Nothing reported the gap —
-the site build was green, faithfully rendering a file that was itself a version behind.
-
-The feed is the authority and can be asked from the page: `api.nuget.org` answers the
-flat-container index with `Access-Control-Allow-Origin: *`. The number is fetched after
-hydration, and the highest published release wins, prereleases skipped unless nothing
-else has ever shipped.
-
-The generated number stays, and stays first. It is what the prerender writes, so a
-reader with no JavaScript gets a real published version rather than a blank, and the
-first client render matches the served markup rather than tearing it. A fetch that fails
-changes nothing, which makes today's behaviour the floor.
-
-The rule is the one the README states about its own badges: trust the badge over the
-typed line where the two disagree. This makes the page say the same thing.
-
 ### §WW501 A sentence per reading, which the vocabulary has nowhere to keep
 
 WW488 publishes the closed list `reads` accepts, in full, because a field described as
@@ -304,3 +279,29 @@ WW492 avoided a fifth by taking the first sentence rather than the first paragra
 its own case refuses a task id outright. That case is the shape the others want: the
 page that published one should say so before somebody reads it and looks for a WW483
 they cannot find.
+
+### §WW506 The documentation area's own copy of the version
+
+WW500 gave the landing page a version it asks nuget.org for. The area did not get one,
+and the reason is structural rather than an omission: `site/docs` is its own npm project
+with its own build, and it cannot import `src/lib/nuget-feed.ts` from the project next
+door.
+
+So it goes on rendering `product.generated.json`, which is right on the day it is built
+and a version behind from the next release onward — in `installing` and in `in-app`, the
+two pages carrying a `PackageReference` somebody pastes into a csproj. The area is the
+half a reader reaches once they have decided to adopt, and it is now the half that
+disagrees.
+
+Copying the picker across is refused. The comparison is where the real failure lives —
+prerelease counters are numeric, a release outranks a prerelease of the same core, text
+ordering gets both wrong — and a second copy is two things to keep true where the suite
+asserts one.
+
+What it wants is the picker somewhere both builds read, the shape `scripts/product.mjs`
+already has: one producer, two consumers. The area then needs a small client script,
+because Starlight ships no JavaScript by default — which is simpler than the landing
+page's case rather than harder, there being no hydration to tear.
+
+Until then the area is correct at deploy and stale after, and WW500's page is the one to
+trust where the two disagree.

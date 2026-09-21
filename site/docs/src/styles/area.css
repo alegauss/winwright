@@ -157,3 +157,23 @@
   margin-inline-start: 0;
   color: var(--sl-color-gray-2);
 }
+
+/* A captured step of a real run: the command, then what it printed. Set apart from an ordinary
+   code block because the difference is the whole claim — one of these was executed, and the
+   exit code beside it is the one the run left behind. */
+.ww-captured {
+  margin-block: 1.2em;
+}
+
+.ww-captured figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4em;
+  margin-block-end: 0.3em;
+}
+
+.ww-captured pre {
+  max-height: 24em;
+  overflow: auto;
+}

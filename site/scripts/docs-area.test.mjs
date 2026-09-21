@@ -316,6 +316,31 @@ test("the built in-app page names every guard, and the condition a run without i
   );
 });
 
+test("the built adoption page shows the captured output rather than describing it", () => {
+  // WW493. The claim the page makes is that these blocks were executed, so the check is that
+  // what the capture holds is what the page renders — a page that summarised it would read the
+  // same and be the paragraph this replaces.
+  const page = join(builtDir, "adoption", "index.html");
+  assert.ok(existsSync(page), "dist/docs/adoption/index.html is missing — run `npm run build` first");
+  const rendered = readFileSync(page, "utf8");
+
+  const adoption = JSON.parse(read(siteDir, "docs", "src", "data", "adoption.captured.json"));
+  assert.ok(adoption.steps.length >= 3, "the capture holds fewer steps than the page reads");
+
+  for (const step of adoption.steps) {
+    assert.ok(rendered.includes(step.command), `the adoption page never shows \`${step.command}\``);
+  }
+
+  // The refusal's own first line, which is the thing a stuck reader will have on screen and
+  // will search for.
+  const refused = adoption.steps.find((one) => one.code !== 0);
+  assert.ok(refused, "the capture shows no refusal, and the page is about one");
+  assert.ok(
+    rendered.includes("CS0579"),
+    "the adoption page never shows the error code the capture is about",
+  );
+});
+
 test("the built area names every outcome the enum declares, with its code", () => {
   const src = read(repoDir, "src", "Winwright", "Verdicts", "RunOutcome.cs");
   const body = /enum\s+RunOutcome\s*\{([\s\S]*)\}/.exec(src);

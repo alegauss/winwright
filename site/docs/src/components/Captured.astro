@@ -1,0 +1,34 @@
+---
+// One captured step of a real run: the command, what it answered, and the code it left behind.
+//
+// Nothing here is typed. `capture-adoption.cmd` builds a throwaway repository laid out the way an
+// adopting one is and keeps both streams of every build, and `adoption.test.mjs` refuses a capture
+// that has stopped describing this tree. A walkthrough pasted from memory misleads at the first
+// message whose wording changed, and the refusals are exactly where somebody decides a tool is not
+// worth the trouble.
+import adoption from "../data/adoption.captured.json";
+
+interface Props {
+  /** Which step, counting from one, in the order the capture ran them. */
+  step: number;
+}
+
+const { step } = Astro.props;
+
+const captured = adoption.steps[step - 1];
+if (!captured) {
+  throw new Error(`[captured] the adoption capture has no step ${step}`);
+}
+
+const refused = captured.code !== 0;
+---
+
+<figure class="ww-captured">
+  <figcaption>
+    <code>{captured.command}</code>
+    <span class={refused ? "ww-tag ww-claim" : "ww-tag"}>
+      {refused ? `exit ${captured.code}` : "exit 0"}
+    </span>
+  </figcaption>
+  <pre><code>{captured.said}</code></pre>
+</figure>

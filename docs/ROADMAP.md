@@ -27,17 +27,17 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW493** (deps: —) **every example in the area was written rather than run, so no page shows one real adoption end to end** — A walkthrough pasted from memory misleads at the first message whose wording changed, and the refusals are where somebody decides a tool is not worth the trouble. → §WW493
+- ⏳ **WW493** (deps: —) **every example in the area was written rather than run, so no page shows one real adoption end to end** — A case run end to end and the foreground hole are still written rather than captured, and both need a desk and a packed feed. → §WW493
 - 📋 **WW494** (deps: —) **a first run's refusals are written up by cause, and a stuck reader has only the words on their screen** — CS0579 naming a wpftmp project, a desk that grants no foreground and a guard nobody built are what stop an adoption, and none of the three is searchable today. → §WW494
 - 📋 **WW495** (deps: —) **the area publishes HTML alone, so an agent renders three pages to learn what the tool is** — The pitch page already writes a plain-text twin per route and a llms.txt beside it, and the area next door publishes neither. → §WW495
 - 📋 **WW496** (deps: —) **the site ships two sitemaps under one base, and the one robots.txt names lists no page of the area** — A crawler is handed the pitch routes and never the pages an adoption is decided on, which are the reads the area was built to publish. → §WW496
 - 📋 **WW497** (deps: —) **the area links README anchors by hand, so a renamed heading breaks them with nothing going red** — Those links carry every reader the area sends to the long form, and they point into a file this repository owns and renames freely. → §WW497
 - 📋 **WW498** (deps: —) **every page assumes the vocabulary, so a first-time reader meets case, hole, desk and reading undefined** — These words carry the design and none of them means here what it means elsewhere, so a reader guessing at one misreads every page that uses it. → §WW498
-- 📋 **WW500** (deps: —) **the site bakes the version at build time, so a release leaves the page offering the version before it** — The deploy is manual and the version is the figure a reader copies rather than reads, so a release opens a window where the page hands out a reference a version behind. → §WW500
 - 📋 **WW501** (deps: —) **the twelve readings a step may name are published as bare words, so nothing tells 'picked' from 'selected'** — An expectation names one reading, and one the element does not offer answers null forever — reported as nothing answering rather than as the wrong choice. → §WW501
 - 📋 **WW502** (deps: —) **one of the four page generators keeps its own C# reader, and it already disagrees with the shared one** — Two readings of a doc comment sit in one repository with nothing pairing them, so a rendering fixed in either is fixed in the wrong half. → §WW502
 - 📋 **WW504** (deps: —) **the six page generators are chained by hand in two package.json scripts, and nothing holds the lists equal** — One missing from the area's own chain is silent on the machine that still holds yesterday's payload and red only on a clean checkout. → §WW504
 - 📋 **WW505** (deps: —) **four published sentences cite a task id, so an adopter reads WW483 and has nothing to open** — The generators publish the engine's own prose, which cites the task its reasoning started in — right for a reader of the source and meaningless on the site. → §WW505
+- 📋 **WW506** (deps: —) **the documentation area still bakes the version, so its package references go stale while the landing page stays current** — It is a second npm project and cannot import the landing page's picker, so making it live means moving that picker somewhere both builds read. → §WW506
 
 ## Done when — Block A
 
@@ -164,6 +164,13 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
+
+## Done when — WW493
+
+- **One case run and the verdict it answered, captured rather than written** The build
+  half is captured and the run half is still prose, so the page stops short of the thing
+  the line is about: a real run, taken on a desk, with the foreground hole among its
+  steps.
 
 ## Non-goals
 

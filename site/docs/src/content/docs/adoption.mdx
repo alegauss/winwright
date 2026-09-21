@@ -1,0 +1,92 @@
+---
+title: The build that fails first
+description: The refusal most adoptions meet before they run anything — captured from a real build rather than written from memory, with the one line that repairs it.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+import Captured from "../../components/Captured.astro";
+import adoption from "../../data/adoption.captured.json";
+
+Everything below is what a real build printed. It is captured by a command in this repository
+rather than typed onto the page, so a message whose wording changed fails a check here instead
+of misleading you halfway through.
+
+## The shape that breaks
+
+An adopting repository usually has the application's own project at the root and the project
+that drives it underneath:
+
+```
+<your repository>/
+  {adoption.shape.application}
+  {adoption.shape.driving}
+```
+
+That is the natural place to put it, and it is the arrangement that fails. Every default glob
+the SDK applies reaches the **whole tree below the project file**, so the driving project gets
+compiled *into* the application.
+
+Built on its own, the driving project is perfectly fine:
+
+<Captured step={1} />
+
+Then the application:
+
+<Captured step={2} />
+
+## Reading that
+
+Nine errors, every one of them `CS0579`, every one naming a generated file, and not one of them
+naming the folder that caused it. With `UseWPF` on, the project in the brackets can be a
+`_wpftmp` project you never wrote — which reads like a WPF problem and sends you looking through
+XAML.
+
+It is not WPF and it is not the generated files. The driving project's own build wrote a set of
+assembly attributes, the application's globs reached down and compiled them as well as its own,
+and two copies of one attribute is what `CS0579` is.
+
+<Aside type="caution" title="Why this arrives late, and about the wrong project">
+The application builds cleanly until something has built the driving project — so it appears the
+first time somebody runs the whole thing rather than when the folder was added, and the error
+names the project that was fine.
+</Aside>
+
+## The one line that repairs it
+
+In the **application's** project file, not the driving one:
+
+```xml
+{adoption.excludes}
+```
+
+<Captured step={3} />
+
+`DefaultItemExcludes` and not a `Compile Remove`, because it is every glob and not only that
+one: `Page`, `Resource` and `EmbeddedResource` reach down there too, and an application with
+`UseWPF` on applies all of them.
+
+<Aside title="This repository holds itself to that line">
+`samples/Adopter` is an adoption kept inside this repository, with a driving project underneath
+it for exactly this reason. The line above is read out of that project file when the capture is
+taken, so it is the spelling this repository actually depends on rather than one written for a
+page — take it out there and the sample is what fails.
+</Aside>
+
+## What was captured, and how to take it again
+
+<p class="ww-figures">
+  SDK <strong>{adoption.sdk}</strong>, {adoption.steps.length} builds, exit codes{" "}
+  {adoption.steps.map((one) => one.code).join(", ")}.
+</p>
+
+`capture-adoption.cmd` at the repository root builds the throwaway tree and rewrites this
+page's data. It needs no desk and no packaged feed, and it answers in seconds.
+
+## Where to go next
+
+- [Installing it](/winwright/docs/installing/) — the package references, and the MSBuild line an
+  application at a repository root needs.
+- [Your first case](/winwright/docs/first-case/) — what to write once the build is green.
+- [Reading the verdict](/winwright/docs/verdicts/) — the other refusal an adoption meets, which
+  is a run that could not get the desk it needed.

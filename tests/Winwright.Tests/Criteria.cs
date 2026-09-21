@@ -330,6 +330,13 @@ internal static class Criteria
         // a disposable fixture — and it went with the task: the bench fabricates both, so the roadmap
         // no longer declares the lead and a catalogue entry for one is a lead pointing nowhere. It is
         // deleted rather than restated, which is what this pair of checks is for.
+
+        // --- WW493, raised by its own partial ship and going with the line that finishes it -----------------
+        new("WW493", "One case run and the verdict it answered, captured rather than written", "",
+            Unshown.NotBuilt, "the build half is captured by `capture-adoption.cmd` and held by "
+                + "`site/scripts/adoption.test.mjs`, and the run half has nothing to demonstrate yet: "
+                + "there is no runnable adoption to capture, only a library sample that compiles — so "
+                + "this is not built rather than shipped unread"),
     ]);
 
     /// <summary>
