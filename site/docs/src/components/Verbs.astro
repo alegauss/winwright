@@ -1,0 +1,45 @@
+---
+// Every verb, against what it needs, off the catalogue the suite is gated on.
+//
+// `scripts/verbs.mjs` reads `Cooperating.Known`, which is checked against the engine in both
+// directions — a verb added without an entry is a red. So this table cannot fall behind the
+// engine without the suite saying so first, which is the difference between publishing it and
+// keeping a second list.
+//
+// In catalogue order, and the family is printed once per run of it: the order is the one a
+// reader of the suite sees, and re-sorting alphabetically would put `Act` between `Admitted`
+// and `ActionabilityCheck` for no reason anybody arrives with.
+import verbs from "../data/verbs.generated.json";
+
+// The row carries an anchor per verb, which is the whole of "no row can be linked".
+const anchor = (named: string): string => `verb-${named.replace(".", "-")}`;
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Family</th>
+      <th>Verb</th>
+      <th>What it does</th>
+      <th>Needs</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      verbs.verbs.map((verb, at) => (
+        <tr id={anchor(verb.named)}>
+          <td>{verbs.verbs[at - 1]?.family === verb.family ? "" : <code>{verb.family}</code>}</td>
+          <td>
+            <code class="ww-field">{verb.member}</code>
+          </td>
+          <td>{verb.does}</td>
+          <td>
+            {verb.desk && <span class="ww-tag ww-claim">a desk</span>}
+            {verb.needs !== "None" && <span class="ww-tag ww-required">the in-app half</span>}
+            {!verb.desk && verb.needs === "None" && <span class="ww-holds">nothing</span>}
+          </td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

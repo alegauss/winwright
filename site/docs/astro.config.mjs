@@ -61,6 +61,7 @@ export default defineConfig({
         { label: "Your first case", link: "/first-case/" },
         { label: "Addressing an element", link: "/locators/" },
         { label: "The case format", link: "/case-format/" },
+        { label: "The verbs", link: "/verbs/" },
       ],
       // No "edit this page": the footer already links the repository, and a second link per
       // page is a claim about a contribution flow this project has not written down.

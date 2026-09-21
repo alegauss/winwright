@@ -118,3 +118,22 @@
   font-size: var(--sl-text-xs);
   color: var(--sl-color-gray-2);
 }
+
+/* The counted figures a page opens with. Set apart from the prose under them because they are
+   read out of the thing they describe, and a reader deciding an adoption reads these first. */
+.ww-figures {
+  padding: 0.7em 1em;
+  border-inline-start: 3px solid var(--sl-color-accent);
+  background: var(--sl-color-gray-6);
+}
+
+/* What a verb may need of the application, term over definition rather than a two-column
+   table: there are two of them and one is a package somebody has to decide to ship. */
+.ww-cooperation dt {
+  margin-block-start: 0.8em;
+}
+
+.ww-cooperation dd {
+  margin-inline-start: 0;
+  color: var(--sl-color-gray-2);
+}

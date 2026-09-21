@@ -188,6 +188,37 @@ test("the built format page publishes every field of every shape the loader read
   }
 });
 
+test("the built verbs page carries a row per verb the catalogue enters, and its needs", () => {
+  // WW489. `verbs.test.mjs` holds the payload to `Cooperating.Known`; this says the page
+  // rendered it. The needs are checked on the page itself because that column is the reason
+  // the page exists — a row published without it reads as a verb that needs nothing.
+  const page = join(builtDir, "verbs", "index.html");
+  assert.ok(existsSync(page), "dist/docs/verbs/index.html is missing — run `npm run build` first");
+  const rendered = readFileSync(page, "utf8");
+
+  const catalogue = read(repoDir, "tests", "Winwright.Tests", "Cooperating.cs");
+  const entries = [...catalogue.matchAll(/new\("([A-Za-z]+)\.([A-Za-z]+)",\s*Cooperation\.([A-Za-z]+),\s*(true|false),/g)];
+  assert.ok(entries.length > 20, `only ${entries.length} verbs could be read out of the catalogue`);
+
+  let needing = 0;
+  for (const [, family, member, needs, desk] of entries) {
+    assert.match(
+      rendered,
+      new RegExp(`id="verb-${family}-${member}"`),
+      `the verbs page publishes no row for ${family}.${member}`,
+    );
+    if (desk === "true" || needs !== "None") needing++;
+  }
+
+  // The page marks what a verb needs with a tag and nothing else, so the tags have to be there
+  // at least as often as the catalogue says something is needed.
+  const tagged = [...rendered.matchAll(/class="ww-tag ww-(?:claim|required)"/g)].length;
+  assert.ok(
+    tagged >= needing,
+    `the catalogue needs something of ${needing} verbs and the page marks ${tagged}`,
+  );
+});
+
 test("the built area names every outcome the enum declares, with its code", () => {
   const src = read(repoDir, "src", "Winwright", "Verdicts", "RunOutcome.cs");
   const body = /enum\s+RunOutcome\s*\{([\s\S]*)\}/.exec(src);

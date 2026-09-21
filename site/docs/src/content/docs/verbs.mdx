@@ -1,0 +1,74 @@
+---
+title: The verbs
+description: Every verb the engine offers, with what each one needs of your application and of the desk it runs on — generated from the catalogue the suite is already gated on.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+import Verbs from "../../components/Verbs.astro";
+import verbs from "../../data/verbs.generated.json";
+
+This is what the engine can do, and — the column that decides where your suite can run — what
+each verb needs before it can answer.
+
+These are the engine's own calls, which is what your driving project reaches for and what a
+case file reaches *through*. A step in a case names an act by one word; the closed list of
+those words is on [the case format](/winwright/docs/case-format/), and the verb underneath it
+is here.
+
+<p class="ww-figures">
+  <strong>{verbs.counts.verbs}</strong> verbs in {verbs.counts.families} families.{" "}
+  <strong>{verbs.counts.anywhere}</strong> of them run against an application that references
+  nothing and a desk nobody promised. <strong>{verbs.counts.desk}</strong> need a desk.{" "}
+  <strong>{verbs.counts.inApp}</strong> need the in-app half on the other end.
+</p>
+
+Those three figures are counted out of the catalogue on every build, and the catalogue is
+checked against the engine in both directions — a verb added without an entry is a red. So the
+table below cannot fall behind the engine without the suite saying so first.
+
+## What a verb can need
+
+**Most need nothing.** A pattern act asks the control through its own accessibility peer:
+`invoke`, `toggle`, `set value`, `select`, `expand`, `collapse`. It works on an application
+that has never heard of this library, on a build agent, with the window in the background.
+
+**A desk means the foreground.** The acts that synthesise real input — typing, clicking,
+nudging, pressing a key, walking a menu — put the input where Windows is pointing, so they need
+the foreground and there is nobody who can promise it. A run that asked and did not get it
+reports a **hole**: named, counted, and not folded into either a pass or a failure. That is the
+difference between a suite that runs unattended and one that only runs at somebody's desk, and
+this table is where to find out which verbs you are reaching for.
+
+**The in-app half is a package you ship.** These verbs need `Winwright.InApp` referenced by the
+application under test, so they are a decision about your product rather than about your tests.
+
+<dl class="ww-cooperation">
+  {verbs.cooperation.map((one) => (
+    <>
+      <dt>
+        <span class="ww-holds">{one.kind}</span>
+      </dt>
+      <dd>{one.means}</dd>
+    </>
+  ))}
+</dl>
+
+<Aside title="A hole is not a failure, and that is the whole point">
+A synthesised act that never got the foreground did not fail — it never ran. Reporting it as a
+failure sends you looking at your application; reporting it as a pass is the defect this project
+exists to refuse. It is reported as what it is, named in the summary, and it sets the exit code
+to `2`.
+</Aside>
+
+## Every verb
+
+<Verbs />
+
+## Where to go next
+
+- [The case format](/winwright/docs/case-format/) — the `act` field, and the closed list of
+  what a step may name.
+- [Addressing an element](/winwright/docs/locators/) — how a verb is told what to act on.
+- [The README](https://github.com/alegauss/winwright#readme) — the same families in prose, with
+  the reasoning behind each.

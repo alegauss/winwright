@@ -20,110 +20,14 @@ import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { bodyOf, code, constants, constructions, splitTop } from "./csharp.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const siteDir = join(here, "..");
 const repoDir = join(siteDir, "..");
 
 const read = (name) =>
   readFileSync(join(repoDir, "src", "Winwright", "Scenarios", name), "utf8");
-
-/** The source with what a person wrote about it taken off, so a comment cannot be read as a
- *  declaration and an apostrophe in one cannot unbalance a quote. A `//` inside a string is
- *  left alone, which is the odd-quote test `Checkout.Code` makes one level down. */
-function code(source) {
-  return source
-    .split(/\r?\n/)
-    .map((line) => {
-      if (line.trimStart().startsWith("//")) return "";
-      let quoted = false;
-      for (let i = 0; i < line.length; i++) {
-        if (line[i] === "\\" && quoted) i++;
-        else if (line[i] === '"') quoted = !quoted;
-        else if (!quoted && line[i] === "/" && line[i + 1] === "/") return line.slice(0, i);
-      }
-      return line;
-    })
-    .join("\n");
-}
-
-/** Split an expression at a separator that is not inside a string, a bracket or a call. */
-function splitTop(text, separator) {
-  const found = [];
-  let depth = 0;
-  let quoted = false;
-  let at = 0;
-  for (let i = 0; i < text.length; i++) {
-    const letter = text[i];
-    if (quoted) {
-      if (letter === "\\") i++;
-      else if (letter === '"') quoted = false;
-      continue;
-    }
-    if (letter === '"') quoted = true;
-    else if (letter === "(" || letter === "[" || letter === "{") depth++;
-    else if (letter === ")" || letter === "]" || letter === "}") depth--;
-    else if (letter === separator && depth === 0) {
-      found.push(text.slice(at, i).trim());
-      at = i + 1;
-    }
-  }
-  found.push(text.slice(at).trim());
-  return found;
-}
-
-/** Every `new(...)` argument list in a collection expression, in the order it declares them. */
-function constructions(body) {
-  const found = [];
-  for (let i = 0; i < body.length; i++) {
-    if (!body.startsWith("new(", i)) continue;
-
-    const from = i + "new(".length;
-    let depth = 1;
-    let quoted = false;
-    let at = from;
-    for (; at < body.length && depth > 0; at++) {
-      const letter = body[at];
-      if (quoted) {
-        if (letter === "\\") at++;
-        else if (letter === '"') quoted = false;
-        continue;
-      }
-      if (letter === '"') quoted = true;
-      else if (letter === "(") depth++;
-      else if (letter === ")") depth--;
-    }
-    if (depth !== 0) throw new Error(`format: a new(...) at ${i} is never closed`);
-
-    found.push(body.slice(from, at - 1));
-    i = at - 1;
-  }
-  return found;
-}
-
-/** One brace- or bracket-delimited body, from the line that opens it. */
-function body(source, opens, open, shut, where) {
-  const at = source.indexOf(opens);
-  if (at < 0) throw new Error(`format: ${where} no longer declares ${opens}`);
-
-  // Past the declaration itself: `ActVerb[] Vocabulary` carries the opening bracket in its own
-  // type, and a search from the start of the match finds that one and reads an empty list.
-  const from = source.indexOf(open, at + opens.length);
-  let depth = 0;
-  for (let i = from; i < source.length; i++) {
-    if (source[i] === open) depth++;
-    else if (source[i] === shut && --depth === 0) return source.slice(from + 1, i);
-  }
-  throw new Error(`format: ${where} never closes ${opens}`);
-}
-
-/** Every `public const string NAME = "value";` a source declares, by name. A field addressed by
- *  one of these is the same key the loader's refusal lists, and resolving it here is what keeps
- *  the page from publishing the constant's name instead of the key. */
-function constants(source) {
-  return new Map(
-    [...source.matchAll(/public const string ([A-Za-z]+) = "([^"]*)"/g)].map((m) => [m[1], m[2]]),
-  );
-}
 
 /** A C# string expression as its value: a literal, a constant, an interpolation of constants, or
  *  any of those concatenated. Throws on anything else, because a description this cannot read is
@@ -201,7 +105,7 @@ function nameOf(expression, own, where) {
 function vocabulary(source, type) {
   const own = constants(source);
   const found = constructions(
-    body(code(source), `private static readonly ${type}[] Vocabulary`, "[", "]", `${type}.cs`),
+    bodyOf(code(source), `private static readonly ${type}[] Vocabulary`, "[", "]", `${type}.cs`),
   ).map((one) => nameOf(one, own, `an entry of ${type}'s vocabulary`));
 
   if (found.length === 0) throw new Error(`format: ${type} declares no vocabulary`);
@@ -268,7 +172,7 @@ function field(argv, where) {
 
 /** One of the schema's four lists, as the page shows it. */
 function shape(property, called) {
-  const declared = body(
+  const declared = bodyOf(
     schema,
     `public static IReadOnlyList<Field> ${property} { get; }`,
     "[",
@@ -286,7 +190,7 @@ function shape(property, called) {
 const kinds = (() => {
   // The source as written and not as `code` leaves it: a doc comment is what this reads, and
   // that pass takes every comment off so the structural parse cannot trip over one.
-  const declared = body(schemaSource, "public enum Taking", "{", "}", "ScenarioSchema.cs");
+  const declared = bodyOf(schemaSource, "public enum Taking", "{", "}", "ScenarioSchema.cs");
   const found = [];
   let doc = [];
   for (const raw of declared.split(/\r?\n/)) {

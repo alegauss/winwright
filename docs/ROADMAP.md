@@ -26,7 +26,6 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW489** (deps: —) **the verb catalogue is a README table, so no row can be linked and no verb says what it needs of the desk** — The suite already checks that catalogue against the engine in both directions, so publishing it costs a generator rather than a second list to keep. → §WW489
 - 📋 **WW490** (deps: —) **winwright.json is described by an example, so a reader cannot tell which keys this build accepts** — It is the first file an adopter writes, and an example with nine keys says nothing about the tenth or about what each one refuses. → §WW490
 - 📋 **WW491** (deps: —) **what earns a hole rather than a red is spread over the README, so a reader who met a 2 cannot look it up** — Degraded is the finding this project exists for and the verdict an adopter meets without understanding it, which is the moment a scattered explanation is worth nothing. → §WW491
 - 📋 **WW492** (deps: —) **the in-app half is described as a list of types, so nobody can tell what shipping it costs their users** — It is the one package that goes into an application real people run, and that decision needs what it writes, when, and what a release does with no harness attached. → §WW492
@@ -38,6 +37,7 @@
 - 📋 **WW498** (deps: —) **every page assumes the vocabulary, so a first-time reader meets case, hole, desk and reading undefined** — These words carry the design and none of them means here what it means elsewhere, so a reader guessing at one misreads every page that uses it. → §WW498
 - 📋 **WW500** (deps: —) **the site bakes the version at build time, so a release leaves the page offering the version before it** — The deploy is manual and the version is the figure a reader copies rather than reads, so a release opens a window where the page hands out a reference a version behind. → §WW500
 - 📋 **WW501** (deps: —) **the twelve readings a step may name are published as bare words, so nothing tells 'picked' from 'selected'** — An expectation names one reading, and one the element does not offer answers null forever — reported as nothing answering rather than as the wrong choice. → §WW501
+- 📋 **WW502** (deps: —) **one of the four page generators keeps its own C# reader, and it already disagrees with the shared one** — Two readings of a doc comment sit in one repository with nothing pairing them, so a rendering fixed in either is fixed in the wrong half. → §WW502
 
 ## Done when — Block A
 

@@ -45,25 +45,6 @@ have.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW489 The verbs, published from the catalogue the suite already checks
-
-Two tables in the README list the verb families: the ones that drive controls, and the
-ones that read the application and the desk it is on. They are the answer to "can this
-tool do the thing I need", and they are twenty-odd rows deep inside a file nobody can
-link a row of.
-
-What the page adds is the column the tables leave implicit: what each verb needs. A
-pattern act needs nothing of the desk and asks the control through its own accessibility
-peer; a synthesised act needs the foreground, and a run that did not get it answers a
-hole. That distinction is the difference between a suite that runs on a build agent and
-one that only runs at somebody's desk, and it is currently discovered on a red run.
-
-It is generated, because the catalogue exists already: every verb is entered in the
-suite against what it needs of the application and of the desk, and that entry is
-checked against the engine in both directions — a verb added without one is a red. So
-the page is a read of a list this repository is already gated on, and the cost of adding
-a verb does not go up by one hand-edited row.
-
 ### §WW490 The project declaration, key by key, off ProjectDeclaration
 
 `winwright.json` is the first file an adopting repository writes, and what the README
@@ -301,3 +282,25 @@ So the page needs a sentence per reading, and there is nowhere to read one from.
 above the entries, which a generator cannot take and a rename does not move. Giving each
 entry the sentence it already has in prose is what makes the column derivable — the same
 shape `LocatorStep`'s summaries gave the predicate table.
+
+### §WW502 The C# reader grammar.mjs was left out of
+
+Four generators now read this repository's C# to build a page, and three of them read it
+the same way: find a declaration's body by brace balance, split a collection expression
+into its `new(...)` entries, split an argument list at the commas that are not inside a
+string, and take a doc comment as data. WW489 extracted those into
+`site/scripts/csharp.mjs` rather than write a third copy of them, which is WW193's rule
+one language over — the walk is shared and the question never is.
+
+`grammar.mjs` was left out of the move, and it is the one that matters most. It carries
+its own `body` and its own `documented`, and they already disagree with the shared pair
+about a doc comment: the extracted `plain` strips the `<para>` tags and keeps what is
+inside them, while the copy in `grammar.mjs` splits on `<para>` and throws the rest
+away. Both are right for what they were written for, and neither says so — so the next
+person to fix a rendering bug in one has fixed it in the wrong half of a pair nothing
+pairs.
+
+The repair is the move rather than a comment explaining the difference. Whichever
+paragraph rule survives becomes the argument the shared reader already takes, and
+`grammar.test.mjs` is the case that says the predicate table did not change while it
+happened.
