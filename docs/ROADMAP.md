@@ -26,10 +26,10 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW502** (deps: —) **one of the four page generators keeps its own C# reader, and it already disagrees with the shared one** — Two readings of a doc comment sit in one repository with nothing pairing them, so a rendering fixed in either is fixed in the wrong half. → §WW502
 - 📋 **WW504** (deps: —) **the six page generators are chained by hand in two package.json scripts, and nothing holds the lists equal** — One missing from the area's own chain is silent on the machine that still holds yesterday's payload and red only on a clean checkout. → §WW504
 - 📋 **WW505** (deps: —) **four published sentences cite a task id, so an adopter reads WW483 and has nothing to open** — The generators publish the engine's own prose, which cites the task its reasoning started in — right for a reader of the source and meaningless on the site. → §WW505
 - 📋 **WW506** (deps: —) **the documentation area still bakes the version, so its package references go stale while the landing page stays current** — It is a second npm project and cannot import the landing page's picker, so making it live means moving that picker somewhere both builds read. → §WW506
+- 📋 **WW507** (deps: —) **the oldest generator still reads a doc comment its own way, and the shared reader's case excepts it by name** — It needs an enum member's declared value, which nothing else wants and the shared reader cannot answer, so the copy stands with a reason. → §WW507
 
 ## Done when — Block A
 

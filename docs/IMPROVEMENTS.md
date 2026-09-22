@@ -44,28 +44,6 @@ read.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW502 The C# reader grammar.mjs was left out of
-
-Four generators now read this repository's C# to build a page, and three of them read it
-the same way: find a declaration's body by brace balance, split a collection expression
-into its `new(...)` entries, split an argument list at the commas that are not inside a
-string, and take a doc comment as data. WW489 extracted those into
-`site/scripts/csharp.mjs` rather than write a third copy of them, which is WW193's rule
-one language over — the walk is shared and the question never is.
-
-`grammar.mjs` was left out of the move, and it is the one that matters most. It carries
-its own `body` and its own `documented`, and they already disagree with the shared pair
-about a doc comment: the extracted `plain` strips the `<para>` tags and keeps what is
-inside them, while the copy in `grammar.mjs` splits on `<para>` and throws the rest
-away. Both are right for what they were written for, and neither says so — so the next
-person to fix a rendering bug in one has fixed it in the wrong half of a pair nothing
-pairs.
-
-The repair is the move rather than a comment explaining the difference. Whichever
-paragraph rule survives becomes the argument the shared reader already takes, and
-`grammar.test.mjs` is the case that says the predicate table did not change while it
-happened.
-
 ### §WW504 The generator list, spelled twice
 
 Six generators now read this repository's C# to build the documentation area, and the
@@ -134,3 +112,27 @@ page's case rather than harder, there being no hydration to tear.
 
 Until then the area is correct at deploy and stale after, and WW500's page is the one to
 trust where the two disagree.
+
+### §WW507 The reader product.mjs still has, and the value it needs
+
+WW502 made `csharp.mjs` the one reader every generator walks C# with, and
+`csharp.test.mjs` refuses a second copy by name. It excepts `product.mjs`, which is the
+oldest of them and still reads a doc comment its own way: `outcomes()` walks
+`RunOutcome`'s members, accumulates the `///` lines above each, and takes the first
+sentence of the summary — which is what `documented` does, written out again.
+
+The exception is honest rather than a shortcut. `documented` answers with a member's
+name and its summary, and this generator needs a third thing the others never want: the
+value the member declares, because `RunOutcome`'s member values *are* the process exit
+codes. A member with no explicit value is refused rather than rendered as a guess, and
+that refusal is the whole reason the generator exists.
+
+So the repair is a parameter rather than a deletion: the shared reader learns to answer
+with the value where a member declares one, `product.mjs` asks for it, and the exception
+in `csharp.test.mjs` goes with the copy. What has to survive the move is the refusal — a
+code nobody wrote must still stop the build — and `product.test.mjs` already holds the
+published figures against the enum in both directions, so it is the case that says the
+exit codes did not change while it happened.
+
+Small, and the reason to do it is that this is the reader every page's figures now come
+through.

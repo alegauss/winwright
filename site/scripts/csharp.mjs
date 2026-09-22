@@ -114,16 +114,27 @@ export function constants(source) {
   );
 }
 
-/** A doc comment's prose as a page can print it: the inline tags carry nothing a reader of HTML
- *  needs, and `<see cref="Index"/>` is the word `Index` once the link is gone. */
-export function plain(xml) {
-  return xml
-    .replace(/<see\s+cref="(?:[A-Za-z]+\.)*([A-Za-z]+)"\s*\/>/g, "$1")
-    .replace(/<\/?(?:c|em|b|i|para)>/g, "")
+/** The four entities a doc comment escapes, back to the characters they stand for.
+ *
+ *  Its own function because a locator wants only this: `Window#main &gt; Pane` is text to
+ *  publish, not prose to clean up, and running it through `plain` would collapse the spacing a
+ *  reader is meant to see. */
+export function unescaped(text) {
+  return text
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, "&")
+    .replace(/&amp;/g, "&");
+}
+
+/** A doc comment's prose as a page can print it: the inline tags carry nothing a reader of HTML
+ *  needs, and `<see cref="Index"/>` is the word `Index` once the link is gone. */
+export function plain(xml) {
+  return unescaped(
+    xml
+      .replace(/<see\s+cref="(?:[A-Za-z]+\.)*([A-Za-z]+)"\s*\/>/g, "$1")
+      .replace(/<\/?(?:c|em|b|i|para)>/g, ""),
+  )
     .replace(/\s+/g, " ")
     .trim();
 }

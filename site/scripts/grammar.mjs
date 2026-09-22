@@ -24,81 +24,23 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { bodyOf, documented, unescaped } from "./csharp.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const siteDir = join(here, "..");
 const repoDir = join(siteDir, "..");
 
 const read = (...parts) => readFileSync(join(repoDir, "src", "Winwright", "Locating", ...parts), "utf8");
 
-/** The four entities a doc comment escapes, back to the characters they stand for. */
-function unescaped(text) {
-  return text
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, "&");
-}
-
-/** A doc comment's prose as a page can print it: the inline tags carry nothing a reader of
- *  HTML needs, and `<see cref="Index"/>` is the word `Index` once the link is gone. */
-function plain(xml) {
-  return unescaped(
-    xml
-      .replace(/<see\s+cref="(?:[A-Za-z]+\.)*([A-Za-z]+)"\s*\/>/g, "$1")
-      .replace(/<\/?(?:c|em|b|i)>/g, ""),
-  )
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-/** The first sentence of a `<summary>`, which is the one line a table cell is.
+/** The first sentence of a member's summary, which is the one line a table cell is.
  *
- *  The rest of the summary is a paragraph of reasoning and stays in the source, where it is
- *  read by whoever changes the thing it reasons about. Same decision as `product.mjs`, for the
- *  same reason. */
-function firstSentence(summary) {
-  return plain(summary.split("<para>")[0]).split(/(?<=\.)\s/)[0];
-}
-
-/** Every `<summary>`-carrying member of a declaration, by the line that declares it.
- *
- *  Doc comments accumulate and are dropped by any other non-blank line, so a member with none
- *  of its own never inherits the one above it. `declares` says which lines are members and
- *  what each is called; anything it does not recognise clears the comment. */
-function documented(source, declares, where) {
-  const found = [];
-  let doc = [];
-  for (const raw of source.split(/\r?\n/)) {
-    const line = raw.trim();
-    if (line.startsWith("///")) {
-      doc.push(line.replace(/^\/\/\/\s?/, ""));
-      continue;
-    }
-    const name = declares(line);
-    if (name) {
-      const summary = /<summary>([\s\S]*?)<\/summary>/.exec(doc.join(" "));
-      if (!summary) throw new Error(`grammar: ${where} declares ${name} with no <summary> to read`);
-      found.push({ name, meaning: firstSentence(summary[1]) });
-      doc = [];
-      continue;
-    }
-    if (line.length > 0) doc = [];
-  }
-  if (found.length === 0) throw new Error(`grammar: ${where} declares nothing this can read`);
-  return found;
-}
-
-/** One brace-delimited body out of a source, from the line that opens it. */
-function body(source, opens, where) {
-  const at = source.indexOf(opens);
-  if (at < 0) throw new Error(`grammar: ${where} no longer declares ${opens}`);
-  const from = source.indexOf("{", at);
-  let depth = 0;
-  for (let i = from; i < source.length; i++) {
-    if (source[i] === "{") depth++;
-    else if (source[i] === "}" && --depth === 0) return source.slice(from + 1, i);
-  }
-  throw new Error(`grammar: ${where} never closes ${opens}`);
+ *  The shared reader answers with the first paragraph, because that is what most of these
+ *  tables want. This one wants less: a predicate's row is one line, and the rest of the summary
+ *  is the reasoning that stays in the source. How much of the answer to show is the caller's
+ *  question, which is why it is asked here and not there.
+ */
+function sentence(meaning) {
+  return meaning.split(/(?<=\.)\s/)[0];
 }
 
 const locatorSource = read("Locator.cs");
@@ -144,8 +86,8 @@ function forms(source) {
 // the join is derived too — `class` fills `className`, which is `ClassName`, and no table here
 // says so.
 function predicates() {
-  const step = body(locatorSource, "private static LocatorStep Step(", "Locator.cs");
-  const arms = [...body(step, "switch (key)", "Locator.cs's Step").matchAll(/case "([A-Za-z]+)":([\s\S]*?)(?=\n\s*(?:case "|default:))/g)];
+  const step = bodyOf(locatorSource, "private static LocatorStep Step(", "{", "}", "Locator.cs");
+  const arms = [...bodyOf(step, "switch (key)", "{", "}", "Locator.cs's Step").matchAll(/case "([A-Za-z]+)":([\s\S]*?)(?=\n\s*(?:case "|default:))/g)];
   if (arms.length === 0) throw new Error("grammar: the switch in Locator.cs's Step has no arms to read");
 
   const fields = new Map(
@@ -153,7 +95,7 @@ function predicates() {
       stepSource,
       (line) => /^public [\w?<>, ]+ ([A-Z][A-Za-z]*) \{ get/.exec(line)?.[1],
       "LocatorStep.cs",
-    ).map((one) => [one.name, one.meaning]),
+    ).map((one) => [one.name, sentence(one.means)]),
   );
 
   const found = [];
@@ -192,7 +134,7 @@ function predicates() {
 // predicate that narrows nothing. Which one is refused is read off the refusal.
 function orders() {
   const declared = documented(
-    body(stepSource, "public enum MatchOrder", "LocatorStep.cs"),
+    bodyOf(stepSource, "public enum MatchOrder", "{", "}", "LocatorStep.cs"),
     (line) => /^([A-Z][A-Za-z]*),$/.exec(line)?.[1],
     "LocatorStep.cs's MatchOrder",
   );
@@ -208,7 +150,7 @@ function orders() {
 
   return declared
     .filter((one) => !refused.includes(one.name))
-    .map((one) => ({ order: one.name.toLowerCase(), meaning: one.meaning }));
+    .map((one) => ({ order: one.name.toLowerCase(), meaning: sentence(one.means) }));
 }
 
 // --- the refusals ---
@@ -218,7 +160,7 @@ function orders() {
 // cannot produce — which is the direction that goes unnoticed.
 function refusals() {
   const declared = documented(
-    body(faultSource, "public enum LocatorFault", "LocatorSyntaxException.cs"),
+    bodyOf(faultSource, "public enum LocatorFault", "{", "}", "LocatorSyntaxException.cs"),
     (line) => /^([A-Z][A-Za-z]*),$/.exec(line)?.[1],
     "LocatorSyntaxException.cs's LocatorFault",
   );
@@ -241,7 +183,7 @@ function refusals() {
     );
   }
 
-  return declared.slice(1).map((one) => ({ arm: one.name, meaning: one.meaning }));
+  return declared.slice(1).map((one) => ({ arm: one.name, meaning: sentence(one.means) }));
 }
 
 const { predicates: keys } = predicates();
