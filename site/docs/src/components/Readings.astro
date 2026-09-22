@@ -1,0 +1,34 @@
+---
+// The twelve readings a step may name, each with what it is about.
+//
+// `reads` publishes its closed list in full because "one of several" sends a reader back to a
+// tool they have not installed. Twelve words came out and nothing said what any one was —
+// `value`, `text` and `name` are guessable, `selected` and `picked` are not, and they are the
+// pair an author gets wrong.
+//
+// The sentence is the entry's own, carried in `ReadBack` beside the lambda that takes the
+// reading. Choosing wrong is not a red that names the mistake: a reading the element does not
+// offer answers null forever, and the failure sentence says nothing answered to it.
+import format from "../data/format.generated.json";
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Reading</th>
+      <th>What it is about</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      format.readings.map((one) => (
+        <tr id={`reads-${one.name}`}>
+          <td>
+            <code class="ww-field">{one.name}</code>
+          </td>
+          <td>{one.means}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

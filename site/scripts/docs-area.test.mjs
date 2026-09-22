@@ -379,6 +379,27 @@ test("the built refusals page shows each message as a searchable heading", () =>
   }
 });
 
+test("the built format page says what each reading is about, not only that it exists", () => {
+  // WW501. The page published these twelve as bare words for two commits. A row rendered with
+  // the name and no sentence reads exactly like one that helped, which is why this checks the
+  // cell rather than the anchor.
+  const page = join(builtDir, "case-format", "index.html");
+  assert.ok(existsSync(page), "dist/docs/case-format/index.html is missing — run `npm run build` first");
+  const rendered = readFileSync(page, "utf8");
+
+  const vocabulary = read(repoDir, "src", "Winwright", "Scenarios", "ReadBack.cs");
+  const entries = [...vocabulary.matchAll(/new\(\s*"([^"]+)",\s*"([^"]+)"/g)];
+  assert.ok(entries.length > 6, `only ${entries.length} reading(s) could be read out of ReadBack`);
+
+  for (const [, name, means] of entries) {
+    assert.match(rendered, new RegExp(`id="reads-${name}"`), `the format page has no row for the reading '${name}'`);
+    assert.ok(
+      rendered.includes(means) || rendered.includes(means.replace(/'/g, "&#39;")),
+      `the format page shows '${name}' without saying what it reads`,
+    );
+  }
+});
+
 test("the built area names every outcome the enum declares, with its code", () => {
   const src = read(repoDir, "src", "Winwright", "Verdicts", "RunOutcome.cs");
   const body = /enum\s+RunOutcome\s*\{([\s\S]*)\}/.exec(src);

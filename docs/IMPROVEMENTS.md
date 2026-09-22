@@ -44,28 +44,6 @@ read.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW501 A sentence per reading, which the vocabulary has nowhere to keep
-
-WW488 publishes the closed list `reads` accepts, in full, because a field described as
-"one of several" sends a reader back to a tool they have not installed. Twelve words
-came out, and nothing beside them says what any one of them is about. `value`, `text`
-and `name` are guessable; `selected` and `picked` are not, and they are the pair an
-author gets wrong.
-
-The distinction is measured rather than stylistic, and the source already states it:
-`selected` asks whether this element is the chosen one and `picked` asks which one a
-container chose. WW266 found it missing on a profile picker offering no ValuePattern —
-`value` answered nothing, `name` answered the picker's own label, and a round trip
-comparing either would have held on every machine whatever the picker did. Choosing
-wrong is not a red that names the mistake: a reading the element does not offer answers
-null forever, and the failure sentence says nothing answered to it.
-
-So the page needs a sentence per reading, and there is nowhere to read one from.
-`ActVerb` and `ReadBack` are vocabularies of lambdas: the reasoning lives in comments
-above the entries, which a generator cannot take and a rename does not move. Giving each
-entry the sentence it already has in prose is what makes the column derivable — the same
-shape `LocatorStep`'s summaries gave the predicate table.
-
 ### §WW502 The C# reader grammar.mjs was left out of
 
 Four generators now read this repository's C# to build a page, and three of them read it

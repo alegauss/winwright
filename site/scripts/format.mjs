@@ -112,6 +112,31 @@ function vocabulary(source, type) {
   return found;
 }
 
+/** The same vocabulary with what each entry says about itself. WW501.
+ *
+ *  `reads` is the one closed list whose words are not guessable: `selected` and `picked` are the
+ *  pair an author gets wrong, and choosing wrong is not a red that names the mistake — a reading
+ *  the element does not offer answers null forever. So the entries carry a sentence, and one that
+ *  stopped carrying it stops the build rather than reaching the page as a bare word again. */
+function explained(source, type) {
+  const own = constants(source);
+  const found = constructions(
+    bodyOf(code(source), `private static readonly ${type}[] Vocabulary`, "[", "]", `${type}.cs`),
+  ).map((one) => {
+    const args = splitTop(one, ",");
+    const name = nameOf(args[0], own, `an entry of ${type}'s vocabulary`);
+    const means = /^"([\s\S]*)"$/.exec((args[1] ?? "").trim());
+
+    if (!means) {
+      throw new Error(`format: ${type}'s '${name}' says nothing about what it reads, and the page publishes it`);
+    }
+    return { name, means: means[1].replace(/\\"/g, '"') };
+  });
+
+  if (found.length === 0) throw new Error(`format: ${type} declares no vocabulary`);
+  return found;
+}
+
 const schemaSource = read("ScenarioSchema.cs");
 const schema = code(schemaSource);
 const consts = constants(schema);
@@ -215,6 +240,9 @@ const kinds = (() => {
 
 const format = {
   kinds,
+  // WW501. The one closed list whose words a reader cannot guess, so it is published with the
+  // sentence each entry carries rather than as `oneOf`'s bare names.
+  readings: explained(read("ReadBack.cs"), "ReadBack"),
   shapes: [
     shape("File", "file"),
     shape("Case", "case"),
@@ -222,6 +250,21 @@ const format = {
     shape("Fixture", "fixture"),
   ],
 };
+
+// The same twelve, said the same way. `reads` publishes the names and this publishes the
+// sentences, and a page showing one list beside the other is a page where an author reads a
+// sentence under the wrong word.
+const named = format.shapes
+  .find((one) => one.shape === "step")
+  ?.fields.find((one) => one.name === "reads")
+  ?.oneOf ?? [];
+
+if (named.join("|") !== format.readings.map((one) => one.name).join("|")) {
+  throw new Error(
+    `format: 'reads' accepts ${named.join(", ")} and the sentences are for `
+      + format.readings.map((one) => one.name).join(", "),
+  );
+}
 
 // Every kind a field claims to hold is one the enum has. A page grouping by a kind that is not
 // there would render an empty word, which reads as a field that says nothing about its value.

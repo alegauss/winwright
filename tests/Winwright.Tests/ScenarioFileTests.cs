@@ -268,6 +268,28 @@ public class ScenarioFileTests
     }
 
     [Fact]
+    public void Every_reading_says_what_it_is_about()
+    {
+        // WW501. The twelve reach a page that publishes the closed list in full, and until this
+        // they reached it as bare words. Choosing wrong is not a red that names the mistake: a
+        // reading the element does not offer answers null forever, and the failure sentence says
+        // nothing answered to it — so the sentence has to reach the author before they choose.
+        Assert.All(ReadBack.All, one =>
+        {
+            Assert.False(string.IsNullOrWhiteSpace(one.Means), $"'{one.Name}' says nothing about what it reads");
+            Assert.EndsWith(".", one.Means, StringComparison.Ordinal);
+
+            // A sentence that is the name again has told an author nothing, and it reads exactly
+            // like one that helped.
+            Assert.DoesNotContain($"the {one.Name} of", one.Means, StringComparison.OrdinalIgnoreCase);
+        });
+
+        // Distinct, because the pair this exists for is `selected` and `picked`: two readings
+        // sharing a sentence are two an author still cannot tell apart.
+        Assert.Distinct(ReadBack.All.Select(one => one.Means));
+    }
+
+    [Fact]
     public void Every_field_a_case_and_a_fixture_declare_arrives_off_the_walk()
     {
         // WW435. The loader read a case's nine fields and a fixture's eight one hand-written line

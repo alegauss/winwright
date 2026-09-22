@@ -7,6 +7,7 @@ import { Aside } from "@astrojs/starlight/components";
 
 import Fields from "../../components/Fields.astro";
 import Kinds from "../../components/Kinds.astro";
+import Readings from "../../components/Readings.astro";
 
 A case is a **data file**. Any file ending `.cases.json`, anywhere under the directory a run
 points at, read recursively in path order.
@@ -57,6 +58,19 @@ that the reading changed, that it says something rather than nothing, that it ma
 that it is back to what an earlier step read, or that it equals a string derived from your
 application's own declarations rather than typed here.
 </Aside>
+
+### Which reading `reads` is about
+
+A claim is about **one** reading, and the wrong one does not fail in a way that says so: a
+reading the element does not offer answers nothing at all, forever, and the failure sentence
+says *nothing answered to it* rather than naming the reading that was never there.
+
+<Readings />
+
+`selected` and `picked` are the pair worth reading twice. One asks whether this element is the
+chosen one; the other asks which one a container chose. A picker offering no value pattern
+answers nothing to `value` and answers its own label to `name`, so a round trip comparing
+either would hold on every machine whatever the picker did.
 
 ## A fixture
 

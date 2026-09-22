@@ -138,6 +138,41 @@ test("the two computed lists are the vocabularies, not an empty set", () => {
   }
 });
 
+test("every reading is published with the sentence its own entry carries", () => {
+  // WW501. `reads` publishes its closed list in full, and the words are not guessable: choosing
+  // wrong is not a red that names the mistake, because a reading the element does not offer
+  // answers null forever. So the sentence has to reach the author, and it has to be the entry's
+  // own rather than one the page invented.
+  const vocabulary = source("ReadBack.cs");
+  const entries = [...vocabulary.matchAll(/new\(\s*"([^"]+)",\s*"([^"]+)"/g)].map((m) => ({
+    name: m[1],
+    means: m[2],
+  }));
+  assert.ok(entries.length > 6, `only ${entries.length} reading(s) could be read out of ReadBack`);
+
+  assert.deepEqual(
+    format.readings.map((one) => one.name),
+    entries.map((one) => one.name),
+    "the readings the page explains are not the ones ReadBack declares",
+  );
+
+  for (const one of format.readings) {
+    const entry = entries.find((each) => each.name === one.name);
+    assert.equal(one.means, entry.means, `'${one.name}' is published with a sentence ReadBack does not carry`);
+    assert.ok(one.means.endsWith("."), `'${one.name}' is published without a full stop`);
+  }
+
+  // The same twelve the field accepts. A page showing one list beside the other is a page where
+  // an author reads a sentence under the wrong word.
+  const reads = shaped("step").fields.find((one) => one.name === "reads");
+  assert.deepEqual(reads.oneOf, format.readings.map((one) => one.name), "'reads' accepts other words than the page explains");
+
+  // Distinct, because the pair this exists for is `selected` and `picked`: two readings sharing
+  // a sentence are two an author still cannot tell apart.
+  const said = format.readings.map((one) => one.means);
+  assert.equal(new Set(said).size, said.length, "two readings are published with the same sentence");
+});
+
 test("exactly the two subjects are alternatives, and the claims are the ones marked", () => {
   const step = shaped("step").fields;
 
