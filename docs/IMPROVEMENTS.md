@@ -24,27 +24,6 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW504 The generator list, spelled twice
-
-Six generators now read this repository's C# to build the documentation area, and the
-list of them is written twice: `generate` in `site/package.json` and `prebuild` in
-`site/docs/package.json`. Both are hand-chained `&&` sequences, and nothing compares
-them. WW491 added the sixth and had to remember two places to do it.
-
-The failure is asymmetric, which is what makes it worth a line rather than a comment. A
-generator missing from `prebuild` is loud on a clean checkout — the area imports a
-payload that was never written and the build stops — and silent on the machine of
-whoever added it, because their `docs/src/data/` still holds the file from the last time
-they ran it by hand. So the author sees green, CI sees red, and the distance between
-those two is a push.
-
-`docs-area.test.mjs` already holds the joins of this shape: the base, the output
-directory, the build order. This is the same kind of fact — two spellings of one list —
-and the same case can hold it, by reading the `.mjs` files that write into
-`docs/src/data/` and asserting each is named in both scripts. That reading is worth more
-than the equality: a generator nobody chained at all would be a file in `scripts/` that
-runs nowhere, and neither list would say so.
-
 ### §WW505 The task ids the generated sentences carry onto the site
 
 Four sentences on the published area cite a task id. `/verbs/` carries WW317, WW470 and

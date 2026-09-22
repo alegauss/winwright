@@ -80,6 +80,51 @@ test("nothing after the area's build empties what it wrote", () => {
   }
 });
 
+test("every generator that writes into the area is chained by both scripts", () => {
+  // WW504. The list of them is written twice — `generate` here and `prebuild` next door — and
+  // nothing compared the two. The failure is asymmetric, which is what makes it worth holding: a
+  // generator missing from `prebuild` stops a clean checkout dead, and is silent on the machine
+  // of whoever added it, because their `docs/src/data/` still holds the file from the last time
+  // they ran it by hand. The author sees green, CI sees red, and the distance is a push.
+  //
+  // Found by what they write rather than by a list, which is the half worth more than the
+  // equality: a generator nobody chained at all is a file in `scripts/` that runs nowhere, and
+  // neither script would say so.
+  const generators = readdirSync(join(siteDir, "scripts"))
+    .filter((one) => one.endsWith(".mjs") && !one.endsWith(".test.mjs"))
+    .filter((one) => read(siteDir, "scripts", one).includes('"docs", "src", "data"'))
+    .sort();
+
+  assert.ok(generators.length > 4, `only ${generators.length} generator(s) write into the area`);
+
+  const docsPackage = JSON.parse(read(docsDir, "package.json"));
+  const chains = [
+    ["site/package.json's generate", sitePackage.scripts.generate, "scripts/"],
+    ["site/docs/package.json's prebuild", docsPackage.scripts.prebuild, "../scripts/"],
+  ];
+
+  const orders = [];
+  for (const [named, chain, prefix] of chains) {
+    assert.ok(chain, `${named} is not there to chain anything`);
+
+    const ran = chain
+      .split("&&")
+      .map((one) => one.trim())
+      .filter((one) => one.startsWith("node "))
+      .map((one) => one.slice("node ".length).trim().replace(prefix, ""));
+
+    // A set, because the order within a chain is a judgement nobody here should overrule: these
+    // read sources rather than each other's output, and whoever chains a seventh may have a
+    // reason to put it anywhere.
+    assert.deepEqual([...ran].sort(), generators, `${named} does not run exactly the generators that write into the area`);
+    orders.push(ran);
+  }
+
+  // The two orders do have to agree with each other, though. Two chains running one set two ways
+  // is two builds, and the one nobody watches is the area's.
+  assert.deepEqual(orders[0], orders[1], "the two scripts run the generators in different orders");
+});
+
 test("the site links to the area rather than to a file on GitHub", () => {
   const content = read(siteDir, "src", "lib", "site-content.ts");
   const docsHref = /export const docsUrl = "([^"]+)"/.exec(content);
