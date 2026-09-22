@@ -20,8 +20,6 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- 📋 **WW503** (deps: —) **the README's project example omits a key this build reads, and the gate over it checks nine names somebody typed** — An adopter writes that block by copying it, so a key missing from it is a key nobody uses — and the check that should have said so names nine of sixteen. → §WW503
-
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ## Block L — The documentation area — written for a reader who has installed nothing

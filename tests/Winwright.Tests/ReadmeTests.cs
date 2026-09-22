@@ -87,16 +87,26 @@ public sealed class ReadmeTests
     {
         // An adopter writes this file by copying the block. A key that is not in the block is a key
         // nobody uses, which is the same as a key that does not exist.
+        //
+        // WW503. This named nine of them, typed here — so the example could lose a key and the
+        // gate would not look, which is what happened: `captures` had been missing since the
+        // capture verb shipped. WW490 gave `ProjectDeclaration` a catalogue of its own keys, held
+        // against the deserialiser's shape in both directions, so there is no longer any reason to
+        // keep a second list of what to look for.
         var said = Text();
+        var keys = Winwright.Projects.ProjectDeclaration.Keys;
 
-        foreach (var key in new[]
-        {
-            "executable", "sourceRoot", "sourceIgnore", "fingerprintStore",
-            "languageFiles", "language", "timeouts", "attempts", "destructive",
-        })
-        {
-            Assert.Contains($"\"{key}\"", said, StringComparison.Ordinal);
-        }
+        Assert.True(keys.Count > 9, $"the catalogue holds {keys.Count} key(s), and this used to name nine");
+
+        var absent = keys
+            .Where(one => !said.Contains($"\"{one.Name}\"", StringComparison.Ordinal))
+            .Select(one => one.Addressed)
+            .ToList();
+
+        Assert.True(
+            absent.Count == 0,
+            $"{absent.Count} key(s) this build reads are not in the example an adopter copies: "
+                + string.Join(", ", absent));
     }
 
     [Fact]

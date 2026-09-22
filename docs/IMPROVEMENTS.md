@@ -20,26 +20,6 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-### §WW503 The nine typed names, now that the catalogue exists
-
-`ReadmeTests` holds the README's `winwright.json` block to the keys a project can
-declare, and the list it holds it to is nine names typed into the case. This build reads
-thirteen at the top level and three more under `language`. The example shows twelve:
-`captures` is missing from it, and has been since the capture verb shipped — the gate
-never looked, because `captures` is not one of the nine.
-
-That is the exact shape the check was written against one file over. An adopter writes
-this block by copying it, so a key that is not in it is a key nobody uses, which is the
-same as a key that does not exist — and the case saying so was itself a hand-kept list
-of what to look for.
-
-WW490 removed the reason to keep one. `ProjectDeclaration.Keys` catalogues every key
-with what it holds, what it means and what leaving it out does, and the suite holds that
-catalogue against the deserialiser's own shape in both directions. So the case can read
-`Keys` instead of naming nine, and the README gains the row it is missing in the same
-commit — two lines of test for a gate that then covers every key this build will ever
-read.
-
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ## Block L — The documentation area — written for a reader who has installed nothing

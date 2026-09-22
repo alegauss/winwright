@@ -294,6 +294,7 @@ needs one this file does not declare is **recorded as not taken**, never quietly
   "sourceRoot": "src/YourApp",
   "sourceIgnore": ["bin", "obj"],
   "fingerprintStore": "%APPDATA%/YourApp",
+  "captures": "TestResults/captures",
   "languageFiles": ["strings.en.json", "strings.pt-BR.json"],
   "reportedSets": { "profiles": ["--print-profiles"] },
   "reportedValues": { "activeProfile": ["--print-active-profile"] },
