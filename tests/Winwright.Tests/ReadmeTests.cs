@@ -220,5 +220,45 @@ public sealed class ReadmeTests
         return found;
     }
 
+    [Fact]
+    public void Every_form_the_grammar_states_is_one_this_file_shows()
+    {
+        // WW499. This file is held to the engine on four counts — the exit codes off the enum, the
+        // verb families off the catalogue, the non-goals off the governed list, the project keys
+        // off the schema — and the locator grammar was not one of them. It is the table every
+        // adopter reads on nuget.org before they have a checkout, and it had already drifted from
+        // the block in `Locator`'s own remarks.
+        //
+        // One direction, and the direction is the decision: the parser's block is the source and
+        // this file is held to it. A form the grammar states and this file does not show is a form
+        // an adopter is never told about.
+        var stated = Grammar.Stated();
+        var published = Grammar.Published().Select(one => one.Written).ToList();
+
+        Assert.True(stated.Count > 10, $"the grammar's own summary states only {stated.Count} form(s)");
+
+        var missing = stated.Where(one => !published.Contains(one.Written, StringComparer.Ordinal)).ToList();
+        Assert.True(
+            missing.Count == 0,
+            $"{missing.Count} form(s) the grammar states are not in the README's table: "
+                + string.Join("; ", missing.Select(one => one.Written)));
+    }
+
+    [Fact]
+    public void Every_form_this_file_shows_is_one_that_parses()
+    {
+        // The other end of the same rule, and why it is not a deletion. The README may carry a row
+        // the parser's summary does not — it does, for the brace that reads what the application
+        // reports — because a longer table is prose and not drift. What it may not carry is a form
+        // the grammar does not have, which is a line somebody copies and is refused on.
+        foreach (var (written, addresses) in Grammar.Published())
+        {
+            Assert.NotEqual("", addresses);
+
+            var parsed = Winwright.Locating.Locator.Parse(written);
+            Assert.Equal(parsed.Steps, Winwright.Locating.Locator.Parse(parsed.ToString()).Steps);
+        }
+    }
+
     private static string Props() => Checkout.At("Directory.Build.props");
 }

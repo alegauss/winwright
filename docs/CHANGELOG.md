@@ -449,6 +449,7 @@
 - ✅ **WW86** **claude-tray still carries a 3,004-line interaction harness, and one of its claims has no case** — Check-Interaction.ps1 is deleted and the icon's left-click is its last claim to become a case: 23 cases check 95 claims in 128-159 s, where the script checked 31 in 46 s and crashed.
 - ✅ **WW484** **claude-tray's Profile submenu switches were only ever checked in whichever position the guest happened to hold** — A fixture puts claude-tray's switches in either position, so both words, both scope sentences, Open Claude Code's two shapes and the pin and its undo are cases.
 - ✅ **WW480** **the preview loop is a 451-line screen copy wired into four documents, and deleting it is not a migration** — claude-tray draws its preview windows as cases: it took Winwright.InApp by decision, `preview.cmd` reaches one by tag, and the 451-line screen copy is deleted.
+- ✅ **WW499** **the README's table of locator forms is a hand-kept copy of the parser's own, and the two already differ** — The README's grammar table is held to the parser both ways now: every form the grammar states is shown, and every form shown parses (design recorded in `tests/Winwright.Tests/Grammar.cs`).
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

@@ -20,27 +20,6 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-### §WW499 The README's grammar table, held to the parser like everything else it states
-
-`ReadmeTests` holds this file to the engine on four counts — the exit codes off the
-enum, the verb families off the catalogue, the non-goals off the governed list, the
-project keys off the schema — and the locator grammar is not one of them. It is a fenced
-block somebody typed, and WW487 found it has already drifted from the block in
-`Locator`'s own remarks: fourteen rows against thirteen, the extra one being the
-reported-name brace.
-
-Which of the two is right is the part worth deciding, and neither is obviously wrong.
-The README's extra row documents a form that really parses; the parser's block is the
-one the documentation area now publishes and the one the suite parses row by row. So the
-repair is not a deletion but a direction — one block is the source and the other is held
-to it.
-
-The check is the shape of the four already there, and most of it is written.
-`LocatorTests.Forms()` reads the parser's block and `site/scripts/grammar.mjs` reads it
-again for the page; a case asserting that every form it yields appears in the README
-lets that file carry extra prose around a form and never a form the grammar does not
-have.
-
 ### §WW503 The nine typed names, now that the catalogue exists
 
 `ReadmeTests` holds the README's `winwright.json` block to the keys a project can
