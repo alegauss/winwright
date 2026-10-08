@@ -11,6 +11,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { bodyOf, members } from "./csharp.mjs";
+
 const siteDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = join(siteDir, "..");
 const distDir = join(siteDir, "dist");
@@ -22,20 +24,26 @@ before(() => {
   landing = readFileSync(md, "utf8");
 });
 
-/** The enum members and their values, read straight out of the C#. */
+/** The enum members and their values, read straight out of the C#.
+ *
+ *  WW511: this required `= <digits>` and so had the generator's own blind spot — a member
+ *  declaring no value matched nothing, and a line a matcher does not match is a line nothing
+ *  reports, so the page could have named three outcomes of four with this agreeing. `members`
+ *  asks what the body separates, and the value is read off a line already known to be a
+ *  member, which is how a code nobody wrote now reaches the assertion below instead of
+ *  slipping past it. */
 function outcomes() {
   const src = readFileSync(
     join(repoDir, "src", "Winwright", "Verdicts", "RunOutcome.cs"),
     "utf8",
   );
-  const body = /enum\s+RunOutcome\s*\{([\s\S]*)\}/.exec(src);
-  assert.ok(body, "RunOutcome.cs no longer declares an enum RunOutcome");
-  const found = [...body[1].matchAll(/^\s*([A-Z][A-Za-z]*)\s*=\s*(\d+)\s*,?$/gm)].map((m) => ({
-    name: m[1],
-    code: Number(m[2]),
-  }));
-  assert.ok(found.length > 0, "RunOutcome.cs declares no members");
-  return found;
+
+  return members(bodyOf(src, "enum RunOutcome", "{", "}", "RunOutcome.cs")).map((one) => {
+    const valued = /=\s*(\d+)\s*$/.exec(one.declares);
+    assert.ok(valued, `RunOutcome.${one.name} declares no value, and its value is the exit code`);
+
+    return { name: one.name, code: Number(valued[1]) };
+  });
 }
 
 test("the landing page names every outcome the enum declares, with its code", () => {

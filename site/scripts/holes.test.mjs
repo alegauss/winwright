@@ -12,7 +12,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { code } from "./csharp.mjs";
+import { bodyOf, code, members } from "./csharp.mjs";
 
 const siteDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = join(siteDir, "..");
@@ -78,11 +78,17 @@ test("the desk's are the ones DeskFacts calls the desk's, each with its reason",
 });
 
 test("the three buckets are the enum's, and each says what to do about it", () => {
+  // WW511. This read `Whose` with the generator's own regex, copied — so a member declared
+  // with a value, or a last one written without its trailing comma, was missed by both and
+  // reported by neither. `members` asks what the body separates instead.
   const source = readFileSync(join(engine, "Verdicts", "Holes.cs"), "utf8");
-  const members = [...source.matchAll(/^ {4}([A-Z][A-Za-z]*),$/gm)].map((m) => m[1]);
-  assert.ok(members.length > 0, "Whose declares nothing this can read");
+  const declared = members(bodyOf(source, "public enum Whose", "{", "}", "Holes.cs"));
 
-  assert.deepEqual(holes.kinds.map((one) => one.kind), members, "the buckets are not the ones Whose declares");
+  assert.deepEqual(
+    holes.kinds.map((one) => one.kind),
+    declared.map((one) => one.name),
+    "the buckets are not the ones Whose declares",
+  );
   for (const { kind, means } of holes.kinds) {
     assert.ok(means.length > 20, `${kind} is published with nothing useful said about it`);
     assert.ok(!means.includes("<"), `${kind}'s sentence still carries a doc-comment tag`);

@@ -139,6 +139,53 @@ export function plain(xml) {
     .trim();
 }
 
+/** Every member a declaration's body declares, by name. WW511.
+ *
+ *  A different question from `documented`'s, deliberately. That one asks which lines look like
+ *  a member, which is a matcher and can be wrong in one direction without saying so: a line it
+ *  does not recognise is a line nothing reports, so the member leaves the page in silence. This
+ *  asks what the body separates, which no name-shape decides — `splitTop` is already here and
+ *  already skips a comma inside a string, a bracket or a call.
+ *
+ *  The name is then read off a line this has already decided is a member, which is the safe
+ *  half of the same reading: being wrong about the spelling of a member it found is a red that
+ *  says so, where being wrong about whether a line is a member at all is silence.
+ *
+ *  So a pairing holds a generator's published list to this rather than to a second copy of the
+ *  generator's own regex, which is the state WW511 found: `verbs.test.mjs` read `Cooperation`'s
+ *  members with the very regex `verbs.mjs` reads them with, and checked one direction. A member
+ *  both halves missed was a member neither reported.
+ *
+ *  Comment-only chunks are not members. A trailing comma leaves one, and so does a `//` note
+ *  after the last member; neither declares anything. */
+export function members(body) {
+  const found = [];
+
+  // Through `code` first, because a doc comment's prose has commas in it and `splitTop` only
+  // knows about the ones inside a string, a bracket or a call. Stripping them is right here
+  // and nowhere near `documented`: there the comment is the subject, and here the separators
+  // are, so a sentence reading "the engine cannot call it at all — the assembly carries no
+  // reference to it" was four members until this line existed.
+  for (const chunk of splitTop(code(body), ",")) {
+    const lines = chunk
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith("//"));
+
+    if (lines.length === 0) continue;
+
+    // The member's own line is the last: a doc comment comes above it, and `splitTop` cut
+    // after the comma that ended the member before.
+    const named = /^([A-Za-z_]\w*)/.exec(lines.at(-1));
+    if (!named) throw new Error(`csharp: a member declared as '${lines.at(-1)}' has no name this can read`);
+
+    found.push({ name: named[1], declares: lines.at(-1) });
+  }
+
+  if (found.length === 0) throw new Error("csharp: that body declares no members");
+  return found;
+}
+
 /** Every `<summary>`-carrying member of a declaration, by the line that declares it.
  *
  *  Doc comments accumulate and are dropped by any other non-blank line, so a member with none

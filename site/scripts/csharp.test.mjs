@@ -25,7 +25,9 @@ test("the shared reader is the only one that declares the walk", () => {
   // By name, because a second walk arrives spelled the same way the first is — somebody copies
   // the function that already works. What each generator then asks of it is its own business
   // and is never checked here, which is the split WW193 made one language over.
-  const walk = ["code", "splitTop", "constructions", "bodyOf", "constants", "plain", "unescaped", "documented"];
+  const walk = [
+    "code", "splitTop", "constructions", "bodyOf", "constants", "plain", "unescaped", "documented", "members",
+  ];
 
   for (const { name, text } of others) {
     for (const one of walk) {
@@ -61,8 +63,13 @@ test("a generator that reads the engine's C# reads it through the shared one", (
 });
 
 test("the shared reader still offers the whole walk", () => {
-  // The seven a generator would otherwise copy. One of them going is how the copying starts
+  // The ones a generator would otherwise copy. One of them going is how the copying starts
   // again: the caller that needed it writes its own, and nothing says the two exist.
+  //
+  // WW511 added `members`, which is the one a pairing reads with rather than a generator: it
+  // asks what a body separates, where `documented` asks which lines look like a member. The
+  // two are deliberately different questions, because a case that asks the generator's is a
+  // case that misses whatever the generator missed.
   //
   // Whether it has started answering somebody's question instead of walking is a judgement
   // about meaning, and this makes no claim about it — a list of forbidden words would pass a
@@ -73,7 +80,7 @@ test("the shared reader still offers the whole walk", () => {
 
   assert.deepEqual(
     exported.sort(),
-    ["bodyOf", "code", "constants", "constructions", "documented", "plain", "splitTop", "unescaped"],
+    ["bodyOf", "code", "constants", "constructions", "documented", "members", "plain", "splitTop", "unescaped"],
     "the shared reader's surface changed, and every generator reads it",
   );
 });

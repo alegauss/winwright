@@ -14,6 +14,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { bodyOf, members } from "./csharp.mjs";
+
 const siteDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = join(siteDir, "..");
 
@@ -126,12 +128,14 @@ test("every refusal the page describes is one the parser throws", () => {
 test("the refusals are the enum's members, in the order it declares them", () => {
   // Minus the default, which is what a throw that did not say which leaves behind. Order
   // matters because the enum's own reasoning is written against it.
-  const declared = [...fault.matchAll(/^\s{4}([A-Z][A-Za-z]*),$/gm)].map((m) => m[1]);
+  // WW511. Read with the generator's own regex, copied, so a member declared with a value or
+  // a last one without its comma was missed by both halves and reported by neither.
+  const declared = members(bodyOf(fault, "public enum LocatorFault", "{", "}", "LocatorSyntaxException.cs"));
   assert.ok(declared.length > 1, "LocatorFault declares nothing this can read");
 
   assert.deepEqual(
     grammar.refusals.map((one) => one.arm),
-    declared.slice(1),
+    declared.slice(1).map((one) => one.name),
     "the page's refusals are not LocatorFault's members after the default one",
   );
 });
@@ -143,7 +147,8 @@ test("the orders are the ones the grammar takes, and never the tree's own", () =
   const refused = [...locator.matchAll(/sorted == MatchOrder\.([A-Za-z]+)/g)].map((m) => m[1]);
   assert.ok(refused.length > 0, "Locator.cs refuses no MatchOrder");
 
-  const declared = [...step.matchAll(/^\s{4}([A-Z][A-Za-z]*),$/gm)].map((m) => m[1]);
+  const declared = members(bodyOf(step, "public enum MatchOrder", "{", "}", "LocatorStep.cs"))
+    .map((one) => one.name);
   const taken = declared.filter((one) => !refused.includes(one)).map((one) => one.toLowerCase());
 
   assert.deepEqual(

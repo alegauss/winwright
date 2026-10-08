@@ -126,32 +126,6 @@ reports that step Ok.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW511 The matcher nothing reports on
-
-`documented` says nothing about a line its matcher did not match. It clears the doc
-comment it had accumulated and moves on — right for a brace or a blank line, silence for
-a member it failed to recognise.
-
-Three callers match with `/^([A-Z][A-Za-z]*),$/` — `grammar.mjs` twice, `verbs.mjs` and
-`holes.mjs`. That recognises a valueless member with a trailing comma and nothing else.
-Give one of those enums a member with a value, or write the last one without its comma,
-and the member leaves the page with nothing said.
-
-What makes this more than a shape worth tidying is that the pairing meant to catch it
-asks the same question. `verbs.test.mjs` finds `Cooperation`'s members with `/^
-{4}([A-Z][A-Za-z]*),$/gm` — the generator's own regex, copied — and checks one
-direction: every kind published is declared. So the page would explain one kind of
-cooperation where the engine has two, and the suite would be green.
-
-WW507 repaired exactly this in the fourth caller, and its shape is the one to carry
-across: the matcher recognises any member, and the caller refuses after the walk what it
-cannot use. A line that does not match is a line nothing reports, so nothing may depend
-on a matcher being complete.
-
-The pairings are the other half, and a second regex over the same lines is not an
-independent read. Counting the members a body declares is a different question from
-which lines look like one, and it is the question a case should ask.
-
 ### §WW514 The hole nothing refuses
 
 `format.mjs` publishes the schema's own sentences, read out of `ScenarioSchema.cs` as

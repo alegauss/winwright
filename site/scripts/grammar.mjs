@@ -93,7 +93,9 @@ function predicates() {
   const fields = new Map(
     documented(
       stepSource,
-      (line) => /^public [\w?<>, ]+ ([A-Z][A-Za-z]*) \{ get/.exec(line)?.[1],
+      // WW511: `{ get` alone missed an expression-bodied property, and a line this does not
+      // match is a line nothing reports — the field would have left the page in silence.
+      (line) => /^public [\w?<>, ]+ ([A-Z][A-Za-z]*) (?:\{ get|=>)/.exec(line)?.[1],
       "LocatorStep.cs",
     ).map((one) => [one.name, sentence(one.means)]),
   );
@@ -135,7 +137,7 @@ function predicates() {
 function orders() {
   const declared = documented(
     bodyOf(stepSource, "public enum MatchOrder", "{", "}", "LocatorStep.cs"),
-    (line) => /^([A-Z][A-Za-z]*),$/.exec(line)?.[1],
+    (line) => /^([A-Z][A-Za-z]*)[^,]*,?$/.exec(line)?.[1],
     "LocatorStep.cs's MatchOrder",
   );
 
@@ -161,7 +163,7 @@ function orders() {
 function refusals() {
   const declared = documented(
     bodyOf(faultSource, "public enum LocatorFault", "{", "}", "LocatorSyntaxException.cs"),
-    (line) => /^([A-Z][A-Za-z]*),$/.exec(line)?.[1],
+    (line) => /^([A-Z][A-Za-z]*)[^,]*,?$/.exec(line)?.[1],
     "LocatorSyntaxException.cs's LocatorFault",
   );
 

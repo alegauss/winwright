@@ -59,7 +59,7 @@ if (declared.length === 0) throw new Error("holes: the engine declares no precon
 // this run's is a repository to open, and unclassified is somebody's to go and classify.
 const kinds = documented(
   bodyOf(read("Verdicts", "Holes.cs"), "public enum Whose", "{", "}", "Holes.cs"),
-  (line) => /^([A-Z][A-Za-z]*),$/.exec(line)?.[1],
+  (line) => /^([A-Z][A-Za-z]*)[^,]*,?$/.exec(line)?.[1],
   "Holes.cs's Whose",
   false,
 ).map((one) => ({ kind: one.name, means: one.means }));

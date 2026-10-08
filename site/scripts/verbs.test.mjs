@@ -13,6 +13,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { bodyOf, members } from "./csharp.mjs";
+
 const siteDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = join(siteDir, "..");
 
@@ -112,12 +114,22 @@ test("the figures the page opens with are the rows it goes on to show", () => {
 });
 
 test("every kind of cooperation is one the enum declares, and says what it is", () => {
-  const members = [...catalogue.matchAll(/^ {4}([A-Z][A-Za-z]*),$/gm)].map((m) => m[1]);
+  // WW511. This read `Cooperation`'s members with the generator's own regex, copied, and then
+  // checked one direction — so a member both halves missed was a member neither reported, and
+  // the page would have explained one kind where the engine has two with nothing saying so.
+  // `members` asks what the body separates rather than which lines look like a member, which
+  // is the question the generator does not ask.
+  const declared = members(bodyOf(catalogue, "internal enum Cooperation", "{", "}", "Cooperating.cs"));
   const kinds = published.cooperation.map((one) => one.kind);
   assert.ok(kinds.length > 0, "the page explains no kind of cooperation");
 
+  assert.deepEqual(
+    kinds,
+    declared.map((one) => one.name),
+    "the page's kinds are not the members Cooperation declares, in its order",
+  );
+
   for (const { kind, means } of published.cooperation) {
-    assert.ok(members.includes(kind), `the page explains ${kind}, which Cooperation does not declare`);
     assert.ok(means.length > 0, `${kind} is published with nothing said about it`);
     assert.ok(!means.includes("<"), `${kind}'s sentence still carries a doc-comment tag`);
   }

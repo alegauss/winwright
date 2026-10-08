@@ -34,7 +34,7 @@ const catalogue = readFileSync(
 // the enum's own words: "the in-app half" is a package an adopter has to decide to ship.
 const cooperation = documented(
   bodyOf(catalogue, "internal enum Cooperation", "{", "}", "Cooperating.cs"),
-  (line) => /^([A-Z][A-Za-z]*),$/.exec(line)?.[1],
+  (line) => /^([A-Z][A-Za-z]*)[^,]*,?$/.exec(line)?.[1],
   "Cooperating.cs's Cooperation",
 ).map((one) => ({ kind: one.name, means: one.means }));
 
