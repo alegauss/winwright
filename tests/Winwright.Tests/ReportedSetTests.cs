@@ -41,6 +41,33 @@ public sealed class ReportedSetTests : IDisposable
         return ProjectDeclaration.Load(path);
     }
 
+    /// <summary>
+    /// WW513. The application has two launchers and WW508 gave one of them a working directory. A
+    /// read-out is a launch of the application too — the project asking it about itself — and it set
+    /// none, so it inherited whichever directory the runner happened to be in and a read-out
+    /// argument naming a file in the project resolved somewhere different under each.
+    /// <para>
+    /// Asserted through the read-out itself rather than on the start info, because WW512 put
+    /// <c>--resolve</c> on the fixture: the set this derives is one value, and the value is what the
+    /// running application resolved that path to. No fixture reaches this launcher, so there is
+    /// nothing here that may name a directory of its own — a read-out happens at the project's root
+    /// and nowhere else.
+    /// </para>
+    /// </summary>
+    [Fact]
+    public void A_read_out_is_asked_at_the_projects_root_and_not_where_the_runner_stood()
+    {
+        var set = DerivedSet.Reported(
+            "where it stands",
+            Declaring("where", "\"--resolve=cases/fixtures/sessions.json\""),
+            "where");
+
+        var resolved = Assert.Single(set.Expected);
+
+        Assert.Equal(Path.Combine(Path.GetFullPath(root), "cases", "fixtures", "sessions.json"), resolved);
+        Assert.NotEqual(Path.GetFullPath("cases/fixtures/sessions.json"), resolved);
+    }
+
     [Fact]
     public void The_expected_set_is_what_the_application_says_it_has()
     {

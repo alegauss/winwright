@@ -738,27 +738,7 @@ public sealed record DerivedSet
     private static List<string> Printed(
         string named, ProjectDeclaration declaration, string key, IReadOnlyList<string> arguments)
     {
-        var start = new System.Diagnostics.ProcessStartInfo(declaration.Executable)
-        {
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-
-            // WW469. Named, because neither end named one and they disagreed: the application wrote
-            // its ANSI page and this decoded the console's OEM page — two code pages on one machine,
-            // and `Relatório` arrived as `Relat¾rio` over the single byte 0xF3, which is `ó` in one
-            // and `¾` in the other. The set then disagreed with the window over a name they both
-            // held, and the red said the value was missing.
-            //
-            // UTF-8 and not a guess at the child's. An engine that infers an encoding is one that
-            // corrupts a name quietly, which is the defect rather than the repair — so this is the
-            // one thing a read-out owes, it costs nothing to an application whose values are ASCII,
-            // and an application whose values are not is already being read wrong.
-            StandardOutputEncoding = new System.Text.UTF8Encoding(false),
-        };
-
-        foreach (var argument in arguments)
-            start.ArgumentList.Add(argument);
+        var start = Reading(declaration, arguments);
 
         string printed;
         int code;
@@ -788,6 +768,62 @@ public sealed record DerivedSet
         }
 
         return printed.Split('\n').Select(one => one.Trim()).Where(one => one.Length > 0).ToList();
+    }
+
+    /// <summary>
+    /// How a read-out is started. WW513.
+    /// <para>
+    /// Its own method because it was inline, and inline is what made the second half of WW508
+    /// unassertable. That task gave the fixture launch a working directory — the project's root,
+    /// which every path the declaration carries already resolves against — and this launcher, the
+    /// other one that starts the application under test, set none and inherited whichever directory
+    /// the runner happened to be in. A read-out whose arguments name a file in the project resolved
+    /// it somewhere different under each runner, exactly as a fixture's did.
+    /// </para>
+    /// <para>
+    /// Handing back the <see cref="System.Diagnostics.ProcessStartInfo"/> rather than starting it,
+    /// which is <c>FixtureDeclaration.Starting</c>'s shape, so a launch is built in one place and
+    /// run in another. Private even so: what reads this back is a read-out driven through
+    /// <see cref="Reported"/> against the fixture's own <c>--resolve</c>, which WW512 added after
+    /// this line was filed — so the directory is asserted on a running process rather than on the
+    /// object that asked for one, and widening the surface would buy a weaker check.
+    /// </para>
+    /// </summary>
+    /// <param name="declaration">The project, for the executable and the root.</param>
+    /// <param name="arguments">What the application is run with.</param>
+    private static System.Diagnostics.ProcessStartInfo Reading(
+        ProjectDeclaration declaration, IReadOnlyList<string> arguments)
+    {
+        var start = new System.Diagnostics.ProcessStartInfo(declaration.Executable)
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+
+            // WW513, and WW508's rule for the launcher it did not name. The root, so a read-out
+            // argument naming a file in the project means the same thing under every runner. No
+            // fixture reaches here and so nothing may name a directory of its own: a read-out is
+            // the project asking the application about itself, and where that happens is the
+            // project's fact.
+            WorkingDirectory = System.IO.Path.GetFullPath(declaration.Root),
+
+            // WW469. Named, because neither end named one and they disagreed: the application wrote
+            // its ANSI page and this decoded the console's OEM page — two code pages on one machine,
+            // and `Relatório` arrived as `Relat¾rio` over the single byte 0xF3, which is `ó` in one
+            // and `¾` in the other. The set then disagreed with the window over a name they both
+            // held, and the red said the value was missing.
+            //
+            // UTF-8 and not a guess at the child's. An engine that infers an encoding is one that
+            // corrupts a name quietly, which is the defect rather than the repair — so this is the
+            // one thing a read-out owes, it costs nothing to an application whose values are ASCII,
+            // and an application whose values are not is already being read wrong.
+            StandardOutputEncoding = new System.Text.UTF8Encoding(false),
+        };
+
+        foreach (var argument in arguments)
+            start.ArgumentList.Add(argument);
+
+        return start;
     }
 
     /// <summary>What a project writes in a read-out's arguments to be handed the run's language.</summary>

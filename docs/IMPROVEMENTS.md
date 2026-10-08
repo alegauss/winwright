@@ -4,32 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW513 The read-out's own directory
-
-WW508 gave the fixture launch a working directory: the project's root, or what the
-fixture named, resolved against that root. The application has a second launcher and it
-did not get one.
-
-`DerivedSet.Printed` runs the application to capture what it prints, which is where a
-derived set comes from when it comes from the application rather than from the strings
-files. It builds its own `ProcessStartInfo` — redirected stdout, `CreateNoWindow`, UTF-8
-— and sets no working directory, so it inherits whichever one the runner happened to be
-in. It holds `declaration`, so the root is one field away.
-
-The exposure is narrower than the fixture launch's and is the same kind. A project's
-`reports` arguments are usually flags, but nothing stops one naming a file, and a
-read-out that resolves it against the runner's directory is WW508's defect in the
-launcher WW508 did not name.
-
-What makes this its own line rather than a line in that commit is that it cannot be
-held. `Printed` builds the start info and starts the process in one call, so there is no
-seam to assert against — which is why `FixtureDeclaration.Starting` returning a
-`ProcessStartInfo` is the shape to copy. Nor does any case exercise a read-out through a
-project's `reports`, so even the one-line change would go in unheld, and an unheld line
-is what this backlog keeps filing tasks about.
-
-So the work is the seam first, then the directory, then a case over both.
-
 ### §WW515 The order nothing enforces
 
 WW509 split a launch into two calls. `Stage(root)` empties the directory a fixture's
