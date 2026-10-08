@@ -205,7 +205,7 @@ internal static class Cooperating
             "what a chord may be, which is what a refusal lists when one is not"),
 
         new("Synthesised.Press", Cooperation.None, true,
-            "a traversal key at the window, or WW317's chord — one verb, and neither needs anything "
+            "a traversal key at the window, or a chord — one verb, and neither needs anything "
                 + "of the application beyond the desktop the keys go to"),
         new("Pick.Value", Cooperation.None, true, "reach a value, by keyboard where the pattern will not"),
 
@@ -242,7 +242,7 @@ internal static class Cooperating
         new("NotificationArea.OpenOverflow", Cooperation.None, true, "open the flyout"),
         new("NotificationArea.CloseOverflow", Cooperation.None, true, "shut it again"),
         new("NotificationArea.OpenMenu", Cooperation.None, true, "an icon's context menu, by key"),
-        new("NotificationArea.Click", Cooperation.None, true, "an icon clicked with the primary button, at its centre (WW483)"),
+        new("NotificationArea.Click", Cooperation.None, true, "an icon clicked with the primary button, at its centre"),
 
         // --- WW209, and the whole of what widening the scope found -----------------------------------
         // Eighteen verbs an adopter can call that this catalogue had never been shown. Every one of
@@ -256,7 +256,7 @@ internal static class Cooperating
         new("Foreground.Now", Cooperation.None, false, "who holds the keyboard, read straight from Windows"),
         new("Foreground.Check", Cooperation.None, false, "whether a named window holds it"),
         new("Foreground.Waited", Cooperation.None, false,
-            "the same, waited for over a budget the caller declares — WW470, for a window that is "
+            "the same, waited for over a budget the caller declares — for a window that is "
                 + "still coming forward rather than one somebody else is holding"),
         new("Foreground.Between", Cooperation.None, false, "the same judgement over two sightings a caller already has"),
         new("ForeignInput.Watch", Cooperation.None, false, "start a window in which this run owns the machine"),

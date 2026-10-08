@@ -75,6 +75,18 @@ test("what each verb needs is what the catalogue entered", () => {
   }
 });
 
+test("no sentence on the page cites a task nobody outside this repository can resolve", () => {
+  // WW505. This page published three of them — WW317, WW470 and WW483 — and an adopter reading
+  // it has nothing to open. The catalogue is held to the same rule where the sentences are
+  // declared; this is the end that notices if a page starts publishing prose from somewhere new.
+  for (const verb of published.verbs) {
+    assert.doesNotMatch(verb.does, /WW\d+/, `${verb.named}'s sentence cites a task id`);
+  }
+  for (const one of published.cooperation) {
+    assert.doesNotMatch(one.means, /WW\d+/, `the ${one.kind} bucket's sentence cites a task id`);
+  }
+});
+
 test("the figures the page opens with are the rows it goes on to show", () => {
   // The same arithmetic `Cooperating.Render` prints to a reader of the suite. A page whose
   // headline disagrees with its own table is worse than one with no headline.

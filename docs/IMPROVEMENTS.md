@@ -4,6 +4,53 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+### §WW508 The directory a fixture starts in
+
+Found by quickshell (QS181). Its import case needed the dialog to look the same on every
+desk, so the fixture was to pass the client a session file committed beside the cases:
+`"arguments": ["--import", "cases/fixtures/MobaXterm.ini"]`. That path means nothing to
+the launched application. `FixtureDeclaration` starts it with a `ProcessStartInfo` that
+sets no working directory, so it inherits whatever directory the test runner happened to
+be in, and a relative path resolves somewhere different under `run-tests.cmd`, under
+`dotnet test` and in the guest.
+
+An adopter is left with two workarounds, both bad: changing the runner process's own
+current directory before `Suite.Launch`, which is global state in a test assembly, or
+writing an absolute path into a data file that is committed and read on other machines.
+
+What to build: the fixture's application starts in the project's root, the directory
+`winwright.json` is found in, unless the fixture names a `workingDirectory` of its own,
+resolved against that same root. The run's trace says which directory it started in, so
+a fixture whose file was not found can be read as a path problem rather than a missing
+file.
+
+Falsified when a fixture argument naming a project-relative file is resolved differently
+by two runners on the same checkout.
+
+### §WW509 A fixture's own environment
+
+Found adopting a case for quickshell's QS217. The client keeps its saved sessions in a
+file under the user's AppData, and a case that searches the session list needs a store
+holding known sessions. A fixture declares `arguments` and `shareable` and nothing else,
+so it cannot give the launched application an environment variable naming another store,
+nor place a file where the application will look, and the case has to stop at "the entry
+is listed".
+
+The workaround on the adopter's side is a command-line flag that exists only for the
+harness, which is a surface the application's users then see, or a test runner that
+writes into the real user profile before launching, which is global state another case
+can trample.
+
+What to build: a fixture may declare `environment`, a map of names to values merged into
+the launched process's environment, values resolved against the project root the way a
+file argument is once WW508 lands. Shared fixtures key on it, so two fixtures differing
+only in environment are two launches. Optionally `files`, copied into a scratch folder
+the environment can name as a token, so a case gets an isolated store without a fixed
+path.
+
+Falsified when a case can launch an application against a file of its own choosing
+without the application growing a flag for it.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -23,28 +70,6 @@
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ## Block L — The documentation area — written for a reader who has installed nothing
-
-### §WW505 The task ids the generated sentences carry onto the site
-
-Four sentences on the published area cite a task id. `/verbs/` carries WW317, WW470 and
-WW483, and `/verdicts/` carries WW450. They arrive honestly: the generators publish the
-engine's own sentences, and this repository's prose cites the task the reasoning started
-in — which is right for a reader of the source and resolves to nothing an adopter can
-open.
-
-Stripping them is not one rule, which is why this is a line rather than a patch. Three
-of the four come out cleanly: `(WW483)` is parenthetical, `WW450:` opens a sentence, and
-`— WW470, for a window…` loses a clause marker. The fourth does not: *a traversal key at
-the window, or WW317's chord* reads the id as a noun, and taking it out leaves *or 's
-chord*. So either the stripper knows four shapes and will meet a fifth, or those
-sentences are rewritten where they are declared — which is the same decision
-`DeskFact.Because` and `VerbNeeds.Because` already make about their audience, made once
-rather than per sentence.
-
-WW492 avoided a fifth by taking the first sentence rather than the first paragraph, and
-its own case refuses a task id outright. That case is the shape the others want: the
-page that published one should say so before somebody reads it and looks for a WW483
-they cannot find.
 
 ### §WW506 The documentation area's own copy of the version
 

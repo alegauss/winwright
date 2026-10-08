@@ -4,6 +4,9 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW508** (deps: —) **A fixture cannot name a file in the project, because the launched application starts wherever the runner happened to be** — No working directory is set on launch, so a relative argument resolves differently under each runner and an adopter must pick global state or an absolute path. → §WW508
+- 📋 **WW509** (deps: —) **A fixture cannot give the application it launches an environment variable or a file of the case's choosing** — An adopter's case that needs a known data file must add a flag only the harness uses, or write into the real user profile first. → §WW509
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -24,7 +27,6 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW505** (deps: —) **four published sentences cite a task id, so an adopter reads WW483 and has nothing to open** — The generators publish the engine's own prose, which cites the task its reasoning started in — right for a reader of the source and meaningless on the site. → §WW505
 - 📋 **WW506** (deps: —) **the documentation area still bakes the version, so its package references go stale while the landing page stays current** — It is a second npm project and cannot import the landing page's picker, so making it live means moving that picker somewhere both builds read. → §WW506
 - 📋 **WW507** (deps: —) **the oldest generator still reads a doc comment its own way, and the shared reader's case excepts it by name** — It needs an enum member's declared value, which nothing else wants and the shared reader cannot answer, so the copy stands with a reason. → §WW507
 

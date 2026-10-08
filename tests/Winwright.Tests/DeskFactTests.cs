@@ -100,6 +100,29 @@ public sealed class DeskFactTests
     }
 
     [Fact]
+    public void No_catalogued_sentence_cites_a_task_an_adopter_cannot_open()
+    {
+        // WW505. Four sentences reached the published site citing a task id — `/verbs/` carried
+        // three and `/verdicts/` one. They arrived honestly: the generators publish these
+        // sentences as written, and this repository's prose cites the task its reasoning started
+        // in, which is right for a reader of the source and resolves to nothing on the site.
+        //
+        // Held where they are declared rather than stripped on the way out. A stripper would have
+        // to know four shapes — parenthetical, opening a sentence, after a dash, and one that
+        // reads the id as a noun — and would meet a fifth; the audience of these two lists is a
+        // decision to make once, and this is where it is made.
+        var cited = Cooperating.Known.Select(one => (one.Named, one.Because))
+            .Concat(DeskFacts.Known.Select(one => (one.Named, one.Because)))
+            .Where(one => System.Text.RegularExpressions.Regex.IsMatch(one.Because, @"WW\d+"))
+            .ToList();
+
+        Assert.True(
+            cited.Count == 0,
+            $"{cited.Count} catalogued sentence(s) cite a task id, and both of these lists are "
+                + "published: " + string.Join("; ", cited.Select(one => $"{one.Named}: {one.Because}")));
+    }
+
+    [Fact]
     public void The_sources_declare_exactly_the_conditions_the_assembly_carries()
     {
         // WW491. The documentation area publishes every condition that can earn a hole, and it is

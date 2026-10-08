@@ -89,6 +89,21 @@ test("the three buckets are the enum's, and each says what to do about it", () =
   }
 });
 
+test("no sentence on the page cites a task nobody outside this repository can resolve", () => {
+  // WW505. This page published WW450, in the reason a menu's missing shadow is the desk's. The
+  // reason is worth publishing and the id is not: it resolves to a changelog line in a repository
+  // the reader has not cloned.
+  for (const one of holes.desk) {
+    assert.doesNotMatch(one.because, /WW\d+/, `the reason for '${one.named}' cites a task id`);
+  }
+  for (const one of holes.kinds) {
+    assert.doesNotMatch(one.means, /WW\d+/, `the ${one.kind} bucket's sentence cites a task id`);
+  }
+  for (const one of holes.underTest) {
+    assert.doesNotMatch(one, /WW\d+/, `the condition "${one}" cites a task id`);
+  }
+});
+
 test("the precedence is the fold's order and never the enum's", () => {
   // The difference is the point: taking the largest member value would rank a hole above a
   // failure, which is the one comparison the numbers get backwards. A page publishing the enum's
