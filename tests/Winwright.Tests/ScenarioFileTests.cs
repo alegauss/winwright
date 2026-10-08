@@ -247,7 +247,7 @@ public class ScenarioFileTests
             ["name", "steps", "tags", "needs", "catches", "filed", "fixture", "forEach", "onlyReads"],
             ScenarioSchema.Case.Select(field => field.Name));
         Assert.Equal(
-            ["name", "environment", "flag", "arguments", "variables", "shareable", "language", "resident"],
+            ["name", "environment", "flag", "arguments", "variables", "shareable", "language", "resident", "workingDirectory"],
             ScenarioSchema.Fixture.Select(field => field.Name));
         Assert.Equal(
             [
@@ -292,7 +292,7 @@ public class ScenarioFileTests
     [Fact]
     public void Every_field_a_case_and_a_fixture_declare_arrives_off_the_walk()
     {
-        // WW435. The loader read a case's nine fields and a fixture's eight one hand-written line
+        // WW435. The loader read a case's nine fields and a fixture's nine one hand-written line
         // each, beside a schema row that had already named the key — and nothing but a case held the
         // two lists together, so a row added to one and not the other was a key an author may write,
         // a tool will publish, and the run will ignore. It walks the rows now, which is what the step
@@ -313,7 +313,8 @@ public class ScenarioFileTests
                   "variables": { "WINWRIGHT_ROLE": "reader" },
                   "shareable": true,
                   "language": "pt-BR",
-                  "resident": true
+                  "resident": true,
+                  "workingDirectory": "cases/fixtures"
                 }
               ],
               "cases": [
@@ -355,6 +356,7 @@ public class ScenarioFileTests
         Assert.True(against.Shareable);
         Assert.Equal("pt-BR", against.Language);
         Assert.True(against.Resident);
+        Assert.Equal("cases/fixtures", against.WorkingDirectory);
     }
 
     [Fact]

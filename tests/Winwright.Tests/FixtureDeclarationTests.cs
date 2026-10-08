@@ -121,12 +121,73 @@ public class FixtureDeclarationTests
             arguments: ["--names"],
             variables: new Dictionary<string, string> { ["WINWRIGHT_SAMPLE"] = "1" });
 
-        var start = fixture.Starting(@"C:\app\YourApp.exe");
+        var start = fixture.Starting(@"C:\app\YourApp.exe", @"C:\checkout");
 
         Assert.Equal(@"C:\app\YourApp.exe", start.FileName);
         Assert.Equal(["--names", "--language=pt-BR"], start.ArgumentList);
         Assert.Equal("1", start.Environment["WINWRIGHT_SAMPLE"]);
         Assert.False(start.UseShellExecute);
+    }
+
+    /// <summary>
+    /// WW508. The defect quickshell found: a fixture passing `--import cases/fixtures/MobaXterm.ini`
+    /// was passing a path the launched application resolved against whichever directory the test
+    /// runner happened to be in, so the same argument meant three things under `run-tests.cmd`,
+    /// under `dotnet test` and in the guest.
+    /// </summary>
+    [Fact]
+    public void A_launch_that_declares_no_directory_starts_in_the_project_root()
+    {
+        var start = FixtureDeclaration.Of("plain").Starting(@"C:\app\YourApp.exe", @"C:\checkout");
+
+        Assert.Equal(@"C:\checkout", start.WorkingDirectory);
+    }
+
+    [Fact]
+    public void A_declared_directory_is_resolved_against_that_same_root()
+    {
+        var fixture = FixtureDeclaration.Of("imported", workingDirectory: "cases/fixtures");
+
+        Assert.Equal(@"C:\checkout\cases\fixtures", fixture.StartsIn(@"C:\checkout"));
+        Assert.Equal(@"C:\checkout\cases\fixtures", fixture.Starting(@"C:\app\YourApp.exe", @"C:\checkout").WorkingDirectory);
+    }
+
+    /// <summary>
+    /// The rule <see cref="ProjectDeclaration"/> already applies to every path it declares, which is
+    /// why this one is not its own: a directory that is already absolute is left where it is, and one
+    /// naming a variable is expanded.
+    /// </summary>
+    [Fact]
+    public void A_directory_resolves_the_way_every_other_declared_path_does()
+    {
+        Assert.Equal(
+            @"D:\elsewhere", FixtureDeclaration.Of("absolute", workingDirectory: @"D:\elsewhere").StartsIn(@"C:\checkout"));
+
+        System.Environment.SetEnvironmentVariable("WINWRIGHT_WW508", @"D:\expanded");
+        try
+        {
+            Assert.Equal(
+                @"D:\expanded",
+                FixtureDeclaration.Of("expanded", workingDirectory: "%WINWRIGHT_WW508%").StartsIn(@"C:\checkout"));
+        }
+        finally
+        {
+            System.Environment.SetEnvironmentVariable("WINWRIGHT_WW508", null);
+        }
+    }
+
+    /// <summary>
+    /// Declared rather than resolved, because a resolved path is this machine's and a report two
+    /// people compare has to say the same thing on both. Said only where the fixture named one.
+    /// </summary>
+    [Fact]
+    public void A_report_names_the_directory_a_fixture_declared_and_says_nothing_where_it_declared_none()
+    {
+        Assert.Equal(
+            "imported: the application as it comes, starting in cases/fixtures.",
+            FixtureDeclaration.Of("imported", workingDirectory: "cases/fixtures").Sentence());
+
+        Assert.Equal("plain: the application as it comes.", FixtureDeclaration.Of("plain").Sentence());
     }
 
     [Fact]

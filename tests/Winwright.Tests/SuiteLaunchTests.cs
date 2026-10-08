@@ -234,7 +234,7 @@ public sealed class SuiteLaunchTests : IDisposable
         // numbers of its own — 15000 and a 50ms poll, against the 20000 and 25 the eleven other
         // copies used, and none of the four was the `draw` deadline this suite declares. The wait is
         // the same wait whoever started the process, so it is the same call now.
-        var launched = register.Launch(Names().Starting(Project().Executable));
+        var launched = register.Launch(Names().Starting(Project().Executable, Project().Root));
         var window = Fixture.Drew(launched.Pid);
         var refusal = Assert.Throws<ScenarioRefusedException>(() => CaseRun.Of(
             acting,

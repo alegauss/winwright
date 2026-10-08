@@ -38,7 +38,8 @@ public sealed record FixtureDeclaration
         IReadOnlyDictionary<string, string> variables,
         bool shareable,
         string language,
-        bool resident)
+        bool resident,
+        string workingDirectory)
     {
         Name = name;
         Environment = environment;
@@ -48,6 +49,7 @@ public sealed record FixtureDeclaration
         Shareable = shareable;
         Language = language;
         Resident = resident;
+        WorkingDirectory = workingDirectory;
     }
 
     /// <summary>What the fixture is called, and what a report names the launch by.</summary>
@@ -117,12 +119,33 @@ public sealed record FixtureDeclaration
     /// </summary>
     public bool Resident { get; }
 
+    /// <summary>
+    /// The directory the application is started in, as the fixture declares it, or empty where it
+    /// starts in the project's own root. Relative paths resolve against that root. WW508.
+    /// <para>
+    /// Found by quickshell. A fixture wanting the dialog to look the same on every desk passed the
+    /// client a session file committed beside the cases — <c>cases/fixtures/MobaXterm.ini</c> — and
+    /// that path meant nothing to the launched application, because the launch set no working
+    /// directory and inherited whatever one the test runner happened to be in. The same argument
+    /// resolved somewhere different under <c>run-tests.cmd</c>, under <c>dotnet test</c> and in the
+    /// guest.
+    /// </para>
+    /// <para>
+    /// The default is the fix and this field is the exception to it: an adopter who declares nothing
+    /// gets the directory <c>winwright.json</c> sits in, which is what every other path the project
+    /// declares already resolves against. The two workarounds that field was worth removing were
+    /// setting the runner process's own current directory before a launch, which is global state in a
+    /// test assembly, and committing an absolute path into a file read on other machines.
+    /// </para>
+    /// </summary>
+    public string WorkingDirectory { get; }
+
     /// <summary>Whether this fixture samples an environment at all.</summary>
     public bool Samples => Environment.Length > 0;
 
     /// <summary>The application as it comes: no arguments, no variables, nothing sampled.</summary>
     public static FixtureDeclaration Plain { get; } =
-        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false);
+        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false, "");
 
     /// <summary>
     /// Declare one.
@@ -135,6 +158,7 @@ public sealed record FixtureDeclaration
     /// <param name="shareable">That this window may be lent to a case that only reads it.</param>
     /// <param name="language">The language tag the window it launches is in.</param>
     /// <param name="resident">That this launch draws no window, so the run holds it as a process.</param>
+    /// <param name="workingDirectory">The directory to start it in, resolved against the project's root.</param>
     /// <exception cref="ScenarioRefusedException">
     /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not one.
     /// </exception>
@@ -146,7 +170,8 @@ public sealed record FixtureDeclaration
         IReadOnlyDictionary<string, string>? variables = null,
         bool shareable = false,
         string? language = null,
-        bool resident = false)
+        bool resident = false,
+        string? workingDirectory = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
         if (string.IsNullOrWhiteSpace(name))
@@ -207,6 +232,12 @@ public sealed record FixtureDeclaration
         if (speaking.Length > 0)
             Culture(called, speaking);
 
+        // WW508. Trimmed and carried as written, never resolved here: a declaration is read without
+        // a filesystem, and the root it resolves against belongs to the project rather than to the
+        // file this fixture was declared in. An absolute path is left alone by the resolve below,
+        // which is the rule every other path the project declares already follows.
+        var starting = workingDirectory?.Trim() ?? "";
+
         return new FixtureDeclaration(
             called,
             sampled,
@@ -215,7 +246,8 @@ public sealed record FixtureDeclaration
             new ReadOnlyDictionary<string, string>(set),
             shareable,
             speaking,
-            resident);
+            resident,
+            starting);
     }
 
     /// <summary>
@@ -268,13 +300,41 @@ public sealed record FixtureDeclaration
         return new ReadOnlyCollection<string>(all);
     }
 
+    /// <summary>
+    /// The directory this launch starts in, resolved. WW508.
+    /// <para>
+    /// <c>Path.GetFullPath(path, root)</c> with the environment expanded, which is the rule
+    /// <see cref="Projects.ProjectDeclaration"/> already applies to every path it declares — so a
+    /// relative directory is relative to the same place, and one that is already absolute is left
+    /// where it is.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The project's root, the directory its declaration sits in.</param>
+    public string StartsIn(string root)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(root);
+
+        return WorkingDirectory.Length == 0
+            ? System.IO.Path.GetFullPath(root)
+            : System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(WorkingDirectory), root);
+    }
+
     /// <summary>How to start the application under test with this fixture in force.</summary>
     /// <param name="executable">The application, usually the project's own.</param>
-    public ProcessStartInfo Starting(string executable)
+    /// <param name="root">
+    /// The project's root. Required rather than defaulted, because the thing WW508 fixed is a launch
+    /// that set no directory and inherited the runner's — and a default here would be that launch,
+    /// spelled as a choice nobody made.
+    /// </param>
+    public ProcessStartInfo Starting(string executable, string root)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(executable);
 
-        var start = new ProcessStartInfo(executable) { UseShellExecute = false };
+        var start = new ProcessStartInfo(executable)
+        {
+            UseShellExecute = false,
+            WorkingDirectory = StartsIn(root),
+        };
         foreach (var argument in Launching())
             start.ArgumentList.Add(argument);
 
@@ -290,7 +350,13 @@ public sealed record FixtureDeclaration
         var sampled = Samples ? $"sampling {Environment}" : "the application as it comes";
         var lent = Shareable ? ", shareable" : "";
         var held = Resident ? ", resident" : "";
-        return $"{Name}: {sampled}{lent}{held}.";
+
+        // WW508, and as declared rather than resolved: the resolved path is this machine's, and a
+        // report that two people compare is a report that has to say the same thing on both. Said
+        // only where the fixture named one, which is Shareable's rule and Resident's — a line that
+        // says "the project root" on every fixture is the mark that marks nothing.
+        var started = WorkingDirectory.Length > 0 ? $", starting in {WorkingDirectory}" : "";
+        return $"{Name}: {sampled}{lent}{held}{started}.";
     }
 
     /// <summary>The one line a listing shows.</summary>

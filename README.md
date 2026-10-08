@@ -868,6 +868,16 @@ the second copy is where the flag gains a value the first does not have, nothing
 every expectation in that file describes an environment nothing set up. Same rule as case names, one
 level up.
 
+`workingDirectory` is the directory the application is started in. The default is the one thing worth
+saying about it: **the project's root**, the directory `winwright.json` sits in, which is already what
+every path that file declares resolves against. Before that default the launch set no directory at
+all, so it inherited whichever one the test runner happened to be in — and a fixture passing
+`"arguments": ["--import", "cases/fixtures/MobaXterm.ini"]` meant three different files under
+`run-tests.cmd`, under `dotnet test` and in the guest. The two workarounds left were setting the
+runner process's own current directory, which is global state in a test assembly, and committing an
+absolute path into a file other machines read. Declare the field to start somewhere else; a relative
+path resolves against that same root, and one that is already absolute is left where it is.
+
 `shareable` says the application leaves a window the next case would accept. `Suite.Launch` lends one
 window to several cases only when three separate things agree: the fixture says it may be lent, every
 case using it declares `onlyReads`, and the invocation asked for sharing. Sharing is opted into per

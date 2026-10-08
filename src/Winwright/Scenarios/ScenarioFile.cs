@@ -260,7 +260,8 @@ public sealed class ScenarioFile
                 wrote.Pairs("variables"),
                 wrote.Truth("shareable"),
                 wrote.Text("language"),
-                wrote.Truth("resident")));
+                wrote.Truth("resident"),
+                wrote.Text("workingDirectory")));
 
             wrote.Handed("fixture");
 

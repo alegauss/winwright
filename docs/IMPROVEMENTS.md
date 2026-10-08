@@ -4,29 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW508 The directory a fixture starts in
-
-Found by quickshell (QS181). Its import case needed the dialog to look the same on every
-desk, so the fixture was to pass the client a session file committed beside the cases:
-`"arguments": ["--import", "cases/fixtures/MobaXterm.ini"]`. That path means nothing to
-the launched application. `FixtureDeclaration` starts it with a `ProcessStartInfo` that
-sets no working directory, so it inherits whatever directory the test runner happened to
-be in, and a relative path resolves somewhere different under `run-tests.cmd`, under
-`dotnet test` and in the guest.
-
-An adopter is left with two workarounds, both bad: changing the runner process's own
-current directory before `Suite.Launch`, which is global state in a test assembly, or
-writing an absolute path into a data file that is committed and read on other machines.
-
-What to build: the fixture's application starts in the project's root, the directory
-`winwright.json` is found in, unless the fixture names a `workingDirectory` of its own,
-resolved against that same root. The run's trace says which directory it started in, so
-a fixture whose file was not found can be read as a path problem rather than a missing
-file.
-
-Falsified when a fixture argument naming a project-relative file is resolved differently
-by two runners on the same checkout.
-
 ### §WW509 A fixture's own environment
 
 Found adopting a case for quickshell's QS217. The client keeps its saved sessions in a
@@ -50,6 +27,57 @@ path.
 
 Falsified when a case can launch an application against a file of its own choosing
 without the application growing a flag for it.
+
+### §WW512 The directory nothing starts in
+
+WW508 set the launch's working directory to the project's root and let a fixture name
+its own. What holds it is four cases over `ProcessStartInfo`: what a declaration
+resolves to, and that `Starting` puts it on the object it returns.
+
+That is the declaration about the launch and not the launch. Nothing starts a process
+and asks what a relative argument resolved to, which is what an adopter relies on — and
+it is the falsification WW508 wrote for itself: *a fixture argument naming a
+project-relative file is resolved differently by two runners on the same checkout*. The
+fix makes that true by construction and no run visits it.
+
+The gap is WW510's shape: every part asserted, the behaviour not. A `WorkingDirectory`
+that `UseShellExecute` ignores, or a later edit dropping the assignment while the cases
+pass over `StartsIn` alone, both read green.
+
+What it needs is a mode on `Winwright.Fixture` and a case over it. The application reads
+no command line today — every fixture here is told apart by what it draws, never by what
+it was passed — so this is a flag making it report where it is, in a label a locator
+reads, which is how everything else here is observed. A case against a fixture naming
+`workingDirectory` reads that label back; one naming none reads the project root.
+
+Worth having beyond this task: the suite's first case where an argument a fixture passes
+changes what the window says — the half of `FixtureDeclaration` nothing observes.
+
+### §WW513 The read-out's own directory
+
+WW508 gave the fixture launch a working directory: the project's root, or what the
+fixture named, resolved against that root. The application has a second launcher and it
+did not get one.
+
+`DerivedSet.Printed` runs the application to capture what it prints, which is where a
+derived set comes from when it comes from the application rather than from the strings
+files. It builds its own `ProcessStartInfo` — redirected stdout, `CreateNoWindow`, UTF-8
+— and sets no working directory, so it inherits whichever one the runner happened to be
+in. It holds `declaration`, so the root is one field away.
+
+The exposure is narrower than the fixture launch's and is the same kind. A project's
+`reports` arguments are usually flags, but nothing stops one naming a file, and a
+read-out that resolves it against the runner's directory is WW508's defect in the
+launcher WW508 did not name.
+
+What makes this its own line rather than a line in that commit is that it cannot be
+held. `Printed` builds the start info and starts the process in one call, so there is no
+seam to assert against — which is why `FixtureDeclaration.Starting` returning a
+`ProcessStartInfo` is the shape to copy. Nor does any case exercise a read-out through a
+project's `reports`, so even the one-line change would go in unheld, and an unheld line
+is what this backlog keeps filing tasks about.
+
+So the work is the seam first, then the directory, then a case over both.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

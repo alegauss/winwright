@@ -198,6 +198,7 @@ public static class ScenarioSchema
         new("shareable", false, Taking.Truth, "that this window may be lent to a case that only reads it", []),
         new("language", false, Taking.Text, "the language tag the window it launches is in, so a derived set reads the strings that window is actually showing", []),
         new("resident", false, Taking.Truth, "that this launch draws no window of its own — a tray — so the run holds it as a process and its locators resolve against the desktop", []),
+        new("workingDirectory", false, Taking.Text, "the directory to start the application in, resolved against the project's root — the default, so that an argument naming a file in the project means the same thing under every runner", []),
     ]);
 
     /// <summary>What a step may say.</summary>

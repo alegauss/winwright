@@ -4,8 +4,9 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW508** (deps: —) **A fixture cannot name a file in the project, because the launched application starts wherever the runner happened to be** — No working directory is set on launch, so a relative argument resolves differently under each runner and an adopter must pick global state or an absolute path. → §WW508
 - 📋 **WW509** (deps: —) **A fixture cannot give the application it launches an environment variable or a file of the case's choosing** — An adopter's case that needs a known data file must add a flag only the harness uses, or write into the real user profile first. → §WW509
+- 📋 **WW512** (deps: —) **the directory a launch starts in is asserted on the ProcessStartInfo and never on a running process** — Nothing starts the application and asks what a relative argument resolved to, which is WW508's own falsification and the one thing an adopter relies on. → §WW512
+- 📋 **WW513** (deps: —) **the application's other launcher sets no working directory, and nothing can assert the one it would set** — A read-out inherits the runner's directory, and Printed builds the start info and starts the process in one call, so there is no seam to hold it by. → §WW513
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

@@ -271,7 +271,10 @@ public static class Suite
     private static (AutomationElement Window, LaunchedProcess Process) Opened(
         ProcessRegister register, ProjectDeclaration project, FixtureDeclaration fixture, string named)
     {
-        var start = fixture.Starting(project.Executable);
+        // WW508. The root, so a fixture argument naming a file in the project means the same thing
+        // under every runner. Before this the launch set no directory at all and inherited whichever
+        // one the test runner happened to be in.
+        var start = fixture.Starting(project.Executable, project.Root);
 
         // WW349. Where pictures go is the project's, and it is also the one directory this run may
         // ask the application to write into — so the launch says so rather than an operator setting
