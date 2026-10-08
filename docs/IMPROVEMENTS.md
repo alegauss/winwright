@@ -10,28 +10,29 @@
 
 ### §WW516 A press that checks the foreground whatever it located
 
-Found in quickshell's guest run on 2026-10-08 (cases\palette.cases.json and
-cases\tabs.cases.json, run by Quickshell.Cases through Suite.Launch). The guest's
-foreground belonged to explorer's 'Program Manager', not to the client under test.
+Found in quickshell's guest run on 2026-10-08, against the published 1.0.0 this tree is.
+Its palette case presses `Ctrl+Shift+P` on `TabItem[order=right]`, traced `synthesised
+keyboard, selected, Ok`, opened no palette, and broke step 2 with "nothing matched".
 
-The two cases met it differently. In tabs, step 1 is `press Ctrl+Shift+T` on
-`Document[class="Terminal"]`; winwright checked that the foreground was the window under
-test, found it was not for five seconds, and reported the step Unchecked with that
-reason. Good. In palette, step 1 is `press Ctrl+Shift+P` on `TabItem[order=right]`; the
-trace reads `Pattern = synthesised keyboard, ReadBack = selected, Verdict = Ok`, so the
-press was called successful, though the chord went nowhere the client could hear and no
-palette opened. Step 2, `set value` on `Edit`, then broke with NotActionableException
-"nothing matched, or what matched has gone since", which names the wrong thing: nothing
-was ever there to match.
+What this line first claimed is ruled out, and that is most of what is known. Every
+keyboard path checks the foreground before sending or reports it after: the chord half
+waits and returns Unchecked unsatisfied, the traversal half does, `Type` reads it back,
+`Pick`'s keyboard route checks it where its pattern route never needed to. The chord
+path consults nothing about what the locator resolved to, so checking for a Document and
+not a TabItem is not something it can do.
 
-What winwright should do: a press delivered as synthesised keyboard input checks the
-same foreground precondition whatever its locator resolved to, a TabItem selected
-through its pattern included, and reports Unchecked with the foreground's owner when it
-fails, as the Document case did. A pattern act that succeeded (the tab selected) should
-not stand in for the keyboard half that was never delivered.
+The readback was misread, and that was the load-bearing half: the step declares no
+`reads`, and `selected` is a TabItem's own reading taken after the act. Nothing selected
+the tab, so no pattern act stood in for the keyboard half.
 
-Falsified when a case whose press lands while another window holds the foreground
-reports that step Ok.
+What is left is narrower and worse — the check said the foreground was ours and the
+chord reached nothing. Either the desk changed between `Waited` and `Keys.Send`, which
+no re-reading afterwards closes, since a chord opening a dialog moves the foreground and
+that is WW317's own reasoning; or `Between` called it ours wrongly, as it says ours
+where the roots match and what `top` resolves to for a TabItem is worth knowing.
+
+Needs the trace, or that run again. The two cases used two fixtures, so the difference
+may be timing.
 
 ## Block E — Capture — the picture that proves what it photographed
 

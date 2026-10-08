@@ -8,7 +8,7 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW516** (deps: —) **A press on a tab reports Ok though the foreground was another window, so its chord went nowhere** — The next step breaks with nothing matched, which names the wrong cause, where a press on a document says Unchecked. → §WW516
+- 📋 **WW516** (deps: —) **A chord press reports Ok with its foreground check satisfied, though it reached nothing the application could hear** — Every keyboard path does check it, so the diagnosis was wrong; what is unexplained is a chord reaching nothing with the check satisfied. → §WW516
 
 ## Block E — Capture — the picture that proves what it photographed
 
