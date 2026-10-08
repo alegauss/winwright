@@ -59,28 +59,11 @@ const code = half
   // outranking a prerelease of the same core — is where the real failure lives.
   import { fetchLatestPublished } from "../../../scripts/nuget-feed.mjs";
 
-  for (const block of document.querySelectorAll<HTMLElement>(".ww-packages")) {
-    const built = block.dataset.built;
-    const asks = (block.dataset.asks ?? "").split(" ").filter(Boolean);
-    if (!built || asks.length === 0) continue;
+  // WW510. The asking and the rewriting both live in `scripts/swap-version.mjs`, because an
+  // inline script is the one thing on this site no run could reach — the selector, the data
+  // attributes, the request per id, the promise and the swap were all unwatched. They are a
+  // function a case runs over the page this build wrote, and what is left here is the feed.
+  import { swapEveryBlock } from "../../../scripts/swap-version.mjs";
 
-    // The halves are published together, so the first id that answers settles the number. One
-    // request each and never one per line, however many times the block states it.
-    void Promise.all(asks.map((id) => fetchLatestPublished(id))).then((answers) => {
-      const published = answers.find((one) => one && one !== built);
-      if (!published) return;
-
-      // The highlighter puts the version in its own text node, and the copy button carries the
-      // whole line in an attribute — a reader who copies and a reader who reads have to get the
-      // same number, so both are rewritten.
-      const walk = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
-      for (let node = walk.nextNode(); node; node = walk.nextNode()) {
-        if (node.textContent === built) node.textContent = published;
-      }
-
-      for (const button of block.querySelectorAll<HTMLElement>("[data-code]")) {
-        button.dataset.code = (button.dataset.code ?? "").split(built).join(published);
-      }
-    });
-  }
+  void swapEveryBlock(document, (id) => fetchLatestPublished(id));
 </script>

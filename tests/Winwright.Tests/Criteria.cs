@@ -338,6 +338,22 @@ internal static class Criteria
         // 2 assertions, 0 unchecked. `site/scripts/walkthrough.test.mjs` holds that capture to the
         // sample's own files, so the page cannot go on showing a run of something that changed.
         // Deleted rather than restated, which is what this pair of checks is for.
+
+        // WW510 shipped the documentation area's half of the version swap and left the landing
+        // page's. The area's runs in a case now — `swap-version.test.mjs` takes the page the build
+        // wrote into a DOM, hands the swap a feed that answers from a table, and reads back what a
+        // reader and the copy button would each be given. The landing page's is React state behind
+        // an effect, so a case for it renders a component rather than reading a file, and the site's
+        // runner executes `.mjs` over built output and compiles no TSX.
+        //
+        // In the bucket rather than paired, and `NotYet` rather than `NotBuilt`: the swap is built
+        // and shipping to readers on both halves, and what is missing is the run. Naming the area's
+        // case here would be the admission this bucket exists to prevent — a green reporting a claim
+        // about the half nothing reads back.
+        new("WW510", "the landing page's version swap is exercised by a run",
+            "", Unshown.NotYet, "WW510's own remainder carries it: the provider sets state from the feed "
+                + "inside an effect and the site's tests are .mjs over built output, so reading it back "
+                + "needs a rendering case and the transform to compile one"),
     ]);
 
     /// <summary>
