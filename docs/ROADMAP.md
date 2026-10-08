@@ -2,13 +2,13 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+- 📋 **WW517** (deps: —) **a foreground check that passed records neither who held the desk nor which finding made it ours** — Every absence names both sides and the satisfied reading names nothing, so a keystroke that was delivered and one that passed a permissive check read alike. → §WW517
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
-
-- 📋 **WW516** (deps: —) **A chord press reports Ok with its foreground check satisfied, though it reached nothing the application could hear** — Every keyboard path does check it, so the diagnosis was wrong; what is unexplained is a chord reaching nothing with the check satisfied. → §WW516
 
 ## Block E — Capture — the picture that proves what it photographed
 

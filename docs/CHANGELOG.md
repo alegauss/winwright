@@ -187,6 +187,7 @@
 - ✅ **WW463** **nothing says whether the entry a submenu step hands back is the submenu's or the parent it was expanded from** — Measured and held by a case: both kinds hand back the entry under the one they expanded, so a step's expectation is compared against the entry it named.
 - ✅ **WW464** **the reference tells an author a submenu locator may name any element of the window, which the walk stopped honouring** — The reference names the entry whose submenu is wanted and says what a step naming the window expands instead, which is the walk WW83 built and the sentence that argued against it.
 - ✅ **WW470** **the desk precondition is read once, so a window still coming forward is reported as a desk somebody else holds** — An act waits for the desk over the resolve budget: a window still arriving is driven, and a desk truly held still holes (design recorded in `src/Winwright/Windowing/Foreground.cs`).
+- 🗑 **WW516** **A chord press reports Ok with its foreground check satisfied, though it reached nothing the application could hear** — superseded by WW517: press claims only that keys were sent at a window holding the foreground, so the Ok was designed; what was real is a record that cannot tell the findings apart.
 
 ## Block E — Capture — the picture that proves what it photographed
 
