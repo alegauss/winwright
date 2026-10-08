@@ -247,8 +247,20 @@ public class ScenarioFileTests
             ["name", "steps", "tags", "needs", "catches", "filed", "fixture", "forEach", "onlyReads"],
             ScenarioSchema.Case.Select(field => field.Name));
         Assert.Equal(
-            ["name", "environment", "flag", "arguments", "variables", "shareable", "language", "resident", "workingDirectory"],
+            [
+                "name", "environment", "flag", "arguments", "variables", "shareable", "language", "resident",
+                "workingDirectory", "files",
+            ],
             ScenarioSchema.Fixture.Select(field => field.Name));
+
+        // WW509. The one description that spells a constant out, and why it has to: the documentation
+        // area reads these sentences out of the source rather than out of a running build, so an
+        // interpolated hole would publish `{FixtureDeclaration.Staged}` to a reader. Spelled, and
+        // held here, because a spelling nothing checks is a spelling that drifts on the first rename.
+        Assert.Contains(
+            $"'{FixtureDeclaration.Staged}'",
+            ScenarioSchema.Fixture.Single(field => field.Name == "files").Means,
+            StringComparison.Ordinal);
         Assert.Equal(
             [
                 "locator", "tray", "act", "with", "expect", "reads", "moves", "answers", "matches", "discloses",
@@ -310,11 +322,12 @@ public class ScenarioFileTests
                   "environment": "pt-BR",
                   "flag": "--language",
                   "arguments": ["--chromeless"],
-                  "variables": { "WINWRIGHT_ROLE": "reader" },
+                  "variables": { "WINWRIGHT_ROLE": "reader", "APPDATA": "{files}" },
                   "shareable": true,
                   "language": "pt-BR",
                   "resident": true,
-                  "workingDirectory": "cases/fixtures"
+                  "workingDirectory": "cases/fixtures",
+                  "files": ["cases/fixtures/sessions.json"]
                 }
               ],
               "cases": [
@@ -357,6 +370,8 @@ public class ScenarioFileTests
         Assert.Equal("pt-BR", against.Language);
         Assert.True(against.Resident);
         Assert.Equal("cases/fixtures", against.WorkingDirectory);
+        Assert.Equal(["cases/fixtures/sessions.json"], against.Files);
+        Assert.Equal(FixtureDeclaration.Staged, against.Variables["APPDATA"]);
     }
 
     [Fact]

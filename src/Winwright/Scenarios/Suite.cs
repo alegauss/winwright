@@ -271,6 +271,12 @@ public static class Suite
     private static (AutomationElement Window, LaunchedProcess Process) Opened(
         ProcessRegister register, ProjectDeclaration project, FixtureDeclaration fixture, string named)
     {
+        // WW509. Before the start info is built, because the directory the token resolves to has to
+        // be the directory the files are actually in by the time the process reads it. A fixture
+        // declaring none still gets an emptied directory, which is what makes the store this
+        // launch's own rather than whatever the last one left.
+        _ = fixture.Stage(project.Root);
+
         // WW508. The root, so a fixture argument naming a file in the project means the same thing
         // under every runner. Before this the launch set no directory at all and inherited whichever
         // one the test runner happened to be in.

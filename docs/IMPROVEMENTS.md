@@ -4,30 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW509 A fixture's own environment
-
-Found adopting a case for quickshell's QS217. The client keeps its saved sessions in a
-file under the user's AppData, and a case that searches the session list needs a store
-holding known sessions. A fixture declares `arguments` and `shareable` and nothing else,
-so it cannot give the launched application an environment variable naming another store,
-nor place a file where the application will look, and the case has to stop at "the entry
-is listed".
-
-The workaround on the adopter's side is a command-line flag that exists only for the
-harness, which is a surface the application's users then see, or a test runner that
-writes into the real user profile before launching, which is global state another case
-can trample.
-
-What to build: a fixture may declare `environment`, a map of names to values merged into
-the launched process's environment, values resolved against the project root the way a
-file argument is once WW508 lands. Shared fixtures key on it, so two fixtures differing
-only in environment are two launches. Optionally `files`, copied into a scratch folder
-the environment can name as a token, so a case gets an isolated store without a fixed
-path.
-
-Falsified when a case can launch an application against a file of its own choosing
-without the application growing a flag for it.
-
 ### §WW512 The directory nothing starts in
 
 WW508 set the launch's working directory to the project's root and let a fixture name
@@ -78,6 +54,32 @@ project's `reports`, so even the one-line change would go in unheld, and an unhe
 is what this backlog keeps filing tasks about.
 
 So the work is the seam first, then the directory, then a case over both.
+
+### §WW515 The order nothing enforces
+
+WW509 split a launch into two calls. `Stage(root)` empties the directory a fixture's
+files go in and copies them there; `Starting(executable, root)` builds the start info,
+resolving `{files}` to that same directory. Both derive the path from the root and the
+fixture's name, so they cannot disagree about *where* — and nothing says one must happen
+before the other.
+
+`Suite.Opened` stages first, which is why this ships correct. A caller that does not
+gets a start info whose `APPDATA` points at a directory that may not exist or holds what
+an earlier run left; the application reports a store it cannot read, and the red is
+about the application. `SuiteLaunchTests` already launches through a door of its own, so
+the second caller is not hypothetical — it stays correct only because its fixture stages
+nothing.
+
+WW508 made this argument one field over and took the other answer: `Starting` requires
+the root rather than defaulting it, because a default there would be the defect that
+task removed, spelled as a choice nobody made. The ordering here is that argument
+unfinished.
+
+What finishes it is a shape where the order cannot be got wrong rather than a comment
+asking for it. `Starting` taking the staged directory is the blunt version and puts a
+third parameter on a launch builder. A type standing for a fixture staged for one launch
+— the fixture, the root, the directory, with `Starting(executable)` on it — reads right,
+and is a refactor rather than a parameter.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -148,3 +150,29 @@ on a matcher being complete.
 The pairings are the other half, and a second regex over the same lines is not an
 independent read. Counting the members a body declares is a different question from
 which lines look like one, and it is the question a case should ask.
+
+### §WW514 The hole nothing refuses
+
+`format.mjs` publishes the schema's own sentences, read out of `ScenarioSchema.cs` as
+source rather than from a running build. An interpolated description is a hole somebody
+has to fill, and `stringly` fills it: a `$"..."` string's `{Name}` is looked up among
+the constants that source declares, and one it cannot find is refused.
+
+That refusal is right and its pattern is narrower than C#. It matches
+`/\{([A-Za-z]+)\}/`, so a hole naming another type's constant —
+`{FixtureDeclaration.Staged}` — is not recognised as a hole at all. Not resolved, not
+refused, and the sentence reaches the page carrying the expression an author wrote: a
+reader is told to spell a field with `'{FixtureDeclaration.Staged}'`.
+
+Found writing WW509, which added the first such description and tripped exactly this.
+The repair there was to spell the token out and pair the spelling to the constant, which
+is right for that field and does nothing for the next one.
+
+The fix is the pattern: anything brace-delimited that could be a name, dotted ones among
+them, is a hole, and one this cannot resolve stops the build. The resolver has no
+business following a qualified name into another file — refusing is the whole job,
+because an author who is told has two correct answers, to spell it out or to move the
+constant, and silence leaves them neither.
+
+Not the fix: the refusal fires only for `$`-prefixed strings, which is right. A plain
+string's braces are a reader's, and that is how WW509's spelling survives it.

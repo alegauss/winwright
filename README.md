@@ -878,6 +878,34 @@ runner process's own current directory, which is global state in a test assembly
 absolute path into a file other machines read. Declare the field to start somewhere else; a relative
 path resolves against that same root, and one that is already absolute is left where it is.
 
+`files` is how a case gives the application a store of its own. Each is a path relative to the project
+root, copied into a directory made for that launch and **emptied first**, and a `variables` value or
+`workingDirectory` names that directory with the token `{files}`:
+
+```json
+{
+  "fixtures": [
+    {
+      "name": "with sessions",
+      "variables": { "APPDATA": "{files}" },
+      "files": ["cases/fixtures/sessions.json"]
+    }
+  ]
+}
+```
+
+So a Windows application needs **no flag for the harness**: point `APPDATA` at the staged directory
+and the application finds the store this case put there. Before it, a case that needed a known data
+file had two choices, both bad — a command-line flag that exists only for testing, which the
+application's users then see, or writing into the real user profile before launching, which the next
+case tramples. The directory is under the system temp rather than in the checkout, because an engine
+that writes into your working tree is one that turns up in your `git status`, and it is per project
+and per fixture, which is what a launch is keyed by. A fixture that stages files and names `{files}`
+nowhere is **refused**: files nothing is looking at are files the case was written to read and never
+read, and the reading it takes instead is the real machine's. Declaring no files is still a directory
+of this launch's own, which is an empty store rather than a mistake. A value naming no token is
+passed exactly as written — `"reader"` is not a path for being a string.
+
 `shareable` says the application leaves a window the next case would accept. `Suite.Launch` lends one
 window to several cases only when three separate things agree: the fixture says it may be lent, every
 case using it declares `onlyReads`, and the invocation asked for sharing. Sharing is opted into per

@@ -39,8 +39,10 @@ public sealed record FixtureDeclaration
         bool shareable,
         string language,
         bool resident,
-        string workingDirectory)
+        string workingDirectory,
+        IReadOnlyList<string> files)
     {
+        Files = files;
         Name = name;
         Environment = environment;
         Flag = flag;
@@ -140,12 +142,44 @@ public sealed record FixtureDeclaration
     /// </summary>
     public string WorkingDirectory { get; }
 
+    /// <summary>
+    /// The token a <see cref="Variables"/> value or a <see cref="WorkingDirectory"/> may name to mean
+    /// the directory this fixture's <see cref="Files"/> were staged into. WW509.
+    /// <para>
+    /// A token rather than resolving every value as a path, which is what WW509's first draft asked
+    /// for: <c>WINWRIGHT_ROLE=reader</c> would become a directory, and a value is not a path for
+    /// being a string. This substitutes exactly where an author wrote it, and a value carrying any
+    /// other brace — a line of JSON, say — is left alone.
+    /// </para>
+    /// </summary>
+    public const string Staged = "{files}";
+
+    /// <summary>
+    /// The files copied into a directory of this launch's own, each a path relative to the project's
+    /// root, in declared order. Empty where the fixture declares none. WW509.
+    /// <para>
+    /// Found adopting a case for quickshell's QS217. The client keeps saved sessions in a file under
+    /// the user's AppData, and a case searching that list needs a store holding known sessions. A
+    /// variable only reaches an application that reads one, so the case needed bytes where the
+    /// application already looks — and the two workarounds were a flag that exists only for the
+    /// harness, which the application's users then see, and writing into the real user profile before
+    /// launching, which the next case tramples.
+    /// </para>
+    /// <para>
+    /// With <see cref="Staged"/> a Windows application needs no flag at all: the fixture points
+    /// <c>APPDATA</c> at the staged directory and the application finds a store this case put there.
+    /// Declaring files and naming the token nowhere is refused, for WW60's reason one field over —
+    /// files that reach the launch nowhere are a declaration that decided nothing.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Files { get; }
+
     /// <summary>Whether this fixture samples an environment at all.</summary>
     public bool Samples => Environment.Length > 0;
 
     /// <summary>The application as it comes: no arguments, no variables, nothing sampled.</summary>
     public static FixtureDeclaration Plain { get; } =
-        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false, "");
+        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false, "", []);
 
     /// <summary>
     /// Declare one.
@@ -159,8 +193,10 @@ public sealed record FixtureDeclaration
     /// <param name="language">The language tag the window it launches is in.</param>
     /// <param name="resident">That this launch draws no window, so the run holds it as a process.</param>
     /// <param name="workingDirectory">The directory to start it in, resolved against the project's root.</param>
+    /// <param name="files">The files to stage for this launch, each relative to the project's root.</param>
     /// <exception cref="ScenarioRefusedException">
-    /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not one.
+    /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not
+    /// one, or files are declared that reach the launch nowhere.
     /// </exception>
     public static FixtureDeclaration Of(
         string name,
@@ -171,7 +207,8 @@ public sealed record FixtureDeclaration
         bool shareable = false,
         string? language = null,
         bool resident = false,
-        string? workingDirectory = null)
+        string? workingDirectory = null,
+        IEnumerable<string>? files = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
         if (string.IsNullOrWhiteSpace(name))
@@ -238,6 +275,29 @@ public sealed record FixtureDeclaration
         // which is the rule every other path the project declares already follows.
         var starting = workingDirectory?.Trim() ?? "";
 
+        var staging = new List<string>();
+        foreach (var file in files ?? [])
+        {
+            if (string.IsNullOrWhiteSpace(file))
+                throw new ScenarioRefusedException(called, "one of its files is blank, and a blank path names nothing");
+
+            staging.Add(file.Trim());
+        }
+
+        // WW509, and WW60's refusal one field over: a declaration that reaches the launch nowhere
+        // decided nothing. Files staged into a directory no variable and no working directory names
+        // are files the application cannot be looking at, and the case that was written to read them
+        // reads whatever the real machine had instead — which is green, and about the wrong store.
+        if (staging.Count > 0
+            && !starting.Contains(Staged, StringComparison.Ordinal)
+            && !set.Values.Any(value => value.Contains(Staged, StringComparison.Ordinal)))
+        {
+            throw new ScenarioRefusedException(
+                called,
+                $"it stages {staging.Count} file(s) and nothing names '{Staged}', so the launch cannot "
+                + "be looking at them");
+        }
+
         return new FixtureDeclaration(
             called,
             sampled,
@@ -247,7 +307,8 @@ public sealed record FixtureDeclaration
             shareable,
             speaking,
             resident,
-            starting);
+            starting,
+            new ReadOnlyCollection<string>(staging));
     }
 
     /// <summary>
@@ -316,7 +377,94 @@ public sealed record FixtureDeclaration
 
         return WorkingDirectory.Length == 0
             ? System.IO.Path.GetFullPath(root)
-            : System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(WorkingDirectory), root);
+            : System.IO.Path.GetFullPath(
+                System.Environment.ExpandEnvironmentVariables(Resolved(WorkingDirectory, root)), root);
+    }
+
+    /// <summary>
+    /// The directory this fixture's <see cref="Files"/> are staged into. Derived and never stored, so
+    /// the path <see cref="Staged"/> resolves to and the path <see cref="Stage"/> writes cannot come
+    /// apart. Creates nothing. WW509.
+    /// <para>
+    /// Under the system temp rather than the checkout, which is the decision worth stating: an engine
+    /// that writes into an adopter's working tree by default is an engine that turns up in their
+    /// <c>git status</c>, and a store seeded for a case is not a thing anybody meant to commit.
+    /// </para>
+    /// <para>
+    /// Per project and per fixture, because that is what a launch is keyed by: two fixtures are two
+    /// launches with two stores, and two cases sharing one fixture share the window already. The
+    /// project's root goes through a hash because a path is not a directory name, and the root's own
+    /// folder name rides along so a person looking in temp can tell whose it is.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The project's root.</param>
+    public string StagedInto(string root)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(root);
+
+        var full = System.IO.Path.GetFullPath(root);
+        var hashed = System.Security.Cryptography.SHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes(full.ToLowerInvariant()));
+
+        return System.IO.Path.Combine(
+            System.IO.Path.GetTempPath(),
+            "winwright",
+            $"{Legible(new System.IO.DirectoryInfo(full).Name)}-{Convert.ToHexString(hashed)[..8].ToLowerInvariant()}",
+            Legible(Name));
+    }
+
+    /// <summary>
+    /// Put this fixture's files in that directory, emptied first, and hand back where they went.
+    /// <para>
+    /// Emptied, because a launch that inherits what the last one left is the global state this field
+    /// exists to remove — the same defect as writing into the real user profile, moved somewhere
+    /// tidier. A fixture declaring no files still gets the directory, so a variable naming
+    /// <see cref="Staged"/> with nothing staged is an empty store of this launch's own, which is a
+    /// thing worth asking for rather than a mistake.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The project's root, which the declared paths are relative to.</param>
+    /// <exception cref="ScenarioRefusedException">Where a declared file is not there to copy.</exception>
+    public string Stage(string root)
+    {
+        var into = StagedInto(root);
+        if (System.IO.Directory.Exists(into))
+            System.IO.Directory.Delete(into, recursive: true);
+
+        System.IO.Directory.CreateDirectory(into);
+
+        foreach (var file in Files)
+        {
+            var from = System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(file), root);
+            if (!System.IO.File.Exists(from))
+            {
+                // Named as the fixture wrote it and as it resolved, because the two are the whole
+                // question: a reader who sees only one of them cannot tell a missing file from a
+                // path that meant something else.
+                throw new ScenarioRefusedException(
+                    Name, $"it stages '{file}', which is not a file — it resolved to {from}");
+            }
+
+            System.IO.File.Copy(from, System.IO.Path.Combine(into, System.IO.Path.GetFileName(from)), overwrite: true);
+        }
+
+        return into;
+    }
+
+    /// <summary><paramref name="value"/> with <see cref="Staged"/> swapped for where the files went.</summary>
+    private string Resolved(string value, string root) =>
+        value.Contains(Staged, StringComparison.Ordinal)
+            ? value.Replace(Staged, StagedInto(root), StringComparison.Ordinal)
+            : value;
+
+    /// <summary>A name a directory can be called, for the one in temp a person has to recognise.</summary>
+    private static string Legible(string name)
+    {
+        var letters = name
+            .Select(one => System.IO.Path.GetInvalidFileNameChars().Contains(one) || one == ' ' ? '-' : one)
+            .ToArray();
+
+        return new string(letters);
     }
 
     /// <summary>How to start the application under test with this fixture in force.</summary>
@@ -338,8 +486,11 @@ public sealed record FixtureDeclaration
         foreach (var argument in Launching())
             start.ArgumentList.Add(argument);
 
+        // WW509. The token resolves here and not in the declaration: where the files go is a fact
+        // about this machine, and a declaration read on one machine is the same declaration on the
+        // next. A value naming no token is handed over exactly as written.
         foreach (var variable in Variables)
-            start.Environment[variable.Key] = variable.Value;
+            start.Environment[variable.Key] = Resolved(variable.Value, root);
 
         return start;
     }
@@ -356,7 +507,11 @@ public sealed record FixtureDeclaration
         // only where the fixture named one, which is Shareable's rule and Resident's — a line that
         // says "the project root" on every fixture is the mark that marks nothing.
         var started = WorkingDirectory.Length > 0 ? $", starting in {WorkingDirectory}" : "";
-        return $"{Name}: {sampled}{lent}{held}{started}.";
+
+        // WW509. Counted rather than listed: a reader of a red wants to know this launch had a store
+        // of its own, and which files were in it is the declaration's business.
+        var staged = Files.Count > 0 ? $", staging {Files.Count} file(s)" : "";
+        return $"{Name}: {sampled}{lent}{held}{started}{staged}.";
     }
 
     /// <summary>The one line a listing shows.</summary>

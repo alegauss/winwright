@@ -190,6 +190,164 @@ public class FixtureDeclarationTests
         Assert.Equal("plain: the application as it comes.", FixtureDeclaration.Of("plain").Sentence());
     }
 
+    /// <summary>
+    /// WW509. The defect quickshell found at QS217: the client reads its saved sessions from a file
+    /// under the user's AppData, so a case that searches the session list had nowhere to put a store
+    /// holding known ones. A variable alone does not reach an application that reads no flag.
+    /// </summary>
+    [Fact]
+    public void A_staged_file_reaches_the_launch_through_the_token_a_variable_names()
+    {
+        var fixture = FixtureDeclaration.Of(
+            "with sessions",
+            variables: new Dictionary<string, string> { ["APPDATA"] = FixtureDeclaration.Staged },
+            files: ["cases/fixtures/sessions.json"]);
+
+        var into = fixture.StagedInto(@"C:\checkout");
+        var start = fixture.Starting(@"C:\app\YourApp.exe", @"C:\checkout");
+
+        Assert.Equal(into, start.Environment["APPDATA"]);
+        Assert.DoesNotContain(FixtureDeclaration.Staged, start.Environment["APPDATA"]);
+    }
+
+    /// <summary>
+    /// Under the system temp and not the checkout: an engine that writes into an adopter's working
+    /// tree is one that turns up in their `git status`. Per project and per fixture, which is what a
+    /// launch is keyed by.
+    /// </summary>
+    [Fact]
+    public void Where_files_are_staged_is_this_project_and_this_fixture_and_is_not_the_checkout()
+    {
+        var one = FixtureDeclaration.Of("sessions", workingDirectory: FixtureDeclaration.Staged);
+        var other = FixtureDeclaration.Of("no sessions", workingDirectory: FixtureDeclaration.Staged);
+
+        var mine = one.StagedInto(@"C:\checkout");
+
+        Assert.StartsWith(System.IO.Path.GetTempPath(), mine, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(@"C:\checkout", mine, StringComparison.OrdinalIgnoreCase);
+        Assert.NotEqual(mine, other.StagedInto(@"C:\checkout"));
+        Assert.NotEqual(mine, one.StagedInto(@"D:\elsewhere"));
+        Assert.Equal(mine, one.StagedInto(@"C:\checkout"));
+    }
+
+    /// <summary>
+    /// The token works in `workingDirectory` too, which makes staging and starting one story: put
+    /// the files somewhere of this launch's own, and start the application in it.
+    /// </summary>
+    [Fact]
+    public void The_token_resolves_in_the_working_directory_as_well_as_in_a_variable()
+    {
+        var fixture = FixtureDeclaration.Of("in its own", workingDirectory: FixtureDeclaration.Staged);
+
+        Assert.Equal(fixture.StagedInto(@"C:\checkout"), fixture.StartsIn(@"C:\checkout"));
+    }
+
+    /// <summary>
+    /// WW60's refusal one field over. Files staged where nothing is looking are files the case was
+    /// written to read and never read — and the reading it takes instead is the real machine's,
+    /// which is green and about the wrong store.
+    /// </summary>
+    [Fact]
+    public void A_fixture_staging_files_that_the_launch_names_nowhere_is_refused()
+    {
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => FixtureDeclaration.Of(
+            "nothing looks",
+            variables: new Dictionary<string, string> { ["WINWRIGHT_ROLE"] = "reader" },
+            files: ["cases/fixtures/sessions.json"]));
+
+        Assert.Contains(FixtureDeclaration.Staged, refusal.Because, StringComparison.Ordinal);
+        Assert.Contains("cannot be looking at them", refusal.Because, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// A value naming no token is handed over as written, because the alternative WW509's first
+    /// draft asked for — every value resolved as a path — turns `reader` into a directory.
+    /// </summary>
+    [Fact]
+    public void A_variable_that_names_no_token_is_passed_exactly_as_it_was_written()
+    {
+        var fixture = FixtureDeclaration.Of(
+            "plain values",
+            variables: new Dictionary<string, string> { ["WINWRIGHT_ROLE"] = "reader", ["SHAPE"] = "{\"json\":1}" });
+
+        var start = fixture.Starting(@"C:\app\YourApp.exe", @"C:\checkout");
+
+        Assert.Equal("reader", start.Environment["WINWRIGHT_ROLE"]);
+        Assert.Equal("{\"json\":1}", start.Environment["SHAPE"]);
+    }
+
+    /// <summary>
+    /// Emptied first, because a launch inheriting what the last one left is the global state this
+    /// field exists to remove. A fixture declaring no files still gets the directory, so a variable
+    /// naming the token with nothing staged is an empty store of this launch's own.
+    /// </summary>
+    [Fact]
+    public void Staging_puts_the_declared_files_in_that_directory_and_empties_it_first()
+    {
+        var root = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"ww509-{Guid.NewGuid():N}");
+        System.IO.Directory.CreateDirectory(System.IO.Path.Combine(root, "cases", "fixtures"));
+        System.IO.File.WriteAllText(System.IO.Path.Combine(root, "cases", "fixtures", "sessions.json"), "[]");
+
+        var fixture = FixtureDeclaration.Of(
+            "with sessions",
+            workingDirectory: FixtureDeclaration.Staged,
+            files: ["cases/fixtures/sessions.json"]);
+
+        try
+        {
+            var into = fixture.Stage(root);
+            Assert.Equal("[]", System.IO.File.ReadAllText(System.IO.Path.Combine(into, "sessions.json")));
+
+            // What the application wrote last time, which the next launch must not inherit.
+            System.IO.File.WriteAllText(System.IO.Path.Combine(into, "written-by-the-app.json"), "{}");
+
+            Assert.Equal(into, fixture.Stage(root));
+            Assert.False(System.IO.File.Exists(System.IO.Path.Combine(into, "written-by-the-app.json")));
+            Assert.Equal("[]", System.IO.File.ReadAllText(System.IO.Path.Combine(into, "sessions.json")));
+
+            // And one that stages nothing still gets an emptied directory of its own.
+            var empty = FixtureDeclaration.Of("empty store", workingDirectory: FixtureDeclaration.Staged);
+            Assert.Empty(System.IO.Directory.GetFiles(empty.Stage(root)));
+        }
+        finally
+        {
+            System.IO.Directory.Delete(root, recursive: true);
+            foreach (var one in new[] { fixture, FixtureDeclaration.Of("empty store", workingDirectory: FixtureDeclaration.Staged) })
+            {
+                if (System.IO.Directory.Exists(one.StagedInto(root)))
+                    System.IO.Directory.Delete(one.StagedInto(root), recursive: true);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Named as the fixture wrote it and as it resolved, because the two are the whole question: a
+    /// reader who sees only one cannot tell a missing file from a path that meant something else.
+    /// </summary>
+    [Fact]
+    public void Staging_a_file_that_is_not_there_is_refused_naming_both_what_was_written_and_where_it_looked()
+    {
+        var root = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"ww509-{Guid.NewGuid():N}");
+        System.IO.Directory.CreateDirectory(root);
+
+        var fixture = FixtureDeclaration.Of(
+            "missing", workingDirectory: FixtureDeclaration.Staged, files: ["cases/fixtures/sessions.json"]);
+
+        try
+        {
+            var refusal = Assert.Throws<ScenarioRefusedException>(() => fixture.Stage(root));
+
+            Assert.Contains("cases/fixtures/sessions.json", refusal.Because, StringComparison.Ordinal);
+            Assert.Contains(System.IO.Path.Combine(root, "cases", "fixtures", "sessions.json"), refusal.Because, StringComparison.Ordinal);
+        }
+        finally
+        {
+            System.IO.Directory.Delete(root, recursive: true);
+            if (System.IO.Directory.Exists(fixture.StagedInto(root)))
+                System.IO.Directory.Delete(fixture.StagedInto(root), recursive: true);
+        }
+    }
+
     [Fact]
     public void A_case_names_a_fixture_its_own_file_declares_and_nothing_else()
     {

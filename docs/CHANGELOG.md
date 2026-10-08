@@ -91,6 +91,7 @@
 - ✅ **WW471** **the preamble reads the foreground once, so it reports absent a desk every act in the run then waited for and had** — The desk is read again when the run ends, so a window that came forward is told from one the desk never reached, and neither look waits.
 - ✅ **WW472** **the runner says a shell holding the desk clears itself, and carries the tree anyway when it does not** — The runner asks the desk for the foreground as a fixture does and refuses before the carry when it is not given; one input event is what was missing (design recorded in `tools/desk-take.ps1`).
 - ✅ **WW508** **A fixture cannot name a file in the project, because the launched application starts wherever the runner happened to be** — A launch starts in the project's root, and a fixture may name a directory of its own against it (design recorded in `src/Winwright/Scenarios/FixtureDeclaration.cs`).
+- ✅ **WW509** **A fixture cannot put a file where the application looks, so a case needing a known store writes into the user profile** — A fixture stages files into a directory of its own, named by '{files}' in a variable or the working directory (design recorded in `src/Winwright/Scenarios/FixtureDeclaration.cs`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

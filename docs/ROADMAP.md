@@ -4,9 +4,9 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW509** (deps: —) **A fixture cannot give the application it launches an environment variable or a file of the case's choosing** — An adopter's case that needs a known data file must add a flag only the harness uses, or write into the real user profile first. → §WW509
 - 📋 **WW512** (deps: —) **the directory a launch starts in is asserted on the ProcessStartInfo and never on a running process** — Nothing starts the application and asks what a relative argument resolved to, which is WW508's own falsification and the one thing an adopter relies on. → §WW512
 - 📋 **WW513** (deps: —) **the application's other launcher sets no working directory, and nothing can assert the one it would set** — A read-out inherits the runner's directory, and Printed builds the start info and starts the process in one call, so there is no seam to hold it by. → §WW513
+- 📋 **WW515** (deps: —) **staging a launch and building it are two calls whose order nothing enforces** — A caller that builds the start info without staging first points the application at a directory that may not exist or holds what an earlier run left. → §WW515
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -30,6 +30,7 @@
 
 - 📋 **WW510** (deps: —) **the version swap is the one behaviour on the site no run exercises, on both halves of it** — The picker and the markup are each asserted, and every one of those can hold while a reader is handed the number the page was built with. → §WW510
 - 📋 **WW511** (deps: —) **three generators read an enum with a matcher that only recognises a valueless member, and the pairing copies it** — A member declaring a value leaves the page with nothing said, and the case that would catch it finds the members with the generator's own regex. → §WW511
+- 📋 **WW514** (deps: —) **a generated sentence may carry an interpolation hole the build cannot resolve, and the page publishes it verbatim** — The refusal that exists for this matches an unqualified name only, so a hole naming another type's constant is not recognised as a hole at all. → §WW514
 
 ## Done when — Block A
 
