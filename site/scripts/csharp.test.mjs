@@ -42,9 +42,11 @@ test("a generator that reads the engine's C# reads it through the shared one", (
   // Reading a source and never importing the reader is the state grammar.mjs was in: its own
   // brace balance, its own doc comment, its own entity table, all of it a copy.
   //
-  // `messages.mjs` is the exception and says so: it checks that an exact run of words is still
-  // in a file, which needs no parse at all — a reader would be the wrong tool, not a shared one.
-  const exceptions = new Set(["messages.mjs", "product.mjs"]);
+  // `messages.mjs` is the one exception and says so: it checks that an exact run of words is
+  // still in a file, which needs no parse at all — a reader would be the wrong tool, not a
+  // shared one. WW507 took `product.mjs` off this list by teaching the shared reader to carry
+  // the one thing it needed that nothing else does, which is an enum member's declared value.
+  const exceptions = new Set(["messages.mjs"]);
 
   for (const { name, text } of others) {
     if (exceptions.has(name) || name.endsWith(".test.mjs")) continue;

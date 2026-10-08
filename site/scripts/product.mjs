@@ -16,6 +16,8 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { bodyOf, documented } from "./csharp.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const siteDir = join(here, "..");
 const repoDir = join(siteDir, "..");
@@ -53,38 +55,38 @@ const packages = [
 // its <summary>. A member with no explicit value would be a code nobody wrote down, so it
 // is refused here rather than rendered as a guess.
 function outcomes(source) {
-  const body = /enum\s+RunOutcome\s*\{([\s\S]*)\}/.exec(source);
-  if (!body) throw new Error("product: RunOutcome.cs no longer declares an enum RunOutcome");
+  const members = documented(
+    bodyOf(source, "enum RunOutcome", "{", "}", "RunOutcome.cs"),
+    (line) => {
+      // Any member, with or without a value. WW507: the matcher used to require `= <digits>`,
+      // so a member declaring none was not matched at all — which meant it cleared the doc
+      // comment and was skipped, and the page published three outcomes of four with nothing
+      // saying so. The refusal below is what that regex was standing in for, and it could not
+      // do the job: a line a matcher does not match is a line nothing reports.
+      const found = /^([A-Z][A-Za-z]*)\s*(?:=\s*(\d+))?\s*,?$/.exec(line);
+      return found ? { name: found[1], code: found[2] === undefined ? null : Number(found[2]) } : undefined;
+    },
+    "RunOutcome.cs",
+  );
 
-  const found = [];
-  let doc = [];
-  for (const raw of body[1].split(/\r?\n/)) {
-    const line = raw.trim();
-    if (line.startsWith("///")) {
-      doc.push(line.replace(/^\/\/\/\s?/, ""));
-      continue;
+  for (const one of members) {
+    // The member values ARE the process exit codes, which is the product's own decision. A
+    // member with no explicit value is a code nobody wrote, and rendering it as a guess is the
+    // one thing this generator exists to refuse.
+    if (one.code === null) {
+      throw new Error(`product: RunOutcome.${one.name} declares no value, and its value is the exit code`);
     }
-    const member = /^([A-Z][A-Za-z]*)\s*=\s*(\d+)\s*,?$/.exec(line);
-    if (member) {
-      const summary = /<summary>([\s\S]*?)<\/summary>/.exec(doc.join(" "));
-      if (!summary) {
-        throw new Error(`product: ${member[1]} carries no <summary> to read`);
-      }
-      found.push({
-        name: member[1],
-        code: Number(member[2]),
-        // the first sentence: the whole summary is a paragraph of reasoning, and a table
-        // cell is one line. The reasoning stays in the source, where it is read by whoever
-        // changes the value.
-        meaning: `${summary[1].replace(/\s+/g, " ").trim().split(/(?<=\.)\s/)[0]}`,
-      });
-      doc = [];
-      continue;
-    }
-    if (line.length > 0) doc = [];
   }
-  if (found.length === 0) throw new Error("product: RunOutcome.cs declares no members");
-  return found;
+
+  return members.map((one) => ({
+    name: one.name,
+    code: one.code,
+    // The first sentence: the whole summary is a paragraph of reasoning, and a table cell is
+    // one line. The reasoning stays in the source, where it is read by whoever changes the
+    // value. The shared reader answers with the first paragraph, and how much of that to show
+    // is this caller's question.
+    meaning: one.means.split(/(?<=\.)\s/)[0],
+  }));
 }
 
 const verdicts = outcomes(read("src", "Winwright", "Verdicts", "RunOutcome.cs"));

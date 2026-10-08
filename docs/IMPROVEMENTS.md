@@ -71,30 +71,6 @@ without the application growing a flag for it.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW507 The reader product.mjs still has, and the value it needs
-
-WW502 made `csharp.mjs` the one reader every generator walks C# with, and
-`csharp.test.mjs` refuses a second copy by name. It excepts `product.mjs`, which is the
-oldest of them and still reads a doc comment its own way: `outcomes()` walks
-`RunOutcome`'s members, accumulates the `///` lines above each, and takes the first
-sentence of the summary — which is what `documented` does, written out again.
-
-The exception is honest rather than a shortcut. `documented` answers with a member's
-name and its summary, and this generator needs a third thing the others never want: the
-value the member declares, because `RunOutcome`'s member values *are* the process exit
-codes. A member with no explicit value is refused rather than rendered as a guess, and
-that refusal is the whole reason the generator exists.
-
-So the repair is a parameter rather than a deletion: the shared reader learns to answer
-with the value where a member declares one, `product.mjs` asks for it, and the exception
-in `csharp.test.mjs` goes with the copy. What has to survive the move is the refusal — a
-code nobody wrote must still stop the build — and `product.test.mjs` already holds the
-published figures against the enum in both directions, so it is the case that says the
-exit codes did not change while it happened.
-
-Small, and the reason to do it is that this is the reader every page's figures now come
-through.
-
 ### §WW510 The swap nothing loads a page to watch
 
 Both halves of the site now state a version the browser asks nuget.org for: the landing
@@ -118,3 +94,29 @@ so the case is about the swap rather than about nuget.org being up. That is anot
 devDependency, which is the cost to weigh: the no-dependency rule is the engine's, and
 nothing holds the site's build tooling to it. Weigh it against the alternative, which is
 the one behaviour here published on trust.
+
+### §WW511 The matcher nothing reports on
+
+`documented` says nothing about a line its matcher did not match. It clears the doc
+comment it had accumulated and moves on — right for a brace or a blank line, silence for
+a member it failed to recognise.
+
+Three callers match with `/^([A-Z][A-Za-z]*),$/` — `grammar.mjs` twice, `verbs.mjs` and
+`holes.mjs`. That recognises a valueless member with a trailing comma and nothing else.
+Give one of those enums a member with a value, or write the last one without its comma,
+and the member leaves the page with nothing said.
+
+What makes this more than a shape worth tidying is that the pairing meant to catch it
+asks the same question. `verbs.test.mjs` finds `Cooperation`'s members with `/^
+{4}([A-Z][A-Za-z]*),$/gm` — the generator's own regex, copied — and checks one
+direction: every kind published is declared. So the page would explain one kind of
+cooperation where the engine has two, and the suite would be green.
+
+WW507 repaired exactly this in the fourth caller, and its shape is the one to carry
+across: the matcher recognises any member, and the caller refuses after the walk what it
+cannot use. A line that does not match is a line nothing reports, so nothing may depend
+on a matcher being complete.
+
+The pairings are the other half, and a second regex over the same lines is not an
+independent read. Counting the members a body declares is a different question from
+which lines look like one, and it is the question a case should ask.

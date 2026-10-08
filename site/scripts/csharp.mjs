@@ -156,11 +156,17 @@ export function documented(source, declares, where, paragraph = true) {
       doc.push(line.replace(/^\/\/\/\s?/, ""));
       continue;
     }
-    const name = declares(line);
-    if (name) {
+    // A matcher may answer with the name alone, or with an object carrying whatever else it
+    // read off the line — `RunOutcome`'s members declare the process exit code, and nothing
+    // else that comes through here wants it. WW507: the walk carries what it was handed and
+    // never asks what it means, which is the same split one language over.
+    const declared = declares(line);
+    if (declared) {
+      const carried = typeof declared === "string" ? { name: declared } : declared;
       const summary = /<summary>([\s\S]*?)<\/summary>/.exec(doc.join(" "));
-      if (!summary) throw new Error(`csharp: ${where} declares ${name} with no <summary> to read`);
-      found.push({ name, means: plain(paragraph ? summary[1].split("<para>")[0] : summary[1]) });
+      if (!summary) throw new Error(`csharp: ${where} declares ${carried.name} with no <summary> to read`);
+
+      found.push({ ...carried, means: plain(paragraph ? summary[1].split("<para>")[0] : summary[1]) });
       doc = [];
       continue;
     }

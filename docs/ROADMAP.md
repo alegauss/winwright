@@ -27,8 +27,8 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW507** (deps: —) **the oldest generator still reads a doc comment its own way, and the shared reader's case excepts it by name** — It needs an enum member's declared value, which nothing else wants and the shared reader cannot answer, so the copy stands with a reason. → §WW507
 - 📋 **WW510** (deps: —) **the version swap is the one behaviour on the site no run exercises, on both halves of it** — The picker and the markup are each asserted, and every one of those can hold while a reader is handed the number the page was built with. → §WW510
+- 📋 **WW511** (deps: —) **three generators read an enum with a matcher that only recognises a valueless member, and the pairing copies it** — A member declaring a value leaves the page with nothing said, and the case that would catch it finds the members with the generator's own regex. → §WW511
 
 ## Done when — Block A
 
