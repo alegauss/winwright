@@ -133,6 +133,39 @@ public sealed class SynthesisedActTests : IDisposable
     }
 
     /// <summary>
+    /// WW518. Typing reads the desk and then the focus, and carried only the second — so the finding
+    /// WW517 recorded was dropped before the line was written, for the act an adopter writes most.
+    /// <para>
+    /// The condition carried is still the focus, which is what keeps <c>BusyDesk</c> honest: it
+    /// decides whether a hole was the desk's by the name, and a composition that invented one would
+    /// make every excusal in this suite say something untrue. Asserted here.
+    /// </para>
+    /// </summary>
+    [Fact]
+    public void A_typing_step_says_how_the_desk_was_ours_as_well_as_which_control_took_the_focus()
+    {
+        var typed = Synthesised.Type(On("Edit[order=top]"), "zeta");
+        var step = typed.AsTraceStep();
+
+        if (BusyDesk.Excused(typed.Needed!))
+        {
+            // Checked on a busy desk too, rather than returning having asserted nothing.
+            Assert.Equal(StepVerdict.Unchecked, step.Verdict);
+            Assert.NotNull(step.Detail);
+            Assert.Null(step.Met);
+            return;
+        }
+
+        Assert.Equal(Winwright.Acting.Keyboard.FocusPreconditionName, typed.Needed!.Name);
+
+        Assert.Equal(StepVerdict.Ok, step.Verdict);
+        Assert.Null(step.Detail);
+        Assert.NotNull(step.Met);
+        Assert.Contains("holds it", step.Met, StringComparison.Ordinal);
+        Assert.Contains("window under test", step.Met, StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// WW517. The trace line for an act that ran says how its precondition was met, which the line
     /// for an act that did not has always said about the absence. A keystroke delivered to the
     /// window the step was about and one sent on a shared root used to read alike.

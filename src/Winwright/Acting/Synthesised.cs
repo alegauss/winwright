@@ -62,13 +62,17 @@ public static class Synthesised
         // The foreground first, then the focus: read in the order they stop each other mattering, so
         // a run that never owned the desktop is reported as that rather than as a control that would
         // not take the focus underneath it.
+        //
+        // WW518. `Beside` where both held, so the focus stays the condition this act carries — the
+        // name is what `BusyDesk` reads to tell a desk's hole from anything else — and WW517's
+        // finding about the desk rides along instead of being dropped before the line is written.
         return Landed(
             subject,
             "type",
             ByKeyboard,
             typed.Element,
             before,
-            typed.Foreground.Satisfied ? typed.Focus : typed.Foreground);
+            typed.Foreground.Satisfied ? typed.Focus.Beside(typed.Foreground) : typed.Foreground);
     }
 
     /// <summary>

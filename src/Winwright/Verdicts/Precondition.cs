@@ -64,6 +64,39 @@ public sealed record Precondition
     }
 
     /// <summary>
+    /// This condition, carrying what a condition read before it said about having been met. WW518.
+    /// <para>
+    /// An act carries one precondition and some acts read two: typing reads the foreground and then
+    /// the focus, in the order that makes each stop the other mattering — so a run that never owned
+    /// the desk reads as that rather than as a control that refused the focus. The one that was
+    /// carried was the later one, and WW517's finding about the desk was dropped before the trace
+    /// line was written.
+    /// </para>
+    /// <para>
+    /// This keeps <see cref="Name"/>, which is the constraint rather than a detail: <c>BusyDesk</c>
+    /// decides whether a hole was the desk's by the name the condition carries, so a composition
+    /// that invented one would make every excusal in the suite say something untrue. The later
+    /// condition is the subject; the earlier one only adds how it was met.
+    /// </para>
+    /// <para>
+    /// An absence is returned untouched. Where this condition is the one that failed, what it says
+    /// is the whole content of the hole, and a sentence about something that did hold would be
+    /// padding in front of the answer.
+    /// </para>
+    /// </summary>
+    /// <param name="earlier">The condition read before this one.</param>
+    public Precondition Beside(Precondition earlier)
+    {
+        ArgumentNullException.ThrowIfNull(earlier);
+
+        if (!Satisfied || !earlier.Satisfied)
+            return this;
+
+        var both = new[] { earlier.Presence, Presence }.Where(one => one.Length > 0).ToArray();
+        return both.Length == 0 ? this : new(Name, true, "", string.Join("; ", both));
+    }
+
+    /// <summary>
     /// This machine does not have it. <paramref name="absence"/> says what was looked for and
     /// what was there instead, because that sentence is the whole content of a degraded reading.
     /// </summary>

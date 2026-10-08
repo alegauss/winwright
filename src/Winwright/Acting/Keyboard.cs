@@ -145,7 +145,22 @@ public sealed record TypedResult
         ReadBack = ReadBack,
         Verdict = !Sent ? StepVerdict.Unchecked : Arrived ? StepVerdict.Ok : StepVerdict.Failed,
         Detail = TraceDetail(),
+
+        // WW518. The same pair this step's detail folds, said on the met side: where both held,
+        // the line carries which finding made the desk ours rather than dropping it. Null where
+        // either was absent, because then `Detail` is the answer and this would be noise beside it.
+        Met = TraceMet(),
     };
+
+    /// <summary>How the pair this step read was met, where both were and there is something to say.</summary>
+    private string? TraceMet()
+    {
+        if (!Sent)
+            return null;
+
+        var how = Focus.Beside(Foreground).Presence;
+        return how.Length > 0 ? how : null;
+    }
 
     /// <summary>
     /// The sentence a trace carries beside the verdict, or null where the verdict is the whole of it.

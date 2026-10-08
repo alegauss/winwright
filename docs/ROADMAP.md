@@ -8,8 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW518** (deps: —) **a typing step's line says nothing about the desk, because an act carries one precondition and two were read** — The focus condition is the one carried where the foreground is satisfied, so the finding that made the desk ours is dropped before the line is written. → §WW518
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

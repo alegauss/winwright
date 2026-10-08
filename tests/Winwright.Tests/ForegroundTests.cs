@@ -129,6 +129,54 @@ public sealed class ForegroundTests : IDisposable
         Assert.Equal("", Precondition.Met("a second profile is registered").Presence);
     }
 
+    /// <summary>
+    /// WW518. An act carries one precondition and typing reads two, so the finding about the desk
+    /// was dropped before the line was written. The composition keeps the later condition's name,
+    /// which is the constraint rather than a detail: <c>BusyDesk</c> decides whether a hole was the
+    /// desk's by that name, so inventing one would make every excusal in the suite say something
+    /// untrue.
+    /// </summary>
+    [Fact]
+    public void A_condition_read_after_another_carries_how_the_first_was_met_and_keeps_its_own_name()
+    {
+        var desk = Foreground.Between(ItsTextBox, Rooted).AsPrecondition();
+        var focus = Precondition.Met("the control under test holds the keyboard focus");
+
+        var both = focus.Beside(desk);
+
+        Assert.Equal(focus.Name, both.Name);
+        Assert.True(both.Satisfied);
+        Assert.Equal(desk.Presence, both.Presence);
+
+        // And where the later one has its own sentence, the two are joined rather than one winning.
+        var saying = Precondition.Met(focus.Name, "the box took it on the first attempt").Beside(desk);
+
+        Assert.Equal($"{desk.Presence}; the box took it on the first attempt", saying.Presence);
+    }
+
+    /// <summary>
+    /// An absence comes back untouched: where the later condition is the one that failed, what it
+    /// says is the whole content of the hole, and a sentence about something that did hold would be
+    /// padding in front of the answer.
+    /// </summary>
+    [Fact]
+    public void A_condition_that_failed_says_only_that_whatever_was_read_before_it()
+    {
+        var desk = Foreground.Between(Rooted, Rooted).AsPrecondition();
+        var refused = Precondition.Absent("the control under test holds the keyboard focus", "the box never took it");
+
+        var both = refused.Beside(desk);
+
+        Assert.False(both.Satisfied);
+        Assert.Equal("the box never took it", both.Absence);
+        Assert.Equal("", both.Presence);
+
+        // And the other way round: a desk nobody owned is not dressed up by a focus that held.
+        var noDesk = Foreground.Between(Editor, UnderTest).AsPrecondition();
+
+        Assert.False(noDesk.Beside(Precondition.Met("x", "y")).Satisfied);
+    }
+
     [Fact]
     public void A_met_precondition_that_says_how_says_something()
     {
