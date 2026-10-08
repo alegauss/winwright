@@ -177,6 +177,15 @@ public sealed record FixtureDeclaration
     /// <summary>Whether this fixture samples an environment at all.</summary>
     public bool Samples => Environment.Length > 0;
 
+    /// <summary>
+    /// Whether this fixture's launch depends on the staged directory existing — because it stages
+    /// files, or because something it declares names <see cref="Staged"/>. WW515.
+    /// </summary>
+    public bool NeedsStaging =>
+        Files.Count > 0
+        || WorkingDirectory.Contains(Staged, StringComparison.Ordinal)
+        || Variables.Values.Any(value => value.Contains(Staged, StringComparison.Ordinal));
+
     /// <summary>The application as it comes: no arguments, no variables, nothing sampled.</summary>
     public static FixtureDeclaration Plain { get; } =
         new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false, "", []);
@@ -425,7 +434,7 @@ public sealed record FixtureDeclaration
     /// </summary>
     /// <param name="root">The project's root, which the declared paths are relative to.</param>
     /// <exception cref="ScenarioRefusedException">Where a declared file is not there to copy.</exception>
-    public string Stage(string root)
+    public StagedFixture Stage(string root)
     {
         var into = StagedInto(root);
         if (System.IO.Directory.Exists(into))
@@ -448,7 +457,10 @@ public sealed record FixtureDeclaration
             System.IO.File.Copy(from, System.IO.Path.Combine(into, System.IO.Path.GetFileName(from)), overwrite: true);
         }
 
-        return into;
+        // WW515. A type rather than the path, so the thing a launch is composed from is a fixture
+        // that has been staged, and the root it resolves against is the root its files went under
+        // by construction. Two calls each taking a root could be handed two.
+        return new StagedFixture(this, root, into);
     }
 
     /// <summary><paramref name="value"/> with <see cref="Staged"/> swapped for where the files went.</summary>
@@ -477,6 +489,24 @@ public sealed record FixtureDeclaration
     public ProcessStartInfo Starting(string executable, string root)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(executable);
+        ArgumentException.ThrowIfNullOrWhiteSpace(root);
+
+        // WW515. The order WW509 left to whoever called these two. A fixture that names the staged
+        // directory is a fixture whose launch resolves a token to a path, and a path that was never
+        // staged is a directory that may not exist or may hold what an earlier run left — the
+        // application then reports a store it cannot read and the red is about the application.
+        //
+        // Asked of the fixtures that depend on it and not of every fixture, because that is where
+        // the dependency is: one that never mentions the staged directory does not care whether it
+        // exists, and a launch that demanded staging from all of them would make `Suite` the only
+        // caller that could compose one at all.
+        if (NeedsStaging && !System.IO.Directory.Exists(StagedInto(root)))
+        {
+            throw new ScenarioRefusedException(
+                Name,
+                $"it names '{Staged}' or stages files, and nothing has staged it — {nameof(Stage)} makes the "
+                    + "directory a launch resolves that to");
+        }
 
         var start = new ProcessStartInfo(executable)
         {

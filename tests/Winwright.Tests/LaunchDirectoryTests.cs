@@ -96,7 +96,7 @@ public sealed class LaunchDirectoryTests : IDisposable
 
         try
         {
-            var into = fixture.Stage(root);
+            var into = fixture.Stage(root).Into;
 
             Assert.Equal(Path.GetFullPath(into), Resolved(fixture, root, "."));
             Assert.Equal(

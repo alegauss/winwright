@@ -4,32 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW515 The order nothing enforces
-
-WW509 split a launch into two calls. `Stage(root)` empties the directory a fixture's
-files go in and copies them there; `Starting(executable, root)` builds the start info,
-resolving `{files}` to that same directory. Both derive the path from the root and the
-fixture's name, so they cannot disagree about *where* — and nothing says one must happen
-before the other.
-
-`Suite.Opened` stages first, which is why this ships correct. A caller that does not
-gets a start info whose `APPDATA` points at a directory that may not exist or holds what
-an earlier run left; the application reports a store it cannot read, and the red is
-about the application. `SuiteLaunchTests` already launches through a door of its own, so
-the second caller is not hypothetical — it stays correct only because its fixture stages
-nothing.
-
-WW508 made this argument one field over and took the other answer: `Starting` requires
-the root rather than defaulting it, because a default there would be the defect that
-task removed, spelled as a choice nobody made. The ordering here is that argument
-unfinished.
-
-What finishes it is a shape where the order cannot be got wrong rather than a comment
-asking for it. `Starting` taking the staged directory is the blunt version and puts a
-third parameter on a launch builder. A type standing for a fixture staged for one launch
-— the fixture, the root, the directory, with `Starting(executable)` on it — reads right,
-and is a refactor rather than a parameter.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

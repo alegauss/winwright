@@ -4,8 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW515** (deps: —) **staging a launch and building it are two calls whose order nothing enforces** — A caller that builds the start info without staging first points the application at a directory that may not exist or holds what an earlier run left. → §WW515
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

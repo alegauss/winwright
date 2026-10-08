@@ -198,16 +198,35 @@ public class FixtureDeclarationTests
     [Fact]
     public void A_staged_file_reaches_the_launch_through_the_token_a_variable_names()
     {
+        // WW515 rewrote this. It composed the launch from the declaration against a root nothing
+        // had staged, which is the order that task closed — so the fixture is staged first and the
+        // launch comes off what staging hands back, which is the only way it can now be reached.
+        var root = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"ww509-{Guid.NewGuid():N}");
+        System.IO.Directory.CreateDirectory(System.IO.Path.Combine(root, "cases", "fixtures"));
+        System.IO.File.WriteAllText(
+            System.IO.Path.Combine(root, "cases", "fixtures", "sessions.json"), "[]");
+
         var fixture = FixtureDeclaration.Of(
             "with sessions",
             variables: new Dictionary<string, string> { ["APPDATA"] = FixtureDeclaration.Staged },
             files: ["cases/fixtures/sessions.json"]);
 
-        var into = fixture.StagedInto(@"C:\checkout");
-        var start = fixture.Starting(@"C:\app\YourApp.exe", @"C:\checkout");
+        try
+        {
+            var staged = fixture.Stage(root);
+            var start = staged.Starting(@"C:\app\YourApp.exe");
 
-        Assert.Equal(into, start.Environment["APPDATA"]);
-        Assert.DoesNotContain(FixtureDeclaration.Staged, start.Environment["APPDATA"]);
+            Assert.Equal(staged.Into, start.Environment["APPDATA"]);
+            Assert.DoesNotContain(FixtureDeclaration.Staged, start.Environment["APPDATA"]);
+            Assert.True(System.IO.File.Exists(System.IO.Path.Combine(staged.Into, "sessions.json")));
+        }
+        finally
+        {
+            if (System.IO.Directory.Exists(fixture.StagedInto(root)))
+                System.IO.Directory.Delete(fixture.StagedInto(root), recursive: true);
+
+            System.IO.Directory.Delete(root, recursive: true);
+        }
     }
 
     /// <summary>
@@ -295,19 +314,19 @@ public class FixtureDeclarationTests
 
         try
         {
-            var into = fixture.Stage(root);
+            var into = fixture.Stage(root).Into;
             Assert.Equal("[]", System.IO.File.ReadAllText(System.IO.Path.Combine(into, "sessions.json")));
 
             // What the application wrote last time, which the next launch must not inherit.
             System.IO.File.WriteAllText(System.IO.Path.Combine(into, "written-by-the-app.json"), "{}");
 
-            Assert.Equal(into, fixture.Stage(root));
+            Assert.Equal(into, fixture.Stage(root).Into);
             Assert.False(System.IO.File.Exists(System.IO.Path.Combine(into, "written-by-the-app.json")));
             Assert.Equal("[]", System.IO.File.ReadAllText(System.IO.Path.Combine(into, "sessions.json")));
 
             // And one that stages nothing still gets an emptied directory of its own.
             var empty = FixtureDeclaration.Of("empty store", workingDirectory: FixtureDeclaration.Staged);
-            Assert.Empty(System.IO.Directory.GetFiles(empty.Stage(root)));
+            Assert.Empty(System.IO.Directory.GetFiles(empty.Stage(root).Into));
         }
         finally
         {
@@ -318,6 +337,61 @@ public class FixtureDeclarationTests
                     System.IO.Directory.Delete(one.StagedInto(root), recursive: true);
             }
         }
+    }
+
+    /// <summary>
+    /// WW515. WW509 left two calls and no order, and a launch composed without staging first
+    /// resolved the token to a directory that might not exist or might hold what an earlier run
+    /// left — so the application reported a store it could not read and the red was about the
+    /// application. Asked of the fixtures that depend on it, which is where the dependency is.
+    /// </summary>
+    [Fact]
+    public void A_launch_that_needs_the_staged_directory_is_refused_until_something_has_staged_it()
+    {
+        var root = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"ww515-{Guid.NewGuid():N}");
+        System.IO.Directory.CreateDirectory(root);
+
+        var needs = FixtureDeclaration.Of(
+            "needs a store",
+            variables: new Dictionary<string, string> { ["APPDATA"] = FixtureDeclaration.Staged });
+
+        Assert.True(needs.NeedsStaging);
+
+        try
+        {
+            var refusal = Assert.Throws<ScenarioRefusedException>(
+                () => needs.Starting(@"C:\app\YourApp.exe", root));
+
+            Assert.Contains("nothing has staged it", refusal.Because, StringComparison.Ordinal);
+
+            // And staged, the same declaration composes a launch — through the thing staging hands
+            // back, which is the only order this can be reached by.
+            var staged = needs.Stage(root);
+
+            Assert.Equal(staged.Into, staged.Starting(@"C:\app\YourApp.exe").Environment["APPDATA"]);
+            Assert.Equal(root, staged.Root);
+        }
+        finally
+        {
+            if (System.IO.Directory.Exists(needs.StagedInto(root)))
+                System.IO.Directory.Delete(needs.StagedInto(root), recursive: true);
+
+            System.IO.Directory.Delete(root, recursive: true);
+        }
+    }
+
+    /// <summary>
+    /// A fixture that never mentions the staged directory does not care whether it exists, and a
+    /// launch demanding staging from all of them would leave `Suite` the only caller able to
+    /// compose one at all.
+    /// </summary>
+    [Fact]
+    public void A_launch_that_does_not_need_it_is_composed_without_staging_anything()
+    {
+        var plain = FixtureDeclaration.Of("plain", arguments: ["--chromeless"]);
+
+        Assert.False(plain.NeedsStaging);
+        Assert.Equal(@"C:\checkout", plain.Starting(@"C:\app\YourApp.exe", @"C:\checkout").WorkingDirectory);
     }
 
     /// <summary>

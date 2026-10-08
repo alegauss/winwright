@@ -271,16 +271,17 @@ public static class Suite
     private static (AutomationElement Window, LaunchedProcess Process) Opened(
         ProcessRegister register, ProjectDeclaration project, FixtureDeclaration fixture, string named)
     {
-        // WW509. Before the start info is built, because the directory the token resolves to has to
-        // be the directory the files are actually in by the time the process reads it. A fixture
-        // declaring none still gets an emptied directory, which is what makes the store this
-        // launch's own rather than whatever the last one left.
-        _ = fixture.Stage(project.Root);
-
-        // WW508. The root, so a fixture argument naming a file in the project means the same thing
-        // under every runner. Before this the launch set no directory at all and inherited whichever
-        // one the test runner happened to be in.
-        var start = fixture.Starting(project.Executable, project.Root);
+        // WW509, and WW515 for the order. Staging comes first because the directory the token
+        // resolves to has to be the directory the files are actually in by the time the process
+        // reads it — and the launch is composed from what staging hands back rather than from the
+        // declaration again, so the two cannot be given two different roots. A fixture declaring
+        // no files still gets an emptied directory, which is what makes the store this launch's
+        // own rather than whatever the last one left.
+        //
+        // WW508 is the other half: the directory it starts in is the project's root, so a fixture
+        // argument naming a file in the project means the same thing under every runner. Before
+        // that the launch set none and inherited whichever one the test runner happened to be in.
+        var start = fixture.Stage(project.Root).Starting(project.Executable);
 
         // WW349. Where pictures go is the project's, and it is also the one directory this run may
         // ask the application to write into — so the launch says so rather than an operator setting
