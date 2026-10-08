@@ -80,6 +80,20 @@ public static class Program
         if (shapes.Value("render") is string path)
             return Rendered(path, shapes);
 
+        // WW512. Before any window, like every other read-out here. `GetFullPath` with one
+        // argument resolves against the process's own current directory, which is the whole point:
+        // what this prints is where the launch actually put this process, observed from inside it
+        // rather than read back off the ProcessStartInfo that asked for it.
+        //
+        // A path rather than a bare directory, because the claim WW508 makes is about an argument:
+        // a fixture passing `cases/fixtures/sessions.json` is relying on that resolving against the
+        // project's root under every runner, and `--resolve .` answers the directory itself.
+        if (shapes.Value("resolve") is string relative)
+        {
+            Console.Out.WriteLine(System.IO.Path.GetFullPath(relative));
+            return 0;
+        }
+
         // WW260. On the output stream and before any window, exactly as `--flags` is: this is an
         // answer the application gives about itself, and a case derives its expected set from it
         // rather than from a strings file. One per line, because that is all a set needs.

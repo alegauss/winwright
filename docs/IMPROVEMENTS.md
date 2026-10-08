@@ -4,31 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW512 The directory nothing starts in
-
-WW508 set the launch's working directory to the project's root and let a fixture name
-its own. What holds it is four cases over `ProcessStartInfo`: what a declaration
-resolves to, and that `Starting` puts it on the object it returns.
-
-That is the declaration about the launch and not the launch. Nothing starts a process
-and asks what a relative argument resolved to, which is what an adopter relies on — and
-it is the falsification WW508 wrote for itself: *a fixture argument naming a
-project-relative file is resolved differently by two runners on the same checkout*. The
-fix makes that true by construction and no run visits it.
-
-The gap is WW510's shape: every part asserted, the behaviour not. A `WorkingDirectory`
-that `UseShellExecute` ignores, or a later edit dropping the assignment while the cases
-pass over `StartsIn` alone, both read green.
-
-What it needs is a mode on `Winwright.Fixture` and a case over it. The application reads
-no command line today — every fixture here is told apart by what it draws, never by what
-it was passed — so this is a flag making it report where it is, in a label a locator
-reads, which is how everything else here is observed. A case against a fixture naming
-`workingDirectory` reads that label back; one naming none reads the project root.
-
-Worth having beyond this task: the suite's first case where an argument a fixture passes
-changes what the window says — the half of `FixtureDeclaration` nothing observes.
-
 ### §WW513 The read-out's own directory
 
 WW508 gave the fixture launch a working directory: the project's root, or what the

@@ -333,6 +333,12 @@ public sealed record Flags
             Draws: false,
             Choices: Trayed.Kinds),
         new Flag(
+            "resolve",
+            "path",
+            "print what that path resolves to from where this process was started, and exit - the read-out that makes the launch's working directory a thing a case can observe rather than infer",
+            "WW508 set the launch's directory to the project's root and four cases held the ProcessStartInfo, which is the declaration about a launch and not the launch - nothing started a process and asked what a relative argument resolved to, which is the one thing an adopter passing `cases/fixtures/sessions.json` is relying on",
+            Draws: false),
+        new Flag(
             "profiles",
             "",
             "print the profiles this application has, one per line, and exit - the set a case derives from what the application reports rather than from a strings file",

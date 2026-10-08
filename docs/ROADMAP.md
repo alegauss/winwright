@@ -4,7 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW512** (deps: —) **the directory a launch starts in is asserted on the ProcessStartInfo and never on a running process** — Nothing starts the application and asks what a relative argument resolved to, which is WW508's own falsification and the one thing an adopter relies on. → §WW512
 - 📋 **WW513** (deps: —) **the application's other launcher sets no working directory, and nothing can assert the one it would set** — A read-out inherits the runner's directory, and Printed builds the start info and starts the process in one call, so there is no seam to hold it by. → §WW513
 - 📋 **WW515** (deps: —) **staging a launch and building it are two calls whose order nothing enforces** — A caller that builds the start info without staging first points the application at a directory that may not exist or holds what an earlier run left. → §WW515
 
