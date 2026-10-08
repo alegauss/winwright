@@ -71,32 +71,6 @@ without the application growing a flag for it.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW506 The documentation area's own copy of the version
-
-WW500 gave the landing page a version it asks nuget.org for. The area did not get one,
-and the reason is structural rather than an omission: `site/docs` is its own npm project
-with its own build, and it cannot import `src/lib/nuget-feed.ts` from the project next
-door.
-
-So it goes on rendering `product.generated.json`, which is right on the day it is built
-and a version behind from the next release onward — in `installing` and in `in-app`, the
-two pages carrying a `PackageReference` somebody pastes into a csproj. The area is the
-half a reader reaches once they have decided to adopt, and it is now the half that
-disagrees.
-
-Copying the picker across is refused. The comparison is where the real failure lives —
-prerelease counters are numeric, a release outranks a prerelease of the same core, text
-ordering gets both wrong — and a second copy is two things to keep true where the suite
-asserts one.
-
-What it wants is the picker somewhere both builds read, the shape `scripts/product.mjs`
-already has: one producer, two consumers. The area then needs a small client script,
-because Starlight ships no JavaScript by default — which is simpler than the landing
-page's case rather than harder, there being no hydration to tear.
-
-Until then the area is correct at deploy and stale after, and WW500's page is the one to
-trust where the two disagree.
-
 ### §WW507 The reader product.mjs still has, and the value it needs
 
 WW502 made `csharp.mjs` the one reader every generator walks C# with, and
@@ -120,3 +94,27 @@ exit codes did not change while it happened.
 
 Small, and the reason to do it is that this is the reader every page's figures now come
 through.
+
+### §WW510 The swap nothing loads a page to watch
+
+Both halves of the site now state a version the browser asks nuget.org for: the landing
+page since WW500, the area since WW506. Nothing exercises the swap on either.
+
+What is asserted is the parts. `nuget-feed.test.mjs` runs the picker against versions it
+makes up, which is where the real failure lived — a numeric prerelease counter, a
+release outranking a prerelease of the same core. `docs-area.test.mjs` asserts the block
+carries the version it was built with and the ids to ask, and that the picker reached
+the page. Every one of those can hold while a reader sees the built number forever: a
+selector matching nothing, a text node the highlighter split differently, a promise
+nobody awaited.
+
+The copy button is the specific worry rather than a general one. The page rewrites two
+things for one number — the text a reader sees and the `data-code` the button hands over
+— and a reader who copies getting a different version from one who reads is worse than
+both being stale.
+
+It needs a page loaded in something that runs scripts, with the feed answered by a stub
+so the case is about the swap rather than about nuget.org being up. That is another
+devDependency, which is the cost to weigh: the no-dependency rule is the engine's, and
+nothing holds the site's build tooling to it. Weigh it against the alternative, which is
+the one behaviour here published on trust.

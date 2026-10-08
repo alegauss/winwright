@@ -1,9 +1,10 @@
 // WW500. The version the page states is chosen rather than read, and this is where that
 // choice is asserted.
 //
-// Read out of the built SSR bundle for the same reason prerender.test.mjs reads dist/: that
-// bundle is the one form in which this site's TypeScript is something node can import. So
-// these run after `npm run build`, which is what CI does.
+// Imported directly, which it could not be when WW500 wrote it: the picker was TypeScript, so
+// the only form node could read was the built SSR bundle. WW506 moved the implementation to
+// `scripts/nuget-feed.mjs` so the documentation area's own build could read it too, and the
+// side effect is that these cases now assert the module rather than a bundle of it.
 //
 // The second half asserts the other side of the token: that nothing shipped into dist/ still
 // carries an unsubstituted `{{version}}`. A section that forgets to substitute renders the
@@ -22,9 +23,7 @@ let latestPublished;
 let feedUrl;
 
 before(async () => {
-  const bundle = join(siteDir, "dist-server", "entry-server.js");
-  assert.ok(existsSync(bundle), "dist-server/entry-server.js is missing — run `npm run build` first");
-  ({ latestPublished, feedUrl } = await import(`file://${bundle}`));
+  ({ latestPublished, feedUrl } = await import("./nuget-feed.mjs"));
 });
 
 test("the flat-container url is the package id lowercased", () => {

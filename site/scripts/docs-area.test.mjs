@@ -159,6 +159,40 @@ before(() => {
   landing = readFileSync(page, "utf8");
 });
 
+test("the area asks the feed for the version rather than shipping the one it was built with", () => {
+  // WW506. The area is a second npm project and could not import the landing page's picker, so
+  // it rendered the generated number — right on the day it is built and a version behind from
+  // the next release onward, on the one line somebody copies into a csproj.
+  //
+  // Both halves are checked, because either alone passes while the page stays stale: the block
+  // has to carry what the swap needs, and the picker has to have reached the page at all.
+  const pages = ["index", "installing", "in-app"]
+    .map((one) => ({ name: one, at: join(builtDir, one === "index" ? "" : one, "index.html") }))
+    .filter((one) => existsSync(one.at));
+
+  assert.ok(pages.length >= 2, `only ${pages.length} page(s) of the area state a package reference`);
+
+  const version = /<Version>([^<]+)<\/Version>/.exec(read(repoDir, "Directory.Build.props"))?.[1];
+  assert.ok(version, "Directory.Build.props no longer declares a Version");
+
+  for (const { name, at } of pages) {
+    const rendered = readFileSync(at, "utf8");
+
+    assert.match(
+      rendered,
+      new RegExp(`class="ww-packages" data-built="${version.replace(/\./g, "\\.")}" data-asks="[^"]+"`),
+      `${name} does not carry what the swap needs: the version it was built with and the ids to ask`,
+    );
+
+    // The picker itself, by the one url it builds. Astro inlines a script this small rather
+    // than emitting a file, so this looks at the page rather than at the asset directory.
+    assert.ok(
+      rendered.includes("v3-flatcontainer"),
+      `${name} carries no picker, so the number it shows is the one it was built with forever`,
+    );
+  }
+});
+
 test("the built area carries the version this tree declares", () => {
   // The figure is generated into docs/src/data/product.generated.json by the same script the
   // pitch page's is. This is the second, independent read of the property it came from.

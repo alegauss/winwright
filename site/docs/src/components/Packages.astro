@@ -1,11 +1,21 @@
 ---
-// The package references an adopter pastes, at the version this repository declares.
+// The package references an adopter pastes, at the version they can actually restore.
 //
-// Read out of `docs/src/data/product.generated.json`, which `scripts/product.mjs` writes from
-// `Directory.Build.props` and the two packable csproj files. A version typed onto this page
-// would be right on the day it was typed and would then send every reader after the next
-// release to a package that is a version behind — which is the exact hazard the concordance
-// check exists for, arriving through the documentation instead.
+// What renders is `docs/src/data/product.generated.json`, which `scripts/product.mjs` writes
+// from `Directory.Build.props` and the two packable csproj files. A version typed onto this
+// page would be right on the day it was typed and would then send every reader after the next
+// release to a package that is a version behind — the exact hazard the concordance check
+// exists for, arriving through the documentation instead.
+//
+// WW506: and generated is not enough either. The site deploys on `workflow_dispatch` and
+// publishing a release does not trigger it, so the two drift by construction — this block was
+// right on the day it was built and a version behind from the next release onward, on the one
+// line somebody copies into a csproj. So the browser asks nuget.org and swaps the number where
+// the feed answers with a better one.
+//
+// The generated number is what the page ships. A reader offline, behind a proxy, or with
+// JavaScript off sees exactly what they see today, and the number they see is never one this
+// invented — the picker answers null for every way of not knowing.
 import { Code } from "@astrojs/starlight/components";
 
 import product from "../data/product.generated.json";
@@ -39,4 +49,38 @@ const code = half
     ].join("\n");
 ---
 
-<Code lang="xml" code={code} />
+<div class="ww-packages" data-built={product.version} data-asks={product.packages.map((one) => one.id).join(" ")}>
+  <Code lang="xml" code={code} />
+</div>
+
+<script>
+  // The one picker, imported rather than copied: `src/lib/nuget-feed.ts` is this same module
+  // with types over it, and the comparison inside it — a numeric prerelease counter, a release
+  // outranking a prerelease of the same core — is where the real failure lives.
+  import { fetchLatestPublished } from "../../../scripts/nuget-feed.mjs";
+
+  for (const block of document.querySelectorAll<HTMLElement>(".ww-packages")) {
+    const built = block.dataset.built;
+    const asks = (block.dataset.asks ?? "").split(" ").filter(Boolean);
+    if (!built || asks.length === 0) continue;
+
+    // The halves are published together, so the first id that answers settles the number. One
+    // request each and never one per line, however many times the block states it.
+    void Promise.all(asks.map((id) => fetchLatestPublished(id))).then((answers) => {
+      const published = answers.find((one) => one && one !== built);
+      if (!published) return;
+
+      // The highlighter puts the version in its own text node, and the copy button carries the
+      // whole line in an attribute — a reader who copies and a reader who reads have to get the
+      // same number, so both are rewritten.
+      const walk = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+      for (let node = walk.nextNode(); node; node = walk.nextNode()) {
+        if (node.textContent === built) node.textContent = published;
+      }
+
+      for (const button of block.querySelectorAll<HTMLElement>("[data-code]")) {
+        button.dataset.code = (button.dataset.code ?? "").split(built).join(published);
+      }
+    });
+  }
+</script>
