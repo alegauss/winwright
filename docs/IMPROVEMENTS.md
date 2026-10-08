@@ -74,29 +74,3 @@ reports that step Ok.
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ## Block L — The documentation area — written for a reader who has installed nothing
-
-### §WW514 The hole nothing refuses
-
-`format.mjs` publishes the schema's own sentences, read out of `ScenarioSchema.cs` as
-source rather than from a running build. An interpolated description is a hole somebody
-has to fill, and `stringly` fills it: a `$"..."` string's `{Name}` is looked up among
-the constants that source declares, and one it cannot find is refused.
-
-That refusal is right and its pattern is narrower than C#. It matches
-`/\{([A-Za-z]+)\}/`, so a hole naming another type's constant —
-`{FixtureDeclaration.Staged}` — is not recognised as a hole at all. Not resolved, not
-refused, and the sentence reaches the page carrying the expression an author wrote: a
-reader is told to spell a field with `'{FixtureDeclaration.Staged}'`.
-
-Found writing WW509, which added the first such description and tripped exactly this.
-The repair there was to spell the token out and pair the spelling to the constant, which
-is right for that field and does nothing for the next one.
-
-The fix is the pattern: anything brace-delimited that could be a name, dotted ones among
-them, is a hole, and one this cannot resolve stops the build. The resolver has no
-business following a qualified name into another file — refusing is the whole job,
-because an author who is told has two correct answers, to spell it out or to move the
-constant, and silence leaves them neither.
-
-Not the fix: the refusal fires only for `$`-prefixed strings, which is right. A plain
-string's braces are a reader's, and that is how WW509's spelling survives it.

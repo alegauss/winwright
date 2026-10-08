@@ -103,6 +103,20 @@ test("a description is prose and never the expression that built it", () => {
           `the ${shape}'s '${name}' carries ${JSON.stringify(leak)}, so its description was not read whole`,
         );
       }
+      // WW514. This looked for the constants THIS source declares, which is the blind spot that
+      // let one through: `{FixtureDeclaration.Staged}` names another type's constant, so it was
+      // in no list here and the resolver's own pattern did not see it as a hole either. It was
+      // published to a reader as the expression somebody wrote.
+      //
+      // So the shape of a leak rather than a list of names. A C# symbol in braces is dotted or
+      // capitalised; `{files}` and `{}` are prose this page means, and WW509's token is the
+      // first of those — which is why the rule is about the spelling and not about braces.
+      assert.doesNotMatch(
+        means,
+        /\{(?:[A-Z]\w*|\w+\.\w+)[\w.]*\}/,
+        `the ${shape}'s '${name}' carries a C# symbol in braces, so an interpolation reached the page`,
+      );
+
       for (const named of consts) {
         assert.ok(
           !means.includes(`{${named}}`),

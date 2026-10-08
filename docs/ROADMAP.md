@@ -28,8 +28,6 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- 📋 **WW514** (deps: —) **a generated sentence may carry an interpolation hole the build cannot resolve, and the page publishes it verbatim** — The refusal that exists for this matches an unqualified name only, so a hole naming another type's constant is not recognised as a hole at all. → §WW514
-
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine

@@ -49,8 +49,24 @@ function stringly(expression, consts, where) {
 
       if (!piece.startsWith("$")) return text;
 
-      return text.replace(/\{([A-Za-z]+)\}/g, (whole, name) => {
-        if (!consts.has(name)) throw new Error(`format: ${where} interpolates ${name}, which is no constant here`);
+      // WW514. The pattern was `{([A-Za-z]+)}` and C# is wider than that, so a hole naming
+      // another type's constant — `{FixtureDeclaration.Staged}` — was not recognised as a hole
+      // at all: not resolved, not refused, and published to a reader as the expression somebody
+      // wrote. Found by writing one, in the commit that added the schema's first such sentence.
+      //
+      // Anything brace-delimited that could be a name is a hole now, dotted ones among them,
+      // and one this cannot resolve stops the build. Following a qualified name into another
+      // file is deliberately not the repair: refusing is the whole job, because an author who
+      // is told has two correct answers — spell it out, or move the constant — and silence
+      // leaves them neither. A brace holding anything else is left alone, so a format
+      // specifier is not mistaken for a hole this ought to know about.
+      return text.replace(/\{([A-Za-z_][\w.]*)\}/g, (whole, name) => {
+        if (!consts.has(name)) {
+          throw new Error(
+            `format: ${where} interpolates ${name}, which is no constant this reads — spell the value `
+              + `out, or move the constant into the source this generator reads`,
+          );
+        }
         return consts.get(name);
       });
     })
