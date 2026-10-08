@@ -2,39 +2,36 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW517 The met reading that says nothing
-
-`Between` says the foreground is ours on either of two findings: the handles match, or
-only the roots do. The second is a deliberate repair — focusing a control through
-automation makes it the foreground as far as Windows is concerned, so raw handles called
-the desk somebody else's while keys landed correctly.
-
-The two findings are not equally strong and nothing tells them apart. `AsPrecondition`
-answers every absence by naming both sides, which is WW245's rule; the satisfied reading
-answers `Precondition.Met` and nothing else. A step whose keystroke was delivered and
-one that passed because an ancestor shared a root with the holder leave the same record:
-`Ok`.
-
-WW516 is where that cost something. A chord press traced `Ok` with no palette opened,
-and its two readings — the keys reached the client, or the check was permissive and they
-went elsewhere — are exactly handle-match against root-match.
-
-What to build: the met reading carries who held the foreground and on which finding it
-counted as ours, as every absence already carries both sides. It changes no verdict and
-no behaviour, which is the point — a chord that opens a dialog still moves the
-foreground legitimately, so nothing re-reads after a send.
-
-Checkable without a desk: `Between` is a function over two sightings, so a case hands it
-a root-match and a handle-match and reads what each says.
-
-Falsified when a trace line for a press that passed its check names the holder and the
-finding.
-
 ## Block B — Attach, launch, and leave nothing behind
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
+
+### §WW518 The desk a typing line never names
+
+WW517 made a met foreground say how it was ours, the holder and the finding, as every
+absence already names both sides, and a press carries that to its trace line. Typing
+does not, and typing is the act an adopter writes most.
+
+`Synthesised.Type` hands the result the *focus* condition where the foreground is
+satisfied. That order is right and documented: each is read so the other stops
+mattering, and a run that never owned the desk should read as that and not as a control
+that refused the focus. But an act carries one precondition, so the foreground reading
+is dropped before the line is written. `Keyboard`'s trace step folds the same way — the
+foreground's absence, then the focus's, then null.
+
+So a typing step says nothing about the desk once both hold, and WW517's question —
+whether the keys reached the window the step was about or something sharing its
+top-level window — cannot be asked there. It is answerable for a press alone.
+
+Why this is not a line in that commit: two conditions were read and one field carries
+them. Closing it means a second slot on the result and the trace line, or one
+precondition composed from the pair. The composition is tidier and carries a constraint:
+`BusyDesk` reads `Needed.Name` to tell whether a hole was the desk's, so it keeps a name
+that check knows or every excusal starts lying.
+
+Falsified when a typing step's line says which finding made the desk ours.
 
 ## Block E — Capture — the picture that proves what it photographed
 

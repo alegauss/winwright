@@ -2,13 +2,13 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW517** (deps: —) **a foreground check that passed records neither who held the desk nor which finding made it ours** — Every absence names both sides and the satisfied reading names nothing, so a keystroke that was delivered and one that passed a permissive check read alike. → §WW517
-
 ## Block B — Attach, launch, and leave nothing behind
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
+
+- 📋 **WW518** (deps: —) **a typing step's line says nothing about the desk, because an act carries one precondition and two were read** — The focus condition is the one carried where the foreground is satisfied, so the finding that made the desk ours is dropped before the line is written. → §WW518
 
 ## Block E — Capture — the picture that proves what it photographed
 

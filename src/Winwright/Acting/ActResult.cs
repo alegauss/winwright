@@ -119,6 +119,12 @@ public sealed record ActResult
         Polls = Polls,
         Verdict = Attempted ? StepVerdict.Ok : StepVerdict.Unchecked,
         Detail = Attempted ? null : Needed!.Absence,
+
+        // WW517. What the condition said about having been met, where it had something to say. An
+        // act with no precondition at all, and one whose precondition being met says everything,
+        // both leave this out — and the empty string is turned into null here rather than written
+        // as a blank field nobody can grep for.
+        Met = Attempted && Needed is { Presence.Length: > 0 } ? Needed.Presence : null,
     };
 
     /// <summary>The one line a report shows, with what moved where it moved.</summary>

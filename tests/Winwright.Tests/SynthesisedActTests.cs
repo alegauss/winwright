@@ -109,6 +109,11 @@ public sealed class SynthesisedActTests : IDisposable
         Assert.Null(step.Resolved);
         Assert.Equal(StepVerdict.Unchecked, step.Verdict);
         Assert.Contains("nothing matching", Synthesised.ExpandMenu(OnNothing()).ToString(), StringComparison.Ordinal);
+
+        // WW517, and the branch discipline of the pair: an act that did not run carries the absence
+        // and says nothing about how anything was met. The two fields are mirrors and never both.
+        Assert.NotNull(step.Detail);
+        Assert.Null(step.Met);
     }
 
     [Fact]
@@ -125,6 +130,42 @@ public sealed class SynthesisedActTests : IDisposable
         Assert.Equal("beta", typed.After.Value);
         Assert.True(typed.Changed, typed.ToString());
         Assert.Equal("synthesised keyboard", typed.Pattern);
+    }
+
+    /// <summary>
+    /// WW517. The trace line for an act that ran says how its precondition was met, which the line
+    /// for an act that did not has always said about the absence. A keystroke delivered to the
+    /// window the step was about and one sent on a shared root used to read alike.
+    /// <para>
+    /// A press and not `type`, which is the thing this case had to be moved to: when the foreground
+    /// is satisfied, `Type` carries the focus condition instead — the documented order, read so that
+    /// each stops the other mattering — so the finding never reaches its line. A press carries the
+    /// foreground itself.
+    /// </para>
+    /// </summary>
+    [Fact]
+    public void A_press_that_ran_says_how_its_desk_was_ours()
+    {
+        var pressed = Synthesised.Press(On("Edit[order=top]"), TraversalKey.Tab);
+        var step = pressed.AsTraceStep();
+
+        if (BusyDesk.Excused(pressed.Needed!))
+        {
+            // Asserted on a busy desk too, rather than returning having checked nothing. The two
+            // fields are mirrors, so a press the desk refused carries the absence and stays silent
+            // about how anything was met — which is the half this case can always reach, and the
+            // reason it is not a green that excused itself.
+            Assert.Equal(StepVerdict.Unchecked, step.Verdict);
+            Assert.NotNull(step.Detail);
+            Assert.Null(step.Met);
+            return;
+        }
+
+        Assert.Equal(StepVerdict.Ok, step.Verdict);
+        Assert.Null(step.Detail);
+        Assert.NotNull(step.Met);
+        Assert.Contains("holds it", step.Met, StringComparison.Ordinal);
+        Assert.Contains("window under test", step.Met, StringComparison.Ordinal);
     }
 
     [Fact]

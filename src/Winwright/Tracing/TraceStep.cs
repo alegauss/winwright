@@ -87,4 +87,20 @@ public sealed record TraceStep
 
     /// <summary>Why, on anything that is not <see cref="StepVerdict.Ok"/>: what broke, or what was absent.</summary>
     public string? Detail { get; init; }
+
+    /// <summary>
+    /// How the precondition this step needed was met, where being met is not all one reading. WW517.
+    /// <para>
+    /// <see cref="Detail"/>'s mirror, and it exists because the pair was not mirrored: a step that
+    /// was not attempted carried the absence and a step that ran carried nothing, so a keystroke
+    /// delivered to the window the step was about and one sent on a shared root both read
+    /// <em>ok</em> with nothing to tell them apart. That is what left WW516 undiagnosable.
+    /// </para>
+    /// <para>
+    /// Null on most lines, which is the same restraint <see cref="Settled"/> keeps: a second
+    /// sentence on every line is the mark that marks nothing. A precondition whose being met says
+    /// everything there is to say — a second profile registered — leaves this out.
+    /// </para>
+    /// </summary>
+    public string? Met { get; init; }
 }

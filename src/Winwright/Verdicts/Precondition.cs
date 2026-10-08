@@ -8,11 +8,12 @@ namespace Winwright.Verdicts;
 /// </summary>
 public sealed record Precondition
 {
-    private Precondition(string name, bool satisfied, string absence)
+    private Precondition(string name, bool satisfied, string absence, string presence = "")
     {
         Name = name;
         Satisfied = satisfied;
         Absence = absence;
+        Presence = presence;
     }
 
     /// <summary>What the assertion needs, as the scenario names it.</summary>
@@ -24,8 +25,43 @@ public sealed record Precondition
     /// <summary>Why this machine does not have it. Empty where it does.</summary>
     public string Absence { get; }
 
+    /// <summary>
+    /// How this machine has it, where saying so tells two satisfied readings apart. Empty on the
+    /// ones where being met says everything there is to say. WW517.
+    /// <para>
+    /// The mirror of <see cref="Absence"/>, and it exists because the two were not mirrored. Every
+    /// absence names both sides, which is WW245's rule and cost two runs to arrive at; a met reading
+    /// said only that it was met — so a foreground owned by the window under test and one judged ours
+    /// because an ancestor shared a root with the holder left the same record, and a keystroke that
+    /// was delivered could not be told from one that may not have been.
+    /// </para>
+    /// <para>
+    /// Empty on most conditions, deliberately. A second profile registered is registered, and a
+    /// sentence about how would be the mark that marks nothing.
+    /// </para>
+    /// </summary>
+    public string Presence { get; }
+
     /// <summary>This machine has it, so every assertion needing it is free to run.</summary>
     public static Precondition Met(string name) => new(Named(name), true, "");
+
+    /// <summary>
+    /// The same, saying how. WW517: for a condition whose satisfied readings are not all the same
+    /// reading, where which one it was belongs in the record rather than in a reader's inference.
+    /// </summary>
+    /// <param name="name">What the assertion needs, as the scenario names it.</param>
+    /// <param name="presence">How this machine has it.</param>
+    public static Precondition Met(string name, string presence)
+    {
+        if (string.IsNullOrWhiteSpace(presence))
+        {
+            throw new ArgumentException(
+                "a met precondition that says how says something, or it is the plain Met and should say so",
+                nameof(presence));
+        }
+
+        return new(Named(name), true, "", presence.Trim());
+    }
 
     /// <summary>
     /// This machine does not have it. <paramref name="absence"/> says what was looked for and

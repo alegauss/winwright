@@ -52,6 +52,13 @@ public sealed class ForegroundTests : IDisposable
     private static readonly WindowOwner UnderTest = new(0x2222, 777, "ClaudeTray", "Statistics");
     private static readonly WindowOwner ItsOwnDialog = new(0x3333, 777, "ClaudeTray", "Settings");
 
+    /// <summary>A control inside the window under test, focused through automation: its own handle
+    /// holds the desk and its top-level ancestor is the window the step was about.</summary>
+    private static readonly WindowOwner ItsTextBox = new(0x4444, 777, "ClaudeTray", "", 0x2222);
+
+    /// <summary>The same window under test, read with its root, which is itself.</summary>
+    private static readonly WindowOwner Rooted = new(0x2222, 777, "ClaudeTray", "Statistics", 0x2222);
+
     [Fact]
     public void The_window_under_test_holding_it_is_the_only_reading_that_passes()
     {
@@ -60,6 +67,74 @@ public sealed class ForegroundTests : IDisposable
         Assert.Equal(ForegroundState.Ours, foreground.State);
         Assert.True(foreground.Ours);
         Assert.True(foreground.AsPrecondition().Satisfied);
+    }
+
+    /// <summary>
+    /// WW517. Ours is reached two ways and they are not equally strong: the window holds the desk
+    /// itself, or something sharing its top-level window does. The second is the allowance that
+    /// keeps a focused text box from reading as somebody else's desk, and it is wider than the
+    /// first — keys go to whatever inside that root has the focus.
+    /// </summary>
+    [Fact]
+    public void A_reading_that_is_ours_says_which_finding_made_it_ours()
+    {
+        var itself = Foreground.Between(Rooted, Rooted);
+        var itsRoot = Foreground.Between(ItsTextBox, Rooted);
+
+        Assert.Equal(ForegroundState.Ours, itself.State);
+        Assert.Equal(ForegroundState.Ours, itsRoot.State);
+
+        Assert.Equal(OwnedBy.TheWindow, itself.Owned);
+        Assert.Equal(OwnedBy.ItsRoot, itsRoot.Owned);
+    }
+
+    /// <summary>
+    /// The mirror of WW245's rule, which the met reading did not have: every absence names both
+    /// sides and this named neither, so a keystroke delivered to the window the step was about and
+    /// one sent on a shared root left the same record. That is what left WW516 undiagnosable.
+    /// </summary>
+    [Fact]
+    public void A_met_foreground_records_the_holder_and_the_finding()
+    {
+        var itself = Foreground.Between(Rooted, Rooted).AsPrecondition();
+        var itsRoot = Foreground.Between(ItsTextBox, Rooted).AsPrecondition();
+
+        Assert.True(itself.Satisfied);
+        Assert.True(itsRoot.Satisfied);
+
+        Assert.Equal($"{Rooted} holds it, which is the window under test", itself.Presence);
+        Assert.Equal(
+            $"{ItsTextBox} holds it, which shares a top-level window with the window under test, {Rooted}",
+            itsRoot.Presence);
+
+        // The two readings are what a reader has to be able to tell apart, so the sentences differ.
+        Assert.NotEqual(itself.Presence, itsRoot.Presence);
+    }
+
+    /// <summary>
+    /// A condition whose being met says everything there is to say leaves it out, which is the
+    /// restraint that keeps the field worth reading: a second sentence on every line marks nothing.
+    /// </summary>
+    [Fact]
+    public void A_reading_that_is_not_ours_says_nothing_about_how_it_would_have_been()
+    {
+        foreach (var holder in new[] { Editor, ItsOwnDialog, WindowOwner.None })
+        {
+            var reading = Foreground.Between(holder, UnderTest);
+
+            Assert.Equal(OwnedBy.Nothing, reading.Owned);
+            Assert.Equal("", reading.AsPrecondition().Presence);
+        }
+
+        Assert.Equal("", Precondition.Met("a second profile is registered").Presence);
+    }
+
+    [Fact]
+    public void A_met_precondition_that_says_how_says_something()
+    {
+        // Rather than a blank field nobody can grep for, which is what the plain `Met` is already
+        // for — two ways to spell "nothing to add" is one of them going unread.
+        Assert.Throws<ArgumentException>(() => Precondition.Met("the desk", "   "));
     }
 
     [Fact]

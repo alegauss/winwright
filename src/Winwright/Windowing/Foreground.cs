@@ -21,6 +21,35 @@ public enum ForegroundState
     Nobody,
 }
 
+/// <summary>
+/// Which finding made the foreground the window under test's. WW517.
+/// <para>
+/// Two of them, and the second is why this type exists: a window that holds the desk itself, and
+/// one whose top-level ancestor is what holds it. The second is a deliberate allowance — focusing a
+/// control through automation makes that control the foreground as far as Windows is concerned, so
+/// comparing raw handles called the desk somebody else's while the keys were landing exactly where
+/// they were meant to. A text box inside the window under test read as another window of the same
+/// process.
+/// </para>
+/// <para>
+/// Recorded rather than collapsed, because the allowance is wider than the certainty. Keys sent to
+/// a window that holds the desk went where the step said; keys sent on a shared root went to
+/// whatever inside that root has the focus, which is usually the same thing and is not the same
+/// claim. A reader of a trace asking why a keystroke reached nothing needs to know which it was.
+/// </para>
+/// </summary>
+public enum OwnedBy
+{
+    /// <summary>Not ours at all, so nothing made it ours.</summary>
+    Nothing,
+
+    /// <summary>The window under test holds the desk itself.</summary>
+    TheWindow,
+
+    /// <summary>Its top-level ancestor holds the desk, and the focus is somewhere inside that.</summary>
+    ItsRoot,
+}
+
 /// <summary>A window and who owns it, as one sighting.</summary>
 /// <param name="Window">The handle, or zero where there is no window.</param>
 /// <param name="Pid">The process that owns it, or zero.</param>
@@ -128,15 +157,27 @@ public sealed record Foreground
     /// </summary>
     public const string ArrivedName = "the desk the preamble read is the desk the run ran on";
 
-    private Foreground(ForegroundState state, WindowOwner holder, WindowOwner wanted)
+    private Foreground(ForegroundState state, WindowOwner holder, WindowOwner wanted, OwnedBy owned = OwnedBy.Nothing)
     {
         State = state;
         Holder = holder;
         Wanted = wanted;
+        Owned = owned;
     }
 
     /// <summary>Which of the four this is.</summary>
     public ForegroundState State { get; }
+
+    /// <summary>
+    /// Which finding made this ours, where it is. WW517.
+    /// <para>
+    /// <see cref="ForegroundState.Ours"/> is reached two ways and they are not equally strong, so a
+    /// reading that said only <em>ours</em> left a keystroke that was delivered and one that may
+    /// not have been looking alike. <see cref="OwnedBy.Nothing"/> on every reading that is not ours,
+    /// where the question does not arise.
+    /// </para>
+    /// </summary>
+    public OwnedBy Owned { get; }
 
     /// <summary>What actually has the keyboard.</summary>
     public WindowOwner Holder { get; }
@@ -202,13 +243,21 @@ public sealed record Foreground
         // the keys were landing exactly where they were meant to. Measured: a text box inside the
         // window under test read as "another window of the same process".
         var sameRoot = holder.Root != 0 && wanted.Root != 0 && holder.Root == wanted.Root;
+        var itself = holder.Window != 0 && holder.Window == wanted.Window;
 
         var state = holder.Window == 0 ? ForegroundState.Nobody
-            : holder.Window == wanted.Window || sameRoot ? ForegroundState.Ours
+            : itself || sameRoot ? ForegroundState.Ours
             : holder.Pid != 0 && holder.Pid == wanted.Pid ? ForegroundState.SameProcess
             : ForegroundState.Elsewhere;
 
-        return new Foreground(state, holder, wanted);
+        // WW517. Which of the two, kept rather than folded away: the allowance above is wider than
+        // the certainty, and a reader asking why a keystroke reached nothing is asking exactly this.
+        // `itself` first, because a window that holds the desk also shares a root with itself.
+        var owned = state != ForegroundState.Ours ? OwnedBy.Nothing
+            : itself ? OwnedBy.TheWindow
+            : OwnedBy.ItsRoot;
+
+        return new Foreground(state, holder, wanted, owned);
     }
 
     /// <summary>
@@ -228,7 +277,10 @@ public sealed record Foreground
     /// </remarks>
     public Precondition AsPrecondition() => State switch
     {
-        ForegroundState.Ours => Precondition.Met(PreconditionName),
+        // WW517. Says how, because being ours is reached two ways. Every absence below names both
+        // sides — WW245's rule — and this named neither, so a keystroke delivered to the window the
+        // step was about and one sent on a shared root left the same record.
+        ForegroundState.Ours => Precondition.Met(PreconditionName, Held),
         ForegroundState.Nobody => Precondition.Absent(
             PreconditionName, $"nothing owns the foreground, and the window under test is {Wanted}{Stood}"),
         ForegroundState.SameProcess => Precondition.Absent(
@@ -236,6 +288,18 @@ public sealed record Foreground
         _ => Precondition.Absent(
             PreconditionName, $"the foreground belongs to {Holder}, and the window under test is {Wanted}{Stood}"),
     };
+
+    /// <summary>
+    /// How it is ours, naming the holder and the finding. WW517.
+    /// <para>
+    /// The holder is named even though it is ours, because on <see cref="OwnedBy.ItsRoot"/> the
+    /// holder is <em>not</em> the window the step was about — it is whatever inside that root has
+    /// the focus, and which one that was is the question a reader of an unexplained keystroke has.
+    /// </para>
+    /// </summary>
+    private string Held => Owned == OwnedBy.TheWindow
+        ? $"{Holder} holds it, which is the window under test{Took}"
+        : $"{Holder} holds it, which shares a top-level window with the window under test, {Wanted}{Took}";
 
     /// <summary>Who had the keyboard when this was asked, said either way.</summary>
     public string Sentence() => Ours
