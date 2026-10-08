@@ -30,7 +30,6 @@
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-- ⏳ **WW510** (deps: —) **the version swap is the one behaviour on the site no run exercises, on both halves of it** — The landing page's half is React state and needs a rendering case, so nothing exercises its swap. → §WW510
 - 📋 **WW511** (deps: —) **three generators read an enum with a matcher that only recognises a valueless member, and the pairing copies it** — A member declaring a value leaves the page with nothing said, and the case that would catch it finds the members with the generator's own regex. → §WW511
 - 📋 **WW514** (deps: —) **a generated sentence may carry an interpolation hole the build cannot resolve, and the page publishes it verbatim** — The refusal that exists for this matches an unqualified name only, so a hole naming another type's constant is not recognised as a hole at all. → §WW514
 
@@ -159,12 +158,6 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
-
-## Done when — WW510
-
-- **the landing page's version swap is exercised by a run** A case renders the provider
-  against a feed that answers from a table and reads the version the page then states,
-  as the area's half is read off the page the build wrote.
 
 ## Non-goals
 

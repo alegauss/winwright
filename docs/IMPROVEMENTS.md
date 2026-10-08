@@ -126,30 +126,6 @@ reports that step Ok.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
-### §WW510 The swap nothing loads a page to watch
-
-Both halves of the site now state a version the browser asks nuget.org for: the landing
-page since WW500, the area since WW506. Nothing exercises the swap on either.
-
-What is asserted is the parts. `nuget-feed.test.mjs` runs the picker against versions it
-makes up, which is where the real failure lived — a numeric prerelease counter, a
-release outranking a prerelease of the same core. `docs-area.test.mjs` asserts the block
-carries the version it was built with and the ids to ask, and that the picker reached
-the page. Every one of those can hold while a reader sees the built number forever: a
-selector matching nothing, a text node the highlighter split differently, a promise
-nobody awaited.
-
-The copy button is the specific worry rather than a general one. The page rewrites two
-things for one number — the text a reader sees and the `data-code` the button hands over
-— and a reader who copies getting a different version from one who reads is worse than
-both being stale.
-
-It needs a page loaded in something that runs scripts, with the feed answered by a stub
-so the case is about the swap rather than about nuget.org being up. That is another
-devDependency, which is the cost to weigh: the no-dependency rule is the engine's, and
-nothing holds the site's build tooling to it. Weigh it against the alternative, which is
-the one behaviour here published on trust.
-
 ### §WW511 The matcher nothing reports on
 
 `documented` says nothing about a line its matcher did not match. It clears the doc

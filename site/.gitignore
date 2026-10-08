@@ -1,5 +1,10 @@
 node_modules
 dist
 dist-server
+# WW510. `published-version.test.mjs` bundles the one TSX component it renders, because this
+# runner executes .mjs and the build emits nothing importable — tsc is noEmit and the client
+# bundle is minified. Written here rather than to a temp directory so a failing run leaves the
+# module a person can read.
+dist-test
 *.local
 .vite
