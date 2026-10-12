@@ -106,6 +106,81 @@ public class ProjectDeclarationTests : IDisposable
             declaration.LanguageFiles);
     }
 
+    /// <summary>
+    /// WW521. Found by quickshell (QS265): its declaration named the Debug build because its local
+    /// runner builds Debug, and CI builds Release — so every CI run launched a file that was not
+    /// there, or a Debug build another job had left behind.
+    /// </summary>
+    [Fact]
+    public void One_declaration_names_the_build_each_run_is_told_about()
+    {
+        var path = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            path,
+            """{ "executable": "bin/{configuration}/YourApp.exe", "sourceRoot": "src", "configuration": "Debug" }""");
+
+        Assert.Equal(Path.Combine(root, "bin", "Debug", "YourApp.exe"), ProjectDeclaration.Load(path).Executable);
+        Assert.Equal(
+            Path.Combine(root, "bin", "Release", "YourApp.exe"),
+            ProjectDeclaration.Load(path, "Release").Executable);
+        Assert.Equal("Release", ProjectDeclaration.Load(path, "Release").Configuration);
+    }
+
+    [Fact]
+    public void The_variable_overrides_the_file_and_an_argument_overrides_the_variable()
+    {
+        var path = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(path, """{ "executable": "bin/{configuration}/YourApp.exe", "configuration": "Debug" }""");
+
+        var was = Environment.GetEnvironmentVariable(ProjectDeclaration.ConfigurationVariable);
+        try
+        {
+            Environment.SetEnvironmentVariable(ProjectDeclaration.ConfigurationVariable, "Release");
+
+            Assert.Equal(Path.Combine(root, "bin", "Release", "YourApp.exe"), ProjectDeclaration.Load(path).Executable);
+            Assert.Equal(
+                Path.Combine(root, "bin", "Checked", "YourApp.exe"),
+                ProjectDeclaration.Load(path, "Checked").Executable);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ProjectDeclaration.ConfigurationVariable, was);
+        }
+    }
+
+    [Fact]
+    public void A_token_nothing_fills_is_refused_when_the_path_is_asked_for_and_never_launched()
+    {
+        // Run in this class so the variable test above cannot be setting it at the same moment.
+        Assert.True(string.IsNullOrEmpty(Environment.GetEnvironmentVariable(ProjectDeclaration.ConfigurationVariable)));
+
+        var declaration = Declare("""{ "executable": "bin/{configuration}/YourApp.exe" }""");
+
+        // Declared, so a reading that needs it asks and meets the refusal rather than passing by.
+        Assert.True(declaration.Declares("executable"));
+        Assert.False(declaration.Declares("configuration"));
+
+        var refusal = Assert.Throws<DeclarationMissingException>(() => declaration.Executable);
+
+        Assert.Equal(MissingDeclaration.KeyNotDeclared, refusal.Arm);
+        Assert.Equal("configuration", refusal.Key);
+        Assert.Contains("launching the application under test", refusal.Message, StringComparison.Ordinal);
+        Assert.Contains(ProjectDeclaration.ConfigurationVariable, refusal.Message, StringComparison.Ordinal);
+        Assert.Contains("{configuration}", refusal.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_token_nothing_fills_in_a_path_read_at_load_is_refused_at_load()
+    {
+        Assert.True(string.IsNullOrEmpty(Environment.GetEnvironmentVariable(ProjectDeclaration.ConfigurationVariable)));
+
+        var refusal = Assert.Throws<DeclarationMissingException>(
+            () => Declare("""{ "languageFiles": ["bin/{configuration}/strings.en.json"] }"""));
+
+        Assert.Equal("configuration", refusal.Key);
+        Assert.Contains("'languageFiles'", refusal.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void The_declaration_is_found_by_walking_up_from_the_scenario()
     {

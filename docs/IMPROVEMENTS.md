@@ -4,28 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW521 An executable per configuration
-
-Found adopting the engine in quickshell (QS265, 2026-10-11). `winwright.json` takes one
-`executable`, a path, and quickshell's names
-`src/Quickshell.App/bin/Debug/net10.0-windows/win-x64/quickshell.exe` because its local
-runner builds Debug. CI builds and tests Release. So every CI run launches a file that
-is not there and fails with `Win32Exception: The system cannot find the file specified`.
-Where a Debug build is left over from another job, it runs the wrong build and passes.
-The declaration has no way to say which build it means, so a project that tests two
-configurations needs a second declaration or a script that rewrites this one, and
-neither is a case file any more.
-
-What to build: the declaration's `executable` may name the configuration as a
-placeholder, `bin/{configuration}/...`, filled from what the runner is told. The default
-is the one value the project declares, and an environment variable such as
-`WINWRIGHT_CONFIGURATION` or a runner argument overrides it. A placeholder left unfilled
-is refused, naming the key and how to fill it, and never launches a literal brace path.
-The staleness check already reads `executable`, and it reads the filled path.
-
-Falsified when a project built in two configurations still needs two declarations to run
-its cases against each.
-
 ### §WW522 A fixture that names what it reaches
 
 Found by quickshell's QS269 (2026-10-12). The session bar over a connected tab says

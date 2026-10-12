@@ -291,7 +291,8 @@ needs one this file does not declare is **recorded as not taken**, never quietly
 
 ```json
 {
-  "executable": "bin/Debug/net10.0-windows/YourApp.exe",
+  "executable": "bin/{configuration}/net10.0-windows/YourApp.exe",
+  "configuration": "Debug",
   "sourceRoot": "src/YourApp",
   "sourceIgnore": ["bin", "obj"],
   "fingerprintStore": "%APPDATA%/YourApp",
@@ -306,6 +307,15 @@ needs one this file does not declare is **recorded as not taken**, never quietly
   "destructive": [{ "id": "quitCommand" }, { "key": "menu.exit" }]
 }
 ```
+
+`{configuration}` in a declared path stands for the build being tested, so one declaration serves a
+local Debug run and a Release run in CI. A run fills it from, in order: the configuration a caller
+passes to `ProjectDeclaration.Load(path, configuration)`, then the `WINWRIGHT_CONFIGURATION`
+environment variable, then `configuration` in this file. CI sets the variable for its Release job, and
+a developer's runner gets the file's default without saying anything. A path naming
+`{configuration}` that none of the three fills **refuses when it is asked for**, naming the
+`configuration` key and the variable, so a run never launches a path with a brace in it, or a Debug
+build left over from another job.
 
 `loading` names the **keys** of the strings your application shows while a page is still computing,
 never the text: a phrase written here is one a translation rewrites, and a check comparing against it

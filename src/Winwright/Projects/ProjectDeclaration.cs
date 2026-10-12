@@ -83,6 +83,15 @@ public sealed class ProjectDeclaration
                 + "test; a run that attaches to a process already running never asks",
             ""),
         new(
+            "configuration",
+            "",
+            "a build configuration, such as Debug",
+            "what {configuration} means in a declared path, so one declaration serves every build a "
+                + "project tests; WINWRIGHT_CONFIGURATION set for a run overrides it",
+            "a path naming {configuration} refuses when it is asked for, naming this key and the "
+                + "variable, rather than launching a path with a brace in it",
+            ""),
+        new(
             "sourceRoot",
             "",
             "a path",
@@ -226,16 +235,46 @@ public sealed class ProjectDeclaration
     private readonly string? fingerprintStore;
     private readonly string? captures;
 
-    private ProjectDeclaration(string path, Shape shape)
+    /// <summary>
+    /// The token a declared path may carry for the build configuration. WW521.
+    /// <para>
+    /// Found adopting the engine in quickshell (QS265). Its declaration named the Debug build's
+    /// path because its local runner builds Debug, and CI builds and tests Release: every CI run
+    /// launched a file that was not there, and where a Debug build was left over from another job it
+    /// ran the wrong build and passed. One declaration could not say which build it meant.
+    /// </para>
+    /// </summary>
+    public const string ConfigurationToken = "{configuration}";
+
+    /// <summary>The variable that tells a run which configuration it is driving. WW521.</summary>
+    public const string ConfigurationVariable = "WINWRIGHT_CONFIGURATION";
+
+    /// <summary>The paths whose token nothing filled, by key, refused when one is asked for.</summary>
+    private readonly HashSet<string> unfilled = new(StringComparer.Ordinal);
+
+    private ProjectDeclaration(string path, Shape shape, string? asked)
     {
         Path = path;
         Root = System.IO.Path.GetDirectoryName(path)!;
-        executable = Resolve(shape.Executable);
-        sourceRoot = Resolve(shape.SourceRoot);
-        fingerprintStore = Resolve(shape.FingerprintStore);
-        captures = Resolve(shape.Captures);
+
+        // WW521. What the caller asked for first, then the variable, then the file. The first two
+        // are how a runner says what it built — CI exports the variable for the Release job — and
+        // the value in the file is the default a developer's own runner gets without saying anything.
+        var told = asked;
+        if (string.IsNullOrWhiteSpace(told))
+            told = System.Environment.GetEnvironmentVariable(ConfigurationVariable);
+
+        if (string.IsNullOrWhiteSpace(told))
+            told = shape.Configuration;
+
+        Configuration = string.IsNullOrWhiteSpace(told) ? null : told.Trim();
+
+        executable = Resolve(shape.Executable, "executable");
+        sourceRoot = Resolve(shape.SourceRoot, "sourceRoot");
+        fingerprintStore = Resolve(shape.FingerprintStore, "fingerprintStore");
+        captures = Resolve(shape.Captures, "captures");
         LanguageFiles = new ReadOnlyCollection<string>(
-            (shape.LanguageFiles ?? []).Select(Resolve).OfType<string>().ToList());
+            (shape.LanguageFiles ?? []).Select(one => Resolve(one, "languageFiles")).OfType<string>().ToList());
         Loading = new ReadOnlyCollection<string>(
             (shape.Loading ?? []).Select(one => one?.Trim() ?? "").Where(one => one.Length > 0).ToList());
         SourceIgnore = new ReadOnlyCollection<string>(
@@ -243,7 +282,13 @@ public sealed class ProjectDeclaration
                 .Where(name => !string.IsNullOrWhiteSpace(name))
                 .Select(name => name.Trim())
                 .ToList());
-        LanguagePreferenceFile = Resolve(shape.Language?.PreferenceFile);
+        LanguagePreferenceFile = Resolve(shape.Language?.PreferenceFile, "language.preferenceFile");
+
+        // WW521. These two are read as the declaration loads rather than when something asks, so a
+        // token nothing filled in either is refused here: carried on, it would be a strings file or a
+        // preference file that is not there, and the reading it fed would answer about nothing.
+        if (unfilled.FirstOrDefault(key => key.StartsWith("language", StringComparison.Ordinal)) is { } eager)
+            throw new DeclarationMissingException(MissingDeclaration.KeyNotDeclared, "configuration", path, Filling(eager));
         LanguagePreferenceKey = string.IsNullOrWhiteSpace(shape.Language?.PreferenceKey)
             ? null
             : shape.Language.PreferenceKey.Trim();
@@ -364,8 +409,17 @@ public sealed class ProjectDeclaration
     public int Attempts { get; }
 
     /// <summary>The application under test.</summary>
-    /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
+    /// <exception cref="DeclarationMissingException">
+    /// Where the project declares none, or names <see cref="ConfigurationToken"/> in it and nothing
+    /// says which configuration this run is driving.
+    /// </exception>
     public string Executable => Require(executable, "executable", "launching the application under test");
+
+    /// <summary>
+    /// The build configuration this run is driving: <see cref="ConfigurationVariable"/> where it is
+    /// set, otherwise what the declaration says, otherwise null. WW521.
+    /// </summary>
+    public string? Configuration { get; }
 
     /// <summary>
     /// The sets the application reports about itself, by name, each holding the arguments that make it
@@ -443,10 +497,14 @@ public sealed class ProjectDeclaration
     /// <summary>Whether the project declared a value for that key at all, without refusing.</summary>
     public bool Declares(string key) => key switch
     {
-        "captures" => captures is not null,
-        "executable" => executable is not null,
-        "sourceRoot" => sourceRoot is not null,
-        "fingerprintStore" => fingerprintStore is not null,
+        "captures" => captures is not null || unfilled.Contains("captures"),
+        // WW521. A path whose token nothing filled still counts as declared, so the reading that
+        // needs it asks and meets the refusal saying how to fill it, rather than passing it by as a
+        // key the project never wrote.
+        "executable" => executable is not null || unfilled.Contains("executable"),
+        "sourceRoot" => sourceRoot is not null || unfilled.Contains("sourceRoot"),
+        "fingerprintStore" => fingerprintStore is not null || unfilled.Contains("fingerprintStore"),
+        "configuration" => Configuration is not null,
         "languageFiles" => LanguageFiles.Count > 0,
         "loading" => Loading.Count > 0,
         "language.fallback" => LanguageFallback is not null,
@@ -456,7 +514,18 @@ public sealed class ProjectDeclaration
 
     /// <summary>Read one declaration file.</summary>
     /// <exception cref="DeclarationMissingException">Where the file is not there.</exception>
-    public static ProjectDeclaration Load(string path)
+    public static ProjectDeclaration Load(string path) => Load(path, configuration: null);
+
+    /// <summary>
+    /// Read one declaration file for the build configuration a runner names. WW521.
+    /// </summary>
+    /// <param name="path">The declaration file.</param>
+    /// <param name="configuration">
+    /// What <see cref="ConfigurationToken"/> means for this run, ahead of
+    /// <see cref="ConfigurationVariable"/> and the file's own value. Null to leave those to decide.
+    /// </param>
+    /// <exception cref="DeclarationMissingException">Where the file is not there.</exception>
+    public static ProjectDeclaration Load(string path, string? configuration)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
@@ -467,7 +536,7 @@ public sealed class ProjectDeclaration
         var shape = JsonSerializer.Deserialize<Shape>(File.ReadAllText(full), ReadAs)
             ?? throw new JsonException($"{full} is empty, and an empty declaration declares nothing");
 
-        return new ProjectDeclaration(full, shape);
+        return new ProjectDeclaration(full, shape, configuration);
     }
 
     /// <summary>
@@ -520,21 +589,56 @@ public sealed class ProjectDeclaration
         return declared;
     }
 
-    private string? Resolve(string? path)
+    /// <summary>
+    /// A declared path, resolved against this file's directory, with <see cref="ConfigurationToken"/>
+    /// filled. Null where nothing was declared, and null with the key remembered where the token is
+    /// there and nothing fills it — so the refusal arrives when the path is asked for, which is when
+    /// every other missing path refuses.
+    /// </summary>
+    private string? Resolve(string? path, string key)
     {
         if (string.IsNullOrWhiteSpace(path))
             return null;
 
-        var expanded = System.Environment.ExpandEnvironmentVariables(path.Trim());
+        var written = path.Trim();
+        if (written.Contains(ConfigurationToken, StringComparison.OrdinalIgnoreCase))
+        {
+            if (Configuration is null)
+            {
+                unfilled.Add(key);
+                return null;
+            }
+
+            written = written.Replace(ConfigurationToken, Configuration, StringComparison.OrdinalIgnoreCase);
+        }
+
+        var expanded = System.Environment.ExpandEnvironmentVariables(written);
         return System.IO.Path.GetFullPath(expanded, Root);
     }
 
-    private string Require(string? value, string key, string wanted) =>
-        value ?? throw new DeclarationMissingException(MissingDeclaration.KeyNotDeclared, key, Path, wanted);
+    /// <summary>What a refusal says an unfilled token in <paramref name="key"/> needed. WW521.</summary>
+    private static string Filling(string key) =>
+        $"'{key}' names {ConfigurationToken}, and filling it needs one — or {ConfigurationVariable} "
+            + "set for this run";
+
+    private string Require(string? value, string key, string wanted)
+    {
+        // WW521. Said as the configuration that is missing and not as the path: the path is right
+        // there in the file, and an author told it was not declared would go looking for a typo.
+        if (value is null && unfilled.Contains(key))
+        {
+            throw new DeclarationMissingException(
+                MissingDeclaration.KeyNotDeclared, "configuration", Path, $"{wanted}, where {Filling(key)}");
+        }
+
+        return value ?? throw new DeclarationMissingException(MissingDeclaration.KeyNotDeclared, key, Path, wanted);
+    }
 
     private sealed record Shape
     {
         [JsonPropertyName("executable")] public string? Executable { get; init; }
+
+        [JsonPropertyName("configuration")] public string? Configuration { get; init; }
 
         [JsonPropertyName("sourceRoot")] public string? SourceRoot { get; init; }
 
