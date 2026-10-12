@@ -34,7 +34,7 @@ public sealed class ContainsTests : IDisposable
     public void A_reading_that_quotes_an_earlier_one_holds_it()
     {
         var verdict = Run("Text#chordEcho", "contains");
-        if (verdict is null)
+        if (verdict is null || BusyDesk.Excused(verdict))
             return;
 
         Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
@@ -46,7 +46,7 @@ public sealed class ContainsTests : IDisposable
         // The control. `sameAs` is the claim that was available, and this is the case it cannot
         // make: the echo holds the read-out and is not it.
         var verdict = Run("Text#chordEcho", "sameAs");
-        if (verdict is null)
+        if (verdict is null || BusyDesk.Excused(verdict))
             return;
 
         Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
@@ -58,7 +58,7 @@ public sealed class ContainsTests : IDisposable
         // The title says "Chords" and holds nothing the read-out said, so the claim is false — and
         // the failure has to say what it read rather than only that it did not hold.
         var verdict = Run("Text#chordsTitle", "contains");
-        if (verdict is null)
+        if (verdict is null || BusyDesk.Excused(verdict))
             return;
 
         Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));

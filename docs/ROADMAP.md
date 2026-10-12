@@ -4,7 +4,7 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW521** (deps: —) **A project declaration names one executable, so a run against a Release build launches the Debug path** — The executable is a fixed path with nothing a runner can vary by configuration, so a project that tests two builds needs two declarations. → §WW521
+- 🛠 **WW521** (deps: —) **A project declaration names one executable, so a run against a Release build launches the Debug path** — The executable is a fixed path with nothing a runner can vary by configuration, so a project that tests two builds needs two declarations. → §WW521
 - 📋 **WW522** (deps: —) **A case cannot say it needs a server the application connects to, so a connected client's window has no case** — A fixture stages files and arguments only, so a screen that exists only while a live connection does is proven by a unit test instead. → §WW522
 - 📋 **WW524** (deps: —) **A staged file always lands flat under {files}, so a store one folder down cannot be reproduced (WW519)** — Staging keeps only the file name, so an application reading a subfolder of its data directory gets no store and two same-named files overwrite each other. → §WW524
 

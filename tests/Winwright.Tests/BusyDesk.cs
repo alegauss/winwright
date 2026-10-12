@@ -1,3 +1,4 @@
+using Winwright.Scenarios;
 using Winwright.Verdicts;
 using Winwright.Windowing;
 
@@ -106,6 +107,36 @@ internal static class BusyDesk
         // what excused it, which is the shape of green this whole project exists to withdraw.
         Assert.NotNull(verdict.Missing);
         Excusing(verdict.Missing);
+
+        return true;
+    }
+
+    /// <summary>
+    /// The same for a whole run of cases, where the act that needed the desk is one step of several.
+    /// <para>
+    /// WW526. The chord and contains tests launch a case through <c>Suite.Launch</c> and asserted it
+    /// passed, so a press the desk refused was a red about the code. On a guest whose shell held the
+    /// foreground that was five reds in three of four full runs, while every act-level test beside
+    /// them excused the same hole here.
+    /// </para>
+    /// <para>
+    /// Excused only where every shortfall is a hole. A run that also failed something is red about
+    /// what it did observe, and excusing it would hide that behind the desk.
+    /// </para>
+    /// </summary>
+    /// <param name="verdict">What the run answered.</param>
+    /// <returns>True where a hole about the desk is the run's only shortfall.</returns>
+    internal static bool Excused(SuiteVerdict verdict)
+    {
+        ArgumentNullException.ThrowIfNull(verdict);
+
+        var results = verdict.Ran.SelectMany(one => one.Verdict.Results).ToList();
+        var holes = results.Where(one => one.DidNotRun).ToList();
+        if (holes.Count == 0 || results.Any(one => one.Outcome == AssertionOutcome.Failed))
+            return false;
+
+        foreach (var hole in holes)
+            Excused(hole);
 
         return true;
     }

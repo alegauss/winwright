@@ -38,7 +38,7 @@ public sealed class ChordTests : IDisposable
     public void A_command_no_button_reaches_runs_when_its_chord_is_pressed()
     {
         var verdict = Run("Ctrl+Shift+I", "imported");
-        if (verdict is null)
+        if (verdict is null || BusyDesk.Excused(verdict))
             return;
 
         Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
@@ -50,7 +50,7 @@ public sealed class ChordTests : IDisposable
         // Two commands and not one, so a run that pressed anything at all cannot pass: what is
         // asserted is which of them ran.
         var verdict = Run("Ctrl+Alt+F1", "wrote a bundle");
-        if (verdict is null)
+        if (verdict is null || BusyDesk.Excused(verdict))
             return;
 
         Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
@@ -63,7 +63,7 @@ public sealed class ChordTests : IDisposable
         // above, and the surface would prove that a case can press keys rather than that a case can
         // reach a command.
         var verdict = Run("Ctrl+Shift+Q", ChordsPaneNothing);
-        if (verdict is null)
+        if (verdict is null || BusyDesk.Excused(verdict))
             return;
 
         Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
