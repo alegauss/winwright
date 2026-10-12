@@ -191,6 +191,43 @@ public class FixtureDeclarationTests
     }
 
     /// <summary>
+    /// WW519. QS217 pointed <c>APPDATA</c> at the staged directory, and the client read the real
+    /// profile's store anyway, because it asks Windows for the known folder and never reads the
+    /// variable. The engine cannot see which kind it launched, so the report says it every time.
+    /// </summary>
+    [Fact]
+    public void A_fixture_setting_a_profile_variable_says_the_known_folder_is_not_redirected()
+    {
+        var staged = FixtureDeclaration.Of(
+            "with sessions",
+            variables: new Dictionary<string, string>
+            {
+                ["localappdata"] = FixtureDeclaration.Staged,
+                ["APPDATA"] = FixtureDeclaration.Staged,
+                ["WINWRIGHT_ROLE"] = "reader",
+            },
+            files: ["cases/fixtures/sessions.json"]);
+
+        // In the list's order and not the declaration's, so two fixtures setting the same pair read
+        // the same; spelled as the list spells them, because that is the folder's name.
+        Assert.Equal(["APPDATA", "LOCALAPPDATA"], staged.VariableOnly);
+        Assert.Equal(
+            "with sessions: the application as it comes, staging 1 file(s), setting APPDATA and LOCALAPPDATA "
+                + "as a variable only — an application asking Windows for that known folder still reads the real profile.",
+            staged.Sentence());
+
+        // Said of the variable and not of the token: a value naming no staged directory is the same
+        // variable an application asking Windows never reads.
+        Assert.Contains(
+            "setting HOME as a variable only",
+            FixtureDeclaration.Of("home", variables: new Dictionary<string, string> { ["HOME"] = @"C:\elsewhere" }).Sentence());
+
+        var other = FixtureDeclaration.Of("role", variables: new Dictionary<string, string> { ["WINWRIGHT_ROLE"] = "reader" });
+        Assert.Empty(other.VariableOnly);
+        Assert.Equal("", other.VariableOnlyClause);
+    }
+
+    /// <summary>
     /// WW509. The defect quickshell found at QS217: the client reads its saved sessions from a file
     /// under the user's AppData, so a case that searches the session list had nowhere to put a store
     /// holding known ones. A variable alone does not reach an application that reads no flag.

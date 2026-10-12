@@ -4,36 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW519 Staged files and known folders
-
-Found by quickshell's QS217 adopting 1.0.1. The case wanted the client over a session
-store of its own: stage `cases/fixtures/sessions.json`, type part of a session's name
-into "Open session", read it at the top. The schema says a variable naming `{files}`
-gives an application a store "without the application growing a flag".
-
-That holds only where the application reads its store through a variable. quickshell
-reads `%AppData%\quickshell\sessions.json` via
-`GetFolderPath(SpecialFolder.ApplicationData)`, which is `SHGetKnownFolderPath`:
-resolved from the registry, never from `APPDATA`. So `"variables": { "APPDATA":
-"{files}" }` launches cleanly, stages the file, and the client reads the real profile's
-store: green about the wrong store, the failure WW509's refusal was written against,
-invisible to the engine. Most Windows applications are in this position. Staging also
-flattens to `{files}\<name>`, so a `<root>\quickshell\sessions.json` layout cannot be
-reproduced.
-
-Workaround: quickshell grew `QUICKSHELL_DATA`, a variable naming its data folder,
-documented as a user feature; its only caller today is the case.
-
-What winwright should offer:
-1. Say it: the schema text and the run's report should name the known-folder case where a
-   fixture sets `APPDATA`, `LOCALAPPDATA`, `USERPROFILE` or `HOME`.
-2. Stage to a relative destination (`{ "from": …, "to": "quickshell/sessions.json" }`).
-3. Only if those leave adopters adding variables anyway: a guest-only, restored-after
-   known-folder redirect for the launch.
-
-Falsified when a case can hand a known-folder-reading application a store without it
-adding a variable, or the engine says plainly that it cannot.
-
 ### §WW521 An executable per configuration
 
 Found adopting the engine in quickshell (QS265, 2026-10-11). `winwright.json` takes one
@@ -79,6 +49,30 @@ README's "no service, no daemon" stands. The fixture only says what it needs and
 says whether it was there.
 
 Open choice: whether a probe answer is cached per run or per fixture launch.
+
+### §WW524 Staged files keep only their name
+
+Found with WW519, from quickshell's QS217. `FixtureDeclaration.Stage` copies every
+declared file to `{files}\<file name>`, so the staged directory is always flat. An
+application whose store sits one folder down from the directory a variable names, as
+`%AppData%\quickshell\sessions.json` does, cannot be handed that layout. The case then
+has to point the variable at the subfolder itself, which only works when the application
+reads that exact variable and nothing above it. Two files with the same name from
+different folders also overwrite each other without a word.
+
+What to build: a `files` entry may be an object, `{ "from":
+"cases/fixtures/sessions.json", "to": "quickshell/sessions.json" }`, beside the plain
+string that keeps meaning "copy to the top". `to` is relative to the staged directory.
+It is refused when absolute, when it climbs out with `..`, or when two entries resolve
+to the same destination, and the refusal names both entries. The schema's `files` kind
+changes from a list of words to a list whose members are a word or that object, and
+`scripts/format.mjs` has to read the new kind.
+
+Two plain entries sharing a file name are refused by the same rule, which turns today's
+silent overwrite into a load-time answer.
+
+Falsified when a fixture can reproduce `<root>\quickshell\sessions.json` under
+`{files}`, and two entries landing on one path are refused at load.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

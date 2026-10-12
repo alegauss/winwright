@@ -96,6 +96,7 @@
 - ✅ **WW512** **the directory a launch starts in is asserted on the ProcessStartInfo and never on a running process** — The fixture answers --resolve, so five cases start a process and read back what a relative argument resolved to (design recorded in `tests/Winwright.Tests/LaunchDirectoryTests.cs`).
 - ✅ **WW513** **the application's other launcher sets no working directory, and nothing can assert the one it would set** — A read-out starts at the project's root, and a case drives one to read back what it resolved there (design recorded in `src/Winwright/Asserting/DerivedSet.cs`).
 - ✅ **WW515** **staging a launch and building it are two calls whose order nothing enforces** — Staging hands back the type a launch is composed from, and a fixture that needs it is refused until something has (design recorded in `src/Winwright/Scenarios/StagedFixture.cs`).
+- ✅ **WW519** **A staged store never reaches an application reading a Windows known folder, and the launch is green (WW509)** — A fixture setting a profile variable says on its line and each case's that an app asking for the folder sees the real one (design recorded in `src/Winwright/Scenarios/FixtureDeclaration.cs`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

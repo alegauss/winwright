@@ -174,6 +174,43 @@ public sealed record FixtureDeclaration
     /// </summary>
     public IReadOnlyList<string> Files { get; }
 
+    /// <summary>
+    /// The variables that name a folder Windows also answers as a known folder. WW519.
+    /// <para>
+    /// Found by quickshell's QS217. Its fixture pointed <c>APPDATA</c> at <see cref="Staged"/>, the
+    /// launch was clean and the file was staged, and the client read the real profile's store anyway:
+    /// <c>GetFolderPath(SpecialFolder.ApplicationData)</c> is <c>SHGetKnownFolderPath</c>, resolved
+    /// from the registry and never from the variable. So did most Windows applications, which makes
+    /// the variable a store only for an application that reads it — and a case about the wrong store
+    /// is green.
+    /// </para>
+    /// <para>
+    /// Said and not refused, because the engine cannot tell which kind of application it launched:
+    /// one that reads the variable gets exactly the store the fixture asked for, and refusing that is
+    /// refusing the case that works. What it can do is never let the fixture read as though the
+    /// redirect covered both.
+    /// </para>
+    /// </summary>
+    public static IReadOnlyList<string> ProfileVariables { get; } =
+        new ReadOnlyCollection<string>(["APPDATA", "LOCALAPPDATA", "USERPROFILE", "HOME"]);
+
+    /// <summary>
+    /// The <see cref="ProfileVariables"/> this fixture sets, as declared, in that list's order. Empty
+    /// where it sets none. WW519.
+    /// </summary>
+    public IReadOnlyList<string> VariableOnly =>
+        new ReadOnlyCollection<string>(ProfileVariables.Where(Variables.ContainsKey).ToList());
+
+    /// <summary>
+    /// The clause a report adds where this fixture sets a <see cref="ProfileVariables"/> name, or
+    /// empty where it sets none. WW519.
+    /// </summary>
+    public string VariableOnlyClause =>
+        VariableOnly.Count == 0
+            ? ""
+            : $", setting {string.Join(" and ", VariableOnly)} as a variable only — an application asking "
+                + "Windows for that known folder still reads the real profile";
+
     /// <summary>Whether this fixture samples an environment at all.</summary>
     public bool Samples => Environment.Length > 0;
 
@@ -541,7 +578,9 @@ public sealed record FixtureDeclaration
         // WW509. Counted rather than listed: a reader of a red wants to know this launch had a store
         // of its own, and which files were in it is the declaration's business.
         var staged = Files.Count > 0 ? $", staging {Files.Count} file(s)" : "";
-        return $"{Name}: {sampled}{lent}{held}{started}{staged}.";
+
+        // WW519. Last, because it qualifies the store the clauses before it describe.
+        return $"{Name}: {sampled}{lent}{held}{started}{staged}{VariableOnlyClause}.";
     }
 
     /// <summary>The one line a listing shows.</summary>

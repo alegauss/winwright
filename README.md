@@ -906,6 +906,16 @@ read, and the reading it takes instead is the real machine's. Declaring no files
 of this launch's own, which is an empty store rather than a mistake. A value naming no token is
 passed exactly as written — `"reader"` is not a path for being a string.
 
+**A variable reaches only an application that reads it.** Most Windows applications don't: .NET's
+`GetFolderPath(SpecialFolder.ApplicationData)` asks Windows for the *known folder*, which comes from
+the registry and ignores `APPDATA`. Such an application launches cleanly with the store staged and
+reads the real profile's store anyway, so a case about it is green about the wrong file. winwright
+cannot tell the two kinds apart from outside, so it does not refuse the fixture. Instead, wherever a
+fixture sets `APPDATA`, `LOCALAPPDATA`, `USERPROFILE` or `HOME`, the fixture's line and every case
+line run against it say so: *setting APPDATA as a variable only — an application asking Windows for
+that known folder still reads the real profile*. If your application reads its known folder, it
+needs a variable or argument of its own that names its data folder.
+
 `shareable` says the application leaves a window the next case would accept. `Suite.Launch` lends one
 window to several cases only when three separate things agree: the fixture says it may be lent, every
 case using it declares `onlyReads`, and the invocation asked for sharing. Sharing is opted into per

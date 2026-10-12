@@ -125,6 +125,10 @@ public sealed class CaseResult
         var where = Against.Samples ? $", sampling {Against.Environment}" : "";
         var window = Lent ? ", on a borrowed window" : "";
 
+        // WW519. On the case's own line, because a green here may be about the real profile's store
+        // rather than the one the fixture staged, and the line that says green is the one read.
+        var folders = Against.VariableOnlyClause;
+
         var over = Across == 1
             ? $"{Declared.Checks} check(s)"
             : $"{Declared.Checks} check(s) across {Across} member(s)";
@@ -137,7 +141,7 @@ public sealed class CaseResult
         var died = Departed is null ? "" : $"the application {Departed} — ";
 
         return $"{Declared.Name}: {died}{Verdict.Outcome} over {Verdict.Ran} of {over}"
-            + $"{short_fall}{where}{window}";
+            + $"{short_fall}{where}{window}{folders}";
     }
 }
 
