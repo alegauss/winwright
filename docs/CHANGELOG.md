@@ -99,6 +99,7 @@
 - ✅ **WW519** **A staged store never reaches an application reading a Windows known folder, and the launch is green (WW509)** — A fixture setting a profile variable says on its line and each case's that an app asking for the folder sees the real one (design recorded in `src/Winwright/Scenarios/FixtureDeclaration.cs`).
 - ✅ **WW526** **The chord, contains and drag suite tests go red when the desk refuses the foreground, instead of excusing it** — A suite desk test whose only shortfall is a desk hole is excused, not red; a held guest desk excused 9, a healthy one passed all (design recorded in `tests/Winwright.Tests/BusyDesk.cs`).
 - ✅ **WW521** **A project declaration names one executable, so a run against a Release build launches the Debug path** — A declared path may carry {configuration}, filled by caller, WINWRIGHT_CONFIGURATION or file, refused by name if unfilled (design recorded in `src/Winwright/Projects/ProjectDeclaration.cs`).
+- ✅ **WW522** **A case cannot say it needs a server the application connects to, so a connected client's window has no case** — A fixture names its server in 'reaches'; each launch probes it, offers {reach0} if it answers, else holes every check unlaunched (design recorded in `src/Winwright/Processes/Reaching.cs`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

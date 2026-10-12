@@ -4,30 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW522 A fixture that names what it reaches
-
-Found by quickshell's QS269 (2026-10-12). The session bar over a connected tab says
-Connected, Reconnecting or Disconnected and carries a chip per running forward. Its
-design asks for a UI case reading the chip's word and the forward chip after a forward
-opens. No case can be written: the window shows the bar only while a pane holds a live
-SSH session, and a fixture can stage files and pass arguments but cannot say the case
-needs a server the application connects to. So the bar's evidence is an xunit test
-against the project's own Docker sshd.
-
-What to build: a fixture may declare what it reaches outside the application, as an
-address (`"reaches": ["127.0.0.1:2222"]`) or a variable naming one. Before launching,
-the runner probes each with a TCP connect under a short timeout. Reachable, the case
-runs and the address is offered to `arguments` and `files` as `{reach0}` so a staged
-store can name it. Unreachable, every assertion of every case on that fixture is
-reported not observed, with the address and the probe's answer, never failed and never
-passed: the verdict rule this engine already keeps for an absent precondition.
-
-Not a service the engine starts: starting a container is the project's job, and the
-README's "no service, no daemon" stands. The fixture only says what it needs and the run
-says whether it was there.
-
-Open choice: whether a probe answer is cached per run or per fixture launch.
-
 ### §WW524 Staged files keep only their name
 
 Found with WW519, from quickshell's QS217. `FixtureDeclaration.Stage` copies every
@@ -51,6 +27,26 @@ silent overwrite into a load-time answer.
 
 Falsified when a fixture can reproduce `<root>\quickshell\sessions.json` under
 `{files}`, and two entries landing on one path are refused at load.
+
+### §WW527 Filling tokens in a staged file
+
+Left by WW522. A fixture's `reaches` addresses are offered to `arguments` and
+`variables` as `{reach0}`, `{reach1}` and on, and WW522's design also offered them to
+`files` so a staged store can name the server. quickshell's QS269 is that shape: its
+session store, staged under `{files}`, names the host and port the session connects to.
+Staging copies bytes as they are, so the store has to carry a literal address, which is
+a second spelling of what `reaches` already says. The two can disagree, and then the
+probe checks one server while the client connects to another.
+
+What to build: a staged file may ask for its tokens to be filled. In WW524's object form
+that is `{ "from": ..., "fill": true }`; until that exists, a fixture-level `"fill":
+["sessions.json"]`. Filling replaces `{reachN}` and `{files}` in the file's text, read
+and written as UTF-8 without a BOM change. A file asked to be filled that is not valid
+UTF-8 is refused, naming it, and a file not asked is copied byte for byte as today.
+Copying silently is the default because most staged files are not text.
+
+Falsified when a staged store names the server only as `{reach0}` and the launched
+application reads the address the probe reached.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

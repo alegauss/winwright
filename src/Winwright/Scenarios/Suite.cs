@@ -196,6 +196,16 @@ public static class Suite
                 continue;
             }
 
+            // WW522. Before the launch, so an application that needed a server and was not given one
+            // is never started against its absence: every check is a hole naming the address, and the
+            // lent window is not lent, because there is no window. Asked per case, which is per launch.
+            var timeout = project.Declares("timeouts.reach") ? project.Timeouts.For("reach") : Processes.Reaching.DefaultTimeoutMs;
+            if (fixture.Unreachable(timeout) is { } unreachable)
+            {
+                ran.Add(CaseRun.NotOn(one, unreachable, lent: false));
+                continue;
+            }
+
             var (window, process) = Opened(register, project, fixture, one.Name);
             if (borrowing)
                 lent[fixture.Name] = window;

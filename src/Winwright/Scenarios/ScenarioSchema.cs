@@ -204,6 +204,7 @@ public static class ScenarioSchema
         // publishes `{FixtureDeclaration.Staged}` to a reader. `ScenarioFileTests` holds the spelling
         // to the constant, which is the pairing that keeps the two from drifting.
         new("files", false, Taking.Words, "the files to put in a directory of this launch's own, each relative to the project's root, as an array — a variable or the working directory names that directory with '{files}', which is how a case gives the application a store of its own without the application growing a flag", []),
+        new("reaches", false, Taking.Words, "what the application connects to outside itself, each a host:port or a %VARIABLE% naming one, as an array — probed before every launch and never started; unreachable, every check on the fixture is a hole naming the address, and reachable, the arguments and variables name each as {reach0}, {reach1} and on", []),
     ]);
 
     /// <summary>What a step may say.</summary>

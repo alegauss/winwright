@@ -894,7 +894,7 @@ public static class CaseRun
     /// rather than passed, so nothing about this reads as a green.
     /// </para>
     /// </summary>
-    private static CaseResult NotOn(CaseDeclaration declared, Precondition missing, bool lent)
+    internal static CaseResult NotOn(CaseDeclaration declared, Precondition missing, bool lent)
     {
         var trace = new List<TraceStep>();
         var results = new List<AssertionResult>();

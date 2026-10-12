@@ -933,6 +933,26 @@ read, and the reading it takes instead is the real machine's. Declaring no files
 of this launch's own, which is an empty store rather than a mistake. A value naming no token is
 passed exactly as written — `"reader"` is not a path for being a string.
 
+`reaches` names what the application connects to outside itself, each a `host:port` or a
+`%VARIABLE%` naming one:
+
+```json
+{
+  "name": "connected",
+  "reaches": ["127.0.0.1:2222"],
+  "arguments": ["--connect", "{reach0}"]
+}
+```
+
+Before every launch on that fixture the run opens a TCP connection to each address, with
+`timeouts.reach` as the deadline (2000 ms when the project declares none). If every address answers,
+the case runs, and `{reach0}`, `{reach1}` and so on in `arguments` and `variables` become the
+addresses the probe reached. If one does not answer, the application is **never launched**: every
+check in the case is a hole naming the address and what the connect said, never a red and never a
+pass. winwright starts nothing itself. Bringing the server up (a container, a local sshd) is the
+project's job; the fixture says what it needs and the run says whether it was there. An address
+written out that is not a host and a port is refused at load.
+
 **A variable reaches only an application that reads it.** Most Windows applications don't: .NET's
 `GetFolderPath(SpecialFolder.ApplicationData)` asks Windows for the *known folder*, which comes from
 the registry and ignores `APPDATA`. Such an application launches cleanly with the store staged and

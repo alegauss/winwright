@@ -145,6 +145,10 @@ internal static class Sleeps
                 + "which about 36 is the guest — press and nudge moved 234 to 268 and 196 to 235 "
                 + "between the same two runs without being touched. Both read 0 late of 150, so "
                 + "what this bought is the shape and not a fault removed"),
+        new("Reaching.cs", 1, Sleeping.OnASignal,
+            "WW522. The connect is a task the socket completes, and the probe parks on it with the "
+                + "deadline the project declares: a server that answers ends the wait at once, and "
+                + "one that never does is the absence it reports"),
         new("Drag.cs", 2, Sleeping.Resolution,
             "WW520. A drag is a press, a run of moves and a release, and the pause between them is "
                 + "the resolution of the gesture: sent in one call they reach the application as a "

@@ -40,8 +40,10 @@ public sealed record FixtureDeclaration
         string language,
         bool resident,
         string workingDirectory,
-        IReadOnlyList<string> files)
+        IReadOnlyList<string> files,
+        IReadOnlyList<string> reaches)
     {
+        Reaches = reaches;
         Files = files;
         Name = name;
         Environment = environment;
@@ -211,6 +213,57 @@ public sealed record FixtureDeclaration
             : $", setting {string.Join(" and ", VariableOnly)} as a variable only — an application asking "
                 + "Windows for that known folder still reads the real profile";
 
+    /// <summary>
+    /// What the application connects to outside itself, each as <c>host:port</c> or as an
+    /// environment variable naming one, in declared order. Empty where it reaches nothing. WW522.
+    /// <para>
+    /// Probed before the launch, every time, and never started: the server is the project's to run.
+    /// Unreachable, every check on this fixture is a hole naming the address. Reachable, each is
+    /// offered to the arguments and the variables as <c>{reach0}</c>, <c>{reach1}</c> and on, so the
+    /// launch names the server the probe found rather than a second spelling of it.
+    /// </para>
+    /// <para>
+    /// Probed per launch and not once per run, which was the open choice: a server that goes away
+    /// halfway through a suite is the case where a run-wide answer would be a pass about a connection
+    /// that was no longer there.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Reaches { get; }
+
+    /// <summary>The token the arguments and variables name <see cref="Reaches"/>' first address by. WW522.</summary>
+    public const string FirstReach = "{reach0}";
+
+    /// <summary>
+    /// Probe what this fixture reaches. Null where it reaches nothing or everything answered, and the
+    /// absence that names the address that did not where something did not. WW522.
+    /// </summary>
+    /// <param name="timeoutMs">How long each connect may take.</param>
+    public Verdicts.Precondition? Unreachable(int timeoutMs)
+    {
+        if (Reaches.Count == 0)
+            return null;
+
+        var probed = Processes.Reaching.Probe(Reached(), timeoutMs);
+        return probed.Satisfied ? null : probed;
+    }
+
+    /// <summary>The addresses with their variables expanded, which is what is probed and what is offered.</summary>
+    private IReadOnlyList<string> Reached() =>
+        Reaches.Select(one => System.Environment.ExpandEnvironmentVariables(one)).ToList();
+
+    /// <summary><paramref name="value"/> with every <c>{reachN}</c> swapped for that address.</summary>
+    private string Offered(string value)
+    {
+        if (Reaches.Count == 0 || !value.Contains("{reach", StringComparison.Ordinal))
+            return value;
+
+        var reached = Reached();
+        for (var at = 0; at < reached.Count; at++)
+            value = value.Replace($"{{reach{at}}}", reached[at], StringComparison.Ordinal);
+
+        return value;
+    }
+
     /// <summary>Whether this fixture samples an environment at all.</summary>
     public bool Samples => Environment.Length > 0;
 
@@ -225,7 +278,7 @@ public sealed record FixtureDeclaration
 
     /// <summary>The application as it comes: no arguments, no variables, nothing sampled.</summary>
     public static FixtureDeclaration Plain { get; } =
-        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false, "", []);
+        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false, "", [], []);
 
     /// <summary>
     /// Declare one.
@@ -240,6 +293,7 @@ public sealed record FixtureDeclaration
     /// <param name="resident">That this launch draws no window, so the run holds it as a process.</param>
     /// <param name="workingDirectory">The directory to start it in, resolved against the project's root.</param>
     /// <param name="files">The files to stage for this launch, each relative to the project's root.</param>
+    /// <param name="reaches">What the application connects to, each <c>host:port</c> or a variable naming one.</param>
     /// <exception cref="ScenarioRefusedException">
     /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not
     /// one, or files are declared that reach the launch nowhere.
@@ -254,7 +308,8 @@ public sealed record FixtureDeclaration
         string? language = null,
         bool resident = false,
         string? workingDirectory = null,
-        IEnumerable<string>? files = null)
+        IEnumerable<string>? files = null,
+        IEnumerable<string>? reaches = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
         if (string.IsNullOrWhiteSpace(name))
@@ -344,6 +399,25 @@ public sealed record FixtureDeclaration
                 + "be looking at them");
         }
 
+        // WW522. An address written out is judged here, because one that is not a host and a port is
+        // wrong on every machine. One naming a variable is judged when it is probed, since what it
+        // expands to is a fact about the machine running it.
+        var reaching = new List<string>();
+        foreach (var address in reaches ?? [])
+        {
+            if (string.IsNullOrWhiteSpace(address))
+                throw new ScenarioRefusedException(called, "one of the addresses it reaches is blank, and a blank address names nothing");
+
+            var written = address.Trim();
+            if (!written.Contains('%', StringComparison.Ordinal) && Processes.Reaching.Parsed(written) is null)
+            {
+                throw new ScenarioRefusedException(
+                    called, $"it reaches '{written}', which is not a host:port such as 127.0.0.1:2222 or a %VARIABLE% naming one");
+            }
+
+            reaching.Add(written);
+        }
+
         return new FixtureDeclaration(
             called,
             sampled,
@@ -354,7 +428,8 @@ public sealed record FixtureDeclaration
             speaking,
             resident,
             starting,
-            new ReadOnlyCollection<string>(staging));
+            new ReadOnlyCollection<string>(staging),
+            new ReadOnlyCollection<string>(reaching));
     }
 
     /// <summary>
@@ -550,14 +625,16 @@ public sealed record FixtureDeclaration
             UseShellExecute = false,
             WorkingDirectory = StartsIn(root),
         };
+        // WW522. The addresses this fixture reaches are offered here too, so an argument naming the
+        // server is the one the probe found.
         foreach (var argument in Launching())
-            start.ArgumentList.Add(argument);
+            start.ArgumentList.Add(Offered(argument));
 
         // WW509. The token resolves here and not in the declaration: where the files go is a fact
         // about this machine, and a declaration read on one machine is the same declaration on the
         // next. A value naming no token is handed over exactly as written.
         foreach (var variable in Variables)
-            start.Environment[variable.Key] = Resolved(variable.Value, root);
+            start.Environment[variable.Key] = Offered(Resolved(variable.Value, root));
 
         return start;
     }
@@ -578,6 +655,11 @@ public sealed record FixtureDeclaration
         // WW509. Counted rather than listed: a reader of a red wants to know this launch had a store
         // of its own, and which files were in it is the declaration's business.
         var staged = Files.Count > 0 ? $", staging {Files.Count} file(s)" : "";
+
+        // WW522. Named rather than counted: which server a launch needed is what a reader of a hole
+        // has to go and start.
+        if (Reaches.Count > 0)
+            staged += $", reaching {string.Join(", ", Reaches)}";
 
         // WW519. Last, because it qualifies the store the clauses before it describe.
         return $"{Name}: {sampled}{lent}{held}{started}{staged}{VariableOnlyClause}.";
