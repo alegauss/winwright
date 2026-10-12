@@ -176,6 +176,17 @@ public sealed record StepDeclaration
     /// </summary>
     public string? Popup => Wrote.Trimmed("popup");
 
+    /// <summary>
+    /// Where this step's act ends, parsed, or null on every step whose verb does not end elsewhere.
+    /// WW520.
+    /// <para>
+    /// A second locator rather than a second subject. The step still addresses one element, the one
+    /// it presses, and this says where the pointer lets go. That is why it is not a third arm of the
+    /// group <c>locator</c> and <c>tray</c> share.
+    /// </para>
+    /// </summary>
+    public Locator? To { get; private init; }
+
     /// <summary>What it does.</summary>
     public ActVerb Verb { get; }
 
@@ -943,6 +954,10 @@ public sealed record StepDeclaration
         if (act.Refuses(wrote.Text("with")) is { } wrong)
             throw new ScenarioRefusedException(subject, wrong);
 
+        // WW520. Judged beside the argument because it is the other thing a verb needs said. Ahead
+        // of the tray's early return, so an icon step naming a destination is refused for it.
+        var to = Destination(subject, act, wrote.Text("to"));
+
         var reading = ReadBack.Named(wrote.Text("reads"));
 
         // WW250. Compiled at the door for the timeout's sake, and because a pattern that does not
@@ -964,6 +979,7 @@ public sealed record StepDeclaration
         {
             Locator = parsed,
             Matches = pattern,
+            To = to,
         };
 
         // WW391. A tray step is finished here, and what finishes it is the same step every other
@@ -1059,6 +1075,38 @@ public sealed record StepDeclaration
                 "a step acts on one thing, and this one names a locator and a tray icon; a tray icon is "
                     + "not in the window's tree, so no locator reaches it and naming both names two subjects");
         }
+    }
+
+    /// <summary>
+    /// Where the act ends, parsed, or null where the verb ends nowhere else. WW520.
+    /// <para>
+    /// Refused both ways. A drag with no destination is a press that never lets go anywhere
+    /// anybody named. A destination beside any other verb is a field the run would ignore, and a
+    /// case that reads as moving something while its act only clicks is green about a gesture
+    /// nobody made.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="act">The verb.</param>
+    /// <param name="to">The destination as the case wrote it.</param>
+    private static Locator? Destination(string subject, ActVerb act, string? to)
+    {
+        var written = string.IsNullOrWhiteSpace(to) ? null : to;
+        if (act.EndsElsewhere && written is null)
+        {
+            throw new ScenarioRefusedException(
+                subject, $"'{act.Name}' moves one element onto another, and this one names no 'to' to end on");
+        }
+
+        if (!act.EndsElsewhere && written is not null)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it names '{written.Trim()}' in 'to' and acts with '{act.Name}', which ends where it starts; "
+                    + "only an act that moves something onto something else, such as 'drag', takes one");
+        }
+
+        return written is null ? null : Parsed(subject, written);
     }
 
     /// <summary>
@@ -1752,6 +1800,9 @@ public sealed record StepDeclaration
         return this with
         {
             Locator = parsed,
+            // WW520. The destination faces the same door, so a drag inside a repeated case can end
+            // on the member's own row as well as start on it.
+            To = To is null ? null : Substituted($"{Name} [{member}]", To.Text.Replace(Member, member, StringComparison.Ordinal)),
             Name = $"{Name} [{member}]",
             // The last step and not the whole locator: that is the one a sweep's matches are of, so
             // `Group[name="{}"]` finding nothing is the strings and the window disagreeing, and
@@ -1793,10 +1844,17 @@ public sealed record StepDeclaration
     /// names its element in words.
     /// </summary>
     public IReadOnlyList<string> Declares() => Locator is null ? [] : Braced.Matches(Locator.Text)
+        .Concat(To is null ? [] : Braced.Matches(To.Text))
         .Select(one => one.Groups[1].Value)
         .Where(one => one.Length > 0)
         .Distinct(StringComparer.Ordinal)
         .ToList();
+
+    /// <summary>A substituted locator, re-parsed, or a refusal naming the text that would not parse.</summary>
+    private static Locator Substituted(string name, string text) =>
+        Locator.TryParse(text, out var parsed, out var because)
+            ? parsed
+            : throw new ScenarioRefusedException(name, $"'{text}' does not parse: {because}");
 
     /// <summary>
     /// This step with every <c>{a.key}</c> in its locator replaced by the string that key declares.
@@ -1830,16 +1888,21 @@ public sealed record StepDeclaration
             return this;
 
         // Not null here: `Declares()` answers empty for a tray step, so the return above took it.
-        var locator = Locator!;
-        var text = Braced.Replace(locator.Text, one => one.Groups[1].Value.Length == 0
+        return this with
+        {
+            Locator = Substituted(Name, Filled(Locator!, reading)),
+
+            // WW520. The destination is named out of the same strings, so a drag can end on a tab
+            // whose label is declared rather than typed.
+            To = To is null ? null : Substituted(Name, Filled(To, reading)),
+        };
+    }
+
+    /// <summary>A locator's text with every <c>{a.key}</c> replaced by what that key declares.</summary>
+    private static string Filled(Locator locator, Func<string, Asserting.Anchored, string> reading) =>
+        Braced.Replace(locator.Text, one => one.Groups[1].Value.Length == 0
             ? one.Value
             : reading(one.Groups[1].Value, Anchoring(locator, one)));
-
-        if (!Locator.TryParse(text, out var parsed, out var because))
-            throw new ScenarioRefusedException(Name, $"'{text}' does not parse: {because}");
-
-        return this with { Locator = parsed };
-    }
 
     /// <summary>
     /// Which end of a label this brace may be filled from, out of the predicate it is written in.

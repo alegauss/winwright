@@ -82,6 +82,17 @@ public sealed record ActVerb
             (subject, argument) => Synthesised.Click(subject, Because(argument!)),
             synthesises: true,
             accepts: Enum.GetValues<PointerReason>().Select(one => one.ToString()).ToList()),
+        // WW520. The one act about two elements, so it carries the second delegate shape and no
+        // first: there is nothing it could do with one subject. Takes nothing in 'with', because its
+        // pointer reason is always that the pointer is the act; the destination is 'to'. Not
+        // repeatable, because a second drag moves the item again from wherever the first one left it.
+        new(
+            "drag",
+            Takes.Nothing,
+            repeatable: false,
+            null,
+            synthesises: true,
+            onto: (subject, to) => Synthesised.Drag(subject, to)),
         new("nudge", Takes.Nothing, repeatable: false, (subject, _) => Synthesised.Nudge(subject), synthesises: true),
         // WW317. Two kinds of keystroke through one verb, because a case writing it means one thing
         // either way: send this key at the window. What differs is the claim underneath — a
@@ -204,6 +215,7 @@ public sealed record ActVerb
     public const string ClicksTrayIcon = "click tray icon";
 
     private readonly Func<Subject, string?, ActResult>? doing;
+    private readonly Func<Subject, Subject, ActResult>? onto;
     private readonly bool onATray;
 
     private ActVerb(
@@ -217,8 +229,10 @@ public sealed record ActVerb
         bool onATray = false,
         string alsoTakes = "",
         bool captures = false,
-        string needs = "")
+        string needs = "",
+        Func<Subject, Subject, ActResult>? onto = null)
     {
+        this.onto = onto;
         AlsoTakes = alsoTakes;
         Name = name;
         Wants = takes;
@@ -350,7 +364,17 @@ public sealed record ActVerb
     /// screen holds and writes a file, so every rule that lets a read through because a read touches
     /// nothing would be letting this through on a claim that is false of it.
     /// </remarks>
-    public bool Reads => doing is null && !onATray && !Captures;
+    public bool Reads => doing is null && onto is null && !onATray && !Captures;
+
+    /// <summary>
+    /// Whether this act ends on a second element, which the step names in <c>to</c>. WW520.
+    /// <para>
+    /// Data for the reason <see cref="Captures"/> is: the step's refusals ask whether a verb needs
+    /// a destination, never which verb it is, so a second such verb gets them without anybody
+    /// writing them again.
+    /// </para>
+    /// </summary>
+    public bool EndsElsewhere => onto is not null;
 
     /// <summary>
     /// Whether a step whose subject is a tray icon may name it.
@@ -434,12 +458,29 @@ public sealed record ActVerb
     }
 
     /// <summary>Do it. The subject is resolved, judged and read either side by <see cref="Act"/>.</summary>
-    /// <exception cref="InvalidOperationException">Where this verb reads and there is no act to run.</exception>
-    internal ActResult Perform(Subject subject, string? argument) =>
-        doing is null
+    /// <param name="subject">What the step addresses.</param>
+    /// <param name="argument">What the step wrote in <c>with</c>.</param>
+    /// <param name="to">Where the act ends, for a verb that <see cref="EndsElsewhere"/>.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Where this verb reads and there is no act to run, or ends elsewhere and was given nowhere —
+    /// which the step refuses at load, so reaching it means the two disagree.
+    /// </exception>
+    internal ActResult Perform(Subject subject, string? argument, Subject? to = null)
+    {
+        if (onto is not null)
+        {
+            return onto(
+                subject,
+                to ?? throw new InvalidOperationException(
+                    $"'{Name}' ends on a second element and reached the act without one, so the load "
+                        + "accepted what the act cannot run"));
+        }
+
+        return doing is null
             ? throw new InvalidOperationException(
                 $"'{Name}' reads and never acts, so the engine takes the look rather than calling this")
             : doing(subject, argument);
+    }
 
     /// <summary>
     /// The reason a click carries, out of the name a case wrote.

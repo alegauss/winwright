@@ -2073,7 +2073,11 @@ public static class CaseRun
         // A read never goes through Act: an act must have found something to press and a read need
         // not, so the element that was not there comes out as an expectation nothing answered rather
         // than a throw about a pattern the reader has to trace back to a locator.
-        var acted = step.Verb.Reads ? null : step.Verb.Perform(subject, step.Argument);
+        //
+        // WW520. A drag's destination is looked for through the step's own subject, so it is in the
+        // same window under the same timeouts and the same destructive guard.
+        var to = step.To is null ? null : subject.Elsewhere(step.To);
+        var acted = step.Verb.Reads ? null : step.Verb.Perform(subject, step.Argument, to);
 
         if (step.Moves)
             return Moved(step, subject, acted, was);

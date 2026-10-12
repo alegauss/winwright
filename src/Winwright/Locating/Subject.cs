@@ -77,6 +77,17 @@ public sealed class Subject
         MeansIt = meansIt;
     }
 
+    private Subject(Subject was, Locator locator)
+    {
+        root = was.root;
+        timeouts = was.timeouts;
+        deadlineMs = was.deadlineMs;
+        pollMs = was.pollMs;
+        Locator = locator;
+        Destructive = was.Destructive;
+        MeansIt = was.MeansIt;
+    }
+
     private Subject(AutomationElement root, Locator locator, int deadlineMs, int pollMs)
     {
         ArgumentNullException.ThrowIfNull(root);
@@ -148,6 +159,22 @@ public sealed class Subject
     /// </para>
     /// </summary>
     public Subject MeaningIt() => new(this, meansIt: true);
+
+    /// <summary>
+    /// A second subject in the same window, under the same project. WW520.
+    /// <para>
+    /// For the one act that is about two elements: a drag starts on this subject and ends on that
+    /// one. Built from this subject rather than from a root a caller holds, so the second element
+    /// cannot be looked for in a different window, under different timeouts, or with the
+    /// destructive guard dropped.
+    /// </para>
+    /// </summary>
+    /// <param name="locator">The other element.</param>
+    public Subject Elsewhere(Locator locator)
+    {
+        ArgumentNullException.ThrowIfNull(locator);
+        return new(this, locator);
+    }
 
     /// <summary>
     /// How long an act on this subject waits for what it did to show up, in milliseconds. Input

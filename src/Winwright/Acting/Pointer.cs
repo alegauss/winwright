@@ -466,7 +466,8 @@ public static class Pointer
         Win32.SendInput((uint)inputs.Count, [.. inputs], System.Runtime.InteropServices.Marshal.SizeOf<Win32.Input>());
     }
 
-    private static Win32.Input Mouse(uint flags, int dx, int dy) => new()
+    /// <summary>One mouse input. Internal for <see cref="Drag"/>, which sends its parts one at a time. WW520.</summary>
+    internal static Win32.Input Mouse(uint flags, int dx, int dy) => new()
     {
         Type = Win32.InputMouse,
         Payload = new Win32.InputPayload

@@ -398,7 +398,7 @@ public sealed class SynthesisedActTests : IDisposable
         // a synthesised right-click opens nothing at all on this shell.
         // WW483: 'click tray icon', whose route is a pointer at the icon's rectangle and nothing else.
         Assert.Equal(
-            ["type", "click", "nudge", "press", "pick", "pick at", "open submenu", "open tray menu", "click tray icon"],
+            ["type", "click", "drag", "nudge", "press", "pick", "pick at", "open submenu", "open tray menu", "click tray icon"],
             ActVerb.All.Where(one => one.Synthesises).Select(one => one.Name));
 
         Assert.All(

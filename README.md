@@ -214,10 +214,11 @@ directions — a verb added without an entry is a red.
 | `Attempt` / `Retry` | a deadline on a sighting or a condition; an act attempted to a cap and counted |
 | `Preflight` | what each declared act needs, checked against the tree before anything is pressed |
 | `Act` | invoke, toggle, set a value or a range, select, expand, collapse — through the control's own patterns |
-| `Synthesised` | the acts a case can name that put real input on the desk — type, click, nudge, press, pick — each carrying what it needed of the machine |
+| `Synthesised` | the acts a case can name that put real input on the desk — type, click, drag, nudge, press, pick — each carrying what it needed of the machine |
 | `Selecting` / `Pick` | select and confirm; every value a picker holds, and reaching one |
 | `Surface` | record controls as a case found them and put them back |
 | `Pointer` | synthesised mouse input, and the declared readings about why an act needs it |
+| `Drag` | a press held across moves past the drag threshold and released over a second element |
 | `Keyboard` / `Traversal` | synthesised keys, traversal keys at a window, and what holds the focus |
 | `Chord` | a key with modifiers, parsed where the case wrote it and sent as one batch — the only route to an application whose commands have no button |
 | `Focus` | what holds the focus, read against the application under test rather than the whole desk |
@@ -364,7 +365,23 @@ button, which is how a person opens what a tray application opens on a left-clic
 a control through its patterns, and a step naming one against a `tray` is refused where it was written;
 the two tray acts named against a `locator` are refused the same way, since there is no control to hand
 them. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
+`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `drag`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
+
+`drag` presses on the step's `locator`, moves past the system's drag threshold with the button held,
+and releases over a second element named in **`to`**, which is looked for in the same window. It is
+for the gesture no pattern expresses, such as a tab strip reordered by dragging one tab across its
+neighbours:
+
+```json
+{ "locator": "TabItem#firstTab", "act": "drag", "to": "TabItem#secondTab", "named": "First is dragged onto Second" },
+{ "locator": "Text#dragOrder", "act": "read", "reads": "name", "expect": "Second, First, Third" }
+```
+
+Its claim is that the gesture was made. Where the item ended up is the next step's read, as it is
+after a `click`. Like `click`, it needs the foreground, and a desk that will not give it is a hole
+rather than a red. `with` takes nothing, because the pointer is the act. A `drag` with no `to` is
+refused, and so is a `to` beside any other act, since nothing else would read it. It is attempted
+once: a second drag moves the item again from wherever the first one left it.
 
 `click tray icon` is a pointer at the icon's centre, and on purpose: every taskbar button refuses a
 clickable point, so the rectangle is the only address an icon has. What it claims is the click — sent

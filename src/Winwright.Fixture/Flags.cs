@@ -261,6 +261,11 @@ public sealed record Flags
             "a pane carrying the two answers 'what does this picker hold' has - one shut, whose items are in no tree until it opens, and one already dropped down",
             "Pick was driven only against a Win32 combo, which holds its items either way, so the walk read 'it holds nothing' about a WPF picker holding two and refused the case it was built for"),
         new Flag(
+            "drags",
+            "",
+            "a pane holding a strip of three tabs that reorders only when one is dragged onto another, with a read-out of the order",
+            "a tab strip reordered by dragging had no case, because no verb pressed on one element, moved past the drag threshold and released over another"),
+        new Flag(
             "backdrop",
             "kind",
             "a window that opted into a system backdrop, which transmits what is behind it through the glass",

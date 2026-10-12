@@ -82,6 +82,7 @@ internal static class Synthesising
                 + "route was not the one taken"),
         new("Pointer.DoubleClick", Asking.ItIsTheAct, "two presses, and it says so"),
         new("Pointer.Run", Asking.ItIsTheAct, "the send under both, which is where the desk is asked"),
+        new("Drag.Onto", Asking.ItIsTheAct, "a press, moves and a release, which is the gesture itself"),
         new("Traversal.Press", Asking.ItIsTheAct, "a traversal key at a window, which is a keystroke"),
         new("Traversal.Nudge", Asking.ItIsTheAct, "an arrow at whatever holds the focus"),
 
@@ -93,6 +94,7 @@ internal static class Synthesising
         new("Synthesised.Type", Asking.ItIsTheAct, "typing, as a step's own result"),
         new("Synthesised.Click", Asking.ItIsTheAct,
             "a click, carrying the PointerReason a case had to write to reach it"),
+        new("Synthesised.Drag", Asking.ItIsTheAct, "a drag onto a second element, as a step"),
         new("Synthesised.Nudge", Asking.ItIsTheAct, "an arrow key at a range control, as a step"),
         new("Synthesised.Press", Asking.ItIsTheAct, "a traversal key at the window, as a step"),
 

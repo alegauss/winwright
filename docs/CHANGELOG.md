@@ -191,6 +191,7 @@
 - ✅ **WW470** **the desk precondition is read once, so a window still coming forward is reported as a desk somebody else holds** — An act waits for the desk over the resolve budget: a window still arriving is driven, and a desk truly held still holes (design recorded in `src/Winwright/Windowing/Foreground.cs`).
 - 🗑 **WW516** **A chord press reports Ok with its foreground check satisfied, though it reached nothing the application could hear** — superseded by WW517: press claims only that keys were sent at a window holding the foreground, so the Ok was designed; what was real is a record that cannot tell the findings apart.
 - ✅ **WW518** **a typing step's line says nothing about the desk, because an act carries one precondition and two were read** — Typing composes the pair it reads, so its line names the control that took the focus and how the desk was ours (design recorded in `src/Winwright/Verdicts/Precondition.cs`).
+- ✅ **WW520** **A case cannot drag one element onto another, so a strip reordered by dragging has no case** — A case drags one element onto another with 'act: drag' and 'to', past the drag threshold, and the fixture's tab strip reorders in the guest (design recorded in `src/Winwright/Acting/Drag.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

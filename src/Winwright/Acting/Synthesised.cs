@@ -97,6 +97,32 @@ public static class Synthesised
     }
 
     /// <summary>
+    /// Drag one control onto another with the pointer. WW520.
+    /// <para>
+    /// The reading either side is the source's, because the source is what the case addressed: a
+    /// tab that moved is still the tab, and a claim about where it ended up is a later step's read.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What to press.</param>
+    /// <param name="to">What to release over.</param>
+    public static ActResult Drag(Subject subject, Subject to)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        ArgumentNullException.ThrowIfNull(to);
+
+        var before = subject.Read();
+        var dragged = Acting.Drag.Onto(subject, to);
+
+        return Landed(
+            subject,
+            "drag",
+            $"synthesised pointer ({PointerReason.PointerIsTheAct}) onto {to.Locator}",
+            dragged.Element,
+            before,
+            dragged.Foreground);
+    }
+
+    /// <summary>
     /// Move a range control one step with an arrow key, in whichever direction can actually move it.
     /// <para>
     /// At the end of its range the other direction is used, so the assertion stays about whether the

@@ -222,6 +222,7 @@ public static class ScenarioSchema
             Subject),
         new("act", true, Taking.Text, "what to do to it", ActVerb.All.Select(verb => verb.Name).ToList()),
         new("with", false, Taking.Text, "what the act needs said, where it needs anything", []),
+        new("to", false, Taking.Text, "where a 'drag' ends: a second locator, in the same window, that the pointer is released over — for the gesture no pattern expresses, such as a tab dragged across its neighbours", []),
         new("expect", false, Taking.Text, "what the reading should be once the act has landed", [], Claims: true),
         new("reads", false, Taking.Text, "which reading the expectation is about", ReadBack.All.Select(one => one.Name).ToList()),
         new("moves", false, Taking.Truth, "that the reading should end up different, where the case cannot know what it will be", [], Claims: true),

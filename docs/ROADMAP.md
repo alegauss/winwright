@@ -12,13 +12,12 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW520** (deps: —) **A case cannot drag one element onto another, so a strip reordered by dragging has no case** — Adopting quickshell's tab drag (QS250) found click and read but no verb that presses, moves past the drag threshold and releases elsewhere. → §WW520
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
 
 - 📋 **WW523** (deps: —) **A case cannot read an element's item status, so a state an application publishes there cannot be asserted** — An adopter that says a state in words for screen readers, as UIA asks, has to prove that word in process instead of in a case. → §WW523
+- 📋 **WW525** (deps: —) **Reading value on an element with no Value pattern polls for seconds and fails as nothing answered, never naming picked** — An adopter reading a drop-down's choice gets a timeout that names no cause, and a case left expanded after it degrades the next one. → §WW525
 
 ## Block G — The scenario — a case is a data file
 

@@ -267,6 +267,12 @@ internal static class Win32
     internal const int VirtualScreenWidth = 78;
     internal const int VirtualScreenHeight = 79;
 
+    /// <summary>SM_CXDRAG: how far the pointer moves sideways, button down, before a drag starts. WW520.</summary>
+    internal const int DragWidth = 68;
+
+    /// <summary>SM_CYDRAG: the same, up or down. WW520.</summary>
+    internal const int DragHeight = 69;
+
     /// <summary>SM_CMONITORS: how many displays are attached. Zero is a desk that draws nothing.</summary>
     internal const int MonitorCount = 80;
 

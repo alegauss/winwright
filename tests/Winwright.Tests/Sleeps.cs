@@ -145,6 +145,13 @@ internal static class Sleeps
                 + "which about 36 is the guest — press and nudge moved 234 to 268 and 196 to 235 "
                 + "between the same two runs without being touched. Both read 0 late of 150, so "
                 + "what this bought is the shape and not a fault removed"),
+        new("Drag.cs", 2, Sleeping.Resolution,
+            "WW520. A drag is a press, a run of moves and a release, and the pause between them is "
+                + "the resolution of the gesture: sent in one call they reach the application as a "
+                + "jump, and a framework starts a drag only after it has seen moves past the "
+                + "threshold one message at a time. A deadline would have no condition to watch, "
+                + "since nothing reports a message as handled. The second is WW353's pause before "
+                + "the read, taken as the click takes it"),
         new("Keyboard.cs", 1, Sleeping.Undisturbed,
             "WW329, and the one entry here where the sleeping is the repair: the engine's own poll "
                 + "was provoking the substitution it then resent. Measured on the guest over 1200 "

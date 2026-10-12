@@ -27,7 +27,7 @@ public class ActVerbTests
         Assert.Equal(
             [
                 "read", "invoke", "toggle", "set value", "set range", "select", "expand", "collapse",
-                "type", "click", "nudge", "press", "pick", "pick at", "open submenu", "open tray menu",
+                "type", "click", "drag", "nudge", "press", "pick", "pick at", "open submenu", "open tray menu",
                 "click tray icon", "capture",
             ],
             ActVerb.All.Select(verb => verb.Name));
