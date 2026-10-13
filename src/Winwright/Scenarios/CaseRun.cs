@@ -2111,6 +2111,9 @@ public static class CaseRun
         if (step.Expected is not { } wanted)
             return new Landed(acted, null, acted?.Element);
 
+        if (Unreadable(step, subject, acted, wanted) is { } refused)
+            return refused;
+
         // Expect.That rather than Expect.Of: the diagnosis is a window dump, and taking one per
         // missed attempt pays for three of them to report the last.
         var saw = acted?.Element;
@@ -2182,9 +2185,31 @@ public static class CaseRun
     /// control saying <c>""</c> is what this claim exists to catch.
     /// </para>
     /// </summary>
+    /// <summary>
+    /// A step whose reading the element it found has no pattern for, failed at once; null where the
+    /// reading can answer or nothing resolved on the first look. WW525.
+    /// <para>
+    /// One look and not a wait. A pattern an element does not offer is not one it grows because a
+    /// case waited, so the deadline would only buy five seconds of "nothing answered" — which is
+    /// what quickshell's QS280 got for reading <c>value</c> off a ComboBox whose selection is
+    /// <c>picked</c>. Where nothing resolved yet, the usual wait runs and says what it always says.
+    /// </para>
+    /// </summary>
+    private static Landed? Unreadable(StepDeclaration step, Subject subject, ActResult? acted, string wanted)
+    {
+        var look = subject.ReadOnce();
+        if (!look.Found || look.Facts is not { } facts || step.Reads.Lacking(facts) is not { } why)
+            return null;
+
+        return new Landed(acted, Expect.Now(step.Name, wanted, () => null).Refusing(why), facts);
+    }
+
     private static Landed Answered(StepDeclaration step, Subject subject, ActResult? acted)
     {
         const string wanted = "something rather than nothing";
+        if (Unreadable(step, subject, acted, wanted) is { } refused)
+            return refused;
+
         var saw = acted?.Element;
         var expectation = Expect.That(
             step.Name,
@@ -2499,6 +2524,9 @@ public static class CaseRun
     private static Landed Matched(StepDeclaration step, Subject subject, ActResult? acted)
     {
         var wanted = $"something matching '{step.Matches}'";
+        if (Unreadable(step, subject, acted, wanted) is { } refused)
+            return refused;
+
         var saw = acted?.Element;
         var expectation = Expect.That(
             step.Name,

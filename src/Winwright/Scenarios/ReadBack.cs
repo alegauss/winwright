@@ -27,24 +27,24 @@ public sealed record ReadBack
     private static readonly ReadBack[] Vocabulary =
     [
         new("anything", "the one value worth showing, whichever pattern the element happens to offer.", read => read.Values.Reading()),
-        new("value", "what a control holding a value says it holds, through its ValuePattern.", read => read.Values.Value),
-        new("range", "where a slider or a progress bar sits, as a number.", read => read.Values.Range is { } range ? range.ToString(CultureInfo.InvariantCulture) : null),
-        new("toggle", "whether a checkbox or a switch is on, off, or neither.", read => read.Values.Toggle),
+        new("value", "what a control holding a value says it holds, through its ValuePattern.", read => read.Values.Value, pattern: "Value"),
+        new("range", "where a slider or a progress bar sits, as a number.", read => read.Values.Range is { } range ? range.ToString(CultureInfo.InvariantCulture) : null, pattern: "RangeValue"),
+        new("toggle", "whether a checkbox or a switch is on, off, or neither.", read => read.Values.Toggle, pattern: "Toggle"),
         new("selected", "whether this element is the chosen one, which is a claim about the element.", read => read.Values.IsSelected switch
         {
             true => "selected",
             false => "not selected",
             null => null,
-        }),
+        }, pattern: "SelectionItem"),
         // WW266. The other half of 'selected', and the one a claim about a picker is actually about:
         // that one asks whether this element is chosen, and this asks which one the container chose.
         // Measured missing on claude-tray's profile picker, which offers no ValuePattern — so 'value'
         // answered nothing, 'name' answered the picker's own label, and a round trip comparing either
         // would have held on every machine whatever the picker did.
-        new("picked", "which one a container chose, which is a claim about the container and the pair to selected.", read => read.Values.Picked),
+        new("picked", "which one a container chose, which is a claim about the container and the pair to selected.", read => read.Values.Picked, pattern: "Selection"),
 
-        new("expanded", "whether something that opens and closes is open.", read => read.Values.ExpandCollapse),
-        new("text", "what a text-editing control holds, through its TextPattern; a label offers none and answers nothing.", read => read.Values.Text),
+        new("expanded", "whether something that opens and closes is open.", read => read.Values.ExpandCollapse, pattern: "ExpandCollapse"),
+        new("text", "what a text-editing control holds, through its TextPattern; a label offers none and answers nothing.", read => read.Values.Text, pattern: "Text"),
 
         // WW238, and it is here because it was measured to be missing. A WPF label was read through
         // the seven above and answered nothing to all of them: its words are in its name, exactly as
@@ -141,8 +141,10 @@ public sealed record ReadBack
         string means,
         Func<Reading, string?> reading,
         bool always = false,
-        Func<LocatorStep, string?>? pinned = null)
+        Func<LocatorStep, string?>? pinned = null,
+        string? pattern = null)
     {
+        Pattern = pattern;
         Always = always;
         Name = name;
         Means = means;
@@ -194,6 +196,46 @@ public sealed record ReadBack
     /// </para>
     /// </summary>
     public bool Always { get; }
+
+    /// <summary>
+    /// The UI Automation pattern this reading is read through, by the short name
+    /// <see cref="ElementFacts.Patterns"/> uses, or null where it reads a property every element
+    /// has. WW525.
+    /// </summary>
+    public string? Pattern { get; }
+
+    /// <summary>
+    /// Why this reading can never answer for that element, or null where it can. WW525.
+    /// <para>
+    /// Found in quickshell (QS280): a step read <c>value</c> off a WPF ComboBox that is not editable,
+    /// which offers no Value pattern, so it polled for five seconds and failed saying nothing
+    /// answered. The element was there the whole time; what was missing was the pattern, and the
+    /// reading that fits a picker's selection is <c>picked</c>. A pattern an element does not offer
+    /// is not one it starts offering because a case waited, so this is said at once, with the
+    /// readings that element can give.
+    /// </para>
+    /// </summary>
+    /// <param name="facts">What the element said about itself.</param>
+    public string? Lacking(ElementFacts facts)
+    {
+        ArgumentNullException.ThrowIfNull(facts);
+        if (Pattern is null || facts.Supports(Pattern))
+            return null;
+
+        var offered = Vocabulary
+            .Where(one => one.Pattern is not null && facts.Supports(one.Pattern))
+            .Select(one => $"'{one.Name}'")
+            .ToList();
+
+        if (facts.Says is not null)
+            offered.Add("'name'");
+
+        var instead = offered.Count == 0
+            ? "and it offers no reading but the ones every element has"
+            : $"and what it does offer reads as {string.Join(", ", offered)}";
+
+        return $"{facts} has no {Pattern} pattern, so '{Name}' can never answer for it, {instead}";
+    }
 
     /// <summary>
     /// What <paramref name="step"/> has already fixed this reading to, or null where it has fixed

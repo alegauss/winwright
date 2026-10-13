@@ -438,7 +438,10 @@ because the run asked, the application answered, and what is wrong is the word t
 `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
 `toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `description`, `status`, `enabled`, `focused`, defaulting to `anything`, the one value the element
-reports, in the order a reader looks at them. `selected` asks whether *this* element is chosen and
+reports, in the order a reader looks at them. A reading that goes through a pattern the element does
+not offer (`value` on a ComboBox that is not editable, which has no Value pattern) **fails at once**,
+naming the missing pattern and the readings that element does give, rather than polling its deadline
+out and saying nothing answered. `selected` asks whether *this* element is chosen and
 `picked` asks which one a container chose — the reading every claim about a picker is about, and the
 only one that answers on a ComboBox offering no value. `name` is what a label says: a caption's words are in its
 name and in no pattern, so it is the only reading that answers for one — and a step may not read it

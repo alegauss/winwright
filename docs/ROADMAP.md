@@ -14,7 +14,7 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW525** (deps: —) **Reading value on an element with no Value pattern polls for seconds and fails as nothing answered, never naming picked** — An adopter reading a drop-down's choice gets a timeout that names no cause, and a case left expanded after it degrades the next one. → §WW525
+- ⏳ **WW525** (deps: —) **Reading value on an element with no Value pattern polls for seconds and fails as nothing answered, never naming picked** — A case that stops after an expand leaves the drop-down open, so its red degrades the next case. → §WW525
 - 📋 **WW528** (deps: —) **A case cannot claim a reading is empty, so a tab with no status or a field left blank has no claim** — Blank expect claims nothing, answers takes only true, and a pattern matching the empty string is refused, so empty is proven in process. → §WW528
 
 ## Block G — The scenario — a case is a data file
@@ -154,6 +154,12 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
+
+## Done when — WW525
+
+- **A case that stops collapses what it expanded** A case going red after an expand step
+  leaves the drop-down shut, so the next case in the same run starts on a desk the first
+  did not keep, and a guest run shows no case degraded by its neighbour.
 
 ## Non-goals
 

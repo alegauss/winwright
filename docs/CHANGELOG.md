@@ -306,6 +306,7 @@
 - ✅ **WW469** **a read-out carrying anything but ASCII reaches the expectation as mojibake and reads as missing from the window** — Both ends of the read-out's pipe declare UTF-8, so an accented value arrives as what the application printed.
 - ✅ **WW475** **a label carrying a placeholder is refused for every claim, including the two that only read the part it does not move** — A begins-with or ends-with claim reads the fixed part a placeholder at the far end leaves, and each is refused by the label the other can use.
 - ✅ **WW523** **A case cannot read an element's item status, so a state an application publishes there cannot be asserted** — A locator selects by item status with [status="Connected"], so a case finds the connected tab without its title (design recorded in `src/Winwright/Locating/LocatorStep.cs`).
+- ✅ **WW525 (the reading said at once)** **Reading value on an element with no Value pattern polls for seconds and fails as nothing answered, never naming picked** — A reading the element has no pattern for fails at once, naming the pattern and the readings it does give, such as picked.
 
 ## Block G — The scenario — a case is a data file
 

@@ -122,6 +122,21 @@ public sealed record Expectation
     }
 
     /// <summary>
+    /// Why the reading can never answer for the element that was there, or null where nothing said
+    /// so. WW525: a reading the element has no pattern for fails at once with this, rather than
+    /// polling a deadline out and saying nothing answered.
+    /// </summary>
+    public string? Unanswerable { get; private init; }
+
+    /// <summary>The same expectation, failed at once for that reason. WW525.</summary>
+    /// <param name="why">Why the reading can never answer.</param>
+    public Expectation Refusing(string why)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(why);
+        return this with { Unanswerable = why };
+    }
+
+    /// <summary>
     /// How many of those looks found the subject answering at all. This is the number that
     /// separates "it was never there" from "it was there and it never said what was wanted", and
     /// it is the whole reason this type exists.
@@ -144,6 +159,11 @@ public sealed record Expectation
     {
         if (Held)
             return $"{Name} read '{Wanted}' after {WaitedMs}ms and {Times(Polls)}.";
+
+        // WW525. Said before the timing arm, because the element was there and no amount of
+        // waiting would have made it answer.
+        if (Unanswerable is not null)
+            return $"expected {Name} to read '{Wanted}'; {Unanswerable}.";
 
         // Never answered. This used to be the only sentence that sounds like it is about timing,
         // and WW456 is why it no longer is left at that: it sounds like timing and it is usually
