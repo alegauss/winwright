@@ -81,7 +81,9 @@ public sealed record ReadBack
         // came back unobserved would make "this tab is not reconnecting" a claim nothing could check.
         // Null only where nothing resolved, like every reading here. Not Always, because `answers`
         // asks for something non-empty and an element with no status says nothing.
-        new("status", "the state the element publishes in words for a screen reader, such as Connected; empty where it publishes none.", read => read.Facts?.ItemStatus),
+        // A step that found its element by [status=...] has fixed this reading before the act, which
+        // is WW238's unearned green, so the predicate pins it like name.
+        new("status", "the state the element publishes in words for a screen reader, such as Connected; empty where it publishes none.", read => read.Facts?.ItemStatus, pinned: step => step.Status),
 
         // WW325. Whether the control will take input at all, which is the state a half-finished form
         // is supposed to be in — and the one an application gets wrong by leaving a command enabled

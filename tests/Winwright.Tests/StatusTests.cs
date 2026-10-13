@@ -45,7 +45,33 @@ public sealed class StatusTests : IDisposable
             return;
 
         Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
-        Assert.Equal(3, verdict.Assertions);
+        Assert.Equal(5, verdict.Assertions);
+    }
+
+    [Fact]
+    public void A_locator_selects_by_status_and_writes_it_back_the_way_it_read_it()
+    {
+        var parsed = Locator.Parse("TabItem[status=\"Connected\"][order=left]");
+
+        Assert.Equal("Connected", parsed.Steps[0].Status);
+        Assert.Equal(parsed.Steps, Locator.Parse(parsed.ToString()).Steps);
+    }
+
+    [Fact]
+    public void An_empty_status_is_refused_because_every_element_without_a_state_has_one()
+    {
+        var refused = Assert.Throws<LocatorSyntaxException>(() => Locator.Parse("TabItem[status=\"\"]"));
+
+        Assert.Contains("'status' is empty", refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Reading_the_status_a_locator_selected_by_is_refused_as_already_fixed()
+    {
+        // WW238's unearned green: the locator chose the element because it says Connected, so a
+        // claim that it says Connected could never be false.
+        Assert.Throws<ScenarioRefusedException>(
+            () => Wrote.Step("Text[status=\"Connected\"]", "read", ("reads", "status"), ("expect", "Connected")));
     }
 
     [Fact]
@@ -103,8 +129,10 @@ public sealed class StatusTests : IDisposable
                   "fixture": "a session that publishes its state",
                   "steps": [
                     { "locator": "Text#sessionState", "act": "read", "reads": "status", "expect": "Disconnected", "named": "it starts disconnected" },
+                    { "locator": "Text[status=\"Connected\"]", "act": "read", "absent": true, "named": "no element is connected yet" },
                     { "locator": "Button#connectButton", "act": "invoke", "named": "Connect is pressed" },
                     { "locator": "Text#sessionState", "act": "read", "reads": "status", "expect": "Connected", "named": "it says connected once it is" },
+                    { "locator": "Text[status=\"Connected\"]", "act": "read", "reads": "name", "expect": "prod-db", "named": "the connected one is found by its state, not its title" },
                     { "locator": "Text#sessionState", "act": "read", "reads": "status", "matches": "^Connected$", "named": "and says nothing else" }
                   ]
                 }

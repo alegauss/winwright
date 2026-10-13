@@ -126,7 +126,7 @@ public class LocatorTests
     {
         var refusal = Assert.Throws<LocatorSyntaxException>(() => Locator.Parse("Button[label=Save]"));
 
-        Assert.Contains("the keys are name, nameStarts, class, pattern, order, index", refusal.Because);
+        Assert.Contains("the keys are name, nameStarts, class, status, pattern, order, index", refusal.Because);
     }
 
     [Fact]

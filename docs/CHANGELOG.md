@@ -304,7 +304,7 @@
 - ✅ **WW468** **a set read out of the application is derived in the machine's language and compared against a window in the fixture's** — A read-out's arguments take `{language}`, so it answers in the language the window under test was launched in.
 - ✅ **WW469** **a read-out carrying anything but ASCII reaches the expectation as mojibake and reads as missing from the window** — Both ends of the read-out's pipe declare UTF-8, so an accented value arrives as what the application printed.
 - ✅ **WW475** **a label carrying a placeholder is refused for every claim, including the two that only read the part it does not move** — A begins-with or ends-with claim reads the fixed part a placeholder at the far end leaves, and each is refused by the label the other can use.
-- ✅ **WW523 (the status reading)** **A case cannot read an element's item status, so a state an application publishes there cannot be asserted** — A case reads an element's UIA ItemStatus with reads: status, live after a change, and an element publishing none reads as empty.
+- ✅ **WW523** **A case cannot read an element's item status, so a state an application publishes there cannot be asserted** — A locator selects by item status with [status="Connected"], so a case finds the connected tab without its title (design recorded in `src/Winwright/Locating/LocatorStep.cs`).
 
 ## Block G — The scenario — a case is a data file
 

@@ -95,6 +95,17 @@ public sealed record LocatorStep
     /// <summary>The window class, which is what tells one framework's chrome from another's.</summary>
     public string? ClassName { get; }
 
+    /// <summary>
+    /// The state the element must publish in words, UI Automation's ItemStatus, matched whole.
+    /// WW523.
+    /// <para>
+    /// Found in quickshell (QS278): its tabs say Connected or Local there, and a case looking for the
+    /// connected tab had to know its title. This finds it by the state instead, which is what a
+    /// screen-reader user hears and the one thing about the tab the case is actually asking.
+    /// </para>
+    /// </summary>
+    public string? Status { get; init; }
+
     /// <summary>The pattern the element must carry, which is what makes a step actionable.</summary>
     public string? Pattern { get; }
 
@@ -127,7 +138,8 @@ public sealed record LocatorStep
         (Name?.Contains(what, StringComparison.Ordinal) ?? false)
         || (NameStarts?.Contains(what, StringComparison.Ordinal) ?? false)
         || (AutomationId?.Contains(what, StringComparison.Ordinal) ?? false)
-        || (ClassName?.Contains(what, StringComparison.Ordinal) ?? false);
+        || (ClassName?.Contains(what, StringComparison.Ordinal) ?? false)
+        || (Status?.Contains(what, StringComparison.Ordinal) ?? false);
 
     /// <summary>
     /// Two steps are equal where they constrain the same things, which the compiler's own answer
@@ -143,6 +155,7 @@ public sealed record LocatorStep
         && string.Equals(Name, other.Name, StringComparison.Ordinal)
         && string.Equals(NameStarts, other.NameStarts, StringComparison.Ordinal)
         && string.Equals(ClassName, other.ClassName, StringComparison.Ordinal)
+        && string.Equals(Status, other.Status, StringComparison.Ordinal)
         && string.Equals(Pattern, other.Pattern, StringComparison.Ordinal)
         && Index == other.Index
         && Order == other.Order;
@@ -158,6 +171,7 @@ public sealed record LocatorStep
         hash.Add(Name, StringComparer.Ordinal);
         hash.Add(NameStarts, StringComparer.Ordinal);
         hash.Add(ClassName, StringComparer.Ordinal);
+        hash.Add(Status, StringComparer.Ordinal);
         hash.Add(Pattern, StringComparer.Ordinal);
         hash.Add(Index);
         hash.Add(Order);
@@ -178,6 +192,8 @@ public sealed record LocatorStep
             text.Append("[nameStarts=").Append(Quoted(NameStarts, bare: false)).Append(']');
         if (ClassName is not null)
             text.Append("[class=").Append(Quoted(ClassName, bare: false)).Append(']');
+        if (Status is not null)
+            text.Append("[status=").Append(Quoted(Status, bare: false)).Append(']');
         if (Pattern is not null)
             text.Append("[pattern=").Append(Pattern).Append(']');
         if (Order is not null)

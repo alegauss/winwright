@@ -501,6 +501,10 @@ public static class Resolve
         if (step.ClassName is not null)
             conditions.Add(new PropertyCondition(AutomationElement.ClassNameProperty, step.ClassName));
 
+        // WW523. Asked of UI Automation like the name, because it is matched whole.
+        if (step.Status is not null)
+            conditions.Add(new PropertyCondition(AutomationElement.ItemStatusProperty, step.Status));
+
         return conditions.Count switch
         {
             0 => Condition.TrueCondition,

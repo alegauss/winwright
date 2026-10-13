@@ -56,33 +56,6 @@ application reads the address the probe reached.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW523 Reading an element's item status
-
-Found 2026-10-12 in quickshell, QS278 (the tab strip). Each tab publishes its connection
-state as UIA ItemStatus (`AutomationProperties.ItemStatus` in WPF): "Connected",
-"Reconnecting", "Disconnected" or "Local". That is the accessible half of a coloured
-dot, and the one a screen reader announces. The design asked for `cases\tabs.cases.json`
-to read it; the step it wanted is:
-
-```json
-{ "locator": "TabItem[order=left]", "act": "read", "reads": "status", "expect": "Local",
-  "named": "a local shell's tab says it is one" }
-```
-
-`reads` offers `name`, `value`, `selected`, `toggle` and `text`, and nothing reads
-`ItemStatusProperty`, so the step cannot be written. The claim settled for: quickshell's
-`TabStripTests` reads the status in process, which is the in-process stand-in the
-evidence rule exists to avoid. The sidebar (QS268) publishes "Connected" the same way
-and has the same gap.
-
-What to build: a `status` reading (`reads: "status"`) that returns the element's
-`UIA_ItemStatusPropertyId`, empty where unset, usable with `expect` and `matches` like
-`name`. Its absence should read as the empty string and not as unobserved, since an
-unset status is an answer ("no state to report"). Also offer it as a locator attribute
-(`TabItem[status="Connected"]`), so a case can find the connected tab without knowing
-its title. The fixture app needs one element whose ItemStatus changes on a button press,
-to prove the reading follows the live value and not a cached one.
-
 ### §WW525 A reading the element cannot give, said at once
 
 Found 2026-10-12 in quickshell, QS280, `cases\home.cases.json`. A step read the Sign in

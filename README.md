@@ -140,6 +140,7 @@ Button#saveButton                        both
 Button[name="Save as..."]                the name
 MenuItem[nameStarts="Pessoal "]          the name, where the rest of it is decoration
 Pane[class=Chrome_WidgetWin_1]           the window class
+TabItem[status="Connected"]              the state it publishes for a screen reader
 Button[pattern=Invoke]                   it must carry that pattern
 ComboBox|Slider|Edit                     any one of several control types
 Text[name="Statistics"][order=left]      the leftmost of the ones that match
@@ -164,6 +165,12 @@ and goes, so equality addresses it on no machine. A prefix and never a containme
 called `one` cannot address the entry for `twenty-one`; a step naming `name` and `nameStarts` both is
 refused, because a name equal to something already begins with it, and an empty prefix is refused
 because every name begins with nothing.
+
+`status` matches UI Automation's ItemStatus whole: the state an element publishes in words, such as
+*Connected* on a tab, which is what a screen-reader user hears. It finds the connected tab without
+knowing its title. An empty status is refused, because every element that publishes no state
+publishes that, and a step that found its element by `status` may not then claim its `status`
+reading, since the locator already fixed it.
 
 Both braces are refused at declaration where the locator will not parse with something in it, and a
 key that declares nothing is refused before the first act, naming the key and the file. What the trace

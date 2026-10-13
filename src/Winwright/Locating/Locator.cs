@@ -33,6 +33,7 @@ public readonly record struct Holding(string Key, int At, int Length)
 /// Button[name="Save as..."]                     the name
 /// MenuItem[nameStarts="Pessoal "]               the name, where the rest of it is decoration
 /// Pane[class=Chrome_WidgetWin_1]                the window class
+/// TabItem[status="Connected"]                   the state it publishes for a screen reader
 /// Button[pattern=Invoke]                        it must carry that pattern
 /// ComboBox|Slider|Edit                          any one of several control types
 /// Text[name="Statistics"][order=left]           the leftmost of the ones that match
@@ -58,7 +59,7 @@ public readonly record struct Holding(string Key, int At, int Length)
 /// </remarks>
 public sealed record Locator
 {
-    private const string Keys = "name, nameStarts, class, pattern, order, index";
+    private const string Keys = "name, nameStarts, class, status, pattern, order, index";
 
     private Locator(string text, IReadOnlyList<LocatorStep> steps, IReadOnlyList<Holding> holds)
     {
@@ -174,6 +175,7 @@ public sealed record Locator
         string? name = null;
         string? nameStarts = null;
         string? className = null;
+        string? status = null;
         string? pattern = null;
         int? index = null;
         MatchOrder? order = null;
@@ -252,6 +254,20 @@ public sealed record Locator
                     Once(text, opened, className, "class");
                     className = value;
                     break;
+                // WW523. Refused empty for nameStarts' reason one key over: every element that
+                // publishes no state publishes the empty string, so the step would address nearly
+                // everything while reading as though it had narrowed something.
+                case "status":
+                    Once(text, opened, status, "status");
+                    if (value.Length == 0)
+                        throw new LocatorSyntaxException(
+                            LocatorFault.PredicateMalformed,
+                            text,
+                            opened,
+                            "'status' is empty, and every element that publishes no state publishes that");
+
+                    status = value;
+                    break;
                 case "pattern":
                     Once(text, opened, pattern, "pattern");
                     if (!UiaVocabulary.IsPattern(value))
@@ -294,7 +310,7 @@ public sealed record Locator
         }
 
         if (controlTypes.Count == 0 && automationId is null && name is null && nameStarts is null
-            && className is null && pattern is null && index is null && order is null)
+            && className is null && status is null && pattern is null && index is null && order is null)
         {
             throw new LocatorSyntaxException(
                 LocatorFault.StepConstrainsNothing, text, began, "a step that constrains nothing addresses everything, so it is refused");
@@ -315,6 +331,7 @@ public sealed record Locator
         return new LocatorStep(controlTypes, automationId, name, className, pattern, index, order)
         {
             NameStarts = nameStarts,
+            Status = status,
         };
     }
 
