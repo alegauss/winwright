@@ -399,6 +399,15 @@ public sealed class McpTests : IDisposable
                     Assert.Equal("object", property["type"]!.GetValue<string>());
                     Assert.Equal("string", property["additionalProperties"]!["type"]!.GetValue<string>());
                     break;
+
+                // WW524. A path or {from, to}, which is the pair the loader reads and nothing else.
+                case Taking.Placed:
+                    Assert.Equal("array", property["type"]!.GetValue<string>());
+                    var either = property["items"]!["oneOf"]!.AsArray();
+                    Assert.Equal("string", either[0]!["type"]!.GetValue<string>());
+                    Assert.Equal(["from", "to"], either[1]!["properties"]!.AsObject().Select(one => one.Key));
+                    Assert.Equal(["from"], either[1]!["required"]!.AsArray().Select(one => one!.GetValue<string>()));
+                    break;
                 default:
                     Assert.Equal("array", property["type"]!.GetValue<string>());
                     Shaped(property["items"]!, Under(field.Holds));

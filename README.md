@@ -945,6 +945,22 @@ read, and the reading it takes instead is the real machine's. Declaring no files
 of this launch's own, which is an empty store rather than a mistake. A value naming no token is
 passed exactly as written — `"reader"` is not a path for being a string.
 
+A plain path lands at the top of that directory under its own name. Where the application's store sits
+a folder down, as `%AppData%\YourApp\sessions.json` does, say where it lands instead:
+
+```json
+"files": [
+  { "from": "cases/fixtures/sessions.json", "to": "YourApp/sessions.json" },
+  "cases/fixtures/theme.json"
+]
+```
+
+`to` is relative to the staged directory and its folders are made for you. A `to` that is absolute or
+climbs out with `..` is **refused**, because that directory is emptied before every launch and a file
+written outside it is one no run cleans up. Two entries that land on the same path are refused too,
+naming both, and that includes two plain files with the same name from different folders, which used
+to overwrite each other without a word.
+
 `reaches` names what the application connects to outside itself, each a `host:port` or a
 `%VARIABLE%` naming one:
 

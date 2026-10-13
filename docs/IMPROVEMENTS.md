@@ -4,30 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW524 Staged files keep only their name
-
-Found with WW519, from quickshell's QS217. `FixtureDeclaration.Stage` copies every
-declared file to `{files}\<file name>`, so the staged directory is always flat. An
-application whose store sits one folder down from the directory a variable names, as
-`%AppData%\quickshell\sessions.json` does, cannot be handed that layout. The case then
-has to point the variable at the subfolder itself, which only works when the application
-reads that exact variable and nothing above it. Two files with the same name from
-different folders also overwrite each other without a word.
-
-What to build: a `files` entry may be an object, `{ "from":
-"cases/fixtures/sessions.json", "to": "quickshell/sessions.json" }`, beside the plain
-string that keeps meaning "copy to the top". `to` is relative to the staged directory.
-It is refused when absolute, when it climbs out with `..`, or when two entries resolve
-to the same destination, and the refusal names both entries. The schema's `files` kind
-changes from a list of words to a list whose members are a word or that object, and
-`scripts/format.mjs` has to read the new kind.
-
-Two plain entries sharing a file name are refused by the same rule, which turns today's
-silent overwrite into a load-time answer.
-
-Falsified when a fixture can reproduce `<root>\quickshell\sessions.json` under
-`{files}`, and two entries landing on one path are refused at load.
-
 ### §WW527 Filling tokens in a staged file
 
 Left by WW522. A fixture's `reaches` addresses are offered to `arguments` and

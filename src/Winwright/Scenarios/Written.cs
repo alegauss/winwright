@@ -121,6 +121,14 @@ public sealed class Written
         return wrote.TryGetValue(field, out var value) ? (IReadOnlyList<string>)value : [];
     }
 
+    /// <summary>An array of staged files, empty where the case wrote none. WW524.</summary>
+    /// <param name="field">The key, spelled as the file spells it.</param>
+    public IReadOnlyList<StagedFile> Placed(string field)
+    {
+        Asked(field, Taking.Placed);
+        return wrote.TryGetValue(field, out var value) ? (IReadOnlyList<StagedFile>)value : [];
+    }
+
     /// <summary>An object of text by name, empty where the case wrote none.</summary>
     /// <param name="field">The key, spelled as the file spells it.</param>
     public IReadOnlyDictionary<string, string> Pairs(string field)
@@ -195,6 +203,7 @@ public sealed class Written
         IReadOnlyList<StepDeclaration> => Taking.Steps,
         IReadOnlyList<CaseDeclaration> => Taking.Cases,
         IReadOnlyList<FixtureDeclaration> => Taking.Fixtures,
+        IReadOnlyList<StagedFile> => Taking.Placed,
         _ => throw new InvalidOperationException(
             $"'{field}' was written as {value.GetType().Name}, which is not a kind the format holds"),
     };

@@ -377,6 +377,107 @@ public class FixtureDeclarationTests
     }
 
     /// <summary>
+    /// WW524. Found with WW519, from QS217: quickshell's store is <c>%AppData%\quickshell\sessions.json</c>,
+    /// one folder down from the directory a variable names, and staging could only land a file at the
+    /// top. Loaded from a case file, so the object form is proven through the loader that reads it.
+    /// </summary>
+    [Fact]
+    public void A_file_lands_where_its_to_says_under_the_staged_directory()
+    {
+        var root = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"ww524-{Guid.NewGuid():N}");
+        System.IO.Directory.CreateDirectory(System.IO.Path.Combine(root, "cases", "fixtures"));
+        System.IO.File.WriteAllText(System.IO.Path.Combine(root, "cases", "fixtures", "sessions.json"), "[1]");
+        System.IO.File.WriteAllText(System.IO.Path.Combine(root, "cases", "fixtures", "theme.json"), "{}");
+
+        var fixture = Launched("""
+            {
+              "name": "with a store one folder down",
+              "variables": { "APPDATA": "{files}" },
+              "files": [
+                { "from": "cases/fixtures/sessions.json", "to": "quickshell/sessions.json" },
+                "cases/fixtures/theme.json"
+              ]
+            }
+            """);
+
+        try
+        {
+            var into = fixture.Stage(root).Into;
+
+            Assert.Equal("[1]", System.IO.File.ReadAllText(System.IO.Path.Combine(into, "quickshell", "sessions.json")));
+            Assert.False(System.IO.File.Exists(System.IO.Path.Combine(into, "sessions.json")));
+
+            // The plain form still lands at the top, exactly as before.
+            Assert.Equal("{}", System.IO.File.ReadAllText(System.IO.Path.Combine(into, "theme.json")));
+        }
+        finally
+        {
+            System.IO.Directory.Delete(root, recursive: true);
+            if (System.IO.Directory.Exists(fixture.StagedInto(root)))
+                System.IO.Directory.Delete(fixture.StagedInto(root), recursive: true);
+        }
+    }
+
+    [Theory]
+    [InlineData(@"C:\elsewhere\sessions.json", "under the staged directory")]
+    [InlineData("../sessions.json", "climbs out")]
+    [InlineData("quickshell/../../sessions.json", "climbs out")]
+    public void A_destination_outside_the_staged_directory_is_refused(string to, string because)
+    {
+        var refused = Assert.Throws<ScenarioRefusedException>(() => FixtureDeclaration.Of(
+            "escaping",
+            variables: new Dictionary<string, string> { ["APPDATA"] = FixtureDeclaration.Staged },
+            files: [new StagedFile("cases/fixtures/sessions.json", to)]));
+
+        Assert.Contains(because, refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Two_files_landing_on_one_path_are_refused_naming_both()
+    {
+        // Two plain files sharing a name were the silent overwrite: whichever came last was the store.
+        var refused = Assert.Throws<ScenarioRefusedException>(() => FixtureDeclaration.Of(
+            "colliding",
+            variables: new Dictionary<string, string> { ["APPDATA"] = FixtureDeclaration.Staged },
+            files: ["cases/a/sessions.json", "cases/b/sessions.json"]));
+
+        Assert.Contains("cases/a/sessions.json", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("cases/b/sessions.json", refused.Because, StringComparison.Ordinal);
+
+        // And the object form landing on a plain one's place is the same collision.
+        Assert.Throws<ScenarioRefusedException>(() => FixtureDeclaration.Of(
+            "colliding again",
+            variables: new Dictionary<string, string> { ["APPDATA"] = FixtureDeclaration.Staged },
+            files: ["cases/a/sessions.json", new StagedFile("cases/b/other.json", "sessions.json")]));
+    }
+
+    [Fact]
+    public void An_object_entry_takes_from_and_to_and_nothing_else()
+    {
+        var refused = Assert.Throws<ScenarioRefusedException>(() => Launched("""
+            { "name": "x", "variables": { "APPDATA": "{files}" }, "files": [ { "from": "a.json", "into": "b" } ] }
+            """));
+
+        Assert.Contains("into", refused.Subject, StringComparison.Ordinal);
+    }
+
+    /// <summary>The one fixture a case file declares, read through the loader as a case names it.</summary>
+    private static FixtureDeclaration Launched(string fixture) => Assert.Single(ScenarioFile.Read(
+        "store.cases.json",
+        $$"""
+        {
+          "fixtures": [ {{fixture}} ],
+          "cases": [
+            {
+              "name": "it is staged",
+              "fixture": {{System.Text.Json.JsonSerializer.Serialize(System.Text.Json.JsonDocument.Parse(fixture).RootElement.GetProperty("name").GetString())}},
+              "steps": [ { "locator": "Pane", "act": "read", "answers": true } ]
+            }
+          ]
+        }
+        """)).Fixture;
+
+    /// <summary>
     /// WW515. WW509 left two calls and no order, and a launch composed without staging first
     /// resolved the token to a directory that might not exist or might hold what an earlier run
     /// left — so the application reported a store it could not read and the red was about the

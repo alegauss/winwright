@@ -4,8 +4,7 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW524** (deps: —) **A staged file always lands flat under {files}, so a store one folder down cannot be reproduced (WW519)** — Staging keeps only the file name, so an application reading a subfolder of its data directory gets no store and two same-named files overwrite each other. → §WW524
-- 📋 **WW527** (deps: WW524) **A staged file cannot name the server a fixture reaches, so its store carries a second spelling of the address** — Staging copies bytes as they are, so {reach0} reaches arguments and variables but never a store the application reads its server from. → §WW527
+- 📋 **WW527** (deps: WW524 ✅) **A staged file cannot name the server a fixture reaches, so its store carries a second spelling of the address** — Staging copies bytes as they are, so {reach0} reaches arguments and variables but never a store the application reads its server from. → §WW527
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

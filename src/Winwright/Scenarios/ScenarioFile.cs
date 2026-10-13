@@ -262,7 +262,7 @@ public sealed class ScenarioFile
                 wrote.Text("language"),
                 wrote.Truth("resident"),
                 wrote.Text("workingDirectory"),
-                wrote.Words("files"),
+                wrote.Placed("files"),
                 wrote.Words("reaches")));
 
             wrote.Handed("fixture");
@@ -408,6 +408,7 @@ public sealed class ScenarioFile
                 Taking.Truth => Truth(at, element, fields, field.Name),
                 Taking.Words => Words(at, element, fields, field.Name),
                 Taking.Pairs => Pairs(at, element, fields, field.Name),
+                Taking.Placed => Placed(at, element, fields, field.Name),
                 _ => shaped is not null
                     ? shaped(field)
                     : throw new InvalidOperationException(
@@ -482,6 +483,66 @@ public sealed class ScenarioFile
         }
 
         return read;
+    }
+
+    /// <summary>
+    /// An array of staged files, each a path or <c>{ "from": ..., "to": ... }</c>. WW524.
+    /// <para>
+    /// The object takes those two keys and no others, refused by name, for the reason
+    /// <see cref="Unknown"/> refuses a key a shape does not have.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<StagedFile> Placed(string at, JsonElement element, IReadOnlyList<Field> fields, string key)
+    {
+        ScenarioSchema.Of(fields, key, Taking.Placed);
+        if (!element.TryGetProperty(key, out var value) || value.ValueKind == JsonValueKind.Null)
+            return [];
+
+        if (value.ValueKind != JsonValueKind.Array)
+            throw new ScenarioRefusedException($"{at}.{key}", $"it is {Kind(value)} and it has to be an array of files");
+
+        var read = new List<StagedFile>();
+        var index = 0;
+        foreach (var one in value.EnumerateArray())
+        {
+            var here = $"{at}.{key}[{index}]";
+            read.Add(one.ValueKind switch
+            {
+                JsonValueKind.String => new StagedFile(one.GetString()!),
+                JsonValueKind.Object => Object(here, one),
+                _ => throw new ScenarioRefusedException(here, $"it is {Kind(one)} and it has to be a path or {{\"from\", \"to\"}}"),
+            });
+            index++;
+        }
+
+        return read;
+
+        static StagedFile Object(string here, JsonElement one)
+        {
+            string? from = null;
+            string? to = null;
+            foreach (var property in one.EnumerateObject())
+            {
+                if (property.Value.ValueKind != JsonValueKind.String)
+                    throw new ScenarioRefusedException($"{here}.{property.Name}", $"it is {Kind(property.Value)} and it has to be text");
+
+                switch (property.Name)
+                {
+                    case "from":
+                        from = property.Value.GetString();
+                        break;
+                    case "to":
+                        to = property.Value.GetString();
+                        break;
+                    default:
+                        throw new ScenarioRefusedException($"{here}.{property.Name}", "there is no such field; there is from, to");
+                }
+            }
+
+            return from is null
+                ? throw new ScenarioRefusedException($"{here}.from", "it is not there, and it has to be")
+                : new StagedFile(from, to);
+        }
     }
 
     private static IReadOnlyDictionary<string, string> Pairs(

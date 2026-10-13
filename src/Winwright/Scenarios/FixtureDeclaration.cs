@@ -40,7 +40,7 @@ public sealed record FixtureDeclaration
         string language,
         bool resident,
         string workingDirectory,
-        IReadOnlyList<string> files,
+        IReadOnlyList<StagedFile> files,
         IReadOnlyList<string> reaches)
     {
         Reaches = reaches;
@@ -174,7 +174,7 @@ public sealed record FixtureDeclaration
     /// files that reach the launch nowhere are a declaration that decided nothing.
     /// </para>
     /// </summary>
-    public IReadOnlyList<string> Files { get; }
+    public IReadOnlyList<StagedFile> Files { get; }
 
     /// <summary>
     /// The variables that name a folder Windows also answers as a known folder. WW519.
@@ -308,7 +308,7 @@ public sealed record FixtureDeclaration
         string? language = null,
         bool resident = false,
         string? workingDirectory = null,
-        IEnumerable<string>? files = null,
+        IEnumerable<StagedFile>? files = null,
         IEnumerable<string>? reaches = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
@@ -376,13 +376,27 @@ public sealed record FixtureDeclaration
         // which is the rule every other path the project declares already follows.
         var starting = workingDirectory?.Trim() ?? "";
 
-        var staging = new List<string>();
+        var staging = new List<StagedFile>();
+        var landing = new Dictionary<string, StagedFile>(StringComparer.OrdinalIgnoreCase);
         foreach (var file in files ?? [])
         {
-            if (string.IsNullOrWhiteSpace(file))
+            if (string.IsNullOrWhiteSpace(file?.From))
                 throw new ScenarioRefusedException(called, "one of its files is blank, and a blank path names nothing");
 
-            staging.Add(file.Trim());
+            var staged = new StagedFile(file.From.Trim(), file.To?.Trim());
+            var lands = Landing(called, staged);
+
+            // WW524. Two entries landing on one path is the silent overwrite this used to be — two
+            // plain files sharing a name from different folders among them — and which one the
+            // application then reads is whichever was declared last.
+            if (landing.TryGetValue(lands, out var already))
+            {
+                throw new ScenarioRefusedException(
+                    called, $"'{already}' and '{staged}' both land on '{lands}', so one would overwrite the other");
+            }
+
+            landing[lands] = staged;
+            staging.Add(staged);
         }
 
         // WW509, and WW60's refusal one field over: a declaration that reaches the launch nowhere
@@ -428,7 +442,7 @@ public sealed record FixtureDeclaration
             speaking,
             resident,
             starting,
-            new ReadOnlyCollection<string>(staging),
+            new ReadOnlyCollection<StagedFile>(staging),
             new ReadOnlyCollection<string>(reaching));
     }
 
@@ -556,23 +570,56 @@ public sealed record FixtureDeclaration
 
         foreach (var file in Files)
         {
-            var from = System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(file), root);
+            var from = System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(file.From), root);
             if (!System.IO.File.Exists(from))
             {
                 // Named as the fixture wrote it and as it resolved, because the two are the whole
                 // question: a reader who sees only one of them cannot tell a missing file from a
                 // path that meant something else.
                 throw new ScenarioRefusedException(
-                    Name, $"it stages '{file}', which is not a file — it resolved to {from}");
+                    Name, $"it stages '{file.From}', which is not a file — it resolved to {from}");
             }
 
-            System.IO.File.Copy(from, System.IO.Path.Combine(into, System.IO.Path.GetFileName(from)), overwrite: true);
+            // WW524. Where it lands, under the staged directory: the top under its own name for a
+            // plain path, or the folder the fixture named. Its folders are made here, because the
+            // whole point of naming one is that the application looks one folder down.
+            var to = System.IO.Path.Combine(into, Landing(Name, file));
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(to)!);
+            System.IO.File.Copy(from, to, overwrite: true);
         }
 
         // WW515. A type rather than the path, so the thing a launch is composed from is a fixture
         // that has been staged, and the root it resolves against is the root its files went under
         // by construction. Two calls each taking a root could be handed two.
         return new StagedFixture(this, root, into);
+    }
+
+    /// <summary>
+    /// Where a staged file lands, relative to the staged directory and normalised, or a refusal where
+    /// it would land outside it. WW524.
+    /// <para>
+    /// Refused absolute and refused climbing out, because the staged directory is emptied before
+    /// every launch: a destination outside it is a file this run writes into somebody's machine and
+    /// never cleans, which is the global state staging exists to remove.
+    /// </para>
+    /// </summary>
+    private static string Landing(string called, StagedFile file)
+    {
+        var to = file.Lands.Replace('/', System.IO.Path.DirectorySeparatorChar);
+        if (to.Length == 0 || System.IO.Path.IsPathRooted(to))
+        {
+            throw new ScenarioRefusedException(
+                called, $"it stages '{file}', and 'to' has to be a path under the staged directory, such as quickshell/sessions.json");
+        }
+
+        var parts = to.Split(System.IO.Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Any(part => part == ".."))
+        {
+            throw new ScenarioRefusedException(
+                called, $"it stages '{file}', and '..' climbs out of the staged directory, which is emptied before every launch");
+        }
+
+        return string.Join(System.IO.Path.DirectorySeparatorChar, parts.Where(part => part != "."));
     }
 
     /// <summary><paramref name="value"/> with <see cref="Staged"/> swapped for where the files went.</summary>

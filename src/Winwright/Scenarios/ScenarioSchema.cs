@@ -35,6 +35,9 @@ public enum Taking
 
     /// <summary>An array of fixtures.</summary>
     Fixtures,
+
+    /// <summary>An array of files, each a path or an object naming where under the staged directory it lands.</summary>
+    Placed,
 }
 
 /// <summary>
@@ -203,7 +206,7 @@ public static class ScenarioSchema
         // sentences out of this source rather than out of a running build — an interpolated hole
         // publishes `{FixtureDeclaration.Staged}` to a reader. `ScenarioFileTests` holds the spelling
         // to the constant, which is the pairing that keeps the two from drifting.
-        new("files", false, Taking.Words, "the files to put in a directory of this launch's own, each relative to the project's root, as an array — a variable or the working directory names that directory with '{files}', which is how a case gives the application a store of its own without the application growing a flag", []),
+        new("files", false, Taking.Placed, "the files to put in a directory of this launch's own, each relative to the project's root, as an array — a variable or the working directory names that directory with '{files}', which is how a case gives the application a store of its own without the application growing a flag; an entry may instead be an object with 'from' and 'to', where 'to' is a path under that directory such as quickshell/sessions.json, for an application whose store sits one folder down", []),
         new("reaches", false, Taking.Words, "what the application connects to outside itself, each a host:port or a %VARIABLE% naming one, as an array — probed before every launch and never started; unreachable, every check on the fixture is a hole naming the address, and reachable, the arguments and variables name each as {reach0}, {reach1} and on", []),
     ]);
 
@@ -450,6 +453,29 @@ public static class ScenarioSchema
             {
                 ["type"] = "object",
                 ["additionalProperties"] = new JsonObject { ["type"] = "string" },
+            },
+            // WW524. A path, or an object saying where under the staged directory it lands.
+            Taking.Placed => new JsonObject
+            {
+                ["type"] = "array",
+                ["items"] = new JsonObject
+                {
+                    ["oneOf"] = new JsonArray
+                    {
+                        new JsonObject { ["type"] = "string" },
+                        new JsonObject
+                        {
+                            ["type"] = "object",
+                            ["properties"] = new JsonObject
+                            {
+                                ["from"] = new JsonObject { ["type"] = "string" },
+                                ["to"] = new JsonObject { ["type"] = "string" },
+                            },
+                            ["required"] = new JsonArray { "from" },
+                            ["additionalProperties"] = false,
+                        },
+                    },
+                },
             },
             Taking.Cases => ArrayOf(Case),
             Taking.Steps => ArrayOf(Step),
