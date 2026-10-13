@@ -969,9 +969,10 @@ a folder down, as `%AppData%\YourApp\sessions.json` does, say where it lands ins
 
 An entry may also say `"fill": true`, so a store can name the server a fixture `reaches` without
 spelling the address a second time. Its text gets `{reach0}`, `{reach1}` and so on replaced with the
-addresses the probe reached, and `{files}` replaced with the staged directory, written as Windows
-spells it with backslashes (inside a JSON string, that needs escaping you have to arrange). The file
-is read as UTF-8 and keeps the byte-order mark it came with. A file asked to be filled that is not
+addresses the probe reached, and `{files}` replaced with the staged directory. In a file that lands
+as `.json`, every replacement is JSON-escaped, so `"store": "{files}"` parses and names the
+directory whole. Any other file is filled raw, with the path as Windows spells it, because winwright
+cannot know that file's quoting. The file is read as UTF-8 and keeps the byte-order mark it came with. A file asked to be filled that is not
 UTF-8 is refused by name, and a file not asked is copied byte for byte.
 
 `to` is relative to the staged directory and its folders are made for you. A `to` that is absolute or

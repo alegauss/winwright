@@ -102,6 +102,7 @@
 - ✅ **WW522** **A case cannot say it needs a server the application connects to, so a connected client's window has no case** — A fixture names its server in 'reaches'; each launch probes it, offers {reach0} if it answers, else holes every check unlaunched (design recorded in `src/Winwright/Processes/Reaching.cs`).
 - ✅ **WW524** **A staged file always lands flat under {files}, so a store one folder down cannot be reproduced (WW519)** — A files entry may be {from, to} so a store lands one folder down under {files}; escapes and collisions are refused at load (design recorded in `src/Winwright/Scenarios/StagedFile.cs`).
 - ✅ **WW527** **A staged file cannot name the server a fixture reaches, so its store carries a second spelling of the address** — A staged file with fill: true gets {reach0} and {files} filled as UTF-8, so a store names its server once, in reaches (design recorded in `src/Winwright/Scenarios/StagedFile.cs`).
+- ✅ **WW529** **A filled JSON store naming {files} inside a string comes out invalid, because the path's backslashes are not escaped** — A filled .json file gets each replacement JSON-escaped, so a store naming {files} parses and keeps the path (design recorded in `src/Winwright/Scenarios/FixtureDeclaration.cs`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

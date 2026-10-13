@@ -651,7 +651,20 @@ public sealed record FixtureDeclaration
                 Name, $"it asks to fill '{file.From}', which is not UTF-8 text, so filling it would rewrite bytes nobody asked to change");
         }
 
-        var filled = Offered(Resolved(text, root));
+        // WW529. The escaping belongs to the file and not to the token: inside a JSON string every
+        // backslash starts an escape, so the staged directory written raw into a .json store is
+        // invalid JSON or a path with its separators eaten. Any other kind of file is filled raw,
+        // because the engine cannot know its quoting.
+        Func<string, string> escaped = staged.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+            ? value => System.Text.Json.JsonEncodedText.Encode(
+                value, System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping).ToString()
+            : value => value;
+
+        var filled = text.Replace(Staged, escaped(StagedInto(root)), StringComparison.Ordinal);
+        var reached = Reached();
+        for (var at = 0; at < reached.Count; at++)
+            filled = filled.Replace($"{{reach{at}}}", escaped(reached[at]), StringComparison.Ordinal);
+
         if (!string.Equals(filled, text, StringComparison.Ordinal))
             System.IO.File.WriteAllText(staged, filled, strict);
     }

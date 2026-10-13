@@ -158,10 +158,36 @@ public sealed class ReachesTests : IDisposable
             Assert.Equal([0xEF, 0xBB, 0xBF], staged.Take(3));
             var text = System.Text.Encoding.UTF8.GetString(staged, 3, staged.Length - 3);
             Assert.Contains("\"host\": \"127.0.0.1:2222\"", text, StringComparison.Ordinal);
-            Assert.Contains(into, text, StringComparison.Ordinal);
+
+            // WW529. A .json store is filled escaped, so it parses and the path round-trips whole.
+            using var parsed = System.Text.Json.JsonDocument.Parse(text);
+            Assert.Equal(into, parsed.RootElement.GetProperty("store").GetString());
 
             // A file that did not ask is copied byte for byte, token and all.
             Assert.Equal("""{ "host": "{reach0}" }""", File.ReadAllText(Path.Combine(into, "raw.json")));
+        }
+        finally
+        {
+            if (Directory.Exists(fixture.StagedInto(root)))
+                Directory.Delete(fixture.StagedInto(root), recursive: true);
+        }
+    }
+
+    [Fact]
+    public void A_file_that_is_not_json_is_filled_raw_because_its_quoting_is_not_the_engines_to_know()
+    {
+        Directory.CreateDirectory(Path.Combine(root, "cases"));
+        File.WriteAllText(Path.Combine(root, "cases", "store.ini"), "store={files}\n");
+
+        var fixture = FixtureDeclaration.Of(
+            "ini",
+            variables: new Dictionary<string, string> { ["APPDATA"] = FixtureDeclaration.Staged },
+            files: [new StagedFile("cases/store.ini", Fill: true)]);
+
+        try
+        {
+            var into = fixture.Stage(root).Into;
+            Assert.Equal($"store={into}\n", File.ReadAllText(Path.Combine(into, "store.ini")));
         }
         finally
         {
