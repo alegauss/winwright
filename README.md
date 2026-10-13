@@ -1229,6 +1229,22 @@ and until this took a tree they had nowhere to run but the machine they were wor
 whoever is building winwright, and they are governed — the files are written through `roadkeep`
 rather than by hand.
 
+## More tools by alegauss
+
+For Claude Code:
+
+- **[Claude Code Tray](https://alegauss.github.io/claude-tray/)**: your rate-limit usage as a Windows tray icon that turns red before you run out.
+- **[roadkeep](https://alegauss.github.io/roadkeep/)**: keeps ROADMAP, CHANGELOG and IMPROVEMENTS to one format, as a CLI and a Claude Code plugin.
+- **[commitclerk](https://alegauss.github.io/commitclerk/)**: Conventional Commits messages from your staged diff, in a single-file Python CLI.
+- **[polyweave](https://alegauss.github.io/polyweave/)**: a Claude Code plugin that makes a game's 3D assets, sounds and names by declaring what each has to satisfy.
+
+For Windows developers:
+
+- **[FreeWilly](https://alegauss.github.io/freewilly/)**: Docker on Windows without Docker Desktop, with no admin prompt and no telemetry.
+- **[Quickshell](https://alegauss.github.io/quickshell/)**: an SSH client for Windows with sessions, keys, SFTP and tunnels, and without the rest of the suite.
+
+All of them: [alegauss.github.io](https://alegauss.github.io/)
+
 ## Licence, and saying something is wrong
 
 Apache-2.0, in [`LICENSE`](LICENSE), and both packages declare it. What has shipped is in
