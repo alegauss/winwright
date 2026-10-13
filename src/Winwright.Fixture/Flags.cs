@@ -266,6 +266,11 @@ public sealed record Flags
             "a pane holding a strip of three tabs that reorders only when one is dragged onto another, with a read-out of the order",
             "a tab strip reordered by dragging had no case, because no verb pressed on one element, moved past the drag threshold and released over another"),
         new Flag(
+            "status",
+            "",
+            "a pane holding an element that publishes its state as UIA ItemStatus, a button that changes it, and a neighbour that publishes none",
+            "an application that says a state in words for screen readers, as UIA asks, had no reading a case could make of it"),
+        new Flag(
             "backdrop",
             "kind",
             "a window that opted into a system backdrop, which transmits what is behind it through the glass",

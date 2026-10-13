@@ -15,8 +15,9 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW523** (deps: —) **A case cannot read an element's item status, so a state an application publishes there cannot be asserted** — An adopter that says a state in words for screen readers, as UIA asks, has to prove that word in process instead of in a case. → §WW523
+- ⏳ **WW523** (deps: —) **A case cannot read an element's item status, so a state an application publishes there cannot be asserted** — A locator cannot select by item status, so a case still cannot find the connected tab without its title. → §WW523
 - 📋 **WW525** (deps: —) **Reading value on an element with no Value pattern polls for seconds and fails as nothing answered, never naming picked** — An adopter reading a drop-down's choice gets a timeout that names no cause, and a case left expanded after it degrades the next one. → §WW525
+- 📋 **WW528** (deps: —) **A case cannot claim a reading is empty, so a tab with no status or a field left blank has no claim** — Blank expect claims nothing, answers takes only true, and a pattern matching the empty string is refused, so empty is proven in process. → §WW528
 
 ## Block G — The scenario — a case is a data file
 
@@ -155,6 +156,12 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
+
+## Done when — WW523
+
+- **A locator selects an element by its item status** A case finds the connected tab
+  with TabItem[status="Connected"] without naming its title, and the fixture's --status
+  pane resolves it before and not after Connect is pressed.
 
 ## Non-goals
 

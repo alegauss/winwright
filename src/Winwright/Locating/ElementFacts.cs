@@ -60,6 +60,19 @@ public sealed record ElementFacts(
     public string Announces { get; init; } = "";
 
     /// <summary>
+    /// The state this element publishes in words for a screen reader, and empty where it publishes
+    /// none. WW523.
+    /// <para>
+    /// UI Automation's <c>ItemStatus</c>, which WPF sets through <c>AutomationProperties.ItemStatus</c>.
+    /// Found in quickshell (QS278): each tab publishes its connection there — Connected,
+    /// Reconnecting, Disconnected, Local — as the accessible half of a coloured dot, and no reading
+    /// reached it, so the tab's state was proven in process. Read in the same pass as the rest, for
+    /// the reason every field here is.
+    /// </para>
+    /// </summary>
+    public string ItemStatus { get; init; } = "";
+
+    /// <summary>
     /// What this element says beside its name, or nothing where it says none. The counterpart of
     /// <see cref="Says"/>, and blank rather than merely empty for its reason.
     /// </summary>
@@ -138,6 +151,7 @@ public sealed record ElementFacts(
             {
                 HasKeyboardFocus = current.HasKeyboardFocus,
                 Announces = current.HelpText ?? "",
+                ItemStatus = current.ItemStatus ?? "",
             };
         }
         catch (ElementNotAvailableException)

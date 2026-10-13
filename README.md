@@ -430,7 +430,7 @@ because the run asked, the application answered, and what is wrong is the word t
 
 `expect` is what the element should read
 once the act has landed, and `reads` says which reading that is — one of `anything`, `value`, `range`,
-`toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `description`, `enabled`, `focused`, defaulting to `anything`, the one value the element
+`toggle`, `selected`, `picked`, `expanded`, `text`, `name`, `description`, `status`, `enabled`, `focused`, defaulting to `anything`, the one value the element
 reports, in the order a reader looks at them. `selected` asks whether *this* element is chosen and
 `picked` asks which one a container chose — the reading every claim about a picker is about, and the
 only one that answers on a ComboBox offering no value. `name` is what a label says: a caption's words are in its
@@ -438,7 +438,12 @@ name and in no pattern, so it is the only reading that answers for one — and a
 where its own locator matched on the name or on the front of it, because then the reading is fixed
 before the act runs. `description` is the sentence an element says *beside* its name, which is where
 an application puts what will not fit in a label — and, where a framework's own accessible object had
-to be replaced to carry that sentence, the state it stopped exposing as a pattern. `enabled` is
+to be replaced to carry that sentence, the state it stopped exposing as a pattern. `status` is the
+state an element publishes in words for a screen reader, UI Automation's ItemStatus (WPF's
+`AutomationProperties.ItemStatus`): *Connected*, *Reconnecting*, the accessible half of a coloured
+dot. An element that publishes none reads as the **empty string**, not as nothing observed, because
+an unset status is an answer, so a case expecting *Reconnecting* against a tab with no status fails
+naming what it read rather than standing down as a hole. `enabled` is
 whether the control will take input at all — the state a half-finished form is supposed to be in,
 and not a locator predicate, because a locator selecting only enabled controls makes the greyed case
 match nothing and *not there* and *there and refusing* are opposite findings about a form. Like

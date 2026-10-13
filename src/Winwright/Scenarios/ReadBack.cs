@@ -72,6 +72,17 @@ public sealed record ReadBack
         // stays a claim that can be false.
         new("description", "what the element says about itself beyond its name.", read => read.Facts?.Explains),
 
+        // WW523. The state an element publishes in words, which UIA asks an application to put in
+        // ItemStatus rather than in a colour. Found in quickshell, whose tabs say Connected or Local
+        // there and nowhere a reading reached.
+        //
+        // Empty rather than null where the element publishes no status, and that is the design's
+        // point: an unset status is an answer — there is no state to report — and a reading that
+        // came back unobserved would make "this tab is not reconnecting" a claim nothing could check.
+        // Null only where nothing resolved, like every reading here. Not Always, because `answers`
+        // asks for something non-empty and an element with no status says nothing.
+        new("status", "the state the element publishes in words for a screen reader, such as Connected; empty where it publishes none.", read => read.Facts?.ItemStatus),
+
         // WW325. Whether the control will take input at all, which is the state a half-finished form
         // is supposed to be in — and the one an application gets wrong by leaving a command enabled
         // before its precondition is met.

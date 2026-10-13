@@ -125,6 +125,11 @@ internal static class Criteria
             null, "a desk that cannot observe ends the run as degraded, and BusyDesk carries the same "
                 + "rule through every desk-dependent case in this suite"),
 
+        // --- WW523, raised by its partial ship ------------------------------------------------------
+        new("WW523", "A locator selects an element by its item status", "", Unshown.NotBuilt,
+            "the status reading shipped and the locator attribute did not, so there is no locator to "
+                + "resolve; StatusTests reads the status the attribute would select by"),
+
         // --- C, locate ---------------------------------------------------------------------------
         new("C", "An element is addressed without reading the markup", "", Unshown.NotBuilt,
             "the claim is about migrated scenarios and there are none; Inspect is what they would be "
