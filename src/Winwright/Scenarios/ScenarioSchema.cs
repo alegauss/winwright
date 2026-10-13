@@ -231,6 +231,7 @@ public static class ScenarioSchema
         new("reads", false, Taking.Text, "which reading the expectation is about", ReadBack.All.Select(one => one.Name).ToList()),
         new("moves", false, Taking.Truth, "that the reading should end up different, where the case cannot know what it will be", [], Claims: true),
         new("answers", false, Taking.Truth, "that the reading it names should say something rather than nothing, where the case cannot know what", [], Claims: true),
+        new("empty", false, Taking.Truth, "that the element is there and the reading it names says nothing — a field left blank, a tab with no state to report; unlike 'absent', a locator that matches nothing fails it", [], Claims: true),
         new("matches", false, Taking.Text, "the regular expression the reading should match, where the case cannot name the value but can name its shape", [], Claims: true),
         new("discloses", false, Taking.Truth, "that the act put something under the locator that was not in the tree before it", [], Claims: true),
         new("sameAs", false, Taking.Text, "the 'named' of an earlier step in this case whose reading this one claims to be back to, for the round trip whose value no case can name", [], Claims: true),

@@ -14,8 +14,6 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW528** (deps: —) **A case cannot claim a reading is empty, so a tab with no status or a field left blank has no claim** — Blank expect claims nothing, answers takes only true, and a pattern matching the empty string is refused, so empty is proven in process. → §WW528
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

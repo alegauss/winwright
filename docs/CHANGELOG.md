@@ -308,6 +308,7 @@
 - ✅ **WW475** **a label carrying a placeholder is refused for every claim, including the two that only read the part it does not move** — A begins-with or ends-with claim reads the fixed part a placeholder at the far end leaves, and each is refused by the label the other can use.
 - ✅ **WW523** **A case cannot read an element's item status, so a state an application publishes there cannot be asserted** — A locator selects by item status with [status="Connected"], so a case finds the connected tab without its title (design recorded in `src/Winwright/Locating/LocatorStep.cs`).
 - ✅ **WW525** **Reading value on an element with no Value pattern polls for seconds and fails as nothing answered, never naming picked** — A case that stops short collapses what its expand steps left open, so a drop-down from one red case won't hold the next (design recorded in `src/Winwright/Scenarios/CaseRun.cs`).
+- ✅ **WW528** **A case cannot claim a reading is empty, so a tab with no status or a field left blank has no claim** — A case claims a reading is empty with empty: true, which holds only for an element that is there and says nothing (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 
 ## Block G — The scenario — a case is a data file
 

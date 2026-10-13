@@ -45,7 +45,46 @@ public sealed class StatusTests : IDisposable
             return;
 
         Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
-        Assert.Equal(5, verdict.Assertions);
+        Assert.Equal(6, verdict.Assertions);
+    }
+
+    /// <summary>
+    /// WW528. The two ways the empty claim must fail: an element that does publish a state, and a
+    /// locator that matches nothing — the second is what makes it a claim about an element and not
+    /// a second spelling of <c>absent</c>.
+    /// </summary>
+    [Fact]
+    public void The_empty_claim_fails_on_a_status_and_on_an_element_that_is_not_there()
+    {
+        var verdict = Run("""
+            {
+              "fixtures": [ { "name": "a session that publishes its state", "arguments": ["--status", "--show"] } ],
+              "cases": [
+                {
+                  "name": "two empty claims that are false",
+                  "fixture": "a session that publishes its state",
+                  "steps": [
+                    { "locator": "Text#sessionState", "act": "read", "reads": "status", "empty": true, "named": "a session that is disconnected" },
+                    { "locator": "Text#noSuchState", "act": "read", "reads": "status", "empty": true, "named": "an element that is not there" }
+                  ]
+                }
+              ]
+            }
+            """);
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        var results = Assert.Single(verdict.Ran).Verdict.Results;
+        Assert.Equal(2, results.Count);
+        Assert.All(results, one => Assert.Equal(AssertionOutcome.Failed, one.Outcome));
+        Assert.Contains("Disconnected", results[0].Detail, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Claiming_an_always_answering_reading_is_empty_is_refused()
+    {
+        Assert.Throws<ScenarioRefusedException>(
+            () => Wrote.Step("Text#plainState", "read", ("reads", "focused"), ("empty", true)));
     }
 
     [Fact]
@@ -104,7 +143,7 @@ public sealed class StatusTests : IDisposable
             .Concat(verdict.Ran.SelectMany(one => one.Verdict.Broke.Select(each => each.ToString())))
             .Concat(verdict.Ran.SelectMany(one => one.Trace.Select(each => each.ToString()))));
 
-    private SuiteVerdict? Run()
+    private SuiteVerdict? Run(string? written = null)
     {
         if (!Desk.Read().CanObserve)
             return null;
@@ -119,7 +158,7 @@ public sealed class StatusTests : IDisposable
             }
             """);
 
-        const string cases = """
+        const string Standard = """
             {
               "fixtures": [ { "name": "a session that publishes its state", "arguments": ["--status", "--show"] } ],
               "cases": [
@@ -129,6 +168,7 @@ public sealed class StatusTests : IDisposable
                   "fixture": "a session that publishes its state",
                   "steps": [
                     { "locator": "Text#sessionState", "act": "read", "reads": "status", "expect": "Disconnected", "named": "it starts disconnected" },
+                    { "locator": "Text#plainState", "act": "read", "reads": "status", "empty": true, "named": "a neighbour with no state publishes none" },
                     { "locator": "Text[status=\"Connected\"]", "act": "read", "absent": true, "named": "no element is connected yet" },
                     { "locator": "Button#connectButton", "act": "invoke", "named": "Connect is pressed" },
                     { "locator": "Text#sessionState", "act": "read", "reads": "status", "expect": "Connected", "named": "it says connected once it is" },
@@ -143,7 +183,7 @@ public sealed class StatusTests : IDisposable
         var project = ProjectDeclaration.Load(declaration);
         using var register = ProcessRegister.For(project);
 
-        var verdict = Suite.Launch(ScenarioFile.Read("status.cases.json", cases), Selection.All, register, project);
+        var verdict = Suite.Launch(ScenarioFile.Read("status.cases.json", written ?? Standard), Selection.All, register, project);
 
         register.StopAll();
         return verdict;

@@ -478,7 +478,10 @@ is the third — that the reading said something rather than nothing, for the va
 know. `matches` is the fourth: the pattern the reading should match, for the value a case cannot name
 but whose shape it can — a note carrying the date its figure came from, say. A pattern that matches
 the empty string is refused, because that is `answers` in a field that reads as though it checked
-more. `discloses` is the fifth: that the act put something under the locator that was not in the tree
+more. `empty` is its opposite and says what that pattern could not: the element is there and the
+reading says nothing, such as a field a form must leave blank or a tab with no state to report
+(`"reads": "status", "empty": true`). Unlike `absent`, a locator that matches nothing fails it, and it
+is refused beside a reading such as `focused` that answers for every element. `discloses` is the fifth: that the act put something under the locator that was not in the tree
 before it — an expander, a tree view, a details pane, a search that fills a list. Never a count the
 case types; the engine compares the subtree against what it read a moment earlier. `sameAs` is the
 sixth and is `moves` with a memory: it names the `named` of an earlier step in the same case and

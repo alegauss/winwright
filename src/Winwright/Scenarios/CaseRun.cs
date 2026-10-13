@@ -2147,6 +2147,9 @@ public static class CaseRun
         if (step.Answers)
             return Answered(step, subject, acted);
 
+        if (step.Empty)
+            return Emptied(step, subject, acted);
+
         if (step.Absent)
             return Missing(step, subject, acted);
 
@@ -2264,6 +2267,41 @@ public static class CaseRun
             return null;
 
         return new Landed(acted, Expect.Now(step.Name, wanted, () => null).Refusing(why), facts);
+    }
+
+    /// <summary>
+    /// A step claiming its element is there and its reading says nothing. WW528.
+    /// <para>
+    /// Empty and blank are the same answer here, for the reason <c>name</c> answers null for a blank
+    /// label: a reading of spaces shows a person nothing. An element that never resolved answers
+    /// nothing at all, which fails the claim rather than meeting it — the difference from
+    /// <c>absent</c>, and the reason the wait reads null for it and not the empty string.
+    /// </para>
+    /// </summary>
+    private static Landed Emptied(StepDeclaration step, Subject subject, ActResult? acted)
+    {
+        const string wanted = "nothing, from an element that is there";
+        if (Unreadable(step, subject, acted, wanted) is { } refused)
+            return refused;
+
+        var saw = acted?.Element;
+        var expectation = Expect.That(
+            step.Name,
+            wanted,
+            () =>
+            {
+                var look = subject.ReadOnce();
+                saw = look.Facts ?? saw;
+                if (!look.Found)
+                    return null;
+
+                var now = step.Reads.Of(look);
+                return string.IsNullOrWhiteSpace(now) ? wanted : now;
+            },
+            subject.ActMs,
+            subject.PollMs);
+
+        return new Landed(acted, expectation, saw);
     }
 
     private static Landed Answered(StepDeclaration step, Subject subject, ActResult? acted)

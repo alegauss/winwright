@@ -784,6 +784,18 @@ public sealed record StepDeclaration
     public bool Answers => Wrote.Truth("answers");
 
     /// <summary>
+    /// Whether the step claims the element is there and its reading says nothing. WW528.
+    /// <para>
+    /// Found shipping WW523: a tab publishing no state publishes the empty string, and no field could
+    /// say so. A blank <c>expect</c> claims nothing, <c>answers</c> takes only true, and a pattern
+    /// matching the empty string is refused for holding over every answer. So the control was a test
+    /// reading the facts in process. This is the claim, and it fails on an element that was never
+    /// there, which is the difference from <c>absent</c>.
+    /// </para>
+    /// </summary>
+    public bool Empty => Wrote.Truth("empty");
+
+    /// <summary>
     /// Whether this step says anything a run could find false. A step that expects nothing, claims no
     /// movement and covers no set produces no assertion result, which is why a case made only of these
     /// is refused by <see cref="CaseDeclaration"/> rather than run to a green it did not earn.
@@ -865,6 +877,7 @@ public sealed record StepDeclaration
             Claiming(Expected is not null, "expect", $"the reading is '{Expected}'");
             Claiming(Moves, "moves", "the reading ended up different");
             Claiming(Answers, "answers", "the reading says something rather than nothing");
+            Claiming(Empty, "empty", "the element is there and the reading says nothing");
             Claiming(Sweeps is not null, sweptAs, $"the '{Sweeps}' set is read here");
             Claiming(Matches is not null, "matches", $"the reading matches {Matches}");
             Claiming(Discloses, "discloses", "the act put something under the locator");
@@ -1363,6 +1376,16 @@ public sealed record StepDeclaration
                     + "resolved at all; the claim could never be false, so it says nothing");
         }
 
+        // WW528. The mirror of the rule above: a reading that answers for every element that resolved
+        // never says nothing, so claiming it is empty is a step that can only ever go red.
+        if (step.Empty && step.Reads.Always)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims '{step.Reads.Name}' is empty, and that reading answers for every element that "
+                    + "resolved at all; the claim could never hold");
+        }
+
         // The unearned green this field is easiest to write. A pattern that matches the empty string
         // matches every answer there is, so the step holds wherever the reading answered at all —
         // which is what 'answers' says, in a field that reads as though it checked more. The same
@@ -1612,7 +1635,7 @@ public sealed record StepDeclaration
     {
         if (step.Locator is not { } located
             || step.Reads.PinnedBy(located.Steps[^1]) is not { } already
-            || (step.Expected is null && !step.Moves && !step.Answers))
+            || (step.Expected is null && !step.Moves && !step.Answers && !step.Empty))
         {
             return;
         }

@@ -32,6 +32,7 @@ public class ClaimsTests
         // An acting verb, because a step that only reads cannot be what moved the reading.
         ("moves", () => Wrote.Step("Edit", "type", ("with", "beta"), ("moves", true))),
         ("answers", () => Wrote.Step("Text", "read", ("answers", true))),
+        ("empty", () => Wrote.Step("Text", "read", ("reads", "status"), ("empty", true))),
         ("matches", () => Wrote.Step("Text", "read", ("reads", "name"), ("matches", @"\d{4}"))),
         ("discloses", () => Wrote.Step("TabItem#statusPane", "select", ("discloses", true))),
         ("sameAs", () => Wrote.Step(
