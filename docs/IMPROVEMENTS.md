@@ -32,34 +32,6 @@ application reads the address the probe reached.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW525 A reading the element cannot give, said at once
-
-Found 2026-10-12 in quickshell, QS280, `cases\home.cases.json`. A step read the Sign in
-with drop-down, a WPF ComboBox that is not editable:
-
-```json
-{ "locator": "ComboBox#SignIn", "act": "read", "reads": "value",
-  "expect": "Key or agent (automatic)" }
-```
-
-The ComboBox publishes no Value pattern, so `value` can never answer. The step polled 27
-times over 5121 ms and failed with "nothing answered to it". Nothing said that this
-element has no value to read, or that `picked` (WW266) is the reading for a picker's
-selection, which the expand step on the same element read back in its trace ("Key or
-agent (automatic)").
-
-What it cost: a red case, then a step that expanded the drop-down, then a collapse that
-never ran because the case had stopped. The next case (quick connect, a chord) ran
-Degraded with "stopping 8 steps short", most likely because the open drop-down held the
-foreground. The adopter rewrote the case to read the expanded list's entries before
-finding `picked` in the changelog.
-
-What to build: before polling, check whether the element supports the pattern the
-reading needs. Where it does not, fail at once with a reason that names the missing
-pattern and the reading that does fit ("ComboBox #SignIn has no Value pattern; its
-selection reads as `picked`"). Separately, a case that stops after an expand should
-collapse what it expanded, so one case's red does not degrade the next.
-
 ### §WW528 Claiming a reading is empty
 
 Found shipping WW523. Its case wanted to say that a tab publishing no state publishes

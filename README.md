@@ -384,6 +384,12 @@ the two tray acts named against a `locator` are refused the same way, since ther
 them. `act` is one of `read`, `invoke`, `toggle`,
 `set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `drag`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
 
+A case that **stops short** (a step threw, or an act was never sent) collapses whatever its `expand`
+steps opened and its own `collapse` steps did not close again, last opened first, through the
+pattern so the tidy needs no foreground. Each one is a line in the trace. Without it, a drop-down
+left open by one red case held the desk for the next one. A case that runs to its end is left
+exactly as its last step left it.
+
 `drag` presses on the step's `locator`, moves past the system's drag threshold with the button held,
 and releases over a second element named in **`to`**, which is looked for in the same window. It is
 for the gesture no pattern expresses, such as a tab strip reordered by dragging one tab across its

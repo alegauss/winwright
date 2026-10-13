@@ -125,11 +125,6 @@ internal static class Criteria
             null, "a desk that cannot observe ends the run as degraded, and BusyDesk carries the same "
                 + "rule through every desk-dependent case in this suite"),
 
-        // --- WW525, raised by its partial ship ------------------------------------------------------
-        new("WW525", "A case that stops collapses what it expanded", "", Unshown.NotBuilt,
-            "the reading half shipped and the clean-up did not, so nothing collapses a drop-down a "
-                + "stopped case left open; UnreadableTests covers the half that landed"),
-
         // --- C, locate ---------------------------------------------------------------------------
         new("C", "An element is addressed without reading the markup", "", Unshown.NotBuilt,
             "the claim is about migrated scenarios and there are none; Inspect is what they would be "

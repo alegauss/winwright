@@ -57,8 +57,8 @@ public sealed record ActVerb
         new("set value", Takes.Text, repeatable: true, (subject, argument) => Act.SetValue(subject, argument!)),
         new("set range", Takes.Number, repeatable: true, (subject, argument) => Act.SetRange(subject, Number(argument!))),
         new("select", Takes.Nothing, repeatable: true, (subject, _) => Act.Select(subject)),
-        new("expand", Takes.Nothing, repeatable: true, (subject, _) => Act.Expand(subject)),
-        new("collapse", Takes.Nothing, repeatable: true, (subject, _) => Act.Collapse(subject)),
+        new(Expands, Takes.Nothing, repeatable: true, (subject, _) => Act.Expand(subject)),
+        new(Collapses, Takes.Nothing, repeatable: true, (subject, _) => Act.Collapse(subject)),
 
         // WW225. The three that synthesise input, which is the half of the engine a case could not
         // name. Each has a pattern act beside it that reads almost the same and proves something
@@ -207,6 +207,12 @@ public sealed record ActVerb
             captures: true,
             needs: "captures"),
     ];
+
+    /// <summary>The verb that opens something that opens and closes. Named for WW525's tidy.</summary>
+    public const string Expands = "expand";
+
+    /// <summary>And the one that closes it again.</summary>
+    public const string Collapses = "collapse";
 
     /// <summary>The verb that asks a tray icon for its menu. WW258.</summary>
     public const string OpensTrayMenu = "open tray menu";

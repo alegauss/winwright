@@ -275,14 +275,27 @@ public static class CaseRun
         // closes a drop-down, so the tidying would dismiss the answer the case came for.
         var opened = new List<TrayMenu>();
 
+        // WW525. Every element this case expanded and has not collapsed again, so a case that stops
+        // short can close what it opened. Found in quickshell (QS280): a case went red with a
+        // drop-down open, the collapse written after it never ran, and the next case ran degraded.
+        var expanded = new List<Subject>();
+        var finished = false;
+
         try
         {
             Stepping(
                 running, root, project, budget, pictures, trace, results, broke, claims,
-                pointedAt, recalled, speaking, sampling, opened, out stopped);
+                pointedAt, recalled, speaking, sampling, opened, expanded, out stopped);
+            finished = stopped < 0;
         }
         finally
         {
+            // Only where the case stopped short: a case that ran to its end left the window the way
+            // its author wrote it to, and closing what it meant to leave open would be this engine
+            // deciding the last step for it.
+            if (!finished)
+                Collapsed(expanded, trace);
+
             // In a finally for the reason the step's own flyout close is in one: the promise is
             // about the desk and not about how the case ended. A case that threw took the same
             // foreground as one that passed.
@@ -301,6 +314,50 @@ public static class CaseRun
             new ReadOnlyCollection<StepDeclaration>(notReached),
             lent,
             members.Count);
+    }
+
+    /// <summary>What an expand or a collapse step does to the list the tidy closes. WW525.</summary>
+    private static void Tracked(StepDeclaration step, Subject subject, List<Subject> expanded)
+    {
+        if (step.Verb.Name == ActVerb.Expands)
+            expanded.Add(subject);
+        else if (step.Verb.Name == ActVerb.Collapses)
+            expanded.RemoveAll(one => one.Locator.Text == subject.Locator.Text);
+    }
+
+    /// <summary>
+    /// Close what a case that stopped short had expanded, last opened first. WW525.
+    /// <para>
+    /// Through the pattern, which needs no foreground, so the tidy cannot itself be refused by the
+    /// desk the case just lost. Best effort like <see cref="HandedBack"/>, and for its reason: an
+    /// element that has gone, or one that will not close, is written into the trace rather than
+    /// thrown, because the case has already been read and the tidy is not a claim.
+    /// </para>
+    /// </summary>
+    private static void Collapsed(List<Subject> expanded, List<TraceStep> trace)
+    {
+        for (var index = expanded.Count - 1; index >= 0; index--)
+        {
+            var subject = expanded[index];
+            string? why;
+            try
+            {
+                why = Act.Collapse(subject).Changed ? null : "it was already closed";
+            }
+            catch (Exception refused) when (refused is not (OutOfMemoryException or StackOverflowException))
+            {
+                why = refused.Message;
+            }
+
+            trace.Add(new TraceStep
+            {
+                Step = trace.Count + 1,
+                Verb = "collapse what the case expanded",
+                Locator = subject.Locator.Text,
+                Verdict = why is null ? StepVerdict.Ok : StepVerdict.Unchecked,
+                Detail = why,
+            });
+        }
     }
 
     /// <summary>
@@ -375,6 +432,7 @@ public static class CaseRun
     /// <param name="speaking">What language the window is in.</param>
     /// <param name="sampling">What the fixture put the application on, or empty. WW473.</param>
     /// <param name="opened">Where a tray menu this case opened is kept, for the restore.</param>
+    /// <param name="expanded">Where an element this case expanded is kept, for the tidy. WW525.</param>
     /// <param name="stopped">The index of the step that stopped the case, or -1.</param>
     private static void Stepping(
         List<StepDeclaration> running,
@@ -391,6 +449,7 @@ public static class CaseRun
         System.Globalization.CultureInfo? speaking,
         string sampling,
         List<TrayMenu> opened,
+        List<Subject> expanded,
         out int stopped)
     {
         stopped = -1;
@@ -429,6 +488,9 @@ public static class CaseRun
                 step, subject, project, budget, pictures, trace, results, root, pointedAt, recalled, speaking, sampling);
                 while (claims.Count < results.Count)
                     claims.Add(step.Claimed);
+
+                // WW525. Kept for the tidy, and crossed off when the case closes it itself.
+                Tracked(step, subject, expanded);
 
                 if (!went)
                 {
