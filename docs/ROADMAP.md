@@ -4,7 +4,7 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW527** (deps: WW524 ✅) **A staged file cannot name the server a fixture reaches, so its store carries a second spelling of the address** — Staging copies bytes as they are, so {reach0} reaches arguments and variables but never a store the application reads its server from. → §WW527
+- 📋 **WW529** (deps: —) **A filled JSON store naming {files} inside a string comes out invalid, because the path's backslashes are not escaped** — Filling writes the staged directory raw, and inside a JSON string every backslash starts an escape, so the store breaks or names another path. → §WW529
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

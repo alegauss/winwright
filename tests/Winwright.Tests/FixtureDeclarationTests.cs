@@ -461,6 +461,22 @@ public class FixtureDeclarationTests
         Assert.Contains("into", refused.Subject, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void An_object_entry_may_ask_to_be_filled_with_true_or_false_and_nothing_else()
+    {
+        var fixture = Launched("""
+            { "name": "x", "variables": { "APPDATA": "{files}" }, "files": [ { "from": "a.json", "fill": true }, { "from": "b.json" } ] }
+            """);
+
+        Assert.Equal([true, false], fixture.Files.Select(one => one.Fill));
+
+        var refused = Assert.Throws<ScenarioRefusedException>(() => Launched("""
+            { "name": "y", "variables": { "APPDATA": "{files}" }, "files": [ { "from": "a.json", "fill": "yes" } ] }
+            """));
+
+        Assert.EndsWith(".fill", refused.Subject, StringComparison.Ordinal);
+    }
+
     /// <summary>The one fixture a case file declares, read through the loader as a case names it.</summary>
     private static FixtureDeclaration Launched(string fixture) => Assert.Single(ScenarioFile.Read(
         "store.cases.json",

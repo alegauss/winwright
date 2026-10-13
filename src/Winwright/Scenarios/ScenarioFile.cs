@@ -521,27 +521,38 @@ public sealed class ScenarioFile
         {
             string? from = null;
             string? to = null;
+            var fill = false;
             foreach (var property in one.EnumerateObject())
             {
-                if (property.Value.ValueKind != JsonValueKind.String)
-                    throw new ScenarioRefusedException($"{here}.{property.Name}", $"it is {Kind(property.Value)} and it has to be text");
-
                 switch (property.Name)
                 {
+                    case "from" or "to" when property.Value.ValueKind != JsonValueKind.String:
+                        throw new ScenarioRefusedException($"{here}.{property.Name}", $"it is {Kind(property.Value)} and it has to be text");
                     case "from":
                         from = property.Value.GetString();
                         break;
                     case "to":
                         to = property.Value.GetString();
                         break;
+
+                    // WW527.
+                    case "fill":
+                        fill = property.Value.ValueKind switch
+                        {
+                            JsonValueKind.True => true,
+                            JsonValueKind.False => false,
+                            _ => throw new ScenarioRefusedException(
+                                $"{here}.fill", $"it is {Kind(property.Value)} and it has to be true or false"),
+                        };
+                        break;
                     default:
-                        throw new ScenarioRefusedException($"{here}.{property.Name}", "there is no such field; there is from, to");
+                        throw new ScenarioRefusedException($"{here}.{property.Name}", "there is no such field; there is from, to, fill");
                 }
             }
 
             return from is null
                 ? throw new ScenarioRefusedException($"{here}.from", "it is not there, and it has to be")
-                : new StagedFile(from, to);
+                : new StagedFile(from, to, fill);
         }
     }
 

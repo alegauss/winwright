@@ -383,7 +383,7 @@ public sealed record FixtureDeclaration
             if (string.IsNullOrWhiteSpace(file?.From))
                 throw new ScenarioRefusedException(called, "one of its files is blank, and a blank path names nothing");
 
-            var staged = new StagedFile(file.From.Trim(), file.To?.Trim());
+            var staged = file with { From = file.From.Trim(), To = file.To?.Trim() };
             var lands = Landing(called, staged);
 
             // WW524. Two entries landing on one path is the silent overwrite this used to be — two
@@ -586,6 +586,9 @@ public sealed record FixtureDeclaration
             var to = System.IO.Path.Combine(into, Landing(Name, file));
             System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(to)!);
             System.IO.File.Copy(from, to, overwrite: true);
+
+            if (file.Fill)
+                Filled(file, to, root);
         }
 
         // WW515. A type rather than the path, so the thing a launch is composed from is a fixture
@@ -620,6 +623,37 @@ public sealed record FixtureDeclaration
         }
 
         return string.Join(System.IO.Path.DirectorySeparatorChar, parts.Where(part => part != "."));
+    }
+
+    /// <summary>
+    /// Fill a staged copy's tokens in place: <c>{reach0}</c> and on with the addresses this fixture
+    /// reaches, and <see cref="Staged"/> with where the files went. WW527.
+    /// <para>
+    /// Read as strict UTF-8 and written back with the byte-order mark it came with, so a file the
+    /// application parses is changed in the tokens and nowhere else. A file that is not UTF-8 is
+    /// refused naming it, because filling it would rewrite bytes nobody asked to change.
+    /// </para>
+    /// </summary>
+    private void Filled(StagedFile file, string staged, string root)
+    {
+        var bytes = System.IO.File.ReadAllBytes(staged);
+        var marked = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
+        var strict = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: marked, throwOnInvalidBytes: true);
+
+        string text;
+        try
+        {
+            text = strict.GetString(bytes, marked ? 3 : 0, bytes.Length - (marked ? 3 : 0));
+        }
+        catch (System.Text.DecoderFallbackException)
+        {
+            throw new ScenarioRefusedException(
+                Name, $"it asks to fill '{file.From}', which is not UTF-8 text, so filling it would rewrite bytes nobody asked to change");
+        }
+
+        var filled = Offered(Resolved(text, root));
+        if (!string.Equals(filled, text, StringComparison.Ordinal))
+            System.IO.File.WriteAllText(staged, filled, strict);
     }
 
     /// <summary><paramref name="value"/> with <see cref="Staged"/> swapped for where the files went.</summary>

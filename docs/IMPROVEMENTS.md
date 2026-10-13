@@ -4,25 +4,25 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW527 Filling tokens in a staged file
+### §WW529 Filling a JSON store
 
-Left by WW522. A fixture's `reaches` addresses are offered to `arguments` and
-`variables` as `{reach0}`, `{reach1}` and on, and WW522's design also offered them to
-`files` so a staged store can name the server. quickshell's QS269 is that shape: its
-session store, staged under `{files}`, names the host and port the session connects to.
-Staging copies bytes as they are, so the store has to carry a literal address, which is
-a second spelling of what `reaches` already says. The two can disagree, and then the
-probe checks one server while the client connects to another.
+Left by WW527. A staged file asking to be filled gets `{files}` replaced with the staged
+directory as Windows spells it, `C:\Users\...\Temp\winwright\...`. Inside a JSON string
+each backslash starts an escape, so a store such as `{ "store": "{files}\\cache" }`
+comes out as invalid JSON, or as a path with its separators silently eaten. The
+application then refuses the store, or reads a different one, and the case reports
+something about the application. Most stores an adopter stages are JSON, quickshell's
+`sessions.json` among them. `{reachN}` is safe, since a host:port carries no backslash.
 
-What to build: a staged file may ask for its tokens to be filled. In WW524's object form
-that is `{ "from": ..., "fill": true }`; until that exists, a fixture-level `"fill":
-["sessions.json"]`. Filling replaces `{reachN}` and `{files}` in the file's text, read
-and written as UTF-8 without a BOM change. A file asked to be filled that is not valid
-UTF-8 is refused, naming it, and a file not asked is copied byte for byte as today.
-Copying silently is the default because most staged files are not text.
+What to build: the escaping belongs to the file, not to the token. A staged file whose
+destination ends in `.json` and asks to be filled has every replacement JSON-escaped
+before it is written, so `{files}` lands as `C:\\Users\\...` inside a string. Any other
+extension is filled raw, as today. The rule goes on the `files` field's schema text and
+in the README beside `fill`, so an adopter staging an `.ini` or `.xml` knows the value
+arrives unescaped.
 
-Falsified when a staged store names the server only as `{reach0}` and the launched
-application reads the address the probe reached.
+Falsified when a filled `.json` store naming `{files}` inside a string parses, and
+round-trips to the staged directory's own path.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

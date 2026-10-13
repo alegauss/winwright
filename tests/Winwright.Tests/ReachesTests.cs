@@ -127,6 +127,73 @@ public sealed class ReachesTests : IDisposable
         });
     }
 
+    /// <summary>
+    /// WW527. quickshell's QS269 stages a session store naming the server the session connects to,
+    /// and staging copied bytes as they were, so the store spelled the address a second time and the
+    /// probe and the client could be talking about two servers.
+    /// </summary>
+    [Fact]
+    public void A_staged_file_asking_to_be_filled_names_the_server_the_fixture_reaches()
+    {
+        var fixtures = Path.Combine(root, "cases", "fixtures");
+        Directory.CreateDirectory(fixtures);
+        File.WriteAllText(
+            Path.Combine(fixtures, "sessions.json"),
+            """{ "host": "{reach0}", "store": "{files}" }""",
+            new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+        File.WriteAllText(Path.Combine(fixtures, "raw.json"), """{ "host": "{reach0}" }""");
+
+        var fixture = FixtureDeclaration.Of(
+            "connected",
+            variables: new Dictionary<string, string> { ["APPDATA"] = FixtureDeclaration.Staged },
+            files: [new StagedFile("cases/fixtures/sessions.json", "quickshell/sessions.json", Fill: true), "cases/fixtures/raw.json"],
+            reaches: ["127.0.0.1:2222"]);
+
+        try
+        {
+            var into = fixture.Stage(root).Into;
+            var staged = File.ReadAllBytes(Path.Combine(into, "quickshell", "sessions.json"));
+
+            // The mark the file came with, kept: an application that parses it sees only the tokens move.
+            Assert.Equal([0xEF, 0xBB, 0xBF], staged.Take(3));
+            var text = System.Text.Encoding.UTF8.GetString(staged, 3, staged.Length - 3);
+            Assert.Contains("\"host\": \"127.0.0.1:2222\"", text, StringComparison.Ordinal);
+            Assert.Contains(into, text, StringComparison.Ordinal);
+
+            // A file that did not ask is copied byte for byte, token and all.
+            Assert.Equal("""{ "host": "{reach0}" }""", File.ReadAllText(Path.Combine(into, "raw.json")));
+        }
+        finally
+        {
+            if (Directory.Exists(fixture.StagedInto(root)))
+                Directory.Delete(fixture.StagedInto(root), recursive: true);
+        }
+    }
+
+    [Fact]
+    public void A_file_that_is_not_utf8_is_refused_rather_than_filled()
+    {
+        Directory.CreateDirectory(Path.Combine(root, "cases"));
+        File.WriteAllBytes(Path.Combine(root, "cases", "store.bin"), [0x7B, 0xFF, 0xFE, 0x7D]);
+
+        var fixture = FixtureDeclaration.Of(
+            "binary",
+            variables: new Dictionary<string, string> { ["APPDATA"] = FixtureDeclaration.Staged },
+            files: [new StagedFile("cases/store.bin", Fill: true)]);
+
+        try
+        {
+            var refused = Assert.Throws<ScenarioRefusedException>(() => fixture.Stage(root));
+            Assert.Contains("cases/store.bin", refused.Because, StringComparison.Ordinal);
+            Assert.Contains("not UTF-8", refused.Because, StringComparison.Ordinal);
+        }
+        finally
+        {
+            if (Directory.Exists(fixture.StagedInto(root)))
+                Directory.Delete(fixture.StagedInto(root), recursive: true);
+        }
+    }
+
     /// <summary>A loopback port nothing is listening on: bound, read and let go.</summary>
     private static int Closed()
     {

@@ -16,7 +16,13 @@ namespace Winwright.Scenarios;
 /// </summary>
 /// <param name="From">The file, relative to the project's root.</param>
 /// <param name="To">Where it lands under the staged directory, or null for the top under its own name.</param>
-public sealed record StagedFile(string From, string? To = null)
+/// <param name="Fill">
+/// Whether its text has <c>{reach0}</c> and on, and <c>{files}</c>, filled as it is staged. WW527:
+/// a store naming the server a fixture reaches would otherwise carry a second spelling of the
+/// address, and the probe and the client could then be talking about two servers. Off by default,
+/// because most staged files are not text and are copied byte for byte.
+/// </param>
+public sealed record StagedFile(string From, string? To = null, bool Fill = false)
 {
     /// <summary>The plain form: copy this file to the top of the staged directory.</summary>
     /// <param name="from">The file, relative to the project's root.</param>
@@ -26,5 +32,5 @@ public sealed record StagedFile(string From, string? To = null)
     public string Lands => To ?? System.IO.Path.GetFileName(From);
 
     /// <summary>The one line a refusal names it by.</summary>
-    public override string ToString() => To is null ? From : $"{From} -> {To}";
+    public override string ToString() => (To is null ? From : $"{From} -> {To}") + (Fill ? ", filled" : "");
 }
