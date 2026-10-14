@@ -18,11 +18,16 @@ public enum SurvivorFate
 /// <param name="Pid">The process id, which is what a file-lock message names.</param>
 /// <param name="Executable">What was launched, as it was launched.</param>
 /// <param name="Fate">Whether the register managed to stop it.</param>
-public sealed record Survivor(int Pid, string Executable, SurvivorFate Fate)
+/// <param name="Case">
+/// The case it was launched for, or null where the launch named none. WW531: a survivor named by pid
+/// alone in a sixteen-case run is sixteen guesses.
+/// </param>
+/// <param name="Lent">Whether that launch was lent on to the cases after it.</param>
+public sealed record Survivor(int Pid, string Executable, SurvivorFate Fate, string? Case = null, bool Lent = false)
 {
     /// <summary>The one line a summary shows.</summary>
     public override string ToString() =>
         Fate == SurvivorFate.Stopped
-            ? $"pid {Pid} {Executable} - outlived its case and was stopped"
-            : $"pid {Pid} {Executable} - outlived its case and would not stop";
+            ? $"pid {Pid} {Executable}{LaunchedProcess.Owner(Case, Lent)} - outlived its case and was stopped"
+            : $"pid {Pid} {Executable}{LaunchedProcess.Owner(Case, Lent)} - outlived its case and would not stop";
 }

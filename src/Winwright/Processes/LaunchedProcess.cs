@@ -12,10 +12,43 @@ public sealed class LaunchedProcess
 {
     private readonly Process process;
 
-    internal LaunchedProcess(Process process, string executable)
+    internal LaunchedProcess(Process process, string executable, string? forCase = null, bool lent = false)
     {
         this.process = process;
         Executable = executable;
+        Case = forCase;
+        Lent = lent;
+    }
+
+    /// <summary>
+    /// The case this launch was made for, or null where the caller did not say.
+    /// <para>
+    /// WW531. Found by quickshell (QS298): a sixteen-case run went red on one survivor named by pid
+    /// alone, the same cases passed straight afterwards, and the pid was gone by the time anybody read
+    /// it. The suite knew which case it was launching for and the register was never told, so the
+    /// line a reader had to act on was the one line that could not say where to look.
+    /// </para>
+    /// </summary>
+    public string? Case { get; }
+
+    /// <summary>
+    /// Whether this launch was lent on to the cases after <see cref="Case"/>, so outliving it may be
+    /// any of theirs and not only the first one's.
+    /// </summary>
+    public bool Lent { get; }
+
+    /// <summary>
+    /// The clause every line about this launch carries after its executable: which case it was
+    /// launched for, and that it was lent where it was. Empty where no case was named. WW531.
+    /// </summary>
+    /// <param name="forCase">The case, or null.</param>
+    /// <param name="lent">Whether it was lent on.</param>
+    internal static string Owner(string? forCase, bool lent)
+    {
+        if (forCase is null)
+            return "";
+
+        return lent ? $", launched for '{forCase}' and lent to the cases after it" : $", launched for '{forCase}'";
     }
 
     /// <summary>The process id, which is what a file-lock message names.</summary>
@@ -73,7 +106,7 @@ public sealed class LaunchedProcess
     /// <param name="seen">Where the register was standing when it looked. WW286.</param>
     internal Departure Left(DepartureSeen seen)
     {
-        Departed ??= new Departure(Pid, Executable, process.ExitCode, seen);
+        Departed ??= new Departure(Pid, Executable, process.ExitCode, seen, Case, Lent);
         return Departed;
     }
 }

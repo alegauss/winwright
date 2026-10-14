@@ -128,7 +128,13 @@ public sealed class ProcessRegister : IDisposable
     }
 
     /// <summary>The same, where the caller needs to say more about how it starts.</summary>
-    public LaunchedProcess Launch(ProcessStartInfo start)
+    /// <param name="start">How to start it.</param>
+    /// <param name="forCase">
+    /// The case this launch is for, which every line about it that outlives the case then names.
+    /// WW531: a survivor named by pid alone could not be traced back to anything.
+    /// </param>
+    /// <param name="lent">That the launch will be lent on to the cases after <paramref name="forCase"/>.</param>
+    public LaunchedProcess Launch(ProcessStartInfo start, string? forCase = null, bool lent = false)
     {
         ArgumentNullException.ThrowIfNull(start);
         ObjectDisposedException.ThrowIf(survivors is not null, this);
@@ -136,7 +142,7 @@ public sealed class ProcessRegister : IDisposable
         var started = Process.Start(start)
             ?? throw new InvalidOperationException($"{start.FileName} started nothing this run can hold");
 
-        var registered = new LaunchedProcess(started, start.FileName);
+        var registered = new LaunchedProcess(started, start.FileName, forCase, lent);
         launched.Add(registered);
         return registered;
     }
@@ -199,7 +205,7 @@ public sealed class ProcessRegister : IDisposable
         if (Ending(registered) == SurvivorFate.Stopped)
             return null;
 
-        var refused = new Survivor(pid, registered.Executable, SurvivorFate.WouldNotStop);
+        var refused = new Survivor(pid, registered.Executable, SurvivorFate.WouldNotStop, registered.Case, registered.Lent);
         outlived.Add(refused);
         return refused;
     }
@@ -241,7 +247,7 @@ public sealed class ProcessRegister : IDisposable
             }
 
             var pid = registered.Pid;
-            left.Add(new Survivor(pid, registered.Executable, Ending(registered)));
+            left.Add(new Survivor(pid, registered.Executable, Ending(registered), registered.Case, registered.Lent));
         }
 
         survivors = new ReadOnlyCollection<Survivor>(left);

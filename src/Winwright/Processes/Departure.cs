@@ -53,8 +53,14 @@ public enum DepartureSeen
 /// Where the register was standing when it found it gone. WW286: what bounds how much anything
 /// reading this may claim about when the application went.
 /// </param>
-public sealed record Departure(int Pid, string Executable, int Code, DepartureSeen Seen)
+/// <param name="Case">The case it was launched for, or null where the launch named none. WW531.</param>
+/// <param name="Lent">Whether that launch was lent on to the cases after it.</param>
+public sealed record Departure(
+    int Pid, string Executable, int Code, DepartureSeen Seen, string? Case = null, bool Lent = false)
 {
+    /// <summary>Which case it was launched for, as the clause a line carries after the executable.</summary>
+    public string Owner => LaunchedProcess.Owner(Case, Lent);
+
     /// <summary>
     /// The fact and nothing about what it means, which is the caller's to say: a case that ended by
     /// closing the application under test left this behind on purpose, and a phrase claiming the run

@@ -179,6 +179,16 @@ public sealed class EarlyExitsTests : IDisposable
         Assert.Equal(1, read.Unattributable);
         Assert.Contains("which case it went during", read.Sentence(), StringComparison.Ordinal);
         Assert.Contains($"exited with {Fixture.ExitFor("dies")}", read.Sentence(), StringComparison.Ordinal);
+
+        // WW531. The suite tells the register which case the launch was for, and that it was lent,
+        // so the line names where to start looking even where it cannot say which case it went during.
+        var left = Assert.Single(read.Left);
+        Assert.Equal("the first case through the lent launch", left.Case);
+        Assert.True(left.Lent);
+        Assert.Contains(
+            "launched for 'the first case through the lent launch' and lent to the cases after it",
+            read.Sentence(),
+            StringComparison.Ordinal);
     }
 
     /// <summary>Wait until that launch has gone on its own, so a stop looks at a settled process.</summary>

@@ -177,6 +177,34 @@ public class ProcessRegisterTests
     }
 
     [Fact]
+    public void A_survivor_names_the_case_it_was_launched_for()
+    {
+        // WW531. Found by quickshell (QS298): one survivor in a sixteen-case run, named by a pid that
+        // was gone by the time anybody read it, so nothing said which case had started it.
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning(), "connected tab reads its bars");
+
+        var survivor = Assert.Single(register.StopAll());
+
+        Assert.Equal("connected tab reads its bars", launched.Case);
+        Assert.Equal("connected tab reads its bars", survivor.Case);
+        Assert.False(survivor.Lent);
+        Assert.Contains(", launched for 'connected tab reads its bars' - outlived", survivor.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_survivor_from_a_lent_launch_says_it_was_lent_and_one_that_named_no_case_says_nothing_more()
+    {
+        var lent = new Survivor(1234, "ClaudeTray.exe", SurvivorFate.WouldNotStop, "the first reader", Lent: true);
+        var unnamed = new Survivor(1235, "ClaudeTray.exe", SurvivorFate.WouldNotStop);
+
+        Assert.Equal(
+            "pid 1234 ClaudeTray.exe, launched for 'the first reader' and lent to the cases after it - outlived its case and would not stop",
+            lent.ToString());
+        Assert.Equal("pid 1235 ClaudeTray.exe - outlived its case and would not stop", unnamed.ToString());
+    }
+
+    [Fact]
     public void A_launched_process_cannot_be_constructed_any_other_way()
     {
         var constructors = typeof(LaunchedProcess).GetConstructors();

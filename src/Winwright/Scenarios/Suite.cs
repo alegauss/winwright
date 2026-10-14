@@ -206,7 +206,7 @@ public static class Suite
                 continue;
             }
 
-            var (window, process) = Opened(register, project, fixture, one.Name);
+            var (window, process) = Opened(register, project, fixture, one.Name, borrowing);
             if (borrowing)
                 lent[fixture.Name] = window;
 
@@ -279,7 +279,7 @@ public static class Suite
     /// than a red: nothing about the case was observed, so nothing about the application was.
     /// </exception>
     private static (AutomationElement Window, LaunchedProcess Process) Opened(
-        ProcessRegister register, ProjectDeclaration project, FixtureDeclaration fixture, string named)
+        ProcessRegister register, ProjectDeclaration project, FixtureDeclaration fixture, string named, bool lent)
     {
         // WW509, and WW515 for the order. Staging comes first because the directory the token
         // resolves to has to be the directory the files are actually in by the time the process
@@ -304,7 +304,9 @@ public static class Suite
         if (project.Declares("captures") && !start.Environment.ContainsKey(Capturing.OwnRender.RendersInto))
             start.Environment[Capturing.OwnRender.RendersInto] = project.Captures;
 
-        var launched = register.Launch(start);
+        // WW531. The register is told which case this is for, so a process that outlives it is named
+        // by that case and not by a pid that has gone by the time anybody reads it.
+        var launched = register.Launch(start, named, lent);
         var deadline = project.Timeouts.For(WindowTimeout);
 
         // WW257. A tray draws no window, and the window in that case is what a click on the icon is

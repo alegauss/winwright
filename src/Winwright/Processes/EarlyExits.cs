@@ -71,7 +71,7 @@ public sealed record EarlyExits(IReadOnlyList<Departure> Left, bool Asked)
         }
 
         return $"{Left.Count} launch(es) had gone before the run asked: {string.Join(", ", clauses)} — "
-            + $"{string.Join(", ", Left.Select(one => $"pid {one.Pid} {one.Executable} {one}"))}.";
+            + $"{string.Join(", ", Left.Select(one => $"pid {one.Pid} {one.Executable}{one.Owner} {one}"))}.";
     }
 
     /// <inheritdoc cref="Sentence" />

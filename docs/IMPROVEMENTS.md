@@ -50,31 +50,6 @@ decision to make once WW532 has a design.
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW531 A survivor names its case
-
-Found by quickshell (QS298, 2026-10-13). A guest run with all sixteen cases passed went
-red on CasesRun's last check, `Assert.Empty(register.StopAll())`, with one line: `pid N
-quickshell.exe - outlived its case and would not stop`. The same cases alone passed
-straight afterwards, and the pid was gone by the time anybody read it, so nothing said
-which case had started the client.
-
-Suite.Launch knows: Opened is handed the case's name and the register's Launch is called
-inside it, and the per-case Stop in the finally is where WouldNotStop is found. The
-register is not told, so a Survivor carries a pid, an executable and a fate, and a
-reader with sixteen cases has sixteen guesses.
-
-What to build: the register takes the name of the case a launch is for (Launch with an
-owner, or a LaunchedProcess.For the suite sets), and Survivor and Departure carry it, so
-`ToString` reads `pid N quickshell.exe, launched for 'connected tab reads its bars' -
-outlived its case and would not stop`. A lent fixture names the first case it was
-launched for and says it was lent.
-
-The adopter's workaround until then is to pair register.Launched with verdict.Ran by
-order, which holds only while no case is skipped as unreachable after the launch list
-was built.
-
-Falsified when a survivor's line does not name the case that launched it.
-
 ### §WW534 One runner per guest desk
 
 Found by quickshell (QS302, 2026-10-14). quickshell's guest suite and winwright's own

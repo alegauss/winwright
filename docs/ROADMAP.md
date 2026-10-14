@@ -7,7 +7,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW531** (deps: —) **A process that outlived its case is named by pid alone, never by the case that launched it** — The register is not told which case a launch is for, so an intermittent survivor in a sixteen-case run cannot be traced. → §WW531
 - 📋 **WW534** (deps: —) **Two runners driving one guest VM interleave their windows, and neither says another run holds the desk** — A quickshell guest run lost the foreground to Winwright.Fixture three times while winwright's own suite ran in the same VM. → §WW534
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
