@@ -2,11 +2,18 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+- 📋 **WW532** (deps: —) **A case that ran last run and not this one goes unnoticed while the total holds, so a swap reads green** — A count notices a subtraction and only the set of cases that ran notices a substitution, as a reader of the dev.to article measured. → §WW532
+- 💭 **WW533** (deps: WW532) **A case renamed and a claim no case makes any more read alike between runs, so a lost claim is one rename among many** — A diff of names flags every harmless rename, while the loss worth a red is a `catches` claim nothing carries now. → §WW533
+
 ## Block B — Attach, launch, and leave nothing behind
+
+- 📋 **WW531** (deps: —) **A process that outlived its case is named by pid alone, never by the case that launched it** — The register is not told which case a launch is for, so an intermittent survivor in a sixteen-case run cannot be traced. → §WW531
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
+
+- 📋 **WW530** (deps: —) **A drag can only be released over an element of the window it started in, so a drop onto Explorer has no case** — Found by quickshell's QS188: a file dragged from its server pane onto an Explorer folder cannot be named as the drop target. → §WW530
 
 ## Block E — Capture — the picture that proves what it photographed
 
