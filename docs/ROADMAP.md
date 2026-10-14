@@ -8,12 +8,13 @@
 ## Block B — Attach, launch, and leave nothing behind
 
 - 📋 **WW531** (deps: —) **A process that outlived its case is named by pid alone, never by the case that launched it** — The register is not told which case a launch is for, so an intermittent survivor in a sixteen-case run cannot be traced. → §WW531
+- 📋 **WW534** (deps: —) **Two runners driving one guest VM interleave their windows, and neither says another run holds the desk** — A quickshell guest run lost the foreground to Winwright.Fixture three times while winwright's own suite ran in the same VM. → §WW534
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW530** (deps: —) **A drag can only be released over an element of the window it started in, so a drop onto Explorer has no case** — Found by quickshell's QS188: a file dragged from its server pane onto an Explorer folder cannot be named as the drop target. → §WW530
+- 🛠 **WW530** (deps: —) **A drag can only be released over an element of the window it started in, so a drop onto Explorer has no case** — Found by quickshell's QS188: a file dragged from its server pane onto an Explorer folder cannot be named as the drop target. → §WW530
 
 ## Block E — Capture — the picture that proves what it photographed
 

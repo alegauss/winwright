@@ -75,6 +75,25 @@ was built.
 
 Falsified when a survivor's line does not name the case that launched it.
 
+### §WW534 One runner per guest desk
+
+Found by quickshell (QS302, 2026-10-14). quickshell's guest suite and winwright's own
+(C:\winwright-sync\run.cmd) ran in the same VM at once, started by two sessions. Three
+quickshell UI cases went Degraded, each waiting for a foreground held by
+"Winwright.Fixture", and winwright's run had quickshell's clients on its desk too.
+
+The verdict read it honestly as a foreground it could not get, but nothing said another
+runner was on the desk, so the reader goes looking for a defect in the cases.
+
+What to build, shared by every adopter that drives a guest: a claim on the desk for the
+length of a run, which a second runner waits on and names (a host-side named mutex keyed
+on the .vmx path is enough, since one host drives the VM). And where a foreground is
+lost to a window of a process the run did not start, the Unchecked line says that
+process belongs to no case here.
+
+Falsified when two runners' suites interleave on one guest desk without either saying
+so.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
