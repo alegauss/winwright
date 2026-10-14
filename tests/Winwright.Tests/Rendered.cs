@@ -156,6 +156,9 @@ internal static class Rendered
             null, "what the run had to stop, apart from what would not stop"),
         new("EarlyExits.Sentence", "EarlyExitsTests.An_exit_only_the_end_of_the_run_saw_is_counted_apart_and_says_why",
             null, "which launches had gone before the run asked, and which of those no case can claim"),
+        new("RanBefore.Sentence", "RanBeforeTests.A_case_swapped_for_another_at_the_same_total_is_named_both_ways",
+            null, "whether the cases that ran are the ones the last run over the same selection ran, and "
+                + "which appeared and vanished where not"),
         new("RenderMatch.Sentence", "UnchangedTests.Two_renders_of_unchanged_code_are_byte_identical",
             null, "whether two renders are the same bytes, and where they are not, whether the picture "
                 + "changed with them"),

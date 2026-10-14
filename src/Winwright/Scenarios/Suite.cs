@@ -67,6 +67,13 @@ public sealed class SuiteVerdict
     /// <summary>The one of four readings the whole run earned.</summary>
     public RunOutcome Outcome { get; }
 
+    /// <summary>
+    /// Whether the cases that ran are the ones the last run over the same selection ran. WW532: a
+    /// count notices a subtraction, and only this notices a substitution. A finding, so it never
+    /// moves <see cref="Outcome"/>.
+    /// </summary>
+    public RanBefore Compared { get; internal init; } = RanBefore.NotAsked;
+
     /// <summary>The process exit code, which is the outcome itself and not a second mapping.</summary>
     public int ExitCode => (int)Outcome;
 
@@ -106,7 +113,9 @@ public sealed class SuiteVerdict
     /// <summary>The whole reading as a report prints it: the sentence, then a line for each case.</summary>
     public IReadOnlyList<string> Render()
     {
-        var lines = new List<string> { Sentence() };
+        // WW532. Second, beside the count it qualifies: a total that held is read as nothing changed,
+        // and this is the line that says whether that is so.
+        var lines = new List<string> { Sentence(), Compared.Sentence() };
         lines.AddRange(Ran.Select(one => $"  {one}"));
         lines.AddRange(Skipped.Select(one => $"  {one}"));
 
@@ -240,7 +249,7 @@ public static class Suite
             ran.Add(process.Departed is { } departed ? result.After(departed) : result);
         }
 
-        return new SuiteVerdict(asked, new ReadOnlyCollection<CaseResult>(ran), new ReadOnlyCollection<NotRun>(skipped));
+        return Remembered(asked, ran, skipped, project);
     }
 
     /// <summary>
@@ -482,6 +491,20 @@ public static class Suite
                 ran.Add(CaseRun.Of(one, root, project, budget, measured));
         }
 
-        return new SuiteVerdict(asked, new ReadOnlyCollection<CaseResult>(ran), new ReadOnlyCollection<NotRun>(skipped));
+        return Remembered(asked, ran, skipped, project);
+    }
+
+    /// <summary>
+    /// The verdict, with the cases that ran held against the last run over the same selection and
+    /// written down for the next one. WW532: both doors end here, so neither can forget to compare.
+    /// </summary>
+    private static SuiteVerdict Remembered(
+        Selection asked, List<CaseResult> ran, List<NotRun> skipped, ProjectDeclaration project)
+    {
+        var cases = new ReadOnlyCollection<CaseResult>(ran);
+        return new SuiteVerdict(asked, cases, new ReadOnlyCollection<NotRun>(skipped))
+        {
+            Compared = RanBefore.Of(asked, cases.Select(one => one.Declared.Name), project),
+        };
     }
 }

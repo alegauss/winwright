@@ -117,6 +117,16 @@ public sealed class ProjectDeclaration
             "a capture step refuses at the door rather than after launching the application",
             ""),
         new(
+            "lastRun",
+            "",
+            "a path to a file",
+            "where a run keeps the names of the cases it actually ran, per selection, so the next run "
+                + "over the same selection names each case that appeared and each that vanished — a "
+                + "case swapped for another at the same total included",
+            "every run reads only itself, and says so: a case renamed or replaced between two runs at "
+                + "the same total does not show",
+            ""),
+        new(
             "languageFiles",
             "",
             "an array of paths",
@@ -234,6 +244,7 @@ public sealed class ProjectDeclaration
     private readonly string? sourceRoot;
     private readonly string? fingerprintStore;
     private readonly string? captures;
+    private readonly string? lastRun;
 
     /// <summary>
     /// The token a declared path may carry for the build configuration. WW521.
@@ -273,6 +284,7 @@ public sealed class ProjectDeclaration
         sourceRoot = Resolve(shape.SourceRoot, "sourceRoot");
         fingerprintStore = Resolve(shape.FingerprintStore, "fingerprintStore");
         captures = Resolve(shape.Captures, "captures");
+        lastRun = Resolve(shape.LastRun, "lastRun");
         LanguageFiles = new ReadOnlyCollection<string>(
             (shape.LanguageFiles ?? []).Select(one => Resolve(one, "languageFiles")).OfType<string>().ToList());
         Loading = new ReadOnlyCollection<string>(
@@ -494,10 +506,28 @@ public sealed class ProjectDeclaration
     public string Captures =>
         Require(captures, "captures", "writing a picture a case asked for");
 
+    /// <summary>
+    /// Where a run keeps the names of the cases it actually ran, per selection. WW532.
+    /// <para>
+    /// Raised by a reader of the article about the run that went from 374 to 352: a count notices a
+    /// subtraction and cannot notice a substitution, because a suite that keeps its total and changes
+    /// its contents has no test left to fail for the check that stopped being made. Every run read only
+    /// itself, so the one thing that could tell was a memory nobody kept.
+    /// </para>
+    /// <para>
+    /// The project's, as <see cref="Captures"/> is, and a file the run writes: a path declared here
+    /// names where this checkout keeps it, and none is the reading saying it was never asked.
+    /// </para>
+    /// </summary>
+    /// <exception cref="DeclarationMissingException">Where the project declares none.</exception>
+    public string LastRun =>
+        Require(lastRun, "lastRun", "comparing the cases a run ran with the ones the last run ran");
+
     /// <summary>Whether the project declared a value for that key at all, without refusing.</summary>
     public bool Declares(string key) => key switch
     {
         "captures" => captures is not null || unfilled.Contains("captures"),
+        "lastRun" => lastRun is not null || unfilled.Contains("lastRun"),
         // WW521. A path whose token nothing filled still counts as declared, so the reading that
         // needs it asks and meets the refusal saying how to fill it, rather than passing it by as a
         // key the project never wrote.
@@ -645,6 +675,8 @@ public sealed class ProjectDeclaration
         [JsonPropertyName("fingerprintStore")] public string? FingerprintStore { get; init; }
 
         [JsonPropertyName("captures")] public string? Captures { get; init; }
+
+        [JsonPropertyName("lastRun")] public string? LastRun { get; init; }
 
         [JsonPropertyName("languageFiles")] public IReadOnlyList<string>? LanguageFiles { get; init; }
 

@@ -38,6 +38,7 @@
 - ✅ **WW460** **the diagnosed miss reaches a case in this suite and not a scenario step, which is the door an adopter reads** — A scenario step's never-answered detail carries the miss now, and the case asserts on the detail a trace prints rather than on an expectation in hand.
 - ✅ **WW462** **the sweep for verbs that reach the desk walks one file, so a verb reaching it through another is never seen** — The sweep crosses files: 24 verbs became 51, each classified, and the excuse a synthesised act is written with is one the rule can see (design recorded in `tests/Winwright.Tests/Checkout.cs`).
 - ✅ **WW517** **a foreground check that passed records neither who held the desk nor which finding made it ours** — A met foreground names the holder and the finding that made it ours, and a press carries both to its trace line (design recorded in `src/Winwright/Windowing/Foreground.cs`).
+- ✅ **WW532** **A case that ran last run and not this one goes unnoticed while the total holds, so a swap reads green** — With lastRun declared, a run names the cases that appeared and vanished since the last run over its selection (design recorded in `src/Winwright/Scenarios/RanBefore.cs`).
 
 ## Block B — Attach, launch, and leave nothing behind
 

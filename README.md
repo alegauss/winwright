@@ -304,6 +304,7 @@ needs one this file does not declare is **recorded as not taken**, never quietly
   "sourceIgnore": ["bin", "obj"],
   "fingerprintStore": "%APPDATA%/YourApp",
   "captures": "TestResults/captures",
+  "lastRun": "TestResults/last-run.json",
   "languageFiles": ["strings.en.json", "strings.pt-BR.json"],
   "reportedSets": { "profiles": ["--print-profiles"] },
   "reportedValues": { "activeProfile": ["--print-active-profile"] },
@@ -330,6 +331,14 @@ starts matching nothing the day somebody ships another language. `Loading.In` re
 of `languageFiles` for whichever language the run resolved and asks the tree, so a page that is still
 saying it is loading is a failure rather than a photograph. A key none of those files carries
 **refuses the run** — a check that silently matches nothing reports a page as finished forever.
+
+`lastRun` names a file where a run keeps the names of the cases it actually ran, per selection. The
+next run over the same selection compares against it, and the line under the verdict's sentence
+names each case that **appeared** and each that **vanished**. A count catches 374 becoming 352. Only
+this catches a case swapped for another at the same total, for example one test turned into a skip
+and another renamed, which still exits 0 with the line people read unchanged. It is a finding and
+never moves the exit code. The file is rewritten on every run, so a deliberate rename is named once,
+on the run that made it. Without the key, that line says nothing remembers the last run.
 
 `destructive` names the entries that end the run, and it is the one key with a refusal of its own: a
 bare name is refused where the project ships more than one language, because a name is the field a

@@ -87,11 +87,44 @@ public sealed class SuiteRunTests : IDisposable
 
         var rendered = verdict.Render();
 
-        Assert.Equal(4, rendered.Count);
+        Assert.Equal(5, rendered.Count);
         Assert.Contains("2 of 3 cases, 1 not run", rendered[0]);
-        Assert.Contains("the field takes a name: Passed", rendered[1]);
-        Assert.Contains("the box ticks: Passed", rendered[2]);
-        Assert.Contains("the field reads gamma — not selected by tag smoke", rendered[3]);
+
+        // WW532. Beside the count it qualifies, and said even where the project keeps no record.
+        Assert.Contains("nothing remembers which cases the last run ran", rendered[1]);
+        Assert.Contains("the field takes a name: Passed", rendered[2]);
+        Assert.Contains("the box ticks: Passed", rendered[3]);
+        Assert.Contains("the field reads gamma — not selected by tag smoke", rendered[4]);
+    }
+
+    [Fact]
+    public void A_run_over_a_project_that_keeps_a_record_is_compared_with_the_last_run()
+    {
+        // WW532. Through the suite's own door, so the comparison is something a run does and not
+        // something a caller has to remember: the first run over the selection is the record, and the
+        // second over the same selection reads it back.
+        var frame = Dialog();
+        var record = Path.Combine(root, "records", "last-run.json");
+        var path = Path.Combine(root, "remembering", ProjectDeclaration.FileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Environment.ProcessPath)}},
+              "lastRun": {{System.Text.Json.JsonSerializer.Serialize(record)}},
+              "timeouts": { "resolve": 600, "act": 600, "poll": 20 }
+            }
+            """);
+        var project = ProjectDeclaration.Load(path);
+
+        var first = Suite.Run(Three(), Selection.Tag("smoke"), Root(frame), project);
+        var second = Suite.Run(Three(), Selection.Tag("smoke"), Root(frame), project);
+
+        Assert.True(first.Compared.First);
+        Assert.True(second.Compared.Same, second.Compared.Sentence());
+        Assert.Equal(second.Compared.Sentence(), second.Render()[1]);
+        Assert.True(File.Exists(record));
     }
 
     [Fact]

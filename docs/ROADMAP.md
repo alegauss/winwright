@@ -2,8 +2,7 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW532** (deps: —) **A case that ran last run and not this one goes unnoticed while the total holds, so a swap reads green** — A count notices a subtraction and only the set of cases that ran notices a substitution, as a reader of the dev.to article measured. → §WW532
-- 💭 **WW533** (deps: WW532) **A case renamed and a claim no case makes any more read alike between runs, so a lost claim is one rename among many** — A diff of names flags every harmless rename, while the loss worth a red is a `catches` claim nothing carries now. → §WW533
+- 💭 **WW533** (deps: WW532 ✅) **A case renamed and a claim no case makes any more read alike between runs, so a lost claim is one rename among many** — A diff of names flags every harmless rename, while the loss worth a red is a `catches` claim nothing carries now. → §WW533
 
 ## Block B — Attach, launch, and leave nothing behind
 

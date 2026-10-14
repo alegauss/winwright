@@ -2,30 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW532 A run compares its cases against nothing
-
-Raised in a comment on the dev.to article about the 374-to-352 run. The commenter
-reproduced it in pytest: four tests, `4 passed`, exit 0; then one test became a skip and
-one was renamed, and the run still exited 0 with the line people read unchanged.
-Comparing totals catches 374 becoming 352. It cannot catch a suite that keeps its total
-and changes its contents, because the check that stopped being made has no test left to
-fail.
-
-Half of that is already closed here. `SuiteVerdict.Skipped` names every case a selection
-left alone, in the sentence, and a case whose `needs` the desk lacks comes back
-unchecked with the run degraded rather than passed. So winwright has no silent skip.
-What it has no answer for is the other half: every run reads only itself, so a case
-renamed or replaced between two runs at the same total is invisible.
-
-What is missing is a memory. A run would record the names of the cases that actually
-ran, and the next run over the same selection would read the difference in both
-directions, naming each case that appeared and each that vanished.
-
-Open before this is designed: where the record lives (a project-declared path, as
-`captures` is, and never the checkout); which verdict a difference earns, since it is
-neither the application failing nor the desk refusing; and how a deliberate rename is
-acknowledged once, so the difference does not become a line everybody learns to skip.
-
 ### §WW533 What a substitution loses is a claim, not a name
 
 An idea that grew out of WW532, filed apart because it may not survive its design. A
@@ -45,8 +21,8 @@ as nothing lost; the run already counts the cases that say nothing, which is whe
 sentence would come from. And two cases may name the same defect, so the set is of
 claims, and a claim one case dropped while another still makes it is not a loss.
 
-Whether this replaces the name diff, sits beside it, or is a reading WW532 takes is the
-decision to make once WW532 has a design.
+WW532 shipped the name diff as `RanBefore`, a per-selection record at the project's
+`lastRun`; the claims fit beside the names in that record.
 
 ## Block B — Attach, launch, and leave nothing behind
 
