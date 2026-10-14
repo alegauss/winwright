@@ -2,8 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 💭 **WW533** (deps: WW532 ✅) **A case renamed and a claim no case makes any more read alike between runs, so a lost claim is one rename among many** — A diff of names flags every harmless rename, while the loss worth a red is a `catches` claim nothing carries now. → §WW533
-
 ## Block B — Attach, launch, and leave nothing behind
 
 - 📋 **WW534** (deps: —) **Two runners driving one guest VM interleave their windows, and neither says another run holds the desk** — A quickshell guest run lost the foreground to Winwright.Fixture three times while winwright's own suite ran in the same VM. → §WW534

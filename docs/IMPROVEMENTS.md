@@ -2,28 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW533 What a substitution loses is a claim, not a name
-
-An idea that grew out of WW532, filed apart because it may not survive its design. A
-diff of case names, before against after, treats a rename as a change, and most renames
-change nothing that is checked. A diff that is mostly noise is one people learn to wave
-through, and then it misses the one difference that mattered.
-
-What a substitution actually loses is a claim. A case may carry `catches`, the defect it
-exists to catch, and that sentence survives a rename untouched. Diffing the set of
-`catches` across runs would stay quiet when a case is renamed and its claim kept, and
-speak when a claim no longer has any case making it, which is the subtraction the
-commenter's pytest run hid behind an unchanged total.
-
-Two things stand in the way. `catches` is optional on purpose, so a suite whose cases
-leave it out has nothing to compare, and this must say so rather than read an empty set
-as nothing lost; the run already counts the cases that say nothing, which is where that
-sentence would come from. And two cases may name the same defect, so the set is of
-claims, and a claim one case dropped while another still makes it is not a loss.
-
-WW532 shipped the name diff as `RanBefore`, a per-selection record at the project's
-`lastRun`; the claims fit beside the names in that record.
-
 ## Block B — Attach, launch, and leave nothing behind
 
 ### §WW534 One runner per guest desk

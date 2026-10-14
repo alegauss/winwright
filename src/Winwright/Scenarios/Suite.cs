@@ -504,7 +504,7 @@ public static class Suite
         var cases = new ReadOnlyCollection<CaseResult>(ran);
         return new SuiteVerdict(asked, cases, new ReadOnlyCollection<NotRun>(skipped))
         {
-            Compared = RanBefore.Of(asked, cases.Select(one => one.Declared.Name), project),
+            Compared = RanBefore.Of(asked, cases.Select(one => (one.Declared.Name, one.Declared.Catches)), project),
         };
     }
 }

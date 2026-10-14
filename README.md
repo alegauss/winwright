@@ -336,9 +336,12 @@ saying it is loading is a failure rather than a photograph. A key none of those 
 next run over the same selection compares against it, and the line under the verdict's sentence
 names each case that **appeared** and each that **vanished**. A count catches 374 becoming 352. Only
 this catches a case swapped for another at the same total, for example one test turned into a skip
-and another renamed, which still exits 0 with the line people read unchanged. It is a finding and
-never moves the exit code. The file is rewritten on every run, so a deliberate rename is named once,
-on the run that made it. Without the key, that line says nothing remembers the last run.
+and another renamed, which still exits 0 with the line people read unchanged. Each case's `catches`
+is kept beside its name, and that is what the line judges. A rename that kept its claim **holds**. A
+claim no case that ran makes any more is named as **lost**. A case that vanished without a `catches`
+is named as one whose loss cannot be told. Two cases making the same claim cover each other. It is a
+finding and never moves the exit code. The file is rewritten on every run, so a deliberate change is
+named once, on the run that made it. Without the key, that line says nothing remembers the last run.
 
 `destructive` names the entries that end the run, and it is the one key with a refusal of its own: a
 bare name is refused where the project ships more than one language, because a name is the field a

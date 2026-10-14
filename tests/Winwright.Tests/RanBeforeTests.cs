@@ -36,8 +36,70 @@ public sealed class RanBeforeTests : IDisposable
         Assert.False(read.AsFinding().Holds);
         Assert.Equal(
             "the cases that ran are not the ones the last run over everything ran: 1 appeared ('renamed'), "
-                + "and 1 vanished ('renames').",
+                + "and 1 vanished ('renames'); 1 that vanished said nothing about what it catches ('renames'), "
+                + "so whether a claim went with it cannot be told.",
             read.Sentence());
+    }
+
+    [Fact]
+    public void A_rename_that_kept_its_claim_holds_though_the_names_changed()
+    {
+        // WW533. The noise a name diff makes: most renames change nothing that is checked.
+        var project = Declared(remembering: true);
+
+        RanBefore.Of(Selection.All, [("renames", "a rename that writes nothing"), ("opens", "a blank window")], project);
+        var read = RanBefore.Of(
+            Selection.All, [("renamed", "a rename that writes nothing"), ("opens", "a blank window")], project);
+
+        Assert.False(read.Same);
+        Assert.True(read.Kept);
+        Assert.True(read.AsFinding().Holds);
+        Assert.Empty(read.Lost);
+        Assert.EndsWith("; every claim the last run made is still made.", read.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_claim_no_case_makes_any_more_is_named_as_lost()
+    {
+        // WW533. The substitution the commenter's pytest run hid behind an unchanged total.
+        var project = Declared(remembering: true);
+
+        RanBefore.Of(Selection.All, [("opens", "a blank window"), ("saves", "a save that writes nothing")], project);
+        var read = RanBefore.Of(Selection.All, [("opens", "a blank window"), ("prints", "a print with no pages")], project);
+
+        Assert.False(read.Kept);
+        Assert.False(read.AsFinding().Holds);
+        Assert.Equal(["a save that writes nothing"], read.Lost);
+        Assert.Empty(read.Unclaimed);
+        Assert.Contains("1 claim no case makes any more ('a save that writes nothing')", read.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_claim_one_case_dropped_while_another_still_makes_it_is_no_loss()
+    {
+        var project = Declared(remembering: true);
+
+        RanBefore.Of(Selection.All, [("saves", "a save that writes nothing"), ("saves as", "a save that writes nothing")], project);
+        var read = RanBefore.Of(Selection.All, [("saves", "a save that writes nothing")], project);
+
+        Assert.Equal(["saves as"], read.Vanished);
+        Assert.Empty(read.Lost);
+        Assert.True(read.Kept);
+    }
+
+    [Fact]
+    public void A_record_kept_as_names_alone_still_reads()
+    {
+        // The shape WW532 wrote: a list of names per selection, which reads as names that claimed nothing.
+        var project = Declared(remembering: true);
+        Directory.CreateDirectory(Path.GetDirectoryName(project.LastRun)!);
+        File.WriteAllText(project.LastRun, """{ "everything": ["opens"] }""");
+
+        var read = RanBefore.Of(Selection.All, [("opens", "a blank window")], project);
+
+        Assert.False(read.First);
+        Assert.True(read.Same);
+        Assert.True(read.Kept);
     }
 
     [Fact]
@@ -50,7 +112,9 @@ public sealed class RanBeforeTests : IDisposable
 
         Assert.True(read.Same);
         Assert.True(read.AsFinding().Holds);
-        Assert.Equal("the same 2 cases ran as the last run over everything.", read.Sentence());
+        Assert.Equal(
+            "the same 2 cases ran as the last run over everything; every claim the last run made is still made.",
+            read.Sentence());
     }
 
     [Fact]
