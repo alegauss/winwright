@@ -106,6 +106,7 @@
 - ✅ **WW527** **A staged file cannot name the server a fixture reaches, so its store carries a second spelling of the address** — A staged file with fill: true gets {reach0} and {files} filled as UTF-8, so a store names its server once, in reaches (design recorded in `src/Winwright/Scenarios/StagedFile.cs`).
 - ✅ **WW529** **A filled JSON store naming {files} inside a string comes out invalid, because the path's backslashes are not escaped** — A filled .json file gets each replacement JSON-escaped, so a store naming {files} parses and keeps the path (design recorded in `src/Winwright/Scenarios/FixtureDeclaration.cs`).
 - ✅ **WW531** **A process that outlived its case is named by pid alone, never by the case that launched it** — A process that outlived its case, or left early, is named with the case it was launched for and whether that launch was lent, so a survivor in a long run can be traced.
+- ✅ **WW534** **Two runners driving one guest VM interleave their windows, and neither says another run holds the desk** — A guest run claims the desk through a host mutex a second runner waits on and names, and a foreground lost to a process no case started says so (design recorded in `README.md`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

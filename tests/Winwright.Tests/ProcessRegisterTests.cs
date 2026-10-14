@@ -193,6 +193,46 @@ public class ProcessRegisterTests
     }
 
     [Fact]
+    public void A_foreground_held_by_a_process_this_run_launched_names_the_case_it_was_launched_for()
+    {
+        // WW534. A window an earlier case left behind, holding the desk the next case needs.
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning(), "the case that opened a dialog");
+
+        var holder = new Winwright.Windowing.WindowOwner(1, launched.Pid, "cmd", "a dialog", 1);
+        var wanted = new Winwright.Windowing.WindowOwner(2, Environment.ProcessId, "testhost", "the window under test", 2);
+        var desk = Winwright.Windowing.Foreground.Between(holder, wanted);
+
+        Assert.Contains(
+            "which this run launched for 'the case that opened a dialog'",
+            desk.AsPrecondition().Absence,
+            StringComparison.Ordinal);
+        Assert.Contains("which this run launched for", desk.Sentence(), StringComparison.Ordinal);
+
+        // And once it has gone, its pid is no longer this run's to claim.
+        register.StopAll();
+        Assert.Contains(
+            "which no case in this run started",
+            Winwright.Windowing.Foreground.Between(holder, wanted).AsPrecondition().Absence,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_foreground_held_by_a_process_no_case_started_says_so()
+    {
+        // WW534. Found by quickshell (QS302): another runner on the same guest desk, named by its
+        // window alone, read as a defect in the cases.
+        var holder = new Winwright.Windowing.WindowOwner(1, Environment.ProcessId, "quickshell", "Files", 1);
+        var wanted = new Winwright.Windowing.WindowOwner(2, Environment.ProcessId + 1, "Winwright.Fixture", "winwright fixture", 2);
+
+        var desk = Winwright.Windowing.Foreground.Between(holder, wanted).AsPrecondition();
+
+        Assert.False(desk.Satisfied);
+        Assert.Contains("quickshell (pid", desk.Absence, StringComparison.Ordinal);
+        Assert.Contains("which no case in this run started", desk.Absence, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_survivor_from_a_lent_launch_says_it_was_lent_and_one_that_named_no_case_says_nothing_more()
     {
         var lent = new Survivor(1234, "ClaudeTray.exe", SurvivorFate.WouldNotStop, "the first reader", Lent: true);

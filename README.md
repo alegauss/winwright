@@ -1244,6 +1244,14 @@ collide in one guest; `-ResultsIn` says where the command left what it wrote. **
 carry two trees is why it prints which one it took** — otherwise a green is a green about whichever
 tree the caller believed they named.
 
+**One run holds the guest desk at a time.** Two runs on one desk take each other's foreground, and
+each reads that, honestly, as a desk it could not get. So every run claims the desk for its whole
+length through a host-wide mutex named `winwright-guest-desk-<hash of the .vmx path>`. A second run
+waits for it, naming the run that holds it, and refuses if the wait outlasts the holder's bound. An
+adopter with a runner of its own takes the same mutex. Inside a run, a foreground lost to another
+window says whether that window is a process the run launched (and for which case) or one **no case
+in this run started**, which on a shared desk is the other runner.
+
 This matters more for an adopter than it does here. Every reason this exists — a host run that
 reported eight failures of which two were only the desk, and a negative control that passed because
 the host wrote a file faster than the guest could — applies to anybody driving a window from a test,

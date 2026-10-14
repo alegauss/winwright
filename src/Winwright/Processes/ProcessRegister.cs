@@ -20,6 +20,18 @@ namespace Winwright.Processes;
 /// </summary>
 public sealed class ProcessRegister : IDisposable
 {
+    /// <summary>
+    /// Every launch any register in this process has made, by pid. WW534.
+    /// <para>
+    /// Process-wide rather than per register, because what reads it is a foreground reading, which
+    /// holds no register: when the desk belongs to a window, the one question it can add is whether
+    /// that window is a process this run started — a case's leftover — or one nothing here started,
+    /// which on a shared guest desk is another runner. Found by quickshell (QS302), whose reds named
+    /// the window and left the reader looking for a defect in the cases.
+    /// </para>
+    /// </summary>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, LaunchedProcess> AnyLaunch = new();
+
     private readonly List<LaunchedProcess> launched = [];
 
     /// <summary>
@@ -144,7 +156,31 @@ public sealed class ProcessRegister : IDisposable
 
         var registered = new LaunchedProcess(started, start.FileName, forCase, lent);
         launched.Add(registered);
+        AnyLaunch[registered.Pid] = registered;
         return registered;
+    }
+
+    /// <summary>
+    /// The launch this process made that is running under <paramref name="pid"/>, or null where none
+    /// is — which is either a process no register here started, or one that has gone and whose pid
+    /// Windows may since have handed to something else. WW534.
+    /// </summary>
+    /// <param name="pid">The process to ask about.</param>
+    internal static LaunchedProcess? Running(int pid)
+    {
+        if (!AnyLaunch.TryGetValue(pid, out var found))
+            return null;
+
+        try
+        {
+            found.Refresh();
+            return found.HasExited ? null : found;
+        }
+        catch (InvalidOperationException)
+        {
+            // Its handle was let go, which is a launch that has finished.
+            return null;
+        }
     }
 
     /// <summary>

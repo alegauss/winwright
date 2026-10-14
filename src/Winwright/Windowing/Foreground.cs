@@ -286,8 +286,32 @@ public sealed record Foreground
         ForegroundState.SameProcess => Precondition.Absent(
             PreconditionName, $"another window of the same process owns it: {Holder}, and the window under test is {Wanted}{Stood}"),
         _ => Precondition.Absent(
-            PreconditionName, $"the foreground belongs to {Holder}, and the window under test is {Wanted}{Stood}"),
+            PreconditionName, $"the foreground belongs to {Holder}{Whose}, and the window under test is {Wanted}{Stood}"),
     };
+
+    /// <summary>
+    /// Whether the window holding the desk is a process this run started, and for which case, or one
+    /// no case here started. WW534.
+    /// <para>
+    /// Found by quickshell (QS302): two runners on one guest desk took each other's foreground, and
+    /// every hole named the holding window without saying it belonged to no case in the run, so the
+    /// reader went looking for a defect in the cases. A holder this run did start is the other answer
+    /// worth having: a window an earlier case left behind, named by that case (WW531).
+    /// </para>
+    /// </summary>
+    private string Whose
+    {
+        get
+        {
+            if (Holder.Pid == 0)
+                return "";
+
+            if (Processes.ProcessRegister.Running(Holder.Pid) is not { } ours)
+                return ", which no case in this run started";
+
+            return ours.Case is null ? ", which this run launched" : $", which this run launched for '{ours.Case}'";
+        }
+    }
 
     /// <summary>
     /// How it is ours, naming the holder and the finding. WW517.
@@ -304,7 +328,10 @@ public sealed record Foreground
     /// <summary>Who had the keyboard when this was asked, said either way.</summary>
     public string Sentence() => Ours
         ? $"the foreground belongs to the window under test, {Wanted}{Took}."
-        : $"the foreground belongs to {Holder}, and the window under test is {Wanted}{Stood}.";
+        : $"the foreground belongs to {Holder}{Elsewhere}, and the window under test is {Wanted}{Stood}.";
+
+    /// <summary><see cref="Whose"/> where the holder is another process, and nothing otherwise.</summary>
+    private string Elsewhere => State == ForegroundState.Elsewhere ? Whose : "";
 
     /// <summary>
     /// What a wait that ran out adds to an absence, and nothing at all where nothing waited. WW470:

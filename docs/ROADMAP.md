@@ -4,8 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW534** (deps: —) **Two runners driving one guest VM interleave their windows, and neither says another run holds the desk** — A quickshell guest run lost the foreground to Winwright.Fixture three times while winwright's own suite ran in the same VM. → §WW534
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
