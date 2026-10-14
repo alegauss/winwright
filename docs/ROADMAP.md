@@ -14,8 +14,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 🛠 **WW530** (deps: —) **A drag can only be released over an element of the window it started in, so a drop onto Explorer has no case** — Found by quickshell's QS188: a file dragged from its server pane onto an Explorer folder cannot be named as the drop target. → §WW530
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

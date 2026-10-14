@@ -41,7 +41,11 @@ public static class Drag
     /// </para>
     /// </summary>
     /// <param name="from">What to press.</param>
-    /// <param name="to">What to release over, in the same window.</param>
+    /// <param name="to">
+    /// What to release over, in the same window or, built by <see cref="Subject.OnDesktop"/>, in
+    /// another one (WW530). Only the release lands there: the foreground asked for is still the
+    /// window the press is in.
+    /// </param>
     /// <exception cref="NotActionableException">Where either element cannot take the pointer.</exception>
     public static PointerResult Onto(Subject from, Subject to)
     {

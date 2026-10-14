@@ -98,29 +98,6 @@ so.
 
 ## Block D — Act — patterns before pointers
 
-### §WW530 A drop onto another window
-
-Found by quickshell (QS188, 2026-10-13). Its file browser offers a file dragged out of
-its server pane as a virtual file, and the claim to prove is that the file lands in an
-Explorer folder byte for byte. The gesture starts in the window under test and ends in
-another process's window, and `drag`'s `to` is looked for in the same window as the
-`locator` (`Drag.Onto`), so the case cannot be written: the drop target is not there to
-name.
-
-What it needs is a `to` that can name an element of another top-level window —
-Explorer's folder view, the desktop's list — resolved the way a resident fixture's later
-step finds a window it opened, from the desktop. The press, the threshold and the
-release are unchanged; only where the release lands is looked up elsewhere. The
-foreground rule is the same as now: the gesture needs the window under test in front at
-the press, and a desk that will not give it is a hole.
-
-What it then claims is still only the gesture. Whether the file arrived is the next
-step's to read, which for a drop onto Explorer is a file on disk rather than an element,
-and that read may be the case's own fixture check rather than winwright's.
-
-Falsified when a case cannot drag an element of the window under test onto an Explorer
-folder view and have the drop land there.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

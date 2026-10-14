@@ -263,7 +263,7 @@ public class ScenarioFileTests
             StringComparison.Ordinal);
         Assert.Equal(
             [
-                "locator", "tray", "act", "with", "to", "expect", "reads", "moves", "answers", "empty", "matches", "discloses",
+                "locator", "tray", "act", "with", "to", "toDesktop", "expect", "reads", "moves", "answers", "empty", "matches", "discloses",
                 "sameAs", "unlike", "sameCountdownAs", "contains", "label", "expectReported", "notLabel", "beginsWithLabel",
                 "endsWithLabel", "notEndsWithLabel", "absent",
                 "ownHeader", "eachSpoken", "spoken", "never", "covers",

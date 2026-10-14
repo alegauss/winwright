@@ -198,6 +198,7 @@
 - 🗑 **WW516** **A chord press reports Ok with its foreground check satisfied, though it reached nothing the application could hear** — superseded by WW517: press claims only that keys were sent at a window holding the foreground, so the Ok was designed; what was real is a record that cannot tell the findings apart.
 - ✅ **WW518** **a typing step's line says nothing about the desk, because an act carries one precondition and two were read** — Typing composes the pair it reads, so its line names the control that took the focus and how the desk was ours (design recorded in `src/Winwright/Verdicts/Precondition.cs`).
 - ✅ **WW520** **A case cannot drag one element onto another, so a strip reordered by dragging has no case** — A case drags one element onto another with 'act: drag' and 'to', past the drag threshold, and the fixture's tab strip reorders in the guest (design recorded in `src/Winwright/Acting/Drag.cs`).
+- ✅ **WW530** **A drag can only be released over an element of the window it started in, so a drop onto Explorer has no case** — A drag step with "toDesktop": true looks its `to` up from the desktop, so a case can drop onto another window, such as an Explorer folder (design recorded in `README.md`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

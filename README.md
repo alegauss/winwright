@@ -406,6 +406,18 @@ rather than a red. `with` takes nothing, because the pointer is the act. A `drag
 refused, and so is a `to` beside any other act, since nothing else would read it. It is attempted
 once: a second drag moves the item again from wherever the first one left it.
 
+A drop onto another application's window, such as a file dragged onto an Explorer folder, says
+**`"toDesktop": true`**. The `to` locator is then looked for from the desktop rather than in the
+window under test, so its first step names the other window:
+
+```json
+{ "locator": "ListItem[name=\"report.txt\"]", "act": "drag", "to": "Window[name=\"Downloads\"] > List", "toDesktop": true }
+```
+
+Only the release lands there. The foreground the drag needs is still the window under test, and
+whether the file arrived is the next step's to check. For a drop onto Explorer that is a file on
+disk, not an element. `toDesktop` with no `to` is refused.
+
 `click tray icon` is a pointer at the icon's centre, and on purpose: every taskbar button refuses a
 clickable point, so the rectangle is the only address an icon has. What it claims is the click — sent
 at the icon, with the icon the thing standing at that point — and what the application did with it is

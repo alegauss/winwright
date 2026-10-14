@@ -263,8 +263,8 @@ public sealed record Flags
         new Flag(
             "drags",
             "",
-            "a pane holding a strip of three tabs that reorders only when one is dragged onto another, with a read-out of the order",
-            "a tab strip reordered by dragging had no case, because no verb pressed on one element, moved past the drag threshold and released over another"),
+            "a pane holding a strip of three tabs that reorders only when one is dragged onto another, with a read-out of the order, and a note that can be dropped onto a second window beside it",
+            "a tab strip reordered by dragging had no case, because no verb pressed on one element, moved past the drag threshold and released over another - and a drop onto another window had none either, because the destination was looked for only in the window the drag started in"),
         new Flag(
             "status",
             "",

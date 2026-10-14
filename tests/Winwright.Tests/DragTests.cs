@@ -24,6 +24,12 @@ namespace Winwright.Tests;
 [Collection(WindowFixture.Serial)]
 public sealed class DragTests : IDisposable
 {
+    /// <summary>
+    /// The fixture's second window's drop zone, from the desktop down — the title is
+    /// <c>DragsPane.DropWindowTitle</c>, spelled out because this suite builds the fixture without referencing it.
+    /// </summary>
+    private const string DropZone = "Window[name=\"winwright drop target\"] > Text#dropZone";
+
     private readonly string root = Directory.CreateTempSubdirectory("winwright-drag-").FullName;
 
     public void Dispose() => Directory.Delete(root, recursive: true);
@@ -58,6 +64,51 @@ public sealed class DragTests : IDisposable
             return;
 
         Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void A_note_dragged_onto_another_window_is_dropped_there()
+    {
+        // WW530. The destination is another top-level window, found from the desktop by its title,
+        // and what it took is reported back in the window under test.
+        var verdict = Run(
+            "Text#dragNote",
+            DropZone,
+            "Text#dropSaid",
+            "nothing dropped",
+            "dropped: A note",
+            desktop: true);
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void A_destination_in_another_window_is_not_found_in_the_window_under_test()
+    {
+        // The control: the same locator without 'toDesktop' is looked for where the drag starts,
+        // where no such window is, so nothing is pressed and nothing is dropped.
+        var verdict = Run(
+            "Text#dragNote",
+            DropZone,
+            "Text#dropSaid",
+            "nothing dropped",
+            "dropped: A note",
+            desktop: false);
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome != RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void Looking_from_the_desktop_with_no_destination_is_refused_where_it_is_written()
+    {
+        var refused = Assert.Throws<ScenarioRefusedException>(
+            () => Wrote.Step("TabItem#firstTab", "click", ("with", "PointerIsTheAct"), ("toDesktop", true)));
+
+        Assert.Contains("'toDesktop'", refused.Because, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -105,7 +156,16 @@ public sealed class DragTests : IDisposable
     /// Drag the first tab onto <paramref name="onto"/> and read the order, or null where this desk
     /// cannot observe.
     /// </summary>
-    private SuiteVerdict? Run(string onto, string expected)
+    private SuiteVerdict? Run(string onto, string expected) =>
+        Run("TabItem#firstTab", onto, "Text#dragOrder", "First, Second, Third", expected, desktop: false);
+
+    /// <summary>
+    /// Read <paramref name="readOut"/> expecting <paramref name="opening"/>, drag
+    /// <paramref name="from"/> onto <paramref name="onto"/>, and read it again expecting
+    /// <paramref name="expected"/>; or null where this desk cannot observe.
+    /// </summary>
+    private SuiteVerdict? Run(
+        string from, string onto, string readOut, string opening, string expected, bool desktop)
     {
         if (!Desk.Read().CanObserve)
             return null;
@@ -132,20 +192,21 @@ public sealed class DragTests : IDisposable
                   "fixture": "a strip reordered by dragging",
                   "steps": [
                     {
-                      "locator": "Text#dragOrder",
+                      "locator": {{System.Text.Json.JsonSerializer.Serialize(readOut)}},
                       "act": "read",
                       "reads": "name",
-                      "expect": "First, Second, Third",
-                      "named": "the strip opens in its own order"
+                      "expect": {{System.Text.Json.JsonSerializer.Serialize(opening)}},
+                      "named": "the read-out says what it opens with"
                     },
                     {
-                      "locator": "TabItem#firstTab",
+                      "locator": {{System.Text.Json.JsonSerializer.Serialize(from)}},
                       "act": "drag",
                       "to": {{System.Text.Json.JsonSerializer.Serialize(onto)}},
-                      "named": "First is dragged"
+                      "toDesktop": {{(desktop ? "true" : "false")}},
+                      "named": "it is dragged"
                     },
                     {
-                      "locator": "Text#dragOrder",
+                      "locator": {{System.Text.Json.JsonSerializer.Serialize(readOut)}},
                       "act": "read",
                       "reads": "name",
                       "expect": {{System.Text.Json.JsonSerializer.Serialize(expected)}},

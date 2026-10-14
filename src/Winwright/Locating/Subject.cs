@@ -77,9 +77,9 @@ public sealed class Subject
         MeansIt = meansIt;
     }
 
-    private Subject(Subject was, Locator locator)
+    private Subject(Subject was, Locator locator, AutomationElement? under = null)
     {
-        root = was.root;
+        root = under ?? was.root;
         timeouts = was.timeouts;
         deadlineMs = was.deadlineMs;
         pollMs = was.pollMs;
@@ -174,6 +174,23 @@ public sealed class Subject
     {
         ArgumentNullException.ThrowIfNull(locator);
         return new(this, locator);
+    }
+
+    /// <summary>
+    /// A second subject looked for from the desktop, under the same project. WW530.
+    /// <para>
+    /// For a drag that ends in another process's window: a file dragged onto an Explorer folder is
+    /// released over an element no locator under the window under test can reach. The root is the
+    /// desktop, the way a resident fixture's is, so the locator's first step names that window. The
+    /// timeouts and the destructive guard still come from this subject, for
+    /// <see cref="Elsewhere"/>'s reason.
+    /// </para>
+    /// </summary>
+    /// <param name="locator">The other element, from the desktop down.</param>
+    public Subject OnDesktop(Locator locator)
+    {
+        ArgumentNullException.ThrowIfNull(locator);
+        return new(this, locator, AutomationElement.RootElement);
     }
 
     /// <summary>

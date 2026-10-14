@@ -187,6 +187,18 @@ public sealed record StepDeclaration
     /// </summary>
     public Locator? To { get; private init; }
 
+    /// <summary>
+    /// Whether <see cref="To"/> is looked for from the desktop rather than in the window under test.
+    /// WW530.
+    /// <para>
+    /// Found by quickshell's QS188: a file dragged out of its server pane onto an Explorer folder
+    /// ends in another process's window, and a destination looked for in the window the drag started
+    /// in cannot name it. Said in the step rather than guessed from the locator, because the same
+    /// locator can match in both places and the case means one of them.
+    /// </para>
+    /// </summary>
+    public bool ToDesktop => Wrote.Truth("toDesktop");
+
     /// <summary>What it does.</summary>
     public ActVerb Verb { get; }
 
@@ -969,7 +981,7 @@ public sealed record StepDeclaration
 
         // WW520. Judged beside the argument because it is the other thing a verb needs said. Ahead
         // of the tray's early return, so an icon step naming a destination is refused for it.
-        var to = Destination(subject, act, wrote.Text("to"));
+        var to = Destination(subject, act, wrote.Text("to"), wrote.Truth("toDesktop"));
 
         var reading = ReadBack.Named(wrote.Text("reads"));
 
@@ -1102,9 +1114,19 @@ public sealed record StepDeclaration
     /// <param name="subject">What a refusal calls this step.</param>
     /// <param name="act">The verb.</param>
     /// <param name="to">The destination as the case wrote it.</param>
-    private static Locator? Destination(string subject, ActVerb act, string? to)
+    /// <param name="desktop">Whether the case said to look for it from the desktop. WW530.</param>
+    private static Locator? Destination(string subject, ActVerb act, string? to, bool desktop)
     {
         var written = string.IsNullOrWhiteSpace(to) ? null : to;
+
+        // WW530. Ahead of the two below, because it is a claim about a field that is not there:
+        // where to look for a destination nobody named is no instruction at all.
+        if (desktop && written is null)
+        {
+            throw new ScenarioRefusedException(
+                subject, "it says 'toDesktop' and names no 'to', so there is nothing to look for from the desktop");
+        }
+
         if (act.EndsElsewhere && written is null)
         {
             throw new ScenarioRefusedException(

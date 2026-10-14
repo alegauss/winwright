@@ -2138,7 +2138,11 @@ public static class CaseRun
         //
         // WW520. A drag's destination is looked for through the step's own subject, so it is in the
         // same window under the same timeouts and the same destructive guard.
-        var to = step.To is null ? null : subject.Elsewhere(step.To);
+        //
+        // WW530. From the desktop where the step says so, for a drop onto another application.
+        var to = step.To is null ? null
+            : step.ToDesktop ? subject.OnDesktop(step.To)
+            : subject.Elsewhere(step.To);
         var acted = step.Verb.Reads ? null : step.Verb.Perform(subject, step.Argument, to);
 
         if (step.Moves)

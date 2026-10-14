@@ -22,6 +22,11 @@ namespace Winwright.Fixture;
 /// </summary>
 public static class DragsPane
 {
+    /// <summary>The title a case finds the second window by, from the desktop. WW530.</summary>
+    public const string DropWindowTitle = "winwright drop target";
+
+    private static Window? dropWindow;
+
     /// <summary>The tabs, in the order the strip opens with.</summary>
     public static IReadOnlyList<string> Opening { get; } = ["First", "Second", "Third"];
 
@@ -60,6 +65,40 @@ public static class DragsPane
         rows.Children.Add(order);
 
         Reorderable(strip, order);
+
+        // WW530. A note dragged out of this window onto another one, and the read-out the drop is
+        // reported in, here, where the case's next step can read it. Beside the title and above the
+        // strip, because the pane's lower edge sits under the window's own button row.
+        var note = new TextBlock
+        {
+            Name = "dragNote",
+            Text = "A note",
+            Padding = new Thickness(8),
+            Margin = new Thickness(16, 0, 0, 0),
+            Background = Brushes.LightYellow,
+        };
+
+        var dropped = new TextBlock
+        {
+            Name = "dropSaid",
+            Text = "nothing dropped",
+            Margin = new Thickness(16, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        System.Windows.Automation.AutomationProperties.SetName(dropped, dropped.Text);
+
+        var header = (TextBlock)rows.Children[0];
+        rows.Children.RemoveAt(0);
+        var top = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
+        header.Margin = new Thickness(0);
+        header.VerticalAlignment = VerticalAlignment.Center;
+        top.Children.Add(header);
+        top.Children.Add(note);
+        top.Children.Add(dropped);
+        rows.Children.Insert(0, top);
+
+        Draggable(note);
+        rows.Loaded += (_, _) => DropWindowBeside(Window.GetWindow(rows), dropped);
 
         var pane = new TabItem { Name = "dragsPane", Header = "Drags", Content = rows };
         panes.Items.Add(pane);
@@ -128,6 +167,124 @@ public static class DragsPane
             Said(order, strip);
             e.Handled = true;
         };
+    }
+
+    /// <summary>
+    /// A note that starts a real drag-and-drop once the pointer has gone past the threshold with the
+    /// button down, the way a file browser offers a file to Explorer. WW530.
+    /// <para>
+    /// Through <see cref="DragDrop.DoDragDrop"/>, so what carries the note is the system's own drag
+    /// loop, and the release is seen by whichever window is under the pointer rather than by this one.
+    /// </para>
+    /// </summary>
+    private static void Draggable(TextBlock note)
+    {
+        var from = default(Point?);
+
+        // Captured on the press, as a file list does, so the move that crosses the threshold reaches
+        // the note wherever the pointer is by then.
+        note.PreviewMouseLeftButtonDown += (_, e) =>
+        {
+            from = e.GetPosition(note);
+            note.CaptureMouse();
+        };
+
+        note.PreviewMouseLeftButtonUp += (_, _) =>
+        {
+            from = null;
+            note.ReleaseMouseCapture();
+        };
+
+        note.PreviewMouseMove += (_, e) =>
+        {
+            if (from is not { } pressed || e.LeftButton != MouseButtonState.Pressed)
+                return;
+
+            var moved = e.GetPosition(note) - pressed;
+            if (Math.Abs(moved.X) < SystemParameters.MinimumHorizontalDragDistance
+                && Math.Abs(moved.Y) < SystemParameters.MinimumVerticalDragDistance)
+            {
+                return;
+            }
+
+            // Handed back before the system's loop starts, which takes the pointer itself.
+            from = null;
+            note.ReleaseMouseCapture();
+            DragDrop.DoDragDrop(note, new DataObject(DataFormats.UnicodeText, note.Text), DragDropEffects.Copy);
+        };
+    }
+
+    /// <summary>
+    /// A second top-level window that takes a drop, raised once to the right of the window under
+    /// test. WW530.
+    /// <para>
+    /// Found by quickshell's QS188: a file dragged out of its server pane is dropped onto an Explorer
+    /// folder, which is another process's window, and a drag whose destination could only be looked
+    /// for in the window it started in had no case. Explorer is not something this fixture can count
+    /// on, so this stands in for it: a separate top-level window, found from the desktop by its title.
+    /// </para>
+    /// <para>
+    /// Smaller than the main window, because the launcher takes the largest window a process draws
+    /// as the one under test. Not owned and never activated, so it neither joins the main window's
+    /// tree nor takes the desk a case needs. What it took is written into the main window's read-out,
+    /// where the step after the drag can read it.
+    /// </para>
+    /// </summary>
+    /// <param name="beside">The window under test, or null where it is not known yet.</param>
+    /// <param name="said">The read-out in the window under test that a drop is reported in.</param>
+    private static void DropWindowBeside(Window? beside, TextBlock said)
+    {
+        if (dropWindow is not null || beside is null)
+            return;
+
+        var zone = new TextBlock
+        {
+            Name = "dropZone",
+            Text = "Drop here",
+            Padding = new Thickness(16),
+            Background = Brushes.Lavender,
+            AllowDrop = true,
+        };
+
+        zone.DragOver += (_, e) =>
+        {
+            e.Effects = e.Data.GetDataPresent(DataFormats.UnicodeText) ? DragDropEffects.Copy : DragDropEffects.None;
+            e.Handled = true;
+        };
+
+        zone.Drop += (_, e) =>
+        {
+            if (e.Data.GetData(DataFormats.UnicodeText) is not string text)
+                return;
+
+            said.Text = $"dropped: {text}";
+            System.Windows.Automation.AutomationProperties.SetName(said, said.Text);
+            e.Handled = true;
+        };
+
+        var shown = new Window
+        {
+            Title = DropWindowTitle,
+            Width = 260,
+            Height = 160,
+            WindowStartupLocation = WindowStartupLocation.Manual,
+            Left = beside.Left + beside.ActualWidth + 20,
+            Top = beside.Top,
+            ShowInTaskbar = false,
+            ShowActivated = false,
+            Content = zone,
+        };
+
+        // Said as its automation name as well, and measured: left to itself the window announced its
+        // content's text, 'Drop here', and the locator naming it by its title found nothing.
+        System.Windows.Automation.AutomationProperties.SetName(shown, DropWindowTitle);
+
+        // Unowned, so the application's default shutdown would wait for this one too: closed with the
+        // window under test, or closing that window would leave a process behind it.
+        beside.Closed += (_, _) => shown.Close();
+
+        dropWindow = shown;
+        shown.Show();
     }
 
     /// <summary>The tab under a point in the strip, or null where the point is over no tab.</summary>
