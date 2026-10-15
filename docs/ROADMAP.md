@@ -8,9 +8,13 @@
 
 ## Block D — Act — patterns before pointers
 
+- 📋 **WW540** (deps: —) **A case cannot add an item to a selection or click with Ctrl or Shift held, so a list choosing several has no case** — The select act replaces the selection, and AddToSelection, which UI Automation offers a multiple-selection list, has no verb. → §WW540
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
+
+- 📋 **WW539** (deps: —) **A case cannot claim an element is drawn inside another, so a control clipped or laid out empty passes every case** — No reading touches geometry, so quickshell's close cross painted nothing while every case found it and read its name. → §WW539
 
 ## Block G — The scenario — a case is a data file
 
