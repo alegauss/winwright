@@ -2302,7 +2302,7 @@ public static class CaseRun
         var to = step.To is null ? null
             : step.ToDesktop ? subject.OnDesktop(step.To)
             : subject.Elsewhere(step.To);
-        var acted = step.Verb.Reads ? null : step.Verb.Perform(subject, step.Argument, to);
+        var acted = step.Verb.Reads ? null : step.Verb.Perform(subject, step.Argument, to, step.Button);
 
         if (step.Moves)
             return Moved(step, subject, acted, was);

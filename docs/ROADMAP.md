@@ -8,8 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW538** (deps: —) **A case cannot click with the middle or right button, so a tab closed by a middle click has no case** — The click verb always presses the left button, though Pointer.Click already takes a MouseButton and Win32 sends the middle one. → §WW538
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

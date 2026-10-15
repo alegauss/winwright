@@ -177,6 +177,73 @@ public sealed class DragTests : IDisposable
     }
 
     [Fact]
+    public void A_middle_click_on_a_tab_closes_it()
+    {
+        // WW538. quickshell's QS310 gesture, on the fixture's strip.
+        var verdict = Clicked("middle", "First, Third");
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void A_left_click_on_the_same_tab_closes_nothing()
+    {
+        // The control: the same step on the primary button selects the tab and leaves the strip whole.
+        var verdict = Clicked("left", "First, Second, Third");
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    /// <summary>
+    /// Click the strip's second tab with <paramref name="button"/> and read the order, or null where
+    /// this desk cannot observe.
+    /// </summary>
+    private SuiteVerdict? Clicked(string button, string expected)
+    {
+        if (!Desk.Read().CanObserve)
+            return null;
+
+        var declaration = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            declaration,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "timeouts": { "launch": 30000, "resolve": 4000, "act": 4000, "poll": 25 }
+            }
+            """);
+
+        var cases = $$"""
+            {
+              "fixtures": [ { "name": "a strip closed by the middle button", "arguments": ["--drags", "--show"] } ],
+              "cases": [
+                {
+                  "name": "a tab is clicked with one button",
+                  "catches": "a tab closed by a middle click, with no step that could press the middle button",
+                  "fixture": "a strip closed by the middle button",
+                  "steps": [
+                    { "locator": "TabItem#secondTab", "act": "click", "with": "PointerIsTheAct", "button": "{{button}}" },
+                    { "locator": "Text#dragOrder", "act": "read", "reads": "name", "expect": "{{expected}}" }
+                  ]
+                }
+              ]
+            }
+            """;
+
+        var project = ProjectDeclaration.Load(declaration);
+        using var register = ProcessRegister.For(project);
+
+        var verdict = Suite.Launch(ScenarioFile.Read("click.cases.json", cases), Selection.All, register, project);
+
+        register.StopAll();
+        return verdict;
+    }
+
+    [Fact]
     public void Looking_from_the_desktop_with_no_destination_is_refused_where_it_is_written()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(

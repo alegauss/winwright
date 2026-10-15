@@ -76,7 +76,7 @@ public sealed record ActVerb
             (subject, argument) => Synthesised.Type(subject, argument!),
             synthesises: true),
         new(
-            "click",
+            Clicks,
             Takes.Text,
             repeatable: false,
             (subject, argument) => Synthesised.Click(subject, Because(argument!)),
@@ -219,6 +219,12 @@ public sealed record ActVerb
 
     /// <summary>The verb that clicks a tray icon with the primary button. WW483.</summary>
     public const string ClicksTrayIcon = "click tray icon";
+
+    /// <summary>The pointer click, the one verb a step may say the button of. WW538.</summary>
+    public const string Clicks = "click";
+
+    /// <summary>Whether a step may name the button this verb presses. WW538.</summary>
+    public bool PressesAButton => Name == Clicks;
 
     private readonly Func<Subject, string?, ActResult>? doing;
     private readonly Func<Subject, Subject, ActResult>? onto;
@@ -467,12 +473,18 @@ public sealed record ActVerb
     /// <param name="subject">What the step addresses.</param>
     /// <param name="argument">What the step wrote in <c>with</c>.</param>
     /// <param name="to">Where the act ends, for a verb that <see cref="EndsElsewhere"/>.</param>
+    /// <param name="button">Which button a verb that <see cref="PressesAButton"/> presses. WW538.</param>
     /// <exception cref="InvalidOperationException">
     /// Where this verb reads and there is no act to run, or ends elsewhere and was given nowhere —
     /// which the step refuses at load, so reaching it means the two disagree.
     /// </exception>
-    internal ActResult Perform(Subject subject, string? argument, Subject? to = null)
+    internal ActResult Perform(Subject subject, string? argument, Subject? to = null, MouseButton button = MouseButton.Left)
     {
+        // WW538. The one verb that presses a button a case may name; every other one ignores it,
+        // and the step refuses 'button' beside them before anything reaches here.
+        if (PressesAButton && button != MouseButton.Left)
+            return Synthesised.Click(subject, Because(argument!), button);
+
         if (onto is not null)
         {
             return onto(

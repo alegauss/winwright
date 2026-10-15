@@ -238,6 +238,7 @@ public static class ScenarioSchema
             Subject),
         new("act", true, Taking.Text, "what to do to it", ActVerb.All.Select(verb => verb.Name).ToList()),
         new("with", false, Taking.Text, "what the act needs said, where it needs anything", []),
+        new("button", false, Taking.Text, "which button a 'click' presses, left where the step names none — middle closes a tab in a browser or a terminal, and right opens a context menu", StepDeclaration.Buttons),
         new("to", false, Taking.Text, "where a 'drag' ends: a second locator, in the same window unless 'toDesktop' says otherwise, that the pointer is released over — for the gesture no pattern expresses, such as a tab dragged across its neighbours", []),
         new("toDesktop", false, Taking.Truth, "that 'to' is looked for from the desktop rather than in the window under test, so its first step names another top-level window — for a drop onto another application, such as an Explorer folder", []),
         new("expect", false, Taking.Text, "what the reading should be once the act has landed", [], Claims: true),

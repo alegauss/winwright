@@ -65,6 +65,7 @@ public static class DragsPane
         rows.Children.Add(order);
 
         Reorderable(strip, order);
+        ClosedByTheMiddleButton(strip, order);
 
         // WW530. A note dragged out of this window onto another one, and the read-out the drop is
         // reported in, here, where the case's next step can read it. Beside the title and above the
@@ -164,6 +165,26 @@ public static class DragsPane
             strip.Items.Remove(source);
             strip.Items.Insert(to, source);
             strip.SelectedItem = source;
+            Said(order, strip);
+            e.Handled = true;
+        };
+    }
+
+    /// <summary>
+    /// A middle click on a tab closes it, as it does in every browser and terminal on Windows. WW538.
+    /// <para>
+    /// Found by quickshell's QS310: its tab strip closes a tab on the middle button, and a case could
+    /// press only the left one. A left click selects and closes nothing, which is the control.
+    /// </para>
+    /// </summary>
+    private static void ClosedByTheMiddleButton(TabControl strip, TextBlock order)
+    {
+        strip.PreviewMouseDown += (_, e) =>
+        {
+            if (e.ChangedButton != MouseButton.Middle || Under(strip, e.GetPosition(strip)) is not { } tab)
+                return;
+
+            strip.Items.Remove(tab);
             Said(order, strip);
             e.Handled = true;
         };

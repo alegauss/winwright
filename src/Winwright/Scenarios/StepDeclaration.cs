@@ -225,6 +225,27 @@ public sealed record StepDeclaration
     public string? Argument => Wrote.Trimmed("with");
 
     /// <summary>
+    /// The button a <c>click</c> presses: left where the case named none, which is every click
+    /// written before this existed. WW538.
+    /// <para>
+    /// Found by quickshell (QS310): a middle click on a tab closes it, as it does in every browser
+    /// and terminal on Windows, and a case could not say it — the engine sent the middle button
+    /// already, and the grammar had no word for it.
+    /// </para>
+    /// </summary>
+    public Acting.MouseButton Button => Pressed(Wrote.Trimmed("button")) ?? Acting.MouseButton.Left;
+
+    /// <summary>The buttons a step may name, as the format spells them. WW538.</summary>
+    public static IReadOnlyList<string> Buttons { get; } =
+        Enum.GetValues<Acting.MouseButton>().Select(one => one.ToString().ToLowerInvariant()).ToList();
+
+    /// <summary>The button a written name means, or null where it means none.</summary>
+    private static Acting.MouseButton? Pressed(string? written) =>
+        written is not null && Buttons.Contains(written, StringComparer.OrdinalIgnoreCase)
+            ? Enum.Parse<Acting.MouseButton>(written, ignoreCase: true)
+            : null;
+
+    /// <summary>
     /// What <see cref="Reads"/> should say once the act has landed, or null where this step is an
     /// act and nothing else — a navigation whose consequence a later step is the check for.
     /// </summary>
@@ -1010,6 +1031,10 @@ public sealed record StepDeclaration
         // of the tray's early return, so an icon step naming a destination is refused for it.
         var to = Destination(subject, act, wrote.Text("to"), wrote.Truth("toDesktop"));
 
+        // WW538. Beside the argument for the same reason the destination is: it is the other thing a
+        // click needs said, and a button beside any other verb is a field the run would ignore.
+        var button = Pressing(subject, act, wrote.Trimmed("button"));
+
         var reading = ReadBack.Named(wrote.Text("reads"));
 
         // WW250. Compiled at the door for the timeout's sake, and because a pattern that does not
@@ -1026,8 +1051,13 @@ public sealed record StepDeclaration
         // WW323, WW340, WW351. Built before the refusals below rather than after them, which is what
         // keeps their order: every one of them was written against the claim set that already existed
         // at this point, and this suite asserts which refusal wins where a step is wrong twice over.
-        var step = new StepDeclaration(
-            called ?? (parsed is null ? subject : Describing(act.Name, parsed.Text)), act, reading, wrote)
+        // WW538. A click with another button says so in the name a report shows, because a trace
+        // reading "click Tab#second" about a middle click sends the reader to the wrong gesture.
+        var described = parsed is null ? subject : Describing(act.Name, parsed.Text);
+        if (called is null && button != Acting.MouseButton.Left)
+            described = $"{button.ToString().ToLowerInvariant()} {described}";
+
+        var step = new StepDeclaration(called ?? described, act, reading, wrote)
         {
             Locator = parsed,
             Matches = pattern,
@@ -1149,6 +1179,36 @@ public sealed record StepDeclaration
                     + "not in the window's tree, so no locator reaches it and naming both names two subjects"
                 : $"a step acts on one thing, and this one names {string.Join(" and ", named)}; each is "
                     + "reached a different way, so naming more than one names that many subjects");
+    }
+
+    /// <summary>
+    /// The button a step names, judged against its verb. WW538.
+    /// <para>
+    /// Refused beside any verb but <c>click</c>, for the format's founding reason: a field that loads
+    /// and is read by nothing is a check the author wrote and the run never made. And a name that is
+    /// not a button is refused with the ones there are, rather than falling back to the left one —
+    /// a typo that clicks with the primary button is a case about the wrong gesture that reads green.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="act">The verb.</param>
+    /// <param name="written">The button as the case wrote it, or null.</param>
+    private static Acting.MouseButton Pressing(string subject, ActVerb act, string? written)
+    {
+        if (written is null)
+            return Acting.MouseButton.Left;
+
+        if (!act.PressesAButton)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it names the button '{written}' and acts with '{act.Name}'; 'button' is which button a "
+                    + $"'{ActVerb.Clicks}' presses, and no other act presses one");
+        }
+
+        return Pressed(written) ?? throw new ScenarioRefusedException(
+            subject,
+            $"it names the button '{written}', and a click presses {string.Join(", ", Buttons.Select(one => $"'{one}'"))}");
     }
 
     /// <summary>

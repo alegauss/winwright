@@ -848,6 +848,18 @@ precondition, and the act itself is sent once.
 click nobody had to justify, and then every act quietly escalates and the suite is driving the desktop
 instead of asking controls.
 
+A click presses the left button unless the step says **`button`**: `middle`, which closes a tab in
+every browser and terminal on Windows, or `right`, which opens a context menu. The step's name in the
+report says the button too, so a trace about a middle click does not read as an ordinary one:
+
+```json
+{ "locator": "TabItem#second", "act": "click", "with": "PointerIsTheAct", "button": "middle" }
+```
+
+A button that is not one is refused with the three there are, rather than falling back to the left
+one, because a typo that clicks with the primary button is a case about the wrong gesture that reads
+green. `button` beside any act but `click` is refused.
+
 `read` is the one verb that touches nothing. It resolves, reads, and claims what it read, which is
 what a case checking a label after a save actually wants — and what it stops the case from doing is
 naming `select` on a text label to get there, which says the case moved something and turns a check

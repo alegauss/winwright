@@ -85,15 +85,30 @@ public static class Synthesised
     /// </summary>
     /// <param name="subject">What to press.</param>
     /// <param name="because">Why the pattern route is unavailable, named rather than guessed.</param>
-    public static ActResult Click(Subject subject, PointerReason because)
+    public static ActResult Click(Subject subject, PointerReason because) =>
+        Click(subject, because, MouseButton.Left);
+
+    /// <summary>
+    /// The same click with another button. WW538: a middle click closes a tab in every browser and
+    /// terminal on Windows, and a right click opens a context menu, and neither is a pattern act.
+    /// </summary>
+    /// <param name="subject">What to press.</param>
+    /// <param name="because">Why the pattern route was unavailable.</param>
+    /// <param name="button">Which button.</param>
+    public static ActResult Click(Subject subject, PointerReason because, MouseButton button)
     {
         ArgumentNullException.ThrowIfNull(subject);
 
         var before = subject.Read();
-        var clicked = Pointer.Click(subject, because);
+        var clicked = Pointer.Click(subject, because, button);
 
-        return Landed(
-            subject, "click", $"synthesised pointer ({because})", clicked.Element, before, clicked.Foreground);
+        // The button is said only where it is not the one every click used to be, so a left click's
+        // line reads exactly as it did before this existed.
+        var route = button == MouseButton.Left
+            ? $"synthesised pointer ({because})"
+            : $"synthesised pointer ({because}, {button.ToString().ToLowerInvariant()} button)";
+
+        return Landed(subject, "click", route, clicked.Element, before, clicked.Foreground);
     }
 
     /// <summary>
