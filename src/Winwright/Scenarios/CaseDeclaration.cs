@@ -227,12 +227,7 @@ public sealed record CaseDeclaration
                     + $"member with '{StepDeclaration.Member}', so every run would drive the same window");
         }
 
-        // A present-but-blank justification is worse than an absent one: it reads as answered.
-        if (catches is not null && catches.Trim().Length == 0)
-            throw new ScenarioRefusedException(called, "it says what it catches and then says nothing, which reads as answered");
-
-        if (filed is not null && filed.Trim().Length == 0)
-            throw new ScenarioRefusedException(called, "it names the task it was filed under and then names none");
+        Justifying(called, catches, filed);
 
         return new CaseDeclaration(
             called,
@@ -342,6 +337,42 @@ public sealed record CaseDeclaration
         index == 0
             ? "none — it is the first step"
             : string.Join(", ", steps.Take(index).Select(step => $"'{step.Name}'").Distinct(StringComparer.Ordinal));
+
+    /// <summary>Judge the two fields that say why a case exists, where the case says them at all.</summary>
+    /// <param name="called">The case, for the refusal and for the name a claim may not repeat.</param>
+    /// <param name="catches">The defect it exists to catch, or null where it says none.</param>
+    /// <param name="filed">The task it was filed under, or null where it names none.</param>
+    /// <exception cref="ScenarioRefusedException">Where either is blank, or the claim is the name again.</exception>
+    private static void Justifying(string called, string? catches, string? filed)
+    {
+        // A present-but-blank justification is worse than an absent one: it reads as answered.
+        if (catches is not null && catches.Trim().Length == 0)
+            throw new ScenarioRefusedException(called, "it says what it catches and then says nothing, which reads as answered");
+
+        // WW537. A claim that is the name again is the same nothing, said more convincingly: it counts
+        // as justified, and RanBefore's claim diff over it is a diff of names, flagging every rename
+        // and missing a case that kept its name and changed what it checks. Equality only, folded:
+        // a short name may stand inside an honest claim, and a refusal that turns one away teaches
+        // people to leave the field out, which is worse than the paste.
+        if (catches is not null && Folded(catches) == Folded(called))
+        {
+            throw new ScenarioRefusedException(
+                called,
+                $"it says it catches '{catches.Trim()}', which is its own name again, so a run comparing "
+                    + "claims across runs would read every rename of it as a claim lost; say what goes "
+                    + "wrong without it");
+        }
+
+        if (filed is not null && filed.Trim().Length == 0)
+            throw new ScenarioRefusedException(called, "it names the task it was filed under and then names none");
+    }
+
+    /// <summary>
+    /// A sentence with its case, its spacing and its punctuation taken out — what is left is the
+    /// words, which is what a claim pasted from a title shares with it.
+    /// </summary>
+    private static string Folded(string text) =>
+        string.Concat(text.Where(char.IsLetterOrDigit).Select(char.ToLowerInvariant));
 
     private static IReadOnlyList<string> Words(string called, IEnumerable<string>? given, string what, string blankly)
     {

@@ -23,6 +23,23 @@ Falsified when a drop case needs C# to put its target window on the desk.
 
 ## Block D — Act — patterns before pointers
 
+### §WW538 Clicking with another button
+
+Found by quickshell QS310, where a middle click on a tab closes it, as it does in every
+browser and terminal on Windows. The case cannot be written: the `click` verb takes only
+a reason as its argument and always presses the left button, although `Pointer.Click`
+already takes a `MouseButton` and `Win32` already sends the middle button's down and up.
+quickshell proves the gesture with a unit test that raises WPF's routed events on the
+tab item instead, which is the substitute the evidence rule says not to need.
+
+The engine half exists, so this is the grammar's: a step names the button, say
+`"button": "middle"` (or `right`) beside `"act": "click"`, defaulting to left so no case
+changes, and the step's rendered line and its refusal name the button. A right click
+opens a context menu, which QS311 in quickshell will want next for a tab's Close others.
+
+Done when a case middle-clicks an element of the fixture app and reads what the click
+did, and a case naming an unknown button is refused with the buttons it takes.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
@@ -45,28 +62,6 @@ Falsified when a case cannot say that a file dropped onto Explorer landed with t
 it had.
 
 ## Block G — The scenario — a case is a data file
-
-### §WW537 A claim that is the name again
-
-Raised in the second dev.to comment on the 374-to-352 article. The commenter ran four
-synthetic runs over three cases and diffed them three ways: by name, by `catches` as
-authored, and by `catches` filled from the case's own name. The authored column did what
-WW533 meant: quiet on a rename, red on a lost claim, and red on a case that kept its
-name and changed its claim. The derived column matched the name diff line for line,
-flagging the rename and missing the replacement. So what makes the claim diff worth
-having is that `catches` says something the name does not. Being filled is not enough.
-
-Today the loader takes any non-empty `catches`, so a case whose claim is its name pasted
-again loads, counts as justified, and quietly turns WW533 back into WW532.
-
-What to build: refuse, where it is written, a `catches` equal to the case's `name` once
-both are folded (case, whitespace and punctuation ignored), addressed as
-`cases[i].catches` and naming the name it repeats. Equality and never containment: a
-short name can stand inside a real claim, and a refusal that turns away an honest
-sentence teaches people to leave the field out, which is worse than the paste.
-Containment waits for a pasted title that gets past equality.
-
-Falsified when a case file whose `catches` repeats its own name loads without a refusal.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 

@@ -64,6 +64,48 @@ public class CaseCatchesTests
     }
 
     [Fact]
+    public void A_claim_that_is_its_own_name_again_is_refused_however_it_is_cased_or_punctuated()
+    {
+        // WW537. Measured by a reader of the 374-to-352 article: a catches filled from the case name
+        // makes the claim diff between runs match the name diff line for line.
+        var refusal = Assert.Throws<ScenarioRefusedException>(
+            () => CaseDeclaration.Declared(
+                "renaming a profile writes it back", [Step()], catches: "  Renaming a profile — writes it back. "));
+
+        Assert.Contains("which is its own name again", refusal.Because);
+        Assert.Contains("say what goes wrong without it", refusal.Because);
+    }
+
+    [Fact]
+    public void A_claim_that_holds_its_name_inside_a_longer_sentence_is_taken()
+    {
+        // Equality and never containment: a short name stands inside honest claims, and turning one
+        // away teaches people to leave the field out.
+        var one = CaseDeclaration.Declared("save", [Step()], catches: "a save that reports success and writes nothing");
+
+        Assert.True(one.Justified);
+    }
+
+    [Fact]
+    public void A_claim_that_is_its_own_name_is_refused_at_the_case_in_the_file()
+    {
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => ScenarioFile.Read("one.cases.json", """
+            {
+              "cases": [
+                {
+                  "name": "the second profile renames",
+                  "catches": "The second profile renames",
+                  "steps": [ { "locator": "Edit", "act": "set value", "with": "b", "expect": "b" } ]
+                }
+              ]
+            }
+            """));
+
+        Assert.StartsWith("one.cases.json cases[0]", refusal.Subject);
+        Assert.Contains("its own name again", refusal.Because);
+    }
+
+    [Fact]
     public void What_is_unjustified_is_counted_over_a_set_rather_than_asked_case_by_case()
     {
         var declared = new[]
