@@ -152,11 +152,30 @@ public sealed record StepDeclaration
     public string? Tray => Wrote.Trimmed("tray");
 
     /// <summary>
-    /// What this step is about, as a sentence — the locator's text, or the icon's name. WW258: what a
-    /// trace line and a refusal want, and the one accessor that cannot be wrong about which kind of
-    /// subject a step has.
+    /// The file on disk this step is about, as the case wrote the path — relative to the project's
+    /// root, or naming the fixture's staged directory with <c>{files}</c>. Null on every other step.
+    /// WW535.
+    /// <para>
+    /// The third kind of subject. Found by quickshell (QS292): a drop onto an Explorer folder lands as
+    /// a file, and whether it arrived with the bytes it had is the claim the drop exists to make — so
+    /// the next step's check is about something no locator reaches, because it is not in any window's
+    /// tree at all.
+    /// </para>
     /// </summary>
-    public string Addressed => Locator?.Text ?? $"tray icon '{Tray}'";
+    public string? File => Wrote.Trimmed("file");
+
+    /// <summary>
+    /// The file whose bytes <see cref="File"/> claims to hold, written the way <see cref="File"/> is.
+    /// Null on every step but a file step, which cannot be written without it. WW535.
+    /// </summary>
+    public string? SameBytesAs => Wrote.Trimmed("sameBytesAs");
+
+    /// <summary>
+    /// What this step is about, as a sentence — the locator's text, the icon's name, or the file's
+    /// path. WW258: what a trace line and a refusal want, and the one accessor that cannot be wrong
+    /// about which kind of subject a step has.
+    /// </summary>
+    public string Addressed => Locator?.Text ?? (Tray is not null ? $"tray icon '{Tray}'" : $"file '{File}'");
 
     /// <summary>
     /// The popup inside this step's window whose tree the capture is of, by the name the
@@ -909,6 +928,7 @@ public sealed record StepDeclaration
                 $"the reading is the value reported under '{ExpectReported}'");
             Claiming(EachSpoken, "eachSpoken", "every element it matches announces a name");
             Claiming(OwnHeader, "ownHeader", "each row's controls announce that row");
+            Claiming(SameBytesAs is not null, "sameBytesAs", $"the file holds the bytes '{SameBytesAs}' holds");
 
             return claiming.AsReadOnly();
         }
@@ -954,15 +974,22 @@ public sealed record StepDeclaration
 
         var called = wrote.Trimmed("named");
         var tray = wrote.Trimmed("tray");
+        var file = wrote.Trimmed("file");
         var locator = wrote.Text("locator");
         var verb = wrote.Text("act");
-        var subject = called ?? Describing(verb, locator ?? $"tray icon '{tray}'");
+        var subject = called ?? Describing(verb, locator ?? (tray is not null ? $"tray icon '{tray}'" : $"file '{file}'"));
 
-        RefusesTwoSubjects(subject, locator, tray);
+        RefusesTwoSubjects(subject, locator, tray, file);
 
         // Not null past the guard above, which refuses a step that named nothing to act on — and
         // blank is refused by the verb itself, naming the vocabulary there is.
         var act = ActVerb.Named(verb!);
+
+        // WW535. The file step's own two refusals, ahead of the tray's for the reason the tray's are
+        // ahead of everything else: a step about a file that named a pressing act is refused for that
+        // and not for whichever field the reader would then delete.
+        RefusesFileVerb(subject, file, act);
+        RefusesBytesWithoutFile(subject, file, wrote.Trimmed("sameBytesAs"));
 
         // WW391. The tray's own refusal about the verb, kept ahead of everything else a case wrote:
         // an icon that named a pressing act is refused for that and not for whichever claim the
@@ -974,7 +1001,7 @@ public sealed record StepDeclaration
         // Null for a tray step, which has no locator to parse, and never null for the other kind:
         // the guard above threw for a step that named neither. Parsed before the argument is judged,
         // which is the order a step with two faults is refused in.
-        var parsed = tray is null ? Parsed(subject, locator!) : null;
+        var parsed = locator is not null ? Parsed(subject, locator) : null;
 
         if (act.Refuses(wrote.Text("with")) is { } wrong)
             throw new ScenarioRefusedException(subject, wrong);
@@ -1020,6 +1047,14 @@ public sealed record StepDeclaration
         if (tray is not null)
         {
             RefusesTrayClaims(step, subject);
+            return step;
+        }
+
+        // WW535. Finished the way a tray step is: every field it may not carry is refused, and what
+        // survives is a path, a read and the one claim a file answers.
+        if (file is not null)
+        {
+            RefusesFileClaims(step, subject);
             return step;
         }
 
@@ -1088,17 +1123,113 @@ public sealed record StepDeclaration
     /// <param name="subject">What a refusal calls this step.</param>
     /// <param name="locator">The locator, where the step named one.</param>
     /// <param name="tray">The notification-area icon, where the step named one.</param>
-    private static void RefusesTwoSubjects(string subject, string? locator, string? tray)
+    /// <param name="file">The file on disk, where the step named one. WW535.</param>
+    private static void RefusesTwoSubjects(string subject, string? locator, string? tray, string? file)
     {
-        if (string.IsNullOrWhiteSpace(locator) && tray is null)
+        var named = new List<string>();
+        if (!string.IsNullOrWhiteSpace(locator))
+            named.Add("a locator");
+        if (tray is not null)
+            named.Add("a tray icon");
+        if (file is not null)
+            named.Add("a file");
+
+        if (named.Count == 0)
             throw new ScenarioRefusedException(subject, "a step acts on something, and this one names nothing");
 
-        if (!string.IsNullOrWhiteSpace(locator) && tray is not null)
+        if (named.Count == 1)
+            return;
+
+        // The tray's sentence kept where it is the pair, because it says why the two cannot meet;
+        // a pair with a file says the same thing about a path, which no locator reaches either.
+        throw new ScenarioRefusedException(
+            subject,
+            named.Count == 2 && tray is not null && file is null
+                ? "a step acts on one thing, and this one names a locator and a tray icon; a tray icon is "
+                    + "not in the window's tree, so no locator reaches it and naming both names two subjects"
+                : $"a step acts on one thing, and this one names {string.Join(" and ", named)}; each is "
+                    + "reached a different way, so naming more than one names that many subjects");
+    }
+
+    /// <summary>
+    /// A step whose subject is a file naming any act but <c>read</c>. WW535.
+    /// <para>
+    /// A file is not an element: nothing in it takes a pattern or a pointer, and the one question a
+    /// case has about one is whether it holds what it should — which is a read.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="file">The file it is about, or null where it is about something else.</param>
+    /// <param name="act">The verb it named.</param>
+    private static void RefusesFileVerb(string subject, string? file, ActVerb act)
+    {
+        if (file is null || act.Name == "read")
+            return;
+
+        throw new ScenarioRefusedException(
+            subject,
+            $"it is about a file and names '{act.Name}'; a file is not an element, so nothing in it "
+                + "takes a pattern or a pointer — the one act it takes is 'read'");
+    }
+
+    /// <summary>
+    /// <c>sameBytesAs</c> on a step that is not about a file. WW535.
+    /// <para>
+    /// Refused rather than ignored, for the format's founding reason: a claim that loads beside a
+    /// locator and is read by nothing is a check the author wrote and the run never made.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="file">The file it is about, or null.</param>
+    /// <param name="bytes">What it said the file's bytes are, or null.</param>
+    private static void RefusesBytesWithoutFile(string subject, string? file, string? bytes)
+    {
+        if (file is not null || bytes is null)
+            return;
+
+        throw new ScenarioRefusedException(
+            subject,
+            "it carries 'sameBytesAs', which is a claim about a file on disk; a step that makes it "
+                + "names that file in 'file' and carries no locator");
+    }
+
+    /// <summary>
+    /// Every field a file step may not carry, and the one it must. WW535.
+    /// <para>
+    /// The tray's rule over a third subject: every claim but <c>sameBytesAs</c> is about a reading
+    /// taken through a control's patterns, and a file has none. And a file step with no claim at all
+    /// is refused rather than read as "it exists": existence alone is the claim an empty file the
+    /// drop truncated would pass, which is the defect the step is there for.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step as the case wrote it.</param>
+    /// <param name="subject">What a refusal calls it.</param>
+    private static void RefusesFileClaims(StepDeclaration step, string subject)
+    {
+        var claimed = step.Claims.Where(one => one.Field != "sameBytesAs").Select(one => $"'{one.Field}'").ToList();
+
+        if (step.NamedReading is not null)
+            claimed.Add("'reads'");
+
+        if (step.MeansIt)
+            claimed.Add("'meansIt'");
+
+        if (claimed.Count > 0)
         {
             throw new ScenarioRefusedException(
                 subject,
-                "a step acts on one thing, and this one names a locator and a tray icon; a tray icon is "
-                    + "not in the window's tree, so no locator reaches it and naming both names two subjects");
+                $"it is about a file and carries {string.Join(", ", claimed)}; those are claims about a "
+                    + "reading taken through a control's patterns, and a file has none — the claim a "
+                    + "file step makes is 'sameBytesAs'");
+        }
+
+        if (step.SameBytesAs is null)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                "it is about a file and claims nothing about it; name the file whose bytes it should "
+                    + "hold in 'sameBytesAs', because a file that merely exists is what a truncated "
+                    + "copy is too");
         }
     }
 

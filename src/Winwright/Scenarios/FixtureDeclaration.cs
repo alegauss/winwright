@@ -41,8 +41,10 @@ public sealed record FixtureDeclaration
         bool resident,
         string workingDirectory,
         IReadOnlyList<StagedFile> files,
-        IReadOnlyList<string> reaches)
+        IReadOnlyList<string> reaches,
+        string opens)
     {
+        Opens = opens;
         Reaches = reaches;
         Files = files;
         Name = name;
@@ -230,6 +232,30 @@ public sealed record FixtureDeclaration
     /// </summary>
     public IReadOnlyList<string> Reaches { get; }
 
+    /// <summary>
+    /// The folder this fixture opens in Explorer beside the window under test, as declared — relative
+    /// to the project's root or naming <see cref="Staged"/> — or empty where it opens none. WW536.
+    /// <para>
+    /// Found by quickshell (QS292). A drop with <c>toDesktop</c> onto an Explorer folder needs that
+    /// folder's window on the desk before the first step, and a fixture launched the application under
+    /// test and nothing else, so the folder was opened from C# beside the cases. Opened after the
+    /// launch, the two put side by side, and the folder's window closed again where the case's
+    /// process is given back — a window still standing after the stop budget named as a survivor.
+    /// </para>
+    /// </summary>
+    public string Opens { get; }
+
+    /// <summary>The folder <see cref="Opens"/> names, resolved, or null where it names none. WW536.</summary>
+    /// <param name="root">The project's root.</param>
+    public string? Opening(string root)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(root);
+
+        return Opens.Length == 0
+            ? null
+            : System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(Resolved(Opens, root)), root);
+    }
+
     /// <summary>The token the arguments and variables name <see cref="Reaches"/>' first address by. WW522.</summary>
     public const string FirstReach = "{reach0}";
 
@@ -274,11 +300,12 @@ public sealed record FixtureDeclaration
     public bool NeedsStaging =>
         Files.Count > 0
         || WorkingDirectory.Contains(Staged, StringComparison.Ordinal)
+        || Opens.Contains(Staged, StringComparison.Ordinal)
         || Variables.Values.Any(value => value.Contains(Staged, StringComparison.Ordinal));
 
     /// <summary>The application as it comes: no arguments, no variables, nothing sampled.</summary>
     public static FixtureDeclaration Plain { get; } =
-        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false, "", [], []);
+        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false, "", [], [], "");
 
     /// <summary>
     /// Declare one.
@@ -294,6 +321,7 @@ public sealed record FixtureDeclaration
     /// <param name="workingDirectory">The directory to start it in, resolved against the project's root.</param>
     /// <param name="files">The files to stage for this launch, each relative to the project's root.</param>
     /// <param name="reaches">What the application connects to, each <c>host:port</c> or a variable naming one.</param>
+    /// <param name="opens">The folder to open in Explorer beside the window under test. WW536.</param>
     /// <exception cref="ScenarioRefusedException">
     /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not
     /// one, or files are declared that reach the launch nowhere.
@@ -309,9 +337,11 @@ public sealed record FixtureDeclaration
         bool resident = false,
         string? workingDirectory = null,
         IEnumerable<StagedFile>? files = null,
-        IEnumerable<string>? reaches = null)
+        IEnumerable<string>? reaches = null,
+        string? opens = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
+        var opening = Opened(called, opens, shareable);
         if (string.IsNullOrWhiteSpace(name))
             throw new ScenarioRefusedException(called, "a fixture is named, because a report says which one a case ran against");
 
@@ -405,6 +435,7 @@ public sealed record FixtureDeclaration
         // reads whatever the real machine had instead — which is green, and about the wrong store.
         if (staging.Count > 0
             && !starting.Contains(Staged, StringComparison.Ordinal)
+            && !opening.Contains(Staged, StringComparison.Ordinal)
             && !set.Values.Any(value => value.Contains(Staged, StringComparison.Ordinal)))
         {
             throw new ScenarioRefusedException(
@@ -443,7 +474,35 @@ public sealed record FixtureDeclaration
             resident,
             starting,
             new ReadOnlyCollection<StagedFile>(staging),
-            new ReadOnlyCollection<string>(reaching));
+            new ReadOnlyCollection<string>(reaching),
+            opening);
+    }
+
+    /// <summary>
+    /// The folder a fixture opens, as written, or a refusal. WW536.
+    /// <para>
+    /// Blank is refused for the reason a blank file is: it names nothing. Beside <c>shareable</c> it is
+    /// refused too, because the folder is opened and closed with the launch, and a lent launch outlives
+    /// the case that opened it — so the next case would read a folder the first one dropped into.
+    /// </para>
+    /// </summary>
+    private static string Opened(string called, string? opens, bool shareable)
+    {
+        if (opens is null)
+            return "";
+
+        if (string.IsNullOrWhiteSpace(opens))
+            throw new ScenarioRefusedException(called, "it opens a folder and names none");
+
+        if (shareable)
+        {
+            throw new ScenarioRefusedException(
+                called,
+                "it opens a folder and may be lent; a lent window outlives the case that opened the "
+                    + "folder, so the next case would read what the first one dropped there");
+        }
+
+        return opens.Trim();
     }
 
     /// <summary>

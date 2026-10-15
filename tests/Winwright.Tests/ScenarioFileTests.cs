@@ -249,7 +249,7 @@ public class ScenarioFileTests
         Assert.Equal(
             [
                 "name", "environment", "flag", "arguments", "variables", "shareable", "language", "resident",
-                "workingDirectory", "files", "reaches",
+                "workingDirectory", "files", "opens", "reaches",
             ],
             ScenarioSchema.Fixture.Select(field => field.Name));
 
@@ -263,11 +263,11 @@ public class ScenarioFileTests
             StringComparison.Ordinal);
         Assert.Equal(
             [
-                "locator", "tray", "act", "with", "to", "toDesktop", "expect", "reads", "moves", "answers", "empty", "matches", "discloses",
+                "locator", "tray", "file", "act", "with", "to", "toDesktop", "expect", "reads", "moves", "answers", "empty", "matches", "discloses",
                 "sameAs", "unlike", "sameCountdownAs", "contains", "label", "expectReported", "notLabel", "beginsWithLabel",
                 "endsWithLabel", "notEndsWithLabel", "absent",
                 "ownHeader", "eachSpoken", "spoken", "never", "covers",
-                "coversAtLeast", "coversWithin", "meansIt", "popup", "named",
+                "coversAtLeast", "coversWithin", "sameBytesAs", "meansIt", "popup", "named",
             ],
             ScenarioSchema.Step.Select(field => field.Name));
 

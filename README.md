@@ -430,6 +430,22 @@ Only the release lands there. The foreground the drag needs is still the window 
 whether the file arrived is the next step's to check. For a drop onto Explorer that is a file on
 disk, not an element. `toDesktop` with no `to` is refused.
 
+A file on disk is the third thing a step can be about, beside a `locator` and a `tray` icon. A step
+naming **`file`** takes `read` and makes one claim, **`sameBytesAs`**: that the file holds the bytes of
+another one. Both paths are written the same way, relative to the project's root or naming the
+fixture's staged directory with `{files}`:
+
+```json
+{ "file": "{files}/landing/report.bin", "act": "read", "sameBytesAs": "cases/fixtures/report.bin" }
+```
+
+It is waited for over `timeouts.resolve`, because Explorer writes a dropped file after the release
+returns, and a read that collides with the writer is a look that saw nothing. A file still missing
+then is a failure naming what the folder holds; one that differs names both lengths and the first
+byte that differs. A file step with no `sameBytesAs` is refused, because a file that merely exists is
+what a truncated copy is too, and so is every claim about a control's reading beside it. A
+`sameBytesAs` file that is not there stops the case as the case's own fault, not the application's.
+
 `click tray icon` is a pointer at the icon's centre, and on purpose: every taskbar button refuses a
 clickable point, so the rectangle is the only address an icon has. What it claims is the click — sent
 at the icon, with the icon the thing standing at that point — and what the application did with it is
@@ -952,6 +968,29 @@ all, so it inherited whichever one the test runner happened to be in — and a f
 runner process's own current directory, which is global state in a test assembly, and committing an
 absolute path into a file other machines read. Declare the field to start somewhere else; a relative
 path resolves against that same root, and one that is already absolute is left where it is.
+
+`opens` is a folder the fixture opens in Explorer beside the window under test, for a case that drops
+something onto it. It is written the way `workingDirectory` is, relative to the project's root or
+naming `{files}`, and created where it is not there. After the launch the two windows are put side by
+side on the primary display, so a drop released over the folder lands in it and not in the window it
+started from. The folder's window is closed when the case gives its own window back, and one still
+standing after `timeouts.stop` is named among the survivors. A folder window that never arrives makes
+the case a hole naming the desk, and `opens` beside `shareable` is refused, because a lent window
+outlives the case that opened the folder:
+
+```json
+{
+  "name": "with a landing folder",
+  "files": ["cases/fixtures/report.bin"],
+  "variables": { "YOURAPP_EXPORT": "{files}/report.bin" },
+  "opens": "{files}/landing"
+}
+```
+
+A drag then ends there with `toDesktop`, and a `file` step reads what landed:
+`{ "file": "{files}/landing/report.bin", "act": "read", "sameBytesAs": "cases/fixtures/report.bin" }`.
+Windows 11 may show the folder as a tab of an Explorer window that was already open, and that window is
+used and never closed, because its other tabs are somebody's.
 
 `files` is how a case gives the application a store of its own. Each is a path relative to the project
 root, copied into a directory made for that launch and **emptied first**, and a `variables` value or

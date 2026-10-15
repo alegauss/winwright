@@ -26,6 +26,48 @@ public class FixtureDeclarationTests
     }
 
     [Fact]
+    public void A_folder_a_fixture_opens_resolves_where_its_files_are_staged()
+    {
+        // WW536. Written the way workingDirectory is, so {files} is the launch's own directory and
+        // a fixture naming it there depends on staging the way one naming it anywhere else does.
+        var root = Path.GetTempPath();
+        var fixture = FixtureDeclaration.Of("landing", opens: "{files}/landing");
+
+        Assert.Equal("{files}/landing", fixture.Opens);
+        Assert.True(fixture.NeedsStaging);
+        Assert.Equal(Path.Combine(fixture.StagedInto(root), "landing"), fixture.Opening(root));
+        Assert.Null(FixtureDeclaration.Plain.Opening(root));
+    }
+
+    [Fact]
+    public void A_folder_opened_beside_a_lent_window_or_naming_nothing_is_refused()
+    {
+        Assert.Contains(
+            "may be lent",
+            Assert.Throws<ScenarioRefusedException>(
+                () => FixtureDeclaration.Of("landing", shareable: true, opens: "out")).Because,
+            StringComparison.Ordinal);
+
+        Assert.Contains(
+            "names none",
+            Assert.Throws<ScenarioRefusedException>(() => FixtureDeclaration.Of("landing", opens: "  ")).Because,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_fixture_reads_the_folder_it_opens_out_of_the_file()
+    {
+        var fixtures = ScenarioFile.Read("landing.cases.json", """
+            {
+              "fixtures": [ { "name": "landing", "opens": "out/landing" } ],
+              "cases": [ { "name": "a", "fixture": "landing", "steps": [ { "locator": "Edit", "act": "read", "answers": true } ] } ]
+            }
+            """);
+
+        Assert.Equal("out/landing", Assert.Single(fixtures).Fixture.Opens);
+    }
+
+    [Fact]
     public void The_launch_is_built_out_of_the_environment_field_and_not_beside_it()
     {
         // The enforcement. There is no second place to write the language, so there is nothing for

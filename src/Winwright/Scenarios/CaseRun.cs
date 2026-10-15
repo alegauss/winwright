@@ -285,7 +285,8 @@ public static class CaseRun
         {
             Stepping(
                 running, root, project, budget, pictures, trace, results, broke, claims,
-                pointedAt, recalled, speaking, sampling, opened, expanded, out stopped);
+                pointedAt, recalled, speaking, sampling, opened, expanded,
+                declared.Fixture.StagedInto(project.Root), out stopped);
             finished = stopped < 0;
         }
         finally
@@ -433,6 +434,7 @@ public static class CaseRun
     /// <param name="sampling">What the fixture put the application on, or empty. WW473.</param>
     /// <param name="opened">Where a tray menu this case opened is kept, for the restore.</param>
     /// <param name="expanded">Where an element this case expanded is kept, for the tidy. WW525.</param>
+    /// <param name="staged">The directory the case's fixture stages into, which a file step's <c>{files}</c> names. WW535.</param>
     /// <param name="stopped">The index of the step that stopped the case, or -1.</param>
     private static void Stepping(
         List<StepDeclaration> running,
@@ -450,6 +452,7 @@ public static class CaseRun
         string sampling,
         List<TrayMenu> opened,
         List<Subject> expanded,
+        string staged,
         out int stopped)
     {
         stopped = -1;
@@ -469,6 +472,28 @@ public static class CaseRun
 
                 while (claims.Count < results.Count)
                     claims.Add(step.Claimed);
+
+                continue;
+            }
+
+            // WW535. The third kind of subject, answered before a subject is built for the tray's
+            // reason: a file is in no window's tree, so there is no locator and nothing for `Subject`
+            // to hold. Inside a try of its own, because a file the case compares against that is not
+            // there is the case being wrong, and that stops it the way any step that threw does.
+            if (step.File is not null)
+            {
+                try
+                {
+                    ReadFile(step, staged, project, trace, results);
+                    while (claims.Count < results.Count)
+                        claims.Add(step.Claimed);
+                }
+                catch (Exception thrown) when (thrown is not (OutOfMemoryException or StackOverflowException))
+                {
+                    Threw(step, thrown, trace, results, broke, claims);
+                    stopped = index;
+                    break;
+                }
 
                 continue;
             }
@@ -500,23 +525,157 @@ public static class CaseRun
             }
             catch (Exception thrown) when (thrown is not (OutOfMemoryException or StackOverflowException))
             {
-                trace.Add(new TraceStep
-                {
-                    Step = trace.Count + 1,
-                    Verb = step.Verb.Name,
-                    Locator = step.Addressed,
-                    Verdict = StepVerdict.Threw,
-                    Detail = thrown.Message,
-                });
-
-                broke.Add(HarnessError.At(trace.Count, step.Name, thrown));
-                while (claims.Count < results.Count)
-                    claims.Add(step.Claimed);
-
+                Threw(step, thrown, trace, results, broke, claims);
                 stopped = index;
                 break;
             }
         }
+    }
+
+    /// <summary>A step that threw, recorded as the trace line and the harness error a reader looks for.</summary>
+    private static void Threw(
+        StepDeclaration step,
+        Exception thrown,
+        List<TraceStep> trace,
+        List<AssertionResult> results,
+        List<HarnessError> broke,
+        List<string> claims)
+    {
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = step.Verb.Name,
+            Locator = step.Addressed,
+            Verdict = StepVerdict.Threw,
+            Detail = thrown.Message,
+        });
+
+        broke.Add(HarnessError.At(trace.Count, step.Name, thrown));
+        while (claims.Count < results.Count)
+            claims.Add(step.Claimed);
+    }
+
+    /// <summary>
+    /// A step whose subject is a file: wait for it to hold the bytes the case says, and say which way
+    /// it went. WW535.
+    /// <para>
+    /// Found by quickshell (QS292). A drop onto an Explorer folder lands as a file, and the claim the
+    /// drop exists to make — that it is there byte for byte — was a C# test beside the cases, polling
+    /// for the file and comparing arrays, because nothing a case could write reached a file at all.
+    /// </para>
+    /// <para>
+    /// Waited for, as every read-back is: Explorer writes a dropped file after the release returns,
+    /// and a copy still being written is neither there nor different yet. The file is read whole on
+    /// each look and a read that collides with the writer is a look that saw nothing, so the wait is
+    /// over a file that is finished rather than over one that has merely appeared.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step, whose file and claim are what is read.</param>
+    /// <param name="staged">The directory the case's fixture stages into, which <c>{files}</c> names.</param>
+    /// <param name="project">The declaration, for the root and the timeouts.</param>
+    /// <param name="trace">Where the step is recorded.</param>
+    /// <param name="results">Where its one result is added.</param>
+    /// <exception cref="ScenarioRefusedException">Where the file it compares against is not there.</exception>
+    private static void ReadFile(
+        StepDeclaration step, string staged, ProjectDeclaration project, List<TraceStep> trace, List<AssertionResult> results)
+    {
+        var path = OnDisk(step.File!, staged, project.Root);
+        var against = OnDisk(step.SameBytesAs!, staged, project.Root);
+
+        // The case's own fault and never the application's: a comparison with a file that does not
+        // exist is wrong on every machine, so it stops the case rather than reading as a red.
+        if (!System.IO.File.Exists(against))
+        {
+            throw new ScenarioRefusedException(
+                step.Name, $"it compares with '{step.SameBytesAs}', which is not a file — it resolved to {against}");
+        }
+
+        var wanted = System.IO.File.ReadAllBytes(against);
+        var deadline = project.Timeouts.For("resolve");
+        var poll = project.Timeouts.For("poll");
+
+        // The engine's own wait, so the deadline and the poll are the ones every read-back keeps.
+        var looks = 0;
+        byte[]? found = null;
+        var held = Attempt.UntilTrue(
+            () =>
+            {
+                looks++;
+                found = Contents(path);
+                return found is not null && found.AsSpan().SequenceEqual(wanted);
+            },
+            deadline,
+            poll).Happened;
+        var detail = held
+            ? $"{path} holds the {wanted.Length} bytes {against} holds"
+            : Differing(path, against, found, wanted, deadline, looks);
+
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = step.Verb.Name,
+            Locator = step.Addressed,
+            Verdict = held ? StepVerdict.Ok : StepVerdict.Failed,
+            Detail = detail,
+            Asserted = step.Name,
+        });
+
+        results.Add((held ? AssertionResult.Pass(step.Name, detail) : AssertionResult.Fail(step.Name, detail)).At(trace.Count));
+    }
+
+    /// <summary>
+    /// A path a file step wrote, resolved: <c>{files}</c> is the fixture's staged directory, the
+    /// environment is expanded, and what is left is relative to the project's root — the rule every
+    /// other path the project declares follows. WW535.
+    /// </summary>
+    private static string OnDisk(string written, string staged, string root) =>
+        System.IO.Path.GetFullPath(
+            System.Environment.ExpandEnvironmentVariables(
+                written.Replace(FixtureDeclaration.Staged, staged, StringComparison.Ordinal)),
+            root);
+
+    /// <summary>The file's bytes, or null where it is not there or is still held by whoever writes it.</summary>
+    private static byte[]? Contents(string path)
+    {
+        try
+        {
+            return System.IO.File.Exists(path) ? System.IO.File.ReadAllBytes(path) : null;
+        }
+        catch (Exception busy) when (busy is System.IO.IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Why a file step did not hold, in the sentence a reader acts on: what the folder holds where the
+    /// file never came, and the lengths and the first byte that differs where it came wrong.
+    /// </summary>
+    private static string Differing(string path, string against, byte[]? found, byte[] wanted, int deadline, int looks)
+    {
+        var waited = $"after {deadline}ms and {looks} look{(looks == 1 ? "" : "s")}";
+        if (found is null)
+        {
+            var folder = System.IO.Path.GetDirectoryName(path);
+            var holds = folder is not null && System.IO.Directory.Exists(folder)
+                ? System.IO.Directory.GetFileSystemEntries(folder).Select(System.IO.Path.GetFileName).ToList()
+                : null;
+
+            if (holds is null)
+                return $"nothing could be read at {path} {waited}; the folder {folder} is not there either";
+
+            return holds.Count == 0
+                ? $"nothing could be read at {path} {waited}; {folder} is empty"
+                : $"nothing could be read at {path} {waited}; {folder} holds "
+                    + string.Join(", ", holds.Take(10).Select(one => $"'{one}'"));
+        }
+
+        var first = 0;
+        while (first < found.Length && first < wanted.Length && found[first] == wanted[first])
+            first++;
+
+        return $"{path} holds {found.Length} bytes and {against} holds {wanted.Length}, and they first differ "
+            + $"at byte {first} {waited}";
     }
 
     /// <summary>

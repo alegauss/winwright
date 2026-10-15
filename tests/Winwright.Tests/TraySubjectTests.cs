@@ -215,7 +215,7 @@ public sealed class TraySubjectTests
             .Select(one => one!["required"]!.AsArray()[0]!.GetValue<string>())
             .ToList();
 
-        Assert.Equal(["locator", "tray"], either);
+        Assert.Equal(["locator", "tray", "file"], either);
 
         // And neither is in `required`, which is what would have contradicted the group.
         var required = step["required"]?.AsArray().Select(one => one!.GetValue<string>()).ToList() ?? [];

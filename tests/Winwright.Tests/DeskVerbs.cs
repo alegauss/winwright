@@ -107,6 +107,10 @@ internal static class DeskVerbs
                 + "caller named. A desk crowded with somebody else's windows returns the same list, "
                 + "and a window this run's application has not drawn yet is what a deadline is for "
                 + "rather than what an excuse is for"),
+        new("FolderWindow.Open", Touching.FilteredToWhatTheCallerNamed,
+            "WW536. It walks the desk's Explorer windows and keeps the one whose title holds the "
+                + "folder the fixture named. It is called by the suite before a case begins, never by "
+                + "a case, and a folder window that never arrives is already a hole naming the desk"),
         new("TopLevelWindows.Largest", Touching.FilteredToWhatTheCallerNamed,
             "the same walk, answering the largest of them. It reaches the desk only through "
                 + "OfProcess and inherits the whole of its argument"),

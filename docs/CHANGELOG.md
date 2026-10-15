@@ -107,6 +107,7 @@
 - ✅ **WW529** **A filled JSON store naming {files} inside a string comes out invalid, because the path's backslashes are not escaped** — A filled .json file gets each replacement JSON-escaped, so a store naming {files} parses and keeps the path (design recorded in `src/Winwright/Scenarios/FixtureDeclaration.cs`).
 - ✅ **WW531** **A process that outlived its case is named by pid alone, never by the case that launched it** — A process that outlived its case, or left early, is named with the case it was launched for and whether that launch was lent, so a survivor in a long run can be traced.
 - ✅ **WW534** **Two runners driving one guest VM interleave their windows, and neither says another run holds the desk** — A guest run claims the desk through a host mutex a second runner waits on and names, and a foreground lost to a process no case started says so (design recorded in `README.md`).
+- ✅ **WW536** **A fixture cannot open the window a drop lands in, so a drop onto Explorer needs code outside the case** — A fixture's opens puts an Explorer folder beside the window under test and closes it with the case, so a drop onto Explorer needs no code outside the case.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -315,6 +316,7 @@
 - ✅ **WW523** **A case cannot read an element's item status, so a state an application publishes there cannot be asserted** — A locator selects by item status with [status="Connected"], so a case finds the connected tab without its title (design recorded in `src/Winwright/Locating/LocatorStep.cs`).
 - ✅ **WW525** **Reading value on an element with no Value pattern polls for seconds and fails as nothing answered, never naming picked** — A case that stops short collapses what its expand steps left open, so a drop-down from one red case won't hold the next (design recorded in `src/Winwright/Scenarios/CaseRun.cs`).
 - ✅ **WW528** **A case cannot claim a reading is empty, so a tab with no status or a field left blank has no claim** — A case claims a reading is empty with empty: true, which holds only for an element that is there and says nothing (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
+- ✅ **WW535** **A case cannot read a file on disk, so a drop onto Explorer cannot be checked by the case that made it** — A step naming a file takes read and claims sameBytesAs, waited for over the resolve timeout, so a drop onto Explorer is checked byte for byte by the case.
 
 ## Block G — The scenario — a case is a data file
 

@@ -103,6 +103,80 @@ public sealed class DragTests : IDisposable
     }
 
     [Fact]
+    public void A_file_dragged_onto_a_folder_the_fixture_opened_lands_there_byte_for_byte()
+    {
+        // WW535 and WW536 together, which is quickshell's QS188 written as a case: the fixture opens
+        // the folder beside the window, the drag drops onto Explorer from the desktop, and a file
+        // step reads what landed. ExplorerDropRun did all three in C# because a case could do none.
+        if (!Desk.Read().CanObserve)
+            return;
+
+        var payload = new byte[64 * 1024];
+        Random.Shared.NextBytes(payload);
+        Directory.CreateDirectory(Path.Combine(root, "data"));
+        File.WriteAllBytes(Path.Combine(root, "data", "report.bin"), payload);
+
+        var declaration = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            declaration,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "timeouts": { "launch": 30000, "resolve": 10000, "act": 4000, "poll": 50 }
+            }
+            """);
+
+        var cases = """
+            {
+              "fixtures": [
+                {
+                  "name": "a note that carries a file",
+                  "arguments": ["--drags", "--show"],
+                  "files": ["data/report.bin"],
+                  "variables": { "WINWRIGHT_DRAG_FILE": "{files}/report.bin" },
+                  "opens": "{files}/winwright-landing"
+                }
+              ],
+              "cases": [
+                {
+                  "name": "a file dropped onto an Explorer folder is there byte for byte",
+                  "catches": "a drop onto Explorer that a case could neither aim at nor check",
+                  "fixture": "a note that carries a file",
+                  "steps": [
+                    {
+                      "locator": "Text#dragNote",
+                      "act": "drag",
+                      "to": "Window[nameStarts=\"winwright-landing\"] > List[class=UIItemsView]",
+                      "toDesktop": true,
+                      "named": "the note is dropped on the folder"
+                    },
+                    {
+                      "file": "{files}/winwright-landing/report.bin",
+                      "act": "read",
+                      "sameBytesAs": "data/report.bin",
+                      "named": "the file landed with its bytes"
+                    }
+                  ]
+                }
+              ]
+            }
+            """;
+
+        var project = ProjectDeclaration.Load(declaration);
+        using var register = ProcessRegister.For(project);
+
+        var verdict = Suite.Launch(ScenarioFile.Read("explorer.cases.json", cases), Selection.All, register, project);
+        var survivors = register.StopAll();
+        if (BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+
+        // And the folder's window was given back with the case: nothing it opened is still standing.
+        Assert.Empty(survivors);
+    }
+
+    [Fact]
     public void Looking_from_the_desktop_with_no_destination_is_refused_where_it_is_written()
     {
         var refused = Assert.Throws<ScenarioRefusedException>(

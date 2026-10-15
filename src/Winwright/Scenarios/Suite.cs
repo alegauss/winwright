@@ -215,9 +215,27 @@ public static class Suite
                 continue;
             }
 
-            var (window, process) = Opened(register, project, fixture, one.Name, borrowing);
+            // WW509, and WW515 for the order: staged before anything reads the directory. WW536 puts
+            // the folder between the two — after staging, which empties the directory the folder may
+            // be inside, and before the launch, so the application comes forward over Explorer the
+            // way it does at every launch. Measured in the guest: opened after the launch, Explorer
+            // kept the desk, and a drag's wait for the window under test ran out at ten seconds.
+            var staged = fixture.Stage(project.Root);
+            var folder = Folder(project, fixture, out var noFolder);
+            if (noFolder is not null)
+            {
+                ran.Add(CaseRun.NotOn(one, noFolder, lent: false));
+                continue;
+            }
+
+            var (window, process) = Opened(register, project, staged, one.Name, borrowing);
             if (borrowing)
                 lent[fixture.Name] = window;
+
+            // Asked of the window rather than of the process: a resident fixture's root is the
+            // desktop, whose handle is no window this may move.
+            if (folder is not null && window != AutomationElement.RootElement)
+                folder.Beside(window);
 
             // The first case through a lent fixture pays the launch and does not borrow it: it is
             // the one that owns the window until the run ends, so the reading it takes is the same
@@ -229,6 +247,10 @@ public static class Suite
             }
             finally
             {
+                // WW536. Closed where the case's own window is given back, and before it, so the
+                // folder is never left standing over a desk with nothing under test on it.
+                Closed(register, project, folder, one.Name);
+
                 // WW215. Given back here and not at the end of the run: a case that owns its process
                 // owns it for as long as it is running and no longer. A lent window is the exception
                 // and not the rule — it is held precisely as long as it is being lent, which is
@@ -250,6 +272,43 @@ public static class Suite
         }
 
         return Remembered(asked, ran, skipped, project);
+    }
+
+    /// <summary>
+    /// The folder a fixture opens, opened, or null where it opens none. WW536. Put beside the window
+    /// under test once that window exists, which is after this.
+    /// </summary>
+    /// <param name="project">The declaration, for the root and the budgets.</param>
+    /// <param name="fixture">The fixture, which says whether it opens one.</param>
+    /// <param name="absent">
+    /// Where the fixture opens a folder and no window showing it arrived: the absence a case run on
+    /// this desk is a hole naming. A folder that did not come up is the desk's and never the
+    /// application's, which is why this is not a red.
+    /// </param>
+    private static FolderWindow? Folder(ProjectDeclaration project, FixtureDeclaration fixture, out Precondition? absent)
+    {
+        absent = null;
+        if (fixture.Opening(project.Root) is not { } opening)
+            return null;
+
+        var deadline = project.Timeouts.For(WindowTimeout);
+        var folder = FolderWindow.Open(opening, deadline, project.Timeouts.For("poll"));
+        if (folder is null)
+        {
+            absent = Precondition.Absent(
+                $"an Explorer window on {opening}",
+                $"'{fixture.Name}' opens it, and no window showing it arrived in {deadline}ms");
+            return null;
+        }
+
+        return folder;
+    }
+
+    /// <summary>Close the folder a case opened, naming its window where it would not go. WW536.</summary>
+    private static void Closed(ProcessRegister register, ProjectDeclaration project, FolderWindow? folder, string forCase)
+    {
+        if (folder is not null && !folder.Close(project.Timeouts.For("stop"), project.Timeouts.For("poll")))
+            register.LeftOpen(folder.Pid, folder.ToString(), forCase);
     }
 
     /// <summary>
@@ -288,19 +347,21 @@ public static class Suite
     /// than a red: nothing about the case was observed, so nothing about the application was.
     /// </exception>
     private static (AutomationElement Window, LaunchedProcess Process) Opened(
-        ProcessRegister register, ProjectDeclaration project, FixtureDeclaration fixture, string named, bool lent)
+        ProcessRegister register, ProjectDeclaration project, StagedFixture staged, string named, bool lent)
     {
         // WW509, and WW515 for the order. Staging comes first because the directory the token
         // resolves to has to be the directory the files are actually in by the time the process
         // reads it — and the launch is composed from what staging hands back rather than from the
         // declaration again, so the two cannot be given two different roots. A fixture declaring
         // no files still gets an emptied directory, which is what makes the store this launch's
-        // own rather than whatever the last one left.
+        // own rather than whatever the last one left. WW536 moved the staging to the caller, so a
+        // folder inside the staged directory can be opened between the two.
         //
         // WW508 is the other half: the directory it starts in is the project's root, so a fixture
         // argument naming a file in the project means the same thing under every runner. Before
         // that the launch set none and inherited whichever one the test runner happened to be in.
-        var start = fixture.Stage(project.Root).Starting(project.Executable);
+        var fixture = staged.Fixture;
+        var start = staged.Starting(project.Executable);
 
         // WW349. Where pictures go is the project's, and it is also the one directory this run may
         // ask the application to write into — so the launch says so rather than an operator setting

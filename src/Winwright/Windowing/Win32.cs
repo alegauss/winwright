@@ -478,6 +478,48 @@ internal static class Win32
         return owner == (uint)System.Environment.ProcessId;
     }
 
+    /// <summary>Whether a handle still names a window. WW536: how a closed folder window is told from one left open.</summary>
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool IsWindow(nint window);
+
+    /// <summary>Whether a window is maximised, which a placement has to undo before it can size one. WW536.</summary>
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool IsZoomed(nint window);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool ShowWindow(nint window, int command);
+
+    /// <summary>SW_RESTORE: back to its normal size from maximised or minimised. WW536.</summary>
+    internal const int ShowRestore = 9;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SetWindowPos(nint window, nint after, int x, int y, int width, int height, uint flags);
+
+    /// <summary>SWP_NOZORDER | SWP_NOACTIVATE: move and size, and leave the stacking and the desk alone. WW536.</summary>
+    internal const uint PlaceOnly = 0x0004 | 0x0010;
+
+    /// <summary>
+    /// Posted rather than sent. WW536: a window of the shell's answers its close on its own thread,
+    /// and a send would wait on that thread with no deadline.
+    /// </summary>
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool PostMessageW(nint window, uint message, nint wParam, nint lParam);
+
+    /// <summary>WM_CLOSE: what a person's click on the close button sends.</summary>
+    internal const uint WmClose = 0x0010;
+
+    /// <summary>SPI_GETWORKAREA: the primary display less the taskbar. WW536.</summary>
+    internal const uint SpiGetWorkArea = 0x0030;
+
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SystemParametersInfoW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SystemParametersInfoRect(uint action, uint uiParam, out Rect pvParam, uint winIni);
+
     internal static string ClassOf(nint window)
     {
         var name = new StringBuilder(256);

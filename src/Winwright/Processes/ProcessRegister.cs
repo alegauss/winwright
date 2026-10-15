@@ -247,6 +247,25 @@ public sealed class ProcessRegister : IDisposable
     }
 
     /// <summary>
+    /// A window this run opened in a process it did not start, still standing after it was asked to
+    /// close. WW536.
+    /// <para>
+    /// The folder a fixture opens is drawn by the shell, so there is no launch here to stop and the
+    /// shell is not this run's to end. What outlived the case is the window, and it is named the way a
+    /// process that would not stop is — by the pid drawing it and the case that opened it — because
+    /// a folder window left on the desk is what the next drop case lands in.
+    /// </para>
+    /// </summary>
+    /// <param name="pid">The process drawing the window.</param>
+    /// <param name="what">The window, as a reader recognises it.</param>
+    /// <param name="forCase">The case that opened it.</param>
+    internal void LeftOpen(int pid, string what, string? forCase)
+    {
+        ObjectDisposedException.ThrowIf(survivors is not null, this);
+        outlived.Add(new Survivor(pid, what, SurvivorFate.WouldNotStop, forCase));
+    }
+
+    /// <summary>
     /// Stop everything still running and say what was. A window is asked to close first, because
     /// an application under test is entitled to shut down the way a person would close it; what
     /// does not take the hint is killed with its tree, since the child it spawned holds the same

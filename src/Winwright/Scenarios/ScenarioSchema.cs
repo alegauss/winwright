@@ -207,6 +207,7 @@ public static class ScenarioSchema
         // publishes `{FixtureDeclaration.Staged}` to a reader. `ScenarioFileTests` holds the spelling
         // to the constant, which is the pairing that keeps the two from drifting.
         new("files", false, Taking.Placed, "the files to put in a directory of this launch's own, each relative to the project's root, as an array — a variable or the working directory names that directory with '{files}', which is how a case gives the application a store of its own without the application growing a flag; an entry may instead be an object with 'from' and 'to', where 'to' is a path under that directory such as quickshell/sessions.json, for an application whose store sits one folder down, and 'fill' set to true to have {reach0} and the staged directory's own token filled in its text, JSON-escaped where the file lands as .json and raw anywhere else", []),
+        new("opens", false, Taking.Text, "a folder to open in Explorer beside the window under test before the first step, relative to the project's root or naming '{files}' — created where it is not there, the two windows put side by side so a drop released over the folder lands in it, and the folder's window closed again when the case gives its window back; one still standing then is named as a survivor. Not beside 'shareable'", []),
         new("reaches", false, Taking.Words, "what the application connects to outside itself, each a host:port or a %VARIABLE% naming one, as an array — probed before every launch and never started; unreachable, every check on the fixture is a hole naming the address, and reachable, the arguments and variables name each as {reach0}, {reach1} and on", []),
     ]);
 
@@ -222,6 +223,17 @@ public static class ScenarioSchema
             Taking.Text,
             "the notification-area icon to act on, by the name the shell gives it — a tooltip, matched "
                 + "on its first line, for the surface no locator reaches",
+            [],
+            Subject),
+        // WW535. The third kind of subject: a file a drop or a save left on disk is in no window's
+        // tree, so the check that it arrived is about something no locator reaches either.
+        new(
+            "file",
+            false,
+            Taking.Text,
+            "a file on disk to read, relative to the project's root or naming the fixture's staged "
+                + "directory with '{files}' — for what an act leaves outside any window, such as a file "
+                + "dropped onto an Explorer folder; it takes 'read' and claims 'sameBytesAs'",
             [],
             Subject),
         new("act", true, Taking.Text, "what to do to it", ActVerb.All.Select(verb => verb.Name).ToList()),
@@ -253,6 +265,7 @@ public static class ScenarioSchema
         new("covers", false, Taking.Text, "the key whose every string must be read somewhere the locator matches, and nothing else — derived from the project's own strings and never listed here", [], Claims: true),
         new("coversAtLeast", false, Taking.Text, "the same set, claiming only that every declared string is read here and allowing values that are not in it — for a container the locator cannot separate from its neighbours", [], Claims: true),
         new("coversWithin", false, Taking.Text, "the same set, claiming each declared string appears inside the name of something read rather than equalling it — for an entry that decorates what it is about", [], Claims: true),
+        new("sameBytesAs", false, Taking.Text, "on a 'file' step, the file whose bytes it should hold, written the way 'file' is — waited for over the resolve timeout, and a file still missing or different then is a failure naming the path, the lengths and the first byte that differs", [], Claims: true),
         new("meansIt", false, Taking.Truth, "that this step means a destructive entry it names", []),
         new("popup", false, Taking.Text, "the popup inside this step's window whose tree the picture is of, by the name the application's own author gave it — for a capture, and the one surface no copy of the screen can ever take", []),
         new("named", false, Taking.Text, "what a report should call it, where the act and the locator will not do", []),

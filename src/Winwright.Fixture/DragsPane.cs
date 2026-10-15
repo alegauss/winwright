@@ -210,8 +210,29 @@ public static class DragsPane
             // Handed back before the system's loop starts, which takes the pointer itself.
             from = null;
             note.ReleaseMouseCapture();
-            DragDrop.DoDragDrop(note, new DataObject(DataFormats.UnicodeText, note.Text), DragDropEffects.Copy);
+            DragDrop.DoDragDrop(note, Carried(note.Text), DragDropEffects.Copy);
         };
+    }
+
+    /// <summary>The variable naming a file the note also carries, the way a file browser offers one. WW536.</summary>
+    public const string CarriesFile = "WINWRIGHT_DRAG_FILE";
+
+    /// <summary>
+    /// What the note's drag carries: its text, and the file <see cref="CarriesFile"/> names where it
+    /// names one that is there. WW536.
+    /// <para>
+    /// The file is what an Explorer folder takes: a drop of a file list there is a copy into the
+    /// folder, which is quickshell's QS188 gesture, and a case can then read the copy with a file
+    /// step. The text stays beside it, so the drop window this pane raises still takes the same drag.
+    /// </para>
+    /// </summary>
+    private static DataObject Carried(string text)
+    {
+        var data = new DataObject(DataFormats.UnicodeText, text);
+        if (Environment.GetEnvironmentVariable(CarriesFile) is { Length: > 0 } path && System.IO.File.Exists(path))
+            data.SetFileDropList([path]);
+
+        return data;
     }
 
     /// <summary>

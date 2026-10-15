@@ -4,8 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 🛠 **WW536** (deps: —) **A fixture cannot open the window a drop lands in, so a drop onto Explorer needs code outside the case** — A fixture launches only the application under test, and toDesktop needs a second window already on the desk. → §WW536
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -15,8 +13,6 @@
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
-
-- 🛠 **WW535** (deps: —) **A case cannot read a file on disk, so a drop onto Explorer cannot be checked by the case that made it** — WW530's drop lands as a file, and no act or reading says whether it arrived with the bytes it had. → §WW535
 
 ## Block G — The scenario — a case is a data file
 
