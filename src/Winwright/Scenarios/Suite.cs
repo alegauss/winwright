@@ -110,6 +110,13 @@ public sealed class SuiteVerdict
     /// </summary>
     public IReadOnlyList<CaseDeclaration> Unjustified => CaseDeclaration.Unjustified(Ran.Select(one => one.Declared));
 
+    /// <summary>
+    /// Every case that ran whose claim begins or ends with its own name, in the order it ran. WW541:
+    /// named beside the unjustified ones and for the same kind of reason, and never moving the outcome,
+    /// because a claim that may be the name again is a question for a person rather than a failure.
+    /// </summary>
+    public IReadOnlyList<CaseDeclaration> Echoing => CaseDeclaration.Echoing(Ran.Select(one => one.Declared));
+
     /// <summary>The whole reading as a report prints it: the sentence, then a line for each case.</summary>
     public IReadOnlyList<string> Render()
     {
@@ -125,6 +132,15 @@ public sealed class SuiteVerdict
                 $"{Unjustified.Count} case{(Unjustified.Count == 1 ? "" : "s")} that ran say nothing about what "
                 + "they catch, so nothing says what deleting them would cost:");
             lines.AddRange(Unjustified.Select(one => $"  {one.Name}"));
+        }
+
+        if (Echoing.Count > 0)
+        {
+            lines.Add(
+                $"{Echoing.Count} case{(Echoing.Count == 1 ? "" : "s")} that ran say what they catch in words "
+                + "that begin or end with their own name, so a comparison of claims across runs may be "
+                + "reading the name again:");
+            lines.AddRange(Echoing.Select(one => $"  {one.Name}: {one.Catches}"));
         }
 
         return new ReadOnlyCollection<string>(lines);

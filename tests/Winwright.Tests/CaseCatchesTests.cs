@@ -76,6 +76,40 @@ public class CaseCatchesTests
         Assert.Contains("say what goes wrong without it", refusal.Because);
     }
 
+    [Theory]
+    // WW541. The four shapes a dev.to reader derived from a case name that equality lets through.
+    [InlineData("WW1042 login succeeds for a user")]
+    [InlineData("Tests. Login succeeds for a user")]
+    [InlineData("login succeeds for a user, regression")]
+    [InlineData("Regression: login succeeds for a user")]
+    public void A_claim_that_begins_or_ends_with_a_long_name_is_named_and_still_loads(string claim)
+    {
+        var one = CaseDeclaration.Declared("login succeeds for a user", [Step()], catches: claim);
+
+        Assert.True(one.Justified);
+        Assert.True(one.EchoesItsName);
+        Assert.Equal([one], CaseDeclaration.Echoing([one]));
+    }
+
+    [Theory]
+    // The honest half of his table: new content, and a name inside a sentence rather than at its edge.
+    [InlineData("login succeeds for a user", "a cached session token that accepts a stale token")]
+    [InlineData("login succeeds for a user", "a password whose login succeeds for a user only without its trailing space")]
+    // Under the floor a name is a word or two, and a claim beginning with a word is ordinary prose.
+    [InlineData("save", "save that reports success and writes nothing")]
+    public void A_claim_with_its_own_content_or_a_short_name_at_its_edge_is_not_named(string name, string claim)
+    {
+        var one = CaseDeclaration.Declared(name, [Step()], catches: claim);
+
+        Assert.False(one.EchoesItsName);
+    }
+
+    [Fact]
+    public void A_case_that_says_nothing_does_not_echo_anything()
+    {
+        Assert.False(CaseDeclaration.Of("login succeeds for a user", Step()).EchoesItsName);
+    }
+
     [Fact]
     public void A_claim_that_holds_its_name_inside_a_longer_sentence_is_taken()
     {

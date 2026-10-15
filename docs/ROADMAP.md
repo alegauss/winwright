@@ -4,6 +4,8 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW542** (deps: —) **A step's with cannot name the project's root, so a case types a checkout's path whole and is red on any other desk** — quickshell QS292 serves a file of its tree to a second account's sshd, and spells the guest's checkout path into the case to reach it. → §WW542
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

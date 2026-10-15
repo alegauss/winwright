@@ -166,6 +166,39 @@ public sealed class FileSubjectTests : IDisposable
         }
     }
 
+    [Fact]
+    public void A_run_names_the_claims_that_begin_with_their_own_case_name_and_still_passes()
+    {
+        // WW541, read off a whole run: a file step needs no desk, so the reading is the suite's own
+        // render rather than a list built beside it.
+        var bytes = Written("data/report.bin", 32);
+        Written("out/report.bin", bytes);
+        File.WriteAllText(Path.Combine(root, ProjectDeclaration.FileName), """{ "timeouts": { "resolve": 300, "poll": 50 } }""");
+
+        var declared = ScenarioFile.Read("echo.cases.json", """
+            {
+              "cases": [
+                {
+                  "name": "the report is copied",
+                  "catches": "the report is copied, regression",
+                  "steps": [ { "file": "out/report.bin", "act": "read", "sameBytesAs": "data/report.bin" } ]
+                }
+              ]
+            }
+            """);
+
+        var verdict = Suite.Run(
+            declared, Selection.All, AutomationElement.RootElement, ProjectDeclaration.Load(Path.Combine(root, ProjectDeclaration.FileName)));
+
+        Assert.Equal(RunOutcome.Passed, verdict.Outcome);
+        Assert.Equal(["the report is copied"], verdict.Echoing.Select(one => one.Name));
+        Assert.Contains(
+            "1 case that ran say what they catch in words that begin or end with their own name",
+            Said(verdict),
+            StringComparison.Ordinal);
+        Assert.Contains("  the report is copied: the report is copied, regression", Said(verdict), StringComparison.Ordinal);
+    }
+
     /// <summary>One case holding <paramref name="step"/> and nothing else, loaded.</summary>
     private static CaseDeclaration Loaded(string step) =>
         Assert.Single(ScenarioFile.Read("file.cases.json", $$"""

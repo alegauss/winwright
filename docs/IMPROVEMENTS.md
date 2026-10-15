@@ -4,6 +4,30 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+### §WW542 A token for the project's root
+
+Found by quickshell QS292, the drop of a file from an SSH server's side onto an Explorer
+folder. The server is the guest's own sshd, signing in as a second local account, so the
+file it serves has to be one that account can read. The fixture's staged directory is
+under the runner's own temp and is not; the project's checkout, under the drive's root,
+is. So the case types the checkout's path into the client's remote path box, and has to
+spell it whole: `"with": "/C:/src/quickshell/cases/fixtures"`, the guest's checkout as
+quickshell's guest scripts place it. A desk with the checkout anywhere else reds the
+case for a reason the case never states.
+
+`{files}` is replaced in a fixture's arguments, variables, working directory and
+`opens`, and `{reach0}` in a filled file, but nothing names the project's root, and a
+step's `with` takes no token at all.
+
+What to build: a `{root}` token, the directory winwright.json sits in, replaced in a
+step's `with` beside `{files}`, and in the places `{files}` already is. A path with
+forward slashes is the application's spelling to ask for, so a second form, `{root/}`,
+gives the same path with `/` separators and a leading `/` before the drive, which is how
+Windows OpenSSH names it.
+
+Done when a case types `{root}/cases` into an edit, reads back the checkout's own path,
+and an unknown token in `with` is refused naming the tokens that exist.
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

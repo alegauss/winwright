@@ -40,6 +40,7 @@
 - ✅ **WW517** **a foreground check that passed records neither who held the desk nor which finding made it ours** — A met foreground names the holder and the finding that made it ours, and a press carries both to its trace line (design recorded in `src/Winwright/Windowing/Foreground.cs`).
 - ✅ **WW532** **A case that ran last run and not this one goes unnoticed while the total holds, so a swap reads green** — With lastRun declared, a run names the cases that appeared and vanished since the last run over its selection (design recorded in `src/Winwright/Scenarios/RanBefore.cs`).
 - ✅ **WW533** **A case renamed and a claim no case makes any more read alike between runs, so a lost claim is one rename among many** — A run keeps each case's catches by its name, so a rename that kept its claim holds and a claim no case makes is named lost (design recorded in `src/Winwright/Scenarios/RanBefore.cs`).
+- ✅ **WW541** **A catches that is the case name with a word added passes WW537 and runs unnamed, so the claim diff reads the name** — A run names the cases whose catches begins or ends with their own name, quoting the claim and refusing nothing, so a pasted title past WW537 is seen.
 
 ## Block B — Attach, launch, and leave nothing behind
 

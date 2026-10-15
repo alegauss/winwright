@@ -120,6 +120,50 @@ public sealed record CaseDeclaration
     /// <summary>Whether this case says what it exists to catch.</summary>
     public bool Justified => Catches.Length > 0;
 
+    /// <summary>
+    /// How long a name has to be, folded, before a claim beginning or ending with it reads as the name
+    /// pasted again rather than as a sentence that happens to start with the same word. WW541.
+    /// </summary>
+    public const int EchoFloor = 8;
+
+    /// <summary>
+    /// Whether what this case catches begins or ends with its own name, folded the way WW537 folds
+    /// them. WW541.
+    /// <para>
+    /// The widening WW537 left for evidence, made a reading instead of a refusal. A reader of the
+    /// 374-to-352 article measured it: of eight claims derived from a case name, equality refuses four
+    /// and passes the name with an id or class prefix, an appended word or a regression phrasing — and
+    /// every wider refusal also turned away an honest sentence. Folding cannot tell decoration from a
+    /// clause naming a defect, so this names the claim for a person to read and refuses nothing.
+    /// </para>
+    /// <para>
+    /// The floor is what keeps it from being noise that repeats every run: a name of a word or two
+    /// begins honest claims as ordinary prose, and a list that flags those forever is one people learn
+    /// to skip.
+    /// </para>
+    /// </summary>
+    public bool EchoesItsName
+    {
+        get
+        {
+            if (!Justified)
+                return false;
+
+            var name = Folded(Name);
+            var claim = Folded(Catches);
+            return name.Length >= EchoFloor
+                && (claim.StartsWith(name, StringComparison.Ordinal) || claim.EndsWith(name, StringComparison.Ordinal));
+        }
+    }
+
+    /// <summary>Every case among <paramref name="declared"/> whose claim begins or ends with its own name. WW541.</summary>
+    /// <param name="declared">The cases to read.</param>
+    public static IReadOnlyList<CaseDeclaration> Echoing(IEnumerable<CaseDeclaration> declared)
+    {
+        ArgumentNullException.ThrowIfNull(declared);
+        return new ReadOnlyCollection<CaseDeclaration>(declared.Where(one => one.EchoesItsName).ToList());
+    }
+
     /// <summary>Whether this case declares <paramref name="tag"/>, however it is cased.</summary>
     public bool Tagged(string tag) => Tags.Contains(tag?.Trim() ?? "", StringComparer.OrdinalIgnoreCase);
 
