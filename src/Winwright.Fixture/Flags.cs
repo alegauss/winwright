@@ -258,13 +258,18 @@ public sealed record Flags
         new Flag(
             "pickers",
             "",
-            "a pane carrying the two answers 'what does this picker hold' has - one shut, whose items are in no tree until it opens, and one already dropped down",
-            "Pick was driven only against a Win32 combo, which holds its items either way, so the walk read 'it holds nothing' about a WPF picker holding two and refused the case it was built for"),
+            "a pane carrying the two answers 'what does this picker hold' has - one shut, whose items are in no tree until it opens, and one already dropped down - and two lists, one taking several rows at once and one taking one",
+            "Pick was driven only against a Win32 combo, which holds its items either way, so the walk read 'it holds nothing' about a WPF picker holding two and refused the case it was built for; and a list taking several rows could only ever be given one, because select replaces the selection"),
         new Flag(
             "drags",
             "",
-            "a pane holding a strip of three tabs that reorders only when one is dragged onto another, with a read-out of the order, and a note that can be dropped onto a second window beside it",
-            "a tab strip reordered by dragging had no case, because no verb pressed on one element, moved past the drag threshold and released over another - and a drop onto another window had none either, because the destination was looked for only in the window the drag started in"),
+            "a pane holding a strip of three tabs that reorders only when one is dragged onto another and closes a tab on a middle click, with a read-out of the order, and a note that can be dropped onto a second window beside it or, carrying the file WINWRIGHT_DRAG_FILE names, onto an Explorer folder",
+            "a tab strip reordered by dragging had no case, because no verb pressed on one element, moved past the drag threshold and released over another - and a drop onto another window had none either, because the destination was looked for only in the window the drag started in; a tab closed by the middle button had none, because a click pressed only the left one"),
+        new Flag(
+            "layout",
+            "",
+            "a pane of three buttons in three boxes: one with room, one spilling past the right edge of a box too narrow for it, and one laid out zero wide",
+            "a close button 22 by 22 in the tree that painted nothing passed every case, because a case could read that an element exists and never whether it is drawn inside the element holding it"),
         new Flag(
             "status",
             "",

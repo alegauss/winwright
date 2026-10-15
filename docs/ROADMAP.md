@@ -10,13 +10,11 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW540** (deps: —) **A case cannot add an item to a selection or click with Ctrl or Shift held, so a list choosing several has no case** — The select act replaces the selection, and AddToSelection, which UI Automation offers a multiple-selection list, has no verb. → §WW540
+- ⏳ **WW540** (deps: —) **A case cannot add an item to a selection or click with Ctrl or Shift held, so a list choosing several has no case** — A click with Ctrl or Shift held is still missing, for an application that answers the gesture and not the pattern. → §WW540
 
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
-
-- 📋 **WW539** (deps: —) **A case cannot claim an element is drawn inside another, so a control clipped or laid out empty passes every case** — No reading touches geometry, so quickshell's close cross painted nothing while every case found it and read its name. → §WW539
 
 ## Block G — The scenario — a case is a data file
 
@@ -155,6 +153,12 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
+
+## Done when — WW540
+
+- **A case clicks a row with Ctrl held and reads it added beside those selected** A
+  fixture list answering only the gesture is driven by a case and read back through
+  IsSelected.
 
 ## Non-goals
 

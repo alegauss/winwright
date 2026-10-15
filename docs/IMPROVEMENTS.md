@@ -59,28 +59,6 @@ list is refused naming why.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW539 Claiming an element sits within another
-
-Found by quickshell QS312: a tab's close button was in the tree, 22 by 22, and painted
-nothing, because the theme's padding left its glyph no room. Every case passed, since a
-case can read that an element exists and what it is named, but not where it is drawn or
-whether it fits inside the element holding it. The design asked for a case reading
-CloseTab's bounding rectangle inside its tab's, and none can be written: `reads` takes
-anything, value, range, toggle, selected, picked, expanded, text, name, description,
-status, enabled and focused, and nothing about geometry.
-
-A claim, not a reading, fits the evidence rule best: `"within": "<locator>"` on a step
-asserts that the subject's UIA BoundingRectangle lies inside the named element's, and
-fails naming both rectangles; an empty rectangle (zero width or height, or offscreen) is
-a failure of its own, since that is the shape the defect took. Raw numbers as a reading
-would invite cases that pin pixels a DPI change moves.
-
-quickshell proves its fix in process instead (TabStripTests renders the button and
-counts painted pixels), which is the substitute this line exists to retire.
-
-Done when a fixture case asserts a button within its container and green, one clipped by
-a narrow parent fails naming both rectangles, and one laid out zero wide fails as empty.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

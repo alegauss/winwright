@@ -1253,6 +1253,14 @@ public static class CaseRun
             return true;
         }
 
+        // WW539. A claim about two rectangles, so it has its own wait for the reason the sweeps do:
+        // there is no reading at the end of it to retry towards, only a layout that has settled.
+        if (step.Within is { } container)
+        {
+            Inside(step, subject, subject.Elsewhere(container), trace, results);
+            return true;
+        }
+
         // WW261 and WW270. Resolved once, before the attempts, and out of the language the fixture
         // said its window is in. A key that cannot be read is a scenario that is wrong rather than an
         // application that is: the refusal names the key and the file, and it arrives before anything
@@ -2075,6 +2083,115 @@ public static class CaseRun
     /// never going to change costs the budget and then fails.
     /// </para>
     /// </summary>
+    /// <summary>
+    /// A step claiming its element is drawn inside another: both rectangles, waited for until the
+    /// element's is not empty and lies inside the container's. WW539.
+    /// <para>
+    /// Found by quickshell (QS312): a tab's close button was 22 by 22 in the tree and painted nothing,
+    /// because the theme's padding left its glyph no room. An empty rectangle is a failure of its own,
+    /// since that is the shape the defect took — a control laid out to nothing, or scrolled offscreen.
+    /// Half a pixel of slack on each edge, because a layout rounds to device pixels and a claim that
+    /// went red on rounding would be a claim about the display rather than the layout.
+    /// </para>
+    /// </summary>
+    private static void Inside(
+        StepDeclaration step, Subject subject, Subject container, List<TraceStep> trace, List<AssertionResult> results)
+    {
+        var drawn = System.Windows.Rect.Empty;
+        var holder = System.Windows.Rect.Empty;
+        var found = (Element: false, Container: false);
+
+        var waited = Attempt.UntilTrue(
+            () =>
+            {
+                var element = subject.ResolveOnce().Element;
+                var around = container.ResolveOnce().Element;
+                found = (element is not null, around is not null);
+
+                drawn = Rectangle(element);
+                holder = Rectangle(around);
+                return !Empty(drawn) && !Empty(holder) && Contains(holder, drawn);
+            },
+            subject.DeadlineMs,
+            subject.PollMs);
+
+        var detail = InsideSaid(step.Addressed, container.Locator.Text, drawn, holder, found, waited);
+
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = step.Verb.Name,
+            Locator = step.Addressed,
+            Asserted = step.Name,
+            WaitedMs = waited.WaitedMs,
+            Detail = detail,
+            Verdict = waited.Happened ? StepVerdict.Ok : StepVerdict.Failed,
+        });
+
+        results.Add((waited.Happened ? AssertionResult.Pass(step.Name, detail) : AssertionResult.Fail(step.Name, detail)).At(trace.Count));
+    }
+
+    /// <summary>What a within claim found, in the sentence a reader acts on. WW539.</summary>
+    private static string InsideSaid(
+        string element,
+        string container,
+        System.Windows.Rect drawn,
+        System.Windows.Rect holder,
+        (bool Element, bool Container) found,
+        Waited waited)
+    {
+        if (waited.Happened)
+            return $"{element} {Spelled(drawn)} is drawn within {container} {Spelled(holder)}.";
+
+        if (!found.Element)
+            return $"{element} never arrived in {waited.WaitedMs}ms, so nothing was measured";
+
+        if (!found.Container)
+            return $"{container} never arrived in {waited.WaitedMs}ms, so there was nothing to be within";
+
+        if (Empty(drawn))
+        {
+            return $"{element} is drawn empty {Spelled(drawn)}: it is in the tree and has no room on the screen, "
+                + $"inside {container} {Spelled(holder)}. Waited {waited.WaitedMs}ms.";
+        }
+
+        return $"{element} {Spelled(drawn)} is not within {container} {Spelled(holder)}. Waited {waited.WaitedMs}ms.";
+    }
+
+    /// <summary>An element's rectangle on the screen, or empty where there is no element or it has gone.</summary>
+    private static System.Windows.Rect Rectangle(AutomationElement? element)
+    {
+        if (element is null)
+            return System.Windows.Rect.Empty;
+
+        try
+        {
+            return element.Current.BoundingRectangle;
+        }
+        catch (ElementNotAvailableException)
+        {
+            return System.Windows.Rect.Empty;
+        }
+    }
+
+    /// <summary>Whether a rectangle has no area, which is what a control laid out to nothing or offscreen reports.</summary>
+    private static bool Empty(System.Windows.Rect rectangle) =>
+        rectangle.IsEmpty || rectangle.Width < 1 || rectangle.Height < 1
+        || double.IsInfinity(rectangle.Width) || double.IsInfinity(rectangle.Height);
+
+    /// <summary>Whether <paramref name="inner"/> lies inside <paramref name="outer"/>, with half a pixel of slack on each edge.</summary>
+    private static bool Contains(System.Windows.Rect outer, System.Windows.Rect inner) =>
+        inner.Left >= outer.Left - 0.5 && inner.Top >= outer.Top - 0.5
+        && inner.Right <= outer.Right + 0.5 && inner.Bottom <= outer.Bottom + 0.5;
+
+    /// <summary>A rectangle as a reader takes it in: where it starts and how big it is.</summary>
+    private static string Spelled(System.Windows.Rect rectangle) =>
+        rectangle.IsEmpty
+            ? "(empty)"
+            : string.Create(
+                System.Globalization.CultureInfo.InvariantCulture,
+                $"({rectangle.X:0},{rectangle.Y:0} {rectangle.Width:0}x{rectangle.Height:0})");
+
     private static void Spoke(
         StepDeclaration step, Subject subject, List<TraceStep> trace, List<AssertionResult> results)
     {

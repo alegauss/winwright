@@ -207,6 +207,18 @@ public sealed record StepDeclaration
     public Locator? To { get; private init; }
 
     /// <summary>
+    /// The element this step's subject claims to be drawn inside, parsed, or null on every step that
+    /// makes no such claim. WW539.
+    /// <para>
+    /// Found by quickshell (QS312): a tab's close button was in the tree, 22 by 22, and painted
+    /// nothing, because the theme's padding left its glyph no room. Every case passed, since a case
+    /// could read that an element exists and what it is called and never where it is drawn. A claim
+    /// rather than a reading of numbers, because a case pinning pixels is one a DPI change breaks.
+    /// </para>
+    /// </summary>
+    public Locator? Within { get; private init; }
+
+    /// <summary>
     /// Whether <see cref="To"/> is looked for from the desktop rather than in the window under test.
     /// WW530.
     /// <para>
@@ -950,6 +962,7 @@ public sealed record StepDeclaration
             Claiming(EachSpoken, "eachSpoken", "every element it matches announces a name");
             Claiming(OwnHeader, "ownHeader", "each row's controls announce that row");
             Claiming(SameBytesAs is not null, "sameBytesAs", $"the file holds the bytes '{SameBytesAs}' holds");
+            Claiming(Within is not null, "within", $"it is drawn inside {Within?.Text}");
 
             return claiming.AsReadOnly();
         }
@@ -1062,6 +1075,10 @@ public sealed record StepDeclaration
             Locator = parsed,
             Matches = pattern,
             To = to,
+
+            // WW539. Parsed at the door for the reason the destination is: a locator that does not
+            // parse is wrong on every machine.
+            Within = wrote.Trimmed("within") is { } within ? Parsed(subject, within) : null,
         };
 
         // WW391. A tray step is finished here, and what finishes it is the same step every other
@@ -1109,6 +1126,7 @@ public sealed record StepDeclaration
         RefusesReadingBesideClaim(step, subject);
         RefusesPinnedReading(step, subject);
         RefusesSweepingStep(step, subject);
+        RefusesWithinBesideAnAct(step, subject);
 
         // WW351. The step every refusal above was asked about, handed back. It was built before them
         // rather than after, because the set they read is its own — and nothing between here and
@@ -1179,6 +1197,38 @@ public sealed record StepDeclaration
                     + "not in the window's tree, so no locator reaches it and naming both names two subjects"
                 : $"a step acts on one thing, and this one names {string.Join(" and ", named)}; each is "
                     + "reached a different way, so naming more than one names that many subjects");
+    }
+
+    /// <summary>
+    /// A <c>within</c> claim on a step that acts, or beside a reading. WW539.
+    /// <para>
+    /// It is a claim about where two elements are drawn, taken with its own wait the way a sweep is,
+    /// so the act beside it would never run and a reading beside it would never be read: both are
+    /// fields the run would ignore, which this format refuses rather than loads.
+    /// </para>
+    /// </summary>
+    /// <param name="step">The step as the case wrote it.</param>
+    /// <param name="subject">What a refusal calls it.</param>
+    private static void RefusesWithinBesideAnAct(StepDeclaration step, string subject)
+    {
+        if (step.Within is null)
+            return;
+
+        if (!step.Verb.Reads)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims it is drawn within {step.Within.Text} and acts with '{step.Verb.Name}'; the claim "
+                    + "is about where two elements are drawn, so the act is 'read' and a later step reads it");
+        }
+
+        if (step.NamedReading is not null)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims it is drawn within {step.Within.Text} and reads '{step.Reads.Name}'; the claim is "
+                    + "about two rectangles and not about any reading, so 'reads' says nothing here");
+        }
     }
 
     /// <summary>
@@ -2131,6 +2181,9 @@ public sealed record StepDeclaration
             // WW520. The destination is named out of the same strings, so a drag can end on a tab
             // whose label is declared rather than typed.
             To = To is null ? null : Substituted(Name, Filled(To, reading)),
+
+            // WW539. The container is named out of the same strings, for the same reason.
+            Within = Within is null ? null : Substituted(Name, Filled(Within, reading)),
         };
     }
 

@@ -229,6 +229,10 @@ internal static class Criteria
         // Labelled by the task and not by the block, because that is how the roadmap labels it: a
         // criterion raised by a partial ship binds the line that is still open rather than the block
         // it sits in, and its list is headed with the id. WW384.
+        new("WW540", "A case clicks a row with Ctrl held and reads it added beside those selected", "", Unshown.NotBuilt,
+            "the pattern half shipped (add to selection and remove from selection); a click with a "
+                + "modifier held, for an application that answers the gesture and not the pattern, is "
+                + "the rest of the line and has not been built"),
 
         // --- K, the proving ground -----------------------------------------------------------------------
         new("K", "Every refusal has something that provokes it",

@@ -206,6 +206,7 @@
 - ✅ **WW520** **A case cannot drag one element onto another, so a strip reordered by dragging has no case** — A case drags one element onto another with 'act: drag' and 'to', past the drag threshold, and the fixture's tab strip reorders in the guest (design recorded in `src/Winwright/Acting/Drag.cs`).
 - ✅ **WW530** **A drag can only be released over an element of the window it started in, so a drop onto Explorer has no case** — A drag step with "toDesktop": true looks its `to` up from the desktop, so a case can drop onto another window, such as an Explorer folder (design recorded in `README.md`).
 - ✅ **WW538** **A case cannot click with the middle or right button, so a tab closed by a middle click has no case** — A click names its button, middle or right beside the default left, in its step and its rendered name, so a tab closed by a middle click has a case.
+- ✅ **WW540 (the pattern half)** **A case cannot add an item to a selection or click with Ctrl or Shift held, so a list choosing several has no case** — A multiple-selection list takes add to selection and remove from selection.
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -319,6 +320,7 @@
 - ✅ **WW525** **Reading value on an element with no Value pattern polls for seconds and fails as nothing answered, never naming picked** — A case that stops short collapses what its expand steps left open, so a drop-down from one red case won't hold the next (design recorded in `src/Winwright/Scenarios/CaseRun.cs`).
 - ✅ **WW528** **A case cannot claim a reading is empty, so a tab with no status or a field left blank has no claim** — A case claims a reading is empty with empty: true, which holds only for an element that is there and says nothing (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 - ✅ **WW535** **A case cannot read a file on disk, so a drop onto Explorer cannot be checked by the case that made it** — A step naming a file takes read and claims sameBytesAs, waited for over the resolve timeout, so a drop onto Explorer is checked byte for byte by the case.
+- ✅ **WW539** **A case cannot claim an element is drawn inside another, so a control clipped or laid out empty passes every case** — A step claims within, its element drawn inside a second locator's and not empty, failing with both rectangles, so a control clipped or laid out empty has a case.
 
 ## Block G — The scenario — a case is a data file
 

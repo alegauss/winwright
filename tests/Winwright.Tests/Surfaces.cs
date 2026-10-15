@@ -83,6 +83,7 @@ internal static class Surfaces
         new("Peerless", Carrying.AShape, "peerless"),
         new("PickersPane", Carrying.AShape, "pickers"),
         new("DragsPane", Carrying.AShape, "drags"),
+        new("LayoutPane", Carrying.AShape, "layout"),
         new("StatusPane", Carrying.AShape, "status"),
         new("RowsPane", Carrying.AShape, "rows"),
         new("RangesPane", Carrying.AShape, "ranges"),

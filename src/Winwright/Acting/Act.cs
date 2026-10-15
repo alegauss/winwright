@@ -52,6 +52,61 @@ public static class Act
         subject, "select", "SelectionItem",
         element => ((SelectionItemPattern)element.GetCurrentPattern(SelectionItemPattern.Pattern)).Select());
 
+    /// <summary>
+    /// Add it to what its container has selected, leaving the rest selected. WW540.
+    /// <para>
+    /// Found by quickshell (QS314), whose sidebar takes several rows at once: <see cref="Select"/>
+    /// replaces the selection, so a case could choose one row and never two. This is what UI
+    /// Automation offers a multiple-selection container, and like every pattern act it needs no
+    /// foreground. Refused where the container takes one row at a time, because there an add is a
+    /// replace that reads as an add.
+    /// </para>
+    /// </summary>
+    public static ActResult AddToSelection(Subject subject) => Through(
+        subject, "add to selection", "SelectionItem",
+        element =>
+        {
+            Several(subject, element);
+            ((SelectionItemPattern)element.GetCurrentPattern(SelectionItemPattern.Pattern)).AddToSelection();
+        });
+
+    /// <summary>Take it out of what its container has selected, leaving the rest. WW540.</summary>
+    public static ActResult RemoveFromSelection(Subject subject) => Through(
+        subject, "remove from selection", "SelectionItem",
+        element =>
+        {
+            Several(subject, element);
+            ((SelectionItemPattern)element.GetCurrentPattern(SelectionItemPattern.Pattern)).RemoveFromSelection();
+        });
+
+    /// <summary>
+    /// Refuse an element whose container takes one selection at a time, naming the container. WW540.
+    /// </summary>
+    /// <exception cref="NotActionableException">Where the container is not a multiple selection.</exception>
+    private static void Several(Subject subject, AutomationElement element)
+    {
+        var container = ((SelectionItemPattern)element.GetCurrentPattern(SelectionItemPattern.Pattern)).Current.SelectionContainer;
+        if (container is null)
+        {
+            throw new NotActionableException(
+                subject.Locator.Text,
+                Actionable.PatternMissing,
+                "it is in no selection container, so there is no selection to add it to or take it out of");
+        }
+
+        var several = container.TryGetCurrentPattern(SelectionPattern.Pattern, out var pattern)
+            && ((SelectionPattern)pattern).Current.CanSelectMultiple;
+        if (!several)
+        {
+            var named = container.Current.AutomationId is { Length: > 0 } id ? $"#{id}" : $"'{container.Current.Name}'";
+            throw new NotActionableException(
+                subject.Locator.Text,
+                Actionable.PatternMissing,
+                $"its container {named} takes one selection at a time, so adding to it would replace what it "
+                    + "held; 'select' is the act for a list like that");
+        }
+    }
+
     /// <summary>Open it, which is what puts its contents into the tree at all.</summary>
     public static ActResult Expand(Subject subject) => Through(
         subject, "expand", "ExpandCollapse",

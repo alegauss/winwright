@@ -57,6 +57,10 @@ public sealed record ActVerb
         new("set value", Takes.Text, repeatable: true, (subject, argument) => Act.SetValue(subject, argument!)),
         new("set range", Takes.Number, repeatable: true, (subject, argument) => Act.SetRange(subject, Number(argument!))),
         new("select", Takes.Nothing, repeatable: true, (subject, _) => Act.Select(subject)),
+        // WW540. The two a multiple-selection list takes, beside the one that replaces. Repeatable,
+        // because adding a row already added, or taking out one already out, arrives where it was.
+        new("add to selection", Takes.Nothing, repeatable: true, (subject, _) => Act.AddToSelection(subject)),
+        new("remove from selection", Takes.Nothing, repeatable: true, (subject, _) => Act.RemoveFromSelection(subject)),
         new(Expands, Takes.Nothing, repeatable: true, (subject, _) => Act.Expand(subject)),
         new(Collapses, Takes.Nothing, repeatable: true, (subject, _) => Act.Collapse(subject)),
 

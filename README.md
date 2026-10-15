@@ -394,7 +394,19 @@ button, which is how a person opens what a tray application opens on a left-clic
 a control through its patterns, and a step naming one against a `tray` is refused where it was written;
 the two tray acts named against a `locator` are refused the same way, since there is no control to hand
 them. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `expand`, `collapse`, `type`, `click`, `drag`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
+`set value`, `set range`, `select`, `add to selection`, `remove from selection`, `expand`, `collapse`, `type`, `click`, `drag`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
+
+`select` replaces whatever its list had selected. A list that takes several rows at once, such as a
+sidebar where Ctrl+click adds a row, takes **`add to selection`** and **`remove from selection`**,
+which leave the rest of the selection as it was. Both go through the item's own selection pattern, so
+they need no foreground, and both are read back the way `select` is, with `"reads": "selected"`:
+
+```json
+{ "locator": "List#sessions > ListItem[name=\"Beta\"]", "act": "add to selection", "reads": "selected", "expect": "selected" }
+```
+
+On a list that takes one row at a time, both are refused, naming the list, because there an add is a
+replace that reads as an add.
 
 A case that **stops short** (a step threw, or an act was never sent) collapses whatever its `expand`
 steps opened and its own `collapse` steps did not close again, last opened first, through the
@@ -598,6 +610,21 @@ until it matches, so a control on its way out is waited for and one that never l
 what it found; and the **region** the last step is looked for under has to be there, so
 `Pane#capture > Button#close` matching nothing because the pane never opened is reported as a claim
 that could not be evaluated rather than as a pass.
+
+**`within`** is about where an element is drawn. It names a second locator in the same window, and
+claims this step's element lies inside that one's rectangle and is not empty:
+
+```json
+{ "locator": "Button#closeTab", "act": "read", "within": "TabItem#second" }
+```
+
+It exists for a control that is in the tree and paints nothing: a close button 22 by 22 whose glyph
+the theme's padding left no room for passed every case, because a case could read that the element
+exists and what it is called, but not where it is drawn. A failure names both rectangles, and an
+element laid out to nothing (zero wide, zero high, or offscreen) fails as **empty**, since that was
+the shape of the defect. It is a claim and never a reading of numbers, because a case that pins pixels
+breaks when the display's scale changes. Half a pixel of slack on each edge absorbs the rounding to
+device pixels. The act is `read` and no `reads` sits beside it.
 
 `never` is the thirteenth and is the only claim about the **wait** rather
 than about what it ended on: it names a key whose string must not be showing anywhere in the window

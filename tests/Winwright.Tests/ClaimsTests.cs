@@ -75,6 +75,8 @@ public class ClaimsTests
         ("covers", () => Wrote.Step("Text", "read", ("covers", "stats.tab"))),
         ("coversAtLeast", () => Wrote.Step("Text", "read", ("coversAtLeast", "stats.tab"))),
         ("coversWithin", () => Wrote.Step("MenuItem", "read", ("coversWithin", "profiles"))),
+        // WW539. Where an element is drawn, against a second locator.
+        ("within", () => Wrote.Step("Button#closeTab", "read", ("within", "TabItem#second"))),
         // WW535. The one claim a file step makes, and the only one that has no locator beside it.
         ("sameBytesAs", () => Wrote.Step(null, "read", ("file", "out/report.bin"), ("sameBytesAs", "data/report.bin"))),
     ];

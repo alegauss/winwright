@@ -233,7 +233,9 @@ public class ScenarioFileTests
         // WW258: 'locator' now carries which group it belongs to rather than nothing, because neither
         // "required" nor "optional" is true of it — a step needs it or a 'tray', and exactly one.
         Assert.Contains($"locator (one of the {ScenarioSchema.Subject}): what to act on", rendered);
-        Assert.Contains("one of: read, invoke, toggle, set value, set range, select, expand, collapse", rendered);
+        Assert.Contains(
+            "one of: read, invoke, toggle, set value, set range, select, add to selection, remove from selection, expand, collapse",
+            rendered);
         Assert.Contains("one of: anything, value, range, toggle, selected, picked, expanded, text", rendered);
         Assert.Contains("(optional)", rendered);
     }
@@ -267,7 +269,7 @@ public class ScenarioFileTests
                 "sameAs", "unlike", "sameCountdownAs", "contains", "label", "expectReported", "notLabel", "beginsWithLabel",
                 "endsWithLabel", "notEndsWithLabel", "absent",
                 "ownHeader", "eachSpoken", "spoken", "never", "covers",
-                "coversAtLeast", "coversWithin", "sameBytesAs", "meansIt", "popup", "named",
+                "coversAtLeast", "coversWithin", "within", "sameBytesAs", "meansIt", "popup", "named",
             ],
             ScenarioSchema.Step.Select(field => field.Name));
 

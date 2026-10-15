@@ -98,11 +98,12 @@ internal static class Deadlines
             + "reading Block B's first criterion is about"),
         new("Suite.cs", 1, "false while the launched process owns no top-level window above the floor "
             + "— a launch returns before a window exists, and this is the gap WW374 is inside"),
-        new("CaseRun.cs", 6, "false while the reading a step claims has not arrived: the matches "
+        new("CaseRun.cs", 7, "false while the reading a step claims has not arrived: the matches "
             + "under a locator, the rows whose headers are wrong, the elements that announce nothing, "
-            + "the window a step is about, and a file step's bytes (WW535). Each look rebuilds its "
-            + "own list every poll, and the file is read whole each time, so what makes it false is "
-            + "what is there now rather than what an earlier look kept"),
+            + "the window a step is about, a file step's bytes (WW535), and an element not yet laid "
+            + "out inside its container (WW539). Each look rebuilds its own list every poll, the file "
+            + "is read whole and both rectangles are measured again each time, so what makes it false "
+            + "is what is there now rather than what an earlier look kept"),
         new("FolderWindow.cs", 2, "false while no Explorer window's title holds the folder's name, and "
             + "false while the window a case opened still exists after the close was posted (WW536). "
             + "Each look enumerates the desk again, so a window that arrives late or goes late is "

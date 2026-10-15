@@ -165,6 +165,8 @@ internal static class Cooperating
         new("Act.SetValue", Cooperation.None, false, "write through the value pattern"),
         new("Act.SetRange", Cooperation.None, false, "move through the range pattern"),
         new("Act.Select", Cooperation.None, false, "select through the selection-item pattern"),
+        new("Act.AddToSelection", Cooperation.None, false, "add to a multiple selection through the same pattern"),
+        new("Act.RemoveFromSelection", Cooperation.None, false, "take out of a multiple selection through the same"),
         new("Act.Expand", Cooperation.None, false, "open through the expand-collapse pattern"),
         new("Act.Collapse", Cooperation.None, false, "shut through the same"),
         new("Selecting.Confirmed", Cooperation.None, false, "select and confirm, escalating only if allowed"),

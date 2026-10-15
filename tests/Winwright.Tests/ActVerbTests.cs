@@ -26,8 +26,8 @@ public class ActVerbTests
         // icon in the shell's tree rather than a control in the application's.
         Assert.Equal(
             [
-                "read", "invoke", "toggle", "set value", "set range", "select", "expand", "collapse",
-                "type", "click", "drag", "nudge", "press", "pick", "pick at", "open submenu", "open tray menu",
+                "read", "invoke", "toggle", "set value", "set range", "select", "add to selection",
+                "remove from selection", "expand", "collapse", "type", "click", "drag", "nudge", "press", "pick", "pick at", "open submenu", "open tray menu",
                 "click tray icon", "capture",
             ],
             ActVerb.All.Select(verb => verb.Name));
