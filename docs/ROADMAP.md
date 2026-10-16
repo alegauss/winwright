@@ -4,17 +4,21 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW542** (deps: —) **A step's with cannot name the project's root, so a case types a checkout's path whole and is red on any other desk** — quickshell QS292 serves a file of its tree to a second account's sshd, and spells the guest's checkout path into the case to reach it. → §WW542
+- 🛠 **WW542** (deps: —) **A step's with cannot name the project's root, so a case types a checkout's path whole and is red on any other desk** — quickshell QS292 serves a file of its tree to a second account's sshd, and spells the guest's checkout path into the case to reach it. → §WW542
+- 📋 **WW543** (deps: —) **A staged fixture file keeps its source's modification time, so a rule about how recent a file is fails a day later** — quickshell QS335's case passed the day its feed fixture was made and failed the next, and only a filled token made the copy fresh. → §WW543
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
 
 - ⏳ **WW540** (deps: —) **A case cannot add an item to a selection or click with Ctrl or Shift held, so a list choosing several has no case** — A click with Ctrl or Shift held is still missing, for an application that answers the gesture and not the pattern. → §WW540
+- 📋 **WW544** (deps: —) **A case cannot press Alt alone, so a menu bar shown the Windows way by an Alt tap has no case** — A press names a modifier alone, sent down and up with nothing between, so a classic menu's Alt tap can be driven and read. → §WW544
 
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
+
+- 📋 **WW545** (deps: —) **Typing into a terminal substitutes the last character for an earlier one about once a send in fifty, unrepaired** — WW249's resend needs a value it can compare and erase, and a terminal runs what it is sent, so the fault reaches the case as an app defect. → §WW545
 
 ## Block G — The scenario — a case is a data file
 
