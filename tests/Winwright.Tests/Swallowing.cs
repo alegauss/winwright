@@ -70,6 +70,10 @@ internal static class Swallowing
             "one look inside a deadline, and its own note says so: a dump caught half-written is a "
                 + "file this run has not finished writing, and the wait around it reports what it "
                 + "was still waiting for rather than turning the wait into the failure"),
+        new("FileSubjectTests.Desktop", Swallowed.OneLook,
+            "one look of ten at a root a file step never reads: a COM error from UiaGetRootNode is the call "
+                + "colliding with another on a busy host, and the tenth is not caught, so a desk that is "
+                + "really missing still throws rather than answering a root"),
         new("EncodingTests.EncodedTwice", Swallowed.TheAnswer,
             "the question is whether these bytes are valid UTF-8 for something shorter, so a strict "
                 + "decode that threw is the false this answers — and the throw is the reading rather "

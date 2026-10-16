@@ -156,7 +156,7 @@ public sealed class FileSubjectTests : IDisposable
         declared[0].Fixture.Stage(project.Root);
         try
         {
-            var verdict = Suite.Run(declared, Selection.All, AutomationElement.RootElement, project);
+            var verdict = Suite.Run(declared, Selection.All, Desktop(), project);
 
             Assert.Equal(RunOutcome.Passed, verdict.Outcome);
         }
@@ -188,7 +188,7 @@ public sealed class FileSubjectTests : IDisposable
             """);
 
         var verdict = Suite.Run(
-            declared, Selection.All, AutomationElement.RootElement, ProjectDeclaration.Load(Path.Combine(root, ProjectDeclaration.FileName)));
+            declared, Selection.All, Desktop(), ProjectDeclaration.Load(Path.Combine(root, ProjectDeclaration.FileName)));
 
         Assert.Equal(RunOutcome.Passed, verdict.Outcome);
         Assert.Equal(["the report is copied"], verdict.Echoing.Select(one => one.Name));
@@ -197,6 +197,30 @@ public sealed class FileSubjectTests : IDisposable
             Said(verdict),
             StringComparison.Ordinal);
         Assert.Contains("  the report is copied: the report is copied, regression", Said(verdict), StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// The desktop as a root, which a file step never reads but <see cref="Suite.Run"/> asks for.
+    /// <para>
+    /// Asked again where UI Automation answers with a COM error. Measured on the host gate, where this
+    /// class runs beside a thousand others: <c>UiaGetRootNode</c> returned an unexpected HRESULT about
+    /// one run in four, and the red was about the test's plumbing rather than about a file step.
+    /// </para>
+    /// </summary>
+    private static AutomationElement Desktop()
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                return AutomationElement.RootElement;
+            }
+            catch (System.Runtime.InteropServices.COMException) when (attempt < 10)
+            {
+                // Asked again at once: the failure is the call colliding with another, not a desk
+                // that is missing, and a desk that is missing fails all ten.
+            }
+        }
     }
 
     /// <summary>One case holding <paramref name="step"/> and nothing else, loaded.</summary>
@@ -211,7 +235,7 @@ public sealed class FileSubjectTests : IDisposable
         var path = Path.Combine(root, ProjectDeclaration.FileName);
         File.WriteAllText(path, $$"""{ "timeouts": { "resolve": {{resolveMs}}, "poll": 50 } }""");
 
-        return Suite.Run([Loaded(step)], Selection.All, AutomationElement.RootElement, ProjectDeclaration.Load(path));
+        return Suite.Run([Loaded(step)], Selection.All, Desktop(), ProjectDeclaration.Load(path));
     }
 
     private byte[] Written(string relative, int length)
