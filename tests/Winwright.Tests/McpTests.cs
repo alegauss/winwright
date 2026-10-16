@@ -405,7 +405,7 @@ public sealed class McpTests : IDisposable
                     Assert.Equal("array", property["type"]!.GetValue<string>());
                     var either = property["items"]!["oneOf"]!.AsArray();
                     Assert.Equal("string", either[0]!["type"]!.GetValue<string>());
-                    Assert.Equal(["from", "to", "fill"], either[1]!["properties"]!.AsObject().Select(one => one.Key));
+                    Assert.Equal(["from", "to", "fill", "modified"], either[1]!["properties"]!.AsObject().Select(one => one.Key));
                     Assert.Equal(["from"], either[1]!["required"]!.AsArray().Select(one => one!.GetValue<string>()));
                     break;
                 default:

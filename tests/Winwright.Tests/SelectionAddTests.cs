@@ -13,7 +13,7 @@ namespace Winwright.Tests;
 /// <para>
 /// Found by quickshell (QS314), whose sidebar takes several rows: <c>select</c> replaces the
 /// selection, so a case could hold one row and never two. Driven against the fixture's
-/// <c>--pickers</c> pane, which carries a list taking several rows and one taking one — the control,
+/// <c>--selections</c> pane, which carries a list taking several rows and one taking one — the control,
 /// where an add would be a replace and is refused naming the list.
 /// </para>
 /// </summary>
@@ -42,6 +42,40 @@ public sealed class SelectionAddTests : IDisposable
     }
 
     [Fact]
+    public void A_row_clicked_with_ctrl_held_joins_the_selection_and_shift_takes_the_range()
+    {
+        // WW540's pointer half, for an application that answers the gesture rather than the pattern.
+        // The control is the read of the first row after the second click: a plain click would have
+        // replaced it, and only Ctrl held across the click leaves it selected.
+        var verdict = Run("""
+            { "locator": "List#severalList > ListItem[name=\"Alpha\"]", "act": "click", "with": "PointerIsTheAct", "named": "the first row is clicked" },
+            { "locator": "List#severalList > ListItem[name=\"Charlie\"]", "act": "click", "with": "PointerIsTheAct", "holding": "ctrl" },
+            { "locator": "List#severalList > ListItem[name=\"Alpha\"]", "act": "read", "reads": "selected", "expect": "selected", "named": "the first row is still selected" },
+            { "locator": "List#severalList > ListItem[name=\"Echo\"]", "act": "click", "with": "PointerIsTheAct", "holding": "shift" },
+            { "locator": "List#severalList > ListItem[name=\"Delta\"]", "act": "read", "reads": "selected", "expect": "selected", "named": "the row inside the range is selected" }
+            """);
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void A_row_clicked_with_nothing_held_replaces_the_selection()
+    {
+        // The control for the case above: the same two clicks with no key held leave the first row out.
+        var verdict = Run("""
+            { "locator": "List#severalList > ListItem[name=\"Alpha\"]", "act": "click", "with": "PointerIsTheAct", "named": "the first row is clicked" },
+            { "locator": "List#severalList > ListItem[name=\"Charlie\"]", "act": "click", "with": "PointerIsTheAct", "named": "the second row is clicked" },
+            { "locator": "List#severalList > ListItem[name=\"Alpha\"]", "act": "read", "reads": "selected", "expect": "not selected", "named": "the first row was replaced" }
+            """);
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
     public void Adding_to_a_list_that_takes_one_row_is_refused_naming_the_list()
     {
         var verdict = Run("""
@@ -54,7 +88,7 @@ public sealed class SelectionAddTests : IDisposable
         Assert.Contains("#oneList takes one selection at a time", Said(verdict), StringComparison.Ordinal);
     }
 
-    /// <summary>One case holding <paramref name="steps"/> against the pickers pane, or null where this desk cannot observe.</summary>
+    /// <summary>One case holding <paramref name="steps"/> against the selections pane, or null where this desk cannot observe.</summary>
     private SuiteVerdict? Run(string steps)
     {
         if (!Desk.Read().CanObserve)
@@ -72,7 +106,7 @@ public sealed class SelectionAddTests : IDisposable
 
         var cases = $$"""
             {
-              "fixtures": [ { "name": "a list taking several rows", "arguments": ["--pickers", "--show"] } ],
+              "fixtures": [ { "name": "a list taking several rows", "arguments": ["--selections", "--show"] } ],
               "cases": [
                 {
                   "name": "rows are added to a selection",

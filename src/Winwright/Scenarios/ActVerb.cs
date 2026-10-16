@@ -478,16 +478,18 @@ public sealed record ActVerb
     /// <param name="argument">What the step wrote in <c>with</c>.</param>
     /// <param name="to">Where the act ends, for a verb that <see cref="EndsElsewhere"/>.</param>
     /// <param name="button">Which button a verb that <see cref="PressesAButton"/> presses. WW538.</param>
+    /// <param name="holding">The key such a verb holds across its click, or null. WW540.</param>
     /// <exception cref="InvalidOperationException">
     /// Where this verb reads and there is no act to run, or ends elsewhere and was given nowhere —
     /// which the step refuses at load, so reaching it means the two disagree.
     /// </exception>
-    internal ActResult Perform(Subject subject, string? argument, Subject? to = null, MouseButton button = MouseButton.Left)
+    internal ActResult Perform(
+        Subject subject, string? argument, Subject? to = null, MouseButton button = MouseButton.Left, HeldKey? holding = null)
     {
-        // WW538. The one verb that presses a button a case may name; every other one ignores it,
-        // and the step refuses 'button' beside them before anything reaches here.
-        if (PressesAButton && button != MouseButton.Left)
-            return Synthesised.Click(subject, Because(argument!), button);
+        // WW538 and WW540. The one verb that presses a button and may hold a key; every other one
+        // ignores both, and the step refuses them beside any other verb before anything reaches here.
+        if (PressesAButton && (button != MouseButton.Left || holding is not null))
+            return Synthesised.Click(subject, Because(argument!), button, holding);
 
         if (onto is not null)
         {

@@ -109,6 +109,8 @@
 - ✅ **WW531** **A process that outlived its case is named by pid alone, never by the case that launched it** — A process that outlived its case, or left early, is named with the case it was launched for and whether that launch was lent, so a survivor in a long run can be traced.
 - ✅ **WW534** **Two runners driving one guest VM interleave their windows, and neither says another run holds the desk** — A guest run claims the desk through a host mutex a second runner waits on and names, and a foreground lost to a process no case started says so (design recorded in `README.md`).
 - ✅ **WW536** **A fixture cannot open the window a drop lands in, so a drop onto Explorer needs code outside the case** — A fixture's opens puts an Explorer folder beside the window under test and closes it with the case, so a drop onto Explorer needs no code outside the case.
+- ✅ **WW542** **A step's with cannot name the project's root, so a case types a checkout's path whole and is red on any other desk** — A step's with fills {root}, {root/} and {files}, and fixtures fill {root} where {files} was, so a case reaches its checkout on any desk.
+- ✅ **WW543** **A staged fixture file keeps its source's modification time, so a rule about how recent a file is fails a day later** — A staged copy is written now, or as old as a file's modified age says, so a rule about how recent a file is holds the day after the fixture.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -206,7 +208,7 @@
 - ✅ **WW520** **A case cannot drag one element onto another, so a strip reordered by dragging has no case** — A case drags one element onto another with 'act: drag' and 'to', past the drag threshold, and the fixture's tab strip reorders in the guest (design recorded in `src/Winwright/Acting/Drag.cs`).
 - ✅ **WW530** **A drag can only be released over an element of the window it started in, so a drop onto Explorer has no case** — A drag step with "toDesktop": true looks its `to` up from the desktop, so a case can drop onto another window, such as an Explorer folder (design recorded in `README.md`).
 - ✅ **WW538** **A case cannot click with the middle or right button, so a tab closed by a middle click has no case** — A click names its button, middle or right beside the default left, in its step and its rendered name, so a tab closed by a middle click has a case.
-- ✅ **WW540 (the pattern half)** **A case cannot add an item to a selection or click with Ctrl or Shift held, so a list choosing several has no case** — A multiple-selection list takes add to selection and remove from selection.
+- ✅ **WW540** **A case cannot add an item to a selection or click with Ctrl or Shift held, so a list choosing several has no case** — A click takes holding ctrl or shift, sent in one batch with the click, so a list answering only the gesture adds a row or a range.
 
 ## Block E — Capture — the picture that proves what it photographed
 

@@ -4,78 +4,9 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW542 A token for the project's root
-
-Found by quickshell QS292, the drop of a file from an SSH server's side onto an Explorer
-folder. The server is the guest's own sshd, signing in as a second local account, so the
-file it serves has to be one that account can read. The fixture's staged directory is
-under the runner's own temp and is not; the project's checkout, under the drive's root,
-is. So the case types the checkout's path into the client's remote path box, and has to
-spell it whole: `"with": "/C:/src/quickshell/cases/fixtures"`, the guest's checkout as
-quickshell's guest scripts place it. A desk with the checkout anywhere else reds the
-case for a reason the case never states.
-
-`{files}` is replaced in a fixture's arguments, variables, working directory and
-`opens`, and `{reach0}` in a filled file, but nothing names the project's root, and a
-step's `with` takes no token at all.
-
-What to build: a `{root}` token, the directory winwright.json sits in, replaced in a
-step's `with` beside `{files}`, and in the places `{files}` already is. A path with
-forward slashes is the application's spelling to ask for, so a second form, `{root/}`,
-gives the same path with `/` separators and a leading `/` before the drive, which is how
-Windows OpenSSH names it.
-
-Done when a case types `{root}/cases` into an edit, reads back the checkout's own path,
-and an unknown token in `with` is refused naming the tokens that exist.
-
-### §WW543 A staged file written now
-
-Found by quickshell QS335. Its client opens an agent's feed only when the feed was
-written in the last ten minutes, which is the right rule for a person's desk. A case
-stages a feed with `files`, and the staged copy keeps the modification time the file had
-in the tree, because staging is `File.Copy`, and `fill` writes the file again only when
-a token changed its text. So the case passed on the day the fixture was made and failed
-the next day, with nothing changed, saying only that no tab appeared.
-
-The workaround is a `{files}` token in the fixture's text, which forces the fill to
-rewrite it. That puts a path in the fixture that means nothing to it, only to touch the
-file.
-
-What to build: a staged file is written now, as though the application had just been
-given it, unless the fixture says otherwise. Either stage with a fresh modification time
-always (touch after the copy), which matches what "a store this case put there" means,
-or add a per-file `"modified"` field naming an age, `"now"` by default or `"-2h"` to
-stage a stale one on purpose, so a case can test both sides of a rule like the client's.
-
-Done when a fixture file staged a day after its source was last written is seen by the
-application as just written, and one marked `"modified": "-1d"` is seen as a day old.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
-
-### §WW540 Adding to a selection
-
-Found by quickshell QS314, whose sidebar now takes several rows at once (an extended
-ListBox: Ctrl+click adds or removes a row, Shift+click takes a range, Ctrl+A everything
-listed). The design's evidence is a case that chooses two sessions and a folder and
-reads IsSelected on each row, and none can be written: the select act replaces the
-selection through SelectionItemPattern.Select, and a click holds no modifier.
-
-Two routes, and the pattern one is the better: SelectionItemPattern.AddToSelection and
-RemoveFromSelection are what UI Automation offers a multiple-selection container, and
-they need no foreground. So `"act": "add to selection"` and `"act": "remove from
-selection"`, read back through IsSelected like select is, and refused naming the
-container where it is not multiple-selection (CanSelectMultiple false). A click with a
-modifier held, `"with": "Ctrl"` or `"Shift"` beside a click, is the pointer's half for
-an application that answers the gesture and not the pattern, and can follow.
-
-quickshell proves the selection in process instead (SessionSelectionTests, through
-ListBoxItemAutomationPeer), the substitute this line retires.
-
-Done when a fixture case adds three items of a multiple-selection list and reads each
-selected, removes one and reads it unselected, and the same act on a single-selection
-list is refused naming why.
 
 ### §WW544 A modifier pressed alone
 

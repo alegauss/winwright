@@ -408,6 +408,12 @@ they need no foreground, and both are read back the way `select` is, with `"read
 On a list that takes one row at a time, both are refused, naming the list, because there an add is a
 replace that reads as an add.
 
+An application may answer the gesture and offer no pattern. For that, a `click` takes **`holding`**:
+`ctrl`, which adds the row to the selection, or `shift`, which takes the range to it. The key goes down
+and up in the same batch of input as the click, so nothing can arrive between them, and the step's name
+in the report says the key (`ctrl click List#sessions > ListItem[name="Beta"]`). A key that is not one
+of the two is refused, and `holding` beside any act but `click` is refused.
+
 A case that **stops short** (a step threw, or an act was never sent) collapses whatever its `expand`
 steps opened and its own `collapse` steps did not close again, last opened first, through the
 pattern so the tidy needs no foreground. Each one is a line in the trace. Without it, a drop-down
@@ -1059,6 +1065,20 @@ read, and the reading it takes instead is the real machine's. Declaring no files
 of this launch's own, which is an empty store rather than a mistake. A value naming no token is
 passed exactly as written — `"reader"` is not a path for being a string.
 
+**`{root}`** is the other token, and it names the project's root, the directory `winwright.json` sits
+in. It is filled wherever `{files}` is, and also in a step's **`with`**, so a case can type a path in
+the checkout without spelling one desk's checkout whole. `{root/}` is the same path with forward
+slashes and a slash before the drive, `/C:/src/yourapp`, which is how Windows OpenSSH names a path:
+
+```json
+{ "locator": "Edit#remotePath", "act": "set value", "with": "{root/}/cases/fixtures", "reads": "value", "answers": true }
+```
+
+The tokens in `with` are filled when the step runs, because the root and the staged directory are
+facts about the machine running it. A brace shaped like a token that is none of `{files}`, `{root}`
+and `{root/}` is refused where it is written, naming the three. Any other brace, such as a line of
+JSON a case types, is typed as written.
+
 A plain path lands at the top of that directory under its own name. Where the application's store sits
 a folder down, as `%AppData%\YourApp\sessions.json` does, say where it lands instead:
 
@@ -1076,6 +1096,13 @@ as `.json`, every replacement is JSON-escaped, so `"store": "{files}"` parses an
 directory whole. Any other file is filled raw, with the path as Windows spells it, because winwright
 cannot know that file's quoting. The file is read as UTF-8 and keeps the byte-order mark it came with. A file asked to be filled that is not
 UTF-8 is refused by name, and a file not asked is copied byte for byte.
+
+A staged copy is **written now**, as a file the application was just given, whatever time its source
+has in the tree. Before, it kept the source's time, so a rule about how recent a file is, such as a
+client that opens a feed only when it was written in the last ten minutes, passed on the day the
+fixture was made and failed the day after. An entry may say `"modified": "-1d"` to stage a stale one
+on purpose, for the other side of a rule like that. An age is `now`, or a minus and a whole number of
+`s`, `m`, `h` or `d`. Anything else is refused where the fixture is declared.
 
 `to` is relative to the staged directory and its folders are made for you. A `to` that is absolute or
 climbs out with `..` is **refused**, because that directory is emptied before every launch and a file

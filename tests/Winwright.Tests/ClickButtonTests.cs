@@ -53,6 +53,34 @@ public sealed class ClickButtonTests
     }
 
     [Fact]
+    public void A_click_holds_no_key_unless_it_says_and_its_name_says_the_key_it_holds()
+    {
+        // WW540. The pointer's half of adding to a selection: Ctrl held across the click.
+        Assert.Null(Wrote.Step("ListItem#row", "click", ("with", "PointerIsTheAct")).Holding);
+
+        var step = Wrote.Step("ListItem#row", "click", ("with", "PointerIsTheAct"), ("holding", "ctrl"));
+
+        Assert.Equal(HeldKey.Ctrl, step.Holding);
+        Assert.Equal("ctrl click ListItem#row", step.Name);
+    }
+
+    [Fact]
+    public void A_key_that_is_not_one_or_beside_another_act_is_refused()
+    {
+        Assert.Contains(
+            "a click holds 'ctrl' or 'shift'",
+            Assert.Throws<ScenarioRefusedException>(
+                () => Wrote.Step("ListItem#row", "click", ("with", "PointerIsTheAct"), ("holding", "alt"))).Because,
+            StringComparison.Ordinal);
+
+        Assert.Contains(
+            "no other act holds one",
+            Assert.Throws<ScenarioRefusedException>(
+                () => Wrote.Step("ListItem#row", "select", ("holding", "ctrl"))).Because,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void The_file_format_reads_the_button_and_publishes_the_ones_there_are()
     {
         var step = Assert.Single(Assert.Single(ScenarioFile.Read("click.cases.json", """

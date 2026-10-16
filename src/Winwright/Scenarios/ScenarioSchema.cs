@@ -206,7 +206,7 @@ public static class ScenarioSchema
         // sentences out of this source rather than out of a running build — an interpolated hole
         // publishes `{FixtureDeclaration.Staged}` to a reader. `ScenarioFileTests` holds the spelling
         // to the constant, which is the pairing that keeps the two from drifting.
-        new("files", false, Taking.Placed, "the files to put in a directory of this launch's own, each relative to the project's root, as an array — a variable or the working directory names that directory with '{files}', which is how a case gives the application a store of its own without the application growing a flag; an entry may instead be an object with 'from' and 'to', where 'to' is a path under that directory such as quickshell/sessions.json, for an application whose store sits one folder down, and 'fill' set to true to have {reach0} and the staged directory's own token filled in its text, JSON-escaped where the file lands as .json and raw anywhere else", []),
+        new("files", false, Taking.Placed, "the files to put in a directory of this launch's own, each relative to the project's root, as an array — a variable or the working directory names that directory with '{files}', which is how a case gives the application a store of its own without the application growing a flag; an entry may instead be an object with 'from' and 'to', where 'to' is a path under that directory such as quickshell/sessions.json, for an application whose store sits one folder down, and 'fill' set to true to have {reach0} and the staged directory's own token filled in its text, JSON-escaped where the file lands as .json and raw anywhere else; every staged copy is written now, as a file the application was just given, unless 'modified' names an age such as '-1d' to stage a stale one on purpose", []),
         new("opens", false, Taking.Text, "a folder to open in Explorer beside the window under test before the first step, relative to the project's root or naming '{files}' — created where it is not there, the two windows put side by side so a drop released over the folder lands in it, and the folder's window closed again when the case gives its window back; one still standing then is named as a survivor. Not beside 'shareable'", []),
         new("reaches", false, Taking.Words, "what the application connects to outside itself, each a host:port or a %VARIABLE% naming one, as an array — probed before every launch and never started; unreachable, every check on the fixture is a hole naming the address, and reachable, the arguments and variables name each as {reach0}, {reach1} and on", []),
     ]);
@@ -237,7 +237,8 @@ public static class ScenarioSchema
             [],
             Subject),
         new("act", true, Taking.Text, "what to do to it", ActVerb.All.Select(verb => verb.Name).ToList()),
-        new("with", false, Taking.Text, "what the act needs said, where it needs anything", []),
+        new("with", false, Taking.Text, "what the act needs said, where it needs anything — '{root}' is filled with the project's root, '{root/}' with the same path as Windows OpenSSH spells it (/C:/src/app), and '{files}' with the fixture's staged directory; a brace shaped like a token that is none of those is refused", []),
+        new("holding", false, Taking.Text, "a key a 'click' holds down across it — ctrl adds a row to a list's selection and shift takes the range to it, for an application that answers the gesture and offers no pattern", StepDeclaration.HeldKeys),
         new("button", false, Taking.Text, "which button a 'click' presses, left where the step names none — middle closes a tab in a browser or a terminal, and right opens a context menu", StepDeclaration.Buttons),
         new("to", false, Taking.Text, "where a 'drag' ends: a second locator, in the same window unless 'toDesktop' says otherwise, that the pointer is released over — for the gesture no pattern expresses, such as a tab dragged across its neighbours", []),
         new("toDesktop", false, Taking.Truth, "that 'to' is looked for from the desktop rather than in the window under test, so its first step names another top-level window — for a drop onto another application, such as an Explorer folder", []),
@@ -488,6 +489,7 @@ public static class ScenarioSchema
                                 ["from"] = new JsonObject { ["type"] = "string" },
                                 ["to"] = new JsonObject { ["type"] = "string" },
                                 ["fill"] = new JsonObject { ["type"] = "boolean" },
+                                ["modified"] = new JsonObject { ["type"] = "string" },
                             },
                             ["required"] = new JsonArray { "from" },
                             ["additionalProperties"] = false,

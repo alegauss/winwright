@@ -416,6 +416,17 @@ public sealed record FixtureDeclaration
             var staged = file with { From = file.From.Trim(), To = file.To?.Trim() };
             var lands = Landing(called, staged);
 
+            // WW543. Judged here, where the fixture is named, and not at the stage a launch later
+            // makes: an age that is no age is wrong on every machine.
+            try
+            {
+                _ = staged.Age;
+            }
+            catch (ScenarioRefusedException refused)
+            {
+                throw new ScenarioRefusedException(called, refused.Because);
+            }
+
             // WW524. Two entries landing on one path is the silent overwrite this used to be — two
             // plain files sharing a name from different folders among them — and which one the
             // application then reads is whichever was declared last.
@@ -648,6 +659,11 @@ public sealed record FixtureDeclaration
 
             if (file.Fill)
                 Filled(file, to, root);
+
+            // WW543. Written now, as a file the application was just given, or as old as the fixture
+            // said: a copy keeps its source's time, and a rule about how recent a file is then passes
+            // on the day the fixture was made and fails the day after.
+            System.IO.File.SetLastWriteTime(to, DateTime.Now - file.Age);
         }
 
         // WW515. A type rather than the path, so the thing a launch is composed from is a fixture
@@ -728,11 +744,49 @@ public sealed record FixtureDeclaration
             System.IO.File.WriteAllText(staged, filled, strict);
     }
 
-    /// <summary><paramref name="value"/> with <see cref="Staged"/> swapped for where the files went.</summary>
-    private string Resolved(string value, string root) =>
-        value.Contains(Staged, StringComparison.Ordinal)
-            ? value.Replace(Staged, StagedInto(root), StringComparison.Ordinal)
-            : value;
+    /// <summary><paramref name="value"/> with every token swapped: where the files went, and the project's root.</summary>
+    private string Resolved(string value, string root) => Rooted(value, root, StagedInto(root));
+
+    /// <summary>
+    /// The token naming the project's root, the directory <c>winwright.json</c> sits in. WW542.
+    /// <para>
+    /// Found by quickshell (QS292): a file the guest's own sshd serves to a second account has to be one
+    /// that account can read, which the staged directory under the runner's temp is not and the
+    /// checkout is. So the case typed the guest's checkout path whole into the client's path box, and
+    /// went red on any desk where the checkout was anywhere else, for a reason the case never stated.
+    /// </para>
+    /// </summary>
+    public const string Root = "{root}";
+
+    /// <summary>
+    /// The project's root as a path with forward slashes and a leading one before the drive —
+    /// <c>/C:/src/app</c> — which is how Windows OpenSSH names a path. WW542.
+    /// </summary>
+    public const string RootSlashed = "{root/}";
+
+    /// <summary>Every token a path or a step's <c>with</c> may name, as a refusal lists them. WW542.</summary>
+    public static IReadOnlyList<string> Tokens { get; } = new ReadOnlyCollection<string>([Staged, Root, RootSlashed]);
+
+    /// <summary>
+    /// <paramref name="value"/> with <see cref="Root"/>, <see cref="RootSlashed"/> and
+    /// <see cref="Staged"/> swapped for what they name. WW542: one door for every place a token is
+    /// filled, so a fixture's variable and a step's argument cannot be given two spellings of one root.
+    /// </summary>
+    /// <param name="value">What was written.</param>
+    /// <param name="root">The project's root.</param>
+    /// <param name="staged">The directory the fixture's files were staged into.</param>
+    public static string Rooted(string value, string root, string staged)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        if (!value.Contains('{', StringComparison.Ordinal))
+            return value;
+
+        var full = System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(root));
+        return value
+            .Replace(RootSlashed, "/" + full.Replace('\\', '/'), StringComparison.Ordinal)
+            .Replace(Root, full, StringComparison.Ordinal)
+            .Replace(Staged, staged, StringComparison.Ordinal);
+    }
 
     /// <summary>A name a directory can be called, for the one in temp a person has to recognise.</summary>
     private static string Legible(string name)

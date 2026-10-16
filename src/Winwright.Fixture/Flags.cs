@@ -258,8 +258,13 @@ public sealed record Flags
         new Flag(
             "pickers",
             "",
-            "a pane carrying the two answers 'what does this picker hold' has - one shut, whose items are in no tree until it opens, and one already dropped down - and two lists, one taking several rows at once and one taking one",
-            "Pick was driven only against a Win32 combo, which holds its items either way, so the walk read 'it holds nothing' about a WPF picker holding two and refused the case it was built for; and a list taking several rows could only ever be given one, because select replaces the selection"),
+            "a pane carrying the two answers 'what does this picker hold' has - one shut, whose items are in no tree until it opens, and one already dropped down",
+            "Pick was driven only against a Win32 combo, which holds its items either way, so the walk read 'it holds nothing' about a WPF picker holding two and refused the case it was built for"),
+        new Flag(
+            "selections",
+            "",
+            "a pane of two lists of the same five values, one taking several rows at once and one taking one, with nothing selected",
+            "a list taking several rows could only ever be given one, because select replaces the selection and a click held no key"),
         new Flag(
             "drags",
             "",

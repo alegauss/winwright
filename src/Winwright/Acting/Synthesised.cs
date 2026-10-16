@@ -95,18 +95,35 @@ public static class Synthesised
     /// <param name="subject">What to press.</param>
     /// <param name="because">Why the pattern route was unavailable.</param>
     /// <param name="button">Which button.</param>
-    public static ActResult Click(Subject subject, PointerReason because, MouseButton button)
+    public static ActResult Click(Subject subject, PointerReason because, MouseButton button) =>
+        Click(subject, because, button, holding: null);
+
+    /// <summary>
+    /// The same click with a key held across it. WW540: Ctrl adds a row to a list's selection and
+    /// Shift takes the range to it, for an application that answers the gesture and not the pattern.
+    /// </summary>
+    /// <param name="subject">What to press.</param>
+    /// <param name="because">Why the pattern route was unavailable.</param>
+    /// <param name="button">Which button.</param>
+    /// <param name="holding">The key held down, or null for none.</param>
+    public static ActResult Click(Subject subject, PointerReason because, MouseButton button, HeldKey? holding)
     {
         ArgumentNullException.ThrowIfNull(subject);
 
         var before = subject.Read();
-        var clicked = Pointer.Click(subject, because, button);
+        var clicked = Pointer.Click(subject, because, button, holding: holding);
 
-        // The button is said only where it is not the one every click used to be, so a left click's
-        // line reads exactly as it did before this existed.
-        var route = button == MouseButton.Left
+        // The button and the key are said only where they are not what every click used to be, so a
+        // plain left click's line reads exactly as it did before either existed.
+        var extra = new List<string>();
+        if (button != MouseButton.Left)
+            extra.Add($"{button.ToString().ToLowerInvariant()} button");
+        if (holding is { } key)
+            extra.Add($"{key} held");
+
+        var route = extra.Count == 0
             ? $"synthesised pointer ({because})"
-            : $"synthesised pointer ({because}, {button.ToString().ToLowerInvariant()} button)";
+            : $"synthesised pointer ({because}, {string.Join(", ", extra)})";
 
         return Landed(subject, "click", route, clicked.Element, before, clicked.Foreground);
     }

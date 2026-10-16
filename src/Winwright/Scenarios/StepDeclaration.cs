@@ -234,7 +234,26 @@ public sealed record StepDeclaration
     public ActVerb Verb { get; }
 
     /// <summary>What the verb was given, or null where it takes nothing.</summary>
-    public string? Argument => Wrote.Trimmed("with");
+    public string? Argument => FilledArgument ?? Wrote.Trimmed("with");
+
+    /// <summary>The argument with its tokens filled, once a run has said what they name. WW542.</summary>
+    private string? FilledArgument { get; init; }
+
+    /// <summary>
+    /// This step with the tokens in its <c>with</c> filled: <c>{root}</c>, <c>{root/}</c> and
+    /// <c>{files}</c>. WW542. Filled at the run and never at the load, because the root and the staged
+    /// directory are facts about the machine running it.
+    /// </summary>
+    /// <param name="root">The project's root.</param>
+    /// <param name="staged">The directory the case's fixture stages into.</param>
+    public StepDeclaration Rooted(string root, string staged) =>
+        Argument is { } written && written.Contains('{', StringComparison.Ordinal)
+            ? this with { FilledArgument = FixtureDeclaration.Rooted(written, root, staged) }
+            : this;
+
+    /// <summary>A brace that reads as a token: a lowercase word, perhaps a slash. WW542.</summary>
+    private static readonly System.Text.RegularExpressions.Regex Token =
+        new(@"\{[a-z][a-z0-9]*/?\}", System.Text.RegularExpressions.RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1));
 
     /// <summary>
     /// The button a <c>click</c> presses: left where the case named none, which is every click
@@ -246,6 +265,26 @@ public sealed record StepDeclaration
     /// </para>
     /// </summary>
     public Acting.MouseButton Button => Pressed(Wrote.Trimmed("button")) ?? Acting.MouseButton.Left;
+
+    /// <summary>
+    /// The key a <c>click</c> holds down across it, or null where the case named none. WW540.
+    /// <para>
+    /// Found by quickshell (QS314): its sidebar adds a row on Ctrl+click and takes a range on
+    /// Shift+click. <c>add to selection</c> is the pattern route and needs no foreground; this is the
+    /// pointer's, for an application that answers the gesture and offers no pattern.
+    /// </para>
+    /// </summary>
+    public Acting.HeldKey? Holding => Held(Wrote.Trimmed("holding"));
+
+    /// <summary>The keys a click may hold, as the format spells them. WW540.</summary>
+    public static IReadOnlyList<string> HeldKeys { get; } =
+        Enum.GetValues<Acting.HeldKey>().Select(one => one.ToString().ToLowerInvariant()).ToList();
+
+    /// <summary>The key a written name means, or null where it means none.</summary>
+    private static Acting.HeldKey? Held(string? written) =>
+        written is not null && HeldKeys.Contains(written, StringComparer.OrdinalIgnoreCase)
+            ? Enum.Parse<Acting.HeldKey>(written, ignoreCase: true)
+            : null;
 
     /// <summary>The buttons a step may name, as the format spells them. WW538.</summary>
     public static IReadOnlyList<string> Buttons { get; } =
@@ -1040,6 +1079,8 @@ public sealed record StepDeclaration
         if (act.Refuses(wrote.Text("with")) is { } wrong)
             throw new ScenarioRefusedException(subject, wrong);
 
+        RefusesUnknownToken(subject, wrote.Trimmed("with"));
+
         // WW520. Judged beside the argument because it is the other thing a verb needs said. Ahead
         // of the tray's early return, so an icon step naming a destination is refused for it.
         var to = Destination(subject, act, wrote.Text("to"), wrote.Truth("toDesktop"));
@@ -1047,6 +1088,9 @@ public sealed record StepDeclaration
         // WW538. Beside the argument for the same reason the destination is: it is the other thing a
         // click needs said, and a button beside any other verb is a field the run would ignore.
         var button = Pressing(subject, act, wrote.Trimmed("button"));
+
+        // WW540. The key held across it, judged the same way and for the same reasons.
+        var holding = Holds(subject, act, wrote.Trimmed("holding"));
 
         var reading = ReadBack.Named(wrote.Text("reads"));
 
@@ -1069,6 +1113,10 @@ public sealed record StepDeclaration
         var described = parsed is null ? subject : Describing(act.Name, parsed.Text);
         if (called is null && button != Acting.MouseButton.Left)
             described = $"{button.ToString().ToLowerInvariant()} {described}";
+
+        // WW540. The key in front of all of it, the way a person says it: "ctrl click".
+        if (called is null && holding is { } key)
+            described = $"{key.ToString().ToLowerInvariant()} {described}";
 
         var step = new StepDeclaration(called ?? described, act, reading, wrote)
         {
@@ -1200,6 +1248,33 @@ public sealed record StepDeclaration
     }
 
     /// <summary>
+    /// A token in <c>with</c> that names nothing. WW542.
+    /// <para>
+    /// Refused rather than typed as written, because a case typing <c>{roots}/cases</c> into a path box
+    /// would put a brace into the application and read back whatever it does with one — a red about
+    /// the application caused by a word the file got wrong.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="with">The argument as the case wrote it, or null.</param>
+    private static void RefusesUnknownToken(string subject, string? with)
+    {
+        if (with is null)
+            return;
+
+        foreach (System.Text.RegularExpressions.Match one in Token.Matches(with))
+        {
+            if (FixtureDeclaration.Tokens.Contains(one.Value, StringComparer.Ordinal))
+                continue;
+
+            throw new ScenarioRefusedException(
+                subject,
+                $"its 'with' names '{one.Value}', which is no token; the ones a run fills are "
+                    + string.Join(", ", FixtureDeclaration.Tokens.Select(token => $"'{token}'")));
+        }
+    }
+
+    /// <summary>
     /// A <c>within</c> claim on a step that acts, or beside a reading. WW539.
     /// <para>
     /// It is a claim about where two elements are drawn, taken with its own wait the way a sweep is,
@@ -1229,6 +1304,31 @@ public sealed record StepDeclaration
                 $"it claims it is drawn within {step.Within.Text} and reads '{step.Reads.Name}'; the claim is "
                     + "about two rectangles and not about any reading, so 'reads' says nothing here");
         }
+    }
+
+    /// <summary>
+    /// The key a step holds across its click, judged against its verb. WW540. Refused beside any verb
+    /// but <c>click</c>, and a name that is not one of the keys is refused with the ones there are.
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="act">The verb.</param>
+    /// <param name="written">The key as the case wrote it, or null.</param>
+    private static Acting.HeldKey? Holds(string subject, ActVerb act, string? written)
+    {
+        if (written is null)
+            return null;
+
+        if (!act.PressesAButton)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it holds '{written}' and acts with '{act.Name}'; 'holding' is a key held across a "
+                    + $"'{ActVerb.Clicks}', and no other act holds one");
+        }
+
+        return Held(written) ?? throw new ScenarioRefusedException(
+            subject,
+            $"it holds '{written}', and a click holds {string.Join(" or ", HeldKeys.Select(one => $"'{one}'"))}");
     }
 
     /// <summary>

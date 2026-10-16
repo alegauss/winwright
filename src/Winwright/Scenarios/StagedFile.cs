@@ -22,8 +22,52 @@ namespace Winwright.Scenarios;
 /// address, and the probe and the client could then be talking about two servers. Off by default,
 /// because most staged files are not text and are copied byte for byte.
 /// </param>
-public sealed record StagedFile(string From, string? To = null, bool Fill = false)
+/// <param name="Modified">
+/// How old the staged copy says it is: null or <c>now</c> for just written, or a minus and a number
+/// of s, m, h or d. WW543, read through <see cref="Age"/>.
+/// </param>
+public sealed record StagedFile(string From, string? To = null, bool Fill = false, string? Modified = null)
 {
+    /// <summary>
+    /// How long ago the staged copy says it was written: zero, which is now, unless the fixture said
+    /// otherwise. WW543.
+    /// <para>
+    /// Found by quickshell (QS335): its client opens an agent's feed only when the feed was written
+    /// in the last ten minutes, and a staged copy kept the modification time its source had in the
+    /// tree. The case passed on the day the fixture was made and failed the next, with nothing changed.
+    /// A store this case put there is one the application was just given, so it is written now — and
+    /// <c>"modified": "-1d"</c> stages a stale one on purpose, for the other side of a rule like that.
+    /// </para>
+    /// </summary>
+    /// <exception cref="ScenarioRefusedException">Where <see cref="Modified"/> is not an age.</exception>
+    public TimeSpan Age => Aged(this);
+
+    /// <summary>The ages a fixture may write, as a refusal lists them.</summary>
+    public const string AgesSpelled = "'now', or a minus and a whole number of s, m, h or d, such as '-2h' or '-1d'";
+
+    private static TimeSpan Aged(StagedFile file)
+    {
+        var written = file.Modified?.Trim();
+        if (written is null || written.Equals("now", StringComparison.OrdinalIgnoreCase))
+            return TimeSpan.Zero;
+
+        if (written.Length >= 3
+            && written[0] == '-'
+            && int.TryParse(written.AsSpan(1, written.Length - 2), System.Globalization.NumberStyles.None,
+                System.Globalization.CultureInfo.InvariantCulture, out var count))
+        {
+            switch (written[^1])
+            {
+                case 's': return TimeSpan.FromSeconds(count);
+                case 'm': return TimeSpan.FromMinutes(count);
+                case 'h': return TimeSpan.FromHours(count);
+                case 'd': return TimeSpan.FromDays(count);
+            }
+        }
+
+        throw new ScenarioRefusedException(
+            file.From, $"it is staged as modified '{written}', which is no age; an age is {AgesSpelled}");
+    }
     /// <summary>The plain form: copy this file to the top of the staged directory.</summary>
     /// <param name="from">The file, relative to the project's root.</param>
     public static implicit operator StagedFile(string from) => new(from);
@@ -32,5 +76,6 @@ public sealed record StagedFile(string From, string? To = null, bool Fill = fals
     public string Lands => To ?? System.IO.Path.GetFileName(From);
 
     /// <summary>The one line a refusal names it by.</summary>
-    public override string ToString() => (To is null ? From : $"{From} -> {To}") + (Fill ? ", filled" : "");
+    public override string ToString() =>
+        (To is null ? From : $"{From} -> {To}") + (Fill ? ", filled" : "") + (Modified is null ? "" : $", modified {Modified}");
 }

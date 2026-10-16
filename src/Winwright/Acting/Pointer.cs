@@ -21,6 +21,19 @@ public enum MouseButton
 }
 
 /// <summary>
+/// A key held down for the length of a click. WW540: Ctrl adds a row to a list's selection and Shift
+/// takes the range to it, which an application can answer as a gesture without offering the pattern.
+/// </summary>
+public enum HeldKey
+{
+    /// <summary>The control key.</summary>
+    Ctrl,
+
+    /// <summary>The shift key.</summary>
+    Shift,
+}
+
+/// <summary>
 /// Why a scenario reached for the pointer rather than for a pattern.
 /// <para>
 /// The count was the cheap half of the question. A reader deciding whether a scenario can run
@@ -60,13 +73,15 @@ public enum PointerReason
 /// <param name="Note">What is specific about this one, or empty to let the reason speak alone.</param>
 /// <param name="Button">Which button it presses.</param>
 /// <param name="Clicks">How many times, which is how a double click is said.</param>
+/// <param name="Holding">A key held down across the click, or null for none. WW540.</param>
 public sealed record PointerAct(
     string Verb,
     Locator Locator,
     PointerReason Because,
     string Note = "",
     MouseButton Button = MouseButton.Left,
-    int Clicks = 1)
+    int Clicks = 1,
+    HeldKey? Holding = null)
 {
     /// <summary>The reason as a person says it, with this act's own note where it has one.</summary>
     public string Reason => string.IsNullOrWhiteSpace(Note)
@@ -234,15 +249,17 @@ public static class Pointer
     /// <param name="button">Which button.</param>
     /// <param name="clicks">How many presses.</param>
     /// <param name="note">What is specific about this one, where the reason alone is not enough.</param>
+    /// <param name="holding">A key held down across the click, or null for none. WW540.</param>
     public static PointerResult Click(
         Subject subject,
         PointerReason because,
         MouseButton button = MouseButton.Left,
         int clicks = 1,
-        string note = "")
+        string note = "",
+        HeldKey? holding = null)
     {
         ArgumentNullException.ThrowIfNull(subject);
-        return Run(new PointerAct("click", subject.Locator, because, note, button, clicks), subject);
+        return Run(new PointerAct("click", subject.Locator, because, note, button, clicks, holding), subject);
     }
 
     /// <summary>Press twice, which some templates need and no pattern expresses.</summary>
@@ -300,7 +317,7 @@ public static class Pointer
             return new PointerResult(act, facts, foreground, default, PatternValues.None);
 
         var at = facts.Bounds;
-        Send(at.Left + (at.Width / 2), at.Top + (at.Height / 2), act.Button, act.Clicks);
+        Send(at.Left + (at.Width / 2), at.Top + (at.Height / 2), act.Button, act.Clicks, act.Holding);
 
         // WW353. The send is left alone before this reads what it did, which is the one thing every
         // other synthesised verb was doing and this one was not: typing pauses, and press, nudge and
@@ -437,8 +454,17 @@ public static class Pointer
     /// question every time. That caller asks the questions a tray has instead.
     /// </para>
     /// </summary>
-    internal static void Send(int x, int y, MouseButton button, int clicks)
+    internal static void Send(int x, int y, MouseButton button, int clicks, HeldKey? holding = null)
     {
+        // WW540. The key goes down and comes up in the same batch as the click, so nothing can arrive
+        // between them — the reason a chord is one SendInput, applied to a click.
+        ushort? held = holding switch
+        {
+            HeldKey.Ctrl => 0x11,
+            HeldKey.Shift => 0x10,
+            _ => null,
+        };
+
         var (down, up) = button switch
         {
             MouseButton.Right => (Win32.MouseRightDown, Win32.MouseRightUp),
@@ -457,14 +483,35 @@ public static class Pointer
                 (x - left) * 65535 / width, (y - top) * 65535 / height),
         };
 
+        if (held is { } pressedFirst)
+            inputs.Add(Key(pressedFirst, 0));
+
         for (var press = 0; press < clicks; press++)
         {
             inputs.Add(Mouse(down, 0, 0));
             inputs.Add(Mouse(up, 0, 0));
         }
 
+        if (held is { } releasedLast)
+            inputs.Add(Key(releasedLast, Win32.KeyUp));
+
         Win32.SendInput((uint)inputs.Count, [.. inputs], System.Runtime.InteropServices.Marshal.SizeOf<Win32.Input>());
     }
+
+    /// <summary>One key going down or up, for a key held across a click. WW540.</summary>
+    private static Win32.Input Key(ushort virtualKey, uint flags) => new()
+    {
+        Type = Win32.InputKeyboard,
+        Payload = new Win32.InputPayload
+        {
+            Key = new Win32.KeyInput
+            {
+                VirtualKey = virtualKey,
+                Scan = (ushort)Win32.MapVirtualKeyW(virtualKey, Win32.VirtualKeyToScan),
+                Flags = flags,
+            },
+        },
+    };
 
     /// <summary>One mouse input. Internal for <see cref="Drag"/>, which sends its parts one at a time. WW520.</summary>
     internal static Win32.Input Mouse(uint flags, int dx, int dy) => new()

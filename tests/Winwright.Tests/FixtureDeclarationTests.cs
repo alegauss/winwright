@@ -26,6 +26,73 @@ public class FixtureDeclarationTests
     }
 
     [Fact]
+    public void A_staged_file_is_written_now_whatever_its_source_says()
+    {
+        // WW543. quickshell's feed was read only when written in the last ten minutes, and the staged
+        // copy kept the source's time: the case passed the day the fixture was made and not the next.
+        var root = Directory.CreateTempSubdirectory("winwright-modified-").FullName;
+        try
+        {
+            var source = Path.Combine(root, "feed.json");
+            File.WriteAllText(source, "{}");
+            File.SetLastWriteTime(source, DateTime.Now.AddDays(-3));
+
+            var fixture = FixtureDeclaration.Of(
+                "fresh",
+                variables: new Dictionary<string, string> { ["FEED"] = "{files}" },
+                files: [new StagedFile("feed.json"), new StagedFile("feed.json", "stale/feed.json", Modified: "-1d")]);
+
+            var staged = fixture.Stage(root);
+            var into = fixture.StagedInto(root);
+            try
+            {
+                Assert.InRange(DateTime.Now - File.GetLastWriteTime(Path.Combine(into, "feed.json")), TimeSpan.Zero, TimeSpan.FromMinutes(1));
+                Assert.InRange(
+                    DateTime.Now - File.GetLastWriteTime(Path.Combine(into, "stale", "feed.json")),
+                    TimeSpan.FromDays(1) - TimeSpan.FromMinutes(1),
+                    TimeSpan.FromDays(1) + TimeSpan.FromMinutes(1));
+                Assert.NotNull(staged);
+            }
+            finally
+            {
+                Directory.Delete(into, recursive: true);
+            }
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Theory]
+    [InlineData("yesterday")]
+    [InlineData("-1w")]
+    [InlineData("+2h")]
+    public void An_age_that_is_no_age_is_refused_naming_the_ones_there_are(string modified)
+    {
+        var refused = Assert.Throws<ScenarioRefusedException>(() => FixtureDeclaration.Of(
+            "stale",
+            variables: new Dictionary<string, string> { ["FEED"] = "{files}" },
+            files: [new StagedFile("feed.json", Modified: modified)]));
+
+        Assert.Equal("stale", refused.Subject);
+        Assert.Contains("which is no age", refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_staged_file_reads_its_age_out_of_the_file()
+    {
+        var fixtures = ScenarioFile.Read("aged.cases.json", """
+            {
+              "fixtures": [ { "name": "aged", "variables": { "FEED": "{files}" }, "files": [ { "from": "feed.json", "modified": "-2h" } ] } ],
+              "cases": [ { "name": "a", "fixture": "aged", "steps": [ { "locator": "Edit", "act": "read", "answers": true } ] } ]
+            }
+            """);
+
+        Assert.Equal(TimeSpan.FromHours(2), Assert.Single(Assert.Single(fixtures).Fixture.Files).Age);
+    }
+
+    [Fact]
     public void A_folder_a_fixture_opens_resolves_where_its_files_are_staged()
     {
         // WW536. Written the way workingDirectory is, so {files} is the launch's own directory and

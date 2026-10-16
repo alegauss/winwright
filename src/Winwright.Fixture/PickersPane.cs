@@ -56,13 +56,6 @@ public static class PickersPane
         open.Loaded += (_, _) => open.IsDropDownOpen = true;
         rows.Children.Add(Labelled("Open", open));
 
-        // WW540. Two lists, one taking several rows at once the way quickshell's sidebar does (QS314)
-        // and one taking one, which is the control: adding to it would replace what it held.
-        var lists = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 8, 0, 0) };
-        lists.Children.Add(Labelled("Several", Listed("severalList", SelectionMode.Extended)));
-        lists.Children.Add(Labelled("One", Listed("oneList", SelectionMode.Single)));
-        rows.Children.Add(lists);
-
         var pane = new TabItem { Name = "pickersPane", Header = "Pickers", Content = rows };
         panes.Items.Add(pane);
 
@@ -82,25 +75,6 @@ public static class PickersPane
     /// </summary>
     /// <param name="named">Its automation id.</param>
     /// <param name="selected">Which of <see cref="Values"/> it opens on.</param>
-    /// <summary>
-    /// A list holding the same five values, taking several rows at once or one. WW540.
-    /// <para>
-    /// Nothing selected at the start, so a case reading a row selected is reading what it did and not
-    /// what the pane opened with.
-    /// </para>
-    /// </summary>
-    /// <param name="named">Its automation id.</param>
-    /// <param name="mode">Whether it takes several rows at once.</param>
-    private static ListBox Listed(string named, SelectionMode mode)
-    {
-        var list = new ListBox { Name = named, Width = 160, Height = 110, SelectionMode = mode, Margin = new Thickness(0, 0, 16, 0) };
-
-        foreach (var value in Values)
-            list.Items.Add(new ListBoxItem { Content = value });
-
-        return list;
-    }
-
     private static ComboBox Picker(string named, int selected)
     {
         var picker = new ComboBox
@@ -127,7 +101,7 @@ public static class PickersPane
     /// </summary>
     /// <param name="caption">What the row says.</param>
     /// <param name="control">The picker it labels.</param>
-    private static StackPanel Labelled(string caption, Control control)
+    private static StackPanel Labelled(string caption, ComboBox control)
     {
         var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 4, 0, 4) };
         row.Children.Add(new TextBlock

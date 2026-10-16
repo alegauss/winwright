@@ -523,11 +523,12 @@ public sealed class ScenarioFile
             string? from = null;
             string? to = null;
             var fill = false;
+            string? modified = null;
             foreach (var property in one.EnumerateObject())
             {
                 switch (property.Name)
                 {
-                    case "from" or "to" when property.Value.ValueKind != JsonValueKind.String:
+                    case "from" or "to" or "modified" when property.Value.ValueKind != JsonValueKind.String:
                         throw new ScenarioRefusedException($"{here}.{property.Name}", $"it is {Kind(property.Value)} and it has to be text");
                     case "from":
                         from = property.Value.GetString();
@@ -546,14 +547,19 @@ public sealed class ScenarioFile
                                 $"{here}.fill", $"it is {Kind(property.Value)} and it has to be true or false"),
                         };
                         break;
+
+                    // WW543.
+                    case "modified":
+                        modified = property.Value.GetString();
+                        break;
                     default:
-                        throw new ScenarioRefusedException($"{here}.{property.Name}", "there is no such field; there is from, to, fill");
+                        throw new ScenarioRefusedException($"{here}.{property.Name}", "there is no such field; there is from, to, fill, modified");
                 }
             }
 
             return from is null
                 ? throw new ScenarioRefusedException($"{here}.from", "it is not there, and it has to be")
-                : new StagedFile(from, to, fill);
+                : new StagedFile(from, to, fill, modified);
         }
     }
 

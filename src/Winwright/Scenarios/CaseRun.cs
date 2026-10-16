@@ -458,7 +458,9 @@ public static class CaseRun
         stopped = -1;
         for (var index = 0; index < running.Count; index++)
         {
-            var step = running[index];
+            // WW542. The tokens in a step's argument are filled here, where the root and the staged
+            // directory are known, and nowhere earlier.
+            var step = running[index].Rooted(project.Root, staged);
 
             // WW258. The second kind of subject, answered before a subject is built rather than
             // inside one: the notification area is in the shell's tree and not in the window's, and a
@@ -630,8 +632,7 @@ public static class CaseRun
     /// </summary>
     private static string OnDisk(string written, string staged, string root) =>
         System.IO.Path.GetFullPath(
-            System.Environment.ExpandEnvironmentVariables(
-                written.Replace(FixtureDeclaration.Staged, staged, StringComparison.Ordinal)),
+            System.Environment.ExpandEnvironmentVariables(FixtureDeclaration.Rooted(written, root, staged)),
             root);
 
     /// <summary>The file's bytes, or null where it is not there or is still held by whoever writes it.</summary>
@@ -2419,7 +2420,7 @@ public static class CaseRun
         var to = step.To is null ? null
             : step.ToDesktop ? subject.OnDesktop(step.To)
             : subject.Elsewhere(step.To);
-        var acted = step.Verb.Reads ? null : step.Verb.Perform(subject, step.Argument, to, step.Button);
+        var acted = step.Verb.Reads ? null : step.Verb.Perform(subject, step.Argument, to, step.Button, step.Holding);
 
         if (step.Moves)
             return Moved(step, subject, acted, was);
