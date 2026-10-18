@@ -99,5 +99,9 @@ public sealed class ClickButtonTests
 
         Assert.Equal(MouseButton.Middle, step.Button);
         Assert.Equal(StepDeclaration.Buttons, ScenarioSchema.Step.Single(field => field.Name == "button").OneOf);
+
+        // The schema spells both lists as literals for the documentation area's reader, so this is
+        // what keeps the literals and the step's own vocabularies from drifting apart.
+        Assert.Equal(StepDeclaration.HeldKeys, ScenarioSchema.Step.Single(field => field.Name == "holding").OneOf);
     }
 }

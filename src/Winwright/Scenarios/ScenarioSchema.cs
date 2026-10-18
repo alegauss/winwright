@@ -238,8 +238,11 @@ public static class ScenarioSchema
             Subject),
         new("act", true, Taking.Text, "what to do to it", ActVerb.All.Select(verb => verb.Name).ToList()),
         new("with", false, Taking.Text, "what the act needs said, where it needs anything — '{root}' is filled with the project's root, '{root/}' with the same path as Windows OpenSSH spells it (/C:/src/app), and '{files}' with the fixture's staged directory; a brace shaped like a token that is none of those is refused", []),
-        new("holding", false, Taking.Text, "a key a 'click' holds down across it — ctrl adds a row to a list's selection and shift takes the range to it, for an application that answers the gesture and offers no pattern", StepDeclaration.HeldKeys),
-        new("button", false, Taking.Text, "which button a 'click' presses, left where the step names none — middle closes a tab in a browser or a terminal, and right opens a context menu", StepDeclaration.Buttons),
+        new("holding", false, Taking.Text, "a key a 'click' holds down across it — ctrl adds a row to a list's selection and shift takes the range to it, for an application that answers the gesture and offers no pattern", ["ctrl", "shift"]),
+        // Spelled as literals and not read off StepDeclaration, because the documentation area reads
+        // this source as text and knows only literals and the two vocabularies it names; a property
+        // here broke the site's build. ClickButtonTests holds both lists to the step's own.
+        new("button", false, Taking.Text, "which button a 'click' presses, left where the step names none — middle closes a tab in a browser or a terminal, and right opens a context menu", ["left", "right", "middle"]),
         new("to", false, Taking.Text, "where a 'drag' ends: a second locator, in the same window unless 'toDesktop' says otherwise, that the pointer is released over — for the gesture no pattern expresses, such as a tab dragged across its neighbours", []),
         new("toDesktop", false, Taking.Truth, "that 'to' is looked for from the desktop rather than in the window under test, so its first step names another top-level window — for a drop onto another application, such as an Explorer folder", []),
         new("expect", false, Taking.Text, "what the reading should be once the act has landed", [], Claims: true),
