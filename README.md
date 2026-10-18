@@ -832,6 +832,15 @@ names is the whole of what an interaction loop is for**: `set value` writes thro
 passed on the day a WPF window under a WinForms pump took no keyboard input at all; `type` presses
 keys and did not. Likewise `set range` against `nudge`, and `invoke` against `click`.
 
+`type` reads back what the control holds, and a control that reads as a document — a terminal, whose
+Text pattern is its whole screen — has arrived when the screen **holds** what was typed, since it is
+never only that. Synthesised Unicode input puts the last character typed where an earlier one belongs
+about once a send in fifty, and `type` repairs that one fault by its shape: on a value it erases and
+sends again, and on a terminal it takes back exactly what it sent with Backspace and sends it again,
+which is safe because nothing on the line has run yet. Text carrying Enter or Tab is never repaired —
+the shell acted on those as they arrived — so a case that types a command and runs it presses Enter
+as its own step.
+
 `nudge` presses an arrow key at a range control, in whichever direction can actually move it — at the
 maximum a press upward is a legitimate no-op, so it goes the other way and the check stays about
 whether the control responds rather than about where it started.

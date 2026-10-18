@@ -75,14 +75,22 @@ public sealed record TypedResult
     /// </summary>
     public int Resends { get; internal init; }
 
+    /// <summary>
+    /// WW545. Whether the control reads as a document rather than as a value: it publishes the Text
+    /// pattern and no Value pattern, so what it says is everything it holds — a terminal's whole
+    /// screen — and the string typed is somewhere inside it rather than the whole of it.
+    /// </summary>
+    public bool ReadsADocument { get; internal init; }
+
     /// <summary>Whether keys were sent at all.</summary>
     public bool Sent => Foreground.Satisfied && Focus.Satisfied;
 
     /// <summary>
     /// Whether the text arrived. This is the whole task: a picture of the window cannot tell a
     /// live input path from one that swallowed every key, and the value the control reports can.
+    /// A document arrived where it holds what was typed, since nothing it reads is ever only that.
     /// </summary>
-    public bool Arrived => Sent && Expected() == ReadBack;
+    public bool Arrived => Sent && (ReadsADocument ? Substitution.Holds(ReadBack, Act.Text) : Expected() == ReadBack);
 
     /// <summary>What the control should say if the text arrived.</summary>
     public string Expected() => Act.ReplacingWhatIsThere ? Act.Text : (Before ?? "") + Act.Text;
@@ -94,18 +102,27 @@ public sealed record TypedResult
             return $"{Act}: nothing was sent, {Foreground.Absence}.";
         if (!Focus.Satisfied)
             return $"{Act}: nothing was sent, {Focus.Absence}.";
+        // A document's reading is its whole content, a terminal's screen up to PatternValues.MostText,
+        // so the sentence names what was looked for in it rather than quoting all of it back.
+        var holds = Arrived ? "holds" : "does not hold";
+        var reads = ReadsADocument
+            ? $"the document {holds} \"{Act.Text}\""
+            : $"the control reads \"{ReadBack}\"";
+
         if (Arrived && Resends == 0)
-            return $"{Act}: the control reads \"{ReadBack}\".";
+            return $"{Act}: {reads}.";
 
         if (Arrived)
         {
             var again = Resends == 1 ? "resend" : "resends";
-            return $"{Act}: the control reads \"{ReadBack}\", after {Resends} {again} — the send"
+            return $"{Act}: {reads}, after {Resends} {again} — the send"
                 + " substituted a code unit and it was sent again, WW249.";
         }
 
         var because = ReadOnly ? ", and the control says it is read-only" : "";
-        return $"{Act}: the control reads \"{ReadBack}\" and not \"{Expected()}\"{because}.";
+        return ReadsADocument
+            ? $"{Act}: {reads}{because}."
+            : $"{Act}: {reads} and not \"{Expected()}\"{because}.";
     }
 
     /// <summary>
@@ -254,8 +271,16 @@ public static class Keyboard
 
         Send(act.Text);
 
+        // WW545. A document is read for what it holds and repaired by what was sent, below the loop
+        // a value takes; nothing it reads is the string expected, so the loop could never fire on it.
+        if (!facts.Supports("Value"))
+            return InADocument(act, subject, admitted, foreground, focus, before, readOnly);
+
         var expected = act.ReplacingWhatIsThere ? act.Text : (before ?? "") + act.Text;
-        var readBack = Settled(subject, admitted, expected, act.Text);
+        var readBack = Settled(
+            subject,
+            admitted,
+            reading => reading == expected || TookTheLastSent(reading, expected, act.Text));
 
         // WW249. Send it again where the reading carries this engine's own substitution, and never
         // where it carries anything else. WW329 made this the backstop rather than the repair: the
@@ -292,12 +317,68 @@ public static class Keyboard
             // read back short and be reported as the failure it is.
             Send(expected);
             resends++;
-            readBack = Settled(subject, admitted, expected, act.Text);
+            readBack = Settled(
+                subject,
+                admitted,
+                reading => reading == expected || TookTheLastSent(reading, expected, act.Text));
         }
 
         return new TypedResult(act, facts, foreground, focus, before, readBack, readOnly)
         {
             Resends = resends,
+        };
+    }
+
+    /// <summary>
+    /// WW545. The rest of a typing act whose control reads as a document: a terminal, whose Text
+    /// pattern is its whole screen and which has no value to compare.
+    /// <para>
+    /// WW249's backstop compares a reading with the string expected and erases what the control
+    /// says it holds, and both halves are wrong here. The reading is never the string, so the fault
+    /// reached the case unrepaired — quickshell's tab case read <c>first-tabrmarker</c> twice in
+    /// twenty runs — and erasing what it says it holds is a screen's worth of Backspaces. What is
+    /// still true is where the caret is: right after what was just sent, on a line nothing has run
+    /// yet, because a terminal runs a line on Enter and not on the keys before it. So the repair
+    /// takes back exactly what was sent and sends it again, which is harmless even where it fires
+    /// on a reading that only looked like the fault: the same keys land in the same place.
+    /// </para>
+    /// <para>
+    /// That is also its boundary. Text carrying a control character — Enter, Tab — has already been
+    /// acted on by the time it is read, a run line or a completion, and Backspace takes back neither.
+    /// It is never repaired, and what it reads is reported as it is.
+    /// </para>
+    /// </summary>
+    private static TypedResult InADocument(
+        TypedAct act,
+        Subject subject,
+        Admitted admitted,
+        Precondition foreground,
+        Precondition focus,
+        string? before,
+        bool readOnly)
+    {
+        bool Answered(string? reading) =>
+            Substitution.Holds(reading, act.Text) || Substitution.InDocument(reading, before, act.Text);
+
+        var readBack = Settled(subject, admitted, Answered);
+
+        var resends = 0;
+        while (resends < Resends
+            && !Substitution.Holds(readBack, act.Text)
+            && Substitution.InDocument(readBack, before, act.Text))
+        {
+            // No End first: on a shell's prompt End takes an inline suggestion, which would put text
+            // after the caret that the Backspaces below then do not reach.
+            Erase(act.Text.Length);
+            Send(act.Text);
+            resends++;
+            readBack = Settled(subject, admitted, Answered);
+        }
+
+        return new TypedResult(act, admitted.Facts, foreground, focus, before, readBack, readOnly)
+        {
+            Resends = resends,
+            ReadsADocument = true,
         };
     }
 
@@ -332,9 +413,11 @@ public static class Keyboard
     /// </summary>
     /// <param name="subject">The control to read.</param>
     /// <param name="admitted">The admission taken before the send, whose element this reads.</param>
-    /// <param name="expected">What it should say.</param>
-    /// <param name="sent">The text the keyboard was given, which decides what a substitution is.</param>
-    private static string? Settled(Subject subject, Admitted admitted, string expected, string sent)
+    /// <param name="answered">
+    /// Whether a reading is one of the two that end the wait: what was meant, or the substitution.
+    /// A value and a document spell both differently, and the wait is the same for either.
+    /// </param>
+    private static string? Settled(Subject subject, Admitted admitted, Func<string?, bool> answered)
     {
         // WW329 put a fifty-millisecond pause here and the fault went away. WW342 then found which
         // half of a read does it — 4800 dispatched messages provoked nothing and the automation read
@@ -388,7 +471,7 @@ public static class Keyboard
             () =>
             {
                 var reading = Cheaply(subject, admitted);
-                return reading == expected || TookTheLastSent(reading, expected, sent) ? reading : null;
+                return answered(reading) ? reading : null;
             },
             subject.ActMs,
             subject.PollMs);
@@ -400,8 +483,8 @@ public static class Keyboard
     /// What the control says it holds, asked the way WW355 measured as harmless: one pattern on the
     /// element this act already resolved.
     /// <para>
-    /// Falls back to the whole pass wherever the cheap read cannot answer — no element, no value
-    /// pattern, or an element that went while the queue drained. That last is the one worth naming:
+    /// Falls back to the whole pass wherever the cheap read cannot answer — no element, neither
+    /// pattern answering, or an element that went while the queue drained. That last is the one worth naming:
     /// re-resolving is exactly what this avoids, so it is done only where the alternative is not
     /// reading at all, and a control that closed under a settle is a fact the full pass reports
     /// properly.
@@ -411,11 +494,18 @@ public static class Keyboard
     /// <param name="admitted">The admission taken before the send, which already holds the element.</param>
     private static string? Cheaply(Subject subject, Admitted admitted)
     {
-        if (!admitted.Facts.Supports("Value"))
-            return Reading(subject);
-
         try
         {
+            // WW545. A document is asked through its Text pattern on the same element, for the same
+            // reason a value is: the whole pass re-resolves, and a walk landing mid-drain is the
+            // provoking read WW355 measured. Up to the same length the whole pass reads.
+            if (!admitted.Facts.Supports("Value"))
+            {
+                return admitted.Do(element => element.GetCurrentPattern(TextPattern.Pattern) is TextPattern text
+                    ? text.DocumentRange.GetText(PatternValues.MostText)
+                    : Reading(subject));
+            }
+
             return admitted.Do(element => element.GetCurrentPattern(ValuePattern.Pattern) is ValuePattern pattern
                 ? pattern.Current.Value
                 : Reading(subject));
@@ -448,7 +538,7 @@ public static class Keyboard
     /// <param name="readBack">What the control says it holds.</param>
     /// <param name="expected">What it should say.</param>
     /// <param name="sent">The text the keyboard was given, whose last code unit is the intruder.</param>
-    private static bool TookTheLastSent(string? readBack, string expected, string sent)
+    internal static bool TookTheLastSent(string? readBack, string expected, string sent)
     {
         if (sent.Length == 0 || readBack is null || readBack.Length != expected.Length)
             return false;

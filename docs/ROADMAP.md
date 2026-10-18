@@ -8,11 +8,13 @@
 
 ## Block D — Act — patterns before pointers
 
+- 📋 **WW546** (deps: —) **A case's type step drops the resend count, so a repaired substitution traces exactly like a clean send** — Synthesised.Type answers through Landed and discards the TypedResult, so the fault rate WW249 made countable never reaches an adopter's runs. → §WW546
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW545** (deps: —) **Typing into a terminal substitutes the last character for an earlier one about once a send in fifty, unrepaired** — WW249's resend needs a value it can compare and erase, and a terminal runs what it is sent, so the fault reaches the case as an app defect. → §WW545
+- ⏳ **WW545** (deps: a release proven by quickshell) **Typing into a terminal substitutes the last character for an earlier one about once a send in fifty, unrepaired** — The repair is unproven until quickshell's tab case passes 300 guest runs on a release. → §WW545
 
 ## Block G — The scenario — a case is a data file
 
@@ -151,6 +153,12 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
+
+## Done when — WW545
+
+- **No substitution reaches a terminal case in 300 guest runs** Quickshell's tab case,
+  on a winwright release carrying the document repair, passes 300 guest runs in a row
+  with its title reading first-tab-marker every time.
 
 ## Non-goals
 

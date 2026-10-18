@@ -346,6 +346,13 @@ internal static class Criteria
         // token substitution are one chain a run walks. The area's half is read off the page the
         // build wrote by `swap-version.test.mjs`. Deleted rather than restated, which is what this
         // pair of checks is for: the roadmap no longer declares the lead.
+
+        // WW545's half that landed is the document repair, and `DocumentTypingTests` holds both of
+        // its readings. The claim is about a real terminal over three hundred runs, and the only one
+        // that reproduced the fault is quickshell's — so it is read back there, on a release.
+        new("WW545", "No substitution reaches a terminal case in 300 guest runs", "", Unshown.NotYet,
+            "WW545 carries it: the repair shipped on 2026-10-18 and no released engine has it yet; quickshell's tab "
+                + "case is the one that faulted, two in twenty, and the 300 runs are its to count"),
     ]);
 
     /// <summary>

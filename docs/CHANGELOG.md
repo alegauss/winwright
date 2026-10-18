@@ -324,6 +324,7 @@
 - ✅ **WW528** **A case cannot claim a reading is empty, so a tab with no status or a field left blank has no claim** — A case claims a reading is empty with empty: true, which holds only for an element that is there and says nothing (design recorded in `src/Winwright/Scenarios/StepDeclaration.cs`).
 - ✅ **WW535** **A case cannot read a file on disk, so a drop onto Explorer cannot be checked by the case that made it** — A step naming a file takes read and claims sameBytesAs, waited for over the resolve timeout, so a drop onto Explorer is checked byte for byte by the case.
 - ✅ **WW539** **A case cannot claim an element is drawn inside another, so a control clipped or laid out empty passes every case** — A step claims within, its element drawn inside a second locator's and not empty, failing with both rectangles, so a control clipped or laid out empty has a case.
+- ✅ **WW545 (the document repair)** **Typing into a terminal substitutes the last character for an earlier one about once a send in fifty, unrepaired** — Typing into a terminal counts arrival when the screen holds the text, and the substitution is taken back with Backspace and resent, so it no longer reaches a case.
 
 ## Block G — The scenario — a case is a data file
 
