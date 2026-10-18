@@ -159,7 +159,10 @@ public sealed class SynthesisedActTests : IDisposable
         Assert.Equal(Winwright.Acting.Keyboard.FocusPreconditionName, typed.Needed!.Name);
 
         Assert.Equal(StepVerdict.Ok, step.Verdict);
-        Assert.Null(step.Detail);
+
+        // WW546. Null on a send that landed first time, and the repair's own sentence on one WW249
+        // had to resend — green either way, and the trace says which.
+        Assert.Equal(typed.Repaired, step.Detail);
         Assert.NotNull(step.Met);
         Assert.Contains("holds it", step.Met, StringComparison.Ordinal);
         Assert.Contains("window under test", step.Met, StringComparison.Ordinal);

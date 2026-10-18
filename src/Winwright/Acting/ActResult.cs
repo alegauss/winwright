@@ -98,6 +98,17 @@ public sealed record ActResult
     public bool Attempted => Needed is null || Needed.Satisfied;
 
     /// <summary>
+    /// WW546. What the act had to repeat to land, in a sentence, or null where it landed first time.
+    /// <para>
+    /// Set by <c>type</c> alone today, from the resends WW249's repair made. A repaired step is green
+    /// and says so, which is how a fault this engine compensates for stays countable off an adopter's
+    /// own runs rather than only off this repository's tests. The trace carries it and the summary
+    /// does not: the summary counts verdicts, and this is not one.
+    /// </para>
+    /// </summary>
+    public string? Repaired { get; internal init; }
+
+    /// <summary>
     /// Whether anything the element reports actually moved. False is a real answer and not an
     /// error: an act asked for is not an act that landed, and this is the difference.
     /// </summary>
@@ -118,7 +129,7 @@ public sealed record ActResult
         WaitedMs = WaitedMs,
         Polls = Polls,
         Verdict = Attempted ? StepVerdict.Ok : StepVerdict.Unchecked,
-        Detail = Attempted ? null : Needed!.Absence,
+        Detail = Attempted ? Repaired : Needed!.Absence,
 
         // WW517. What the condition said about having been met, where it had something to say. An
         // act with no precondition at all, and one whose precondition being met says everything,
@@ -139,7 +150,9 @@ public sealed record ActResult
             ? $"{Before.Reading() ?? "nothing"} -> {After.Reading() ?? "nothing"}"
             : "nothing it reports moved";
 
-        return $"{Verb} {Named} via {Pattern}: {moved}";
+        return Repaired is null
+            ? $"{Verb} {Named} via {Pattern}: {moved}"
+            : $"{Verb} {Named} via {Pattern}: {moved}, {Repaired}";
     }
 
     /// <summary>

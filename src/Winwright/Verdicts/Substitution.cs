@@ -57,6 +57,21 @@ public static class Substitution
         return false;
     }
 
+    /// <summary>
+    /// WW546. The sentence a step carries beside its verdict where the send had to be repeated, or
+    /// null where it did not. One wording for every door a typing act answers through, so a resend
+    /// reads the same in a test calling <c>Keyboard.Type</c> and on a case's trace line.
+    /// </summary>
+    /// <param name="resends">How many times the send was repeated.</param>
+    public static string? Repaired(int resends)
+    {
+        if (resends <= 0)
+            return null;
+
+        var again = resends == 1 ? "resend" : "resends";
+        return $"after {resends} {again} — the send substituted a code unit and it was sent again, WW249";
+    }
+
     /// <summary>How many times a run occurs in a reading, overlapping ones included.</summary>
     private static int Count(string? reading, string run)
     {

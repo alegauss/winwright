@@ -79,4 +79,26 @@ public sealed class DocumentTypingTests
     {
         Assert.False(Substitution.InDocument($"{Prompt}x", Prompt, "y"));
     }
+
+    [Fact]
+    public void A_send_that_landed_first_time_has_no_repair_to_report()
+    {
+        // WW546. Null and not an empty sentence, so a trace line's detail stays absent on the 97%
+        // of sends that need nothing.
+        Assert.Null(Substitution.Repaired(0));
+    }
+
+    [Theory]
+    [InlineData(1, "after 1 resend —")]
+    [InlineData(3, "after 3 resends —")]
+    public void A_repaired_send_names_how_many_times_it_was_sent_again(int resends, string opens)
+    {
+        // WW546. The sentence a case's trace line carries beside an ok verdict, counted so the rate
+        // can be read off an adopter's own runs.
+        var said = Substitution.Repaired(resends);
+
+        Assert.NotNull(said);
+        Assert.StartsWith(opens, said, StringComparison.Ordinal);
+        Assert.Contains("WW249", said, StringComparison.Ordinal);
+    }
 }

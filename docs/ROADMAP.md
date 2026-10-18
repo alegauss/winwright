@@ -8,8 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW546** (deps: —) **A case's type step drops the resend count, so a repaired substitution traces exactly like a clean send** — Synthesised.Type answers through Landed and discards the TypedResult, so the fault rate WW249 made countable never reaches an adopter's runs. → §WW546
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

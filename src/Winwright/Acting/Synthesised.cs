@@ -66,13 +66,19 @@ public static class Synthesised
         // WW518. `Beside` where both held, so the focus stays the condition this act carries — the
         // name is what `BusyDesk` reads to tell a desk's hole from anything else — and WW517's
         // finding about the desk rides along instead of being dropped before the line is written.
+        //
+        // WW546. The resends ride along too: Landed reads the two readings and the condition, and
+        // what the send cost to land is the one thing in the TypedResult it would otherwise drop.
         return Landed(
             subject,
             "type",
             ByKeyboard,
             typed.Element,
             before,
-            typed.Foreground.Satisfied ? typed.Focus.Beside(typed.Foreground) : typed.Foreground);
+            typed.Foreground.Satisfied ? typed.Focus.Beside(typed.Foreground) : typed.Foreground) with
+        {
+            Repaired = Substitution.Repaired(typed.Resends),
+        };
     }
 
     /// <summary>

@@ -837,7 +837,8 @@ Text pattern is its whole screen — has arrived when the screen **holds** what 
 never only that. Synthesised Unicode input puts the last character typed where an earlier one belongs
 about once a send in fifty, and `type` repairs that one fault by its shape: on a value it erases and
 sends again, and on a terminal it takes back exactly what it sent with Backspace and sends it again,
-which is safe because nothing on the line has run yet. Text carrying Enter or Tab is never repaired —
+which is safe because nothing on the line has run yet. A repaired step stays green and its trace line
+says how many resends it took, so the rate can be read off your own runs. Text carrying Enter or Tab is never repaired —
 the shell acted on those as they arrived — so a case that types a command and runs it presses Enter
 as its own step.
 

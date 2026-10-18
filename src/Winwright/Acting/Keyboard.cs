@@ -113,11 +113,7 @@ public sealed record TypedResult
             return $"{Act}: {reads}.";
 
         if (Arrived)
-        {
-            var again = Resends == 1 ? "resend" : "resends";
-            return $"{Act}: {reads}, after {Resends} {again} — the send"
-                + " substituted a code unit and it was sent again, WW249.";
-        }
+            return $"{Act}: {reads}, {Substitution.Repaired(Resends)}.";
 
         var because = ReadOnly ? ", and the control says it is read-only" : "";
         return ReadsADocument

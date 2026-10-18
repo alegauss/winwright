@@ -8,30 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-### §WW546 The resend count, on a case's trace
-
-Found while building WW545. `TypedResult.Resends` counts the sends `Keyboard.Run`
-repeated because WW249's substitution landed on them, and its own comment says the count
-is reported and never swallowed: green with a sentence is how a fault the engine
-compensates for stays countable. That holds for a caller of `Keyboard.Type`, and for
-nobody else.
-
-A case's `type` step goes through `Synthesised.Type`, which builds its `ActResult` with
-`Landed` from the preconditions and two readings, and the `TypedResult` is dropped
-there. Nothing outside `Keyboard.cs` reads `Resends`. So a case that needed one, two or
-three resends traces exactly like one that needed none, and the rate WW249 promised
-anyone running a suite could read off their runs is readable only in this repository's
-own tests. With WW545 the same now holds for a terminal, where the repair is new.
-
-What to build: carry the count onto the step's trace line. `ActResult` has no detail of
-its own, so the likely shape is a field on it that `Synthesised.Type` sets from
-`TypedResult.Resends` and that `AsTraceStep` folds into `Detail` beside an ok verdict,
-in the sentence `TypedResult.ToString` already writes. The open choice is whether the
-summary counts repaired steps too, or the trace alone carries them.
-
-Proven by a case in this suite whose type step is made to resend, through a fixture flag
-or by driving the repair directly, and whose trace line then names the resend.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
