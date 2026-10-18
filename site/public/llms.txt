@@ -208,10 +208,10 @@ than a surprise.
 Sponsored by **Viglet** (https://www.viglet.org). Open source search and content tools for
 organisations with a lot to publish — run on your own servers, with no per-user licence.
 
-- **Viglet Turing ES** (https://turing.viglet.org) — Search for sites with a lot of content.
+- **Viglet Turing** (https://turing.viglet.org) — Search for sites with a lot of content.
   People ask in their own words and find it, with AI answers using only your own published
   content.
-- **Viglet Shio CMS** (https://shio.viglet.org) — A content system that takes the page out of
+- **Viglet Shio** (https://shio.viglet.org) — A content system that takes the page out of
   the development queue: AI builds it, your communications team reviews and approves it.
 
 ## Links
