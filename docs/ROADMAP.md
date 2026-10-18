@@ -8,8 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW544** (deps: —) **A case cannot press Alt alone, so a menu bar shown the Windows way by an Alt tap has no case** — A press names a modifier alone, sent down and up with nothing between, so a classic menu's Alt tap can be driven and read. → §WW544
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

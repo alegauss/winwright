@@ -268,8 +268,8 @@ public sealed record Flags
         new Flag(
             "drags",
             "",
-            "a pane holding a strip of three tabs that reorders only when one is dragged onto another and closes a tab on a middle click, with a read-out of the order, and a note that can be dropped onto a second window beside it or, carrying the file WINWRIGHT_DRAG_FILE names, onto an Explorer folder",
-            "a tab strip reordered by dragging had no case, because no verb pressed on one element, moved past the drag threshold and released over another - and a drop onto another window had none either, because the destination was looked for only in the window the drag started in; a tab closed by the middle button had none, because a click pressed only the left one"),
+            "a pane holding a menu bar shown by tapping Alt alone, a strip of three tabs that reorders only when one is dragged onto another and closes a tab on a middle click, with a read-out of the order, and a note that can be dropped onto a second window beside it or, carrying the file WINWRIGHT_DRAG_FILE names, onto an Explorer folder",
+            "a tab strip reordered by dragging had no case, because no verb pressed on one element, moved past the drag threshold and released over another - and a drop onto another window had none either, because the destination was looked for only in the window the drag started in; a tab closed by the middle button had none, because a click pressed only the left one; and a menu bar shown by an Alt tap had none, because a press had to end in a key"),
         new Flag(
             "layout",
             "",

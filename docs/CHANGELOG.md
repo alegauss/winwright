@@ -209,6 +209,7 @@
 - ✅ **WW530** **A drag can only be released over an element of the window it started in, so a drop onto Explorer has no case** — A drag step with "toDesktop": true looks its `to` up from the desktop, so a case can drop onto another window, such as an Explorer folder (design recorded in `README.md`).
 - ✅ **WW538** **A case cannot click with the middle or right button, so a tab closed by a middle click has no case** — A click names its button, middle or right beside the default left, in its step and its rendered name, so a tab closed by a middle click has a case.
 - ✅ **WW540** **A case cannot add an item to a selection or click with Ctrl or Shift held, so a list choosing several has no case** — A click takes holding ctrl or shift, sent in one batch with the click, so a list answering only the gesture adds a row or a range.
+- ✅ **WW544** **A case cannot press Alt alone, so a menu bar shown the Windows way by an Alt tap has no case** — A press of a modifier alone, such as Alt, is a tap sent down and up with nothing between, so a classic menu bar shown by an Alt tap has a case.
 
 ## Block E — Capture — the picture that proves what it photographed
 

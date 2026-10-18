@@ -90,7 +90,19 @@ public sealed record Chord
     public static string Spelled() =>
         $"a key with modifiers, like Ctrl+Shift+I — the modifiers are "
             + $"{string.Join(", ", Held.Select(one => one.Name))}, and the key is a letter, a digit, "
-            + $"F1 to F24, or {string.Join(", ", Named.Keys)}";
+            + $"F1 to F24, or {string.Join(", ", Named.Keys)} — or one modifier alone, like Alt";
+
+    /// <summary>
+    /// Whether this is a modifier pressed and released alone, with nothing between. WW544.
+    /// <para>
+    /// Found by quickshell (QS354): its menu bar is hidden and shown the Windows way, by Alt tapped on
+    /// its own — as Notepad's is, and every classic menu's. A chord ended in a key, so <c>"Alt"</c> was
+    /// refused as no key, and <c>Alt+Escape</c> is another gesture, since releasing Alt after another
+    /// key is not a tap. Two modifiers and no key (<c>Ctrl+Alt</c>) stay refused: that is a chord that
+    /// lost its key, not a tap.
+    /// </para>
+    /// </summary>
+    public bool Alone => Modifiers.Count == 0 && Held.Any(one => one.Name == Key);
 
     /// <summary>
     /// Parse one, or say why it is not a chord.
@@ -127,6 +139,14 @@ public sealed record Chord
         {
             because = $"'{text}' has an empty part, so a '+' names nothing on one side of it";
             return false;
+        }
+
+        // WW544. One modifier and nothing else is a tap of that modifier, which is how a classic menu
+        // bar is shown. Reported as "Alt, alone" so a trace does not read as a chord that lost its key.
+        if (parts.Length == 1 && Held.FirstOrDefault(one => string.Equals(one.Name, parts[0], StringComparison.OrdinalIgnoreCase)) is { Name: not null } alone)
+        {
+            chord = new Chord([], alone.Name, $"{alone.Name}, alone");
+            return true;
         }
 
         var modifiers = new List<string>();
@@ -183,7 +203,7 @@ public sealed record Chord
     /// <summary>The virtual key this chord presses.</summary>
     /// <exception cref="InvalidOperationException">Where the key parsed and no longer maps, which cannot happen.</exception>
     internal ushort Pressing() =>
-        Virtual(Key) ?? throw new InvalidOperationException($"'{Key}' parsed as a key and maps to none");
+        (Alone ? Held.First(one => one.Name == Key).Key : Virtual(Key)) ?? throw new InvalidOperationException($"'{Key}' parsed as a key and maps to none");
 
     /// <summary>The virtual key one name means, or null where it is no key.</summary>
     /// <param name="name">The key's name, as a case wrote it.</param>

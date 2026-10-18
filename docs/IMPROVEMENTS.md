@@ -8,31 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-### §WW544 A modifier pressed alone
-
-Found by quickshell (QS354) on 2026-10-16. Its menu bar is hidden by default and shown
-the Windows way: Alt pressed and released alone, with no other key between. A case
-cannot do that. A chord must end in a key (`Chord.TryParse` takes the last part as the
-key and checks it against letters, digits, F1 to F24 and the named keys), so `"with":
-"Alt"` is refused with "'Alt' is no key this can press", and `Alt+Escape` is a different
-gesture, since the release of Alt after another key is not a tap.
-
-The same gap stands in front of every Windows app with a classic menu: Notepad,
-Explorer's ribbon access keys, and any WPF or WinForms app whose MainMenu answers Alt.
-Each is reached by a modifier alone.
-
-What to build: a press of a modifier alone, spelled `"with": "Alt"` (and Ctrl, Shift,
-Win for symmetry), sending that modifier's down and up with nothing between. It is
-reported as "Alt, alone" in the step's name, so a trace does not read as a chord that
-lost its key. Refusing a modifier held with a modifier alone (`Ctrl+Alt`) stays as it
-is.
-
-quickshell's case shows the bar through its palette instead until this exists. That
-proves the bar and not the gesture a person uses most.
-
-Proven by a fixture case: Alt alone toggles a menu bar in DragsPane's window, and the
-menu is read from the accessibility tree.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

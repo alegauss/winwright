@@ -101,6 +101,13 @@ public static class DragsPane
         Draggable(note);
         rows.Loaded += (_, _) => DropWindowBeside(Window.GetWindow(rows), dropped);
 
+        // WW544. A menu bar hidden until Alt is tapped alone, the Windows way, as quickshell's is
+        // (QS354). Above the strip, so showing it pushes nothing a drag case aims at out of place.
+        var bar = new Menu { Name = "altMenu", Visibility = Visibility.Collapsed };
+        bar.Items.Add(new MenuItem { Name = "altFile", Header = "File" });
+        rows.Children.Insert(0, bar);
+        rows.Loaded += (_, _) => ShownByAlt(Window.GetWindow(rows), bar);
+
         var pane = new TabItem { Name = "dragsPane", Header = "Drags", Content = rows };
         panes.Items.Add(pane);
 
@@ -166,6 +173,36 @@ public static class DragsPane
             strip.Items.Insert(to, source);
             strip.SelectedItem = source;
             Said(order, strip);
+            e.Handled = true;
+        };
+    }
+
+    /// <summary>
+    /// Show or hide <paramref name="bar"/> when Alt goes down and up with no other key between, which
+    /// is what Windows calls tapping Alt. WW544. Alt released after another key is not a tap, so
+    /// <c>Alt+Escape</c> leaves the bar as it was — the control a case needs to tell the gesture from
+    /// any key that happens to involve Alt.
+    /// </summary>
+    private static void ShownByAlt(Window? window, Menu bar)
+    {
+        if (window is null)
+            return;
+
+        var tapping = false;
+        window.PreviewKeyDown += (_, e) =>
+        {
+            var key = e.Key == Key.System ? e.SystemKey : e.Key;
+            tapping = key is Key.LeftAlt or Key.RightAlt;
+        };
+
+        window.PreviewKeyUp += (_, e) =>
+        {
+            var key = e.Key == Key.System ? e.SystemKey : e.Key;
+            if (!tapping || key is not (Key.LeftAlt or Key.RightAlt))
+                return;
+
+            tapping = false;
+            bar.Visibility = bar.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
             e.Handled = true;
         };
     }

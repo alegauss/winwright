@@ -188,6 +188,56 @@ public sealed class DragTests : IDisposable
     }
 
     [Fact]
+    public void Alt_tapped_alone_shows_the_menu_bar_and_a_second_tap_hides_it()
+    {
+        // WW544. quickshell's QS354 gesture: a bar hidden until Alt goes down and up with nothing
+        // between. The second tap is the control — a reading that always found the bar would pass the
+        // first half and fail this one.
+        if (!Desk.Read().CanObserve)
+            return;
+
+        var declaration = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            declaration,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "timeouts": { "launch": 30000, "resolve": 4000, "act": 4000, "poll": 25 }
+            }
+            """);
+
+        var cases = """
+            {
+              "fixtures": [ { "name": "a bar shown by Alt", "arguments": ["--drags", "--show"] } ],
+              "cases": [
+                {
+                  "name": "Alt tapped alone shows the bar",
+                  "catches": "a menu bar shown the Windows way, by Alt tapped alone, that no press could make",
+                  "fixture": "a bar shown by Alt",
+                  "steps": [
+                    { "locator": "MenuItem#altFile", "act": "read", "absent": true, "named": "the bar starts hidden" },
+                    { "locator": "Text#dragOrder", "act": "press", "with": "Alt", "named": "Alt is tapped" },
+                    { "locator": "MenuItem#altFile", "act": "read", "reads": "name", "expect": "File", "named": "the bar is shown" },
+                    { "locator": "Text#dragOrder", "act": "press", "with": "Alt", "named": "Alt is tapped again" },
+                    { "locator": "MenuItem#altFile", "act": "read", "absent": true, "named": "the bar is hidden again" }
+                  ]
+                }
+              ]
+            }
+            """;
+
+        var project = ProjectDeclaration.Load(declaration);
+        using var register = ProcessRegister.For(project);
+
+        var verdict = Suite.Launch(ScenarioFile.Read("alt.cases.json", cases), Selection.All, register, project);
+        register.StopAll();
+        if (BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
     public void A_left_click_on_the_same_tab_closes_nothing()
     {
         // The control: the same step on the primary button selects the tab and leaves the strip whole.

@@ -528,7 +528,10 @@ case means one thing either way, *send this key at the window*; what differs is 
 since a traversal key moves the focus and is read for it, and a chord invokes a command whose
 consequence the next step is the check for. It is what an application with no menu and no toolbar
 needs: the commands **are** the application, the keyboard is the only route to them, and `click`
-needs a target that does not exist. `with` is required exactly where the act takes something and
+needs a target that does not exist. A modifier on its own, `"with": "Alt"`, is a **tap**: the key goes
+down and up with nothing between, which is how Windows shows a classic menu bar. The report calls it
+`Alt, alone`, so it does not read as a chord that lost its key. Two modifiers and no key (`Ctrl+Alt`)
+are still refused. `with` is required exactly where the act takes something and
 refused where it does not. `named` renames a step in the report; `meansIt` is the sentence a step
 needs before it may touch an entry the project declared destructive. `moves` is the other kind of
 expectation: that the reading ended up different, for the claim a case cannot name a value for. `answers`
