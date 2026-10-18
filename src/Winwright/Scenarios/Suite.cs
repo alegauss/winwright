@@ -128,19 +128,20 @@ public sealed class SuiteVerdict
 
         if (Unjustified.Count > 0)
         {
+            var one = new Agreement(Unjustified.Count);
             lines.Add(
-                $"{Unjustified.Count} case{(Unjustified.Count == 1 ? "" : "s")} that ran say nothing about what "
-                + "they catch, so nothing says what deleting them would cost:");
-            lines.AddRange(Unjustified.Select(one => $"  {one.Name}"));
+                $"{one.Cases} that ran {one.Say} nothing about what {one.They} {one.Catch}, so nothing says "
+                + $"what deleting {one.Them} would cost:");
+            lines.AddRange(Unjustified.Select(each => $"  {each.Name}"));
         }
 
         if (Echoing.Count > 0)
         {
+            var one = new Agreement(Echoing.Count);
             lines.Add(
-                $"{Echoing.Count} case{(Echoing.Count == 1 ? "" : "s")} that ran say what they catch in words "
-                + "that begin or end with their own name, so a comparison of claims across runs may be "
-                + "reading the name again:");
-            lines.AddRange(Echoing.Select(one => $"  {one.Name}: {one.Catches}"));
+                $"{one.Cases} that ran {one.Say} what {one.They} {one.Catch} in words that begin or end with "
+                + $"{one.Their} own name, so a comparison of claims across runs may be reading the name again:");
+            lines.AddRange(Echoing.Select(each => $"  {each.Name}: {each.Catches}"));
         }
 
         return new ReadOnlyCollection<string>(lines);
@@ -148,6 +149,30 @@ public sealed class SuiteVerdict
 
     /// <summary>The sentence, which is what a caller printing one line wants.</summary>
     public override string ToString() => Sentence();
+
+    /// <summary>
+    /// WW547. The words of a sentence about some cases that change with how many there are. The noun
+    /// alone used to be inflected, so one case read "1 case that ran say what they catch" — the
+    /// verb and every pronoun after it have to follow the count too, and spelling them in one place
+    /// is what keeps a sentence from agreeing in half its words.
+    /// </summary>
+    /// <param name="Count">How many cases the sentence is about.</param>
+    private readonly record struct Agreement(int Count)
+    {
+        private bool One => Count == 1;
+
+        public string Cases => One ? "1 case" : $"{Count} cases";
+
+        public string Say => One ? "says" : "say";
+
+        public string Catch => One ? "catches" : "catch";
+
+        public string They => One ? "it" : "they";
+
+        public string Them => One ? "it" : "them";
+
+        public string Their => One ? "its" : "their";
+    }
 }
 
 /// <summary>

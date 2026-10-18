@@ -193,7 +193,8 @@ public sealed class FileSubjectTests : IDisposable
         Assert.Equal(RunOutcome.Passed, verdict.Outcome);
         Assert.Equal(["the report is copied"], verdict.Echoing.Select(one => one.Name));
         Assert.Contains(
-            "1 case that ran say what they catch in words that begin or end with their own name",
+            // WW547. The whole sentence agrees with one case, not only its noun.
+            "1 case that ran says what it catches in words that begin or end with its own name",
             Said(verdict),
             StringComparison.Ordinal);
         Assert.Contains("  the report is copied: the report is copied, regression", Said(verdict), StringComparison.Ordinal);

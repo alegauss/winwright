@@ -239,8 +239,12 @@ public sealed class SuiteRunTests : IDisposable
         Assert.Equal(["something"], verdict.Unjustified.Select(one => one.Name));
 
         var rendered = verdict.Render();
-        Assert.Contains(rendered, line => line.Contains("1 case that ran say", StringComparison.Ordinal));
-        Assert.Contains(rendered, line => line.Contains("what deleting them would cost", StringComparison.Ordinal));
+        // WW547. The whole sentence agrees with one case, not only its noun.
+        Assert.Contains(
+            rendered,
+            line => line.Contains(
+                "1 case that ran says nothing about what it catches, so nothing says what deleting it would cost",
+                StringComparison.Ordinal));
     }
 
     [Fact]
