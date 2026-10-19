@@ -584,3 +584,6 @@
 - ✅ **WW510** **the version swap is the one behaviour on the site no run exercises, on both halves of it** — Both halves run in a case now: the area's over the page the build wrote, the landing page's through a render.
 - ✅ **WW511** **three generators read an enum with a matcher that only recognises a valueless member, and the pairing copies it** — Four matchers read any member now, and the pairings count what the body separates instead of copying the generator's regex (design recorded in `site/scripts/csharp.mjs`).
 - ✅ **WW514** **a generated sentence may carry an interpolation hole the build cannot resolve, and the page publishes it verbatim** — Anything brace-delimited that could be a name is a hole now, and one the build cannot resolve stops it (design recorded in `site/scripts/format.mjs`).
+
+## Block M — The site on the shared design system
+
