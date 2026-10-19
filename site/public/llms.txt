@@ -150,7 +150,6 @@ is answered with the nearest name UI Automation actually has.
 
 - Cross-platform — the whole engine is UI Automation and Win32.
 - An external dependency in the engine.
-- An assertion about individual pixels.
 - A recorder that turns clicks into a scenario. The tool never writes the test.
 - A service, a daemon or a database.
 - A green that covers an assertion that did not run.

@@ -743,10 +743,6 @@ const nonGoalItems = [
     body: "A package in the engine is a package every adopting project inherits. The two halves are separate assemblies precisely so an application takes the one it needs without inheriting the other.",
   },
   {
-    title: "An assertion about individual pixels",
-    body: "A picture is evidence that something was drawn and that nothing was over it. What a pixel is worth arguing about belongs to a design review, not to a suite.",
-  },
-  {
     title: "A recorder that turns clicks into a scenario",
     body: "A recorded case asserts what happened rather than what matters, and nobody can tell the two apart afterwards. The tool never writes the test.",
   },

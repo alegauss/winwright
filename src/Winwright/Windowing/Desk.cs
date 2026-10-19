@@ -255,9 +255,9 @@ public sealed record Desk
     /// the screen was refused. Connected before and after, it answered met.
     /// </para>
     /// <para>
-    /// Never a named pixel. The non-goal about individual pixels binds this as it binds the capture
-    /// block, and the capture keeps its own refusal for its own reason: a desk that renders can
-    /// still be photographed while nothing is on it.
+    /// Never a named pixel: this reads whether the desk renders, not what it shows, and the capture
+    /// keeps its own refusal for its own reason: a desk that renders can still be photographed while
+    /// nothing is on it.
     /// </para>
     /// </summary>
     private static Precondition Display()

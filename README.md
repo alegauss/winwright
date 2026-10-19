@@ -1335,7 +1335,6 @@ machine of whoever ran it, a verdict assembled wrongly, and a trace that is not 
 
 - Not cross-platform.
 - No external dependency in the engine.
-- No assertion about individual pixels.
 - The tool never writes the test.
 - No recorder that turns clicks into a scenario.
 - No service, no daemon, no database.

@@ -8,7 +8,12 @@
 
 ## Block D — Act — patterns before pointers
 
+- 📋 **WW550** (deps: —) **A case cannot drop a file from Explorer onto the application, so a drop zone has no case** — Every app that opens files by drag and drop has to add a command-line flag only its tests use, and the drop itself stays unproven. → §WW550
+- 📋 **WW551** (deps: —) **A case cannot drive the common Open or Save dialog, so choosing a file through it has no case** — Opening and exporting are the first and last steps of any document app, and adopters bypass the dialog with test-only flags. → §WW551
+
 ## Block E — Capture — the picture that proves what it photographed
+
+- 📋 **WW552** (deps: —) **A Mica window whose picture is drawn by Direct3D has no capture route at all** — GPU-rendered editors and viewers cannot attach a capture to a case: the screen copy is refused for the glass and the render misses the GPU region. → §WW552
 
 ## Block F — Assert — the expectation is derived, never typed
 
@@ -159,10 +164,6 @@
   in-box in the Windows Desktop framework. A package here is a package every adopting
   project inherits, and two of the three target projects exist partly to delete
   dependencies.
-- **No assertion about individual pixels** Comparing colours or regions is brittle by
-  nature and survives neither a theme, a DPI nor a font. What is claimed about an image
-  is that it drew something, that it photographed the right window, and that it is
-  byte-identical when nothing changed.
 - **The tool never writes the test** It validates, resolves and runs. A generator that
   invented the assertion would reintroduce exactly the drift the declarative format
   exists to stop — roadkeep's law L4, applied to scenarios instead of prose.
