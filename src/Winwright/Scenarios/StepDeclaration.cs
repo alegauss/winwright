@@ -219,6 +219,17 @@ public sealed record StepDeclaration
     public Locator? Within { get; private init; }
 
     /// <summary>
+    /// Whether this step claims its element covers the whole of the monitor it is on. WW548.
+    /// <para>
+    /// Found by quickshell (QS257): F11 took the frame away and a case could read only that it was
+    /// gone, because <see cref="Within"/> compares two elements and the monitor is no element. A
+    /// full screen that left a border or a strip uncovered passed. Measured against the monitor the
+    /// element is mostly on, so a case says nothing about which display that is.
+    /// </para>
+    /// </summary>
+    public bool FillsMonitor => Wrote.Truth("fillsMonitor");
+
+    /// <summary>
     /// Whether <see cref="To"/> is looked for from the desktop rather than in the window under test.
     /// WW530.
     /// <para>
@@ -1002,6 +1013,7 @@ public sealed record StepDeclaration
             Claiming(OwnHeader, "ownHeader", "each row's controls announce that row");
             Claiming(SameBytesAs is not null, "sameBytesAs", $"the file holds the bytes '{SameBytesAs}' holds");
             Claiming(Within is not null, "within", $"it is drawn inside {Within?.Text}");
+            Claiming(FillsMonitor, "fillsMonitor", "it covers the whole of its monitor");
 
             return claiming.AsReadOnly();
         }
@@ -1175,6 +1187,7 @@ public sealed record StepDeclaration
         RefusesPinnedReading(step, subject);
         RefusesSweepingStep(step, subject);
         RefusesWithinBesideAnAct(step, subject);
+        RefusesFillsMonitorBesideAnAct(step, subject);
 
         // WW351. The step every refusal above was asked about, handed back. It was built before them
         // rather than after, because the set they read is its own — and nothing between here and
@@ -1303,6 +1316,35 @@ public sealed record StepDeclaration
                 subject,
                 $"it claims it is drawn within {step.Within.Text} and reads '{step.Reads.Name}'; the claim is "
                     + "about two rectangles and not about any reading, so 'reads' says nothing here");
+        }
+    }
+
+    /// <summary>
+    /// A <c>fillsMonitor</c> claim on a step that acts, or beside a reading. WW548, refused for the
+    /// reasons <see cref="RefusesWithinBesideAnAct"/> gives: it is taken with its own wait, so an act
+    /// or a reading beside it is a field the run would ignore.
+    /// </summary>
+    /// <param name="step">The step as the case wrote it.</param>
+    /// <param name="subject">What a refusal calls it.</param>
+    private static void RefusesFillsMonitorBesideAnAct(StepDeclaration step, string subject)
+    {
+        if (!step.FillsMonitor)
+            return;
+
+        if (!step.Verb.Reads)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims it covers its monitor and acts with '{step.Verb.Name}'; the claim is about "
+                    + "where an element is drawn, so the act is 'read' and the step that acted comes before it");
+        }
+
+        if (step.NamedReading is not null)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it claims it covers its monitor and reads '{step.Reads.Name}'; the claim is about two "
+                    + "rectangles and not about any reading, so 'reads' says nothing here");
         }
     }
 

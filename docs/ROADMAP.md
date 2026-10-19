@@ -13,7 +13,6 @@
 ## Block F — Assert — the expectation is derived, never typed
 
 - ⏳ **WW545** (deps: a release proven by quickshell) **Typing into a terminal substitutes the last character for an earlier one about once a send in fifty, unrepaired** — The repair is unproven until quickshell's tab case passes 300 guest runs on a release. → §WW545
-- 📋 **WW548** (deps: —) **A case cannot claim a window covers its monitor, so a full-screen mode that leaves a border or a pixel uncovered passes** — within compares two elements of one window, and the monitor is no element, so quickshell's F11 case reads only the frame gone. → §WW548
 
 ## Block G — The scenario — a case is a data file
 

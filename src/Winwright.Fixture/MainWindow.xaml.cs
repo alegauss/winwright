@@ -36,6 +36,11 @@ public partial class MainWindow : Window
         if (Shapes.Has("chromeless"))
             WindowStyle = WindowStyle.None;
 
+        // WW548. Here for the reason chromeless is: the frame a full screen goes without is decided
+        // before the source exists. Sized once the handle does, below.
+        if (Shapes.Value("screen") is not null)
+            Screen.Strip(this);
+
         if (Shapes.Has("names"))
             NamesPane.AddTo(panes);
 
@@ -235,6 +240,10 @@ public partial class MainWindow : Window
         // else of the other.
         if (Shapes.Value("layered") is string layer)
             Layered.Set(window, layer);
+
+        // WW548. The monitor is asked about a handle, so it is sized here and stripped above.
+        if (Shapes.Value("screen") is string screen)
+            Screen.Size(window, screen);
 
         // WW249. On every surface and behind no flag, because what it reads is a property of the
         // window rather than of anything a run asked to be drawn — and a flake nobody can provoke on

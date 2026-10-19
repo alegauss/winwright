@@ -1262,6 +1262,13 @@ public static class CaseRun
             return true;
         }
 
+        // WW548. The same claim against the one rectangle that is no element: the monitor.
+        if (step.FillsMonitor)
+        {
+            Filling(step, subject, trace, results);
+            return true;
+        }
+
         // WW261 and WW270. Resolved once, before the attempts, and out of the language the fixture
         // said its window is in. A key that cannot be read is a scenario that is wrong rather than an
         // application that is: the refusal names the key and the file, and it arrives before anything
@@ -2157,6 +2164,117 @@ public static class CaseRun
         }
 
         return $"{element} {Spelled(drawn)} is not within {container} {Spelled(holder)}. Waited {waited.WaitedMs}ms.";
+    }
+
+    /// <summary>
+    /// A step claiming its element covers the whole of the monitor it is on, waited for until it
+    /// does. WW548.
+    /// <para>
+    /// Found by quickshell (QS257): F11 took the frame away, and a case could read only that it had
+    /// gone, because <c>within</c> compares two elements and the monitor is no element. A full screen
+    /// leaving a border uncovered passed. The monitor is the one the element is mostly on, asked again
+    /// on each look, so a window still moving to its display is waited for rather than measured
+    /// against the one it left. Half a pixel of slack, for the reason <c>within</c> has it.
+    /// </para>
+    /// </summary>
+    private static void Filling(
+        StepDeclaration step, Subject subject, List<TraceStep> trace, List<AssertionResult> results)
+    {
+        var drawn = System.Windows.Rect.Empty;
+        var monitor = System.Windows.Rect.Empty;
+        var found = false;
+
+        var waited = Attempt.UntilTrue(
+            () =>
+            {
+                var element = subject.ResolveOnce().Element;
+                found = element is not null;
+
+                drawn = Rectangle(element);
+                monitor = Empty(drawn) ? System.Windows.Rect.Empty : MonitorUnder(drawn);
+                return !Empty(drawn) && !Empty(monitor) && Contains(drawn, monitor);
+            },
+            subject.DeadlineMs,
+            subject.PollMs);
+
+        var detail = FillingSaid(step.Addressed, drawn, monitor, found, waited);
+
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = step.Verb.Name,
+            Locator = step.Addressed,
+            Asserted = step.Name,
+            WaitedMs = waited.WaitedMs,
+            Detail = detail,
+            Verdict = waited.Happened ? StepVerdict.Ok : StepVerdict.Failed,
+        });
+
+        results.Add((waited.Happened ? AssertionResult.Pass(step.Name, detail) : AssertionResult.Fail(step.Name, detail)).At(trace.Count));
+    }
+
+    /// <summary>What a fillsMonitor claim found, in the sentence a reader acts on. WW548.</summary>
+    private static string FillingSaid(
+        string element, System.Windows.Rect drawn, System.Windows.Rect monitor, bool found, Waited waited)
+    {
+        if (waited.Happened)
+            return $"{element} {Spelled(drawn)} covers its monitor {Spelled(monitor)}.";
+
+        if (!found)
+            return $"{element} never arrived in {waited.WaitedMs}ms, so nothing was measured";
+
+        if (Empty(drawn))
+        {
+            return $"{element} is drawn empty {Spelled(drawn)}: it is in the tree and has no room on the screen, "
+                + $"so it covers no monitor. Waited {waited.WaitedMs}ms.";
+        }
+
+        if (Empty(monitor))
+            return $"{element} {Spelled(drawn)} is on no monitor this desk reports. Waited {waited.WaitedMs}ms.";
+
+        return $"{element} {Spelled(drawn)} does not cover its monitor {Spelled(monitor)}: "
+            + $"{Uncovered(drawn, monitor)} left uncovered. Waited {waited.WaitedMs}ms.";
+    }
+
+    /// <summary>
+    /// Each edge of the monitor the element stops short of, and by how many pixels — the diagnosis a
+    /// border on one side and a strip the taskbar kept are told apart by. WW548.
+    /// </summary>
+    private static string Uncovered(System.Windows.Rect drawn, System.Windows.Rect monitor)
+    {
+        var edges = new List<string>();
+        void Short(string edge, double by)
+        {
+            if (by > 0.5)
+                edges.Add(string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{by:0}px at the {edge}"));
+        }
+
+        Short("left", drawn.Left - monitor.Left);
+        Short("top", drawn.Top - monitor.Top);
+        Short("right", monitor.Right - drawn.Right);
+        Short("bottom", monitor.Bottom - drawn.Bottom);
+
+        return string.Join(", ", edges);
+    }
+
+    /// <summary>The whole rectangle of the monitor a rectangle is mostly on, or empty where none answers. WW548.</summary>
+    private static System.Windows.Rect MonitorUnder(System.Windows.Rect drawn)
+    {
+        var asked = new Windowing.Win32.Rect
+        {
+            Left = (int)Math.Round(drawn.Left),
+            Top = (int)Math.Round(drawn.Top),
+            Right = (int)Math.Round(drawn.Right),
+            Bottom = (int)Math.Round(drawn.Bottom),
+        };
+
+        var handle = Windowing.Win32.MonitorFromRect(ref asked, Windowing.Win32.MonitorDefaultToNearest);
+        var info = new Windowing.Win32.MonitorInfo { Size = System.Runtime.InteropServices.Marshal.SizeOf<Windowing.Win32.MonitorInfo>() };
+        if (handle == 0 || !Windowing.Win32.GetMonitorInfo(handle, ref info))
+            return System.Windows.Rect.Empty;
+
+        var whole = info.Monitor;
+        return new System.Windows.Rect(whole.Left, whole.Top, whole.Right - whole.Left, whole.Bottom - whole.Top);
     }
 
     /// <summary>An element's rectangle on the screen, or empty where there is no element or it has gone.</summary>

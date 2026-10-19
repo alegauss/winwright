@@ -269,7 +269,7 @@ public class ScenarioFileTests
                 "sameAs", "unlike", "sameCountdownAs", "contains", "label", "expectReported", "notLabel", "beginsWithLabel",
                 "endsWithLabel", "notEndsWithLabel", "absent",
                 "ownHeader", "eachSpoken", "spoken", "never", "covers",
-                "coversAtLeast", "coversWithin", "within", "sameBytesAs", "meansIt", "popup", "named",
+                "coversAtLeast", "coversWithin", "within", "fillsMonitor", "sameBytesAs", "meansIt", "popup", "named",
             ],
             ScenarioSchema.Step.Select(field => field.Name));
 

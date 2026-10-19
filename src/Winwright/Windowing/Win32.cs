@@ -520,6 +520,26 @@ internal static class Win32
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool SystemParametersInfoRect(uint action, uint uiParam, out Rect pvParam, uint winIni);
 
+    /// <summary>MONITOR_DEFAULTTONEAREST: a rectangle on no monitor is answered with the nearest one.</summary>
+    internal const uint MonitorDefaultToNearest = 0x0000_0002;
+
+    /// <summary>MONITORINFO: a monitor's whole rectangle, and the part of it the taskbar leaves. WW548.</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct MonitorInfo
+    {
+        public int Size;
+        public Rect Monitor;
+        public Rect Work;
+        public uint Flags;
+    }
+
+    [DllImport("user32.dll")]
+    internal static extern nint MonitorFromRect(ref Rect rectangle, uint flags);
+
+    [DllImport("user32.dll", EntryPoint = "GetMonitorInfoW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetMonitorInfo(nint monitor, ref MonitorInfo info);
+
     internal static string ClassOf(nint window)
     {
         var name = new StringBuilder(256);

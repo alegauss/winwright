@@ -635,6 +635,21 @@ the shape of the defect. It is a claim and never a reading of numbers, because a
 breaks when the display's scale changes. Half a pixel of slack on each edge absorbs the rounding to
 device pixels. The act is `read` and no `reads` sits beside it.
 
+**`fillsMonitor`** is the same claim against the one rectangle that is no element: the monitor. It
+claims this step's element covers the whole of the monitor it is mostly on:
+
+```json
+{ "locator": "Document#terminal", "act": "read", "fillsMonitor": true }
+```
+
+It exists for a full-screen mode. A case pressing F11 could read that the title bar had gone, but not
+that what was left filled the screen, so a full screen that kept a border passed. Point it at the
+element that should fill the screen (the terminal, the video, the canvas) rather than only at what
+went away. A failure names both rectangles and each edge left uncovered, in pixels: `8px at the
+right, 8px at the bottom` is a size taken from the wrong rectangle, and a strip at the bottom alone is
+usually the taskbar. Half a pixel of slack again, `read` and no `reads`, and the case never says which
+monitor, so it passes on any display the window was put on.
+
 `never` is the thirteenth and is the only claim about the **wait** rather
 than about what it ended on: it names a key whose string must not be showing anywhere in the window
 at any moment while this step waits for its locator. And `covers` is the fourteenth, which is one claim

@@ -276,6 +276,12 @@ public sealed record Flags
             "a pane of three buttons in three boxes: one with room, one spilling past the right edge of a box too narrow for it, and one laid out zero wide",
             "a close button 22 by 22 in the tree that painted nothing passed every case, because a case could read that an element exists and never whether it is drawn inside the element holding it"),
         new Flag(
+            "screen",
+            "how",
+            "a window in full screen with no frame and nothing but a terminal, covering its monitor to the pixel or all of it but eight pixels at the right and the bottom",
+            "a full screen that kept a border passed every case, because F11 could be read only as the frame gone and no claim compared an element with the monitor it is on",
+            Choices: Screen.Names),
+        new Flag(
             "status",
             "",
             "a pane holding an element that publishes its state as UIA ItemStatus, a button that changes it, and a neighbour that publishes none",
