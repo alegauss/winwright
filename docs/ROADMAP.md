@@ -14,8 +14,6 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- ⏳ **WW545** (deps: a release proven by quickshell) **Typing into a terminal substitutes the last character for an earlier one about once a send in fifty, unrepaired** — The repair is unproven until quickshell's tab case passes 300 guest runs on a release. → §WW545
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
@@ -153,12 +151,6 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
-
-## Done when — WW545
-
-- **No substitution reaches a terminal case in 300 guest runs** Quickshell's tab case,
-  on a winwright release carrying the document repair, passes 300 guest runs in a row
-  with its title reading first-tab-marker every time.
 
 ## Non-goals
 
