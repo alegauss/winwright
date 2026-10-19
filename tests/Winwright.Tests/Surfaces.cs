@@ -93,6 +93,7 @@ internal static class Surfaces
         new("SettlesPane", Carrying.AShape, "settles"),
         new("Shadowed", Carrying.AShape, "shadowed"),
         new("SizelessPane", Carrying.AShape, "sizeless"),
+        new("HostedPane", Carrying.AShape, "hosted"),
         new("Store", Carrying.AShape, "store"),
         new("Strings", Carrying.AShape, "language"),
         new("Toast", Carrying.AShape, "toast"),

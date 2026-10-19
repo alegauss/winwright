@@ -31,6 +31,28 @@ instead of a blank picture.
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
+### §WW554 Marketplace name collision
+
+Found adopting winwright in photo-boost (D:\Git\japode\photo-boost, PB38). The README's
+project-scope install is `claude plugin marketplace add alegauss/winwright --scope
+project` then `claude plugin install winwright@alegauss --scope project`, which writes
+`extraKnownMarketplaces.alegauss` and `enabledPlugins["winwright@alegauss"]` into the
+project's .claude/settings.json.
+
+photo-boost already has `extraKnownMarketplaces.alegauss` pointing at github
+alegauss/roadkeep, because roadkeep's .claude-plugin/marketplace.json is also named
+"alegauss" (pportal has the same entry). Settings key marketplaces by name, so one
+project cannot register both repositories: adding winwright's replaces roadkeep's source
+and `roadkeep@alegauss` stops resolving, or the reverse. The plugin was therefore not
+installed in photo-boost; its cases run through the Winwright package alone, which needs
+no plugin.
+
+What winwright should offer: a marketplace name of its own (e.g. "winwright"), so the
+documented commands become `winwright@winwright` and sit beside roadkeep's; or one
+shared "alegauss" marketplace in a single repository listing both plugins, with both
+READMEs pointing at it. Either way the README's install lines should be tested against a
+settings.json that already carries roadkeep's marketplace.
+
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion

@@ -177,6 +177,21 @@ public sealed class ProvokedByFlagTests : IDisposable
     }
 
     [Fact]
+    public void A_page_holding_a_window_of_its_own_is_refused_naming_the_region()
+    {
+        // --hosted. WW552: the hosted window is not in the visual tree, so the render would be the
+        // right size with a hole in it. The refusal names the region and where it sits, and nothing
+        // is written.
+        var path = Path.Combine(root, "hosted.png");
+        var (code, said) = Rendered(path, "--hosted");
+
+        Assert.Equal(Refused("hosted"), code);
+        Assert.Contains(nameof(UnrenderableException), said, StringComparison.Ordinal);
+        Assert.Contains("WindowsFormsHost 'hostedImage' 200x100 at 0,24", said, StringComparison.Ordinal);
+        Assert.False(File.Exists(path), "the refused render wrote a file anyway");
+    }
+
+    [Fact]
     public void A_render_with_no_application_above_it_has_nothing_saying_what_to_draw_it_on()
     {
         // --unbacked. The shape is the withheld application: the capture background is declared in

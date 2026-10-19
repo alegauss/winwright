@@ -422,6 +422,15 @@ public sealed record Flags
             Alone: "lay out",
             Exits: Program.Refused),
         new Flag(
+            "hosted",
+            "",
+            "render a page holding a region drawn by a window of its own, a WinForms panel in a host",
+            "a hosted window - a Direct3D swapchain, a WinForms control, a browser - is not in the visual tree, so a render of the page came out the right size with a hole where it was and nothing saying so",
+            Draws: false,
+            Needs: "render",
+            Alone: "draw",
+            Exits: Program.Refused),
+        new Flag(
             "blank",
             "",
             "render a page that is the right size and paints nothing, on no background",

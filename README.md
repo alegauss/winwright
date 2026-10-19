@@ -1295,6 +1295,13 @@ route exists for them — and so is an off-screen render, which draws the visual
 compositor not involved and so carries nothing from behind the window at all. It is the screen copy
 that a backdrop reaches.
 
+The render has a limit of its own. A region drawn by a window of its own is not in the visual tree.
+That covers an `HwndHost` holding a Direct3D swapchain, a WinForms control or a browser. The render
+refuses a page holding one, naming the region and where it sits, instead of writing a picture with
+an empty hole where the image was. A Mica window with Direct3D content therefore has no capture
+route yet: the copy is refused for the glass, and the render for the hosted region. What a case can
+still claim is the automation readings and the files the window writes.
+
 Layering is the other way the same thing happens, and `SeeThrough` is the reading for it — `Of`
 takes a window handle and answers how its pixels reach the screen. A
 layered window answers the backdrop question with *auto* — truthfully, it never asked the compositor
@@ -1370,7 +1377,9 @@ The value here is concentrated in the refusals, and every one of them is paired 
 thing that provokes it — a fixture flag, or a stated reason no flag can. Among them: a locator that
 does not parse, two elements matching one step, an element that cannot take the act, a declared
 destructive entry reached without saying you meant it, a picture nothing drew, a render of a tree
-that lays out to nothing, a capture of a window this run is not driving, a run that changed the
+that lays out to nothing, a render of a page holding a window of its own (a Direct3D swapchain, a
+WinForms control or a browser in an `HwndHost`, which the render would leave as an empty hole) that
+names each such region and where it sits, a capture of a window this run is not driving, a run that changed the
 machine of whoever ran it, a verdict assembled wrongly, and a trace that is not a trace.
 
 ## What it is not

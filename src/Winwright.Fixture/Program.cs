@@ -252,6 +252,14 @@ public static class Program
             return 0;
         }
 
+        // WW552. A page holding a hosted window, which the render refuses by naming the region rather
+        // than writing a picture with a hole in it. Refused before anything is written, like sizeless.
+        if (shapes.Has("hosted"))
+        {
+            Console.Out.WriteLine(Winwright.InApp.Render.ToFile(HostedPane.Build(), path, HostedPane.Size).Sentence());
+            return 0;
+        }
+
         // On no background, and that is half the shape: a blank composed onto a colour is opaque
         // everywhere whatever the tree did. This run writes the file and exits clean — the refusal
         // it exists for belongs to whoever reads the picture back, which is the harness.

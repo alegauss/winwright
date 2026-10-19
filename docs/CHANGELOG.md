@@ -249,6 +249,7 @@
 - ✅ **WW374** **a capture asked for before the application hooked the message is refused as a product built wrong** — Both asks wait where the silence is a window whose hook has not run, so a race stops being a sentence about the product (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
 - ✅ **WW402** **a render of a surface that is genuinely one colour is refused as a display that was drawing nothing** — A rendered surface may be one colour and says so on the pass; a window that rendered flat is refused exactly as it was (design recorded in `src/Winwright/Capturing/CaptureReceipt.cs`).
 - ✅ **WW465** **a screen copy of a window whose pixels are not in the rectangle yet passes every question a capture is asked** — A copy is of a rectangle, so the frame is read either side of the take and a window that moved out of it is refused naming both — which is the wallpaper that passed.
+- ✅ **WW552 (the render refuses a hosted window)** **A Mica window whose picture is drawn by Direct3D has no capture route at all** — A render of a page holding an HwndHost refuses, naming each hosted region and where it sits, instead of writing a picture with a hole.
 
 ## Block F — Assert — the expectation is derived, never typed
 

@@ -260,6 +260,50 @@ public static class Render
                 $"{named} laid out to {Measured(settled)}, so there is nothing to render — an empty file is a "
                     + "successful render to everything that only checks a file exists");
         }
+
+        // WW552. A region whose pixels belong to a window of its own: a child HWND carrying a DXGI
+        // swapchain, a WinForms control, a browser. A render draws the visual tree, so each comes out
+        // as the hole it is in the tree, and the picture is the right size with nothing saying a part
+        // of it is missing. Found by PhotoBoost (PB27, PB40), whose image area is Direct3D in an
+        // HwndHost on a Mica window — the screen copy is refused for the glass, rightly, and this
+        // route answered with a picture of the comparator with no comparison in it.
+        var hosted = Hosted(element).ToList();
+        if (hosted.Count > 0)
+        {
+            throw new UnrenderableException(
+                $"{named} holds {hosted.Count} region{(hosted.Count == 1 ? "" : "s")} drawn by a window of "
+                    + $"{(hosted.Count == 1 ? "its" : "their")} own, which a render of the visual tree leaves empty: "
+                    + string.Join("; ", hosted.Select(one => Where(one, element)))
+                    + ". A picture with that hole in it would read as one of the whole window");
+        }
+    }
+
+    /// <summary>Every element under <paramref name="root"/> that hosts a window of its own. WW552.</summary>
+    private static IEnumerable<System.Windows.Interop.HwndHost> Hosted(DependencyObject root)
+    {
+        for (var index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)
+        {
+            var child = VisualTreeHelper.GetChild(root, index);
+            if (child is System.Windows.Interop.HwndHost host)
+            {
+                // Not walked into: what it hosts is not in this tree, which is the whole point.
+                if (host.Visibility == Visibility.Visible)
+                    yield return host;
+
+                continue;
+            }
+
+            foreach (var under in Hosted(child))
+                yield return under;
+        }
+    }
+
+    /// <summary>A hosted region as a refusal names it: its type, its name, and where it sits in the render.</summary>
+    private static string Where(FrameworkElement host, FrameworkElement root)
+    {
+        var named = string.IsNullOrEmpty(host.Name) ? host.GetType().Name : $"{host.GetType().Name} '{host.Name}'";
+        var at = host.TransformToAncestor(root).TransformBounds(new Rect(host.RenderSize));
+        return $"{named} {at.Width:0.##}x{at.Height:0.##} at {at.X:0.##},{at.Y:0.##}";
     }
 
     private static string Measured(Size size) => $"{size.Width:0.##}x{size.Height:0.##}";
