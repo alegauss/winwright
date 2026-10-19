@@ -103,8 +103,9 @@ public sealed class SynthesisingTests
                 one.Named.Split('.')[0],
                 // WW225 added a sixth, and it belongs by the same test the other five pass: the
                 // family is called Synthesised, so a caller reaching for it has said what it wants
-                // by choosing the name. WW520 added Drag, whose name says the same thing.
-                new[] { "Keyboard", "Pointer", "Drag", "Traversal", "Menu", "NotificationArea", "Synthesised" },
+                // by choosing the name. WW520 added Drag, whose name says the same thing, and WW550
+                // FileDrop.
+                new[] { "Keyboard", "Pointer", "Drag", "FileDrop", "Traversal", "Menu", "NotificationArea", "Synthesised" },
                 StringComparer.Ordinal));
     }
 

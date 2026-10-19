@@ -161,6 +161,33 @@ public static class Synthesised
     }
 
     /// <summary>
+    /// Drop a file onto a control from outside the application, as one dragged out of Explorer
+    /// arrives. WW550.
+    /// <para>
+    /// The condition carried is the target's answer where the desk was ours, so a drop zone that
+    /// answered with no effect is a hole that names it rather than a step that read as landed.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What to drop onto.</param>
+    /// <param name="path">The file, as a full path.</param>
+    public static ActResult DropFile(Subject subject, string path)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+
+        var before = subject.Read();
+        var dropped = FileDrop.Onto(subject, path);
+        var foreground = dropped.Pointer.Foreground;
+
+        return Landed(
+            subject,
+            "drop file",
+            $"synthesised pointer ({PointerReason.PointerIsTheAct}) dropping {path}",
+            dropped.Pointer.Element,
+            before,
+            foreground.Satisfied ? dropped.Took.Beside(foreground) : foreground);
+    }
+
+    /// <summary>
     /// Move a range control one step with an arrow key, in whichever direction can actually move it.
     /// <para>
     /// At the end of its range the other direction is used, so the assertion stays about whether the

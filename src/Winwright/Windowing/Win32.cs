@@ -507,6 +507,25 @@ internal static class Win32
     /// <summary>SWP_NOZORDER | SWP_NOACTIVATE: move and size, and leave the stacking and the desk alone. WW536.</summary>
     internal const uint PlaceOnly = 0x0004 | 0x0010;
 
+    /// <summary>SWP_NOSIZE | SWP_NOACTIVATE: move and restack, keep the size and leave the desk alone. WW550.</summary>
+    internal const uint MoveOnTop = 0x0001 | 0x0010;
+
+    /// <summary>HWND_TOPMOST: above every window that is not topmost itself. WW550.</summary>
+    internal const nint Topmost = -1;
+
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SetWindowLongPtrW")]
+    internal static extern nint SetWindowLongPtrW(nint window, int index, nint value);
+
+    /// <summary>GWL_EXSTYLE: the extended style bits. WW550.</summary>
+    internal const int ExtendedStyle = -20;
+
+    /// <summary>
+    /// WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW: a window a click does not activate and the taskbar does
+    /// not list. WW550: the source a file drop starts from, which must take the press without taking
+    /// the desk from the window under test.
+    /// </summary>
+    internal const long StyleNeverActive = 0x0800_0000L | 0x0000_0080L;
+
     /// <summary>
     /// Posted rather than sent. WW536: a window of the shell's answers its close on its own thread,
     /// and a send would wait on that thread with no deadline.

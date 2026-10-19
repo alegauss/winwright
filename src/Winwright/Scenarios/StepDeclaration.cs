@@ -255,12 +255,31 @@ public sealed record StepDeclaration
     /// <c>{files}</c>. WW542. Filled at the run and never at the load, because the root and the staged
     /// directory are facts about the machine running it.
     /// </summary>
+    /// <remarks>
+    /// WW550. A verb whose argument is a path gets it whole as well: the environment expanded and
+    /// what is left made relative to the root, the rule a file step's path follows, so a drop names
+    /// the file the same way the step that reads it back does.
+    /// </remarks>
     /// <param name="root">The project's root.</param>
     /// <param name="staged">The directory the case's fixture stages into.</param>
-    public StepDeclaration Rooted(string root, string staged) =>
-        Argument is { } written && written.Contains('{', StringComparison.Ordinal)
+    public StepDeclaration Rooted(string root, string staged)
+    {
+        if (Argument is not { } written)
+            return this;
+
+        if (Verb.TakesAPath)
+        {
+            return this with
+            {
+                FilledArgument = System.IO.Path.GetFullPath(
+                    System.Environment.ExpandEnvironmentVariables(FixtureDeclaration.Rooted(written, root, staged)), root),
+            };
+        }
+
+        return written.Contains('{', StringComparison.Ordinal)
             ? this with { FilledArgument = FixtureDeclaration.Rooted(written, root, staged) }
             : this;
+    }
 
     /// <summary>A brace that reads as a token: a lowercase word, perhaps a slash. WW542.</summary>
     private static readonly System.Text.RegularExpressions.Regex Token =

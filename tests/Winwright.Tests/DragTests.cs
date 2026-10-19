@@ -177,6 +177,89 @@ public sealed class DragTests : IDisposable
     }
 
     [Fact]
+    public void A_file_dragged_in_from_outside_is_taken_by_the_zone_it_is_dropped_on()
+    {
+        // WW550. PhotoBoost's PB23 written as a case: the fixture stages the file, the step drops it
+        // from outside the application onto the zone, and the zone says what it took.
+        var verdict = Dropped("Text#fileZone", "file dropped: photo.png, 4096 bytes");
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void A_file_dropped_where_nothing_takes_it_is_a_hole_that_says_so()
+    {
+        // The control: the same drop released over a read-out that takes no drop. A drop that read as
+        // landed whatever the target answered would pass here, and the hole has to name the answer.
+        var verdict = Dropped("Text#dragOrder", "file dropped: photo.png, 4096 bytes");
+        if (verdict is null)
+            return;
+
+        // The target's hole is the assertion here and never an excuse: BusyDesk refuses it, rightly,
+        // as no fact about the desk. Only a run that never got that far is the desk's.
+        var refused = verdict.Ran
+            .SelectMany(one => one.Verdict.Results)
+            .FirstOrDefault(one => one.DidNotRun && one.Missing?.Name == Winwright.Acting.FileDrop.TargetTakesIt);
+        if (refused is null && BusyDesk.Excused(verdict))
+            return;
+
+        var said = Said(verdict);
+        Assert.True(verdict.Outcome != RunOutcome.Passed, said);
+        Assert.NotNull(refused);
+        Assert.Contains("no effect", refused.Missing!.Absence, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_drop_names_its_file_and_nowhere_else_to_end()
+    {
+        var bare = Assert.Throws<ScenarioRefusedException>(() => Wrote.Step("Text#fileZone", "drop file"));
+        Assert.Contains("'drop file'", bare.Because, StringComparison.Ordinal);
+
+        Assert.Throws<ScenarioRefusedException>(
+            () => Wrote.Step("Text#fileZone", "drop file", ("with", "photo.png"), ("to", "Text#dragOrder")));
+    }
+
+    [Fact]
+    public void A_file_staged_only_for_the_drop_is_one_a_step_looks_at()
+    {
+        // WW509 refuses staged files the launch never names, and a file staged to be dropped is named
+        // by the step and never by the launch. The control is the same fixture with no step naming
+        // it, which is still refused.
+        const string Fixture = """
+            "fixtures": [ { "name": "a zone", "arguments": ["--drags"], "files": ["data/photo.png"] } ]
+            """;
+
+        const string Read = """{ "locator": "Text#fileSaid", "act": "read", "reads": "name", "expect": "file dropped: photo.png, 4096 bytes" }""";
+
+        var read = ScenarioFile.Read("drop.cases.json", $$"""
+            { {{Fixture}}, "cases": [ { "name": "dropped", "catches": "a drop zone with no case", "fixture": "a zone",
+              "steps": [ { "locator": "Text#fileZone", "act": "drop file", "with": "{files}/photo.png" }, {{Read}} ] } ] }
+            """);
+        Assert.Single(read);
+
+        var refused = Assert.Throws<ScenarioRefusedException>(() => ScenarioFile.Read("drop.cases.json", $$"""
+            { {{Fixture}}, "cases": [ { "name": "dropped", "catches": "a drop zone with no case", "fixture": "a zone",
+              "steps": [ { "locator": "Text#fileZone", "act": "drop file", "with": "data/photo.png" }, {{Read}} ] } ] }
+            """));
+        Assert.Contains("cannot be looking at them", refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_dropped_file_is_found_the_way_a_file_step_finds_one()
+    {
+        var staged = Path.Combine(root, "staged");
+        var step = Wrote.Step("Text#fileZone", "drop file", ("with", "data/photo.png"));
+        var fromStage = Wrote.Step("Text#fileZone", "drop file", ("with", "{files}/photo.png"));
+
+        Assert.Equal(Path.Combine(root, "data", "photo.png"), step.Rooted(root, staged).Argument);
+        Assert.Equal(Path.Combine(staged, "photo.png"), fromStage.Rooted(root, staged).Argument);
+        Assert.True(step.Verb.Synthesises);
+        Assert.False(step.Verb.Repeatable);
+    }
+
+    [Fact]
     public void A_middle_click_on_a_tab_closes_it()
     {
         // WW538. quickshell's QS310 gesture, on the fixture's strip.
@@ -246,6 +329,58 @@ public sealed class DragTests : IDisposable
             return;
 
         Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    /// <summary>
+    /// Drop a staged file onto <paramref name="onto"/> from outside the application and read the
+    /// zone's read-out expecting <paramref name="expected"/>, or null where this desk cannot observe.
+    /// WW550.
+    /// </summary>
+    private SuiteVerdict? Dropped(string onto, string expected)
+    {
+        if (!Desk.Read().CanObserve)
+            return null;
+
+        Directory.CreateDirectory(Path.Combine(root, "data"));
+        File.WriteAllBytes(Path.Combine(root, "data", "photo.png"), new byte[4096]);
+
+        var declaration = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            declaration,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "timeouts": { "launch": 30000, "resolve": 4000, "act": 4000, "poll": 25 }
+            }
+            """);
+
+        var cases = $$"""
+            {
+              "fixtures": [
+                { "name": "a zone that takes files", "arguments": ["--drags", "--show"], "files": ["data/photo.png"] }
+              ],
+              "cases": [
+                {
+                  "name": "a file is dropped from outside",
+                  "catches": "a drop zone that takes files from Explorer, with no step that could start a drag outside the application",
+                  "fixture": "a zone that takes files",
+                  "steps": [
+                    { "locator": "Text#fileSaid", "act": "read", "reads": "name", "expect": "no file dropped", "named": "nothing was dropped yet" },
+                    { "locator": {{System.Text.Json.JsonSerializer.Serialize(onto)}}, "act": "drop file", "with": "{files}/photo.png", "named": "the file is dropped" },
+                    { "locator": "Text#fileSaid", "act": "read", "reads": "name", "expect": {{System.Text.Json.JsonSerializer.Serialize(expected)}}, "named": "the zone took the file" }
+                  ]
+                }
+              ]
+            }
+            """;
+
+        var project = ProjectDeclaration.Load(declaration);
+        using var register = ProcessRegister.For(project);
+
+        var verdict = Suite.Launch(ScenarioFile.Read("drop.cases.json", cases), Selection.All, register, project);
+
+        register.StopAll();
+        return verdict;
     }
 
     /// <summary>

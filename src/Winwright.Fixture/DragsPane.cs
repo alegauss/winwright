@@ -96,6 +96,19 @@ public static class DragsPane
         top.Children.Add(header);
         top.Children.Add(note);
         top.Children.Add(dropped);
+
+        // WW550. A zone that takes files dragged in from outside, as an open-image screen does, and
+        // the read-out it says what it took in.
+        var fileSaid = new TextBlock
+        {
+            Name = "fileSaid",
+            Text = "no file dropped",
+            Margin = new Thickness(16, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        System.Windows.Automation.AutomationProperties.SetName(fileSaid, fileSaid.Text);
+        top.Children.Add(FileZone(fileSaid));
+        top.Children.Add(fileSaid);
         rows.Children.Insert(0, top);
 
         Draggable(note);
@@ -364,6 +377,52 @@ public static class DragsPane
 
         dropWindow = shown;
         shown.Show();
+    }
+
+    /// <summary>
+    /// A zone that takes a file dragged in from outside the application and says its name and size.
+    /// WW550.
+    /// <para>
+    /// Found by PhotoBoost (PB23): an open-image screen whose drop zone takes images from Explorer,
+    /// and a case that could not start a drag outside the application. It takes only a file list, as
+    /// such a zone does, so a drop of anything else is refused with no effect — which the note beside
+    /// it, carrying text, is the control for.
+    /// </para>
+    /// </summary>
+    /// <param name="said">The read-out a drop is reported in.</param>
+    private static TextBlock FileZone(TextBlock said)
+    {
+        var zone = new TextBlock
+        {
+            Name = "fileZone",
+            Text = "Drop a file",
+            Padding = new Thickness(8),
+            Margin = new Thickness(16, 0, 0, 0),
+            Background = Brushes.Honeydew,
+            AllowDrop = true,
+        };
+
+        zone.DragEnter += Offered;
+        zone.DragOver += Offered;
+        zone.Drop += (_, e) =>
+        {
+            if (e.Data.GetData(DataFormats.FileDrop) is not string[] { Length: > 0 } files)
+                return;
+
+            var file = new System.IO.FileInfo(files[0]);
+            said.Text = $"file dropped: {file.Name}, {file.Length} bytes";
+            System.Windows.Automation.AutomationProperties.SetName(said, said.Text);
+            e.Effects = DragDropEffects.Copy;
+            e.Handled = true;
+        };
+
+        return zone;
+
+        static void Offered(object sender, DragEventArgs e)
+        {
+            e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+            e.Handled = true;
+        }
     }
 
     /// <summary>The tab under a point in the strip, or null where the point is over no tab.</summary>

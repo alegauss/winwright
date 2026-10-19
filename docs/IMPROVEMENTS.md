@@ -8,20 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-### §WW550 Dropping a file from Explorer onto the application
-
-Project: PhotoBoost (D:\Git\japode\photo-boost, WPF on .NET 10), task PB23, an
-open-image screen whose drop zone accepts image files dragged from Explorer. The case it
-wants: a fixture stages photo.png into {files}, a step drops {files}\photo.png onto
-Pane#DropZone, and the next step reads Text#ImageSize. WW530 covers the opposite
-direction (app onto Explorer) and WW520 element onto element in one window; nothing
-starts the drag outside the application. The workaround planned is an --open <path> flag
-(PB39) that reaches the same state, so the drop handler itself is never exercised. What
-winwright could offer: a verb such as drop {files}\x onto <locator>, performed either by
-a real drag from an Explorer window the harness opens and closes, or by an OLE
-DoDragDrop with a CF_HDROP data object from a helper process, reported as Degraded where
-the target refuses it.
-
 ### §WW551 The common Open and Save dialogs
 
 Project: PhotoBoost, tasks PB23 (open) and PB25 (export as PNG, JPG or WebP). The cases

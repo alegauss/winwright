@@ -156,6 +156,12 @@ internal static class Sleeps
                 + "threshold one message at a time. A deadline would have no condition to watch, "
                 + "since nothing reports a message as handled. The second is WW353's pause before "
                 + "the read, taken as the click takes it"),
+        new("FileDrop.cs", 3, Sleeping.OnASignal,
+            "WW550. The drop's source window and its drag loop live on a thread of their own, and the "
+                + "act parks on what that thread signals, with the act deadline: once for the window to "
+                + "be up before anything is pressed, and once for the loop to answer after the release — "
+                + "a second time only where it had to be told to cancel. The loop returns after the "
+                + "target's own drop handler has, so no pause is taken before the read"),
         new("Keyboard.cs", 1, Sleeping.Undisturbed,
             "WW329, and the one entry here where the sleeping is the repair: the engine's own poll "
                 + "was provoking the substitution it then resent. Measured on the guest over 1200 "

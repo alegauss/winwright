@@ -83,6 +83,8 @@ internal static class Synthesising
         new("Pointer.DoubleClick", Asking.ItIsTheAct, "two presses, and it says so"),
         new("Pointer.Run", Asking.ItIsTheAct, "the send under both, which is where the desk is asked"),
         new("Drag.Onto", Asking.ItIsTheAct, "a press, moves and a release, which is the gesture itself"),
+        new("FileDrop.Onto", Asking.ItIsTheAct,
+            "WW550: a press on a source window, moves and a release over the target, which is the drop itself"),
         new("Traversal.Press", Asking.ItIsTheAct, "a traversal key at a window, which is a keystroke"),
         new("Traversal.Nudge", Asking.ItIsTheAct, "an arrow at whatever holds the focus"),
 
@@ -95,6 +97,7 @@ internal static class Synthesising
         new("Synthesised.Click", Asking.ItIsTheAct,
             "a click, carrying the PointerReason a case had to write to reach it"),
         new("Synthesised.Drag", Asking.ItIsTheAct, "a drag onto a second element, as a step"),
+        new("Synthesised.DropFile", Asking.ItIsTheAct, "a file dropped from outside the application, as a step"),
         new("Synthesised.Nudge", Asking.ItIsTheAct, "an arrow key at a range control, as a step"),
         new("Synthesised.Press", Asking.ItIsTheAct, "a traversal key at the window, as a step"),
 

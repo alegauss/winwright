@@ -322,9 +322,13 @@ public sealed record FixtureDeclaration
     /// <param name="files">The files to stage for this launch, each relative to the project's root.</param>
     /// <param name="reaches">What the application connects to, each <c>host:port</c> or a variable naming one.</param>
     /// <param name="opens">The folder to open in Explorer beside the window under test. WW536.</param>
+    /// <param name="stepsNameStaged">
+    /// That a step of a case run against this fixture names the staged directory itself, so a file
+    /// staged for that step is not one nobody looks at. WW550.
+    /// </param>
     /// <exception cref="ScenarioRefusedException">
     /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not
-    /// one, or files are declared that reach the launch nowhere.
+    /// one, or files are declared that neither the launch nor a step reaches.
     /// </exception>
     public static FixtureDeclaration Of(
         string name,
@@ -338,7 +342,8 @@ public sealed record FixtureDeclaration
         string? workingDirectory = null,
         IEnumerable<StagedFile>? files = null,
         IEnumerable<string>? reaches = null,
-        string? opens = null)
+        string? opens = null,
+        bool stepsNameStaged = false)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
         var opening = Opened(called, opens, shareable);
@@ -444,15 +449,19 @@ public sealed record FixtureDeclaration
         // decided nothing. Files staged into a directory no variable and no working directory names
         // are files the application cannot be looking at, and the case that was written to read them
         // reads whatever the real machine had instead — which is green, and about the wrong store.
+        //
+        // WW550. Unless a step names it: a file staged to be dropped on the window, or read back by a
+        // file step, is looked at by the case and never by the launch, and is still not decoration.
         if (staging.Count > 0
+            && !stepsNameStaged
             && !starting.Contains(Staged, StringComparison.Ordinal)
             && !opening.Contains(Staged, StringComparison.Ordinal)
             && !set.Values.Any(value => value.Contains(Staged, StringComparison.Ordinal)))
         {
             throw new ScenarioRefusedException(
                 called,
-                $"it stages {staging.Count} file(s) and nothing names '{Staged}', so the launch cannot "
-                + "be looking at them");
+                $"it stages {staging.Count} file(s) and nothing names '{Staged}', in the launch or in a "
+                + "step of a case in this file, so the case cannot be looking at them");
         }
 
         // WW522. An address written out is judged here, because one that is not a host and a port is

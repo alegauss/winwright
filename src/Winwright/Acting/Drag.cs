@@ -15,7 +15,7 @@ namespace Winwright.Acting;
 public static class Drag
 {
     /// <summary>How many moves a drag takes between the threshold and the destination.</summary>
-    private const int DragSteps = 8;
+    internal const int DragSteps = 8;
 
     /// <summary>The pause after each part of a drag, so each arrives as its own message.</summary>
     private const int DragPauseMs = 15;
@@ -96,17 +96,20 @@ public static class Drag
         return new PointerResult(act, facts, foreground, onto.Bounds, from.Read().Values);
     }
 
-    private static (int X, int Y) Centre(WindowBounds at) => (at.Left + (at.Width / 2), at.Top + (at.Height / 2));
+    internal static (int X, int Y) Centre(WindowBounds at) => (at.Left + (at.Width / 2), at.Top + (at.Height / 2));
 
-    /// <summary>One part of a drag, sent on its own and given time to arrive as its own message.</summary>
-    private static void Paced(params Win32.Input[] inputs)
+    /// <summary>
+    /// One part of a drag, sent on its own and given time to arrive as its own message. Internal for
+    /// <see cref="FileDrop"/>, whose drag is made of the same parts. WW550.
+    /// </summary>
+    internal static void Paced(params Win32.Input[] inputs)
     {
         Win32.SendInput((uint)inputs.Length, inputs, System.Runtime.InteropServices.Marshal.SizeOf<Win32.Input>());
         Thread.Sleep(DragPauseMs);
     }
 
     /// <summary>A move to a point on the virtual screen, normalised the way <see cref="Pointer.Send"/> does it.</summary>
-    private static Win32.Input Absolute(int x, int y)
+    internal static Win32.Input Absolute(int x, int y)
     {
         var left = Win32.GetSystemMetrics(Win32.VirtualScreenX);
         var top = Win32.GetSystemMetrics(Win32.VirtualScreenY);

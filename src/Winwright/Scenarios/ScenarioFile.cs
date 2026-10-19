@@ -227,6 +227,44 @@ public sealed class ScenarioFile
     }
 
     /// <summary>
+    /// The fixtures this file's cases run against where one of their steps names the staged
+    /// directory: in what a verb is given, or in the file a file step reads. WW550.
+    /// <para>
+    /// Read off the text before the cases are, because the fixtures are the first pass (WW214) and the
+    /// refusal of files nothing looks at is made there. Lenient on purpose: whatever is malformed here
+    /// is refused by the case's own reading a moment later, with the sentence that belongs to it.
+    /// </para>
+    /// </summary>
+    private static HashSet<string> StagedLookedAt(JsonElement root)
+    {
+        var looked = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (!root.TryGetProperty(ScenarioSchema.Cases, out var cases) || cases.ValueKind != JsonValueKind.Array)
+            return looked;
+
+        foreach (var one in cases.EnumerateArray())
+        {
+            if (one.ValueKind != JsonValueKind.Object
+                || !one.TryGetProperty("fixture", out var fixture) || fixture.ValueKind != JsonValueKind.String
+                || !one.TryGetProperty("steps", out var steps) || steps.ValueKind != JsonValueKind.Array)
+            {
+                continue;
+            }
+
+            var names = steps.EnumerateArray().Any(step =>
+                step.ValueKind == JsonValueKind.Object
+                && new[] { "with", "file", "sameBytesAs" }.Any(field =>
+                    step.TryGetProperty(field, out var value)
+                    && value.ValueKind == JsonValueKind.String
+                    && value.GetString()!.Contains(FixtureDeclaration.Staged, StringComparison.Ordinal)));
+
+            if (names)
+                looked.Add(fixture.GetString()!.Trim());
+        }
+
+        return looked;
+    }
+
+    /// <summary>
     /// The fixtures this file declares, in declared order. Declared at the file rather than on each
     /// case so that several cases can name one — which is what makes WW62's lending expressible at
     /// all, and what stops the same launch being written out three times and drifting on the second.
@@ -242,6 +280,7 @@ public sealed class ScenarioFile
         if (fixtures.ValueKind != JsonValueKind.Array)
             throw new ScenarioRefusedException($"{named} {ScenarioSchema.Fixtures}", "it is not an array of fixtures");
 
+        var looked = StagedLookedAt(root);
         var index = 0;
         foreach (var one in fixtures.EnumerateArray())
         {
@@ -264,7 +303,8 @@ public sealed class ScenarioFile
                 wrote.Text("workingDirectory"),
                 wrote.Placed("files"),
                 wrote.Words("reaches"),
-                wrote.Text("opens")));
+                wrote.Text("opens"),
+                looked.Contains(wrote.Text("name") ?? "")));
 
             wrote.Handed("fixture");
 

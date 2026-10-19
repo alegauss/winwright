@@ -186,6 +186,7 @@ internal static class Cooperating
         new("Pointer.DoubleClick", Cooperation.None, true, "two of the same"),
         new("Pointer.Run", Cooperation.None, true, "a declared pointer act"),
         new("Drag.Onto", Cooperation.None, true, "a press, a move past the drag threshold and a release elsewhere"),
+        new("FileDrop.Onto", Cooperation.None, true, "a file list dragged from a window of the harness's own and released over the target"),
         new("Keyboard.Type", Cooperation.None, true, "synthesised keys into a control"),
         new("Keyboard.Run", Cooperation.None, true, "a declared typing act"),
         new("Traversal.Press", Cooperation.None, true, "a traversal key at a window"),
@@ -198,6 +199,7 @@ internal static class Cooperating
         new("Synthesised.Type", Cooperation.None, true, "typing, as a step's own result"),
         new("Synthesised.Click", Cooperation.None, true, "a click a case had to say the reason for"),
         new("Synthesised.Drag", Cooperation.None, true, "one control dragged onto another, as a step"),
+        new("Synthesised.DropFile", Cooperation.None, true, "a file dropped onto a control from outside, as a step"),
         new("Synthesised.Nudge", Cooperation.None, true, "an arrow key at a range control, as a step"),
         // WW317. The chord's own two, and neither is a verb: one parses text a case wrote and the
         // other says what that text may be. They are in this half because the chord is what an act

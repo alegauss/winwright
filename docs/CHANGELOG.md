@@ -213,6 +213,7 @@
 - ✅ **WW540** **A case cannot add an item to a selection or click with Ctrl or Shift held, so a list choosing several has no case** — A click takes holding ctrl or shift, sent in one batch with the click, so a list answering only the gesture adds a row or a range.
 - ✅ **WW544** **A case cannot press Alt alone, so a menu bar shown the Windows way by an Alt tap has no case** — A press of a modifier alone, such as Alt, is a tap sent down and up with nothing between, so a classic menu bar shown by an Alt tap has a case.
 - ✅ **WW546** **A case's type step drops the resend count, so a repaired substitution traces exactly like a clean send** — A case's type step that WW249 had to resend stays green and its trace line names how many resends it took, so the fault rate can be read off an adopter's own runs.
+- ✅ **WW550** **A case cannot drop a file from Explorer onto the application, so a drop zone has no case** — 'drop file' drops a file onto the app by a real drag carrying CF_HDROP; a target that answers no effect is a named hole (design recorded in `src/Winwright/Acting/FileDrop.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

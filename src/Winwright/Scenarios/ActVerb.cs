@@ -97,6 +97,16 @@ public sealed record ActVerb
             null,
             synthesises: true,
             onto: (subject, to) => Synthesised.Drag(subject, to)),
+        // WW550. A file dragged in from outside the application and released over the subject, which
+        // is how a drop zone is reached from Explorer. The argument is the file, filled and made whole
+        // against the root before it gets here. Not repeatable, because a second drop is a second
+        // file opened, added or copied.
+        new(
+            DropsFile,
+            Takes.Text,
+            repeatable: false,
+            (subject, argument) => Synthesised.DropFile(subject, argument!),
+            synthesises: true),
         new("nudge", Takes.Nothing, repeatable: false, (subject, _) => Synthesised.Nudge(subject), synthesises: true),
         // WW317. Two kinds of keystroke through one verb, because a case writing it means one thing
         // either way: send this key at the window. What differs is the claim underneath — a
@@ -229,6 +239,15 @@ public sealed record ActVerb
 
     /// <summary>Whether a step may name the button this verb presses. WW538.</summary>
     public bool PressesAButton => Name == Clicks;
+
+    /// <summary>The verb that drops a file from outside the application onto its subject. WW550.</summary>
+    public const string DropsFile = "drop file";
+
+    /// <summary>
+    /// Whether this verb's argument is a path on disk, which a run makes whole against the project's
+    /// root the way a file step's path is. WW550.
+    /// </summary>
+    public bool TakesAPath => Name == DropsFile;
 
     private readonly Func<Subject, string?, ActResult>? doing;
     private readonly Func<Subject, Subject, ActResult>? onto;

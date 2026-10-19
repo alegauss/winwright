@@ -221,11 +221,12 @@ directions — a verb added without an entry is a red.
 | `Attempt` / `Retry` | a deadline on a sighting or a condition; an act attempted to a cap and counted |
 | `Preflight` | what each declared act needs, checked against the tree before anything is pressed |
 | `Act` | invoke, toggle, set a value or a range, select, expand, collapse — through the control's own patterns |
-| `Synthesised` | the acts a case can name that put real input on the desk — type, click, drag, nudge, press, pick — each carrying what it needed of the machine |
+| `Synthesised` | the acts a case can name that put real input on the desk — type, click, drag, drop file, nudge, press, pick — each carrying what it needed of the machine |
 | `Selecting` / `Pick` | select and confirm; every value a picker holds, and reaching one |
 | `Surface` | record controls as a case found them and put them back |
 | `Pointer` | synthesised mouse input, and the declared readings about why an act needs it |
 | `Drag` | a press held across moves past the drag threshold and released over a second element |
+| `FileDrop` | a file dragged in from outside the application and released over an element, with the effect the target answered |
 | `Keyboard` / `Traversal` | synthesised keys, traversal keys at a window, and what holds the focus |
 | `Chord` | a key with modifiers, parsed where the case wrote it and sent as one batch — the only route to an application whose commands have no button |
 | `Focus` | what holds the focus, read against the application under test rather than the whole desk |
@@ -394,7 +395,7 @@ button, which is how a person opens what a tray application opens on a left-clic
 a control through its patterns, and a step naming one against a `tray` is refused where it was written;
 the two tray acts named against a `locator` are refused the same way, since there is no control to hand
 them. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `add to selection`, `remove from selection`, `expand`, `collapse`, `type`, `click`, `drag`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
+`set value`, `set range`, `select`, `add to selection`, `remove from selection`, `expand`, `collapse`, `type`, `click`, `drag`, `drop file`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
 
 `select` replaces whatever its list had selected. A list that takes several rows at once, such as a
 sidebar where Ctrl+click adds a row, takes **`add to selection`** and **`remove from selection`**,
@@ -447,6 +448,24 @@ window under test, so its first step names the other window:
 Only the release lands there. The foreground the drag needs is still the window under test, and
 whether the file arrived is the next step's to check. For a drop onto Explorer that is a file on
 disk, not an element. `toDesktop` with no `to` is refused.
+
+The other direction, a file dragged in from Explorer and dropped on the application, is
+**`drop file`**. `with` names the file the way a `file` step does: relative to the project's root, or
+in the fixture's staged directory through `{files}`. The step's `locator` is where it is released:
+
+```json
+{ "locator": "Pane#DropZone", "act": "drop file", "with": "{files}/photo.png", "named": "the photo is dropped" },
+{ "locator": "Text#ImageSize", "act": "read", "reads": "name", "expect": "1920 x 1080" }
+```
+
+The drag is a real one. winwright opens a small window of its own in a corner of the window under
+test, presses on it, and starts the system's drag loop with the file list Explorer offers
+(`CF_HDROP`). It then carries the pointer to the target with the button held and releases it there.
+The application's own drop handler runs, the same as for a drop from Explorer. The effect the target
+answers is the act's evidence. A target that answers with no effect is a hole that says so, not a
+pass. A target that refuses files and one the drop could not reach (an application running elevated,
+for instance) look the same from outside. Like `drag`, it needs the foreground and is attempted once.
+A file that is not there stops the case. A `drop file` with no `with` is refused.
 
 A file on disk is the third thing a step can be about, beside a `locator` and a `tray` icon. A step
 naming **`file`** takes `read` and makes one claim, **`sameBytesAs`**: that the file holds the bytes of

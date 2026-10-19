@@ -8,7 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW550** (deps: —) **A case cannot drop a file from Explorer onto the application, so a drop zone has no case** — Every app that opens files by drag and drop has to add a command-line flag only its tests use, and the drop itself stays unproven. → §WW550
 - 📋 **WW551** (deps: —) **A case cannot drive the common Open or Save dialog, so choosing a file through it has no case** — Opening and exporting are the first and last steps of any document app, and adopters bypass the dialog with test-only flags. → §WW551
 
 ## Block E — Capture — the picture that proves what it photographed
