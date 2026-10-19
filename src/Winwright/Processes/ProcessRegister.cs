@@ -151,10 +151,18 @@ public sealed class ProcessRegister : IDisposable
         ArgumentNullException.ThrowIfNull(start);
         ObjectDisposedException.ThrowIf(survivors is not null, this);
 
+        // WW549. Before the start, because the right to come forward is the creator's at the moment
+        // it creates: a launch first in its run, on a desk nobody touched, otherwise starts an
+        // application whose activation the system refuses.
+        var lifted = Windowing.ForegroundLock.Lift();
+
         var started = Process.Start(start)
             ?? throw new InvalidOperationException($"{start.FileName} started nothing this run can hold");
 
-        var registered = new LaunchedProcess(started, start.FileName, forCase, lent);
+        var registered = new LaunchedProcess(started, start.FileName, forCase, lent)
+        {
+            Handed = lifted && Windowing.ForegroundLock.Hand(started.Id),
+        };
         launched.Add(registered);
         AnyLaunch[registered.Pid] = registered;
         return registered;

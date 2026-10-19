@@ -282,11 +282,11 @@ public sealed record Foreground
         // step was about and one sent on a shared root left the same record.
         ForegroundState.Ours => Precondition.Met(PreconditionName, Held),
         ForegroundState.Nobody => Precondition.Absent(
-            PreconditionName, $"nothing owns the foreground, and the window under test is {Wanted}{Stood}"),
+            PreconditionName, $"nothing owns the foreground, and the window under test is {Wanted}{Stood}{Let}"),
         ForegroundState.SameProcess => Precondition.Absent(
-            PreconditionName, $"another window of the same process owns it: {Holder}, and the window under test is {Wanted}{Stood}"),
+            PreconditionName, $"another window of the same process owns it: {Holder}, and the window under test is {Wanted}{Stood}{Let}"),
         _ => Precondition.Absent(
-            PreconditionName, $"the foreground belongs to {Holder}{Whose}, and the window under test is {Wanted}{Stood}"),
+            PreconditionName, $"the foreground belongs to {Holder}{Whose}, and the window under test is {Wanted}{Stood}{Let}"),
     };
 
     /// <summary>
@@ -328,7 +328,7 @@ public sealed record Foreground
     /// <summary>Who had the keyboard when this was asked, said either way.</summary>
     public string Sentence() => Ours
         ? $"the foreground belongs to the window under test, {Wanted}{Took}."
-        : $"the foreground belongs to {Holder}{Elsewhere}, and the window under test is {Wanted}{Stood}.";
+        : $"the foreground belongs to {Holder}{Elsewhere}, and the window under test is {Wanted}{Stood}{Let}.";
 
     /// <summary><see cref="Whose"/> where the holder is another process, and nothing otherwise.</summary>
     private string Elsewhere => State == ForegroundState.Elsewhere ? Whose : "";
@@ -339,6 +339,16 @@ public sealed record Foreground
     /// did not say which is one a reader has to guess at.
     /// </summary>
     private string Stood => WaitedMs > 0 ? $", and that was still true {WaitedMs}ms later" : "";
+
+    /// <summary>
+    /// Whether the launch of the window under test let it come forward, where this run launched it.
+    /// WW549: the two answers send a reader to different repositories — a window that was handed the
+    /// foreground and did not take it is the application's, and one that was never handed it is the
+    /// desk's.
+    /// </summary>
+    private string Let => Processes.ProcessRegister.Running(Wanted.Pid) is not { } launch ? ""
+        : launch.Handed ? "; its launch handed it the foreground"
+        : "; its launch could not hand it the foreground";
 
     /// <summary>The other half of the same sentence: how long the window took to come forward.</summary>
     private string Took => WaitedMs > 0 ? $", which took it after {WaitedMs}ms" : "";

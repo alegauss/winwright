@@ -38,6 +38,17 @@ public sealed class LaunchedProcess
     public bool Lent { get; }
 
     /// <summary>
+    /// Whether the launch handed this process the right to take the foreground. WW549.
+    /// <para>
+    /// The register sends a mouse move of no distance before it starts anything, so this process is
+    /// the one that received the last input, and then passes that right on by pid. False where the
+    /// system refused either half, which is what a window that never came forward is then read
+    /// against: an application that was let and did not, or one that was never let.
+    /// </para>
+    /// </summary>
+    public bool Handed { get; internal init; }
+
+    /// <summary>
     /// The clause every line about this launch carries after its executable: which case it was
     /// launched for, and that it was lent where it was. Empty where no case was named. WW531.
     /// </summary>

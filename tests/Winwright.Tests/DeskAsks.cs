@@ -37,6 +37,14 @@ internal enum Unaffected
     /// WW155's window, which the walk's own second guard is for and which no excuse here would close.
     /// </summary>
     TheSameReading,
+
+    /// <summary>
+    /// The desk fact is what the engine promises, so a desk that refuses is the defect and not an
+    /// accident of the machine. WW549: a launch hands its window the foreground, and excusing a
+    /// window that never came forward would excuse the exact red the case was written to catch. A
+    /// person's hand is still excused, through its own reading.
+    /// </summary>
+    TheClaim,
 }
 
 /// <summary>
@@ -598,6 +606,10 @@ internal static class DeskAsks
             "the highlight is read inside the sentence this case excuses WITH — a shell that put no "
                 + "menu window up is named as the absence, with what was highlighted in it. The "
                 + "reading is part of the excuse rather than something asserted past one"),
+        new("LaunchForegroundTests.A_window_launched_first_is_handed_the_foreground_and_takes_it",
+            Unaffected.TheClaim,
+            "WW549. That a launch first in its run comes forward is the claim, and the shell holding "
+                + "the desk is QS368's defect, so it is a red. Only somebody else's input is excused"),
     ]);
 
     /// <summary>Every case in this suite that makes one of those calls, whether or not it excuses.</summary>

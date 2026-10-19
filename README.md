@@ -857,6 +857,16 @@ says how many resends it took, so the rate can be read off your own runs. Text c
 the shell acted on those as they arrived — so a case that types a command and runs it presses Enter
 as its own step.
 
+A key or a click sent this way needs the window under test to hold the foreground, and Windows lets a newly started
+application take it only when the process that started it could. A test host that has sent no
+input can't, so a case first in its run, or soaked alone, used to wait out its whole budget behind
+Program Manager. The launch now sends one mouse move of no distance before it starts anything, then
+hands the started process the right by its pid. The cursor does not move, and the run counts the
+move as its own input, never a person's. If your harness sends input of its own before each launch
+to get around this, delete it. Where a window still does not come forward, the hole says whether the
+launch could hand it the foreground. If it could, the application declined to come forward; if it
+could not, the desk refused.
+
 `nudge` presses an arrow key at a range control, in whichever direction can actually move it — at the
 maximum a press upward is a legitimate no-op, so it goes the other way and the check stays about
 whether the control responds rather than about where it started.

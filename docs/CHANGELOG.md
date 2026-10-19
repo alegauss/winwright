@@ -112,6 +112,7 @@
 - ✅ **WW536** **A fixture cannot open the window a drop lands in, so a drop onto Explorer needs code outside the case** — A fixture's opens puts an Explorer folder beside the window under test and closes it with the case, so a drop onto Explorer needs no code outside the case.
 - ✅ **WW542** **A step's with cannot name the project's root, so a case types a checkout's path whole and is red on any other desk** — A step's with fills {root}, {root/} and {files}, and fixtures fill {root} where {files} was, so a case reaches its checkout on any desk.
 - ✅ **WW543** **A staged fixture file keeps its source's modification time, so a rule about how recent a file is fails a day later** — A staged copy is written now, or as old as a file's modified age says, so a rule about how recent a file is holds the day after the fixture.
+- ✅ **WW549** **A case first in its run cannot type: the window it launched never comes forward before any synthesised input** — A launch hands the started process the foreground first, so a case first in its run or soaked alone comes forward (design recorded in `src/Winwright/Windowing/ForegroundLock.cs`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

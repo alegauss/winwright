@@ -134,6 +134,13 @@ internal static class Synthesising
         new("Suite.Run", Asking.TheResultSaysWhichRouteRan,
             "the same against a window the caller already has"),
 
+        // WW549. Not an act at all: one mouse move of no distance before anything starts, so the
+        // window it starts may come forward on a desk nobody touched. It moves nothing, and the
+        // launch it hands back says whether the right to come forward was passed on.
+        new("ProcessRegister.Launch", Asking.TheResultSaysWhichRouteRan,
+            "a move of no distance before the start, so a launch first in its run may come forward; "
+                + "LaunchedProcess.Handed says whether the system let the right be passed on"),
+
         // A menu is entered the way a keyboard user enters one, and that is Block D's third
         // criterion rather than an escalation: reaching a destructive entry by invoke is refused
         // at the door, so walking is the only route there is.
