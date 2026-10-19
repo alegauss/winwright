@@ -234,7 +234,7 @@ public class ScenarioFileTests
         // "required" nor "optional" is true of it — a step needs it or a 'tray', and exactly one.
         Assert.Contains($"locator (one of the {ScenarioSchema.Subject}): what to act on", rendered);
         Assert.Contains(
-            "one of: read, invoke, toggle, set value, set range, select, add to selection, remove from selection, expand, collapse",
+            "one of: read, invoke, toggle, set value, set range, select, add to selection, remove from selection, choose file, expand, collapse",
             rendered);
         Assert.Contains("one of: anything, value, range, toggle, selected, picked, expanded, text", rendered);
         Assert.Contains("(optional)", rendered);

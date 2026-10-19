@@ -61,6 +61,10 @@ public sealed record ActVerb
         // because adding a row already added, or taking out one already out, arrives where it was.
         new("add to selection", Takes.Nothing, repeatable: true, (subject, _) => Act.AddToSelection(subject)),
         new("remove from selection", Takes.Nothing, repeatable: true, (subject, _) => Act.RemoveFromSelection(subject)),
+        // WW551. The common Open and Save dialog, through its own name box and confirm. Not
+        // repeatable: a second go types into whatever the first one left standing, which may be the
+        // question a save asks before replacing.
+        new(ChoosesFile, Takes.Text, repeatable: false, (subject, argument) => Act.ChooseFile(subject, argument!)),
         new(Expands, Takes.Nothing, repeatable: true, (subject, _) => Act.Expand(subject)),
         new(Collapses, Takes.Nothing, repeatable: true, (subject, _) => Act.Collapse(subject)),
 
@@ -247,7 +251,10 @@ public sealed record ActVerb
     /// Whether this verb's argument is a path on disk, which a run makes whole against the project's
     /// root the way a file step's path is. WW550.
     /// </summary>
-    public bool TakesAPath => Name == DropsFile;
+    public bool TakesAPath => Name is DropsFile or ChoosesFile;
+
+    /// <summary>The verb that chooses a file in the system's common Open or Save dialog. WW551.</summary>
+    public const string ChoosesFile = "choose file";
 
     private readonly Func<Subject, string?, ActResult>? doing;
     private readonly Func<Subject, Subject, ActResult>? onto;

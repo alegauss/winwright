@@ -213,11 +213,25 @@ public sealed class Subject
     /// tree under a window, and the subject is what already knows which window that is.
     /// </para>
     /// </summary>
+    /// <remarks>
+    /// WW551. Two matches answer with the root's window, as none does: this is read to describe a
+    /// red, and a locator that matched two dialogs threw out of the description and turned the red
+    /// into a broken case.
+    /// </remarks>
     public nint Window
     {
         get
         {
-            var found = WindowOf(ResolveOnce().Element);
+            nint found;
+            try
+            {
+                found = WindowOf(ResolveOnce().Element);
+            }
+            catch (AmbiguousLocatorException)
+            {
+                found = 0;
+            }
+
             return found != 0 ? found : WindowOf(root);
         }
     }

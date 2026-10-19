@@ -167,6 +167,7 @@ internal static class Cooperating
         new("Act.Select", Cooperation.None, false, "select through the selection-item pattern"),
         new("Act.AddToSelection", Cooperation.None, false, "add to a multiple selection through the same pattern"),
         new("Act.RemoveFromSelection", Cooperation.None, false, "take out of a multiple selection through the same"),
+        new("Act.ChooseFile", Cooperation.None, false, "the common dialog's name box and confirm, through their value and invoke patterns"),
         new("Act.Expand", Cooperation.None, false, "open through the expand-collapse pattern"),
         new("Act.Collapse", Cooperation.None, false, "shut through the same"),
         new("Selecting.Confirmed", Cooperation.None, false, "select and confirm, escalating only if allowed"),

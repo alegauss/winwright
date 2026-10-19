@@ -268,8 +268,13 @@ public sealed record Flags
         new Flag(
             "drags",
             "",
-            "a pane holding a menu bar shown by tapping Alt alone, a strip of three tabs that reorders only when one is dragged onto another and closes a tab on a middle click, with a read-out of the order, and a note that can be dropped onto a second window beside it or, carrying the file WINWRIGHT_DRAG_FILE names, onto an Explorer folder",
-            "a tab strip reordered by dragging had no case, because no verb pressed on one element, moved past the drag threshold and released over another - and a drop onto another window had none either, because the destination was looked for only in the window the drag started in; a tab closed by the middle button had none, because a click pressed only the left one; and a menu bar shown by an Alt tap had none, because a press had to end in a key"),
+            "a pane holding a menu bar shown by tapping Alt alone, a strip of three tabs that reorders only when one is dragged onto another and closes a tab on a middle click, with a read-out of the order, a note that can be dropped onto a second window beside it or, carrying the file WINWRIGHT_DRAG_FILE names, onto an Explorer folder, and a zone that takes a file dropped from outside and says its name and size",
+            "a tab strip reordered by dragging had no case, because no verb pressed on one element, moved past the drag threshold and released over another - and a drop onto another window had none either, because the destination was looked for only in the window the drag started in; a tab closed by the middle button had none, because a click pressed only the left one; a menu bar shown by an Alt tap had none, because a press had to end in a key; and a drop zone for files had none, because no drag started outside the application"),
+        new Flag(
+            "dialogs",
+            "",
+            "a pane whose two buttons open the system's common Open and Save dialogs, owned by the window, with a read-out of what was chosen; a save writes a file naming the type chosen",
+            "choosing a file through the common dialog had no case, so an application opened and exported through test-only flags and the dialog code was never run"),
         new Flag(
             "layout",
             "",

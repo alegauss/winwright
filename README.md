@@ -395,7 +395,7 @@ button, which is how a person opens what a tray application opens on a left-clic
 a control through its patterns, and a step naming one against a `tray` is refused where it was written;
 the two tray acts named against a `locator` are refused the same way, since there is no control to hand
 them. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `add to selection`, `remove from selection`, `expand`, `collapse`, `type`, `click`, `drag`, `drop file`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
+`set value`, `set range`, `select`, `add to selection`, `remove from selection`, `choose file`, `expand`, `collapse`, `type`, `click`, `drag`, `drop file`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
 
 `select` replaces whatever its list had selected. A list that takes several rows at once, such as a
 sidebar where Ctrl+click adds a row, takes **`add to selection`** and **`remove from selection`**,
@@ -466,6 +466,29 @@ answers is the act's evidence. A target that answers with no effect is a hole th
 pass. A target that refuses files and one the drop could not reach (an application running elevated,
 for instance) look the same from outside. Like `drag`, it needs the foreground and is attempted once.
 A file that is not there stops the case. A `drop file` with no `with` is refused.
+
+The system's common **Open** and **Save** dialogs are reached from the window that opened them: a
+dialog the application owns is a child of its window in the tree, `#32770` by class. **`choose file`**
+puts the path from `with` (written the way `drop file` writes it) into the dialog's name box and
+confirms. Both go through the controls' own patterns, so it needs no foreground. Its locator is the
+dialog. Address the dialog's controls by id and never by name, because the names are in the shell's
+language. The type list is `ComboBox#1136` in Open and `ComboBox#FileTypeControlHost` in Save, and
+the existing `pick` chooses an entry from it by the filter's description:
+
+```json
+{ "locator": "Button#ExportButton", "act": "invoke" },
+{ "locator": "Window[class=\"#32770\"] > ComboBox#FileTypeControlHost", "act": "pick", "with": "WebP image" },
+{ "locator": "Window[class=\"#32770\"]", "act": "choose file", "with": "{files}/out" },
+{ "locator": "Window[class=\"#32770\"]", "act": "read", "absent": true, "named": "the dialog closed" },
+{ "file": "{files}/out.webp", "act": "read", "sameBytesAs": "cases/expected/out.webp" }
+```
+
+Whether the dialog accepted the path is not the act's claim. The `read` after it claims, with
+`"absent": true`, that the dialog closed. If the dialog stays open because the file is not there, or
+because a save asks before replacing, that step is red. The question the dialog asks is a second
+`#32770`, and an absence claim that matches two windows fails and names both, instead of refusing
+the locator as ambiguous. It is attempted once. A locator that matches a window
+with no name box or no confirm button is refused, naming what was missing.
 
 A file on disk is the third thing a step can be about, beside a `locator` and a `tray` icon. A step
 naming **`file`** takes `read` and makes one claim, **`sameBytesAs`**: that the file holds the bytes of

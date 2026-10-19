@@ -118,6 +118,87 @@ public static class Act
         element => ((ExpandCollapsePattern)element.GetCurrentPattern(ExpandCollapsePattern.Pattern)).Collapse());
 
     /// <summary>
+    /// The boxes in the common Open and Save dialogs that take the file's name, by automation id.
+    /// WW551: the ids are the same in every language, where the names are the translated label beside
+    /// them — and the two dialogs differ, measured on the guest: Open holds <c>ComboBox#1148</c>, the
+    /// template's own control id, and Save holds <c>ComboBox#FileNameControlHost</c> one pane down.
+    /// The name is typed into the edit inside whichever is there.
+    /// </summary>
+    public static IReadOnlyList<string> FileNameBoxes { get; } = ["1148", "FileNameControlHost"];
+
+    /// <summary>The common dialog's confirming button, IDOK, which is Open or Save depending on the dialog.</summary>
+    public const string ConfirmButton = "1";
+
+    /// <summary>
+    /// Choose a file in the system's common Open or Save dialog: put the path in its name box and
+    /// confirm, both through the controls' own patterns. WW551.
+    /// <para>
+    /// Found by PhotoBoost (PB23, PB25): opening and exporting go through this dialog, and a case
+    /// could not reach it, so the application grew flags only its tests used. Measured on the guest:
+    /// the dialog the application owns is a child of its window in the tree, <c>#32770</c> by class,
+    /// with a name box among <see cref="FileNameBoxes"/> and the confirm at <c>Button#1</c> whatever
+    /// language the shell speaks — so the step's locator is the dialog, and this finds the two
+    /// controls under it by those ids.
+    /// </para>
+    /// <para>
+    /// No pointer and no key, so it needs no foreground, like every act here. Whether the dialog took
+    /// the path is not this act's claim: a read of the dialog after it, saying <c>"absent": true</c>,
+    /// claims the dialog closed, and one that stays open — a file that is not there, a save that asks
+    /// before replacing — is then a red. The type is chosen before, with <c>pick</c> on
+    /// <c>ComboBox#1136</c> in Open and <c>ComboBox#FileTypeControlHost</c> in Save.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">The dialog.</param>
+    /// <param name="path">The file, as a full path.</param>
+    /// <exception cref="NotActionableException">Where the subject is no common dialog: it holds no name box or no confirm.</exception>
+    public static ActResult ChooseFile(Subject subject, string path)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        var admitted = Admitted.To(subject, "Window");
+        var before = admitted.Reading;
+
+        admitted.Do(dialog =>
+        {
+            var box = FileNameBoxes
+                .Select(id => dialog.FindFirst(TreeScope.Descendants, Of(id, ControlType.ComboBox)))
+                .FirstOrDefault(found => found is not null);
+            var name = box?.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Edit))
+                ?? throw Refused(subject, $"a file-name box ({string.Join(" or ", FileNameBoxes.Select(id => $"ComboBox#{id}"))} with an edit in it)");
+            var confirm = dialog.FindFirst(TreeScope.Children, Of(ConfirmButton, ControlType.Button))
+                ?? throw Refused(subject, "a confirming button (Button#1)");
+
+            ((ValuePattern)name.GetCurrentPattern(ValuePattern.Pattern)).SetValue(path);
+            ((InvokePattern)confirm.GetCurrentPattern(InvokePattern.Pattern)).Invoke();
+        });
+
+        // One look and not a resolve: the dialog is meant to be gone, and a resolve would spend its
+        // whole deadline confirming that. Whether it went is the step's claim, waited for there.
+        var after = subject.ReadOnce();
+        return new ActResult(
+            "choose file",
+            subject.Locator,
+            "Value, Invoke",
+            admitted.Facts,
+            before.Values,
+            after.Values,
+            before.Resolution.WaitedMs,
+            before.Resolution.Polls);
+    }
+
+    /// <summary>A control of the common dialog by its id and its type.</summary>
+    private static AndCondition Of(string id, ControlType type) => new(
+        new PropertyCondition(AutomationElement.AutomationIdProperty, id),
+        new PropertyCondition(AutomationElement.ControlTypeProperty, type));
+
+    /// <summary>The refusal for a window that is not the common dialog, naming what was looked for.</summary>
+    private static NotActionableException Refused(Subject subject, string wanted) => new(
+        subject.Locator.Text,
+        Actionable.PatternMissing,
+        $"it holds no {wanted}, so it is not the system's common Open or Save dialog");
+
+    /// <summary>
     /// The shape every act has: resolve, judge, act, read back. The judgement comes before the
     /// act and not after it, so nothing here ever touches a control that could not take it.
     /// </summary>

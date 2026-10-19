@@ -8,8 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW551** (deps: —) **A case cannot drive the common Open or Save dialog, so choosing a file through it has no case** — Opening and exporting are the first and last steps of any document app, and adopters bypass the dialog with test-only flags. → §WW551
-
 ## Block E — Capture — the picture that proves what it photographed
 
 - 📋 **WW552** (deps: —) **A Mica window whose picture is drawn by Direct3D has no capture route at all** — GPU-rendered editors and viewers cannot attach a capture to a case: the screen copy is refused for the glass and the render misses the GPU region. → §WW552

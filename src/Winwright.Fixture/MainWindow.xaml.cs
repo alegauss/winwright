@@ -62,6 +62,9 @@ public partial class MainWindow : Window
         if (Shapes.Has("drags"))
             DragsPane.AddTo(panes);
 
+        if (Shapes.Has("dialogs"))
+            DialogsPane.AddTo(panes);
+
         if (Shapes.Has("layout"))
             LayoutPane.AddTo(panes);
 

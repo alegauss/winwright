@@ -8,19 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-### §WW551 The common Open and Save dialogs
-
-Project: PhotoBoost, tasks PB23 (open) and PB25 (export as PNG, JPG or WebP). The cases
-want to invoke Button#OpenButton, pick {files}\photo.png in the Open dialog and confirm;
-then invoke Button#ExportButton, type {files}\out.png, choose the WebP filter and
-confirm, and check the file step. The dialog is a separate top-level window owned by the
-app, with a shell-hosted tree, and neither the README nor the verbs say how a case
-reaches it, whether the file-name box and the type filter are addressable, or how a run
-proves it closed. The workaround planned is --open and --export flags (PB39), which
-leave the dialog code unproven. What winwright could offer: a locator root for the owned
-dialog and a verb that sets the path, picks the filter and confirms, with a reading of
-what was chosen.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW552 Capturing a Mica window with Direct3D content

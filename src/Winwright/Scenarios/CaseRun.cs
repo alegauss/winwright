@@ -2628,7 +2628,20 @@ public static class CaseRun
                 if (!subject.RegionIsThere)
                     return $"nothing to look in — {subject.Locator} has no region to be absent from";
 
-                var look = subject.ReadOnce();
+                // WW551. Two matches are an answer here and not a question: the ambiguity a resolve
+                // refuses is about which one to act on, and an absence acts on none. Measured on the
+                // common Open dialog, whose refusal of a missing file is a second #32770 — the claim
+                // that the dialog closed threw instead of failing, and the case read as broken.
+                Locating.Reading look;
+                try
+                {
+                    look = subject.ReadOnce();
+                }
+                catch (AmbiguousLocatorException several)
+                {
+                    return several.Message;
+                }
+
                 saw = look.Facts ?? saw;
 
                 // Its own words where something is there, so the failure says what it found rather
