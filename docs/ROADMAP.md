@@ -4,6 +4,8 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW549** (deps: —) **A case first in its run cannot type: the window it launched never comes forward before any synthesised input** — An adopter soaking one case sees Degraded on every run while the same case passes inside the full suite. → §WW549
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
