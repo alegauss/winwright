@@ -43,6 +43,24 @@ once in [src/routes.tsx](src/routes.tsx) where the canonical URLs are built.
 | `src/components/sections/` | One component per landing section; the composition (order, JSX) lives here |
 | `src/pages/Landing.tsx` | The landing page, section order = the argument |
 | `scripts/` | The generator, the prerender and the tests that read `dist/` |
+| `docs/src/consent.js` + `docs/src/styles/area.css` | The documentation area's consent banner (inlined into every page's head) and its Starlight colours, read off the same design-system tokens |
+
+## On the shared design system
+
+The site takes the template the alegauss product sites share from `@viglet/viglet-design-system`,
+pinned to one exact version in both `package.json` and `docs/package.json`. claude-tray moved
+first, and this site followed. Three things about that are worth knowing before changing it:
+
+- **The package has no violet tone.** `data-tone="cool"` is its neutral default and `warm` is
+  clay, so `index.html` asks for `cool` and `src/index.css` lays the hub's iris (`111,92,240`,
+  bright `#a396ff`) over `--vg-brand*` and `--vg-gradient`. The ground is the package's. A
+  violet tone added to the package would replace that override.
+- **The shared components have fixed shapes.** `SiteFooter` takes one flat list of links, so
+  the footer is one row, and `SiteHero` has no slot between its actions and its meta, so the
+  run sits below the pills, passed as the hero's children.
+- **Nothing that the package provides is copied back.** `scripts/lint.test.mjs` names the
+  files the move deleted, and it holds Google Analytics to the two consent scripts: no page
+  loads it before the visitor allows it, on either half of the site.
 
 ## The generator, and why there is one
 

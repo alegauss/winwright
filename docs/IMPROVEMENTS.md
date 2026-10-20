@@ -26,31 +26,26 @@
 
 ## Block M — The site on the shared design system
 
-### §WW553 The site on the shared design system
+### §WW560 The site in the design system's consumers.json
 
-The pitch site moved first (the part shipped 2026-10-20): `site/src` renders its chrome
-from `@viglet/viglet-design-system` 2026.3.21 (`./site`, `./site.css`, `./tokens.css`,
-`./vite`), pinned exactly, and the copies it replaced are gone; `scripts/lint.test.mjs`
-names them so one cannot come back. Two findings bind what is left:
+Left by WW553, which moved the pitch site and the documentation area onto
+`@viglet/viglet-design-system` 2026.3.21 on 2026-10-20: `site/src` renders its chrome
+from `./site` and builds through `./vite`, and `site/docs` reads the package's
+`tokens.css`.
 
-- The package has no violet tone. `cool` is its neutral default and `warm` is clay, so the
-  site takes `cool` and lays the hub's iris (`111,92,240`, bright `#a396ff`) over
-  `--vg-brand*` and `--vg-gradient` in `src/index.css`; the ground is the package's, no longer
-  `#f7f6fd`. A violet tone in the package would remove that override.
-- `SiteFooter` takes flat links and `SiteHero` has no slot between actions and meta, so the
-  footer's three headed groups became one row and the run moved below the pills.
+The design system keeps `consumers.json` (exported as `./consumers.json`), the list of
+the products that take the package, with an entry shape of `id`, `name`, `package`,
+`checkout`, `framework`, `chrome`, `accent`, `tone`, `sourceRoots` and `entries`. It
+lists nine consumers and neither this site nor claude-tray: the `product-site` chrome is
+reserved for them, and the entries are VDS220's to land in that repository, which is
+paused until a site takes the release. Two have now.
 
-Left:
+The entry, measured from this checkout: `package` `site/package.json` (and `site/docs`
+for the area), `framework` Vite + React 19 with an Astro Starlight area, `chrome`
+`product-site`, `tone` `cool`, `accent` the hub's iris `111,92,240`, `sourceRoots`
+`site/src` and `site/docs/src`, and `entries` `./site`, `./site.css`, `./tokens.css` and
+`./vite`.
 
-- The documentation area, `site/docs` (Astro Starlight). `src/styles/area.css` still copies
-  the old palette onto `--sl-color-*`, and `astro.config.mjs` loads the gtag on every page
-  unasked, which is now the only analytics under `/winwright/` without consent. The package
-  ships nothing for Starlight, so this is a local consent gate reading the hub's
-  `alegauss-consent` key (the `Consent.tsx` flow) and the area's colours read off the same
-  tokens, keeping Starlight's layout.
-- The design system's `consumers.json` lists neither this site nor claude-tray; its
-  `product-site` chrome waits on VDS220 in that repository, which is paused until a site
-  takes the release. This site now has.
-
-Done when the area loads no analytics before consent, its palette follows the package's
-tokens, and the site is in `consumers.json`.
+Nothing in this repository changes for it, so this line waits on VDS220 and closes when
+that entry is in the design system's `consumers.json`. Resume VDS220 there (`roadkeep
+resume VDS220`) once a release carrying both sites' entries is wanted.

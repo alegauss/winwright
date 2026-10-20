@@ -48,8 +48,8 @@ test("no source fetches a third-party font at page load", () => {
 });
 
 // WW553. Analytics waits for consent: the tag is not in the page, and the banner is the one
-// source that may name the host it loads from. The docs area is the area's own build and is
-// not walked here.
+// source that may name the host it loads from — one for the pitch page and one for the docs
+// area, which is the area's own build and inlines its banner script into every page.
 test("analytics loads only from the consent banner", () => {
   assert.ok(
     !readFileSync(join(siteDir, "index.html"), "utf8").includes("googletagmanager.com"),
@@ -57,6 +57,18 @@ test("analytics loads only from the consent banner", () => {
   );
   const naming = sourceFiles.filter((f) => readFileSync(f, "utf8").includes("googletagmanager.com"));
   assert.deepEqual(naming.map(rel), ["src/components/Consent.tsx"]);
+
+  const docs = walk(join(siteDir, "docs"))
+    .filter((f) => [".mjs", ".js", ".ts", ".astro", ".mdx", ".md"].includes(extname(f)))
+    .filter((f) => readFileSync(f, "utf8").includes("googletagmanager.com"));
+  assert.deepEqual(docs.map(rel), ["docs/src/consent.js"]);
+});
+
+test("a built docs page names Google Analytics only inside its consent script", () => {
+  const page = join(siteDir, "dist", "docs", "index.html");
+  const html = readFileSync(page, "utf8");
+  assert.doesNotMatch(html, /<script[^>]*src="https:\/\/www\.googletagmanager\.com/, "the area loads the tag unasked");
+  assert.match(html, /alegauss-consent/, "the area's pages carry no consent script");
 });
 
 // WW553. The chrome is the design system's, so a copy of one of its components coming back

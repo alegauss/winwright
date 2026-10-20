@@ -1,22 +1,31 @@
-/* The area's own palette, taken from the pitch page next door so the two read as one site.
-   Starlight is themed by overriding its custom properties rather than by restating its rules:
-   what is here is the accent, the greys and the four verdict colours, and every layout
-   decision stays the theme's. */
+/* The area's palette, read off the design system the pitch page next door renders from, so
+   the two read as one site and cannot drift (WW553). Starlight is themed by overriding its
+   custom properties rather than by restating its rules: what is here is the accent, the greys
+   and the four verdict colours, and every layout decision stays the theme's.
+
+   The greys are one block for both modes, because the --vg-* tokens they read flip with
+   data-theme, which Starlight sets on <html> the way the package's pre-paint script does. The
+   accent is the iris the pitch page lays over the package's brand tokens. */
+@import "@viglet/viglet-design-system/tokens.css";
+
+:root,
+:root[data-theme="light"] {
+  --sl-color-black: var(--vg-background);
+  --sl-color-gray-7: color-mix(in oklab, var(--vg-muted) 50%, var(--vg-background));
+  --sl-color-gray-6: var(--vg-card);
+  --sl-color-gray-5: var(--vg-border);
+  --sl-color-gray-4: color-mix(in oklab, var(--vg-muted-foreground) 70%, var(--vg-background));
+  --sl-color-gray-3: var(--vg-muted-foreground);
+  --sl-color-gray-2: color-mix(in oklab, var(--vg-foreground) 75%, var(--vg-muted-foreground));
+  --sl-color-gray-1: color-mix(in oklab, var(--vg-foreground) 90%, var(--vg-muted-foreground));
+  --sl-color-white: var(--vg-foreground);
+}
 
 :root {
   /* the brand accent, in the ramp Starlight asks for */
   --sl-color-accent-low: #2a1f6b;
   --sl-color-accent: #6f5cf0;
   --sl-color-accent-high: #c3b9ff;
-
-  --sl-color-white: #ffffff;
-  --sl-color-gray-1: #ece7fb;
-  --sl-color-gray-2: #c5bde4;
-  --sl-color-gray-3: #8a81ab;
-  --sl-color-gray-4: #5b5280;
-  --sl-color-gray-5: #322a5c;
-  --sl-color-gray-6: #181231;
-  --sl-color-black: #0c0918;
 
   /* The four verdicts, which are the product's own vocabulary rather than four colours
      somebody liked. A page giving Degraded the same amber as a warning somewhere else would
@@ -32,20 +41,49 @@
   --sl-color-accent: #5546c8;
   --sl-color-accent-high: #2b1f7a;
 
-  --sl-color-white: #150f2b;
-  --sl-color-gray-1: #211a41;
-  --sl-color-gray-2: #2f2757;
-  --sl-color-gray-3: #4b4468;
-  --sl-color-gray-4: #665e85;
-  --sl-color-gray-5: #ddd8f0;
-  --sl-color-gray-6: #efedf9;
-  --sl-color-gray-7: #f7f6fd;
-  --sl-color-black: #ffffff;
-
   --ww-pass: #1a7f37;
   --ww-fail: #c9353a;
   --ww-degraded: #8a6100;
   --ww-broken: #7c3fae;
+}
+
+/* The analytics banner consent.js puts up on a first visit, fixed above the page. */
+.ww-consent {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 18px 20px;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 10px;
+  background: var(--sl-color-gray-6);
+  color: var(--sl-color-white);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.45);
+  font-size: 0.9rem;
+}
+.ww-consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.ww-consent-actions button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--sl-color-gray-5);
+  background: var(--sl-color-black);
+  color: var(--sl-color-white);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ww-consent-actions .ww-consent-allow {
+  border-color: var(--sl-color-accent);
+  background: var(--sl-color-accent);
+  color: #fff;
 }
 
 /* A generated table is as wide as what generated it, so it scrolls inside its own box rather
