@@ -2,6 +2,9 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+- 📋 **WW558** (deps: —) **The frame-run keeps-up case goes red when the host deschedules its thread past one 50 ms slot** — A busy host reads as a capture that cannot keep up, so the desk-free gate can stop a guest run over the machine. → §WW558
+- 📋 **WW559** (deps: —) **A file-step case's desktop root fails all ten immediate asks in the guest, so a case about a file is red over UIA** — The red is about the test's plumbing, which the retry was written to stop, and it costs a whole guest run to clear. → §WW559
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
@@ -21,8 +24,6 @@
 ## Block J — Adoption — the proof is the deletion
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-- 📋 **WW557** (deps: —) **No fixture shape replaces an element between looks, so the act's vanished-match arm is provoked by nothing** — WW555's fix could be undone and the suite would stay green: the guest's picker realises its items too fast to race. → §WW557
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 

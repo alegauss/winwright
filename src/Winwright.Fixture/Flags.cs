@@ -261,6 +261,11 @@ public sealed record Flags
             "a pane carrying the two answers 'what does this picker hold' has - one shut, whose items are in no tree until it opens, and one already dropped down",
             "Pick was driven only against a Win32 combo, which holds its items either way, so the walk read 'it holds nothing' about a WPF picker holding two and refused the case it was built for"),
         new Flag(
+            "vanishing",
+            "",
+            "a pane of two buttons a search finds and cannot read, as a replaced peer answers - one settles a moment after it is first asked, one never does",
+            "photo-boost's select right after expand was refused as nothing matched, because a look matched an item whose peer was replaced before it was read, and the guest's picker never raced so nothing here could"),
+        new Flag(
             "selections",
             "",
             "a pane of two lists of the same five values, one taking several rows at once and one taking one, with nothing selected",

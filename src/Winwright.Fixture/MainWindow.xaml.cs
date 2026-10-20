@@ -59,6 +59,9 @@ public partial class MainWindow : Window
         if (Shapes.Has("pickers"))
             PickersPane.AddTo(panes);
 
+        if (Shapes.Has("vanishing"))
+            VanishingPane.AddTo(panes);
+
         if (Shapes.Has("drags"))
             DragsPane.AddTo(panes);
 

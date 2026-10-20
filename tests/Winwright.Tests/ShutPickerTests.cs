@@ -158,7 +158,7 @@ public sealed class ShutPickerTests : IDisposable
         //
         // It stands for the shape and does not guard the fix: a control tree without it passed 32
         // rounds of 32 in the guest, whose picker realises its items before the first look. The
-        // element replaced between looks on purpose is WW557.
+        // element replaced between looks on purpose is WW557's, in VanishingTests.
         for (var round = 1; round <= 8; round++)
         {
             Act.Expand(Picker("shutPicker"));

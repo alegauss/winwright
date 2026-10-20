@@ -2,6 +2,51 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
+### §WW558 A frame slot lost to the host's scheduler
+
+Found gating WW557 on 2026-10-20. `run-tests-vm.cmd` runs the desk-free half on the host
+before it starts the guest, and that half went red on one case:
+`FrameRunTests.A_run_the_capture_keeps_up_with_says_every_frame_was_in_its_slot` read "4
+frames at 20/s over 218ms, 1 of them past the next slot by up to 68ms". The same build
+passed the same filter three times in a row straight after, and every host gate earlier
+that day was green.
+
+The case asserts that a 50 ms slot is never lost, on whatever machine runs it. The
+comment beside it already says a few milliseconds of descheduling is a fact about the
+machine; 68 ms is the same fact, larger, and the host is shared with whoever sits at it.
+So a red here is a reading about the desk wearing the words of a defect in `FrameRun`,
+which is the confusion this block exists to end.
+
+What to build: the case measures what it needs before it claims it. Sleep a few 50 ms
+slots first and read the worst overshoot; where the machine itself cannot hold a slot,
+the case says so as an excuse (the `BusyDesk.Excused` route the desk cases take) instead
+of a red about the capture. Not a retry and not a wider tolerance: both would hide a
+real lost slot.
+
+### §WW559 The desktop root a file step never reads
+
+Found gating WW557 on 2026-10-20, in the guest, on a run whose desk read 'shell':
+`FileSubjectTests.A_file_that_never_came_fails_saying_what_the_folder_holds` went red
+1.3 s in with `COMException: Unexpected HRESULT` out of `UiaCoreApi.UiaGetRootNode`,
+through `AutomationElement.RootElement` in the class's own `Desktop()` helper. The same
+tree had passed the full guest run three times that day.
+
+`Desktop()` already knows this failure. It was measured on the host gate at about one
+run in four and is answered by asking again at once, up to ten times, on the reading
+that the call collides with another and a desk that is missing fails all ten. This run
+failed all ten, and the desk was there: the next steps of the same run drove windows on
+it.
+
+The case is about a file step, which never reads the root; `Suite.Run` asks for one and
+the helper hands it the desktop. So the red is about the test's plumbing, which is what
+the helper was written to stop.
+
+What to build: either the helper waits between asks (a short sleep, bounded, so a
+collision has time to clear), or a file-only suite run takes no root at all, which
+removes the call rather than retrying it. The second is the better answer if `Suite.Run`
+can say "no window" without a second spelling of it; read `Suite.Run`'s callers before
+choosing.
+
 ## Block B — Attach, launch, and leave nothing behind
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
@@ -21,28 +66,6 @@
 ## Block J — Adoption — the proof is the deletion
 
 ## Block K — The proving ground — a fixture app built to be hard to test
-
-### §WW557 An element replaced between looks
-
-Found shipping WW555. photo-boost's select after expand was refused as "nothing matched"
-one run in four on 1.1.3. The reading behind the fix: a look matched a ListItem whose
-peer was gone before its facts were read, `Resolve` returned it as found with no facts,
-and `Admitted` refused at once instead of polling on. WW555 counts such a look as no
-look, and the refusal says "it matched on N of M looks and was gone each time" where
-that happened.
-
-Neither half is provoked here. `ShutPickerTests` drives photo-boost's two steps against
-the fixture's WPF picker, and a control tree without the fix passed 32 rounds of 32 in
-the guest on 2026-10-20: that picker realises its items before the first look.
-
-What to build: a fixture shape that replaces its element between looks on purpose. A WPF
-pane swapping a named Button for a new one of the same name on a short dispatcher timer
-is the likely spelling, since each swap disconnects the old peer. Two cases: an act
-lands once the swapping stops, and an act against one that never stops is refused with
-the vanished sentence. Pair the flag where the other shapes are paired.
-
-Then photo-boost's workaround (a `read` step between expand and select, commented WW555)
-can go once a release carries the fix.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 

@@ -95,6 +95,7 @@ internal static class Surfaces
         new("SizelessPane", Carrying.AShape, "sizeless"),
         new("HostedPane", Carrying.AShape, "hosted"),
         new("SwapchainPane", Carrying.AShape, "swapchain"),
+        new("VanishingPane", Carrying.AShape, "vanishing"),
         new("SurfacelessPane", Carrying.AShape, "surfaceless"),
         new("Store", Carrying.AShape, "store"),
         new("Strings", Carrying.AShape, "language"),

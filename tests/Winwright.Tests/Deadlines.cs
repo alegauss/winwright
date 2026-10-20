@@ -145,6 +145,8 @@ internal static class Deadlines
             + "which is the state WW374 is about: a window that is up and a half that is not hooked yet"),
         new("PointerTests.cs", 1, "false while the checkbox still reads Off, so a click that landed "
             + "nowhere spends the budget rather than reading as a click that worked"),
+        new("VanishingTests.cs", 1, "false while the pane still says it was not pressed: an invoke on a "
+            + "WPF button is queued to its dispatcher, so one that never landed spends the budget"),
         new("TrayPlacementTests.cs", 2, "false while the shell's flyout is not readable, both times — "
             + "once to open it and once to say it was standing before the fixture added an icon, "
             + "which is how a flyout the fixture never opened is told from one it did"),
