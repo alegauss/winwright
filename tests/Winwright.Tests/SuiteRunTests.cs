@@ -128,6 +128,56 @@ public sealed class SuiteRunTests : IDisposable
     }
 
     [Fact]
+    public void A_red_case_names_its_failing_step_the_locator_and_what_it_read()
+    {
+        // WW562. polyweave's answer was "Failed over 1 of 1 check(s)" and nothing else, and the cause
+        // took a separate investigation. The line under the case says the step, the locator it
+        // resolved, and the reading and wait the expectation already knew.
+        var frame = Dialog();
+        var verdict = Suite.Run(Three(), Selection.All, Root(frame), Declared());
+
+        var rendered = verdict.Render();
+        var red = rendered.ToList().FindIndex(one => one.Contains("the field reads gamma: Failed", StringComparison.Ordinal));
+        Assert.True(red >= 0, string.Join(Environment.NewLine, rendered));
+
+        var under = rendered[red + 1];
+        Assert.StartsWith("    failed     step ", under, StringComparison.Ordinal);
+        Assert.Contains("(Edit)", under, StringComparison.Ordinal);
+        Assert.Contains("'gamma'", under, StringComparison.Ordinal);
+        Assert.Contains("'beta'", under, StringComparison.Ordinal);
+        Assert.Matches(@"over \d+ms", under);
+
+        // Only under the case that did not pass: a green says nothing more than it did.
+        Assert.Equal(rendered.Count - 1, red + 1);
+    }
+
+    [Fact]
+    public void A_red_run_still_writes_the_record_the_next_run_is_compared_with()
+    {
+        // WW562's other half. polyweave saw no last-run.json after a red, and the record is written
+        // whichever way the run went — a baseline only greens could write is one a red run reads wrong.
+        var frame = Dialog();
+        var record = Path.Combine(root, "red", "last-run.json");
+        var path = Path.Combine(root, "remembering-red", ProjectDeclaration.FileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Environment.ProcessPath)}},
+              "lastRun": {{System.Text.Json.JsonSerializer.Serialize(record)}},
+              "timeouts": { "resolve": 600, "act": 600, "poll": 20 }
+            }
+            """);
+
+        var verdict = Suite.Run(Three(), Selection.All, Root(frame), ProjectDeclaration.Load(path));
+
+        Assert.Equal(RunOutcome.Failed, verdict.Outcome);
+        Assert.True(File.Exists(record));
+        Assert.Contains("the field reads gamma", File.ReadAllText(record), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void The_worst_reading_any_case_earned_is_the_runs()
     {
         var frame = Dialog();

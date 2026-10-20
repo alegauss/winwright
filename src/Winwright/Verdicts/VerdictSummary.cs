@@ -137,9 +137,10 @@ public static class VerdictSummary
     /// <summary>
     /// One assertion as its own line. <paramref name="environment"/> is what a sweep puts in
     /// front of it, so the same assertion appearing in three environments reads as three places
-    /// rather than as three assertions.
+    /// rather than as three assertions. <paramref name="subject"/> is the locator the step resolved,
+    /// where a caller holding the trace can say it. WW562.
     /// </summary>
-    public static string Line(AssertionResult result, string? environment = null)
+    public static string Line(AssertionResult result, string? environment = null, string? subject = null)
     {
         ArgumentNullException.ThrowIfNull(result);
         if (result.Outcome == AssertionOutcome.Passed)
@@ -159,7 +160,8 @@ public static class VerdictSummary
         // recording what was read back. Left out entirely where nothing joined them, because a
         // step number nobody assigned would send a reader to whatever line happened to be there.
         var at = result.Traced ? $"step {result.Step}  " : "";
-        return $"  {word} {at}{place}{result.Name} - {why}";
+        var on = string.IsNullOrWhiteSpace(subject) ? "" : $" ({subject.Trim()})";
+        return $"  {word} {at}{place}{result.Name}{on} - {why}";
     }
 
     /// <summary>

@@ -102,7 +102,9 @@ loaded and then typed a key out of:
   scenario is usually first checked before its project exists; without one the answer says it read
   the file alone rather than letting that read as "this would run".
 - **`winwright_run`** — the cases a selection asks for, run. It answers the verdict, a line per case
-  that ran and per case it left alone, the exit code, and what outlived the run. **A desk that cannot
+  that ran and per case it left alone, the exit code, and what outlived the run. Under a case that did
+  not pass, each check that did not is its own line: the step, the locator it resolved, what it read
+  and how long it waited — so a red names what to change without a second run. **A desk that cannot
   observe answers a hole**, naming which of the six conditions is missing — not a red, and not a
   green either. That is the whole reason it is a separate verb from `winwright_check`: whether a file
   parses is a claim nothing about the machine can change, and whether it passed is not.

@@ -89,7 +89,9 @@ public static class Served
         new(
             "winwright_run",
             "Run the cases a selection asks for and answer the verdict: the sentence, a line per case "
-                + "that ran and per case it left alone, the exit code, and what outlived the run. A "
+                + "that ran and per case it left alone, under a case that did not pass a line per "
+                + "check that did not, naming the step, its locator, what it read and how long it "
+                + "waited, then the exit code and what outlived the run. A "
                 + "desk that cannot observe answers a hole rather than a red.",
             Running.Schema(),
             arguments => Running.Over(arguments, Winwright.Windowing.Desk.Read())),

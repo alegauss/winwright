@@ -399,6 +399,7 @@
 - ✅ **WW222** **nothing in a session runs a case, so the tools stop at would-load** — A verb runs the cases a selection asks for and answers the verdict, and a desk that cannot observe answers a hole rather than a red.
 - ✅ **WW224** **a block criterion names a surface the plugin never got** — The criterion now names the three surfaces the plugin carries and says why there are no slash commands, so it covers nothing nobody intends to build.
 - ✅ **WW554** **The plugin's marketplace is named alegauss like roadkeep's, so a project using roadkeep cannot install it per project** — The marketplace is named winwright, so a project registers it beside roadkeep's alegauss and installs winwright@winwright.
+- ✅ **WW562** **winwright_run's answer for a red case names no failing step, locator, reading or wait** — winwright_run lists, under each red case, every unmet check with its step, locator, what it read and how long it waited; a red run still writes lastRun.
 
 ## Block I — The in-app half — the app cooperates with the harness
 

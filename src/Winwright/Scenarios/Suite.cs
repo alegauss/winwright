@@ -123,7 +123,15 @@ public sealed class SuiteVerdict
         // WW532. Second, beside the count it qualifies: a total that held is read as nothing changed,
         // and this is the line that says whether that is so.
         var lines = new List<string> { Sentence(), Compared.Sentence() };
-        lines.AddRange(Ran.Select(one => $"  {one}"));
+
+        // WW562. Under the case and not in a section of their own, so the step that failed is read
+        // beside the case it failed in — an agent told only "1 of 1 check(s)" goes back to the source.
+        foreach (var one in Ran)
+        {
+            lines.Add($"  {one}");
+            lines.AddRange(one.Unmet().Select(each => $"  {each}"));
+        }
+
         lines.AddRange(Skipped.Select(one => $"  {one}"));
 
         if (Unjustified.Count > 0)

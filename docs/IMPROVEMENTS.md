@@ -38,32 +38,6 @@ kind of application: the field is generic, and an Electron adopter names
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW562 A red case says which step and what it read
-
-Found driving polyweave's Electron window (polyweave `gui/`) through the MCP server, on
-2026-10-20. The case was four steps: set the search folder, invoke "Procurar projetos",
-invoke the second "Abrir", then `read` the search button with `"absent": true`, named
-"the list screen is gone". The project declared `lastRun` and `captures`.
-
-`winwright_run` answered, in full:
-
-    Failed: all 1 case, 1 assertion over everything.
-      opening a found project leaves the project list: Failed over 1 of 1 check(s)
-    exit code 1
-
-It did not say which step failed or what that step's locator resolved to, what it read,
-or how long it waited. No `last-run.json` was written. The real cause was outside the
-case: the window takes about 50 s to change screen, longer than the declared 15 s
-resolve wait. It took a separate investigation to find that. The verdict could have
-pointed at it in one line: "step 4 (the list screen is gone): Button[name="Procurar
-projetos"] was still present after 15000 ms".
-
-What to build: a red case's line in the MCP answer, and in the CLI's, names the failing
-step by `named` or by index, its substituted locator, what it read or that it found
-nothing, and the wait it spent. Write the declared `lastRun` on a red run too, or say
-why it was not written. The verdict is the one place an agent learns what to change in
-the case or the application, and a count alone sends it back to the source.
-
 ### §WW563 A launched application never writes on the protocol channel
 
 Found driving polyweave's Electron window through the MCP server from a terminal session

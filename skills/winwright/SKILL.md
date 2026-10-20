@@ -38,7 +38,7 @@ Instead:
    refuse, which is the class of fault that loads cleanly and then never runs.
 4. Ask **`winwright_run`** to run it. It answers the verdict, a line per case that ran and per case
    it left alone, the exit code, and what outlived the run — so *did it pass* does not go back to a
-   shell. A desk that cannot observe answers a hole, which is neither a red nor a green.
+   shell. Under a red case, each failed check names its step, locator, reading and wait. A desk that cannot observe answers a hole, which is neither a red nor a green.
 
 Do not type a field name from memory. The tools carry the loader's own schema, so a key you cannot
 spell is a key you cannot send — take the constraint rather than guessing at it.

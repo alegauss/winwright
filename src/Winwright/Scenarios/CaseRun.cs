@@ -113,6 +113,47 @@ public sealed class CaseResult
     internal CaseResult After(Departure departure) =>
         new(Declared, Verdict, Trace, NotReached, Lent, Across, departure);
 
+    /// <summary>
+    /// One line per check that did not pass, and per place the harness threw: the step, the locator
+    /// it resolved, and what it read and how long it waited. Empty for a case that passed.
+    /// <para>
+    /// WW562. Found driving polyweave's Electron window through the MCP server: the answer said one
+    /// check of one failed and nothing else, and the cause — a screen that took 50 s to change
+    /// under a 15 s wait — took a separate investigation to find. The expectation's own sentence
+    /// already said it; the suite's reading was the one place that dropped it.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Unmet()
+    {
+        var lines = new List<string>();
+        foreach (var error in Verdict.Broke)
+            lines.Add($"  threw      {error}");
+        foreach (var result in Verdict.Failures.Concat(Verdict.Unchecked))
+            lines.Add(VerdictSummary.Line(result, subject: Subject(result)));
+
+        return new ReadOnlyCollection<string>(lines);
+    }
+
+    /// <summary>
+    /// The locator a result's step resolved, read off the trace line it points at, or null where
+    /// that line names nothing but the claim.
+    /// <para>
+    /// An act's expectation is written under the claim's name, and the act's own line just above it
+    /// is the one holding the locator — so that is where an <c>expect</c> line is looked past to.
+    /// </para>
+    /// </summary>
+    private string? Subject(AssertionResult result)
+    {
+        if (!result.Traced || result.Step < 1 || result.Step > Trace.Count)
+            return null;
+
+        var line = Trace[result.Step - 1];
+        if (line.Verb == "expect" && line.Locator == result.Name && result.Step >= 2)
+            line = Trace[result.Step - 2];
+
+        return line.Locator == result.Name ? null : line.Locator;
+    }
+
     /// <summary>The one line a summary shows: what it was, what it earned, and what it skipped.</summary>
     public override string ToString()
     {

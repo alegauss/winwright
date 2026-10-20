@@ -18,7 +18,6 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-- 📋 **WW562** (deps: —) **winwright_run's answer for a red case names no failing step, locator, reading or wait** — An agent told only that one check of one failed has to rediscover the cause outside the case, which the verdict exists to spare it. → §WW562
 - 📋 **WW563** (deps: —) **an application winwright launches writes onto the MCP server's stdout, breaking the protocol stream** — Any client reading JSON-RPC strictly loses the verdict the moment the application under test prints a line. → §WW563
 
 ## Block I — The in-app half — the app cooperates with the harness

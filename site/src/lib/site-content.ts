@@ -902,7 +902,7 @@ export const claudeCode = {
   ],
   doHeading: "Running — it launches the application",
   do: [
-    { k: "winwright_run", d: "the cases a selection asks for: the verdict, a line per case that ran and per case it left alone, the exit code, and what outlived the run" },
+    { k: "winwright_run", d: "the cases a selection asks for: the verdict, a line per case that ran and per case it left alone, each failed check's step, locator, reading and wait, the exit code, and what outlived the run" },
   ],
   splitNote: [
     "The split is the whole reason the last one is a separate tool. Whether a file parses is a claim nothing about the machine can change; whether it passed is not — and a desk that cannot observe answers a ",
