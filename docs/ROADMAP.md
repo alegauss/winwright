@@ -8,6 +8,9 @@
 
 ## Block D — Act — patterns before pointers
 
+- 📋 **WW555** (deps: —) **A select right after expand sometimes finds no list item, since the act resolves before the popup realises it** — A case that picks from a combo box goes red one run in four on a correct locator, and the verdict blames the locator. → §WW555
+- 📋 **WW556** (deps: —) **A fixture argument cannot name the staged directory: {files} is filled only into variables and the working directory** — An app that takes its paths as flags must start inside the staged folder and stage every other file it needs there too. → §WW556
+
 ## Block E — Capture — the picture that proves what it photographed
 
 - ⏳ **WW552** (deps: —) **A Mica window whose picture is drawn by Direct3D has no capture route at all** — A Mica window with Direct3D still has no picture: composite the hosted swapchain into the render, and say what a D3DImage drew. → §WW552

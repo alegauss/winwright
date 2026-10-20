@@ -8,6 +8,54 @@
 
 ## Block D — Act — patterns before pointers
 
+### §WW555 Act resolves before an expanded popup is realised
+
+Found in photo-boost (D:\Git\japode\photo-boost, PB41's run), case "choosing JPEG for a
+transparent photo warns and offers a background" in cases/window.cases.json, on
+Winwright 1.1.3.
+
+The steps: `{"locator": "ComboBox#ExportFormat", "act": "expand"}` then `{"locator":
+"ComboBox#ExportFormat > ListItem[name=\"JPEG\"]", "act": "select", "reads": "selected",
+"expect": "selected"}` against a plain WPF ComboBox with three ComboBoxItems. It passed
+three runs in four; the fourth broke at the select with NotActionableException "cannot
+take this act: nothing matched, or what matched has gone since". A WPF ComboBox realises
+its items' containers and automation peers when the popup opens, a moment after Expand
+returns, so the select resolved its locator before the item existed. `select` is marked
+repeatable, but the retries did not bridge it, and the verdict calls a race "nothing
+matched", reading like a wrong locator.
+
+Workaround in photo-boost: a `read` step on the same ListItem between the two, since an
+expectation polls until the item appears; commented with this id.
+
+What winwright should offer: an act resolves its locator against the act timeout the way
+an expectation does, or `expand` returns only once the expanded element's children are
+realised; and a NotActionable verdict says whether anything matched at any poll.
+
+### §WW556 {files} is not filled into a fixture's arguments
+
+Found in photo-boost (D:\Git\japode\photo-boost, PB42's run), fixture "a window on the
+tiny models, exporting into its own folder" in cases/window.cases.json, on Winwright
+1.1.3.
+
+The fixture staged a photo and declared `"arguments": ["--open",
+"{files}/rotated-exif6.jpg", ..., "--export", "{files}/out.png"]`, so the app opens the
+staged copy and exports beside it, where a file step reads it back with `sameBytesAs`.
+The declaration was refused: "it stages 1 file(s) and nothing names '{files}'".
+FixtureDeclaration checks the working directory, the opened folder and the variables for
+the token, never the arguments, and `Offered` fills only `{reachN}` into an argument, so
+`{files}` would have reached the app literally anyway. The schema's own text for `files`
+says a variable or the working directory names the directory, which is consistent, but
+an app whose paths come in as flags (PhotoBoost's --open, --models, --export) has no
+variable to take them.
+
+Workaround in photo-boost: `"workingDirectory": "{files}"`, relative arguments, and the
+six model files staged one by one with `from`/`to` into a `models/` subfolder, because
+the project's own paths no longer resolve once the app starts in the staged folder.
+Commented with this id.
+
+What winwright should offer: `{files}` filled into arguments like `{reachN}` is, and
+counted by the "nothing names it" check.
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW552 Capturing a Mica window with Direct3D content
