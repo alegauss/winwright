@@ -1,6 +1,7 @@
-import { Nav } from "../components/Nav";
-import { Footer } from "../components/Footer";
-import { Hero } from "../components/sections/Hero";
+import { SiteButton, SiteFeatureIndex, SiteHero } from "@viglet/viglet-design-system/site";
+import { Footer, Nav } from "../components/Chrome";
+import { HeroRun } from "../components/HeroRun";
+import { Lattice } from "../components/ui/Lattice";
 import { Verdict } from "../components/sections/Verdict";
 import { Laws } from "../components/sections/Laws";
 import { Locate } from "../components/sections/Locate";
@@ -12,11 +13,14 @@ import { Project } from "../components/sections/Project";
 import { Agent } from "../components/sections/Agent";
 import { InApp } from "../components/sections/InApp";
 import { Halves } from "../components/sections/Halves";
-import { FeatureIndex } from "../components/sections/FeatureIndex";
 import { Refusals } from "../components/sections/Refusals";
 import { NonGoals } from "../components/sections/NonGoals";
 import { Install } from "../components/sections/Install";
 import { Release } from "../components/sections/Release";
+import { features } from "../lib/features";
+import { useVersionText } from "../lib/published-version";
+import { Rich } from "../lib/rich";
+import { featureIndex, hero, heroRun, install, repoUrl } from "../lib/site-content";
 
 // The landing page. The section order is the argument, not a feature list: the verdict
 // first, because it is the reason the rest exists, then how to take it — this is a shipped
@@ -42,11 +46,56 @@ export function Landing() {
       <Agent />
       <InApp />
       <Halves />
-      <FeatureIndex />
+      <SiteFeatureIndex
+        id="features"
+        items={features.map((f) => ({
+          href: `/winwright/features/${f.slug}/`,
+          heading: f.heading,
+          description: f.description,
+        }))}
+        eyebrow={featureIndex.eyebrow}
+        title={featureIndex.heading}
+        description={<Rich runs={featureIndex.intro} />}
+        goLabel={featureIndex.go}
+      />
       <Refusals />
       <NonGoals />
       <Release />
       <Footer />
     </>
+  );
+}
+
+// The hero, drawn by the design system's SiteHero (WW553). The run a reader sees first goes in
+// as its children, below the meta and the pills: SiteHero has no slot between the actions and
+// the meta, where it used to sit, and the move was chosen over a local copy of the hero.
+function Hero() {
+  const withVersion = useVersionText();
+  return (
+    <SiteHero
+      icon={{ src: "/winwright/logo.svg", alt: "winwright logo" }}
+      badge={withVersion(hero.badge)}
+      title={hero.titleLead}
+      titleAccent={hero.titleAccent}
+      sub={<Rich runs={hero.sub} />}
+      actions={
+        <>
+          <SiteButton href="#install">{install.cta}</SiteButton>
+          <SiteButton variant="ghost" href={repoUrl}>
+            ★ View on GitHub
+          </SiteButton>
+        </>
+      }
+      meta={hero.meta}
+      pills={hero.pills.map((runs, i) => (
+        <Rich runs={runs} key={i} />
+      ))}
+    >
+      <div className="vg-site-wrap">
+        <div className="run-eyebrow">{heroRun.eyebrow}</div>
+        <HeroRun />
+      </div>
+      <Lattice />
+    </SiteHero>
   );
 }

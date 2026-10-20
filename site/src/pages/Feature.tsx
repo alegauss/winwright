@@ -1,6 +1,5 @@
-import { Nav } from "../components/Nav";
-import { Footer } from "../components/Footer";
-import { Rich } from "../components/ui/Rich";
+import { Footer, Nav } from "../components/Chrome";
+import { Rich } from "../lib/rich";
 import { RawSvg } from "../components/ui/RawSvg";
 import { features, type FeatureRecord } from "../lib/features";
 import { scenario, verdictSection } from "../lib/site-content";
@@ -48,14 +47,14 @@ export function FeaturePage({ record }: { record: FeatureRecord }) {
   return (
     <>
       <Nav />
-      <header className="hero page-hero" id="top">
-        <div className="wrap">
+      <header className="vg-site-hero page-hero" id="top">
+        <div className="vg-site-wrap">
           <a className="feature-back" href="/winwright/#features">
             ← All pillars
           </a>
-          <div className="eyebrow">{record.eyebrow}</div>
+          <div className="vg-site-eyebrow">{record.eyebrow}</div>
           <h1>{record.heading}</h1>
-          <p className="sub">
+          <p className="vg-site-sub">
             <Rich runs={record.lead} />
           </p>
         </div>

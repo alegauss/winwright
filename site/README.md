@@ -9,7 +9,7 @@ needs it, and it never writes into `docs/`, which is roadkeep's.
 ```
 npm install        # once
 npm run dev        # dev server at /winwright/
-npm run build      # generate → tsc → client → og image → SSR → prerender
+npm run build      # generate → tsc → client → SSR → og image + prerender → docs
 npm test           # the site's own claims, against what the build produced
 npm run typecheck  # tsc -b, no emit
 npm run preview    # serve the built dist/
@@ -35,7 +35,10 @@ once in [src/routes.tsx](src/routes.tsx) where the canonical URLs are built.
 | `src/lib/features.ts` | One record per depth page; its route, title and description are read off the same record |
 | `src/lib/diagrams.ts` | The illustrative SVGs and the terminal figures, kept verbatim |
 | `src/lib/product.ts` + `product.generated.ts` | **Every figure the copy states**, read out of the C# by `scripts/product.mjs` |
-| `src/lib/theme.ts` + `index.html` pre-paint script + `src/index.css` tokens | **The theme follows the OS**, a stored choice overrides it, applied before first paint |
+| `@viglet/viglet-design-system` (`./site`, `./site.css`, `./tokens.css`, `./vite`) | **The chrome every alegauss product site shares**: nav, hero, buttons, copy button, feature index, sponsor, footer, theme toggle and its pre-paint script, the prerender and the social card. Pinned exactly in `package.json` |
+| `src/components/Chrome.tsx` | This site's half of the chrome: which links, which words, the lattice under the footer |
+| `src/components/Consent.tsx` | **Google Analytics loads only after consent**, sharing the hub's stored choice (same origin); nothing reaches googletagmanager.com before it |
+| `src/index.css` | The iris laid over the design system's brand tokens on its cool tone, the local section styles, the verdict colours and the lattice |
 | `src/routes.tsx` | The route table and its metadata, asserted against each other at import time |
 | `src/components/sections/` | One component per landing section; the composition (order, JSX) lives here |
 | `src/pages/Landing.tsx` | The landing page, section order = the argument |

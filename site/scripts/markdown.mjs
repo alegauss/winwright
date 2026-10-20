@@ -11,6 +11,8 @@ const SKIP_TAGS = new Set(["NAV", "FOOTER", "BUTTON", "SCRIPT", "STYLE", "NOSCRI
 // the step numbers, the banner glyph, the section kicker, terminal window bars, the legend.
 const SKIP_CLASSES = new Set([
   "dot", "chk", "ico", "n", "lock", "eyebrow", "bar", "legend", "copy-btn", "run-prompt",
+  // WW553: the same marks as the design system's site layer draws them.
+  "vg-site-dot", "vg-site-eyebrow", "vg-site-copy",
 ]);
 // Elements that carry a run of text, not a block — rendered inline, never recursed as blocks.
 const INLINE_TAGS = new Set(["SPAN", "B", "STRONG", "I", "EM", "CODE", "KBD", "A", "BR"]);

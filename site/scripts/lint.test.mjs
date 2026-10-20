@@ -47,6 +47,37 @@ test("no source fetches a third-party font at page load", () => {
   assert.deepEqual(offenders.map(rel), []);
 });
 
+// WW553. Analytics waits for consent: the tag is not in the page, and the banner is the one
+// source that may name the host it loads from. The docs area is the area's own build and is
+// not walked here.
+test("analytics loads only from the consent banner", () => {
+  assert.ok(
+    !readFileSync(join(siteDir, "index.html"), "utf8").includes("googletagmanager.com"),
+    "index.html loads Google Analytics before anyone was asked",
+  );
+  const naming = sourceFiles.filter((f) => readFileSync(f, "utf8").includes("googletagmanager.com"));
+  assert.deepEqual(naming.map(rel), ["src/components/Consent.tsx"]);
+});
+
+// WW553. The chrome is the design system's, so a copy of one of its components coming back
+// into src is the drift the move was made to end — named by the file it would be, since that
+// is the name the eight product sites copied it under.
+test("src carries none of the files the design system's site layer provides", () => {
+  const provided = [
+    "src/components/Nav.tsx",
+    "src/components/Footer.tsx",
+    "src/components/sections/Hero.tsx",
+    "src/components/sections/FeatureIndex.tsx",
+    "src/components/ui/CopyButton.tsx",
+    "src/components/ui/ThemeToggle.tsx",
+    "src/components/ui/Rich.tsx",
+    "src/lib/theme.ts",
+    "scripts/og-image.mjs",
+  ];
+  const present = walk(siteDir).map(rel).filter((f) => provided.includes(f));
+  assert.deepEqual(present, []);
+});
+
 // The lattice loops by translating one whole repeat of its rows, so a period that does not
 // divide that repeat puts a visible seam through the band once per cycle — every few
 // seconds, forever. The arithmetic is the whole of the illusion, so it is asserted rather

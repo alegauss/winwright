@@ -1,38 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-tone="cool">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6HG45Q9BHP"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-6HG45Q9BHP');
-    </script>
     <link rel="icon" type="image/svg+xml" href="/winwright/logo.svg" />
 
     <!--
-      The theme follows the OS, and a stored choice wins over it. This runs before first
-      paint: the tokens the body background reads are keyed off data-theme, so a class
-      applied after hydration is a visible flash of the wrong theme. Kept inline and
-      dependency-free for that reason. scripts/prerender.mjs patches the rest of this
-      <head> per route.
+      The theme follows the OS, and a stored choice wins over it. The pre-paint script that
+      applies it is the design system's, put here by vite.config.ts in place of the anchor
+      below, before first paint: a class applied after hydration is a visible flash of the
+      wrong theme. Google Analytics is not in this file: it loads from the consent banner,
+      and only once the visitor allows it. scripts/prerender.mjs patches the rest of this
+      head per route.
     -->
-    <script>
-      (function () {
-        try {
-          var stored = localStorage.getItem("ww-theme");
-          if (stored === "dark" || stored === "light") {
-            document.documentElement.setAttribute("data-theme", stored);
-          }
-        } catch (e) {
-          /* private mode, or no storage — fall through to the OS preference */
-        }
-      })();
-    </script>
+    <!--theme-script-->
 
     <title>winwright — a green never covers a check that did not run</title>
     <meta
@@ -58,7 +39,7 @@
       </style>
     </noscript>
   </head>
-  <body>
+  <body class="vg-site">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

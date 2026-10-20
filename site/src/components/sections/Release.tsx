@@ -1,6 +1,6 @@
 import { release } from "../../lib/site-content";
 import { useVersionText } from "../../lib/published-version";
-import { Rich } from "../ui/Rich";
+import { Rich } from "../../lib/rich";
 
 // The band a shipped product owes a reader before they decide: which version is published,
 // what it is licensed under, where the notes are, and where to say something is wrong.

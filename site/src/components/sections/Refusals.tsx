@@ -1,5 +1,5 @@
 import { refusals } from "../../lib/site-content";
-import { Rich } from "../ui/Rich";
+import { Rich } from "../../lib/rich";
 
 export function Refusals() {
   return (

@@ -1,6 +1,6 @@
 import { halves } from "../../lib/site-content";
 import { useVersionText } from "../../lib/published-version";
-import { Rich } from "../ui/Rich";
+import { Rich } from "../../lib/rich";
 
 export function Halves() {
   const withVersion = useVersionText();

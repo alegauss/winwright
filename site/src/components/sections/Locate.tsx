@@ -1,6 +1,6 @@
 import { locate } from "../../lib/site-content";
 import { treeDiagram } from "../../lib/diagrams";
-import { Rich } from "../ui/Rich";
+import { Rich } from "../../lib/rich";
 import { RawSvg } from "../ui/RawSvg";
 
 export function Locate() {

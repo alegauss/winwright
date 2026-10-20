@@ -12,6 +12,7 @@
 // reason and the generator states the number: a count typed beside the list it describes is
 // true on the day it is typed and silent about the day it stops being — which is the same
 // defect class this product exists to refuse in a test suite.
+import type { SponsorDeclaration } from "@viglet/viglet-design-system/site";
 import {
   Spelled,
   harnessPackage,
@@ -89,34 +90,26 @@ export const navLinks = [
   { href: docsUrl, label: "Docs" },
 ] as const;
 
+// The key a stored theme choice is kept under, which the design system's pre-paint script and
+// its toggle both read (WW553). Unchanged from the local theme module it replaces, so a
+// visitor's choice survives the move.
+export const THEME_KEY = "ww-theme";
+
 export const footer = {
-  groups: [
-    {
-      heading: "Take it",
-      links: [
-        { href: nugetUrl(harnessPackage().id), label: `${harnessPackage().id} on nuget.org` },
-        { href: nugetUrl(inAppPackage().id), label: `${inAppPackage().id} on nuget.org` },
-        { href: releasesUrl, label: "Releases" },
-        { href: changelogUrl, label: "Changelog" },
-      ],
-    },
-    {
-      heading: "Read it",
-      links: [
-        { href: docsUrl, label: "Documentation" },
-        { href: readmeUrl, label: "The README" },
-        { href: "/winwright/claude-code/", label: "Claude Code plugin" },
-        { href: "/winwright/compare/", label: "Compare" },
-      ],
-    },
-    {
-      heading: "Ask about it",
-      links: [
-        { href: repoUrl, label: "GitHub" },
-        { href: issuesUrl, label: "Issues" },
-        { href: licenceUrl, label: "Apache-2.0 licence" },
-      ],
-    },
+  // WW553. One row, because the design system's footer takes a flat list. The order keeps the
+  // three groups it replaced: take it, read it, then say something is wrong with it.
+  links: [
+    { href: nugetUrl(harnessPackage().id), label: `${harnessPackage().id} on nuget.org` },
+    { href: nugetUrl(inAppPackage().id), label: `${inAppPackage().id} on nuget.org` },
+    { href: releasesUrl, label: "Releases" },
+    { href: changelogUrl, label: "Changelog" },
+    { href: docsUrl, label: "Documentation" },
+    { href: readmeUrl, label: "The README" },
+    { href: "/winwright/claude-code/", label: "Claude Code plugin" },
+    { href: "/winwright/compare/", label: "Compare" },
+    { href: repoUrl, label: "GitHub" },
+    { href: issuesUrl, label: "Issues" },
+    { href: licenceUrl, label: "Apache-2.0 licence" },
   ],
   // What this is and what it is not, in the shape a reader can check rather than in
   // adjectives. The licence is named because the packages declare it and a reader deciding
@@ -130,16 +123,21 @@ export const footer = {
 // Mirrors alegauss.github.io/sponsor.json — the canonical sponsor declaration for these
 // projects. Transcribed here rather than fetched at runtime: this site is prerendered, and
 // the whole point of naming a sponsor is that crawlers and LLMs read it in the served HTML.
-export const sponsor = {
-  label: "Sponsored by",
-  name: "Viglet",
-  url: "https://www.viglet.org",
-  siteLabel: "viglet.org",
-  logo: "/winwright/viglet/viglet-logo.png",
-  summary:
-    "Open source search and content tools for organisations with a lot to publish — run on your own servers, with no per-user licence.",
+//
+// WW553: shaped as the design system's SponsorDeclaration, which SiteSponsor renders.
+export const sponsor: SponsorDeclaration = {
+  sponsor: {
+    label: "Sponsored by",
+    name: "Viglet",
+    url: "https://www.viglet.org",
+    siteLabel: "viglet.org",
+    logo: "/winwright/viglet/viglet-logo.png",
+    summary:
+      "Open source search and content tools for organisations with a lot to publish — run on your own servers, with no per-user licence.",
+  },
   products: [
     {
+      id: "turing",
       name: "Viglet Turing",
       url: "https://turing.viglet.org",
       logo: "/winwright/viglet/turing-logo.png",
@@ -147,6 +145,7 @@ export const sponsor = {
         "so visitors find what they came for, with AI answers drawn only from your own content",
     },
     {
+      id: "shio",
       name: "Viglet Shio",
       url: "https://shio.viglet.org",
       logo: "/winwright/viglet/shio-logo.png",
@@ -154,7 +153,7 @@ export const sponsor = {
         "so a new page goes live the same day, reviewed and approved by your own team",
     },
   ],
-} as const;
+};
 
 /* ------------------------------------------------------------------ hero */
 

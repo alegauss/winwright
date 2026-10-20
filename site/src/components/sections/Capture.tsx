@@ -1,6 +1,6 @@
 import { capture } from "../../lib/site-content";
 import { captureDiagram } from "../../lib/diagrams";
-import { Rich } from "../ui/Rich";
+import { Rich } from "../../lib/rich";
 import { RawSvg } from "../ui/RawSvg";
 
 export function Capture() {

@@ -26,7 +26,7 @@
 
 ## Block M — The site on the shared design system
 
-- 📋 **WW553** (deps: —) **The site keeps its own copy of the template that eight product sites share** — The shared Nav, Hero, Footer and sponsor slot drift apart in each copy, and the design system now carries them once. → §WW553
+- ⏳ **WW553** (deps: —) **The site keeps its own copy of the template that eight product sites share** — The docs area still copies the palette and loads the gtag unasked, and the site is not yet in the design system's consumers.json. → §WW553
 
 ## Done when — Block A
 
@@ -153,6 +153,15 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
+
+## Done when — WW553
+
+- **The docs area loads no analytics before consent** A built dist/docs page holds no
+  googletagmanager.com tag, the area asks through the hub's alegauss-consent key, and
+  its palette reads the design system's tokens rather than a copy.
+- **The site is listed in the design system's consumers.json** viglet-design-system's
+  consumers.json carries a winwright entry on the product-site chrome, which VDS220 in
+  that repository holds until a site takes the release.
 
 ## Non-goals
 

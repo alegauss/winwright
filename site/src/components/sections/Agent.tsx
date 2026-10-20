@@ -1,5 +1,5 @@
 import { agent, claudeCode } from "../../lib/site-content";
-import { Rich } from "../ui/Rich";
+import { Rich } from "../../lib/rich";
 
 export function Agent() {
   return (
@@ -17,14 +17,14 @@ export function Agent() {
           {/* The four tools, read off the same records the depth page lists in full, so a
               tool cannot appear here and not there. The mark is the distinction that
               matters before anything else: three of them launch nothing. */}
-          <div className="pills" style={{ marginTop: 0 }}>
+          <div className="vg-site-pills" style={{ marginTop: 0 }}>
             {claudeCode.read.map((tool) => (
-              <span className="pill" key={tool.k}>
+              <span className="vg-site-pill" key={tool.k}>
                 <code>{tool.k}</code>
               </span>
             ))}
             {claudeCode.do.map((tool) => (
-              <span className="pill" key={tool.k}>
+              <span className="vg-site-pill" key={tool.k}>
                 <code>{tool.k}</code>
               </span>
             ))}

@@ -1,7 +1,6 @@
 import { Fragment } from "react";
-import { Nav } from "../components/Nav";
-import { Footer } from "../components/Footer";
-import { Rich } from "../components/ui/Rich";
+import { Footer, Nav } from "../components/Chrome";
+import { Rich } from "../lib/rich";
 import { compare } from "../lib/site-content";
 
 // The three symbols the legend declares, and nothing else reaches a cell: a matrix whose
@@ -18,11 +17,11 @@ export function Compare() {
   return (
     <>
       <Nav />
-      <header className="hero page-hero" id="top">
-        <div className="wrap">
-          <div className="eyebrow">{compare.eyebrow}</div>
+      <header className="vg-site-hero page-hero" id="top">
+        <div className="vg-site-wrap">
+          <div className="vg-site-eyebrow">{compare.eyebrow}</div>
           <h1>{compare.heading}</h1>
-          <p className="sub">
+          <p className="vg-site-sub">
             <Rich runs={compare.intro} />
           </p>
         </div>

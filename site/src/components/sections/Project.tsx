@@ -1,6 +1,6 @@
 import { project } from "../../lib/site-content";
 import { projectJson } from "../../lib/diagrams";
-import { Rich } from "../ui/Rich";
+import { Rich } from "../../lib/rich";
 
 export function Project() {
   return (

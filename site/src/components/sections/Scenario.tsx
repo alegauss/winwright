@@ -1,6 +1,6 @@
 import { scenario } from "../../lib/site-content";
 import { scenarioFile } from "../../lib/diagrams";
-import { Rich } from "../ui/Rich";
+import { Rich } from "../../lib/rich";
 
 export function Scenario() {
   return (

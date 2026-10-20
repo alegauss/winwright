@@ -28,32 +28,29 @@
 
 ### §WW553 The site on the shared design system
 
-`site/src` carries `components/Nav.tsx`, `components/Footer.tsx` with the sponsor block,
-`components/sections/Hero.tsx`, `FeatureIndex.tsx` and `NonGoals.tsx`,
-`pages/Feature.tsx` and `components/ui/CopyButton.tsx`, `ThemeToggle.tsx`, `Rich.tsx`
-and `RawSvg.tsx`, plus `scripts/prerender.mjs` and `scripts/og-image.mjs`: the template
-seven other alegauss product sites copy under the same names. `index.css` declares its
-own `--bg*`, `--panel*`, `--iris*` and `--accent*` tokens for both colour modes.
+The pitch site moved first (the part shipped 2026-10-20): `site/src` renders its chrome
+from `@viglet/viglet-design-system` 2026.3.21 (`./site`, `./site.css`, `./tokens.css`,
+`./vite`), pinned exactly, and the copies it replaced are gone; `scripts/lint.test.mjs`
+names them so one cannot come back. Two findings bind what is left:
 
-The move, after the pilot, claude-tray T389:
+- The package has no violet tone. `cool` is its neutral default and `warm` is clay, so the
+  site takes `cool` and lays the hub's iris (`111,92,240`, bright `#a396ff`) over
+  `--vg-brand*` and `--vg-gradient` in `src/index.css`; the ground is the package's, no longer
+  `#f7f6fd`. A violet tone in the package would remove that override.
+- `SiteFooter` takes flat links and `SiteHero` has no slot between actions and meta, so the
+  footer's three headed groups became one row and the run moved below the pills.
 
-- `data-tone="cool"`: the ground is a violet-tinted white (`#f7f6fd`) and near-black
-  (`#0c0918`), not clay; the warm tone would change the page.
-- The accent from the hub's `projects.json` (`111,92,240`, bright `#a396ff`), the iris
-  the page already uses.
-- The shared components come from `./site`; `HeroRun`, `Lattice`, the product sections
-  and pages and `lib/` stay in `site/src`.
-- The build calls the `./vite` helpers instead of the two scripts.
-- Google Analytics loads only after consent, the same flow as the hub (AG1).
+Left:
 
-The documentation area is in scope: `site/docs`, an Astro Starlight build that the
-site's build runs as `build:docs`, then `docs-twins.mjs` and `docs-sitemap.mjs`. Its
-`src/styles/area.css` copies the pitch page's palette and its `astro.config.mjs` loads
-the gtag on every page. It takes the tone, the accent and the consent gate from the
-package, keeping Starlight's layout.
+- The documentation area, `site/docs` (Astro Starlight). `src/styles/area.css` still copies
+  the old palette onto `--sl-color-*`, and `astro.config.mjs` loads the gtag on every page
+  unasked, which is now the only analytics under `/winwright/` without consent. The package
+  ships nothing for Starlight, so this is a local consent gate reading the hub's
+  `alegauss-consent` key (the `Consent.tsx` flow) and the area's colours read off the same
+  tokens, keeping Starlight's layout.
+- The design system's `consumers.json` lists neither this site nor claude-tray; its
+  `product-site` chrome waits on VDS220 in that repository, which is paused until a site
+  takes the release. This site now has.
 
-Done when `site/src` has none of the files `./site` provides; the prerendered HTML of
-every route, the twelve docs pages and their twins included, holds the same text as
-before; light and dark screenshots of each route are compared before and after with the
-differences listed in the commit; and the site appears in the design system's
-`consumers.json`.
+Done when the area loads no analytics before consent, its palette follows the package's
+tokens, and the site is in `consumers.json`.

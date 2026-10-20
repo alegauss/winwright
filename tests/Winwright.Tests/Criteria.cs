@@ -331,6 +331,13 @@ internal static class Criteria
         // no longer declares the lead and a catalogue entry for one is a lead pointing nowhere. It is
         // deleted rather than restated, which is what this pair of checks is for.
 
+        new("WW553", "The docs area loads no analytics before consent", "", Unshown.NotBuilt,
+            "the pitch site moved first and its gtag waits for consent (site/scripts/lint.test.mjs); "
+                + "the Starlight area still loads one unasked and copies the old palette"),
+        new("WW553", "The site is listed in the design system's consumers.json", "", Unshown.NotBuilt,
+            "the entry is the design system's to land, under VDS220, which was paused until a site "
+                + "took the release; the pitch site has now taken it"),
+
         // WW552's criterion stood here between its two ships and went with the line, checked. The
         // fixture's --swapchain is a Mica window with a Direct3D 11 swapchain in an HwndHost, and
         // ProvokedByFlagTests reads the swapchain's clear colour back out of the render the guest

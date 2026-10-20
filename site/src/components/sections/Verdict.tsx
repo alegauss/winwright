@@ -1,7 +1,7 @@
 import { verdictSection } from "../../lib/site-content";
 import { verdicts } from "../../lib/product";
 import { verdictTerminal } from "../../lib/diagrams";
-import { Rich } from "../ui/Rich";
+import { Rich } from "../../lib/rich";
 
 // One card per member of RunOutcome, in the order the enum declares them — which is also
 // exit-code order. The name, the number and the first line of each card are generated from

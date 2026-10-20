@@ -1,8 +1,8 @@
 import { halves, install, nugetUrl, releasesUrl } from "../../lib/site-content";
 import { harnessPackage } from "../../lib/product";
 import { useVersionText } from "../../lib/published-version";
-import { CopyButton } from "../ui/CopyButton";
-import { Rich } from "../ui/Rich";
+import { SiteButton, SiteCopyButton } from "@viglet/viglet-design-system/site";
+import { Rich } from "../../lib/rich";
 
 // No version number is typed in this section's copy, and that is the same rule as
 // everywhere else rather than laziness: the reference lines below carry the one the tree
@@ -36,9 +36,11 @@ export function Install() {
               </p>
               <div className="codeblock copy">
                 <code>{withVersion(actor.iface)}</code>
-                <CopyButton
+                <SiteCopyButton
                   text={withVersion(actor.iface)}
                   label={`Copy the ${actor.who} reference`}
+                  copyLabel="Copy"
+                  copiedLabel="Copied!"
                 />
               </div>
             </div>
@@ -55,7 +57,7 @@ export function Install() {
             {install.agentCommands.map((command) => (
               <div className="codeblock copy" key={command}>
                 <code>{command}</code>
-                <CopyButton text={command} label="Copy the command" />
+                <SiteCopyButton text={command} label="Copy the command" copyLabel="Copy" copiedLabel="Copied!" />
               </div>
             ))}
           </div>
@@ -63,19 +65,17 @@ export function Install() {
             <Rich runs={install.agentNote} />
           </p>
 
-          <div className="hero-meta" style={{ marginTop: "30px" }}>
+          <div className="vg-site-hero-meta" style={{ marginTop: "30px" }}>
             {install.facts.map((fact) => (
               <span key={fact}>{fact}</span>
             ))}
           </div>
 
-          <div className="hero-cta" data-twin="omit" style={{ marginTop: "26px" }}>
-            <a className="btn btn-primary" href={nugetUrl(harnessPackage().id)}>
-              {install.cta}
-            </a>
-            <a className="btn btn-ghost" href={releasesUrl}>
+          <div className="vg-site-hero-actions" data-twin="omit" style={{ marginTop: "26px" }}>
+            <SiteButton href={nugetUrl(harnessPackage().id)}>{install.cta}</SiteButton>
+            <SiteButton variant="ghost" href={releasesUrl}>
               {install.secondary}
-            </a>
+            </SiteButton>
           </div>
         </div>
       </div>

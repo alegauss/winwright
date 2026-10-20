@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { heroRun } from "../lib/site-content";
-import { Rich } from "./ui/Rich";
+import { Rich } from "../lib/rich";
 
 // The hero is a run: an autoplaying transcript of one case, because what is sold here is
 // the shape of the answer rather than a screenshot of a window. All steps render on the

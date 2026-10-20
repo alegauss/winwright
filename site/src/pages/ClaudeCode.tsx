@@ -1,7 +1,6 @@
-import { Nav } from "../components/Nav";
-import { Footer } from "../components/Footer";
-import { Rich } from "../components/ui/Rich";
-import { CopyButton } from "../components/ui/CopyButton";
+import { SiteCopyButton } from "@viglet/viglet-design-system/site";
+import { Footer, Nav } from "../components/Chrome";
+import { Rich } from "../lib/rich";
 import { claudeCode, friction } from "../lib/site-content";
 import { Spelled } from "../lib/product";
 
@@ -13,11 +12,11 @@ export function ClaudeCode() {
   return (
     <>
       <Nav />
-      <header className="hero page-hero" id="top">
-        <div className="wrap">
-          <div className="eyebrow">{claudeCode.eyebrow}</div>
+      <header className="vg-site-hero page-hero" id="top">
+        <div className="vg-site-wrap">
+          <div className="vg-site-eyebrow">{claudeCode.eyebrow}</div>
           <h1>{claudeCode.heading}</h1>
-          <p className="sub">
+          <p className="vg-site-sub">
             <Rich runs={claudeCode.intro} />
           </p>
         </div>
@@ -129,7 +128,7 @@ export function ClaudeCode() {
               {claudeCode.setupCommands.map((command) => (
                 <div className="codeblock copy" key={command}>
                   <code>{command}</code>
-                  <CopyButton text={command} label="Copy the command" />
+                  <SiteCopyButton text={command} label="Copy the command" copyLabel="Copy" copiedLabel="Copied!" />
                 </div>
               ))}
             </div>
