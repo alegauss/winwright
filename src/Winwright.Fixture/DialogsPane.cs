@@ -23,6 +23,9 @@ public static class DialogsPane
     /// <summary>The types the save dialog offers, in order; the file a save writes says which was chosen.</summary>
     public const string SaveTypes = "PNG image|*.png|JPEG image|*.jpg|WebP image|*.webp";
 
+    /// <summary>The name the save dialog offers before a case gives one.</summary>
+    public const string DefaultSaveName = "untitled.png";
+
     /// <summary>Build the pane and add it to the tab control, selected.</summary>
     /// <param name="panes">The tab control to add it to.</param>
     public static TabItem AddTo(TabControl panes)
@@ -43,7 +46,16 @@ public static class DialogsPane
 
         save.Click += (_, _) =>
         {
-            var dialog = new Microsoft.Win32.SaveFileDialog { Title = "Export the image", Filter = SaveTypes, AddExtension = true };
+            // WW561. A default name, the way an application exporting a document offers one: the
+            // dialog puts it in the name box itself as it starts, which is what overwrote a path a
+            // case had already written there.
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "Export the image",
+                Filter = SaveTypes,
+                AddExtension = true,
+                FileName = DefaultSaveName,
+            };
             if (dialog.ShowDialog(Window.GetWindow(save)) != true)
             {
                 Said(said, "save cancelled");

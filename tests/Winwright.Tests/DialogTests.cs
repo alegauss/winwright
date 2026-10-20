@@ -65,6 +65,26 @@ public sealed class DialogTests : IDisposable
         Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
     }
 
+    /// <summary>
+    /// WW561. The save dialog offers a default name, and on the guest it put that name back over the
+    /// path the act wrote, so the application saved the default while every step was green.
+    /// </summary>
+    [Fact]
+    public void A_name_given_to_the_save_dialog_is_saved_instead_of_its_default_name()
+    {
+        var verdict = Run(
+            """
+            { "locator": "Button#saveFile", "act": "invoke", "named": "the Save dialog is asked for" },
+            { "locator": "Window[class=\"#32770\"]", "act": "choose file", "with": "{files}/given.png", "named": "a name is given" },
+            { "locator": "Window[class=\"#32770\"]", "act": "read", "absent": true, "named": "the dialog closed" },
+            { "locator": "Text#dialogSaid", "act": "read", "reads": "name", "expect": "saved: given.png as PNG image", "named": "the application saved the given name" }
+            """);
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
     [Fact]
     public void A_file_that_is_not_there_leaves_the_open_dialog_standing_and_the_step_red()
     {

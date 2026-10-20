@@ -488,6 +488,14 @@ the existing `pick` chooses an entry from it by the filter's description:
 { "file": "{files}/out.webp", "act": "read", "sameBytesAs": "cases/expected/out.webp" }
 ```
 
+The path is typed into the name box as characters sent to the box's own window, not set as its
+value. A Save dialog the application gave a default name keeps that name until the box is edited, and
+a value set from outside does not count as an edit. The dialog would then save under its default name
+with every step green. If it already existed, the dialog would ask to replace it, and that question
+is a second `#32770`. Typed characters need no foreground either. The box is read back before the
+confirm. If it does not hold the path, the act is refused, naming what the box held, and nothing is
+confirmed.
+
 Whether the dialog accepted the path is not the act's claim. The `read` after it claims, with
 `"absent": true`, that the dialog closed. If the dialog stays open because the file is not there, or
 because a save asks before replacing, that step is red. The question the dialog asks is a second

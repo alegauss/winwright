@@ -2,6 +2,7 @@ using System.Windows.Automation;
 
 using Winwright.Locating;
 using Winwright.Verdicts;
+using Winwright.Windowing;
 
 namespace Winwright.Acting;
 
@@ -129,9 +130,12 @@ public static class Act
     /// <summary>The common dialog's confirming button, IDOK, which is Open or Save depending on the dialog.</summary>
     public const string ConfirmButton = "1";
 
+    /// <summary>How long one character sent to the name box may take to be answered, before the act gives up on the dialog.</summary>
+    public const uint NameCharMs = 5000;
+
     /// <summary>
-    /// Choose a file in the system's common Open or Save dialog: put the path in its name box and
-    /// confirm, both through the controls' own patterns. WW551.
+    /// Choose a file in the system's common Open or Save dialog: type the path into its name box and
+    /// confirm through the button's own pattern. WW551.
     /// <para>
     /// Found by PhotoBoost (PB23, PB25): opening and exporting go through this dialog, and a case
     /// could not reach it, so the application grew flags only its tests used. Measured on the guest:
@@ -141,16 +145,30 @@ public static class Act
     /// controls under it by those ids.
     /// </para>
     /// <para>
-    /// No pointer and no key, so it needs no foreground, like every act here. Whether the dialog took
-    /// the path is not this act's claim: a read of the dialog after it, saying <c>"absent": true</c>,
-    /// claims the dialog closed, and one that stays open — a file that is not there, a save that asks
-    /// before replacing — is then a red. The type is chosen before, with <c>pick</c> on
-    /// <c>ComboBox#1136</c> in Open and <c>ComboBox#FileTypeControlHost</c> in Save.
+    /// No pointer and no synthesised key, so it needs no foreground, like every pattern act here.
+    /// Whether the dialog took the path is not this act's claim: a read of the dialog after it, saying
+    /// <c>"absent": true</c>, claims the dialog closed, and one that stays open — a file that is not
+    /// there, a save that asks before replacing — is then a red. The type is chosen before, with
+    /// <c>pick</c> on <c>ComboBox#1136</c> in Open and <c>ComboBox#FileTypeControlHost</c> in Save.
+    /// </para>
+    /// <para>
+    /// WW561, found by PhotoBoost (PB57), is why the name is typed and not set. A Save dialog given a
+    /// default name keeps that name as its own until the box is edited, and a value set through
+    /// <c>ValuePattern</c> or <c>WM_SETTEXT</c> is not an edit to it: measured on the guest, the box
+    /// read the path back for two seconds and the dialog still confirmed with the default — closing
+    /// green over a file the case never named, or, where the default already existed, asking to
+    /// replace it in a second <c>#32770</c> that made the dialog's own locator ambiguous. Each
+    /// character sent as <c>WM_CHAR</c> to the box's own window is an edit, and the dialog saved the
+    /// typed name every time. The box is then read back, and the act refuses without confirming where
+    /// it does not hold the path, naming what it held.
     /// </para>
     /// </summary>
     /// <param name="subject">The dialog.</param>
     /// <param name="path">The file, as a full path.</param>
-    /// <exception cref="NotActionableException">Where the subject is no common dialog: it holds no name box or no confirm.</exception>
+    /// <exception cref="NotActionableException">
+    /// Where the subject is no common dialog — it holds no name box or no confirm — or where its name
+    /// box would not take the path.
+    /// </exception>
     public static ActResult ChooseFile(Subject subject, string path)
     {
         ArgumentNullException.ThrowIfNull(subject);
@@ -169,7 +187,20 @@ public static class Act
             var confirm = dialog.FindFirst(TreeScope.Children, Of(ConfirmButton, ControlType.Button))
                 ?? throw Refused(subject, "a confirming button (Button#1)");
 
-            ((ValuePattern)name.GetCurrentPattern(ValuePattern.Pattern)).SetValue(path);
+            if (!Typed(name.Current.NativeWindowHandle, path))
+                throw Refused(subject, "a name box that answers what is typed into it in time");
+
+            // Sent and answered before this read, so one look is the whole of it and not a race.
+            var held = ((ValuePattern)name.GetCurrentPattern(ValuePattern.Pattern)).Current.Value ?? string.Empty;
+            if (held != path)
+            {
+                throw new NotActionableException(
+                    subject.Locator.Text,
+                    Actionable.Disabled,
+                    $"its name box held '{held}' after '{path}' was typed into it, so confirming would choose a "
+                        + "file the case did not name; nothing was confirmed");
+            }
+
             ((InvokePattern)confirm.GetCurrentPattern(InvokePattern.Pattern)).Invoke();
         });
 
@@ -179,12 +210,34 @@ public static class Act
         return new ActResult(
             "choose file",
             subject.Locator,
-            "Value, Invoke",
+            "WM_CHAR, Invoke",
             admitted.Facts,
             before.Values,
             after.Values,
             before.Resolution.WaitedMs,
             before.Resolution.Polls);
+    }
+
+    /// <summary>
+    /// Type <paramref name="text"/> over everything in an edit, by its own window: all of it selected,
+    /// then one <c>WM_CHAR</c> per code unit, each sent and answered within <see cref="NameCharMs"/>.
+    /// False where the edit has no window or a send was not answered.
+    /// </summary>
+    private static bool Typed(nint edit, string text)
+    {
+        if (edit == 0)
+            return false;
+
+        if (Win32.SendMessageTimeoutValue(edit, Win32.EmSetSel, 0, -1, Win32.AbortIfHung, NameCharMs, out _) == 0)
+            return false;
+
+        foreach (var unit in text)
+        {
+            if (Win32.SendMessageTimeoutValue(edit, Win32.WmChar, unit, 0, Win32.AbortIfHung, NameCharMs, out _) == 0)
+                return false;
+        }
+
+        return true;
     }
 
     /// <summary>A control of the common dialog by its id and its type.</summary>

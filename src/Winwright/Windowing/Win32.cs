@@ -142,6 +142,17 @@ internal static class Win32
     /// <summary>WM_GETTEXT: the message a window answers its own title with.</summary>
     internal const uint WmGetText = 0x000D;
 
+    /// <summary>The same call where both parameters are numbers. WW561: a character typed into an edit.</summary>
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SendMessageTimeoutW")]
+    internal static extern nint SendMessageTimeoutValue(
+        nint window, uint message, nint wParam, nint lParam, uint flags, uint timeoutMs, out nint answer);
+
+    /// <summary>WM_CHAR: one character, as an edit takes a keystroke once it has been translated.</summary>
+    internal const uint WmChar = 0x0102;
+
+    /// <summary>EM_SETSEL: select a range of an edit's text; 0 to -1 is all of it, which a typed character replaces.</summary>
+    internal const uint EmSetSel = 0x00B1;
+
     /// <summary>
     /// SPI_GETDROPSHADOW: whether the desk draws the shadow a menu asks for. WW450, and read rather
     /// than inferred from a shadow turning up: WinForms asks for <c>CS_DROPSHADOW</c> only where this
