@@ -196,10 +196,12 @@ internal static class Sleeps
         new("FrameRunTests.cs", 2, Sleeping.UnderTest,
             "a writer made deliberately slow so the capture falls behind — the sleeping is the "
                 + "condition under test and waiting for it would be waiting for the case's own hand"),
-        new("FileSubjectTests.cs", 1, Sleeping.UnderTest,
+        new("FileSubjectTests.cs", 2, Sleeping.UnderTest,
             "WW535. A file that arrives while the step is waiting is the condition: Explorer writes a "
                 + "dropped file after the release returns, so the copy has to land after the step began "
-                + "looking and before its deadline. The engine's own wait is what the case measures"),
+                + "looking and before its deadline. The engine's own wait is what the case measures. "
+                + "The second is WW559's, and it is machinery: the pause between asks for the desktop "
+                + "root, a COM call that fails without a state anything could wait on"),
         new("CaseRunTests.cs", 2, Sleeping.UnderTest,
             "WW401, and the delay is the condition: what that rule is about is a desk that moves "
                 + "while a reading is being taken, so the decoy has to arrive after the act landed "

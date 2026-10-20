@@ -207,6 +207,13 @@ public sealed class FileSubjectTests : IDisposable
     /// class runs beside a thousand others: <c>UiaGetRootNode</c> returned an unexpected HRESULT about
     /// one run in four, and the red was about the test's plumbing rather than about a file step.
     /// </para>
+    /// <para>
+    /// WW559. Asked again after a pause that grows, and not at once. A guest run whose desk read
+    /// 'shell' failed all ten immediate asks 1.3 s in, while the next cases of the same run drove
+    /// windows on that desk: ten asks inside a millisecond are one moment asked ten times, and a
+    /// collision that lasts a moment longer fails every one. The pauses add to 2.25 s, so a desk that
+    /// really is missing still fails, and is still a red.
+    /// </para>
     /// </summary>
     private static AutomationElement Desktop()
     {
@@ -218,8 +225,9 @@ public sealed class FileSubjectTests : IDisposable
             }
             catch (System.Runtime.InteropServices.COMException) when (attempt < 10)
             {
-                // Asked again at once: the failure is the call colliding with another, not a desk
-                // that is missing, and a desk that is missing fails all ten.
+                // The failure is the call colliding with another, not a desk that is missing, so it
+                // is given time to clear before the next ask.
+                Thread.Sleep(50 * attempt);
             }
         }
     }

@@ -2,30 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW559 The desktop root a file step never reads
-
-Found gating WW557 on 2026-10-20, in the guest, on a run whose desk read 'shell':
-`FileSubjectTests.A_file_that_never_came_fails_saying_what_the_folder_holds` went red
-1.3 s in with `COMException: Unexpected HRESULT` out of `UiaCoreApi.UiaGetRootNode`,
-through `AutomationElement.RootElement` in the class's own `Desktop()` helper. The same
-tree had passed the full guest run three times that day.
-
-`Desktop()` already knows this failure. It was measured on the host gate at about one
-run in four and is answered by asking again at once, up to ten times, on the reading
-that the call collides with another and a desk that is missing fails all ten. This run
-failed all ten, and the desk was there: the next steps of the same run drove windows on
-it.
-
-The case is about a file step, which never reads the root; `Suite.Run` asks for one and
-the helper hands it the desktop. So the red is about the test's plumbing, which is what
-the helper was written to stop.
-
-What to build: either the helper waits between asks (a short sleep, bounded, so a
-collision has time to clear), or a file-only suite run takes no root at all, which
-removes the call rather than retrying it. The second is the better answer if `Suite.Run`
-can say "no window" without a second spelling of it; read `Suite.Run`'s callers before
-choosing.
-
 ## Block B — Attach, launch, and leave nothing behind
 
 ## Block C — Locate — the locator grammar and the tree an agent reads

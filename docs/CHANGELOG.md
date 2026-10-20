@@ -43,6 +43,7 @@
 - ✅ **WW541** **A catches that is the case name with a word added passes WW537 and runs unnamed, so the claim diff reads the name** — A run names the cases whose catches begins or ends with their own name, quoting the claim and refusing nothing, so a pasted title past WW537 is seen.
 - ✅ **WW547** **A run's summary says "1 case that ran say what they catch", plural verb and pronoun on a single case** — A run's two catches lines agree with one case in every word, saying "1 case that ran says what it catches", and the tests assert the whole singular sentence.
 - ✅ **WW558** **The frame-run keeps-up case goes red when the host deschedules its thread past one 50 ms slot** — A slot lost while every capture was quick is excused as the machine's scheduler through SlowMachine, and one after a slow capture stays red.
+- ✅ **WW559** **A file-step case's desktop root fails all ten immediate asks in the guest, so a case about a file is red over UIA** — The file-step cases ask for the desktop root again after a growing pause, 2.25 s in all, so a UIA collision clears and a missing desk still fails.
 
 ## Block B — Attach, launch, and leave nothing behind
 
