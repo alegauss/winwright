@@ -196,7 +196,7 @@ public static class ScenarioSchema
         new("name", true, Taking.Text, "what to call it, and what a case names to be launched against it", []),
         new("environment", false, Taking.Text, "the sampled environment it is — the one field both the launch and the expectations read", []),
         new("flag", false, Taking.Text, "the argument the environment reaches the application through, without its value", []),
-        new("arguments", false, Taking.Words, "everything else the launch carries, as an array", []),
+        new("arguments", false, Taking.Words, "everything else the launch carries, as an array — '{files}' is filled with the fixture's staged directory and '{root}' with the project's root, for an application whose paths come in as flags", []),
         new("variables", false, Taking.Pairs, "the environment variables it sets, as an object — APPDATA, LOCALAPPDATA, USERPROFILE and HOME reach only an application that reads the variable, and one asking Windows for that known folder still reads the real profile, which a report says", []),
         new("shareable", false, Taking.Truth, "that this window may be lent to a case that only reads it", []),
         new("language", false, Taking.Text, "the language tag the window it launches is in, so a derived set reads the strings that window is actually showing", []),

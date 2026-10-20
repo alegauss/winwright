@@ -375,6 +375,43 @@ public class FixtureDeclarationTests
         }
     }
 
+    [Fact]
+    public void A_staged_file_reaches_the_launch_through_the_token_an_argument_names()
+    {
+        // WW556. photo-boost's fixture: an application whose paths come in as flags, with no variable
+        // to name the staged directory through. The declaration was refused for naming the token
+        // nowhere, and the argument would have reached the application spelling '{files}' anyway.
+        var root = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"ww556-{Guid.NewGuid():N}");
+        System.IO.Directory.CreateDirectory(System.IO.Path.Combine(root, "photos"));
+        System.IO.File.WriteAllText(System.IO.Path.Combine(root, "photos", "rotated.jpg"), "not really a photo");
+
+        var fixture = FixtureDeclaration.Of(
+            "exporting into its own folder",
+            arguments: ["--open", "{files}/rotated.jpg", "--export={files}/out.png", "--models", "{root}/models"],
+            files: ["photos/rotated.jpg"]);
+
+        try
+        {
+            Assert.True(fixture.NeedsStaging);
+
+            var staged = fixture.Stage(root);
+            var start = staged.Starting(@"C:\app\PhotoBoost.exe");
+            var full = System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(root));
+
+            Assert.Equal(
+                ["--open", $"{staged.Into}/rotated.jpg", $"--export={staged.Into}/out.png", "--models", $"{full}/models"],
+                start.ArgumentList);
+            Assert.True(System.IO.File.Exists(System.IO.Path.Combine(staged.Into, "rotated.jpg")));
+        }
+        finally
+        {
+            if (System.IO.Directory.Exists(fixture.StagedInto(root)))
+                System.IO.Directory.Delete(fixture.StagedInto(root), recursive: true);
+
+            System.IO.Directory.Delete(root, recursive: true);
+        }
+    }
+
     /// <summary>
     /// Under the system temp and not the checkout: an engine that writes into an adopter's working
     /// tree is one that turns up in their `git status`. Per project and per fixture, which is what a

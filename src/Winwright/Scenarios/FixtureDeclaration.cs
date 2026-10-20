@@ -301,6 +301,7 @@ public sealed record FixtureDeclaration
         Files.Count > 0
         || WorkingDirectory.Contains(Staged, StringComparison.Ordinal)
         || Opens.Contains(Staged, StringComparison.Ordinal)
+        || Arguments.Any(argument => argument.Contains(Staged, StringComparison.Ordinal))
         || Variables.Values.Any(value => value.Contains(Staged, StringComparison.Ordinal));
 
     /// <summary>The application as it comes: no arguments, no variables, nothing sampled.</summary>
@@ -456,6 +457,7 @@ public sealed record FixtureDeclaration
             && !stepsNameStaged
             && !starting.Contains(Staged, StringComparison.Ordinal)
             && !opening.Contains(Staged, StringComparison.Ordinal)
+            && !rest.Any(argument => argument.Contains(Staged, StringComparison.Ordinal))
             && !set.Values.Any(value => value.Contains(Staged, StringComparison.Ordinal)))
         {
             throw new ScenarioRefusedException(
@@ -843,8 +845,12 @@ public sealed record FixtureDeclaration
         };
         // WW522. The addresses this fixture reaches are offered here too, so an argument naming the
         // server is the one the probe found.
+        //
+        // WW556. And the tokens a variable takes, for an application whose paths come in as flags:
+        // photo-boost's --open and --export had no variable to name the staged directory through, so
+        // its fixture started inside that directory and staged every other file it needed there too.
         foreach (var argument in Launching())
-            start.ArgumentList.Add(Offered(argument));
+            start.ArgumentList.Add(Offered(Resolved(argument, root)));
 
         // WW509. The token resolves here and not in the declaration: where the files go is a fact
         // about this machine, and a declaration read on one machine is the same declaration on the

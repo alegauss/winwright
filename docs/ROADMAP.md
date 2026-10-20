@@ -8,8 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW556** (deps: —) **A fixture argument cannot name the staged directory: {files} is filled only into variables and the working directory** — An app that takes its paths as flags must start inside the staged folder and stage every other file it needs there too. → §WW556
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

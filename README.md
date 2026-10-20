@@ -1130,8 +1130,8 @@ Windows 11 may show the folder as a tab of an Explorer window that was already o
 used and never closed, because its other tabs are somebody's.
 
 `files` is how a case gives the application a store of its own. Each is a path relative to the project
-root, copied into a directory made for that launch and **emptied first**, and a `variables` value or
-`workingDirectory` names that directory with the token `{files}`:
+root, copied into a directory made for that launch and **emptied first**, and a `variables` value,
+an argument or `workingDirectory` names that directory with the token `{files}`:
 
 ```json
 {
@@ -1156,6 +1156,19 @@ nowhere is **refused**: files nothing is looking at are files the case was writt
 read, and the reading it takes instead is the real machine's. Declaring no files is still a directory
 of this launch's own, which is an empty store rather than a mistake. A value naming no token is
 passed exactly as written — `"reader"` is not a path for being a string.
+
+An application whose paths come in as flags names the directory in its **`arguments`**, which take
+the same tokens. The application then opens the staged copy and writes beside it, where a file step
+reads the result back. It still starts in the project's root, so its other paths resolve as they
+always do:
+
+```json
+{
+  "name": "exporting into its own folder",
+  "arguments": ["--open", "{files}/photo.jpg", "--export", "{files}/out.png", "--models", "{root}/models"],
+  "files": ["cases/fixtures/photo.jpg"]
+}
+```
 
 **`{root}`** is the other token, and it names the project's root, the directory `winwright.json` sits
 in. It is filled wherever `{files}` is, and also in a step's **`with`**, so a case can type a path in
