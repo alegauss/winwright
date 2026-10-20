@@ -26,8 +26,6 @@
 
 ## Block M — The site on the shared design system
 
-- 📋 **WW560** (deps: viglet-design-system: VDS220) **The site renders from the shared design system and is not listed in its consumers.json** — WW553 moved both halves of the site onto the package; the design system's list of who takes it is VDS220's to update. → §WW560
-
 ## Done when — Block A
 
 - **A degraded run is legible without reading the log** Run any scenario on a machine

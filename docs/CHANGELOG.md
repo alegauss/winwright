@@ -597,3 +597,4 @@
 ## Block M — The site on the shared design system
 
 - ✅ **WW553** **The site keeps its own copy of the template that eight product sites share** — The docs area asks before loading analytics and reads the design system's tokens, so both halves of the site take the package; consumers.json is WW560 (design recorded in `site/README.md`).
+- ✅ **WW560** **The site renders from the shared design system and is not listed in its consumers.json** — The design system's consumers.json lists winwright-site and winwright-docs (VDS222), and both pin 2026.3.22, whose VDS223 retired the site's link-colour workaround.

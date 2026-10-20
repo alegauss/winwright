@@ -1471,9 +1471,7 @@ figcaption code {
 /* ---------- /features depth pages ----------
    The index of them is the design system's SiteFeatureIndex (WW553); the pages are this
    site's. */
-/* a.-qualified, because .vg-site a sets every link's colour to inherit at the same weight as
-   one class, and the package's stylesheet is imported first (WW553) */
-a.feature-back {
+.feature-back {
   display: inline-block;
   color: var(--accent);
   font-size: 0.9rem;
@@ -1504,7 +1502,7 @@ a.feature-back {
 .feature-section .feat-list {
   margin-top: 8px;
 }
-a.feature-link {
+.feature-link {
   color: var(--accent-strong);
   font-weight: 600;
 }
@@ -1517,17 +1515,17 @@ a.feature-link {
   padding-top: 24px;
   border-top: 1px solid var(--line);
 }
-a.feature-nav-link {
+.feature-nav-link {
   color: var(--muted);
   font-size: 0.92rem;
   font-weight: 500;
   transition: color 0.2s;
   max-width: 48%;
 }
-a.feature-nav-link:hover {
+.feature-nav-link:hover {
   color: var(--accent);
 }
-a.feature-nav-link.next {
+.feature-nav-link.next {
   text-align: right;
   margin-left: auto;
 }
