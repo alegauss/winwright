@@ -20,7 +20,7 @@ export interface Package {
 }
 
 export const product = {
-  version: "1.1.3",
+  version: "1.1.5",
   packages: [
     {
       "id": "Winwright",
