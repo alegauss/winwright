@@ -8,6 +8,8 @@
 
 ## Block D — Act — patterns before pointers
 
+- 📋 **WW561** (deps: —) **choose file reports done while the Save dialog saves its default name, not the path the case gave** — On the VMware guest a Save case writes the app's default file name and the act and the dialog-closed read both pass (WW551). → §WW561
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
