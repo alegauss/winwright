@@ -147,6 +147,31 @@ public sealed class ShutPickerTests : IDisposable
         Assert.Contains("5 value(s)", refusal.Because, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void A_select_right_after_expand_waits_for_the_item_the_popup_is_still_realising()
+    {
+        // WW555. photo-boost's two steps, against a WPF picker that holds no items until it opens:
+        // expand, then select an item at once. It went red one run in four there, refused as "nothing
+        // matched" — the look matched an item whose peer was replaced before it could be read, and the
+        // poll stopped on it. Eight rounds, because a race that loses one time in four is a race one
+        // round would let through more often than not.
+        //
+        // It stands for the shape and does not guard the fix: a control tree without it passed 32
+        // rounds of 32 in the guest, whose picker realises its items before the first look. The
+        // element replaced between looks on purpose is WW557.
+        for (var round = 1; round <= 8; round++)
+        {
+            Act.Expand(Picker("shutPicker"));
+
+            var item = Subject.Unguarded(
+                fixtureRoot, Locator.Parse("""ComboBox#shutPicker > ListItem[name="Delta"]"""), deadlineMs: 4000, pollMs: 25);
+            var selected = Act.Select(item);
+
+            Assert.True(selected.After.IsSelected ?? false, $"round {round}: the select did not take: {selected}");
+            Act.Collapse(Picker("shutPicker"));
+        }
+    }
+
     /// <summary>
     /// Whether the picker is dropped down, read through the engine's own reading rather than through
     /// the walk — so a walk that reported one thing and left another is a red here.

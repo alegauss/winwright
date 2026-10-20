@@ -123,6 +123,11 @@ public sealed class AdmissionTests : IDisposable
         var refused = Assert.Throws<NotActionableException>(() => Admitted.To(On(frame, "Slider")));
 
         Assert.Equal(Actionable.NotInTree, refused.Missing);
+
+        // WW555. Said as the look it was: nothing matched at any poll, which is what tells a locator
+        // naming nothing apart from a race with an element the application kept replacing.
+        Assert.StartsWith("nothing matched, in ", refused.Because, StringComparison.Ordinal);
+        Assert.Contains(" looks over ", refused.Because, StringComparison.Ordinal);
     }
 
     [Fact]

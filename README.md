@@ -781,6 +781,13 @@ reads. An act that survives being repeated is attempted again where its read-bac
 that does not — `toggle`, `invoke` — gets a single go, because a retried toggle fails about the
 opposite state.
 
+An act finds its element the way an expectation does, polling its locator to the deadline. A look
+that matched an element gone before it could be read counts as no look, so an item a WPF combo box
+is still realising after `expand` is waited for. Where nothing arrives, the refusal says which kind
+of absence it was: *nothing matched, in 80 looks over 2000 ms*, or *it matched on 3 of 80 looks and
+was gone each time before it could be read*. The first points at the locator, the second at the
+application replacing the element.
+
 Both instants reach the trace. An act reads once, the moment it returns; the expectation beside it
 polls after that to the deadline, and it is the second reading the verdict turns on. Where the two
 differ the act's own line carries **what the run settled on** as well as what the act read, because

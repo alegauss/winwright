@@ -7,13 +7,15 @@ namespace Winwright.Locating;
 /// <summary>What resolving a locator found, or what it did not and why.</summary>
 public sealed record Resolution
 {
-    internal Resolution(AutomationElement? element, ElementFacts? facts, LocatorMiss? miss, int waitedMs, int polls)
+    internal Resolution(
+        AutomationElement? element, ElementFacts? facts, LocatorMiss? miss, int waitedMs, int polls, int vanished = 0)
     {
         Element = element;
         Facts = facts;
         Miss = miss;
         WaitedMs = waitedMs;
         Polls = polls;
+        Vanished = vanished;
     }
 
     /// <summary>
@@ -36,8 +38,32 @@ public sealed record Resolution
     /// <summary>How many looks it took.</summary>
     public int Polls { get; }
 
+    /// <summary>
+    /// How many of those looks matched an element that was gone before it could be read. WW555.
+    /// <para>
+    /// A WPF combo box realises its items' containers a moment after it expands, and the peer a look
+    /// matched in between is replaced by the one that follows. Such a look is not a sighting and the
+    /// poll goes on; this counts them, so a resolve that ran out still says something matched.
+    /// </para>
+    /// </summary>
+    public int Vanished { get; }
+
     /// <summary>Whether anything matched.</summary>
     public bool Found => Element is not null;
+
+    /// <summary>
+    /// Why nothing was found, in the words an act's refusal uses. WW555: a locator that matched on
+    /// some looks and was gone each time is a race with the application, and saying only "nothing
+    /// matched" sent a reader to correct a locator that was right.
+    /// </summary>
+    public string Absence()
+    {
+        var looks = Polls == 1 ? "1 look" : $"{Polls} looks";
+        return Vanished == 0
+            ? $"nothing matched, in {looks} over {WaitedMs} ms"
+            : $"it matched on {Vanished} of {looks} over {WaitedMs} ms and was gone each time before it could be read, "
+                + "so the application was replacing it rather than the locator naming nothing";
+    }
 }
 
 /// <summary>
@@ -57,8 +83,9 @@ public static class Resolve
         ArgumentNullException.ThrowIfNull(root);
         ArgumentNullException.ThrowIfNull(locator);
 
-        var sighting = Attempt.Once(() => Walk(root, locator));
-        return Answered(root, locator, sighting.Value, sighting.WaitedMs, sighting.Polls);
+        var vanished = 0;
+        var sighting = Attempt.Once(() => Sighted(root, locator, ref vanished));
+        return Answered(root, locator, sighting.Value, sighting.WaitedMs, sighting.Polls, vanished);
     }
 
     /// <summary>Resolve, polling until the deadline. The first look is taken before any waiting.</summary>
@@ -67,8 +94,34 @@ public static class Resolve
         ArgumentNullException.ThrowIfNull(root);
         ArgumentNullException.ThrowIfNull(locator);
 
-        var sighting = Attempt.Until(() => Walk(root, locator), deadlineMs, pollMs);
-        return Answered(root, locator, sighting.Value, sighting.WaitedMs, sighting.Polls);
+        var vanished = 0;
+        var sighting = Attempt.Until(() => Sighted(root, locator, ref vanished), deadlineMs, pollMs);
+        return Answered(root, locator, sighting.Value, sighting.WaitedMs, sighting.Polls, vanished);
+    }
+
+    /// <summary>An element and what it said about itself, read in the same look.</summary>
+    private sealed record Sighting(AutomationElement Element, ElementFacts Facts);
+
+    /// <summary>
+    /// One look: the route walked and the match read. WW555.
+    /// <para>
+    /// The facts are read inside the look and not after the poll returned. A match that is gone before
+    /// it can be read was handed back as found, the poll stopped on it, and the act was refused for
+    /// an element that was not there — while the one replacing it arrived a moment later. Here it is
+    /// a look that saw nothing, so the poll goes on to the deadline the way it does for any absence.
+    /// </para>
+    /// </summary>
+    private static Sighting? Sighted(AutomationElement root, Locator locator, ref int vanished)
+    {
+        var found = Walk(root, locator);
+        if (found is null)
+            return null;
+
+        if (ElementFacts.Of(found) is { } facts)
+            return new Sighting(found, facts);
+
+        vanished++;
+        return null;
     }
 
     /// <summary>The same, with the deadline read from what the project declared.</summary>
@@ -279,12 +332,12 @@ public static class Resolve
     }
 
     private static Resolution Answered(
-        AutomationElement root, Locator locator, AutomationElement? found, int waitedMs, int polls)
+        AutomationElement root, Locator locator, Sighting? found, int waitedMs, int polls, int vanished)
     {
         if (found is not null)
-            return new Resolution(found, ElementFacts.Of(found), null, waitedMs, polls);
+            return new Resolution(found.Element, found.Facts, null, waitedMs, polls, vanished);
 
-        return new Resolution(null, null, Diagnose(root, locator), waitedMs, polls);
+        return new Resolution(null, null, Diagnose(root, locator), waitedMs, polls, vanished);
     }
 
     /// <summary>

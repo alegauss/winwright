@@ -8,29 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-### §WW555 Act resolves before an expanded popup is realised
-
-Found in photo-boost (D:\Git\japode\photo-boost, PB41's run), case "choosing JPEG for a
-transparent photo warns and offers a background" in cases/window.cases.json, on
-Winwright 1.1.3.
-
-The steps: `{"locator": "ComboBox#ExportFormat", "act": "expand"}` then `{"locator":
-"ComboBox#ExportFormat > ListItem[name=\"JPEG\"]", "act": "select", "reads": "selected",
-"expect": "selected"}` against a plain WPF ComboBox with three ComboBoxItems. It passed
-three runs in four; the fourth broke at the select with NotActionableException "cannot
-take this act: nothing matched, or what matched has gone since". A WPF ComboBox realises
-its items' containers and automation peers when the popup opens, a moment after Expand
-returns, so the select resolved its locator before the item existed. `select` is marked
-repeatable, but the retries did not bridge it, and the verdict calls a race "nothing
-matched", reading like a wrong locator.
-
-Workaround in photo-boost: a `read` step on the same ListItem between the two, since an
-expectation polls until the item appears; commented with this id.
-
-What winwright should offer: an act resolves its locator against the act timeout the way
-an expectation does, or `expand` returns only once the expanded element's children are
-realised; and a NotActionable verdict says whether anything matched at any poll.
-
 ### §WW556 {files} is not filled into a fixture's arguments
 
 Found in photo-boost (D:\Git\japode\photo-boost, PB42's run), fixture "a window on the
@@ -69,6 +46,28 @@ counted by the "nothing names it" check.
 ## Block J — Adoption — the proof is the deletion
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+### §WW557 An element replaced between looks
+
+Found shipping WW555. photo-boost's select after expand was refused as "nothing matched"
+one run in four on 1.1.3. The reading behind the fix: a look matched a ListItem whose
+peer was gone before its facts were read, `Resolve` returned it as found with no facts,
+and `Admitted` refused at once instead of polling on. WW555 counts such a look as no
+look, and the refusal says "it matched on N of M looks and was gone each time" where
+that happened.
+
+Neither half is provoked here. `ShutPickerTests` drives photo-boost's two steps against
+the fixture's WPF picker, and a control tree without the fix passed 32 rounds of 32 in
+the guest on 2026-10-20: that picker realises its items before the first look.
+
+What to build: a fixture shape that replaces its element between looks on purpose. A WPF
+pane swapping a named Button for a new one of the same name on a short dispatcher timer
+is the likely spelling, since each swap disconnects the old peer. Two cases: an act
+lands once the swapping stops, and an act against one that never stops is refused with
+the vanished sentence. Pair the flag where the other shapes are paired.
+
+Then photo-boost's workaround (a `read` step between expand and select, commented WW555)
+can go once a release carries the fix.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 

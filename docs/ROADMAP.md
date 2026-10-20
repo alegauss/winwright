@@ -8,7 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW555** (deps: —) **A select right after expand sometimes finds no list item, since the act resolves before the popup realises it** — A case that picks from a combo box goes red one run in four on a correct locator, and the verdict blames the locator. → §WW555
 - 📋 **WW556** (deps: —) **A fixture argument cannot name the staged directory: {files} is filled only into variables and the working directory** — An app that takes its paths as flags must start inside the staged folder and stage every other file it needs there too. → §WW556
 
 ## Block E — Capture — the picture that proves what it photographed
@@ -24,6 +23,8 @@
 ## Block J — Adoption — the proof is the deletion
 
 ## Block K — The proving ground — a fixture app built to be hard to test
+
+- 📋 **WW557** (deps: —) **No fixture shape replaces an element between looks, so the act's vanished-match arm is provoked by nothing** — WW555's fix could be undone and the suite would stay green: the guest's picker realises its items too fast to race. → §WW557
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 

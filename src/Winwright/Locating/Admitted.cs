@@ -132,6 +132,13 @@ public sealed class Admitted
             throw new DestructiveEntryException(subject.Locator.Text, entry, facts.ToString());
         }
 
+        // WW555. Nothing to judge, and the resolve knows more about that than the judgement does: how
+        // long it looked, and whether anything matched on the way. A race with the application and a
+        // locator naming nothing are different defects in different files, and the four-way sentence
+        // alone reads both as the second.
+        if (reading.Facts is null)
+            throw new NotActionableException(subject.Locator.Text, Actionable.NotInTree, $"{reading.Resolution.Absence()}.");
+
         judged.Require(subject.Locator.Text);
 
         return new Admitted(subject, reading, judged, reading.Resolution.Element!);

@@ -215,6 +215,7 @@
 - ✅ **WW546** **A case's type step drops the resend count, so a repaired substitution traces exactly like a clean send** — A case's type step that WW249 had to resend stays green and its trace line names how many resends it took, so the fault rate can be read off an adopter's own runs.
 - ✅ **WW550** **A case cannot drop a file from Explorer onto the application, so a drop zone has no case** — 'drop file' drops a file onto the app by a real drag carrying CF_HDROP; a target that answers no effect is a named hole (design recorded in `src/Winwright/Acting/FileDrop.cs`).
 - ✅ **WW551** **A case cannot drive the common Open or Save dialog, so choosing a file through it has no case** — 'choose file' fills the common Open or Save dialog's name box by id and confirms; a read absent proves it closed, and pick sets the type (design recorded in `src/Winwright/Acting/Act.cs`).
+- ✅ **WW555** **A select right after expand sometimes finds no list item, since the act resolves before the popup realises it** — A look whose match is gone before it is read no longer ends the act's poll, and the refusal says whether anything matched.
 
 ## Block E — Capture — the picture that proves what it photographed
 
