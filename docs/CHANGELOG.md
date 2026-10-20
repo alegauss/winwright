@@ -42,6 +42,7 @@
 - ✅ **WW533** **A case renamed and a claim no case makes any more read alike between runs, so a lost claim is one rename among many** — A run keeps each case's catches by its name, so a rename that kept its claim holds and a claim no case makes is named lost (design recorded in `src/Winwright/Scenarios/RanBefore.cs`).
 - ✅ **WW541** **A catches that is the case name with a word added passes WW537 and runs unnamed, so the claim diff reads the name** — A run names the cases whose catches begins or ends with their own name, quoting the claim and refusing nothing, so a pasted title past WW537 is seen.
 - ✅ **WW547** **A run's summary says "1 case that ran say what they catch", plural verb and pronoun on a single case** — A run's two catches lines agree with one case in every word, saying "1 case that ran says what it catches", and the tests assert the whole singular sentence.
+- ✅ **WW558** **The frame-run keeps-up case goes red when the host deschedules its thread past one 50 ms slot** — A slot lost while every capture was quick is excused as the machine's scheduler through SlowMachine, and one after a slow capture stays red.
 
 ## Block B — Attach, launch, and leave nothing behind
 

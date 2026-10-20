@@ -198,6 +198,27 @@ public sealed class SlowMachineTests
     }
 
     [Fact]
+    public void A_slot_lost_while_every_capture_was_quick_is_the_machines()
+    {
+        // WW558. The fourth shape: one slot of four at 20/s lost, and the slowest capture took a
+        // millisecond, so the frame was late because the thread was woken late.
+        SlowMachine.Excusing(intervalMs: 50, lostSlots: 1, slowestCaptureMs: 1.2);
+    }
+
+    [Fact]
+    public void A_slot_lost_after_a_slow_capture_may_be_the_captures_and_stays_red()
+    {
+        // The half that keeps the check: a capture that took a real share of the slot could be what
+        // pushed the next frame past it, which is a claim about the run and not about the machine.
+        var refused = Assert.ThrowsAny<Xunit.Sdk.XunitException>(
+            () => SlowMachine.Excusing(intervalMs: 50, lostSlots: 1, slowestCaptureMs: 30));
+
+        Assert.Contains("may be the capture's", refused.Message, StringComparison.Ordinal);
+        Assert.ThrowsAny<Xunit.Sdk.XunitException>(
+            () => SlowMachine.Excusing(intervalMs: 50, lostSlots: 0, slowestCaptureMs: 1));
+    }
+
+    [Fact]
     public void This_gate_is_not_the_desks_and_says_so_by_taking_a_name_the_desk_would_refuse()
     {
         // The two excuses are deliberately not interchangeable. BusyDesk demands a condition the

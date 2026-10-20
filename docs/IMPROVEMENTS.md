@@ -2,27 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-### §WW558 A frame slot lost to the host's scheduler
-
-Found gating WW557 on 2026-10-20. `run-tests-vm.cmd` runs the desk-free half on the host
-before it starts the guest, and that half went red on one case:
-`FrameRunTests.A_run_the_capture_keeps_up_with_says_every_frame_was_in_its_slot` read "4
-frames at 20/s over 218ms, 1 of them past the next slot by up to 68ms". The same build
-passed the same filter three times in a row straight after, and every host gate earlier
-that day was green.
-
-The case asserts that a 50 ms slot is never lost, on whatever machine runs it. The
-comment beside it already says a few milliseconds of descheduling is a fact about the
-machine; 68 ms is the same fact, larger, and the host is shared with whoever sits at it.
-So a red here is a reading about the desk wearing the words of a defect in `FrameRun`,
-which is the confusion this block exists to end.
-
-What to build: the case measures what it needs before it claims it. Sleep a few 50 ms
-slots first and read the worst overshoot; where the machine itself cannot hold a slot,
-the case says so as an excuse (the `BusyDesk.Excused` route the desk cases take) instead
-of a red about the capture. Not a retry and not a wider tolerance: both would hide a
-real lost slot.
-
 ### §WW559 The desktop root a file step never reads
 
 Found gating WW557 on 2026-10-20, in the guest, on a run whose desk read 'shell':

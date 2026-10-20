@@ -2,7 +2,6 @@
 
 ## Block A — The verdict (a run is data, and "not observed" is an answer)
 
-- 📋 **WW558** (deps: —) **The frame-run keeps-up case goes red when the host deschedules its thread past one 50 ms slot** — A busy host reads as a capture that cannot keep up, so the desk-free gate can stop a guest run over the machine. → §WW558
 - 📋 **WW559** (deps: —) **A file-step case's desktop root fails all ten immediate asks in the guest, so a case about a file is red over UIA** — The red is about the test's plumbing, which the retry was written to stop, and it costs a whole guest run to clear. → §WW559
 
 ## Block B — Attach, launch, and leave nothing behind

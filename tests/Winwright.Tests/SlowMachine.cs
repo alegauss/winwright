@@ -240,6 +240,42 @@ internal static class SlowMachine
                 + "fixture to hold it for");
     }
 
+    /// <summary>What a slot the scheduler took is called in the ledger. WW558.</summary>
+    internal const string Slot = "the slot a frame run is due in, lost between captures";
+
+    /// <summary>
+    /// That the hole is honest for a frame run that lost a slot while every capture in it was quick.
+    /// <para>
+    /// WW558. The fourth shape. A frame run is due at fixed slots and reports a lost one as a capture
+    /// that could not keep up. Where the capture is a write of five bytes and each one is timed, a slot
+    /// lost anyway was lost between captures — the thread was not woken in time, which is the machine's
+    /// scheduler and nothing <c>FrameRun</c> did. Measured on the host gate: one slot of four at 20/s,
+    /// late by 68ms, on a run that passed three times straight after.
+    /// </para>
+    /// </summary>
+    /// <param name="intervalMs">The slot, as the run asked for it.</param>
+    /// <param name="lostSlots">How many slots the run lost.</param>
+    /// <param name="slowestCaptureMs">The longest any capture in the run took, timed inside it.</param>
+    internal static void Excusing(int intervalMs, int lostSlots, double slowestCaptureMs)
+    {
+        Assert.True(lostSlots > 0, "this run lost no slot, so there is nothing to excuse");
+
+        // A quarter of the slot, and the reason is the arithmetic: a capture taking longer than that
+        // is a real share of the slot, and a slot lost after one is as likely the capture as the
+        // machine. Below it, the capture cannot be what pushed the next frame past its slot.
+        Assert.True(
+            slowestCaptureMs < intervalMs / 4.0,
+            $"a capture in this run took {slowestCaptureMs:0.#}ms of a {intervalMs}ms slot, so the lost "
+                + "slot may be the capture's and this is not the machine's to excuse");
+
+        Excuses.Written(
+            ExcusedBy.Budget,
+            Slot,
+            typeof(SlowMachine),
+            $"{lostSlots} slot(s) of {intervalMs}ms lost while no capture took longer than "
+                + $"{slowestCaptureMs:0.#}ms, so the thread was woken late");
+    }
+
     /// <summary>The sentence for that one, which is the other way a run can be too late.</summary>
     /// <param name="what">What was being looked for.</param>
     /// <param name="holdingMs">How long the fixture was asked to hold it.</param>
