@@ -331,10 +331,10 @@ internal static class Criteria
         // no longer declares the lead and a catalogue entry for one is a lead pointing nowhere. It is
         // deleted rather than restated, which is what this pair of checks is for.
 
-        new("WW552", "A Mica window with a Direct3D region yields a picture that shows it", "", Unshown.NotBuilt,
-            "the first half refuses a render holding a hosted window, by name "
-                + "(ProvokedByFlagTests.A_page_holding_a_window_of_its_own_is_refused_naming_the_region); "
-                + "the composition that would put the swapchain's pixels in the picture is the half still open"),
+        // WW552's criterion stood here between its two ships and went with the line, checked. The
+        // fixture's --swapchain is a Mica window with a Direct3D 11 swapchain in an HwndHost, and
+        // ProvokedByFlagTests reads the swapchain's clear colour back out of the render the guest
+        // wrote. Deleted rather than restated, which is what this pair of checks is for.
 
         // WW493's criterion stood here between its two ships and went with the line, checked.
         // `samples/Walkthrough` is the runnable adoption the first half said did not exist — an

@@ -10,7 +10,9 @@ namespace Winwright.Fixture;
 /// Found by PhotoBoost (PB27, PB40), whose image area is Direct3D in a child window with a DXGI
 /// swapchain, hosted in a WPF page. A render draws the visual tree, and a hosted window is not in
 /// it, so the picture came out the right size with a hole where the image was and nothing saying so.
-/// The render refuses that now, naming the region, and this is the page that makes it refuse.
+/// The render copies such a region from its window now, and this page is built and never shown, so
+/// there is no window to copy from: it is the page that makes the render refuse, naming the region.
+/// <see cref="SwapchainPane"/> is the same region shown.
 /// </para>
 /// <para>
 /// A WinForms panel and not a swapchain, because the property that matters is the one they share:

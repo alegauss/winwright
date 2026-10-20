@@ -188,7 +188,60 @@ public sealed class ProvokedByFlagTests : IDisposable
         Assert.Equal(Refused("hosted"), code);
         Assert.Contains(nameof(UnrenderableException), said, StringComparison.Ordinal);
         Assert.Contains("WindowsFormsHost 'hostedImage' 200x100 at 0,24", said, StringComparison.Ordinal);
+        Assert.Contains("in no window that is shown", said, StringComparison.Ordinal);
         Assert.False(File.Exists(path), "the refused render wrote a file anyway");
+    }
+
+    [Fact]
+    public void A_Mica_window_with_a_Direct3D_region_renders_with_the_swapchain_in_the_picture()
+    {
+        // --swapchain. WW552's other half: the same hosted region, shown this time, on Mica, with a
+        // Direct3D 11 swapchain cleared to a colour nothing else on the page draws. The render copies
+        // the region from its window, so the pixel in the middle of it is the swapchain's and the
+        // receipt says where it came from.
+        var path = Path.Combine(root, "swapchain.png");
+        var (code, said) = Rendered(path, "--swapchain");
+
+        Assert.True(code == 0, said);
+        Assert.Contains("Swapchain 'swapchainImage' 200x100 at 0,24 copied from its own window", said, StringComparison.Ordinal);
+        Assert.True(File.Exists(path), $"the fixture wrote no picture to {path}: {said}");
+
+        var middle = Pixel(path, 100, 74);
+        Assert.True(middle == (0x20, 0xA0, 0x60), $"the middle of the swapchain's region is {middle}, not the colour it was cleared to: {said}");
+
+        // And the tree around it is still the tree's: the title row is not the swapchain's colour.
+        Assert.NotEqual((0x20, 0xA0, 0x60), Pixel(path, 230, 4));
+    }
+
+    [Fact]
+    public void A_D3DImage_that_drew_nothing_into_the_render_is_refused_naming_the_region()
+    {
+        // --surfaceless. A D3DImage reaches a software render only through its fallback; this one has
+        // no surface at all, so its region drew nothing and the render refuses rather than writing a
+        // picture of the right size with that region empty.
+        var path = Path.Combine(root, "surfaceless.png");
+        var (code, said) = Rendered(path, "--surfaceless");
+
+        Assert.Equal(Refused("surfaceless"), code);
+        Assert.Contains(nameof(UnrenderableException), said, StringComparison.Ordinal);
+        // 0x0, because an image whose surface was never set lays out to nothing: the size is part of
+        // what the refusal says about it.
+        Assert.Contains("D3DImage in 'surfacelessImage' 0x0 at 0,24 drew nothing", said, StringComparison.Ordinal);
+        Assert.Contains("enableSoftwareFallback", said, StringComparison.Ordinal);
+        Assert.False(File.Exists(path), "the refused render wrote a file anyway");
+    }
+
+    /// <summary>One pixel of a picture, as red, green and blue, read off the file the fixture wrote.</summary>
+    private static (int, int, int) Pixel(string path, int x, int y)
+    {
+        using var file = File.OpenRead(path);
+        var frame = System.Windows.Media.Imaging.BitmapDecoder.Create(
+            file, System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat, System.Windows.Media.Imaging.BitmapCacheOption.OnLoad).Frames[0];
+        var bgra = new System.Windows.Media.Imaging.FormatConvertedBitmap(frame, System.Windows.Media.PixelFormats.Bgra32, null, 0);
+
+        var read = new byte[4];
+        bgra.CopyPixels(new System.Windows.Int32Rect(x, y, 1, 1), read, 4, 0);
+        return (read[2], read[1], read[0]);
     }
 
     [Fact]

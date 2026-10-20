@@ -13,8 +13,6 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- ⏳ **WW552** (deps: —) **A Mica window whose picture is drawn by Direct3D has no capture route at all** — A Mica window with Direct3D still has no picture: composite the hosted swapchain into the render, and say what a D3DImage drew. → §WW552
-
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
@@ -160,13 +158,6 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
-
-## Done when — WW552
-
-- **A Mica window with a Direct3D region yields a picture that shows it** A capture of a
-  fixture page holding a hosted swapchain that clears to a known colour carries that
-  colour in the region, read back from the file; until then the render refuses it by
-  name.
 
 ## Non-goals
 

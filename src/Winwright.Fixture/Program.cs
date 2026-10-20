@@ -252,11 +252,27 @@ public static class Program
             return 0;
         }
 
-        // WW552. A page holding a hosted window, which the render refuses by naming the region rather
-        // than writing a picture with a hole in it. Refused before anything is written, like sizeless.
+        // WW552. A page holding a hosted window and never shown, so the render has no window to copy
+        // the region from and refuses by naming it. Refused before anything is written, like sizeless.
         if (shapes.Has("hosted"))
         {
             Console.Out.WriteLine(Winwright.InApp.Render.ToFile(HostedPane.Build(), path, HostedPane.Size).Sentence());
+            return 0;
+        }
+
+        // WW552's other half: the hosted window shown, on Mica, with Direct3D in it. The render copies
+        // the region from its window and composes it, so this one writes a picture and exits clean.
+        if (shapes.Has("swapchain"))
+        {
+            Console.Out.WriteLine(SwapchainPane.Rendered(path));
+            return 0;
+        }
+
+        // And the D3DImage, which is in the tree and still draws nothing into a software render
+        // without its fallback. Refused by reading the region back, before anything is written.
+        if (shapes.Has("surfaceless"))
+        {
+            Console.Out.WriteLine(Winwright.InApp.Render.ToFile(SurfacelessPane.Build(), path, SurfacelessPane.Size).Sentence());
             return 0;
         }
 
