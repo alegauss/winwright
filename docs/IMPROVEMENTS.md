@@ -38,27 +38,29 @@ kind of application: the field is generic, and an Electron adopter names
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW563 A launched application never writes on the protocol channel
+### §WW567 A tool that throws answers, and the server stays up
 
-Found driving polyweave's Electron window through the MCP server from a terminal session
-that has no plugin installed. The client was a small JSON-RPC reader over the server's
-stdio (`tools/winwright-mcp.cmd`).
+Found writing WW563's end-to-end test, on 2026-10-20. A project whose `executable` was
+`cmd.exe` resolved it against the project root, and `ProcessRegister.Launch` threw
+`Win32Exception (2)`: the system cannot find the file. Nothing between the throw and
+`Program.Main` catches it. `Running.Over` catches `ScenarioRefusedException` and
+`DeclarationMissingException` only, `Served.Called` catches nothing, and the server
+exited with an unhandled exception. The client got no reply to the call, and every later
+call in the session had no server to answer it.
 
-During `winwright_run`, which launched `electron.exe`, the server's stdout carried a
-line that was not JSON-RPC: an empty line, before the result. A strict reader stopped
-there with `JSONDecodeError: Expecting value: line 2 column 1`. A tolerant reader
-skipped it and got the verdict. The most likely source is the launched application.
-Electron writes to its own stdout, and a child started without redirecting its streams
-inherits the server's, which is the protocol channel. An application that prints a lot,
-or prints a `{`, would corrupt the stream for any MCP client, not only a hand-written
-one.
+So any exception the engine did not foresee costs the session its tools, not one answer.
+That covers a missing executable, a COM failure in UI Automation, or an IO error on a
+staged file. The client sees a closed pipe and no sentence saying why.
 
-What to build: every process the runner launches gets its stdout and stderr redirected
-away from the server's own. Capture them, keep them in the case's trace as the
-application's output, and name them in a red case's verdict where they say why it
-failed. Nothing a launched application writes may reach the MCP channel. A test should
-launch an application that prints to stdout and assert that the protocol stream stays
-parseable.
+What to build: `Served.Called` answers any exception a tool throws as a refused answer.
+The answer names the tool, the exception type and its message, and says the harness
+broke rather than the application, so `isError` is true and the loop goes on. Keep the
+stack trace on the server's stderr, which is not the protocol. Separately,
+`Suite.Opened` could refuse a launch whose executable cannot be started, with a
+`ScenarioRefusedException` naming the resolved path, since that is the declaration being
+wrong. A test should call `winwright_run` on a project naming an executable that does
+not exist, and assert that the reply is a refused answer and a second request is still
+answered.
 
 ## Block I — The in-app half — the app cooperates with the harness
 

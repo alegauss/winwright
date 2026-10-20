@@ -18,7 +18,7 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-- 📋 **WW563** (deps: —) **an application winwright launches writes onto the MCP server's stdout, breaking the protocol stream** — Any client reading JSON-RPC strictly loses the verdict the moment the application under test prints a line. → §WW563
+- 📋 **WW567** (deps: —) **an exception a tool did not foresee ends the MCP server, so the session loses every winwright tool** — A run naming an executable that cannot start threw past Running.Over and the server exited, answering nothing. → §WW567
 
 ## Block I — The in-app half — the app cooperates with the harness
 

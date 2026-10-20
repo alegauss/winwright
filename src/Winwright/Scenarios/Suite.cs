@@ -317,6 +317,8 @@ public static class Suite
             // process that had left before the case finished is what a reading full of missing
             // locators is actually about. A borrowed launch is not stopped here and gets this at the
             // end of the run instead, where no one case can claim it.
+            // WW563. What the launch wrote, which the register kept off the runner's own streams.
+            result = result.Hearing(process);
             ran.Add(process.Departed is { } departed ? result.After(departed) : result);
         }
 

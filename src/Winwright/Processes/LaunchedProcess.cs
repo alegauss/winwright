@@ -95,6 +95,85 @@ public sealed class LaunchedProcess
 
     internal Process Underlying => process;
 
+    /// <summary>How many of the lines it wrote <see cref="Wrote"/> keeps, the last ones.</summary>
+    public const int Kept = 20;
+
+    private readonly Queue<string> heard = new();
+    private int lines;
+
+    /// <summary>
+    /// The last lines it wrote on its output or its error stream, oldest first, where the register
+    /// took them. WW563: nothing it writes reaches the stream its runner answers on, so this is where
+    /// a reader finds what it said. Bounded, because an application that logs every frame would
+    /// otherwise hold a run's memory.
+    /// </summary>
+    public IReadOnlyList<string> Wrote
+    {
+        get
+        {
+            lock (heard)
+                return [.. heard];
+        }
+    }
+
+    /// <summary>How many lines it wrote in all, of which <see cref="Wrote"/> is the tail.</summary>
+    public int Lines
+    {
+        get
+        {
+            lock (heard)
+                return lines;
+        }
+    }
+
+    /// <summary>
+    /// Close the input and drain the outputs the register took. WW563. Drained rather than left
+    /// unread, because a pipe nobody reads fills, and an application blocked on a full pipe is a
+    /// window that stops painting for a reason no case can see.
+    /// </summary>
+    internal void Draining(ProcessRegister.Streams taken)
+    {
+        if (taken.Input)
+        {
+            try
+            {
+                process.StandardInput.Close();
+            }
+            catch (IOException)
+            {
+                // A process that has already gone has a pipe that is already broken, which is closed
+                // enough.
+            }
+        }
+
+        if (taken.Output)
+        {
+            process.OutputDataReceived += (_, said) => Heard(said.Data);
+            process.BeginOutputReadLine();
+        }
+
+        if (taken.Error)
+        {
+            process.ErrorDataReceived += (_, said) => Heard(said.Data);
+            process.BeginErrorReadLine();
+        }
+    }
+
+    private void Heard(string? line)
+    {
+        // Null is the stream closing, and a blank line is nothing a reader can act on.
+        if (string.IsNullOrWhiteSpace(line))
+            return;
+
+        lock (heard)
+        {
+            lines++;
+            heard.Enqueue(line);
+            if (heard.Count > Kept)
+                heard.Dequeue();
+        }
+    }
+
     /// <summary>
     /// Record that the register found it already gone. Kept where it was first recorded: the first
     /// look is the one that happened at the case boundary, and a later stop asking again would move

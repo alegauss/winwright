@@ -156,6 +156,21 @@ public sealed class ProcessRegister : IDisposable
         // application whose activation the system refuses.
         var lifted = Windowing.ForegroundLock.Lift();
 
+        // WW563. A child started without its own streams inherits this process's, and under the MCP
+        // server those are the protocol channel: polyweave's Electron window printed a line onto it
+        // and a strict JSON-RPC reader lost the verdict. So every stream the caller left alone is
+        // taken here — the input closed, the two outputs drained into the launch — and only the
+        // ones it left alone, because a caller that redirected one reads it itself. A shell-executed
+        // start has no streams to take, and inherits none either.
+        var piped = !start.UseShellExecute;
+        var taking = new Streams(
+            piped && !start.RedirectStandardInput,
+            piped && !start.RedirectStandardOutput,
+            piped && !start.RedirectStandardError);
+        start.RedirectStandardInput |= taking.Input;
+        start.RedirectStandardOutput |= taking.Output;
+        start.RedirectStandardError |= taking.Error;
+
         var started = Process.Start(start)
             ?? throw new InvalidOperationException($"{start.FileName} started nothing this run can hold");
 
@@ -163,6 +178,7 @@ public sealed class ProcessRegister : IDisposable
         {
             Handed = lifted && Windowing.ForegroundLock.Hand(started.Id),
         };
+        registered.Draining(taking);
         launched.Add(registered);
         AnyLaunch[registered.Pid] = registered;
         return registered;
@@ -324,6 +340,9 @@ public sealed class ProcessRegister : IDisposable
         foreach (var registered in launched)
             registered.Underlying.Dispose();
     }
+
+    /// <summary>Which of a launch's three streams the register took, rather than the caller. WW563.</summary>
+    internal readonly record struct Streams(bool Input, bool Output, bool Error);
 
     /// <summary>Ask it to go, then make it. The one place the two-stage stop is written.</summary>
     private SurvivorFate Ending(LaunchedProcess registered)

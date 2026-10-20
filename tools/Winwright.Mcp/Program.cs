@@ -21,6 +21,12 @@ public static class Program
         // and a mark in front of it is a parse error at the other end.
         Console.OutputEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
+        // WW563. The channel is held here and nowhere else: anything in this process that writes to
+        // the console by habit lands on the error stream, which is not the protocol. A launched child
+        // is the register's to keep off it, since it would inherit the handle and not this writer.
+        Channel = Console.Out;
+        Console.SetOut(Console.Error);
+
         while (Console.ReadLine() is { } line)
         {
             if (line.Trim().Length == 0)
@@ -41,7 +47,10 @@ public static class Program
     /// <summary>One message, on one line, flushed — a reply sitting in a buffer never arrived.</summary>
     private static void Write(JsonNode reply)
     {
-        Console.Out.WriteLine(reply.ToJsonString());
-        Console.Out.Flush();
+        Channel.WriteLine(reply.ToJsonString());
+        Channel.Flush();
     }
+
+    /// <summary>The stream replies go on, which nothing else in this process writes to. WW563.</summary>
+    private static TextWriter Channel { get; set; } = Console.Out;
 }

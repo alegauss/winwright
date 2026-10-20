@@ -111,7 +111,33 @@ public sealed class CaseResult
     /// </summary>
     /// <param name="departure">What the register found.</param>
     internal CaseResult After(Departure departure) =>
-        new(Declared, Verdict, Trace, NotReached, Lent, Across, departure);
+        new(Declared, Verdict, Trace, NotReached, Lent, Across, departure) { Said = Said, SaidLines = SaidLines };
+
+    /// <summary>
+    /// The last lines the application this case launched wrote on its output and error streams,
+    /// oldest first. Empty where it wrote nothing, or where the case borrowed its window. WW563.
+    /// <para>
+    /// Here and not as trace lines: a line per line printed would make an application's logging
+    /// change every trace its cases write, and what a reader wants is the tail under a red.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Said { get; private init; } = [];
+
+    /// <summary>How many lines it wrote in all, of which <see cref="Said"/> is the tail. WW563.</summary>
+    public int SaidLines { get; private init; }
+
+    /// <summary>
+    /// The same reading, with what its launch wrote. WW563: the register takes a launch's streams so
+    /// nothing reaches the channel a runner answers on, and a red case is where what it wrote may be
+    /// the reason.
+    /// </summary>
+    /// <param name="launched">The launch this case owned.</param>
+    internal CaseResult Hearing(LaunchedProcess launched) =>
+        new(Declared, Verdict, Trace, NotReached, Lent, Across, Departed)
+        {
+            Said = launched.Wrote,
+            SaidLines = launched.Lines,
+        };
 
     /// <summary>
     /// One line per check that did not pass, and per place the harness threw: the step, the locator
@@ -130,6 +156,15 @@ public sealed class CaseResult
             lines.Add($"  threw      {error}");
         foreach (var result in Verdict.Failures.Concat(Verdict.Unchecked))
             lines.Add(VerdictSummary.Line(result, subject: Subject(result)));
+
+        // WW563. What the application said, where a case did not pass: an exception it printed is
+        // often the whole reason, and the stream it went to is no longer one anybody reads.
+        if (lines.Count > 0 && Said.Count > 0)
+        {
+            var of = SaidLines > Said.Count ? $"; the last {Said.Count} of {SaidLines}" : "";
+            lines.Add($"  the application wrote{of}:");
+            lines.AddRange(Said.Select(one => $"    {one}"));
+        }
 
         return new ReadOnlyCollection<string>(lines);
     }

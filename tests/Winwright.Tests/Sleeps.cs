@@ -211,6 +211,11 @@ internal static class Sleeps
                 + "two: disposal waits on that thread's own signal before closing the decoy, because "
                 + "one still opening would outlive the case and take the desk from whatever runs "
                 + "next, which is the fault WW384 spent two guest runs on"),
+        new("LaunchStreamsTests.cs", 2, Sleeping.Machinery,
+            "WW563. One is the interval between looks while a launch's drained lines arrive, which "
+                + "they do after the exit and not with it, under a ten-second deadline; the other is "
+                + "the server's next line read with a minute's deadline, so a server that went quiet "
+                + "is a red rather than a hung suite"),
         // --- parked on a signal, which WW198 widened the reading to see ------------------------------
         new("ApartmentTests.cs", 2, Sleeping.UnderTest,
             "an event nobody ever sets, waited on twice so the apartment's own deadline has something "
