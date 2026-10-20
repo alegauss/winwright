@@ -128,7 +128,7 @@ is answered with the nearest name UI Automation actually has.
   name is the field a translation rewrites.
 - **The Claude Code plugin** — two commands in the repository wire every clone
   (`claude plugin marketplace add alegauss/winwright --scope project`, then
-  `claude plugin install winwright@alegauss --scope project`), and the server and guard are
+  `claude plugin install winwright@winwright --scope project`), and the server and guard are
   .NET processes built once with `dotnet build -c Release` in the plugin's own clone. Four
   MCP tools: `winwright_format` (every field of a file, a case, a step and a fixture),
   `winwright_vocabulary` (every act and what each needs said beside it), `winwright_check`

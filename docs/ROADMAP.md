@@ -19,8 +19,6 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-- 📋 **WW554** (deps: —) **The plugin's marketplace is named alegauss like roadkeep's, so a project using roadkeep cannot install it per project** — settings.json keys marketplaces by name, so adding one repository replaces the other and the documented install breaks an adopter's existing plugin. → §WW554
-
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion

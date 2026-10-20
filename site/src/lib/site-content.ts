@@ -820,7 +820,7 @@ export const install = {
   agentLead: "And in the repository that drives the application, if you use Claude Code:",
   agentCommands: [
     "claude plugin marketplace add alegauss/winwright --scope project",
-    "claude plugin install winwright@alegauss --scope project",
+    "claude plugin install winwright@winwright --scope project",
   ],
   agentNote: [
     "Both write into that repository's ",
@@ -884,7 +884,7 @@ export const claudeCode = {
   setupLead: "Run once, in the repository that drives the application:",
   setupCommands: [
     "claude plugin marketplace add alegauss/winwright --scope project",
-    "claude plugin install winwright@alegauss --scope project",
+    "claude plugin install winwright@winwright --scope project",
   ],
   setupNote: [
     "Both write into that repository's ",

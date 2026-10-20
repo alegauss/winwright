@@ -264,7 +264,16 @@ public sealed class ConcordanceTests : IDisposable
 
         Assert.Equal("winwright", named);
         Assert.Contains(named, offered);
-        Assert.Equal("alegauss", marketplace.RootElement.GetProperty("name").GetString());
+        // WW554. Named after the plugin and not after the account: settings key marketplaces by name,
+        // and roadkeep's is "alegauss", so under that name a project using both could register only
+        // one of them. And the install line the README hands an adopter names this marketplace.
+        var market = marketplace.RootElement.GetProperty("name").GetString();
+        Assert.Equal("winwright", market);
+        Assert.NotEqual("alegauss", market);
+        Assert.Contains(
+            $"claude plugin install {named}@{market} --scope project",
+            File.ReadAllText(Path.Combine(Checkout.Root, "README.md")),
+            StringComparison.Ordinal);
 
         // Where the plugin lives inside the marketplace's own repository, which is this one.
         Assert.Equal(

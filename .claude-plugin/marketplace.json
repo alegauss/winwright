@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "alegauss",
-  "description": "Plugins published from Alexandre Oliveira's repositories.",
+  "name": "winwright",
+  "description": "The winwright plugin: drives a Windows desktop app from a test and reports what was actually observed.",
   "owner": {
     "name": "Alexandre Oliveira",
     "url": "https://github.com/alegauss"

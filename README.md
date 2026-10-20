@@ -68,12 +68,17 @@ Two commands, run once in the repository that drives the application:
 
 ```
 claude plugin marketplace add alegauss/winwright --scope project
-claude plugin install winwright@alegauss --scope project
+claude plugin install winwright@winwright --scope project
 ```
 
 Both write into that repository's `.claude/settings.json`, so **committing that file wires every
 clone**. There is no per-machine install, nothing added to any path, and no instruction that differs
 by whose desk it is. A clone that has the file has the plugin.
+
+The marketplace is named `winwright`, after the plugin, and not after the account. Settings key
+marketplaces by name, and roadkeep's is named `alegauss`: a project using both registers two names
+side by side. Under the old name, adding one replaced the other. If your settings still carry
+`winwright@alegauss`, remove that entry and its marketplace, then run the two commands above.
 
 The version the plugin carries is the version this tree declares, and the two are read against each
 other by the same gate that compares the packages — `Winwright.Concordance --declared … --manifest …`.
