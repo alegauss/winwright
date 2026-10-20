@@ -115,6 +115,7 @@
 - ✅ **WW542** **A step's with cannot name the project's root, so a case types a checkout's path whole and is red on any other desk** — A step's with fills {root}, {root/} and {files}, and fixtures fill {root} where {files} was, so a case reaches its checkout on any desk.
 - ✅ **WW543** **A staged fixture file keeps its source's modification time, so a rule about how recent a file is fails a day later** — A staged copy is written now, or as old as a file's modified age says, so a rule about how recent a file is holds the day after the fixture.
 - ✅ **WW549** **A case first in its run cannot type: the window it launched never comes forward before any synthesised input** — A launch hands the started process the foreground first, so a case first in its run or soaked alone comes forward (design recorded in `src/Winwright/Windowing/ForegroundLock.cs`).
+- 🗑 **WW565** **an Electron app in development cannot be declared: its exe is node_modules' electron and the app is an argument** — abandoned: Already possible: executable resolves against winwright.json's folder and an argument takes {root} (WW542); with WW564's unset an Electron app is an ordinary executable.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -416,6 +417,7 @@
 - ✅ **WW142** **the agreement check carries an exit code for a gate and no gate anywhere runs it** — Continuous integration reads the tree's version, the assembly it loaded, both packages it built and the adopter's pinned reference, and exits 1 on any disagreement.
 - ✅ **WW153** **the agreement report prints the +sha its own sentence drops, in a column too narrow to hold it** — The report spells a version the way its own sentence does and names the build separately, in a column as wide as the widest thing in it, so every row lines up whatever a copy declares.
 - ✅ **WW387** **nothing can answer for a window that is not hooked, so an absent half is told from a late one by waiting** — An armed half puts up a message-only window, so a wait is paid once a window and given back the moment one appears (design recorded in `src/Winwright/Capturing/OwnRender.cs`).
+- 🗑 **WW566** **an Electron application has no in-app half, so it cannot render itself, say it is busy or report its geometry** — abandoned: An Electron window is a Chromium page, and Playwright's _electron already waits on the DOM, renders the window and reads geometry; a second npm runtime here would duplicate it.
 
 ## Block J — Adoption — the proof is the deletion
 

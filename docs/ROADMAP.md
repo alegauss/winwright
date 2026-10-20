@@ -4,6 +4,8 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW564** (deps: —) **a fixture cannot remove an inherited environment variable, so an Electron app launched from VS Code runs as Node** — VS Code exports ELECTRON_RUN_AS_NODE=1 and the window never opens, with an error that never names the variable. → §WW564
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -15,6 +17,9 @@
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
+
+- 📋 **WW562** (deps: —) **winwright_run's answer for a red case names no failing step, locator, reading or wait** — An agent told only that one check of one failed has to rediscover the cause outside the case, which the verdict exists to spare it. → §WW562
+- 📋 **WW563** (deps: —) **an application winwright launches writes onto the MCP server's stdout, breaking the protocol stream** — Any client reading JSON-RPC strictly loses the verdict the moment the application under test prints a line. → §WW563
 
 ## Block I — The in-app half — the app cooperates with the harness
 
