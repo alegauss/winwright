@@ -717,6 +717,9 @@ public sealed record DerivedSet
         return $"{where}, less {string.Join(" and ", parts)}";
     }
 
+    /// <summary>How many of the last lines a read-out wrote on its error stream a refusal names. WW568.</summary>
+    private const int Complaints = 5;
+
     /// <summary>
     /// Run the application the way the project says and hand back the lines it printed, blank ones
     /// dropped and order kept.
@@ -742,14 +745,42 @@ public sealed record DerivedSet
 
         string printed;
         int code;
+        var complained = new Queue<string>();
         try
         {
             using var running = System.Diagnostics.Process.Start(start)
                 ?? throw new UnderivableSetException(
                     $"{named}: {declaration.Executable} started nothing that could be asked for '{key}'");
 
+            // WW568. The input closed at once, because under the MCP server the one this would inherit
+            // is the protocol's: an application reading it during a read-out would take the next
+            // request. The error stream drained beside the output, so a full pipe cannot block it.
+            try
+            {
+                running.StandardInput.Close();
+            }
+            catch (System.IO.IOException)
+            {
+                // Gone already, and a pipe to a process that has gone is closed enough.
+            }
+
+            running.ErrorDataReceived += (_, said) =>
+            {
+                if (string.IsNullOrWhiteSpace(said.Data))
+                    return;
+
+                lock (complained)
+                {
+                    complained.Enqueue(said.Data.Trim());
+                    if (complained.Count > Complaints)
+                        complained.Dequeue();
+                }
+            };
+            running.BeginErrorReadLine();
+
             // Read before the wait: a process filling a redirected pipe nobody is reading blocks on
             // the write, and this would then wait out an application that had already done its work.
+            // The wait takes no deadline, which is also what lets the error lines finish arriving.
             printed = running.StandardOutput.ReadToEnd();
             running.WaitForExit();
             code = running.ExitCode;
@@ -762,9 +793,15 @@ public sealed record DerivedSet
 
         if (code != 0)
         {
+            // WW568. What it said on its way out, which is usually why: the exit code alone sent the
+            // reader to run the application by hand to find out.
+            var said = complained.Count == 0
+                ? ""
+                : $"; it wrote on its error stream: {string.Join(" | ", complained)}";
+
             throw new UnderivableSetException(
                 $"{named}: {declaration.Executable} exited {code} when asked for '{key}', so what it printed "
-                    + "is not an answer");
+                    + $"is not an answer{said}");
         }
 
         return printed.Split('\n').Select(one => one.Trim()).Where(one => one.Length > 0).ToList();
@@ -799,6 +836,11 @@ public sealed record DerivedSet
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true,
+
+            // WW568. The other two streams too, for the register's reason since WW563: neither may be
+            // the runner's, and under the MCP server the runner's input is the protocol.
+            RedirectStandardInput = true,
+            RedirectStandardError = true,
 
             // WW513, and WW508's rule for the launcher it did not name. The root, so a read-out
             // argument naming a file in the project means the same thing under every runner. No

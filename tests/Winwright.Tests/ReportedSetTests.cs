@@ -186,6 +186,49 @@ public sealed class ReportedSetTests : IDisposable
     }
 
     [Fact]
+    public void A_read_out_that_reads_its_input_meets_the_end_of_it_and_answers()
+    {
+        // WW568. Under the MCP server the input a read-out inherited was the protocol's, so an
+        // application reading it took the next request. Closed, findstr reads nothing and the
+        // read-out goes on to print its answer.
+        var set = DerivedSet.Reported(
+            "the echoed",
+            Through(Path.Combine(Environment.SystemDirectory, "cmd.exe"), "echoed", "\"/c\", \"findstr x & echo alpha\""),
+            "echoed");
+
+        Assert.Equal(["alpha"], set.Expected);
+    }
+
+    [Fact]
+    public void A_read_out_that_fails_names_what_it_wrote_on_its_error_stream()
+    {
+        // WW568. The exit code alone sent a reader to run the application by hand.
+        var refused = Assert.Throws<UnderivableSetException>(() => DerivedSet.Reported(
+            "the broken",
+            Through(Path.Combine(Environment.SystemDirectory, "cmd.exe"), "broken", "\"/c\", \"echo no such profile store 1>&2 & exit 3\""),
+            "broken"));
+
+        Assert.Contains("exited 3", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("no such profile store", refused.Message, StringComparison.Ordinal);
+    }
+
+    /// <summary>A declaration whose read-out runs <paramref name="executable"/> rather than the fixture.</summary>
+    private ProjectDeclaration Through(string executable, string named, string arguments)
+    {
+        var path = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(executable)}},
+              "reportedSets": { {{System.Text.Json.JsonSerializer.Serialize(named)}}: [{{arguments}}] }
+            }
+            """);
+
+        return ProjectDeclaration.Load(path);
+    }
+
+    [Fact]
     public void An_application_that_reports_nothing_is_broken_and_never_met()
     {
         // The same rule an empty key is under, and for the same reason: an empty expected set is met

@@ -16,8 +16,6 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-- 📋 **WW568** (deps: —) **a derived set's read-out launch inherits the MCP server's stdin, so the application can read the protocol's input** — The read-out starts outside the register WW563 fixed, and redirects only the output it reads. → §WW568
-
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
