@@ -427,7 +427,21 @@ public static class Suite
 
         // WW531. The register is told which case this is for, so a process that outlives it is named
         // by that case and not by a pid that has gone by the time anybody reads it.
-        var launched = register.Launch(start, named, lent);
+        // WW567. The declaration being wrong, and said as that: an executable Windows cannot start
+        // is the same on every run, and the throw it was ended the MCP server that ran it.
+        LaunchedProcess launched;
+        try
+        {
+            launched = register.Launch(start, named, lent);
+        }
+        catch (System.ComponentModel.Win32Exception refused)
+        {
+            throw new ScenarioRefusedException(
+                named,
+                $"'{start.FileName}' could not be started from {start.WorkingDirectory} — {refused.Message}; "
+                    + $"the executable in {project.Path} resolves against the directory it sits in");
+        }
+
         var deadline = project.Timeouts.For(WindowTimeout);
 
         // WW257. A tray draws no window, and the window in that case is what a click on the icon is

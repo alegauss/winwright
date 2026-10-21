@@ -296,6 +296,26 @@ public sealed class McpTests : IDisposable
     }
 
     [Fact]
+    public void A_tool_that_throws_answers_a_refusal_rather_than_ending_the_server()
+    {
+        // WW567. A project given as a number reaches a read nothing foresaw, and the throw used to
+        // leave Served.To and end the process that was answering every tool in the session.
+        if (!Winwright.Windowing.Desk.Read().CanObserve)
+            return;
+
+        var reply = Served.To(Message(10, "tools/call", Calling("winwright_run", """{ "project": 5, "cases": 5 }""")))!;
+
+        Assert.True(Answered(reply)["isError"]!.GetValue<bool>());
+        var said = Said(reply);
+        Assert.Contains("winwright_run broke rather than answered", said, StringComparison.Ordinal);
+        Assert.Contains("InvalidOperationException", said, StringComparison.Ordinal);
+        Assert.Contains("not the application under test", said, StringComparison.Ordinal);
+
+        // And the next message is answered, which is the server still being there.
+        Assert.NotNull(Answered(Served.To(Message(11, "initialize"))!));
+    }
+
+    [Fact]
     public void A_method_nobody_has_is_an_error_and_never_an_empty_result()
     {
         var reply = Served.To(Message(8, "tools/eval"))!;

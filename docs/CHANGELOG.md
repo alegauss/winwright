@@ -402,6 +402,7 @@
 - ✅ **WW554** **The plugin's marketplace is named alegauss like roadkeep's, so a project using roadkeep cannot install it per project** — The marketplace is named winwright, so a project registers it beside roadkeep's alegauss and installs winwright@winwright.
 - ✅ **WW562** **winwright_run's answer for a red case names no failing step, locator, reading or wait** — winwright_run lists, under each red case, every unmet check with its step, locator, what it read and how long it waited; a red run still writes lastRun.
 - ✅ **WW563** **an application winwright launches writes onto the MCP server's stdout, breaking the protocol stream** — Every launch's stdin is closed and its stdout/stderr drained into the launch, so nothing reaches the MCP channel; a red case ends with the last lines the application wrote.
+- ✅ **WW567** **an exception a tool did not foresee ends the MCP server, so the session loses every winwright tool** — A tool that throws answers a refusal naming the exception and the server stays up; an executable that cannot start is refused naming the path it was looked for at.
 
 ## Block I — The in-app half — the app cooperates with the harness
 

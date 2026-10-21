@@ -150,6 +150,38 @@ public sealed class RunningTests : IDisposable
     }
 
     [Fact]
+    public void An_executable_that_cannot_be_started_is_refused_naming_where_it_was_looked_for()
+    {
+        // WW567. Found writing WW563's test: `cmd.exe` resolved against the project root, the launch
+        // threw Win32Exception, and the server that ran it exited answering nothing.
+        var desk = Desk.Read();
+        if (!desk.CanObserve)
+            return;
+
+        var project = Path.Combine(root, Winwright.Projects.ProjectDeclaration.FileName);
+        File.WriteAllText(project, """{ "executable": "no-such-application.exe" }""");
+        File.WriteAllText(
+            Path.Combine(root, $"missing{Winwright.Scenarios.ScenarioFile.Extension}"),
+            """
+            {
+              "cases": [
+                {
+                  "name": "the missing application opens",
+                  "steps": [ { "locator": "Edit", "act": "read", "reads": "value", "answers": true } ]
+                }
+              ]
+            }
+            """);
+
+        var answered = Running.Over(new JsonObject { ["project"] = project, ["cases"] = root }, desk);
+
+        Assert.True(answered.Refused, answered.Text);
+        Assert.Contains("the missing application opens", answered.Text, StringComparison.Ordinal);
+        Assert.Contains("no-such-application.exe", answered.Text, StringComparison.Ordinal);
+        Assert.Contains("could not be started", answered.Text, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_selector_that_matches_no_case_is_refused_rather_than_passing_over_nothing()
     {
         var desk = Desk.Read();

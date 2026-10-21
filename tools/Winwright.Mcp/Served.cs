@@ -230,7 +230,25 @@ public static class Served
         }
 
         var arguments = parameters?["arguments"] as JsonObject ?? new JsonObject();
-        var answer = tool.Answering(arguments);
+
+        // WW567. A tool that throws answers, and the server stays up: an exception nothing foresaw
+        // used to end this process, so one bad call cost the session every tool and the client saw
+        // a closed pipe with no sentence. The stack goes to stderr, which is not the protocol.
+        Answer answer;
+        try
+        {
+            answer = tool.Answering(arguments);
+        }
+        catch (Exception thrown) when (thrown is not (OutOfMemoryException or StackOverflowException))
+        {
+            Console.Error.WriteLine($"{tool.Name}: {thrown}");
+            answer = new Answer(
+                $"{tool.Name} broke rather than answered — {thrown.GetType().Name}: {thrown.Message}. That is "
+                    + "the harness and not the application under test, and nothing it would have reported "
+                    + "was observed.",
+                Refused: true);
+        }
+
         return Result(id, new JsonObject
         {
             ["content"] = new JsonArray

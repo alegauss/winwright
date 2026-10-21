@@ -106,7 +106,9 @@ loaded and then typed a key out of:
   not pass, each check that did not is its own line: the step, the locator it resolved, what it read
   and how long it waited — so a red names what to change without a second run. Nothing the application
   under test prints reaches the protocol stream: its output and error are kept, and a red case ends
-  with the last lines it wrote. **A desk that cannot
+  with the last lines it wrote. An executable that cannot be started is refused, naming the path it was
+  looked for at, and any tool that breaks answers a refusal naming the exception: the server stays up.
+  **A desk that cannot
   observe answers a hole**, naming which of the six conditions is missing — not a red, and not a
   green either. That is the whole reason it is a separate verb from `winwright_check`: whether a file
   parses is a claim nothing about the machine can change, and whether it passed is not.

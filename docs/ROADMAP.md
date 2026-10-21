@@ -16,7 +16,6 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-- 📋 **WW567** (deps: —) **an exception a tool did not foresee ends the MCP server, so the session loses every winwright tool** — A run naming an executable that cannot start threw past Running.Over and the server exited, answering nothing. → §WW567
 - 📋 **WW568** (deps: —) **a derived set's read-out launch inherits the MCP server's stdin, so the application can read the protocol's input** — The read-out starts outside the register WW563 fixed, and redirects only the output it reads. → §WW568
 
 ## Block I — The in-app half — the app cooperates with the harness
