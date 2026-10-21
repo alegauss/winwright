@@ -42,8 +42,10 @@ public sealed record FixtureDeclaration
         string workingDirectory,
         IReadOnlyList<StagedFile> files,
         IReadOnlyList<string> reaches,
-        string opens)
+        string opens,
+        IReadOnlyList<string> unset)
     {
+        Unset = unset;
         Opens = opens;
         Reaches = reaches;
         Files = files;
@@ -79,6 +81,23 @@ public sealed record FixtureDeclaration
 
     /// <summary>The environment variables the launch sets, by name.</summary>
     public IReadOnlyDictionary<string, string> Variables { get; }
+
+    /// <summary>
+    /// The variables the run inherited that the launch removes, by name, in declared order. Empty
+    /// where it removes none. WW564.
+    /// <para>
+    /// Found launching polyweave's Electron window from a session inside VS Code, which exports
+    /// <c>ELECTRON_RUN_AS_NODE=1</c> to everything it starts: the server inherited it, the launch did
+    /// too, and Electron ran its main script as plain Node — no window, and an error naming a missing
+    /// export rather than the variable. <see cref="Variables"/> could only set a value, and empty is
+    /// not unset to every application.
+    /// </para>
+    /// <para>
+    /// Generic on purpose: nothing here strips a variable for one kind of application, so an
+    /// Electron adopter names this one like any other.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Unset { get; }
 
     /// <summary>Whether this window may be lent to a case that only reads it.</summary>
     public bool Shareable { get; }
@@ -306,7 +325,7 @@ public sealed record FixtureDeclaration
 
     /// <summary>The application as it comes: no arguments, no variables, nothing sampled.</summary>
     public static FixtureDeclaration Plain { get; } =
-        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false, "", [], [], "");
+        new("as it comes", "", "", [], new ReadOnlyDictionary<string, string>(new Dictionary<string, string>()), false, "", false, "", [], [], "", []);
 
     /// <summary>
     /// Declare one.
@@ -327,6 +346,7 @@ public sealed record FixtureDeclaration
     /// That a step of a case run against this fixture names the staged directory itself, so a file
     /// staged for that step is not one nobody looks at. WW550.
     /// </param>
+    /// <param name="unset">The inherited variables the launch removes, by name. WW564.</param>
     /// <exception cref="ScenarioRefusedException">
     /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not
     /// one, or files are declared that neither the launch nor a step reaches.
@@ -344,7 +364,8 @@ public sealed record FixtureDeclaration
         IEnumerable<StagedFile>? files = null,
         IEnumerable<string>? reaches = null,
         string? opens = null,
-        bool stepsNameStaged = false)
+        bool stepsNameStaged = false,
+        IEnumerable<string>? unset = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
         var opening = Opened(called, opens, shareable);
@@ -371,6 +392,27 @@ public sealed record FixtureDeclaration
 
             if (!set.TryAdd(variable.Key.Trim(), variable.Value ?? ""))
                 throw new ScenarioRefusedException(called, $"it sets '{variable.Key.Trim()}' twice");
+        }
+
+        // WW564. Case-blind, as Windows reads a variable's name. A name both set and removed is two
+        // places deciding one variable, and which the launch applied last would be the answer.
+        var removing = new List<string>();
+        foreach (var variable in unset ?? [])
+        {
+            if (string.IsNullOrWhiteSpace(variable))
+                throw new ScenarioRefusedException(called, "one of the variables it unsets has no name");
+
+            var named = variable.Trim();
+            if (removing.Contains(named, StringComparer.OrdinalIgnoreCase))
+                throw new ScenarioRefusedException(called, $"it unsets '{named}' twice");
+
+            if (set.ContainsKey(named))
+            {
+                throw new ScenarioRefusedException(
+                    called, $"it both sets and unsets '{named}', so the launch would decide that variable twice");
+            }
+
+            removing.Add(named);
         }
 
         if (through.Length > 0 && sampled.Length == 0)
@@ -497,7 +539,8 @@ public sealed record FixtureDeclaration
             starting,
             new ReadOnlyCollection<StagedFile>(staging),
             new ReadOnlyCollection<string>(reaching),
-            opening);
+            opening,
+            new ReadOnlyCollection<string>(removing));
     }
 
     /// <summary>
@@ -858,6 +901,10 @@ public sealed record FixtureDeclaration
         foreach (var variable in Variables)
             start.Environment[variable.Key] = Offered(Resolved(variable.Value, root));
 
+        // WW564. Removed from what this process passes on, which is what the launch would inherit.
+        foreach (var variable in Unset)
+            start.Environment.Remove(variable);
+
         return start;
     }
 
@@ -882,6 +929,11 @@ public sealed record FixtureDeclaration
         // has to go and start.
         if (Reaches.Count > 0)
             staged += $", reaching {string.Join(", ", Reaches)}";
+
+        // WW564. Named, because a window that never opened under one runner and opened under another
+        // is read against what each one passed on.
+        if (Unset.Count > 0)
+            staged += $", unsetting {string.Join(", ", Unset)}";
 
         // WW519. Last, because it qualifies the store the clauses before it describe.
         return $"{Name}: {sampled}{lent}{held}{started}{staged}{VariableOnlyClause}.";

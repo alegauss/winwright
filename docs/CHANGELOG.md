@@ -116,6 +116,7 @@
 - ✅ **WW543** **A staged fixture file keeps its source's modification time, so a rule about how recent a file is fails a day later** — A staged copy is written now, or as old as a file's modified age says, so a rule about how recent a file is holds the day after the fixture.
 - ✅ **WW549** **A case first in its run cannot type: the window it launched never comes forward before any synthesised input** — A launch hands the started process the foreground first, so a case first in its run or soaked alone comes forward (design recorded in `src/Winwright/Windowing/ForegroundLock.cs`).
 - 🗑 **WW565** **an Electron app in development cannot be declared: its exe is node_modules' electron and the app is an argument** — abandoned: Already possible: executable resolves against winwright.json's folder and an argument takes {root} (WW542); with WW564's unset an Electron app is an ordinary executable.
+- ✅ **WW564** **a fixture cannot remove an inherited environment variable, so an Electron app launched from VS Code runs as Node** — A fixture's unset names inherited variables the launch removes, case-blind and refused beside variables, so an Electron app started from VS Code opens as a window.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

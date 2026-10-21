@@ -239,6 +239,73 @@ public class FixtureDeclarationTests
     }
 
     /// <summary>
+    /// WW564. polyweave's Electron window, launched from a session inside VS Code, inherited
+    /// ELECTRON_RUN_AS_NODE=1 and ran as Node; a fixture could only set a variable, never remove one.
+    /// </summary>
+    [Fact]
+    public void A_variable_the_fixture_unsets_is_not_passed_on_however_the_runner_had_it()
+    {
+        var name = $"WINWRIGHT_INHERITED_{Guid.NewGuid():N}";
+        Environment.SetEnvironmentVariable(name, "1");
+        try
+        {
+            var fixture = FixtureDeclaration.Of("as a window", unset: [name.ToLowerInvariant()]);
+            var start = fixture.Starting(@"C:\app\YourApp.exe", @"C:\checkout");
+
+            // Case-blind, as Windows reads the name: the lowered spelling removes the inherited one.
+            Assert.False(start.Environment.ContainsKey(name));
+            Assert.Contains($"unsetting {name.ToLowerInvariant()}", fixture.Sentence(), StringComparison.Ordinal);
+
+            // And the fixture that unsets nothing passes it on, which is what made this needed.
+            Assert.Equal("1", FixtureDeclaration.Of("plain").Starting(@"C:\app\YourApp.exe", @"C:\checkout").Environment[name]);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(name, null);
+        }
+    }
+
+    [Fact]
+    public void A_variable_both_set_and_unset_is_refused_because_the_launch_would_decide_it_twice()
+    {
+        var refused = Assert.Throws<ScenarioRefusedException>(() => FixtureDeclaration.Of(
+            "both",
+            variables: new Dictionary<string, string> { ["ELECTRON_RUN_AS_NODE"] = "1" },
+            unset: ["electron_run_as_node"]));
+
+        Assert.Contains("both sets and unsets 'electron_run_as_node'", refused.Because, StringComparison.Ordinal);
+        Assert.Contains(
+            "twice",
+            Assert.Throws<ScenarioRefusedException>(() => FixtureDeclaration.Of("again", unset: ["A", "a"])).Because,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "has no name",
+            Assert.Throws<ScenarioRefusedException>(() => FixtureDeclaration.Of("blank", unset: [" "])).Because,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_file_declares_unset_as_an_array_of_names()
+    {
+        var read = ScenarioFile.Read(
+            "electron.cases.json",
+            """
+            {
+              "fixtures": [ { "name": "the window", "unset": ["ELECTRON_RUN_AS_NODE"] } ],
+              "cases": [
+                {
+                  "name": "it opens",
+                  "fixture": "the window",
+                  "steps": [ { "locator": "Edit", "act": "read", "reads": "value", "answers": true } ]
+                }
+              ]
+            }
+            """);
+
+        Assert.Equal(["ELECTRON_RUN_AS_NODE"], Assert.Single(read).Fixture.Unset);
+    }
+
+    /// <summary>
     /// WW508. The defect quickshell found: a fixture passing `--import cases/fixtures/MobaXterm.ini`
     /// was passing a path the launched application resolved against whichever directory the test
     /// runner happened to be in, so the same argument meant three things under `run-tests.cmd`,

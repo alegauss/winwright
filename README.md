@@ -1118,6 +1118,14 @@ runner process's own current directory, which is global state in a test assembly
 absolute path into a file other machines read. Declare the field to start somewhere else; a relative
 path resolves against that same root, and one that is already absolute is left where it is.
 
+`unset` names variables the run inherited that the launch removes. `variables` can only set a value,
+and empty is not unset to every application. The case that needed it is Electron launched from a
+session inside VS Code: VS Code exports `ELECTRON_RUN_AS_NODE=1` to everything it starts, the
+application inherits it, and Electron runs its main script as plain Node. No window opens, and the
+error never names the variable. `"unset": ["ELECTRON_RUN_AS_NODE"]` gives the launch back the
+environment a person's shell would have given it. A name under both `unset` and `variables` is
+refused, and the fixture's line in a report says what it unset.
+
 `opens` is a folder the fixture opens in Explorer beside the window under test, for a case that drops
 something onto it. It is written the way `workingDirectory` is, relative to the project's root or
 naming `{files}`, and created where it is not there. After the launch the two windows are put side by

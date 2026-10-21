@@ -4,28 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW564 A fixture can unset what the run inherited
-
-Found launching polyweave's Electron window (polyweave `gui/`, run as `electron.exe <app
-dir>`) from a session started inside VS Code. VS Code exports `ELECTRON_RUN_AS_NODE=1`
-to every process it starts, the MCP server inherits it, and so does every application
-the server launches. Electron given that variable runs its main script as plain Node: no
-window, a quick exit, and an error naming a missing `BrowserWindow` export, never the
-variable. polyweave hit the same thing in its own launcher and strips the variable there
-(its PW438).
-
-A fixture's `variables` can only set a value. Nothing in a fixture removes an inherited
-one, and setting it to an empty string is a different state from unset for some
-applications. The workaround lives outside the case: the MCP client that started the
-server removed the variable from the server's environment first. An adopter running from
-the plugin inside VS Code has no such place.
-
-What to build: a fixture field naming inherited variables to remove before the launch,
-for example `"unset": ["ELECTRON_RUN_AS_NODE"]`. Record it in the trace like
-`variables`, and refuse a name given in both.  No default that strips a variable for one
-kind of application: the field is generic, and an Electron adopter names
-`ELECTRON_RUN_AS_NODE` in it like any other.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -61,6 +39,28 @@ stack trace on the server's stderr, which is not the protocol. Separately,
 wrong. A test should call `winwright_run` on a project naming an executable that does
 not exist, and assert that the reply is a refused answer and a second request is still
 answered.
+
+### §WW568 A read-out launch takes its own streams too
+
+Found while building WW564, on 2026-10-20, reading the launches that do not go through
+`ProcessRegister`. WW563 made the register take every stream a caller leaves alone: the
+input is closed, and the output and error are drained into the launch. So nothing a
+case's application does can reach the MCP server's protocol channel.
+
+A derived set's read-out is a launch of the same application, and it does not go through
+the register. `DerivedSet.Reading` builds its own `ProcessStartInfo`, and `Printed`
+starts it with `Process.Start`. It redirects standard output, which it reads, and leaves
+standard input and standard error alone. Under the MCP server the child inherits the
+server's stdin. That stdin is the protocol's input, so an application that reads its
+input during a read-out takes the next request. Its stderr goes to the server's stderr,
+which is harmless but is lost to the refusal a non-zero exit already writes.
+
+What to build: `Reading` redirects standard input and closes it once the process starts.
+It also redirects standard error and keeps what arrived. `Printed` drains both, so a
+full error pipe cannot block the read. A read-out that exits non-zero then names the
+last lines the application wrote on its error stream in the `UnderivableSetException`,
+which is where a reader needs them. A test runs a read-out of an application that reads
+its input, and asserts that it meets the end of input instead of waiting.
 
 ## Block I — The in-app half — the app cooperates with the harness
 

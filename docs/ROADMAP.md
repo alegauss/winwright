@@ -4,8 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW564** (deps: —) **a fixture cannot remove an inherited environment variable, so an Electron app launched from VS Code runs as Node** — VS Code exports ELECTRON_RUN_AS_NODE=1 and the window never opens, with an error that never names the variable. → §WW564
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -19,6 +17,7 @@
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
 - 📋 **WW567** (deps: —) **an exception a tool did not foresee ends the MCP server, so the session loses every winwright tool** — A run naming an executable that cannot start threw past Running.Over and the server exited, answering nothing. → §WW567
+- 📋 **WW568** (deps: —) **a derived set's read-out launch inherits the MCP server's stdin, so the application can read the protocol's input** — The read-out starts outside the register WW563 fixed, and redirects only the output it reads. → §WW568
 
 ## Block I — The in-app half — the app cooperates with the harness
 
