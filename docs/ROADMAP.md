@@ -12,6 +12,8 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
+- 📋 **WW569** (deps: —) **a set derived outside a run is asked in the machine's culture, so a runner's unshipped one is underivable** — a test that passes on its author's desk goes red on every hosted runner, and the exception drops the output that says why. → §WW569
+
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
