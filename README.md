@@ -1,30 +1,63 @@
+<div align="center">
+
+<img src="https://alegauss.github.io/winwright/logo.svg" alt="winwright logo" width="120">
+
 # winwright
 
-Driving a Windows desktop application from a test, and reporting what was actually observed.
+**Tests for a Windows desktop app that Claude Code writes as data, and a verdict that never calls a check green when it did not run.**
+
+```
+claude plugin marketplace add alegauss/winwright --scope project
+claude plugin install winwright@winwright --scope project
+```
+
+Windows · .NET 10 · two NuGet packages, no external dependency · Apache-2.0
 
 [![Winwright on nuget.org](https://img.shields.io/nuget/v/Winwright?label=Winwright)](https://www.nuget.org/packages/Winwright)
 [![Winwright.InApp on nuget.org](https://img.shields.io/nuget/v/Winwright.InApp?label=Winwright.InApp)](https://www.nuget.org/packages/Winwright.InApp)
-[![Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE)
 
-Both halves are published on nuget.org under the Apache-2.0 licence, and neither carries an
-external dependency. The badges are read from the feed; the version in the reference lines below is
-typed, so trust the badge where the two disagree.
-[**alegauss.github.io/winwright**](https://alegauss.github.io/winwright/) is the short version of
-the argument, and this file is the long form — every verb family, every field a case may carry, and
-the reason behind each refusal.
+**[alegauss.github.io/winwright](https://alegauss.github.io/winwright/)**: the short version of
+the argument. This file is the long one.
 
-It exists because of one measurement. A suite reported a pass with no failures and a total of 352
-where the run before it had 374 — twenty-two tests gone, the host had died partway through, and the
-only sign was a number nobody had a reason to read. Everything here follows from refusing that: a
-green may not cover a check that never ran, and anything this tool could not evaluate is named in
-the output rather than left out of it.
+</div>
 
-## What it needs
+- **A case is a data file, not a script.** Steps name an element, an act and what to expect, in a
+  `.cases.json` file. The waits, the retries and the verdict belong to the engine, so two cases never
+  carry two copies of the same loop.
+- **It asks the control, not the desktop.** An act goes through the control's own UI Automation
+  pattern, so most cases need no mouse and no foreground.
+- **A third verdict.** A check that could not run is neither a pass nor a fail: it is named, and a
+  run where everything else passed exits `2`, not `0`. A suite that lost 22 of its 374 tests and
+  still reported a pass is why this exists.
+- **Checked before it runs.** `winwright_check` reads a case against the loader's own schema before
+  the file exists, so a misspelled key is refused with its address, not discovered on a red run.
+- **No harness scripts.** The plugin's guard denies a hand-written script that drives the engine
+  directly, and names the case file and the check that replace it.
 
-- Windows. It is not cross-platform and is not going to be — the whole engine is UI Automation and
-  Win32.
-- .NET 10, `net10.0-windows`. The in-app half needs `<UseWPF>true</UseWPF>`.
-- Two packages, and an application under test takes at most one of them.
+---
+
+> **Unofficial / community project.** Not affiliated with, endorsed by, or sponsored by
+> Anthropic. "Claude" and "Claude Code" are trademarks of Anthropic.
+
+## Install
+
+### The plugin
+
+Run the two commands above in the repository that drives the application. Both write into that
+repository's `.claude/settings.json`, so **committing that file wires every clone**.
+
+The MCP server and the guard are .NET processes, so they need building once, in the plugin's own
+clone: `dotnet build -c Release`. That is the one step the two commands do not cover. Skip it and
+you are told which surface is missing and the command to run, rather than left with a guard that
+silently refuses nothing.
+
+The marketplace is named `winwright`, after the plugin, so it sits beside roadkeep's `alegauss`
+instead of replacing it. If your settings still carry `winwright@alegauss`, remove that entry and
+its marketplace, then run the two commands above.
+
+### The packages
+
+Windows only, .NET 10 (`net10.0-windows`). The in-app half needs `<UseWPF>true</UseWPF>`.
 
 ```xml
 <!-- In the test project that drives the application. -->
@@ -34,111 +67,76 @@ the output rather than left out of it.
 <PackageReference Include="Winwright.InApp" Version="1.1.5" />
 ```
 
-`Winwright.InApp` is optional, and deliberately so: every reading and every pattern act runs against
-an application that references nothing. See [what needs cooperation](#what-needs-the-application-to-cooperate).
+`Winwright.InApp` is optional: every reading and every pattern act runs against an application
+that references nothing. See [what needs cooperation](#what-needs-the-application-to-cooperate).
+The badges above are read from the feed; the version in these lines is typed, so trust the badge
+where the two disagree.
 
-### One line if your application's project is at the repository root
-
-The project that drives the application is a project of its own, and it usually goes in a folder
-underneath. If the application's `.csproj` sits at the repository root, that folder is inside its
-reach: every default glob the SDK applies — `Compile`, and with `UseWPF` also `Page`, `Resource` and
-`EmbeddedResource` — walks the whole tree below the project file, so the driving project's sources and
-its `obj\` are compiled **into the application**.
+**If your application's `.csproj` is at the repository root**, add one line to it:
 
 ```xml
-<!-- In the application's own project, if it lives at the repository root. -->
 <DefaultItemExcludes>$(DefaultItemExcludes);tests\**</DefaultItemExcludes>
 ```
 
-**It is named here because the failure names something else.** Without it the build stops with a
-row of `CS0579` duplicate-attribute errors — and every one of them points at your *own* generated
-`obj\…\AssemblyInfo.cs`, because the duplicate it found is the nested project's copy of the same
-attributes. Nothing in the message mentions the folder that caused it. Under `UseWPF` it is worse
-again: the errors arrive attributed to a `<YourApp>_<random>_wpftmp` project, which reads like a XAML
-problem.
+Without it the SDK's default globs compile the driving project's sources into the application,
+and the build stops with `CS0579` duplicate-attribute errors that point at your *own*
+`obj\…\AssemblyInfo.cs` (under `UseWPF`, at a `<YourApp>_<random>_wpftmp` project), with nothing
+naming the folder that caused it. `samples/Adopter` fails that way on purpose when the line is
+removed.
 
-Measured twice. In claude-tray it took moving the folder out of the tree and building again to find
-out what it was; here it is a negative control — delete the line from `samples/Adopter` and the build
-fails that way on purpose, which is what keeps this a rule rather than a note somebody wrote after
-losing an afternoon.
+## First session
 
-## Adopting it in Claude Code
+Declare the application once, in `winwright.json` at the repository root (every key is optional;
+[Declaring a project](#declaring-a-project) has them all):
 
-Two commands, run once in the repository that drives the application:
-
-```
-claude plugin marketplace add alegauss/winwright --scope project
-claude plugin install winwright@winwright --scope project
+```json
+{ "executable": "bin/{configuration}/net10.0-windows/YourApp.exe", "configuration": "Debug" }
 ```
 
-Both write into that repository's `.claude/settings.json`, so **committing that file wires every
-clone**. There is no per-machine install, nothing added to any path, and no instruction that differs
-by whose desk it is. A clone that has the file has the plugin.
+Then ask Claude Code for the behaviour you want held, in plain words:
 
-The marketplace is named `winwright`, after the plugin, and not after the account. Settings key
-marketplaces by name, and roadkeep's is named `alegauss`: a project using both registers two names
-side by side. Under the old name, adding one replaced the other. If your settings still carry
-`winwright@alegauss`, remove that entry and its marketplace, then run the two commands above.
+> Write a case that opens the Profiles tab, renames the profile to Beta, saves, and checks the
+> status reads Saved.
 
-The version the plugin carries is the version this tree declares, and the two are read against each
-other by the same gate that compares the packages — `Winwright.Concordance --declared … --manifest …`.
-A plugin an adopter installed that is a version behind is the hazard worth naming: nothing goes red,
-and the run answers a question somebody stopped asking.
+> Run the smoke cases and tell me what did not run.
+
+Claude reads the format and the acts from the plugin's tools, writes the case into a
+`.cases.json` file, checks it with `winwright_check` and runs it with `winwright_run`. The answer
+is the verdict, a line per case, and for a case that did not pass, each check that did not: the
+step, the locator it resolved, what it read and how long it waited, so a red names what to change
+without a second run. [Writing a case](#writing-a-case) is the full format.
 
 ### What the tools answer
 
-The plugin wires an MCP server, so the format arrives as a schema rather than as prose somebody
-loaded and then typed a key out of:
-
-- **`winwright_format`** — every field of a file, a case, a step and a fixture, whether it is
+- **`winwright_format`**: every field of a file, a case, a step and a fixture, whether it is
   required, and the closed list of what it accepts.
-- **`winwright_vocabulary`** — every act, what each one needs said beside it, and whether the engine
+- **`winwright_vocabulary`**: every act, what each one needs said beside it, and whether the engine
   may repeat it.
-- **`winwright_check`** — a case read back *before* the file exists. Its input schema **is** the
-  loader's schema, so a misspelled key is not a thing the caller can send; what comes back is either
-  the loader's own refusal, addressed as `cases[0].steps[1].act`, or what a run of it would do. Name
-  a `project` beside the file and it also answers what the *door* of a run would refuse — a `capture`
-  step in a project declaring no `captures`, which loads and then never runs. Optional, because a
-  scenario is usually first checked before its project exists; without one the answer says it read
-  the file alone rather than letting that read as "this would run".
-- **`winwright_run`** — the cases a selection asks for, run. It answers the verdict, a line per case
-  that ran and per case it left alone, the exit code, and what outlived the run. Under a case that did
-  not pass, each check that did not is its own line: the step, the locator it resolved, what it read
-  and how long it waited — so a red names what to change without a second run. Nothing the application
-  under test prints reaches the protocol stream: its output and error are kept, and a red case ends
-  with the last lines it wrote. An executable that cannot be started is refused, naming the path it was
-  looked for at, and any tool that breaks answers a refusal naming the exception: the server stays up.
-  **A desk that cannot
-  observe answers a hole**, naming which of the six conditions is missing — not a red, and not a
-  green either. That is the whole reason it is a separate verb from `winwright_check`: whether a file
-  parses is a claim nothing about the machine can change, and whether it passed is not.
-
-The server and the guard are .NET processes the plugin launches, so they need building once —
-`dotnet build -c Release` in the plugin's own clone. That is the one step the two commands above do
-not cover.
-
-**Skip it and you are told, not left guessing.** Both are wired through a launcher that looks for its
-assembly — Release first, then Debug — and where there is none it writes the missing surface and the
-build command to stderr and exits. What that replaces is the failure mode worth naming: a `dotnet
-exec` on a path a fresh clone does not have produced a .NET assembly error on every write, and a
-guard that is not there refuses nothing. The one surface whose whole job is to be in the way was the
-one that went quiet. The launcher exits 1 and never 2: denying every write because a build is missing
-would put the guard in front of everything instead of in front of a harness script.
+- **`winwright_check`**: a case read back *before* the file exists. Its input schema **is** the
+  loader's, so what comes back is either the loader's own refusal, addressed as
+  `cases[0].steps[1].act`, or what a run of it would do. Name a `project` beside it and it also
+  answers what the run would refuse, such as a `capture` step in a project declaring no `captures`.
+- **`winwright_run`**: the cases a selection asks for, run. It answers the verdict, a line per case
+  that ran and per case it left alone, the exit code, and what outlived the run. The application's
+  own output is kept, and a red case ends with the last lines it wrote. **A desk that cannot observe
+  answers a hole**, naming which of the six conditions is missing: not a red, and not a green
+  either.
 
 ### What the guard refuses
 
-A hand-written harness script is always available and always faster in the moment, and that is
-exactly how a 2,732-line one happens. So the plugin registers a `PreToolUse` hook: a write whose
-content names `Winwright.Acting`, `Winwright.Locating` or `Winwright.Asserting` is **denied**, and the
-refusal names the case file and `winwright_check` that replace it. The refusal arrives before the
-work rather than after it, which is the difference between being asked to write the other thing and
-being asked to delete what you just wrote.
+A hand-written harness script is always faster in the moment, and that is how a 2,732-line one
+happens. So the plugin's `PreToolUse` hook **denies** a write whose content names
+`Winwright.Acting`, `Winwright.Locating` or `Winwright.Asserting`, and names the case file and
+`winwright_check` that replace it. It never denies a `.cases.json` write, never denies a project
+that references the engine's *source*, and allows anything it cannot read: a hook that denies
+what it did not understand is one that gets removed.
 
-It stays out of its own way in three places. A `.cases.json` write is never denied — that is the verb.
-A project referencing the engine's *source* is never denied — the suite here drives windows on
-purpose, and a guard you turn off to work on the tool is a guard whose false denies nobody hears
-about. And anything it cannot read it allows: a hook that denies what it did not understand is one
-that gets removed, after which nothing is guarded at all.
+---
+
+**Everything below is the reference**: the locator grammar, every verb family, every key a project
+may declare, every field a case may carry, the exit codes and the reason behind each refusal. The
+suite holds each section against the engine, so a verb or a field added without its line here is a
+red.
 
 ## Addressing an element
 
