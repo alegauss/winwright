@@ -212,6 +212,88 @@ public sealed class ReportedSetTests : IDisposable
         Assert.Contains("no such profile store", refused.Message, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void A_read_out_that_fails_names_what_it_was_asked_with_and_what_it_printed()
+    {
+        // WW569. claude-tray's application said `unknown language 'en-US'` on its output, and the
+        // refusal named neither that line nor the arguments that provoked it.
+        var refused = Assert.Throws<UnderivableSetException>(() => DerivedSet.Reported(
+            "the refused",
+            Through(Path.Combine(Environment.SystemDirectory, "cmd.exe"), "refused", "\"/c\", \"echo unknown language 'en-US' & exit 1\""),
+            "refused"));
+
+        Assert.Contains("exited 1", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("unknown language 'en-US'", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("[/c echo unknown", refused.Message, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// A project shipping <c>strings.en.json</c> and <c>strings.pt-BR.json</c>, whose saved language
+    /// stands in for the machine's, and whose read-out echoes the language it was asked in.
+    /// </summary>
+    /// <param name="saved">The language this machine resolves to.</param>
+    /// <param name="fallback">What the project declares it falls back to, or null for nothing.</param>
+    private ProjectDeclaration Echoing(string saved, string? fallback)
+    {
+        File.WriteAllText(Path.Combine(root, "strings.en.json"), """{ "tabs": { "one": "Panes" } }""");
+        File.WriteAllText(Path.Combine(root, "strings.pt-BR.json"), """{ "tabs": { "one": "Painéis" } }""");
+        File.WriteAllText(Path.Combine(root, "settings.json"), $$"""{ "language": "{{saved}}" }""");
+
+        var falls = fallback is null ? "" : $", \"fallback\": \"{fallback}\"";
+        var path = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            path,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Path.Combine(Environment.SystemDirectory, "cmd.exe"))}},
+              "languageFiles": ["strings.en.json", "strings.pt-BR.json"],
+              "language": { "preferenceFile": "settings.json", "preferenceKey": "language"{{falls}} },
+              "reportedSets": { "spoken": ["/c", "echo {language}"] }
+            }
+            """);
+
+        return ProjectDeclaration.Load(path);
+    }
+
+    /// <summary>
+    /// WW569. Outside a run nothing says which language a read-out is asked in, and the machine's
+    /// was the answer: a language the application may not ship, so the set derived on the author's
+    /// desk and was refused on every hosted runner.
+    /// </summary>
+    [Theory]
+    [InlineData("pt-BR", "pt-BR")]
+    [InlineData("en-US", "en")]
+    [InlineData("fr-FR", "en")]
+    public void A_read_out_nothing_named_a_language_for_is_asked_in_one_the_project_ships(string machine, string asked)
+    {
+        var set = DerivedSet.Reported("the spoken", Echoing(machine, "en"), "spoken");
+
+        Assert.Equal([asked], set.Expected);
+    }
+
+    [Fact]
+    public void A_machine_in_a_language_the_project_does_not_ship_and_no_fallback_is_refused_by_name()
+    {
+        // WW569. Asked anyway, the application refuses the language and the reader is left with an
+        // exit code; refused here, the sentence names the two ways to say which.
+        var refused = Assert.Throws<UnderivableSetException>(
+            () => DerivedSet.Reported("the spoken", Echoing("fr-FR", null), "spoken"));
+
+        Assert.Contains("fr-FR", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("speaking", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("language.fallback", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_read_out_told_its_language_is_asked_in_that_one_whatever_the_project_ships()
+    {
+        // WW468's arm, unchanged: a fixture that said its window is in German is taken as read.
+        var set = DerivedSet.Reported(
+            "the spoken", Echoing("pt-BR", "en"), "spoken", System.Globalization.CultureInfo.GetCultureInfo("de"));
+
+        Assert.Equal(["de"], set.Expected);
+    }
+
     /// <summary>A declaration whose read-out runs <paramref name="executable"/> rather than the fixture.</summary>
     private ProjectDeclaration Through(string executable, string named, string arguments)
     {

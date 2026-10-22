@@ -717,7 +717,10 @@ public sealed record DerivedSet
         return $"{where}, less {string.Join(" and ", parts)}";
     }
 
-    /// <summary>How many of the last lines a read-out wrote on its error stream a refusal names. WW568.</summary>
+    /// <summary>
+    /// How many lines of a failed read-out a refusal names: the last on its error stream (WW568) and
+    /// the first on its output (WW569).
+    /// </summary>
     private const int Complaints = 5;
 
     /// <summary>
@@ -799,9 +802,15 @@ public sealed record DerivedSet
                 ? ""
                 : $"; it wrote on its error stream: {string.Join(" | ", complained)}";
 
+            // WW569. And on its output, and with what: claude-tray's `unknown language 'en-US'` went to
+            // stdout, and a refusal naming neither the line nor the `--lang en-US` that provoked it left
+            // nine days of red runs with nothing in the log to diagnose them by.
+            var first = printed.Split('\n').Select(one => one.Trim()).Where(one => one.Length > 0).Take(Complaints).ToList();
+            var answered = first.Count == 0 ? "" : $"; it printed: {string.Join(" | ", first)}";
+
             throw new UnderivableSetException(
-                $"{named}: {declaration.Executable} exited {code} when asked for '{key}', so what it printed "
-                    + $"is not an answer{said}");
+                $"{named}: {declaration.Executable} exited {code} when asked for '{key}' with "
+                    + $"[{string.Join(" ", arguments)}], so what it printed is not an answer{said}{answered}");
         }
 
         return printed.Split('\n').Select(one => one.Trim()).Where(one => one.Length > 0).ToList();
@@ -924,12 +933,49 @@ public sealed record DerivedSet
         // The fixture's word where it gave one, and the way the application resolves it where nothing
         // did — the same two arms a declared string is read under, so a read-out and a label in one
         // case can never be answered in two languages.
-        var language = speaking is null
-            ? ResolvedLanguage.Resolve(declaration)
-            : ResolvedLanguage.Speaking(speaking);
+        var language = speaking ?? Shipped(declaration);
 
         return new ReadOnlyCollection<string>(
-            asked.Select(one => one.Replace(Spoken, language.Culture.Name, StringComparison.Ordinal)).ToList());
+            asked.Select(one => one.Replace(Spoken, language.Name, StringComparison.Ordinal)).ToList());
+    }
+
+    /// <summary>
+    /// The language a read-out is asked in where nothing said one: the machine's, as the application
+    /// resolves it, and then the language of the strings that answer for it.
+    /// <para>
+    /// WW569. The resolution alone was the machine's culture, which is a language the application may
+    /// not ship. Measured in claude-tray: a test deriving a set outside a run asked `--lang pt-BR` on
+    /// its author's desk and `--lang en-US` on every hosted runner, which the application refuses by
+    /// design — nine days of red builds whose exception said only "exited 1". The strings file that
+    /// answers is the one a label is read from, nearest match and then `language.fallback`, so a
+    /// read-out and a label in one case are asked in the same language on every machine.
+    /// </para>
+    /// <para>
+    /// A project shipping no tagged strings keeps the machine's answer, there being no file to say a
+    /// better one. A project shipping strings and no file for this machine is refused rather than
+    /// asked in a language it does not ship, which is the red this replaces with a sentence.
+    /// </para>
+    /// </summary>
+    private static System.Globalization.CultureInfo Shipped(ProjectDeclaration declaration)
+    {
+        var machine = ResolvedLanguage.Resolve(declaration).Culture;
+        if (declaration.LanguageFiles.Count == 0)
+            return machine;
+
+        try
+        {
+            return Labels.FileFor(declaration, machine, $"a read-out's {Spoken}").Culture;
+        }
+        catch (UnusableLabelException unusable) when (unusable.Arm != UnusableLabel.NoLanguageFiles)
+        {
+            throw new UnderivableSetException(
+                $"{unusable.Message}. Nothing named the language this read-out is asked in, so it would be "
+                    + $"asked in {machine.Name}, this machine's: pass `speaking`, or declare language.fallback");
+        }
+        catch (UnusableLabelException)
+        {
+            return machine;
+        }
     }
 
     /// <summary>

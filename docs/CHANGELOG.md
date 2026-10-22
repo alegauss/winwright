@@ -339,6 +339,7 @@
 - ✅ **WW539** **A case cannot claim an element is drawn inside another, so a control clipped or laid out empty passes every case** — A step claims within, its element drawn inside a second locator's and not empty, failing with both rectangles, so a control clipped or laid out empty has a case.
 - ✅ **WW545** **Typing into a terminal substitutes the last character for an earlier one about once a send in fifty, unrepaired** — Typing into a terminal repairs the last-character substitution before Enter, proven by quickshell's tab case passing 300 of 300 guest runs on 1.1.2, the repair firing on two.
 - ✅ **WW548** **A case cannot claim a window covers its monitor, so a full-screen mode that leaves a border or a pixel uncovered passes** — A step claims fillsMonitor: its element covers the whole monitor it is on, so a full screen leaving a border fails naming both rectangles and each edge left uncovered in pixels.
+- ✅ **WW569** **a set derived outside a run is asked in the machine's culture, so a runner's unshipped one is underivable** — Without `speaking`, a read-out's `{language}` is the language of the strings file that answers for the machine, then language.fallback, and a failed read-out names its arguments and stdout.
 
 ## Block G — The scenario — a case is a data file
 

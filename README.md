@@ -879,6 +879,14 @@ window under test was launched in the fixture's language, and a sweep whose whol
 two agree reports a value missing from the window it was on. Writing `--lang en` into the declaration
 instead holds exactly as long as every fixture launches in English.
 
+Where nothing names the language — an attach, or a test calling `DerivedSet.Reported` without
+`speaking` — `{language}` is the language of the strings file that answers for this machine, chosen as
+a label's is: the nearest file, then `language.fallback`. So a runner in `en-US` asks `--lang en` of a
+project shipping `strings.en.json`, never a language the application does not ship; and where no file
+answers and no fallback is declared, the set is refused with a sentence naming both. A read-out that
+exits non-zero is refused with the arguments it was run with and the first lines it printed on either
+stream.
+
 Most of what an application knows about itself is **not** a set, so `reportedValues` is the scalar
 beside it and `expectReported` names one:
 
