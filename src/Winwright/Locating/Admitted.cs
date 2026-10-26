@@ -136,8 +136,16 @@ public sealed class Admitted
         // long it looked, and whether anything matched on the way. A race with the application and a
         // locator naming nothing are different defects in different files, and the four-way sentence
         // alone reads both as the second.
+        //
+        // WW571. And the diagnosis beside it, where nothing ever matched: the expectation's red had
+        // carried the miss since WW460 and an act's refusal said only how long it looked, so a toolbar
+        // button moved into its overflow read as a misspelled id on the step that pressed it.
         if (reading.Facts is null)
-            throw new NotActionableException(subject.Locator.Text, Actionable.NotInTree, $"{reading.Resolution.Absence()}.");
+        {
+            var resolution = reading.Resolution;
+            var diagnosed = resolution is { Vanished: 0, Miss: { } miss } ? $": {miss.Sentence()}" : ".";
+            throw new NotActionableException(subject.Locator.Text, Actionable.NotInTree, $"{resolution.Absence()}{diagnosed}");
+        }
 
         judged.Require(subject.Locator.Text);
 

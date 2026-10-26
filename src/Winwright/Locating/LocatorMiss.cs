@@ -149,6 +149,18 @@ public sealed record LocatorMiss
     /// </summary>
     public int? Holding { get; init; }
 
+    /// <summary>
+    /// The toolbars in the window holding items in their overflow, each with the button that opens
+    /// it, named the way a locator names one. WW571.
+    /// <para>
+    /// Found by PhotoBoost (PB65): on a narrower desk a WPF toolbar moved its last buttons into its
+    /// overflow, which is a closed popup and in no tree until the overflow button opens it, so a step
+    /// pressing one read as a misspelled id. Asked only where nothing in the window matched, because
+    /// that is the one reading an overflowed item gives.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> Overflowing { get; init; } = [];
+
     /// <summary>The whole reading, in the sentence a person acts on.</summary>
     public string Sentence() => Diagnosis() + Holdings();
 
@@ -198,6 +210,14 @@ public sealed record LocatorMiss
             MissKind.ArrivedLate =>
                 $"{Stopped} matches now and did not while it was looked for: the window was still "
                 + "drawing, so this is a wait that was too short rather than anything about the control.",
+            // WW571. Before the doors, because it is the likelier answer where it is there at all: a
+            // toolbar holding items in its overflow is a window narrower than the case was written on.
+            _ when Overflowing.Count > 0 =>
+                $"nothing in the window matches {Stopped}, and {string.Join(", ", Overflowing)} "
+                + (Overflowing.Count == 1 ? "holds items in its overflow" : "hold items in their overflow")
+                + ", which the tree does not show until it is opened: a window narrower than the one the "
+                + "case was written on moves a toolbar's last items there."
+                + (ClosedDoors.Count == 0 ? "" : $" Also shut: {string.Join(", ", ClosedDoors)}."),
             _ when ClosedDoors.Count > 0 =>
                 $"nothing in the window matches {Stopped}: it was renamed, removed, or it is behind "
                 + $"something that is not showing — {string.Join(", ", ClosedDoors)} "

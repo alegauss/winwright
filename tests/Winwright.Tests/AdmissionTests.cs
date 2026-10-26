@@ -128,6 +128,10 @@ public sealed class AdmissionTests : IDisposable
         // naming nothing apart from a race with an element the application kept replacing.
         Assert.StartsWith("nothing matched, in ", refused.Because, StringComparison.Ordinal);
         Assert.Contains(" looks over ", refused.Because, StringComparison.Ordinal);
+
+        // WW571. And why, the way an expectation's red has said since WW460: the refusal said only how
+        // long it looked, so an overflowed toolbar button read as a misspelled id.
+        Assert.Contains("nothing in the window matches", refused.Because, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -281,6 +281,11 @@ public sealed record Flags
             "a pane whose two buttons open the system's common Open and Save dialogs, owned by the window, with a read-out of what was chosen; a save writes a file naming the type chosen",
             "choosing a file through the common dialog had no case, so an application opened and exported through test-only flags and the dialog code was never run"),
         new Flag(
+            "toolbar",
+            "",
+            "a pane under a toolbar as wide as the window, holding seven buttons and a read-out of the one pressed - the last ones go into its overflow when the window is narrowed",
+            "a step pressing a toolbar button moved into the overflow on a narrower desk was refused as nothing matched, which read as a misspelled id"),
+        new Flag(
             "layout",
             "",
             "a pane of three buttons in three boxes: one with room, one spilling past the right edge of a box too narrow for it, and one laid out zero wide",

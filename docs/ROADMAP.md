@@ -15,8 +15,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-- 📋 **WW571** (deps: —) **A locator for a toolbar item moved into its overflow says nothing matched, with no word of the overflow** — The case reads as a misspelled id or a missing button, and the cause, a narrower desk, is found only by guessing. → §WW571
-
 ## Block D — Act — patterns before pointers
 
 - 📋 **WW572** (deps: —) **A drag cannot press at one point of an element and release at another, so a handle drawn on a canvas has no case** — A crop handle, a map or a custom-drawn editor is left to unit tests of its arithmetic, and the gesture itself goes unchecked. → §WW572

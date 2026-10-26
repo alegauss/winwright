@@ -438,7 +438,56 @@ public static class Resolve
         {
             Held = held,
             Holding = holding,
+            Overflowing = Overflowing(root),
         };
+    }
+
+    /// <summary>
+    /// The toolbars under <paramref name="root"/> whose overflow holds items, each as
+    /// <c>ToolBar #bar (opened by Button #OverflowButton)</c>. WW571.
+    /// <para>
+    /// The overflow button is a child of its toolbar: <c>#OverflowButton</c> in WPF's own template,
+    /// whatever language the application speaks, and named <c>Overflow</c> on a WinForms tool strip.
+    /// WPF enables it only while the toolbar has items in its overflow, so an enabled one on screen is
+    /// the reading. A diagnosis is a page about a failure and never a second thing that can fail, so a
+    /// tree that goes while it is read answers what was found.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<string> Overflowing(AutomationElement root, int most = 3)
+    {
+        var found = new List<string>();
+        try
+        {
+            var bars = root.FindAll(
+                TreeScope.Descendants,
+                new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ToolBar));
+            foreach (AutomationElement bar in bars)
+            {
+                if (found.Count >= most)
+                    break;
+
+                foreach (AutomationElement child in bar.FindAll(TreeScope.Children, Condition.TrueCondition))
+                {
+                    if (ElementFacts.Of(child) is not { IsEnabled: true, IsOffscreen: false } facts
+                        || !(facts.AutomationId == "OverflowButton"
+                            || facts.Name.Contains("Overflow", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        continue;
+                    }
+
+                    if (ElementFacts.Of(bar) is { } owner)
+                        found.Add($"{owner} (opened by {facts})");
+
+                    break;
+                }
+            }
+        }
+        catch (Exception went) when (went is ElementNotAvailableException or System.Runtime.InteropServices.COMException)
+        {
+            // What was found stands, for the reason ClosedDoors gives.
+        }
+
+        return found;
     }
 
     /// <summary>

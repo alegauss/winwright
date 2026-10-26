@@ -184,32 +184,6 @@ rather than a red step.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW571 Name the toolbar overflow in a refusal
-
-Met in photo-boost on 2026-10-23, task PB65. The editor's WPF `ToolBar` sat beside other
-controls, and on the guest desk, whose window is narrower than the host's, the toolbar
-moved its last buttons into the overflow menu. The case step
-
-```json
-{ "locator": "Button#RotateRightButton", "act": "invoke", "named": "Rotate right is pressed" }
-```
-
-broke with "Button#RotateRightButton cannot take this act: nothing matched, in 46 looks
-over 8084 ms". The button exists with that AutomationId: a WPF toolbar keeps overflowed
-items in a closed popup, outside the accessibility tree until the overflow button opens
-it. Nothing in the refusal pointed there, so the run read as a misspelled id or a button
-never built, and finding the real cause took a guess about the guest's screen size.
-
-The workaround lives in the project: the toolbar was moved to span the whole window so
-it does not overflow at the default size. That fixes the layout, not the diagnosis.
-
-What winwright should offer: when a locator matches nothing and the window holds a
-ToolBar whose overflow button is enabled (UIA `ToolBar` with a child `Button` or
-`MenuItem` that has ExpandCollapse, which is how WPF and WinForms expose "more"), the
-refusal says so and names that toolbar: "nothing matched; ToolBar#EditorToolbar has
-items in its overflow, which the tree does not show until it is expanded". An `expand`
-step on the overflow button then reaches the item, and the hint can name it.
-
 ## Block D — Act — patterns before pointers
 
 ### §WW572 Drag between two points of one element

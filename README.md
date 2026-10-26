@@ -817,6 +817,14 @@ of absence it was: *nothing matched, in 80 looks over 2000 ms*, or *it matched o
 was gone each time before it could be read*. The first points at the locator, the second at the
 application replacing the element.
 
+Where nothing matched, the refusal goes on to say why, the way a red expectation does: the step
+is under a different parent somewhere else in the window, or something it would sit behind is shut
+(a collapsed drop-down, a tab not selected). A toolbar holding items in its **overflow** is named
+first, with the button that opens it: *ToolBar #editorToolbar (opened by Button #OverflowButton)
+holds items in its overflow*. A toolbar's overflow is in no tree until it is opened, so a button a
+narrower window pushed there reads as missing. That usually means the desk running the case is
+narrower than the one it was written on. Size the window with `resize`, or open the overflow first.
+
 Both instants reach the trace. An act reads once, the moment it returns; the expectation beside it
 polls after that to the deadline, and it is the second reading the verdict turns on. Where the two
 differ the act's own line carries **what the run settled on** as well as what the act read, because
