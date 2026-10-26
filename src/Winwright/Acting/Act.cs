@@ -119,6 +119,84 @@ public static class Act
         element => ((ExpandCollapsePattern)element.GetCurrentPattern(ExpandCollapsePattern.Pattern)).Collapse());
 
     /// <summary>
+    /// Size the top-level window the subject is in, in device-independent pixels, and read back the
+    /// size it ended at. WW570.
+    /// <para>
+    /// Found by PhotoBoost (PB63): a toolbar whose groups move into its overflow at a narrow width had
+    /// no case, because nothing set a window's size. The subject is any element of the window, the way
+    /// a capture's is, since the window itself is the root a locator searches under and never one of
+    /// its matches. A maximised window is restored first: it would otherwise keep its size and read as
+    /// one that refused.
+    /// </para>
+    /// <para>
+    /// <c>SetWindowPos</c> with no move, no restack and no activation, so it needs no foreground, like
+    /// every act here. The size asked for is scaled by the display's own DPI and not the window's: a
+    /// window unaware of scaling answers 96 for itself and is still drawn scaled. Whether the window
+    /// took all of it is the read-back's to say: a minimum size refuses part of a request, and the
+    /// result then reads the size asked against the size it ended at rather than refusing the step.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">An element of the window to size.</param>
+    /// <param name="width">The outer width, in device-independent pixels.</param>
+    /// <param name="height">The outer height, in device-independent pixels.</param>
+    /// <exception cref="NotActionableException">Where the subject is in no window, or the window refused to be sized.</exception>
+    public static ActResult Resize(Subject subject, int width, int height)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
+
+        var admitted = Admitted.To(subject);
+        var window = admitted.Window;
+        if (window == 0)
+        {
+            throw new NotActionableException(
+                subject.Locator.Text, Actionable.NotInTree, "it is in no top-level window, so there is no window to size");
+        }
+
+        var scale = ScaleOf(window);
+        var before = SizeOf(window, scale);
+
+        if (Win32.IsZoomed(window))
+            Win32.ShowWindow(window, Win32.ShowRestore);
+
+        if (!Win32.SetWindowPos(
+                window, 0, 0, 0, (int)Math.Round(width * scale), (int)Math.Round(height * scale), Win32.SizeOnly))
+        {
+            throw new NotActionableException(
+                subject.Locator.Text,
+                Actionable.Disabled,
+                $"its window refused to be sized (error {System.Runtime.InteropServices.Marshal.GetLastPInvokeError()})");
+        }
+
+        return new ActResult(
+            "resize",
+            subject.Locator,
+            "SetWindowPos",
+            admitted.Facts,
+            PatternValues.Sized(before),
+            PatternValues.Sized(SizeOf(window, scale)),
+            admitted.Reading.Resolution.WaitedMs,
+            admitted.Reading.Resolution.Polls);
+    }
+
+    /// <summary>Physical pixels per device-independent pixel on the display the window is on. WW570.</summary>
+    private static double ScaleOf(nint window)
+    {
+        var monitor = Win32.MonitorFromWindow(window, Win32.MonitorDefaultToNearest);
+        return Win32.GetDpiForMonitor(monitor, Win32.EffectiveDpi, out var dpi, out _) == 0 && dpi > 0 ? dpi / 96.0 : 1.0;
+    }
+
+    /// <summary>A window's outer size in device-independent pixels, as <c>640x720</c>. WW570.</summary>
+    private static string SizeOf(nint window, double scale)
+    {
+        Win32.GetWindowRect(window, out var at);
+        var wide = (int)Math.Round((at.Right - at.Left) / scale);
+        var high = (int)Math.Round((at.Bottom - at.Top) / scale);
+        return string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{wide}x{high}");
+    }
+
+    /// <summary>
     /// The boxes in the common Open and Save dialogs that take the file's name, by automation id.
     /// WW551: the ids are the same in every language, where the names are the translated label beside
     /// them — and the two dialogs differ, measured on the guest: Open holds <c>ComboBox#1148</c>, the

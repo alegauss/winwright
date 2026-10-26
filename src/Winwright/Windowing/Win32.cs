@@ -518,6 +518,9 @@ internal static class Win32
     /// <summary>SWP_NOZORDER | SWP_NOACTIVATE: move and size, and leave the stacking and the desk alone. WW536.</summary>
     internal const uint PlaceOnly = 0x0004 | 0x0010;
 
+    /// <summary>SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE: size alone, where it stands. WW570.</summary>
+    internal const uint SizeOnly = 0x0002 | 0x0004 | 0x0010;
+
     /// <summary>SWP_NOSIZE | SWP_NOACTIVATE: move and restack, keep the size and leave the desk alone. WW550.</summary>
     internal const uint MoveOnTop = 0x0001 | 0x0010;
 
@@ -574,6 +577,15 @@ internal static class Win32
     [DllImport("user32.dll", EntryPoint = "GetMonitorInfoW")]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool GetMonitorInfo(nint monitor, ref MonitorInfo info);
+
+    [DllImport("user32.dll")]
+    internal static extern nint MonitorFromWindow(nint window, uint flags);
+
+    /// <summary>MDT_EFFECTIVE_DPI: the scale a person set for the display, as a DPI. WW570.</summary>
+    internal const int EffectiveDpi = 0;
+
+    [DllImport("shcore.dll")]
+    internal static extern int GetDpiForMonitor(nint monitor, int kind, out uint dpiX, out uint dpiY);
 
     internal static string ClassOf(nint window)
     {

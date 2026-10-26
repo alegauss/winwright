@@ -66,8 +66,19 @@ public sealed record PatternValues
     /// <summary>The first <see cref="MostText"/> characters a text pattern reads.</summary>
     public string? Text { get; private init; }
 
+    /// <summary>
+    /// A top-level window's outer size in device-independent pixels, as <c>640x720</c>. WW570: read by
+    /// <c>resize</c> alone, either side of it, because a window's minimum can refuse part of the size
+    /// asked for and the size it ended at is then the only honest read-back.
+    /// </summary>
+    public string? Size { get; private init; }
+
     /// <summary>Nothing was read, because the element offered nothing worth reading.</summary>
     public static PatternValues None { get; } = new();
+
+    /// <summary>A reading that is a window's size and nothing else. WW570.</summary>
+    /// <param name="size">The size, as <c>640x720</c>.</param>
+    internal static PatternValues Sized(string size) => new() { Size = size };
 
     /// <summary>
     /// The one value worth showing in a line, or null where the element reports none. The order is
@@ -85,7 +96,8 @@ public sealed record PatternValues
         ?? Toggle
         ?? (IsSelected is { } selected ? selected ? "selected" : "not selected" : null)
         ?? ExpandCollapse
-        ?? Text;
+        ?? Text
+        ?? Size;
 
     /// <summary>
     /// Read every pattern this element offers into values, now. A pattern that throws while being

@@ -19,7 +19,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW570** (deps: —) **A case cannot resize the window under test, so a layout that changes with width has no case** — An adopter whose toolbar overflows or whose panel collapses when narrowed must leave that claim to the framework, unproven. → §WW570
 - 📋 **WW572** (deps: —) **A drag cannot press at one point of an element and release at another, so a handle drawn on a canvas has no case** — A crop handle, a map or a custom-drawn editor is left to unit tests of its arithmetic, and the gesture itself goes unchecked. → §WW572
 - 📋 **WW577** (deps: —) **A step cannot wait longer than the project's resolve timeout, so a minutes-long result has no case** — Modelado's live Meshy case had to raise resolve for the whole project to 10 minutes, which every absent step would then wait out in the gate. → §WW577
 

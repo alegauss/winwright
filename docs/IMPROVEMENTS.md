@@ -212,29 +212,6 @@ step on the overflow button then reaches the item, and the hint can name it.
 
 ## Block D — Act — patterns before pointers
 
-### §WW570 Resize a window from a case
-
-Met in photo-boost on 2026-10-23, task PB63: the editor gained a WPF `ToolBar` whose
-groups must move into its overflow menu at a narrow window width instead of clipping.
-The case that proves it would shrink the window and read where a button went:
-
-```json
-{ "locator": "Window", "act": "resize", "with": "640x720", "named": "the window is narrowed" },
-{ "locator": "Button#OverflowButton", "act": "read", "reads": "enabled", "expect": "enabled",
-  "named": "the toolbar offers its overflow" }
-```
-
-No verb sets a window's size, and no fixture launches the application at a size of the
-case's choosing, so the claim was left to WPF's own `ToolBar` overflow and no case in
-`cases\window.cases.json` reads it. Every layout that changes with width (a panel that
-collapses, a caption that wraps, a toolbar that overflows) is unprovable the same way.
-
-What winwright should offer: a `resize` verb on a top-level window, through
-`TransformPattern.Resize` where the window supports it and `SetWindowPos` otherwise,
-taking a size in device-independent pixels and reporting the size the window ended at,
-since a minimum size can refuse part of the request. A fixture key giving the launch
-size would cover the common case as well, without a step.
-
 ### §WW572 Drag between two points of one element
 
 Met in photo-boost on 2026-10-23, task PB67. The crop editor is drawn on a GPU surface

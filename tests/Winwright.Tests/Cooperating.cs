@@ -170,6 +170,7 @@ internal static class Cooperating
         new("Act.ChooseFile", Cooperation.None, false, "the common dialog's name box and confirm, through their value and invoke patterns"),
         new("Act.Expand", Cooperation.None, false, "open through the expand-collapse pattern"),
         new("Act.Collapse", Cooperation.None, false, "shut through the same"),
+        new("Act.Resize", Cooperation.None, false, "size the window it is in through SetWindowPos, activating nothing"),
         new("Selecting.Confirmed", Cooperation.None, false, "select and confirm, escalating only if allowed"),
         new("Surface.AsFound", Cooperation.None, false, "put the controls back the way they were"),
         new("Pick.Values", Cooperation.None, false, "every value a picker holds"),

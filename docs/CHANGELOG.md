@@ -222,6 +222,7 @@
 - ✅ **WW555** **A select right after expand sometimes finds no list item, since the act resolves before the popup realises it** — A look whose match is gone before it is read no longer ends the act's poll, and the refusal says whether anything matched.
 - ✅ **WW556** **A fixture argument cannot name the staged directory: {files} is filled only into variables and the working directory** — A fixture's arguments take {files} and {root} as its variables do, so an app whose paths are flags opens and writes in the staged folder.
 - ✅ **WW561** **choose file reports done while the Save dialog saves its default name, not the path the case gave** — choose file types the name by WM_CHAR and reads it back, so a Save dialog with a default name saves the given path (design recorded in `src/Winwright/Acting/Act.cs`).
+- ✅ **WW570** **A case cannot resize the window under test, so a layout that changes with width has no case** — A case sizes the window under test with 'resize' and 'with' 640x720 in device-independent pixels, needing no foreground, and the trace reads the size the window ended at.
 
 ## Block E — Capture — the picture that proves what it photographed
 

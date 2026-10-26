@@ -134,6 +134,56 @@ public sealed class ActTests : IDisposable
     }
 
     [Fact]
+    public void A_resize_sizes_the_window_its_subject_is_in_and_reads_back_where_it_ended()
+    {
+        // WW570. The subject is a control and the act is about its window, which is the root a
+        // locator searches under and so never a match of one. The size is in device-independent
+        // pixels, so the rectangle is checked against the display's own scale.
+        var frame = Dialog();
+        var edit = On(frame, "Edit");
+        GiveTheForegroundAway();
+        var desk = GetForegroundWindow();
+
+        var acted = Act.Resize(edit, 360, 240);
+
+        Assert.Equal(0, GetDpiForMonitor(MonitorFromWindow(frame, 2), 0, out var dpi, out _));
+        var scale = dpi / 96.0;
+        GetWindowRect(frame, out var at);
+
+        Assert.Equal((int)Math.Round(360 * scale), at.Right - at.Left);
+        Assert.Equal((int)Math.Round(240 * scale), at.Bottom - at.Top);
+        Assert.Equal($"{(int)Math.Round(480 / scale)}x{(int)Math.Round(320 / scale)}", acted.Before.Size);
+        Assert.Equal("360x240", acted.After.Size);
+        Assert.True(acted.Changed);
+        Assert.Contains("-> 360x240", acted.ToString());
+
+        // And it took nothing from the desk: the window that held the foreground still does.
+        Assert.Equal(desk, GetForegroundWindow());
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Rect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern nint GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetWindowRect(nint window, out Rect rectangle);
+
+    [DllImport("user32.dll")]
+    private static extern nint MonitorFromWindow(nint window, uint flags);
+
+    [DllImport("shcore.dll")]
+    private static extern int GetDpiForMonitor(nint monitor, int kind, out uint dpiX, out uint dpiY);
+
+    [Fact]
     public void Selecting_an_item_lands_and_is_read_back_from_the_item()
     {
         var frame = Dialog();

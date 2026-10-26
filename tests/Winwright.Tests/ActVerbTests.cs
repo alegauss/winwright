@@ -27,7 +27,7 @@ public class ActVerbTests
         Assert.Equal(
             [
                 "read", "invoke", "toggle", "set value", "set range", "select", "add to selection",
-                "remove from selection", "choose file", "expand", "collapse", "type", "click", "drag", "drop file", "nudge", "press", "pick", "pick at", "open submenu", "open tray menu",
+                "remove from selection", "choose file", "expand", "collapse", "resize", "type", "click", "drag", "drop file", "nudge", "press", "pick", "pick at", "open submenu", "open tray menu",
                 "click tray icon", "capture",
             ],
             ActVerb.All.Select(verb => verb.Name));
@@ -95,6 +95,24 @@ public class ActVerbTests
         // mean it on a machine that would otherwise read it as 425.
         Assert.Null(ActVerb.Named("set range").Refuses("42.5"));
         Assert.Contains("not one", ActVerb.Named("set range").Refuses("42,5"));
+    }
+
+    [Fact]
+    public void A_size_nobody_can_set_is_refused_where_it_was_written()
+    {
+        // WW570. A width and a height above zero, in device-independent pixels, and nothing else: a
+        // size the window could never take costs a corrected field, never a launch.
+        var resize = ActVerb.Named("resize");
+
+        Assert.Equal(Takes.Size, resize.Wants);
+        Assert.Null(resize.Refuses("640x720"));
+        Assert.Null(resize.Refuses(" 1280X800 "));
+        Assert.Contains("acts on a size", resize.Refuses(null));
+        Assert.All(
+            ["640", "640x", "0x720", "-640x720", "640.5x720", "640x720x1", "wide"],
+            written => Assert.Contains($"'{written}' is not one", resize.Refuses(written)));
+        Assert.True(resize.Repeatable);
+        Assert.False(resize.Synthesises);
     }
 
     [Fact]

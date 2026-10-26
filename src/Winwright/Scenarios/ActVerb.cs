@@ -27,6 +27,12 @@ public enum Takes
     /// </para>
     /// </summary>
     Position,
+
+    /// <summary>
+    /// A width and a height in device-independent pixels, written <c>640x720</c>. WW570: its own kind
+    /// so a size nobody can set is refused where it was written, like a position below zero.
+    /// </summary>
+    Size,
 }
 
 /// <summary>
@@ -67,6 +73,16 @@ public sealed record ActVerb
         new(ChoosesFile, Takes.Text, repeatable: false, (subject, argument) => Act.ChooseFile(subject, argument!)),
         new(Expands, Takes.Nothing, repeatable: true, (subject, _) => Act.Expand(subject)),
         new(Collapses, Takes.Nothing, repeatable: true, (subject, _) => Act.Collapse(subject)),
+        // WW570. The window the subject is in, to a size. Repeatable, because sizing a window to the
+        // size it already has arrives where it was.
+        new(
+            "resize",
+            Takes.Size,
+            repeatable: true,
+            (subject, argument) => Sized(argument!) is { } size
+                ? Act.Resize(subject, size.Wide, size.High)
+                : throw new InvalidOperationException(
+                    $"'{argument}' reached the act and is not a size, so the load accepted what the act cannot run")),
 
         // WW225. The three that synthesise input, which is the half of the engine a case could not
         // name. Each has a pattern act beside it that reads almost the same and proves something
@@ -495,6 +511,11 @@ public sealed record ActVerb
                 ? null
                 : $"'{Name}' acts on a position, and '{written}' is not a whole number from 0",
 
+            (Takes.Size, _) => Sized(written) is null
+                ? $"'{Name}' acts on a size, and '{written}' is not one; it is a width and a height above 0 in "
+                    + "device-independent pixels, written 640x720"
+                : null,
+
             _ => null,
         };
     }
@@ -580,8 +601,22 @@ public sealed record ActVerb
         Takes.Text => "text",
         Takes.Number => "a number",
         Takes.Position => "a position",
+        Takes.Size => "a size",
         _ => "nothing",
     };
+
+    /// <summary>The width and height a size spells, or null where it spells none. WW570.</summary>
+    /// <param name="argument">What the step wrote, as <c>640x720</c>.</param>
+    private static (int Wide, int High)? Sized(string argument)
+    {
+        var parts = argument.Trim().Split('x', 'X');
+        return parts.Length == 2
+            && int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var wide)
+            && int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out var high)
+            && wide > 0 && high > 0
+                ? (wide, high)
+                : null;
+    }
 
     /// <summary>Whether the argument is a position: a whole number, counted from zero.</summary>
     /// <param name="argument">What the step wrote.</param>

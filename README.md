@@ -404,7 +404,7 @@ button, which is how a person opens what a tray application opens on a left-clic
 a control through its patterns, and a step naming one against a `tray` is refused where it was written;
 the two tray acts named against a `locator` are refused the same way, since there is no control to hand
 them. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `add to selection`, `remove from selection`, `choose file`, `expand`, `collapse`, `type`, `click`, `drag`, `drop file`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
+`set value`, `set range`, `select`, `add to selection`, `remove from selection`, `choose file`, `expand`, `collapse`, `resize`, `type`, `click`, `drag`, `drop file`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
 
 `select` replaces whatever its list had selected. A list that takes several rows at once, such as a
 sidebar where Ctrl+click adds a row, takes **`add to selection`** and **`remove from selection`**,
@@ -423,6 +423,23 @@ An application may answer the gesture and offer no pattern. For that, a `click` 
 and up in the same batch of input as the click, so nothing can arrive between them, and the step's name
 in the report says the key (`ctrl click List#sessions > ListItem[name="Beta"]`). A key that is not one
 of the two is refused, and `holding` beside any act but `click` is refused.
+
+**`resize`** sizes the window the step's `locator` is in. `with` is the outer width and height in
+device-independent pixels, written `640x720`, so the case means the same size on a display scaled to
+150%. Any element of the window will do as the locator: the window itself is what a locator searches
+under, so it never matches one. It is how a case reaches a layout that changes with width, such as a
+toolbar whose groups move into its overflow:
+
+```json
+{ "locator": "ToolBar#MainToolBar", "act": "resize", "with": "640x720", "named": "the window is narrowed" },
+{ "locator": "Button#OverflowButton", "act": "read", "reads": "enabled", "expect": "enabled" }
+```
+
+A maximised window is restored first. The act activates nothing, so it needs no foreground. Its
+read-back is the size the window ended at, beside the size it had (`resize ... via SetWindowPos:
+1024x768 -> 640x720`). A window with a minimum size refuses part of a request, and the trace then
+shows the size it kept rather than the one asked for. Whether the layout answered is the next step's
+claim. A size that is not two whole numbers above 0 joined by `x` is refused where it is written.
 
 A case that **stops short** (a step threw, or an act was never sent) collapses whatever its `expand`
 steps opened and its own `collapse` steps did not close again, last opened first, through the
