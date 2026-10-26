@@ -4,13 +4,30 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW574** (deps: —) **The guest runner carries only the tree's git listing, so a build output such as an installer cannot reach the guest** — An adopter whose evidence is its own build output must stage a throwaway git folder to get it onto the guest. → §WW574
+- 📋 **WW575** (deps: —) **A case cannot drive the installed copy of an app, nor follow it when it exits and relaunches itself to update** — An adopter whose update path is the claim has to drive the installed app with hand-written UI Automation outside every case. → §WW575
+- 📋 **WW576** (deps: —) **A -Run holding & or && logs only its last command and can lose the guest's exit code** — The runner writes call <Run> > vm-run.log, so cmd binds the redirection to one command; modelado had to wrap -Run in cmd /c to see a Blender test fail. → §WW576
+- 📋 **WW578** (deps: —) **Through run-tests-vm.cmd, -Bring a,b arrives as one file name, so only a single file can come back from the guest** — Modelado had to tar its two demo files on the guest to bring them back, since powershell -File binds a comma list as one string. → §WW578
+- 📋 **WW579** (deps: —) **The guest's Search or Start flyout holding the foreground is read as a question and refuses the run** — Modelado's operator had to close Windows Search by hand on the VM console; the overlay closes on Escape and asks nothing. → §WW579
+- 📋 **WW580** (deps: —) **A taskbar holding the guest's foreground refuses the run, though the remedy is a shell restart the runner could do** — The runner has vmrun and the guest's credentials, yet each adopter restarts explorer by hand whenever this happens. → §WW580
+- 📋 **WW581** (deps: —) **A -Run that opens no window is still refused over a held guest desk** — Modelado's CLI-only guest runs (model downloads, demo reconstructions) stopped on a desk they never touch. → §WW581
+- 📋 **WW582** (deps: —) **A fixture cannot run a command, such as the project's own CLI, with its variables before the application launches** — A case cannot prove that what a CLI writes reaches the window, so the adopter tests the file instead and the window never reads it. → §WW582
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+- 📋 **WW571** (deps: —) **A locator for a toolbar item moved into its overflow says nothing matched, with no word of the overflow** — The case reads as a misspelled id or a missing button, and the cause, a narrower desk, is found only by guessing. → §WW571
+
 ## Block D — Act — patterns before pointers
+
+- 📋 **WW570** (deps: —) **A case cannot resize the window under test, so a layout that changes with width has no case** — An adopter whose toolbar overflows or whose panel collapses when narrowed must leave that claim to the framework, unproven. → §WW570
+- 📋 **WW572** (deps: —) **A drag cannot press at one point of an element and release at another, so a handle drawn on a canvas has no case** — A crop handle, a map or a custom-drawn editor is left to unit tests of its arithmetic, and the gesture itself goes unchecked. → §WW572
+- 📋 **WW577** (deps: —) **A step cannot wait longer than the project's resolve timeout, so a minutes-long result has no case** — Modelado's live Meshy case had to raise resolve for the whole project to 10 minutes, which every absent step would then wait out in the gate. → §WW577
 
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
+
+- 📋 **WW573** (deps: —) **A file step claims only sameBytesAs, so an image the app wrote cannot be checked for its size or transparency** — An adopter whose app writes images that vary by desk has no case for them, or proves them only by reopening the file in the app. → §WW573
 
 ## Block G — The scenario — a case is a data file
 
