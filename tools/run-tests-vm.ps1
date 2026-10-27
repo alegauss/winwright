@@ -1482,7 +1482,11 @@ set "RollCallRoot=$script:GuestSync\history"
 dotnet build-server shutdown >nul 2>&1
 
 cd /d "$script:GuestRepo"
-call $script:Run > "$script:GuestSync\vm-run.log" 2>&1
+
+rem WW576: the command goes to cmd as a prompt line, by way of a file, so a chain is logged whole
+rem and a for %%B means what it means typed at a prompt. Written into this line, a chain had the
+rem redirection bound to its last command only.
+powershell -NoProfile -ExecutionPolicy Bypass -File "$script:GuestSync\run-command.ps1" -CommandFile "$script:GuestSync\run-command.txt" -In "$script:GuestRepo" > "$script:GuestSync\vm-run.log" 2>&1
 
 rem Captured before the shutdown and not after. Anything run between the suite and the write takes
 rem %ERRORLEVEL% with it, so the tidying up would have reported its own success as the suite's.
@@ -1495,6 +1499,10 @@ rem wrote "ECHO is off." into the file and the host read the suite's verdict as 
 > "$script:GuestSync\vm-exit.txt" echo %RC%
 exit /b 0
 "@ | Set-Content -LiteralPath (Join-Path $stage 'run.cmd') -Encoding ascii
+
+# WW576. The command itself, as -Run gave it, and the script that hands it to cmd as a prompt line.
+Set-Content -LiteralPath (Join-Path $stage 'run-command.txt') -Value $script:Run -Encoding utf8
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'run-command.ps1') -Destination (Join-Path $stage 'run-command.ps1') -Force
 
 # WW406. What Blame leaves behind when the test host stops answering: a dump of every thread, and a
 # sequence naming the case that was still running. Both are the evidence and both were lost three
@@ -1554,7 +1562,7 @@ foreach ($stale in @('vm-exit.txt', 'vm-run.log', 'sync.log', 'blame.dmp', 'blam
     $null = Invoke-VmRun -Guest -Arguments @('deleteFileInGuest', $vmxPath, "$script:GuestSync\$stale")
 }
 
-foreach ($file in @('source.zip', 'sync.ps1', 'sync.cmd', 'run.cmd', 'blame.ps1')) {
+foreach ($file in @('source.zip', 'sync.ps1', 'sync.cmd', 'run.cmd', 'run-command.ps1', 'run-command.txt', 'blame.ps1')) {
     $sent = Invoke-VmRun -Guest -Arguments @('copyFileFromHostToGuest', $vmxPath, (Join-Path $stage $file), "$script:GuestSync\$file")
     if (-not $sent.Ok) { Refuse "could not copy $file into the guest: $($sent.Output)" }
 }

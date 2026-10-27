@@ -4,20 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW576 A chained -Run
-
-`run-tests-vm.ps1` writes the guest script line `call $script:Run >
-"$GuestSync\vm-run.log" 2>&1`. With `-Run 'dotnet build X &
-blender\tests\run-blender-tests.cmd'`, cmd binds the redirection to the last command
-only: the build's output went to no log, and one run came back as "the guest wrote no
-exit code". A `for /d %B` inside `-Run` also broke, because the line runs from a batch
-file where `%B` must be `%%B`, and cmd refused the whole line before running any of it.
-
-Modelado's workaround was `-Run 'cmd /c "a && b"'`. The runner could wrap `-Run` itself
-(`call cmd /c "<Run>"`, or write `-Run` to its own .cmd and call that), so what a
-developer types at a prompt is what the guest runs, as the parameter's own comment
-promises.
-
 ### §WW578 -Bring through the .cmd wrapper
 
 Modelado's MOD33 made the site's demo model on the guest (modelado-cli object, then edit

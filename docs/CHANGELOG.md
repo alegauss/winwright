@@ -119,6 +119,7 @@
 - ✅ **WW564** **a fixture cannot remove an inherited environment variable, so an Electron app launched from VS Code runs as Node** — A fixture's unset names inherited variables the launch removes, case-blind and refused beside variables, so an Electron app started from VS Code opens as a window.
 - ✅ **WW574** **The guest runner carries only the tree's git listing, so a build output such as an installer cannot reach the guest** — The guest runner takes -Carry, paths or wildcards relative to the tree, ignored or not, so a build output such as an installer reaches the guest at its own path.
 - ✅ **WW575** **A case cannot drive the installed copy of an app, nor follow it when it exits and relaunches itself to update** — A step waits on the application's process: 'exits' claims the exit an update makes, and 'relaunches' follows the new copy into its window, which the run stops with the case.
+- ✅ **WW576** **A -Run holding & or && logs only its last command and can lose the guest's exit code** — The guest hands -Run to cmd as a prompt line through tools/run-command.ps1, so a chain logs every command, a for %B works, and the exit code is the prompt's.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

@@ -1580,7 +1580,9 @@ tools\run-tests-vm.ps1 -Tree D:\path\to\yours -Run "run-cases.cmd" -Bring @('you
 
 `-Name` defaults to the tree's own folder, so it lands in `C:\src\<name>` and two projects cannot
 collide in one guest; `-ResultsIn` says where the command left what it wrote. A run that names its
-own `-Run` and no `-Bring` brings nothing back and does not report a missing trx.
+own `-Run` and no `-Bring` brings nothing back and does not report a missing trx. `-Run` is run in the
+guest as a line typed at a prompt: a chain joined by `&` or `&&` is logged whole and exits with the
+code a prompt would give, and a `for %B` loop means what it means there.
 
 The tree goes over as its git listing, tracked and untracked files minus what `.gitignore` covers.
 A build output the run needs, such as an installer under an ignored `artifacts\`, goes with
