@@ -11,21 +11,23 @@ and nothing may take the foreground, then ask again before refusing. The decisio
 held by RunnerWaitsTests and the run's own lines, but the restart has never run: the
 gate run that shipped WW580 found the desk takeable after 8 ms.
 
-Measured 2026-10-27, with the user's go-ahead: the guest's `ForegroundLockTimeout` was
-raised to 200000 live and in the registry, with `Shell_TrayWnd` in the foreground, both
-read back. The next run read `shell`, not `held`, and was granted the foreground in 14
-ms; the value was then restored to 0 and read back. The lock cannot provoke this arm:
-`desk-take.ps1` sends an input event before it asks (WW472), and Windows gives the
-foreground to the process that sent the last input, which is what the timeout exempts.
-So whatever refused the desk on 2026-10-26 was not the foreground lock.
+Two provocations were measured on 2026-10-27, with the user's go-ahead, and neither
+holds the desk against the runner's asking:
 
-Still to try: a guest helper holding `LockSetForegroundWindow(LSFW_LOCK)`, measured
-first, since input may lift that lock too. If it holds, it proves only the refusal
-("restarted once and still held"), because the lock is the helper's and a shell restart
-cannot clear it. The success arm needs explorer itself refusing the desk, and nothing
-here provokes that on demand. If no provocation is found, this line is retired with the
-measurement above as its reason. Any probe holds the desk claim, because quickshell
-shares the guest.
+- `ForegroundLockTimeout` raised to 200000, live and in the registry, with `Shell_TrayWnd` in
+  the foreground. The next run read `shell` and was granted the foreground in 14 ms. The value
+  was restored to 0 and read back.
+- A guest helper calling `LockSetForegroundWindow(LSFW_LOCK)` with the taskbar in the
+  foreground, and the call succeeded. The next run was granted the foreground in 8 ms, and
+  `LSFW_UNLOCK` then answered access denied, with no lock left to lift.
+
+Both fall to the same rule: `desk-take.ps1` sends an input event before it asks (WW472),
+and input lifts both the timeout and the lock. A fixture does the same, so neither state
+is one a run can meet. Whatever refused the desk on 2026-10-26 was something else, and
+nothing known here provokes it on demand.
+
+Unless a held desk is met again, with the process and window that held it, this line has
+nothing to measure and is retired with these two readings as its reason.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
