@@ -20,6 +20,8 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
+- 📋 **WW583** (deps: —) **an in-app render taken while the page is still fading in writes a washed-out picture and the case passes** — An adopter reads a picture the engine certified and sees nothing, so the visual check falls back to the app's own capture flag, which WW480 meant to retire. → §WW583
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
