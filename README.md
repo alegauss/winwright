@@ -543,9 +543,9 @@ the locator as ambiguous. It is attempted once. A locator that matches a window
 with no name box or no confirm button is refused, naming what was missing.
 
 A file on disk is the third thing a step can be about, beside a `locator` and a `tray` icon. A step
-naming **`file`** takes `read` and makes one claim, **`sameBytesAs`**: that the file holds the bytes of
-another one. Both paths are written the same way, relative to the project's root or naming the
-fixture's staged directory with `{files}`:
+naming **`file`** takes `read` and makes one of two claims. The first, **`sameBytesAs`**, is that the
+file holds the bytes of another one. Both paths are written the same way, relative to the project's
+root or naming the fixture's staged directory with `{files}`:
 
 ```json
 { "file": "{files}/landing/report.bin", "act": "read", "sameBytesAs": "cases/fixtures/report.bin" }
@@ -554,9 +554,24 @@ fixture's staged directory with `{files}`:
 It is waited for over `timeouts.resolve`, because Explorer writes a dropped file after the release
 returns, and a read that collides with the writer is a look that saw nothing. A file still missing
 then is a failure naming what the folder holds; one that differs names both lengths and the first
-byte that differs. A file step with no `sameBytesAs` is refused, because a file that merely exists is
-what a truncated copy is too, and so is every claim about a control's reading beside it. A
+byte that differs. A file step that makes neither claim is refused, because a file that merely exists
+is what a truncated copy is too, and so is every claim about a control's reading beside it. A
 `sameBytesAs` file that is not there stops the case as the case's own fault, not the application's.
+
+The second, **`image`**, is for a picture the application wrote whose bytes vary from desk to desk,
+such as a render sized to the viewport. The file is decoded instead of compared. The claim is a list of
+facts joined by commas: `width N`, `height N`, `longSide N`, `shortSide N` (in pixels), and
+`transparent` (some pixel is less than fully opaque) or `opaque`:
+
+```json
+{ "file": "{files}/view.png", "act": "read", "image": "longSide 2048, transparent" }
+```
+
+It is waited for the same way. A failure names what was read, such as *view.png is 1024x576, with no
+transparent pixel, and the step claimed longSide 2048, transparent*, or says the file could not be
+decoded as an image. Windows' own imaging decodes it: PNG, JPEG, BMP, GIF and TIFF, and WebP where
+the system has that codec. A fact it does not know is refused where it is written, and so is a claim
+that is both `transparent` and `opaque`.
 
 `click tray icon` is a pointer at the icon's centre, and on purpose: every taskbar button refuses a
 clickable point, so the rectangle is the only address an icon has. What it claims is the click — sent

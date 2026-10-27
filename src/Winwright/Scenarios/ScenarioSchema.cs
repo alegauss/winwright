@@ -234,7 +234,7 @@ public static class ScenarioSchema
             Taking.Text,
             "a file on disk to read, relative to the project's root or naming the fixture's staged "
                 + "directory with '{files}' — for what an act leaves outside any window, such as a file "
-                + "dropped onto an Explorer folder; it takes 'read' and claims 'sameBytesAs'",
+                + "dropped onto an Explorer folder; it takes 'read' and claims 'sameBytesAs' or 'image'",
             [],
             Subject),
         new("act", true, Taking.Text, "what to do to it", ActVerb.All.Select(verb => verb.Name).ToList()),
@@ -274,6 +274,7 @@ public static class ScenarioSchema
         new("coversWithin", false, Taking.Text, "the same set, claiming each declared string appears inside the name of something read rather than equalling it — for an entry that decorates what it is about", [], Claims: true),
         new("within", false, Taking.Text, "a second locator, in the same window, that this step's element claims to be drawn inside — its rectangle inside the other's, and not empty, for a control the layout clipped or left no room; waited for over the resolve timeout, and a failure names both rectangles", [], Claims: true),
         new("fillsMonitor", false, Taking.Truth, "that this step's element covers the whole of the monitor it is on — for a full-screen mode, where a border or a strip left uncovered is the defect; waited for over the resolve timeout, and a failure names both rectangles and each edge left uncovered", [], Claims: true),
+        new("image", false, Taking.Text, "on a 'file' step, what the file is as an image, decoded rather than compared byte for byte — facts joined by commas: 'width N', 'height N', 'longSide N', 'shortSide N', 'transparent' or 'opaque', such as 'longSide 2048, transparent' — waited for over the resolve timeout, and a failure names the size and transparency it read", [], Claims: true),
         new("sameBytesAs", false, Taking.Text, "on a 'file' step, the file whose bytes it should hold, written the way 'file' is — waited for over the resolve timeout, and a file still missing or different then is a failure naming the path, the lengths and the first byte that differs", [], Claims: true),
         new("meansIt", false, Taking.Truth, "that this step means a destructive entry it names", []),
         new("popup", false, Taking.Text, "the popup inside this step's window whose tree the picture is of, by the name the application's own author gave it — for a capture, and the one surface no copy of the screen can ever take", []),

@@ -343,6 +343,7 @@
 - ✅ **WW545** **Typing into a terminal substitutes the last character for an earlier one about once a send in fifty, unrepaired** — Typing into a terminal repairs the last-character substitution before Enter, proven by quickshell's tab case passing 300 of 300 guest runs on 1.1.2, the repair firing on two.
 - ✅ **WW548** **A case cannot claim a window covers its monitor, so a full-screen mode that leaves a border or a pixel uncovered passes** — A step claims fillsMonitor: its element covers the whole monitor it is on, so a full screen leaving a border fails naming both rectangles and each edge left uncovered in pixels.
 - ✅ **WW569** **a set derived outside a run is asked in the machine's culture, so a runner's unshipped one is underivable** — Without `speaking`, a read-out's `{language}` is the language of the strings file that answers for the machine, then language.fallback, and a failed read-out names its arguments and stdout.
+- ✅ **WW573** **A file step claims only sameBytesAs, so an image the app wrote cannot be checked for its size or transparency** — A file step claims 'image', such as 'longSide 2048, transparent', decoded through Windows imaging, and a failure names the size and transparency it read.
 
 ## Block G — The scenario — a case is a data file
 

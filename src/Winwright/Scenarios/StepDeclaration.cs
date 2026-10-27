@@ -172,6 +172,14 @@ public sealed record StepDeclaration
     public string? SameBytesAs => Wrote.Trimmed("sameBytesAs");
 
     /// <summary>
+    /// What <see cref="File"/> claims to be as an image — its size and whether it is clear anywhere —
+    /// or null on every step that makes no such claim. WW573: an image whose bytes vary by desk has no
+    /// file to be the same bytes as, and its size and transparency are what the case means.
+    /// </summary>
+    public Asserting.ImageClaim? Image =>
+        Wrote.Trimmed("image") is { } written ? Asserting.ImageClaim.Parse(written, out _) : null;
+
+    /// <summary>
     /// What this step is about, as a sentence — the locator's text, the icon's name, or the file's
     /// path. WW258: what a trace line and a refusal want, and the one accessor that cannot be wrong
     /// about which kind of subject a step has.
@@ -1045,6 +1053,7 @@ public sealed record StepDeclaration
             Claiming(EachSpoken, "eachSpoken", "every element it matches announces a name");
             Claiming(OwnHeader, "ownHeader", "each row's controls announce that row");
             Claiming(SameBytesAs is not null, "sameBytesAs", $"the file holds the bytes '{SameBytesAs}' holds");
+            Claiming(Wrote.Trimmed("image") is not null, "image", $"the file is an image that is {Wrote.Trimmed("image")}");
             Claiming(Within is not null, "within", $"it is drawn inside {Within?.Text}");
             Claiming(FillsMonitor, "fillsMonitor", "it covers the whole of its monitor");
 
@@ -1108,6 +1117,7 @@ public sealed record StepDeclaration
         // and not for whichever field the reader would then delete.
         RefusesFileVerb(subject, file, act);
         RefusesBytesWithoutFile(subject, file, wrote.Trimmed("sameBytesAs"));
+        RefusesImageWithoutFile(subject, file, wrote.Trimmed("image"));
 
         // WW391. The tray's own refusal about the verb, kept ahead of everything else a case wrote:
         // an icon that named a pressing act is refused for that and not for whichever claim the
@@ -1487,6 +1497,33 @@ public sealed record StepDeclaration
     }
 
     /// <summary>
+    /// <c>image</c> on a step that is not about a file, or one that names no fact an image has. WW573.
+    /// <para>
+    /// Both are wrong on every machine, so both are refused where the case wrote them rather than on
+    /// the run that would decode the file and find nothing to compare it with.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="file">The file it is about, or null.</param>
+    /// <param name="image">What it said the image is, or null.</param>
+    private static void RefusesImageWithoutFile(string subject, string? file, string? image)
+    {
+        if (image is null)
+            return;
+
+        if (file is null)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                "it carries 'image', which is a claim about a file on disk; a step that makes it names "
+                    + "that file in 'file' and carries no locator");
+        }
+
+        if (Asserting.ImageClaim.Parse(image, out var wrong) is null)
+            throw new ScenarioRefusedException(subject, $"its 'image' is '{image}', and {wrong}: it takes {Asserting.ImageClaim.Spelled}");
+    }
+
+    /// <summary>
     /// Every field a file step may not carry, and the one it must. WW535.
     /// <para>
     /// The tray's rule over a third subject: every claim but <c>sameBytesAs</c> is about a reading
@@ -1499,7 +1536,12 @@ public sealed record StepDeclaration
     /// <param name="subject">What a refusal calls it.</param>
     private static void RefusesFileClaims(StepDeclaration step, string subject)
     {
-        var claimed = step.Claims.Where(one => one.Field != "sameBytesAs").Select(one => $"'{one.Field}'").ToList();
+        // WW573. The image claim beside the bytes one: both are about the file, and neither is a
+        // reading through a control's patterns.
+        var claimed = step.Claims
+            .Where(one => one.Field is not ("sameBytesAs" or "image"))
+            .Select(one => $"'{one.Field}'")
+            .ToList();
 
         if (step.NamedReading is not null)
             claimed.Add("'reads'");
@@ -1512,17 +1554,26 @@ public sealed record StepDeclaration
             throw new ScenarioRefusedException(
                 subject,
                 $"it is about a file and carries {string.Join(", ", claimed)}; those are claims about a "
-                    + "reading taken through a control's patterns, and a file has none — the claim a "
-                    + "file step makes is 'sameBytesAs'");
+                    + "reading taken through a control's patterns, and a file has none — the claims a "
+                    + "file step makes are 'sameBytesAs' and 'image'");
         }
 
-        if (step.SameBytesAs is null)
+        // WW573. A file step finishes before the claim count runs, so its two claims are counted here.
+        if (step.SameBytesAs is not null && step.Image is not null)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                "it claims both 'sameBytesAs' and 'image', and a step makes one claim; a second claim "
+                    + "about the same file is a second step");
+        }
+
+        if (step.SameBytesAs is null && step.Image is null)
         {
             throw new ScenarioRefusedException(
                 subject,
                 "it is about a file and claims nothing about it; name the file whose bytes it should "
-                    + "hold in 'sameBytesAs', because a file that merely exists is what a truncated "
-                    + "copy is too");
+                    + "hold in 'sameBytesAs', or what it is as an image in 'image', because a file that "
+                    + "merely exists is what a truncated copy is too");
         }
     }
 

@@ -23,8 +23,6 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW573** (deps: —) **A file step claims only sameBytesAs, so an image the app wrote cannot be checked for its size or transparency** — An adopter whose app writes images that vary by desk has no case for them, or proves them only by reopening the file in the app. → §WW573
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

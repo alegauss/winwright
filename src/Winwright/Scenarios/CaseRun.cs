@@ -657,6 +657,12 @@ public static class CaseRun
     private static void ReadFile(
         StepDeclaration step, string staged, ProjectDeclaration project, List<TraceStep> trace, List<AssertionResult> results)
     {
+        if (step.Image is { } image)
+        {
+            ReadImage(step, image, OnDisk(step.File!, staged, project.Root), project, trace, results);
+            return;
+        }
+
         var path = OnDisk(step.File!, staged, project.Root);
         var against = OnDisk(step.SameBytesAs!, staged, project.Root);
 
@@ -687,6 +693,60 @@ public static class CaseRun
         var detail = held
             ? $"{path} holds the {wanted.Length} bytes {against} holds"
             : Differing(path, against, found, wanted, deadline, looks);
+
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = step.Verb.Name,
+            Locator = step.Addressed,
+            Verdict = held ? StepVerdict.Ok : StepVerdict.Failed,
+            Detail = detail,
+            Asserted = step.Name,
+        });
+
+        results.Add((held ? AssertionResult.Pass(step.Name, detail) : AssertionResult.Fail(step.Name, detail)).At(trace.Count));
+    }
+
+    /// <summary>
+    /// A file step claiming what its file is as an image: wait for it to decode as one that is, and
+    /// say what it was read as either way. WW573.
+    /// <para>
+    /// Found by Modelado (MOD19): a PNG rendered at 2048 pixels on its long side, clear around the
+    /// model, whose bytes vary with the viewport on each desk. Waited for as <see cref="ReadFile"/>
+    /// waits, so a file still being written is a look that saw nothing rather than a red about a
+    /// truncated image.
+    /// </para>
+    /// </summary>
+    private static void ReadImage(
+        StepDeclaration step,
+        Asserting.ImageClaim image,
+        string path,
+        ProjectDeclaration project,
+        List<TraceStep> trace,
+        List<AssertionResult> results)
+    {
+        var deadline = project.Timeouts.For("resolve");
+        var looks = 0;
+        Asserting.ImageReading? read = null;
+        string? undecoded = null;
+        var held = Attempt.UntilTrue(
+            () =>
+            {
+                looks++;
+                read = Contents(path) is { } bytes ? Asserting.ImageClaim.Read(bytes, out undecoded) : null;
+                return read is not null && image.HeldBy(read);
+            },
+            deadline,
+            project.Timeouts.For("poll")).Happened;
+
+        var waited = $"after {deadline}ms and {looks} look{(looks == 1 ? "" : "s")}";
+        var detail = (held, read, undecoded) switch
+        {
+            (true, _, _) => $"{path} is {read}, which is {image}",
+            (_, { } wrong, _) => $"{path} is {wrong}, and the step claimed {image} {waited}",
+            (_, null, { } why) => $"{path} could not be read as an image {waited}: {why}",
+            _ => $"nothing could be read at {path} {waited}",
+        };
 
         trace.Add(new TraceStep
         {

@@ -79,7 +79,10 @@ public class ClaimsTests
         ("within", () => Wrote.Step("Button#closeTab", "read", ("within", "TabItem#second"))),
         // WW548. Where an element is drawn, against the monitor it is on.
         ("fillsMonitor", () => Wrote.Step("Document#terminal", "read", ("fillsMonitor", true))),
-        // WW535. The one claim a file step makes, and the only one that has no locator beside it.
+        // WW573. The image a file is, the second claim a file step makes.
+        ("image", () => Wrote.Step(null, "read", ("file", "out/view.png"), ("image", "longSide 2048, transparent"))),
+
+        // WW535. The first claim a file step makes, and with 'image' the only ones that have no locator beside them.
         ("sameBytesAs", () => Wrote.Step(null, "read", ("file", "out/report.bin"), ("sameBytesAs", "data/report.bin"))),
     ];
 

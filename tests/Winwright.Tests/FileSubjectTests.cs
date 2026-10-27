@@ -215,7 +215,7 @@ public sealed class FileSubjectTests : IDisposable
     /// really is missing still fails, and is still a red.
     /// </para>
     /// </summary>
-    private static AutomationElement Desktop()
+    internal static AutomationElement Desktop()
     {
         for (var attempt = 1; ; attempt++)
         {

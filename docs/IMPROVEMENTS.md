@@ -207,29 +207,6 @@ named wait has to cover both.
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW573 Claims on an image file
-
-Met in Modelado (MOD19), case "Save view as image writes a 2048 px PNG of the view,
-clear around the model" in `cases\window.cases.json`. The app renders the 3D view again
-at 2048 px on the long side and writes a PNG with a transparent background. The case
-wanted:
-
-```
-{ "file": "{files}/view.png", "act": "read", "image": { "longSide": 2048, "transparent": true } }
-```
-
-A file step takes `read` with `sameBytesAs` and nothing else (WW535). The saved bytes
-depend on the viewport's proportions, which differ from one desk to the next, so there
-is no fixture to compare them to. The case works around this by dropping the PNG back
-into the app and reading the app's own source chip (`view.png · 2048 × N · cut out`).
-That works only because this app happens to open PNGs and report their size and alpha.
-An app that writes images it cannot open has no case at all.
-
-What winwright should offer: a file step claim that decodes an image (PNG, JPEG, WebP)
-and checks its width, height or long side, whether it has transparent pixels, and
-perhaps the alpha at a named point. Each claim is derived from the decoded file and
-reported with what was read, so a wrong size names the size found.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
