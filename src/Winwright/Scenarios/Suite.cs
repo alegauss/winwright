@@ -412,7 +412,9 @@ public static class Suite
         // argument naming a file in the project means the same thing under every runner. Before
         // that the launch set none and inherited whichever one the test runner happened to be in.
         var fixture = staged.Fixture;
-        var start = staged.Starting(project.Executable);
+
+        // WW575. The fixture's own executable where it names one, such as the installed copy.
+        var start = staged.Starting(fixture.Launches(project.Executable, staged.Root));
 
         // WW349. Where pictures go is the project's, and it is also the one directory this run may
         // ask the application to write into — so the launch says so rather than an operator setting
@@ -439,7 +441,9 @@ public static class Suite
             throw new ScenarioRefusedException(
                 named,
                 $"'{start.FileName}' could not be started from {start.WorkingDirectory} — {refused.Message}; "
-                    + $"the executable in {project.Path} resolves against the directory it sits in");
+                    + (fixture.Application.Length > 0
+                        ? $"the fixture's 'application' resolves against the project's root, {staged.Root}"
+                        : $"the executable in {project.Path} resolves against the directory it sits in"));
         }
 
         var deadline = project.Timeouts.For(WindowTimeout);

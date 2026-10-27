@@ -230,6 +230,12 @@ internal static class Criteria
         // criterion raised by a partial ship binds the line that is still open rather than the block
         // it sits in, and its list is headed with the id. WW384.
 
+        // --- WW575, the remainder after the installed copy landed ---------------------------------------
+        new("WW575", "A step claims the application exited by its own choice", "", Unshown.NotBuilt,
+            "the fixture's 'application' landed; nothing yet lets a step say the exit was the point"),
+        new("WW575", "A relaunched process is followed by the steps after it", "", Unshown.NotBuilt,
+            "no step yet waits for a new process of the same executable and rebinds the case to it"),
+
         // --- K, the proving ground -----------------------------------------------------------------------
         new("K", "Every refusal has something that provokes it",
             "RefusalArmTests.Every_arm_the_engine_declares_is_provoked_by_something",

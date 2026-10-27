@@ -25,10 +25,11 @@ TextBlock's Name and polls `Get-Process` for the relaunched copy, about 40 lines
 duplicate what winwright's locators and waits already do. It runs on the guest through
 `-Run` with the staged tree WW574 describes.
 
-What winwright should offer: a fixture `application` path (or a variable) overriding the
-project's exe, an act or expectation that the application exited, and an `await
-relaunch` that rebinds the case to a new process of the same executable, with a
-deadline.
+The first of the three landed as the fixture field `application` (WW575, installed
+copy), resolved in `FixtureDeclaration.Launches`. What is left: an act or expectation
+that the application exited by its own choice, which the register today reads as an
+early exit, and an `await relaunch` that rebinds the case to a new process of the same
+executable, with a deadline, so the steps after it resolve in the relaunched window.
 
 ### §WW576 A chained -Run
 

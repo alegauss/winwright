@@ -251,7 +251,7 @@ public class ScenarioFileTests
         Assert.Equal(
             [
                 "name", "environment", "flag", "arguments", "variables", "shareable", "language", "resident",
-                "workingDirectory", "files", "opens", "reaches", "unset",
+                "workingDirectory", "files", "opens", "reaches", "application", "unset",
             ],
             ScenarioSchema.Fixture.Select(field => field.Name));
 

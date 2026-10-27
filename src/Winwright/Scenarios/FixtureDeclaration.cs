@@ -166,6 +166,32 @@ public sealed record FixtureDeclaration
     public string WorkingDirectory { get; }
 
     /// <summary>
+    /// The executable this launch starts instead of the project's, as the fixture declares it, or
+    /// empty where it starts the one <c>winwright.json</c> names. WW575.
+    /// <para>
+    /// Found by Modelado (MOD31): the update's evidence is a click in the copy an installer put in
+    /// <c>%LOCALAPPDATA%\Programs</c>, not the build tree's, and no case could launch that one, so the
+    /// project drove the installed window with hand-written UI Automation. Resolved the way
+    /// <see cref="WorkingDirectory"/> is: the environment expanded, the tokens filled, and what is
+    /// left relative to the project's root.
+    /// </para>
+    /// </summary>
+    public string Application { get; private init; } = "";
+
+    /// <summary>The executable this launch starts, resolved: this fixture's own, or the project's. WW575.</summary>
+    /// <param name="declared">The project's executable, already resolved.</param>
+    /// <param name="root">The project's root.</param>
+    public string Launches(string declared, string root)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(declared);
+        ArgumentException.ThrowIfNullOrWhiteSpace(root);
+
+        return Application.Length == 0
+            ? declared
+            : System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(Resolved(Application, root)), root);
+    }
+
+    /// <summary>
     /// The token a <see cref="Variables"/> value or a <see cref="WorkingDirectory"/> may name to mean
     /// the directory this fixture's <see cref="Files"/> were staged into. WW509.
     /// <para>
@@ -347,6 +373,7 @@ public sealed record FixtureDeclaration
     /// staged for that step is not one nobody looks at. WW550.
     /// </param>
     /// <param name="unset">The inherited variables the launch removes, by name. WW564.</param>
+    /// <param name="application">The executable this launch starts instead of the project's. WW575.</param>
     /// <exception cref="ScenarioRefusedException">
     /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not
     /// one, or files are declared that neither the launch nor a step reaches.
@@ -365,7 +392,8 @@ public sealed record FixtureDeclaration
         IEnumerable<string>? reaches = null,
         string? opens = null,
         bool stepsNameStaged = false,
-        IEnumerable<string>? unset = null)
+        IEnumerable<string>? unset = null,
+        string? application = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
         var opening = Opened(called, opens, shareable);
@@ -540,7 +568,10 @@ public sealed record FixtureDeclaration
             new ReadOnlyCollection<StagedFile>(staging),
             new ReadOnlyCollection<string>(reaching),
             opening,
-            new ReadOnlyCollection<string>(removing));
+            new ReadOnlyCollection<string>(removing))
+        {
+            Application = application?.Trim() ?? "",
+        };
     }
 
     /// <summary>
@@ -920,6 +951,10 @@ public sealed record FixtureDeclaration
         // only where the fixture named one, which is Shareable's rule and Resident's — a line that
         // says "the project root" on every fixture is the mark that marks nothing.
         var started = WorkingDirectory.Length > 0 ? $", starting in {WorkingDirectory}" : "";
+
+        // WW575. The binary first among what the launch was, because a run says which one it drove.
+        if (Application.Length > 0)
+            started = $", launching {Application}{started}";
 
         // WW509. Counted rather than listed: a reader of a red wants to know this launch had a store
         // of its own, and which files were in it is the declaration's business.

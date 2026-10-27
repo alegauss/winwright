@@ -1192,6 +1192,17 @@ error never names the variable. `"unset": ["ELECTRON_RUN_AS_NODE"]` gives the la
 environment a person's shell would have given it. A name under both `unset` and `variables` is
 refused, and the fixture's line in a report says what it unset.
 
+`application` is the executable a fixture launches instead of the one `winwright.json` names. It is
+for the installed copy of an application, the one an installer put in `%LOCALAPPDATA%\Programs`,
+which is what a case about installing or updating has to drive and the build tree's is not. It is
+written the way `workingDirectory` is: the environment is expanded, the tokens are filled, and what is
+left is relative to the project's root. The fixture's line in a report names it, so a run says which
+binary it drove:
+
+```json
+{ "name": "the installed copy", "application": "%LOCALAPPDATA%\\Programs\\Modelado\\Modelado.exe" }
+```
+
 `opens` is a folder the fixture opens in Explorer beside the window under test, for a case that drops
 something onto it. It is written the way `workingDirectory` is, relative to the project's root or
 naming `{files}`, and created where it is not there. After the launch the two windows are put side by

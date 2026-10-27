@@ -305,7 +305,8 @@ public sealed class ScenarioFile
                 wrote.Words("reaches"),
                 wrote.Text("opens"),
                 looked.Contains(wrote.Text("name") ?? ""),
-                wrote.Words("unset")));
+                wrote.Words("unset"),
+                wrote.Text("application")));
 
             wrote.Handed("fixture");
 
