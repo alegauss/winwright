@@ -4,28 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW578 -Bring through the .cmd wrapper
-
-Modelado's MOD33 made the site's demo model on the guest (modelado-cli object, then edit
---simplify --preview) and needed two files back: robot.glb and robot-poster.png. It ran
-
-    run-tests-vm.cmd -Tree D:\Git\alegauss\modelado -Run mod33-demo.cmd -NoGate -ResultsIn demo-out -Bring robot.glb,robot-poster.png
-
-and the runner answered `no robot.glb,robot-poster.png came back from the guest`. The
-wrapper calls `powershell -File tools\run-tests-vm.ps1 %*`, and under -File a comma list
-is not an array: `[string[]] $Bring` binds one element holding the whole string, so the
-first (and only) name is a file that does not exist. The script's own comment says the
-first is fetched always and the rest on a green run, which no caller of the .cmd can
-reach.
-
-The workaround in Modelado: the guest script tars both files into demo-out\demo.tar and
--Bring names that one archive.
-
-What winwright should offer: -Bring split on commas inside the script (a name holding a
-comma is not a file anyone brings), or a -Bring that takes a folder relative to
--ResultsIn and brings its files. Either way the miss names each file that did not come
-back.
-
 ### §WW579 Dismiss the shell's overlays before the desk check
 
 On 2026-10-26 Modelado's guest run was refused before anything ran:

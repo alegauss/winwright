@@ -1587,7 +1587,10 @@ tools\run-tests-vm.ps1 -Tree D:\path\to\yours -Run "run-cases.cmd" -Bring @('you
 
 `-Name` defaults to the tree's own folder, so it lands in `C:\src\<name>` and two projects cannot
 collide in one guest; `-ResultsIn` says where the command left what it wrote. A run that names its
-own `-Run` and no `-Bring` brings nothing back and does not report a missing trx. `-Run` is run in the
+own `-Run` and no `-Bring` brings nothing back and does not report a missing trx. `-Bring` names
+files under `-ResultsIn`, as a list or joined by commas (`-Bring robot.glb,robot-poster.png` works
+through `run-tests-vm.cmd`). An adopter's `-Run` gets every one of them back whether it passed or not,
+and each that did not come back is named. `-Run` is run in the
 guest as a line typed at a prompt: a chain joined by `&` or `&&` is logged whole and exits with the
 code a prompt would give, and a `for %B` loop means what it means there.
 

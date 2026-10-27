@@ -120,6 +120,7 @@
 - ✅ **WW574** **The guest runner carries only the tree's git listing, so a build output such as an installer cannot reach the guest** — The guest runner takes -Carry, paths or wildcards relative to the tree, ignored or not, so a build output such as an installer reaches the guest at its own path.
 - ✅ **WW575** **A case cannot drive the installed copy of an app, nor follow it when it exits and relaunches itself to update** — A step waits on the application's process: 'exits' claims the exit an update makes, and 'relaunches' follows the new copy into its window, which the run stops with the case.
 - ✅ **WW576** **A -Run holding & or && logs only its last command and can lose the guest's exit code** — The guest hands -Run to cmd as a prompt line through tools/run-command.ps1, so a chain logs every command, a for %B works, and the exit code is the prompt's.
+- ✅ **WW578** **Through run-tests-vm.cmd, -Bring a,b arrives as one file name, so only a single file can come back from the guest** — The runner splits -Bring on commas, so a list through run-tests-vm.cmd brings each file back, and an adopter's -Run gets them whether it passed or not.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

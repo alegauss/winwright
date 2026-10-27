@@ -318,7 +318,14 @@ $script:Run = if ($Run) { $Run } else { "run-tests.cmd $Configuration" }
 $script:ResultsIn = if ($ResultsIn) { $ResultsIn } else { "TestResults\$script:RunName" }
 # Wrapped, because an empty list out of an `if` arrives as null, and the count asked of it later is
 # then a refusal under strict mode.
-$script:Bring = @(if ($Bring) { $Bring } elseif ($Run) { @() } else { @('winwright.trx', 'discovered.txt') })
+#
+# WW578. Split on commas here, because `powershell -File` hands `-Bring a,b` over as one string and a
+# name holding a comma is no file anybody brings: through run-tests-vm.cmd only one file ever came back.
+$script:Bring = @(if ($Bring) {
+        $Bring | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ }
+    }
+    elseif ($Run) { @() }
+    else { @('winwright.trx', 'discovered.txt') })
 
 # The VM's credentials and not the project's, so the search is not multiplied per tree: one guest,
 # one file. The tree's own copy is second because a project may pin a different machine.
@@ -1754,10 +1761,16 @@ if ($got.Ok -and (Test-Path -LiteralPath $read) -and $first -like '*.trx') {
 # rather than about the guest. The roll call hangs off AfterTargets="VSTest", so a failed VSTest never
 # reaches it and writes no discovered.txt - warning about its absence on a red run reports a missing
 # check that was never due, which is noise on exactly the runs already carrying a real answer.
-if ($code -eq 0) {
+#
+# WW578. An adopter's own -Run brings what it names whatever the run concluded: the rule above is
+# about this repository's roll call, and a red run's output is often the evidence an adopter came for.
+if ($code -eq 0 -or $Run) {
     foreach ($also in ($script:Bring | Select-Object -Skip 1)) {
         $roll = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\$also", (Join-Path $results $also))
-        if (-not $roll.Ok) { Write-Host "  the run passed and no $also came back" -ForegroundColor Yellow }
+        if (-not $roll.Ok) {
+            $when = if ($code -eq 0) { 'the run passed and ' } else { '' }
+            Write-Host "  ${when}no $also came back from the guest" -ForegroundColor Yellow
+        }
     }
 }
 
