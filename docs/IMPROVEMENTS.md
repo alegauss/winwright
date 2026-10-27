@@ -7,24 +7,25 @@
 ### §WW584 Provoke a held desk to prove the shell restart
 
 WW580 made the runner restart the guest's explorer once when the taskbar holds the desk
-and nothing may take the foreground, and ask the desk again before refusing. The
-decision is held by RunnerWaitsTests (the `shell` wait) and the run's own lines, but the
-restart itself has never run: the full guest run that gated WW580 found the taskbar
-selected and the desk takeable after 8 ms, so the arm did not fire. `Restart-GuestShell`
-kills explorer through `vmrun runProgramInGuest -interactive`, starts it again with
-`-noWait` (it does not come back on its own in this guest), and waits on
-`listProcessesInGuest` for `explorer.exe`.
+and nothing may take the foreground, then ask again before refusing. The decision is
+held by RunnerWaitsTests and the run's own lines, but the restart has never run: the
+gate run that shipped WW580 found the desk takeable after 8 ms.
 
-What is unproven: that the second `Read-GuestTake` after the restart reads `takeable` on
-a desk that really was held, and that the three seconds left for the taskbar to draw are
-enough.
+Measured 2026-10-27, with the user's go-ahead: the guest's `ForegroundLockTimeout` was
+raised to 200000 live and in the registry, with `Shell_TrayWnd` in the foreground, both
+read back. The next run read `shell`, not `held`, and was granted the foreground in 14
+ms; the value was then restored to 0 and read back. The lock cannot provoke this arm:
+`desk-take.ps1` sends an input event before it asks (WW472), and Windows gives the
+foreground to the process that sent the last input, which is what the timeout exempts.
+So whatever refused the desk on 2026-10-26 was not the foreground lock.
 
-What to build: a way to provoke a held desk on the guest on purpose, so the arm runs
-under a probe. Two candidates, to measure first: a guest helper calling
-`LockSetForegroundWindow` (LSFW_LOCK) while the taskbar is focused, or raising
-`ForegroundLockTimeout` back to its default and restarting the shell without input,
-which is how the desk stuck in October. The probe must hold the desk claim, because
-quickshell shares the guest.
+Still to try: a guest helper holding `LockSetForegroundWindow(LSFW_LOCK)`, measured
+first, since input may lift that lock too. If it holds, it proves only the refusal
+("restarted once and still held"), because the lock is the helper's and a shell restart
+cannot clear it. The success arm needs explorer itself refusing the desk, and nothing
+here provokes that on demand. If no provocation is found, this line is retired with the
+measurement above as its reason. Any probe holds the desk claim, because quickshell
+shares the guest.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
