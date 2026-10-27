@@ -109,8 +109,16 @@ param(
     [string] $ResultsIn,
 
     # What to bring back out of it. The first is fetched always; the rest only on a green run, for
-    # the reason the roll call is: a check that was never due is not a check that is missing.
+    # the reason the roll call is: a check that was never due is not a check that is missing. A run
+    # that names its own -Run and no -Bring brings nothing back (WW574): its results are not this
+    # repository's trx, and saying that none came back described a case run it never was.
     [string[]] $Bring,
+
+    # WW574. Files to carry beside the tree's git listing, as paths or wildcards relative to the
+    # tree, ignored by git or not: a build output such as an installer, which .gitignore rightly keeps
+    # out of the listing. Each lands at the same path under the tree in the guest. A pattern that
+    # matches nothing is refused before the guest is touched. Read by `carry.ps1`.
+    [string[]] $Carry,
 
     # WW386. How many minutes the guest run may take before this stops waiting on it.
     #
@@ -308,7 +316,9 @@ function Waiting {
 # this repository's own invocation is unchanged and an adopter names the two things that differ.
 $script:Run = if ($Run) { $Run } else { "run-tests.cmd $Configuration" }
 $script:ResultsIn = if ($ResultsIn) { $ResultsIn } else { "TestResults\$script:RunName" }
-$script:Bring = if ($Bring) { $Bring } else { @('winwright.trx', 'discovered.txt') }
+# Wrapped, because an empty list out of an `if` arrives as null, and the count asked of it later is
+# then a refusal under strict mode.
+$script:Bring = @(if ($Bring) { $Bring } elseif ($Run) { @() } else { @('winwright.trx', 'discovered.txt') })
 
 # The VM's credentials and not the project's, so the search is not multiplied per tree: one guest,
 # one file. The tree's own copy is second because a project may pin a different machine.
@@ -1372,6 +1382,17 @@ try {
 }
 finally { Pop-Location }
 
+# WW574. What the listing leaves out and the run needs: a build output, ignored as it should be.
+# Forward slashes, as git lists, so a file both listed and carried goes into the archive once.
+$carried = @()
+if ($Carry) {
+    . (Join-Path $PSScriptRoot 'carry.ps1') -DefineOnly
+    try { $carried = @(Get-Carried -Tree $script:Tree -Pattern $Carry | ForEach-Object { $_ -replace '\\', '/' }) }
+    catch { Refuse $_.Exception.Message 'Name files under the tree, by a path or a wildcard relative to it, that are there before the run starts.' }
+
+    $files = @($files) + @($carried | Where-Object { $files -notcontains $_ })
+}
+
 $zip = Join-Path $stage 'source.zip'
 Add-Type -AssemblyName System.IO.Compression.FileSystem | Out-Null
 $archive = [IO.Compression.ZipFile]::Open($zip, 'Create')
@@ -1387,6 +1408,7 @@ finally { $archive.Dispose() }
 
 $size = [math]::Round((Get-Item -LiteralPath $zip).Length / 1MB, 1)
 $carrying = if ($CommittedOnly) { 'HEAD only' } else { 'the working tree' }
+if ($carried.Count -gt 0) { $carrying += ", and $($carried.Count) carried: $(($carried | Select-Object -First 5) -join ', ')" }
 Write-Host "  carrying    $($files.Count) files, $size MB ($carrying)"
 
 # --- the scripts the guest runs, generated here so nothing is quoted through vmrun ---------------
@@ -1635,9 +1657,14 @@ $null = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$
 
 $guestResults = "$script:GuestRepo\$script:ResultsIn"
 
-$first = $script:Bring[0]
-$got = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\$first", (Join-Path $results $first))
-if (-not $got.Ok) { Write-Host "  no $first came back from the guest" -ForegroundColor Yellow }
+# WW574. A run that names its own command and nothing to bring has nothing to fetch here.
+$first = $null
+$got = [pscustomobject]@{ Ok = $false }
+if ($script:Bring.Count -gt 0) {
+    $first = $script:Bring[0]
+    $got = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\$first", (Join-Path $results $first))
+    if (-not $got.Ok) { Write-Host "  no $first came back from the guest" -ForegroundColor Yellow }
+}
 
 # WW430. What the gate's half costs in the guest, which nothing had ever measured.
 #
@@ -1655,7 +1682,7 @@ if (-not $got.Ok) { Write-Host "  no $first came back from the guest" -Foregroun
 # 778s that run spent in cases. Three percent of the case time, and less than that off the clock
 # because they run in parallel - so the saving the skip would buy is not worth the mechanism, and
 # what this line is for now is noticing the day that stops being true.
-$read = Join-Path $results $first
+$read = if ($first) { Join-Path $results $first } else { $null }
 if ($got.Ok -and (Test-Path -LiteralPath $read) -and $first -like '*.trx') {
     $gate = Join-Path $PSScriptRoot 'host-gate.ps1'
     $suiteTree = Join-Path $script:Tree 'tests'

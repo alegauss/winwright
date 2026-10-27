@@ -1548,7 +1548,18 @@ tools\run-tests-vm.ps1 -Tree D:\path\to\yours -Run "run-cases.cmd" -Bring @('you
 ```
 
 `-Name` defaults to the tree's own folder, so it lands in `C:\src\<name>` and two projects cannot
-collide in one guest; `-ResultsIn` says where the command left what it wrote. **That the runner can
+collide in one guest; `-ResultsIn` says where the command left what it wrote. A run that names its
+own `-Run` and no `-Bring` brings nothing back and does not report a missing trx.
+
+The tree goes over as its git listing, tracked and untracked files minus what `.gitignore` covers.
+A build output the run needs, such as an installer under an ignored `artifacts\`, goes with
+**`-Carry`**: paths or wildcards relative to the tree, ignored or not, each landing at the same path
+in the guest. Several may be given as a list or joined by commas. A pattern that matches no file, or
+one naming a file outside the tree, is refused before the guest is touched:
+
+```
+tools\run-tests-vm.ps1 -Tree D:\path\to\yours -NoGate -Run "check-installer.cmd" -Carry 'artifacts\installer\*.exe'
+``` **That the runner can
 carry two trees is why it prints which one it took** — otherwise a green is a green about whichever
 tree the caller believed they named.
 

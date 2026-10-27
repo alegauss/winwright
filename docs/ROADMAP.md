@@ -4,7 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW574** (deps: —) **The guest runner carries only the tree's git listing, so a build output such as an installer cannot reach the guest** — An adopter whose evidence is its own build output must stage a throwaway git folder to get it onto the guest. → §WW574
 - 📋 **WW575** (deps: —) **A case cannot drive the installed copy of an app, nor follow it when it exits and relaunches itself to update** — An adopter whose update path is the claim has to drive the installed app with hand-written UI Automation outside every case. → §WW575
 - 📋 **WW576** (deps: —) **A -Run holding & or && logs only its last command and can lose the guest's exit code** — The runner writes call <Run> > vm-run.log, so cmd binds the redirection to one command; modelado had to wrap -Run in cmd /c to see a Blender test fail. → §WW576
 - 📋 **WW578** (deps: —) **Through run-tests-vm.cmd, -Bring a,b arrives as one file name, so only a single file can come back from the guest** — Modelado had to tar its two demo files on the guest to bring them back, since powershell -File binds a comma list as one string. → §WW578

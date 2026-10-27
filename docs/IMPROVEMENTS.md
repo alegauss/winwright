@@ -4,27 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW574 Carry build outputs to the guest
-
-Met in Modelado (MOD28). The task's evidence is its own installer, installed, upgraded
-and uninstalled on the guest. `build\build-installer.cmd` writes it to
-`artifacts\installer\Modelado-Setup-<version>.exe`, and `.gitignore` keeps `artifacts\`
-out of the tree, as build outputs should be. `tools\run-tests-vm.ps1` carries `git
-ls-files -c -o --exclude-standard` of `-Tree`, so the installer never reaches the guest.
-Building it there instead needs Inno Setup on the guest, which the runner rightly does
-not provision.
-
-The workaround is `build\check-installer-vm.ps1`, about 15 lines. It copies the two
-installers, the check script and a fixture into `%TEMP%\modelado-installer-check`, runs
-`git init` there so the runner can list it, and passes that folder as `-Tree` with
-`-NoGate`. The run then also prints "no winwright.trx came back from the guest" and the
-desk-claim narrative, which describe a case run this one is not.
-
-What winwright should offer: a way to carry named files beside the tree, ignored or
-outside it, e.g. `-Carry artifacts\installer\*.exe` (or a `carry` list in
-winwright.json), landing at the same relative path in the guest. A run whose `-Run` is
-not a case run should also be able to say so, so it does not report a missing trx.
-
 ### §WW575 Installed apps and relaunches
 
 Met in Modelado (MOD31). The update's evidence is a click in the installed app: About's
