@@ -4,7 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW579** (deps: —) **The guest's Search or Start flyout holding the foreground is read as a question and refuses the run** — Modelado's operator had to close Windows Search by hand on the VM console; the overlay closes on Escape and asks nothing. → §WW579
 - 📋 **WW580** (deps: —) **A taskbar holding the guest's foreground refuses the run, though the remedy is a shell restart the runner could do** — The runner has vmrun and the guest's credentials, yet each adopter restarts explorer by hand whenever this happens. → §WW580
 - 📋 **WW581** (deps: —) **A -Run that opens no window is still refused over a held guest desk** — Modelado's CLI-only guest runs (model downloads, demo reconstructions) stopped on a desk they never touch. → §WW581
 - 📋 **WW582** (deps: —) **A fixture cannot run a command, such as the project's own CLI, with its variables before the application launches** — A case cannot prove that what a CLI writes reaches the window, so the adopter tests the file instead and the window never reads it. → §WW582

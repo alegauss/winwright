@@ -4,26 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW579 Dismiss the shell's overlays before the desk check
-
-On 2026-10-26 Modelado's guest run was refused before anything ran:
-
-    run-tests-vm: the guest's desk is waiting for an answer: SearchHost (pid 7432, Windows.UI.Core.CoreWindow) 'Pesquisar' held the foreground for every look, and it is still there after the run tried to put it away - left 'Pesquisar' (Windows.UI.Core.CoreWindow) alone: it has no minimise button, which is what a question looks like
-
-The Windows Search flyout (SearchHost.exe, class Windows.UI.Core.CoreWindow) and the
-Start menu (StartMenuExperienceHost.exe, same class) are shell overlays, not questions:
-they have no minimise button because they close on Escape or on losing focus, and
-nothing in them waits for an answer. The runner's rule "no minimise button means a
-question, leave it alone" reads them as dialogs, so the operator had to open the VM
-console and close Search by hand.
-
-What winwright should do: before the foreground check, recognise these overlays by
-process and class (SearchHost, StartMenuExperienceHost, ShellExperienceHost's action
-centre, the notification flyouts) and dismiss them (send Escape to the overlay, or ask
-the shell to hide it), then read the desk again. Say in the run's first lines what was
-dismissed. A window outside that list keeps today's rule, so a real question is still
-never answered on the operator's behalf.
-
 ### §WW580 Restart the guest shell once before refusing
 
 Right after Search was closed on Modelado's guest (2026-10-26), the next run was

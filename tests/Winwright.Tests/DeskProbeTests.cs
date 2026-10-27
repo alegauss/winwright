@@ -991,6 +991,25 @@ public sealed class DeskProbeTests
 
     [Fact]
     [Trait(NoDesk.Key, NoDesk.Free)]
+    public void The_shells_search_and_start_overlays_are_dismissed_and_nothing_else_of_their_class_is()
+    {
+        // WW579. Search and Start have no minimise button because they close on Escape, so the rule
+        // above read them as questions and an operator had to close Windows Search at the console.
+        // Matched on process and class together: the same class from an application is still judged
+        // by its minimise button, and the minimise rule still leaves a dialog alone.
+        var said = Cleared(
+            "Test-Dismissable -Process 'SearchHost' -Class 'Windows.UI.Core.CoreWindow'",
+            "Test-Dismissable -Process 'StartMenuExperienceHost' -Class 'Windows.UI.Core.CoreWindow'",
+            "Test-Dismissable -Process 'ShellExperienceHost' -Class 'Windows.UI.Core.CoreWindow'",
+            "Test-Dismissable -Process 'SomeApp' -Class 'Windows.UI.Core.CoreWindow'",
+            "Test-Dismissable -Process 'SearchHost' -Class '#32770'",
+            "Test-Clearable -Class 'Windows.UI.Core.CoreWindow' -Style 0x00000000");
+
+        Assert.Equal(["True", "True", "True", "False", "False", "False"], said);
+    }
+
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
     public void The_runner_reads_the_desk_again_rather_than_believing_the_clearing()
     {
         // The rule that keeps WW311 intact while WW371 relaxes the refusal: a repair is attempted

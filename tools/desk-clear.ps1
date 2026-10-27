@@ -42,6 +42,27 @@ $script:Untouchable = @('Shell_TrayWnd', 'Shell_SecondaryTrayWnd', 'TopLevelWind
 # have to answer.
 $script:MinimizeBox = 0x00020000
 
+# WW579. The shell's overlays: Search, Start, and the action centre and notification flyouts. They
+# have no minimise button because they close on Escape or on losing focus, and nothing in them waits
+# for an answer, so the minimise rule read them as questions. Found by Modelado, whose operator had
+# to close Windows Search ('Pesquisar', SearchHost) by hand at the guest console. Matched on the
+# process and the class together, so a window of the same class from anything else is still judged
+# by the minimise button.
+$script:Overlays = @('SearchHost', 'SearchApp', 'StartMenuExperienceHost', 'ShellExperienceHost')
+$script:OverlayClass = 'Windows.UI.Core.CoreWindow'
+
+function Test-Dismissable {
+    <#
+      Whether the window holding the desk is one of the shell's overlays, which Escape closes and
+      which asks nothing. A pure function of what was read off it, as `Test-Clearable` is.
+    #>
+    param(
+        [Parameter(Mandatory)] [AllowEmptyString()] [string] $Process,
+        [Parameter(Mandatory)] [AllowEmptyString()] [string] $Class)
+
+    return ($Class -eq $script:OverlayClass) -and ($script:Overlays -contains $Process)
+}
+
 function Test-Clearable {
     <#
       Whether a run may put this window away, as a pure function of what was read off it.
@@ -73,6 +94,18 @@ public static class Clr {
     [DllImport("user32.dll", SetLastError = true)] public static extern IntPtr GetWindowLongPtrW(IntPtr h, int index);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowTextW(IntPtr h, StringBuilder s, int n);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassNameW(IntPtr h, StringBuilder s, int n);
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+
+    public static int PidOf(IntPtr h) { uint pid; GetWindowThreadProcessId(h, out pid); return (int)pid; }
+
+    // WW579. What a person presses to close Search or Start: Escape, to the overlay that has the
+    // keyboard because it holds the foreground.
+    public static void Escape() {
+        const byte esc = 0x1B;
+        const uint up = 0x0002;
+        keybd_event(esc, 0, 0, UIntPtr.Zero);
+        keybd_event(esc, 0, up, UIntPtr.Zero);
+    }
 
     public static string TextOf(IntPtr h) { var s = new StringBuilder(512); GetWindowTextW(h, s, s.Capacity); return s.ToString(); }
     public static string ClassOf(IntPtr h) { var s = new StringBuilder(256); GetClassNameW(h, s, s.Capacity); return s.ToString(); }
@@ -122,6 +155,17 @@ function Clear-TheDesk {
 
     $class = [Clr]::ClassOf($handle)
     $title = [Clr]::TextOf($handle)
+
+    # WW579. A shell overlay first, because the minimise rule below would call it a question.
+    $owner = try { (Get-Process -Id ([Clr]::PidOf($handle)) -ErrorAction Stop).ProcessName } catch { '' }
+    if (Test-Dismissable -Process $owner -Class $class) {
+        [Clr]::Escape()
+        Start-Sleep -Milliseconds 800
+
+        $now = [Clr]::GetForegroundWindow()
+        $still = if ($now -eq $handle) { ', and it still holds the foreground' } else { '' }
+        return "dismissed the shell's '$title' ($owner, $class) with Escape: it is an overlay and asks nothing$still"
+    }
 
     if (-not (Test-Clearable -Class $class -Style ([Clr]::StyleOf($handle)))) {
         return "left '$title' ($class) alone: it has no minimise button, which is what a question looks like"
