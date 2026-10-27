@@ -42,7 +42,7 @@ export default defineConfig({
     starlight({
       title: "winwright",
       description:
-        "Driving a Windows desktop application from a test: what to install, how to declare a "
+        "Driving a Windows desktop application from a test: installing from nuget.org, how to declare a "
         + "project, how to write a case, and how to read what the run answered.",
       // Pagefind, indexed at build time — which is why search here needs no service to be up
       // and no account to exist.

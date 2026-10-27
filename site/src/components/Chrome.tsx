@@ -8,9 +8,9 @@ import {
 import {
   footer,
   install,
+  installUrl,
   navLinks,
   parentUrl,
-  releasesUrl,
   repoUrl,
   sponsor,
   THEME_KEY,
@@ -34,7 +34,7 @@ export function Nav() {
       links={[...navLinks]}
       actions={
         <>
-          <SiteButton href={releasesUrl}>{install.ctaShort}</SiteButton>
+          <SiteButton href={installUrl}>{install.ctaShort}</SiteButton>
           <SiteButton variant="ghost" href={repoUrl}>
             ★ View on GitHub
           </SiteButton>

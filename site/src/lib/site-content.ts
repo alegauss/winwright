@@ -49,7 +49,7 @@ export const meta = {
   og: {
     title: "winwright",
     description:
-      `Drive a Windows desktop application from a test, and report what was actually observed. ${Spelled(verdictCount)} verdicts, one locator grammar, patterns before pointers, and a picture that proves what it photographed.`,
+      `Drive a Windows desktop application from a test, and report what was actually observed. On nuget.org for .NET 10. ${Spelled(verdictCount)} verdicts, one locator grammar, patterns before pointers, and a picture that proves what it photographed.`,
     url: "https://alegauss.github.io/winwright/",
   },
 } as const;
@@ -57,10 +57,13 @@ export const meta = {
 export const repoUrl = "https://github.com/alegauss/winwright";
 export const parentUrl = "https://alegauss.github.io/";
 
-// The release page rather than a file: the packages carry their version in their names, so
-// there is no version-independent URL for an asset itself, and a hard-coded
-// `Winwright.0.1.0.nupkg` would 404 on the day 0.1.1 ships.
+// The release page is where the notes are, not where an adopter gets the packages: those come
+// from nuget.org through a PackageReference, which the install section shows. Linked as
+// "Release notes", never as the way in.
 export const releasesUrl = `${repoUrl}/releases/latest`;
+// The way in, from every route: the install section on the landing page, which leads with the
+// PackageReference lines and nuget.org. Base-absolute because the nav is drawn on every page.
+export const installUrl = "/winwright/#install";
 export const changelogUrl = `${repoUrl}/blob/main/docs/CHANGELOG.md`;
 
 // The documentation area, which is a second build under the same base (site/docs/, an Astro

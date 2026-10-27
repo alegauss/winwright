@@ -6,7 +6,7 @@ import { Rich } from "../../lib/rich";
 
 // No version number is typed in this section's copy, and that is the same rule as
 // everywhere else rather than laziness: the reference lines below carry the one the tree
-// declares, read out of Directory.Build.props by the generator, and `releases/latest`
+// declares, read out of Directory.Build.props by the generator, and the nuget.org page
 // resolves to whatever actually shipped.
 //
 // Two acts, in the order an adopter performs them: the package references a csproj takes,
