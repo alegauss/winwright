@@ -186,30 +186,6 @@ rather than a red step.
 
 ## Block D — Act — patterns before pointers
 
-### §WW572 Drag between two points of one element
-
-Met in photo-boost on 2026-10-23, task PB67. The crop editor is drawn on a GPU surface
-(a child HWND with a swapchain), so its eight handles and the rectangle's inside are
-pixels, not elements. Resizing the crop means pressing on a handle and releasing
-somewhere else on the same surface. The step the evidence wanted:
-
-```json
-{ "locator": "Slider#Surface", "act": "drag", "from": "12%,8%", "to": "40%,30%",
-  "named": "the top-left handle is dragged inwards" }
-```
-
-`drag` (WW520) only goes from one element onto another, and `pick at` (WW267) is a
-single press at a position, so no step can press at one point of an element and release
-at another. The case in `cases\window.cases.json` sets the rectangle through the
-surface's ValuePattern with `set value` instead, and the handle arithmetic is covered by
-unit tests in `tests\PhotoBoost.Render.Tests`; the gesture itself, a mouse drag landing
-on the handle the maths says it should, has no case.
-
-What winwright should offer: `drag` with a `from` and a `to` position inside the subject
-(the same position grammar `pick at` takes: fractions or pixels from the element's
-top-left), synthesised as press, moves and release, and read back like any other act.
-Any canvas, map, slider track or custom-drawn editor needs it.
-
 ### §WW577 A step's own named wait
 
 `timeouts.resolve` in winwright.json is the one wait every step's read takes, and a step

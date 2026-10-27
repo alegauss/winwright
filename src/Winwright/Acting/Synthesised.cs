@@ -161,6 +161,29 @@ public static class Synthesised
     }
 
     /// <summary>
+    /// Drag inside one control, from one point of it to another. WW572: a handle drawn on a canvas is
+    /// pixels and not an element, so there is nothing for <see cref="Drag(Subject, Subject)"/> to end on.
+    /// </summary>
+    /// <param name="subject">The control both points are in.</param>
+    /// <param name="from">Where to press.</param>
+    /// <param name="to">Where to release.</param>
+    public static ActResult DragWithin(Subject subject, ElementPoint from, ElementPoint to)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+
+        var before = subject.Read();
+        var dragged = Acting.Drag.Within(subject, from, to);
+
+        return Landed(
+            subject,
+            "drag",
+            $"synthesised pointer ({PointerReason.PointerIsTheAct}) from {from} to {to}",
+            dragged.Element,
+            before,
+            dragged.Foreground);
+    }
+
+    /// <summary>
     /// Drop a file onto a control from outside the application, as one dragged out of Explorer
     /// arrives. WW550.
     /// <para>

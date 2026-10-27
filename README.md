@@ -229,12 +229,13 @@ directions — a verb added without an entry is a red.
 | `Subject` | a locator bound to a root, a deadline and a project |
 | `Attempt` / `Retry` | a deadline on a sighting or a condition; an act attempted to a cap and counted |
 | `Preflight` | what each declared act needs, checked against the tree before anything is pressed |
-| `Act` | invoke, toggle, set a value or a range, select, expand, collapse — through the control's own patterns |
+| `Act` | invoke, toggle, set a value or a range, select, expand, collapse, resize the window — through the control's own patterns or, for a window's size, `SetWindowPos` |
 | `Synthesised` | the acts a case can name that put real input on the desk — type, click, drag, drop file, nudge, press, pick — each carrying what it needed of the machine |
 | `Selecting` / `Pick` | select and confirm; every value a picker holds, and reaching one |
 | `Surface` | record controls as a case found them and put them back |
 | `Pointer` | synthesised mouse input, and the declared readings about why an act needs it |
-| `Drag` | a press held across moves past the drag threshold and released over a second element |
+| `Drag` | a press held across moves past the drag threshold and released over a second element, or at a second point of the same one |
+| `ElementPoint` | a point inside an element as a case writes it, a percentage of the element or device-independent pixels from its corner |
 | `FileDrop` | a file dragged in from outside the application and released over an element, with the effect the target answered |
 | `Keyboard` / `Traversal` | synthesised keys, traversal keys at a window, and what holds the focus |
 | `Chord` | a key with modifiers, parsed where the case wrote it and sent as one batch — the only route to an application whose commands have no button |
@@ -474,6 +475,23 @@ window under test, so its first step names the other window:
 Only the release lands there. The foreground the drag needs is still the window under test, and
 whether the file arrived is the next step's to check. For a drop onto Explorer that is a file on
 disk, not an element. `toDesktop` with no `to` is refused.
+
+A drag can also stay inside one element, for something drawn on a canvas: a crop handle, a map, a
+slider track, a custom editor. Its handles are pixels, not elements. **`from`** names the point the
+drag presses at, and `to` is then the point of the same element it releases at instead of a
+locator. A point is `x,y`. Each half is a percentage of the element (`12%`) or whole
+device-independent pixels from its top-left corner (`40`), so it means the same spot on a display
+scaled to 150%:
+
+```json
+{ "locator": "Pane#cropSurface", "act": "drag", "from": "10%,10%", "to": "40%,30%", "named": "the top-left handle is dragged in" },
+{ "locator": "Text#cropSaid", "act": "read", "reads": "name", "expect": "crop: 120,60 150x120" }
+```
+
+A point the case cannot have meant is refused where it is written: half a point, a percentage above
+100, a `from` with no `to`, a `from` beside any act but `drag`, or `toDesktop` beside `from`. A
+point in pixels that falls outside the element is refused by the act, which then names the element's
+size, and nothing is pressed. Like any `drag` it needs the foreground and is attempted once.
 
 The other direction, a file dragged in from Explorer and dropped on the application, is
 **`drop file`**. `with` names the file the way a `file` step does: relative to the project's root, or

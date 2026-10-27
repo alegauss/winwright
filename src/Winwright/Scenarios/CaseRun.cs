@@ -2614,7 +2614,12 @@ public static class CaseRun
         var to = step.To is null ? null
             : step.ToDesktop ? subject.OnDesktop(step.To)
             : subject.Elsewhere(step.To);
-        var acted = step.Verb.Reads ? null : step.Verb.Perform(subject, step.Argument, to, step.Button, step.Holding);
+        //
+        // WW572. A drag that names its points stays inside its own element, so there is no second
+        // subject to hand the vocabulary and the two points go straight to the act.
+        var acted = step.Verb.Reads ? null
+            : step.From is { } from ? Acting.Synthesised.DragWithin(subject, from, step.ToPoint!)
+            : step.Verb.Perform(subject, step.Argument, to, step.Button, step.Holding);
 
         if (step.Moves)
             return Moved(step, subject, acted, was);

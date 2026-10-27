@@ -244,7 +244,8 @@ public static class ScenarioSchema
         // this source as text and knows only literals and the two vocabularies it names; a property
         // here broke the site's build. ClickButtonTests holds both lists to the step's own.
         new("button", false, Taking.Text, "which button a 'click' presses, left where the step names none — middle closes a tab in a browser or a terminal, and right opens a context menu", ["left", "right", "middle"]),
-        new("to", false, Taking.Text, "where a 'drag' ends: a second locator, in the same window unless 'toDesktop' says otherwise, that the pointer is released over — for the gesture no pattern expresses, such as a tab dragged across its neighbours", []),
+        new("to", false, Taking.Text, "where a 'drag' ends: a second locator, in the same window unless 'toDesktop' says otherwise, that the pointer is released over — for the gesture no pattern expresses, such as a tab dragged across its neighbours; beside 'from', the point of the same element it is released at", []),
+        new("from", false, Taking.Text, "where a 'drag' presses inside its own element, as 'x,y' — each a percentage of the element ('12%') or device-independent pixels from its top-left corner ('40') — with 'to' the point of the same element it is released at, for a handle drawn on a canvas", []),
         new("toDesktop", false, Taking.Truth, "that 'to' is looked for from the desktop rather than in the window under test, so its first step names another top-level window — for a drop onto another application, such as an Explorer folder", []),
         new("expect", false, Taking.Text, "what the reading should be once the act has landed", [], Claims: true),
         new("reads", false, Taking.Text, "which reading the expectation is about", ReadBack.All.Select(one => one.Name).ToList()),

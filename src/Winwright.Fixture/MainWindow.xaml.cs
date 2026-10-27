@@ -71,6 +71,9 @@ public partial class MainWindow : Window
         if (Shapes.Has("toolbar"))
             ToolbarPane.AddTo(panes);
 
+        if (Shapes.Has("handles"))
+            HandlesPane.AddTo(panes);
+
         if (Shapes.Has("layout"))
             LayoutPane.AddTo(panes);
 

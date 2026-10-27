@@ -587,6 +587,17 @@ internal static class Win32
     [DllImport("shcore.dll")]
     internal static extern int GetDpiForMonitor(nint monitor, int kind, out uint dpiX, out uint dpiY);
 
+    /// <summary>
+    /// Physical pixels per device-independent pixel on the display a window is on. WW570, and WW572
+    /// reads it for a point a case wrote in pixels. The display's scale and not the window's own: a
+    /// window unaware of scaling answers 96 for itself and is still drawn scaled.
+    /// </summary>
+    internal static double ScaleOf(nint window)
+    {
+        var monitor = MonitorFromWindow(window, MonitorDefaultToNearest);
+        return GetDpiForMonitor(monitor, EffectiveDpi, out var dpi, out _) == 0 && dpi > 0 ? dpi / 96.0 : 1.0;
+    }
+
     internal static string ClassOf(nint window)
     {
         var name = new StringBuilder(256);

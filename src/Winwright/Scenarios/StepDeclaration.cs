@@ -1,3 +1,4 @@
+using Winwright.Acting;
 using Winwright.Locating;
 
 namespace Winwright.Scenarios;
@@ -205,6 +206,19 @@ public sealed record StepDeclaration
     /// </para>
     /// </summary>
     public Locator? To { get; private init; }
+
+    /// <summary>
+    /// Where inside its own element a drag presses, or null on every step that names no point. WW572.
+    /// <para>
+    /// Found by PhotoBoost (PB67): a crop handle drawn on a GPU surface is pixels and not an element,
+    /// so <see cref="To"/> had nothing to name. A step writing this drags inside the one element it
+    /// addresses, and <see cref="ToPoint"/> is where it lets go.
+    /// </para>
+    /// </summary>
+    public ElementPoint? From { get; private init; }
+
+    /// <summary>Where inside the same element a drag that names <see cref="From"/> releases. WW572.</summary>
+    public ElementPoint? ToPoint { get; private init; }
 
     /// <summary>
     /// The element this step's subject claims to be drawn inside, parsed, or null on every step that
@@ -1114,7 +1128,13 @@ public sealed record StepDeclaration
 
         // WW520. Judged beside the argument because it is the other thing a verb needs said. Ahead
         // of the tray's early return, so an icon step naming a destination is refused for it.
-        var to = Destination(subject, act, wrote.Text("to"), wrote.Truth("toDesktop"));
+        //
+        // WW572. Unless the step says where inside its own element the drag presses: then 'to' is a
+        // point in that same element, and there is no second locator to parse.
+        var points = wrote.Trimmed("from") is { } from
+            ? Points(subject, act, from, wrote.Trimmed("to"), wrote.Truth("toDesktop"))
+            : default((ElementPoint From, ElementPoint To)?);
+        var to = points is null ? Destination(subject, act, wrote.Text("to"), wrote.Truth("toDesktop")) : null;
 
         // WW538. Beside the argument for the same reason the destination is: it is the other thing a
         // click needs said, and a button beside any other verb is a field the run would ignore.
@@ -1154,6 +1174,8 @@ public sealed record StepDeclaration
             Locator = parsed,
             Matches = pattern,
             To = to,
+            From = points?.From,
+            ToPoint = points?.To,
 
             // WW539. Parsed at the door for the reason the destination is: a locator that does not
             // parse is wrong on every machine.
@@ -1544,6 +1566,54 @@ public sealed record StepDeclaration
         }
 
         return written is null ? null : Parsed(subject, written);
+    }
+
+    /// <summary>
+    /// The two points a drag inside one element presses and releases at, parsed. WW572.
+    /// <para>
+    /// Refused where the case wrote them, for the reason <see cref="Destination"/> refuses: a point
+    /// beside a verb that is no drag is a field the run would ignore, and a point nobody can parse is
+    /// wrong on every machine. Where it falls inside the element is a fact about the window and is
+    /// the act's to refuse.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="act">The verb.</param>
+    /// <param name="from">Where the case said to press.</param>
+    /// <param name="to">Where it said to release.</param>
+    /// <param name="desktop">Whether it said to look for 'to' from the desktop.</param>
+    private static (ElementPoint From, ElementPoint To) Points(
+        string subject, ActVerb act, string from, string? to, bool desktop)
+    {
+        if (!act.EndsElsewhere)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it names '{from}' in 'from' and acts with '{act.Name}'; only a 'drag' presses at a point of its element");
+        }
+
+        if (desktop)
+        {
+            throw new ScenarioRefusedException(
+                subject, "it names 'from', so it drags inside its own element, and 'toDesktop' would look for 'to' in another window");
+        }
+
+        var pressed = ElementPoint.Parse(from)
+            ?? throw new ScenarioRefusedException(subject, $"'from' is '{from}', which is no point: a point is {ElementPoint.Spelled}");
+
+        if (to is null)
+        {
+            throw new ScenarioRefusedException(
+                subject, $"it presses at '{from}' and names no 'to', the point of the same element it releases at");
+        }
+
+        var released = ElementPoint.Parse(to)
+            ?? throw new ScenarioRefusedException(
+                subject,
+                $"'to' is '{to}', which is no point; beside 'from' it is where the drag releases inside the same "
+                    + $"element, and a point is {ElementPoint.Spelled}");
+
+        return (pressed, released);
     }
 
     /// <summary>

@@ -154,7 +154,7 @@ public static class Act
                 subject.Locator.Text, Actionable.NotInTree, "it is in no top-level window, so there is no window to size");
         }
 
-        var scale = ScaleOf(window);
+        var scale = Win32.ScaleOf(window);
         var before = SizeOf(window, scale);
 
         if (Win32.IsZoomed(window))
@@ -178,13 +178,6 @@ public static class Act
             PatternValues.Sized(SizeOf(window, scale)),
             admitted.Reading.Resolution.WaitedMs,
             admitted.Reading.Resolution.Polls);
-    }
-
-    /// <summary>Physical pixels per device-independent pixel on the display the window is on. WW570.</summary>
-    private static double ScaleOf(nint window)
-    {
-        var monitor = Win32.MonitorFromWindow(window, Win32.MonitorDefaultToNearest);
-        return Win32.GetDpiForMonitor(monitor, Win32.EffectiveDpi, out var dpi, out _) == 0 && dpi > 0 ? dpi / 96.0 : 1.0;
     }
 
     /// <summary>A window's outer size in device-independent pixels, as <c>640x720</c>. WW570.</summary>

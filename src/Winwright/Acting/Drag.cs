@@ -66,8 +66,65 @@ public static class Drag
         if (!foreground.Satisfied)
             return new PointerResult(act, facts, foreground, default, PatternValues.None);
 
-        var (x, y) = Centre(facts.Bounds);
-        var (toX, toY) = Centre(onto.Bounds);
+        Moved(Centre(facts.Bounds), Centre(onto.Bounds));
+        return new PointerResult(act, facts, foreground, onto.Bounds, from.Read().Values);
+    }
+
+    /// <summary>
+    /// Press at one point of an element and release at another point of the same one. WW572.
+    /// <para>
+    /// Found by PhotoBoost (PB67): a crop editor drawn on a GPU surface has its handles as pixels, so
+    /// there is no second element to release over, and the gesture had no case. The same press, moves
+    /// and release <see cref="Onto"/> sends, at two points the case wrote inside the subject. Both
+    /// points are placed before anything is pressed, so a point written past the element's size is
+    /// refused with the button never down.
+    /// </para>
+    /// </summary>
+    /// <param name="subject">The element both points are in.</param>
+    /// <param name="from">Where to press.</param>
+    /// <param name="to">Where to release.</param>
+    /// <exception cref="NotActionableException">Where the element cannot take the pointer, or a point is outside it.</exception>
+    public static PointerResult Within(Subject subject, ElementPoint from, ElementPoint to)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        ArgumentNullException.ThrowIfNull(from);
+        ArgumentNullException.ThrowIfNull(to);
+
+        var act = new PointerAct("drag", subject.Locator, PointerReason.PointerIsTheAct, $"from {from} to {to}");
+        var admitted = Admitted.To(subject);
+        var facts = admitted.Facts;
+
+        var scale = Win32.ScaleOf(admitted.Window);
+        var pressed = Placed(subject, facts, from, scale);
+        var released = Placed(subject, facts, to, scale);
+
+        var foreground = Foreground
+            .Waited(admitted.Window, DeskWait.Of(subject.DeadlineMs, subject.PollMs))
+            .AsPrecondition();
+
+        if (!foreground.Satisfied)
+            return new PointerResult(act, facts, foreground, default, PatternValues.None);
+
+        Moved(pressed, released);
+        return new PointerResult(act, facts, foreground, facts.Bounds, subject.Read().Values);
+    }
+
+    /// <summary>A point of the subject on the screen, or the refusal naming the element's size. WW572.</summary>
+    private static (int X, int Y) Placed(Subject subject, ElementFacts facts, ElementPoint point, double scale) =>
+        point.On(facts.Bounds, scale) ?? throw new NotActionableException(
+            subject.Locator.Text,
+            Actionable.Offscreen,
+            $"'{point}' is outside it: it is {Math.Round(facts.Bounds.Width / scale)}x"
+                + $"{Math.Round(facts.Bounds.Height / scale)} device-independent pixels, and nothing was pressed");
+
+    /// <summary>
+    /// Press at one point, move past the drag threshold and on to the other, and release there,
+    /// each part its own message.
+    /// </summary>
+    private static void Moved((int X, int Y) from, (int X, int Y) to)
+    {
+        var (x, y) = from;
+        var (toX, toY) = to;
 
         // Past the threshold before the long move, sideways always and up or down where the
         // destination is, so a drag between two elements that share a row still crosses it.
@@ -92,8 +149,6 @@ public static class Drag
         // WW353's pause, as the click takes it before its read, so the release is not read before
         // the application has handled it.
         Thread.Sleep(Keys.FirstLookMs);
-
-        return new PointerResult(act, facts, foreground, onto.Bounds, from.Read().Values);
     }
 
     internal static (int X, int Y) Centre(WindowBounds at) => (at.Left + (at.Width / 2), at.Top + (at.Height / 2));

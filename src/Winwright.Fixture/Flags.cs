@@ -286,6 +286,11 @@ public sealed record Flags
             "a pane under a toolbar as wide as the window, holding seven buttons and a read-out of the one pressed - the last ones go into its overflow when the window is narrowed",
             "a step pressing a toolbar button moved into the overflow on a narrower desk was refused as nothing matched, which read as a misspelled id"),
         new Flag(
+            "handles",
+            "",
+            "a pane holding a crop rectangle drawn on a surface, whose top-left handle is pixels and no element, with a read-out of the crop",
+            "a crop handle drawn on a GPU surface had no case, because a drag went only from one element onto another"),
+        new Flag(
             "layout",
             "",
             "a pane of three buttons in three boxes: one with room, one spilling past the right edge of a box too narrow for it, and one laid out zero wide",

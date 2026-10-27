@@ -224,6 +224,7 @@
 - ✅ **WW556** **A fixture argument cannot name the staged directory: {files} is filled only into variables and the working directory** — A fixture's arguments take {files} and {root} as its variables do, so an app whose paths are flags opens and writes in the staged folder.
 - ✅ **WW561** **choose file reports done while the Save dialog saves its default name, not the path the case gave** — choose file types the name by WM_CHAR and reads it back, so a Save dialog with a default name saves the given path (design recorded in `src/Winwright/Acting/Act.cs`).
 - ✅ **WW570** **A case cannot resize the window under test, so a layout that changes with width has no case** — A case sizes the window under test with 'resize' and 'with' 640x720 in device-independent pixels, needing no foreground, and the trace reads the size the window ended at.
+- ✅ **WW572** **A drag cannot press at one point of an element and release at another, so a handle drawn on a canvas has no case** — A drag names 'from' and 'to' as points inside its own element, in percent or device-independent pixels, so a handle drawn on a canvas is pressed and moved by a case.
 
 ## Block E — Capture — the picture that proves what it photographed
 
