@@ -187,12 +187,13 @@ test("every reading is published with the sentence its own entry carries", () =>
   assert.equal(new Set(said).size, said.length, "two readings are published with the same sentence");
 });
 
-test("exactly the three subjects are alternatives, and the claims are the ones marked", () => {
+test("exactly the four subjects are alternatives, and the claims are the ones marked", () => {
   const step = shaped("step").fields;
 
-  // WW535 added the third: a file on disk, for what an act leaves outside any window.
+  // WW535 added the third: a file on disk, for what an act leaves outside any window. WW575 added
+  // the fourth: the application's own process, which a step waits on to exit or relaunch.
   const alternatives = step.filter((one) => one.instead).map((one) => one.name);
-  assert.deepEqual(alternatives, ["locator", "tray", "file"], "the step's one-of group is not the three subjects");
+  assert.deepEqual(alternatives, ["locator", "tray", "file", "process"], "the step's one-of group is not the four subjects");
 
   // Counted off the declaration by the named argument that sets it, which the generator reads
   // positionally as often as not.
