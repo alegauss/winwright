@@ -428,6 +428,12 @@ public sealed class McpTests : IDisposable
                     Assert.Equal(["from", "to", "fill", "modified"], either[1]!["properties"]!.AsObject().Select(one => one.Key));
                     Assert.Equal(["from"], either[1]!["required"]!.AsArray().Select(one => one!.GetValue<string>()));
                     break;
+                // WW582. A command a fixture runs before its launch, by the four keys the loader reads.
+                case Taking.Commands:
+                    Assert.Equal("array", property["type"]!.GetValue<string>());
+                    Assert.Equal(["run", "arguments", "input", "expectExit"], property["items"]!["properties"]!.AsObject().Select(one => one.Key));
+                    Assert.Equal(["run"], property["items"]!["required"]!.AsArray().Select(one => one!.GetValue<string>()));
+                    break;
                 default:
                     Assert.Equal("array", property["type"]!.GetValue<string>());
                     Shaped(property["items"]!, Under(field.Holds));

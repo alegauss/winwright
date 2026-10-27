@@ -307,6 +307,24 @@ public sealed class ProcessRegister : IDisposable
     }
 
     /// <summary>
+    /// Let go of a launch that ran to its end because running to its end was its job: a command a
+    /// fixture runs before its application. WW582. Its exit is the point, so it is no early exit, and
+    /// a process that has gone is nothing the roll could find outliving the run. Refused for one still
+    /// running, which is the register's to stop.
+    /// </summary>
+    /// <param name="registered">The launch that finished.</param>
+    /// <exception cref="InvalidOperationException">Where it has not exited.</exception>
+    internal void Finished(LaunchedProcess registered)
+    {
+        ArgumentNullException.ThrowIfNull(registered);
+        registered.Refresh();
+        if (!registered.HasExited)
+            throw new InvalidOperationException($"pid {registered.Pid} is still running, so it is the register's to stop and not to let go of");
+
+        launched.Remove(registered);
+    }
+
+    /// <summary>
     /// Take back the early exit a stop recorded for a launch whose case claimed that exit. WW575: an
     /// application that exits to update has done what the case said it would, and a run reading that
     /// as a launch gone before it was asked would report the claim as a fault.

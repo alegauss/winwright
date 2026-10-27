@@ -347,7 +347,40 @@ public sealed record FixtureDeclaration
         || WorkingDirectory.Contains(Staged, StringComparison.Ordinal)
         || Opens.Contains(Staged, StringComparison.Ordinal)
         || Arguments.Any(argument => argument.Contains(Staged, StringComparison.Ordinal))
-        || Variables.Values.Any(value => value.Contains(Staged, StringComparison.Ordinal));
+        || Variables.Values.Any(value => value.Contains(Staged, StringComparison.Ordinal))
+        || Before.Any(NamesStaged);
+
+    /// <summary>Whether a command run before the launch names the staged directory. WW582.</summary>
+    private static bool NamesStaged(BeforeCommand command) =>
+        command.Run.Contains(Staged, StringComparison.Ordinal)
+        || command.Arguments.Any(argument => argument.Contains(Staged, StringComparison.Ordinal));
+
+    /// <summary>
+    /// The commands this fixture runs once its files are staged and before its application launches,
+    /// in declared order. Empty where it runs none. WW582.
+    /// </summary>
+    public IReadOnlyList<BeforeCommand> Before { get; private init; } = [];
+
+    /// <summary>
+    /// How to start one of <see cref="Before"/>: the program resolved the way <see cref="Application"/>
+    /// is, its arguments with the tokens filled, and the fixture's variables, unset variables and
+    /// working directory, so it runs in the environment the application then launches into. WW582.
+    /// </summary>
+    /// <param name="command">One of this fixture's commands.</param>
+    /// <param name="root">The project's root.</param>
+    public ProcessStartInfo Preparing(BeforeCommand command, string root)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        var run = System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(Resolved(command.Run, root)), root);
+        var start = Starting(run, root);
+        start.ArgumentList.Clear();
+        foreach (var argument in command.Arguments)
+            start.ArgumentList.Add(Offered(Resolved(argument, root)));
+
+        start.RedirectStandardInput = command.Input is not null;
+        return start;
+    }
 
     /// <summary>The application as it comes: no arguments, no variables, nothing sampled.</summary>
     public static FixtureDeclaration Plain { get; } =
@@ -374,6 +407,7 @@ public sealed record FixtureDeclaration
     /// </param>
     /// <param name="unset">The inherited variables the launch removes, by name. WW564.</param>
     /// <param name="application">The executable this launch starts instead of the project's. WW575.</param>
+    /// <param name="before">The commands run once the files are staged and before the launch. WW582.</param>
     /// <exception cref="ScenarioRefusedException">
     /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not
     /// one, or files are declared that neither the launch nor a step reaches.
@@ -393,7 +427,8 @@ public sealed record FixtureDeclaration
         string? opens = null,
         bool stepsNameStaged = false,
         IEnumerable<string>? unset = null,
-        string? application = null)
+        string? application = null,
+        IEnumerable<BeforeCommand>? before = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
         var opening = Opened(called, opens, shareable);
@@ -523,8 +558,14 @@ public sealed record FixtureDeclaration
         //
         // WW550. Unless a step names it: a file staged to be dropped on the window, or read back by a
         // file step, is looked at by the case and never by the launch, and is still not decoration.
+        // WW582. A command run before the launch is a reader of the staged directory too.
+        var commands = (before ?? []).ToList();
+        if (commands.Exists(one => string.IsNullOrWhiteSpace(one?.Run)))
+            throw new ScenarioRefusedException(called, "one of the commands it runs before the launch names nothing to run");
+
         if (staging.Count > 0
             && !stepsNameStaged
+            && !commands.Exists(NamesStaged)
             && !starting.Contains(Staged, StringComparison.Ordinal)
             && !opening.Contains(Staged, StringComparison.Ordinal)
             && !rest.Any(argument => argument.Contains(Staged, StringComparison.Ordinal))
@@ -571,6 +612,7 @@ public sealed record FixtureDeclaration
             new ReadOnlyCollection<string>(removing))
         {
             Application = application?.Trim() ?? "",
+            Before = new ReadOnlyCollection<BeforeCommand>(commands),
         };
     }
 
@@ -955,6 +997,10 @@ public sealed record FixtureDeclaration
         // WW575. The binary first among what the launch was, because a run says which one it drove.
         if (Application.Length > 0)
             started = $", launching {Application}{started}";
+
+        // WW582. Counted, as the staged files are: which commands ran is the declaration's business.
+        if (Before.Count > 0)
+            started += $", running {Before.Count} command(s) first";
 
         // WW509. Counted rather than listed: a reader of a red wants to know this launch had a store
         // of its own, and which files were in it is the declaration's business.

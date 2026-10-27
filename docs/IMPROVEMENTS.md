@@ -4,39 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW582 Commands before the launch
-
-Met in modelado, MOD65 (2026-10-26). modelado-cli gained `cloud image-to-3d`, which
-sends a photo to Meshy AI and records the spend in
-%LOCALAPPDATA%\Modelado\cloud-ledger.jsonl, the ledger the window's About reads. The
-task's evidence is that a job sent from the CLI shows in About, so the case wanted to
-be:
-
-```json
-{ "name": "a window whose LOCALAPPDATA had a Meshy job sent by modelado-cli",
-  "variables": { "LOCALAPPDATA": "{files}" },
-  "before": [{ "run": "tools/Modelado.Cli/bin/Debug/net10.0/modelado-cli.exe",
-               "arguments": ["cloud", "image-to-3d", "cases/fixtures/photo.png", "-o", "{files}/m.glb",
-                             "--cloud-api", "meshy=http://127.0.0.1:47631/meshy/"],
-               "input": "msy_case_key", "expectExit": 0 }],
-  "arguments": ["--cloud-api", "meshy=http://127.0.0.1:47631/meshy/"] }
-```
-
-then a step reading `Text#CloudUsage-meshy` for "1 job(s), estimated 30, charged 30". A
-fixture can stage files, variables and arguments, but cannot run a program in its staged
-folder, with the fixture's variables, before the application launches. Staging a
-hand-written ledger instead would prove only that About reads a file, not that the CLI
-writes what About reads.
-
-What modelado settled for: a CLI test (tests/Modelado.Cli.Tests/CliJsonTests.cs) and the
-Blender add-on test assert the ledger the CLI wrote, through CloudLedger.Drift, the call
-About's line is made from. The window itself never opens on it.
-
-winwright should offer: a fixture's `before` list of commands, each run with the
-fixture's variables and working directory, its standard input given, its exit code
-checked, and its output in the report, so a failing setup reads as a setup failure
-rather than a red step.
-
 ### §WW584 Provoke a held desk to prove the shell restart
 
 WW580 made the runner restart the guest's explorer once when the taskbar holds the desk

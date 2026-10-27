@@ -129,6 +129,14 @@ public sealed class Written
         return wrote.TryGetValue(field, out var value) ? (IReadOnlyList<StagedFile>)value : [];
     }
 
+    /// <summary>An array of commands, empty where the case wrote none. WW582.</summary>
+    /// <param name="field">The key, spelled as the file spells it.</param>
+    public IReadOnlyList<BeforeCommand> Commands(string field)
+    {
+        Asked(field, Taking.Commands);
+        return wrote.TryGetValue(field, out var value) ? (IReadOnlyList<BeforeCommand>)value : [];
+    }
+
     /// <summary>An object of text by name, empty where the case wrote none.</summary>
     /// <param name="field">The key, spelled as the file spells it.</param>
     public IReadOnlyDictionary<string, string> Pairs(string field)
@@ -153,7 +161,7 @@ public sealed class Written
     public IReadOnlyList<T> Shaped<T>(string field)
     {
         var row = ScenarioSchema.Row(fields, field);
-        if (row.Holds is Taking.Text or Taking.Truth or Taking.Words or Taking.Pairs)
+        if (row.Holds is Taking.Text or Taking.Truth or Taking.Words or Taking.Pairs or Taking.Commands)
         {
             throw new InvalidOperationException(
                 $"the schema says '{field}' holds {row.Holds}, which is a value and not shapes");
@@ -204,6 +212,7 @@ public sealed class Written
         IReadOnlyList<CaseDeclaration> => Taking.Cases,
         IReadOnlyList<FixtureDeclaration> => Taking.Fixtures,
         IReadOnlyList<StagedFile> => Taking.Placed,
+        IReadOnlyList<BeforeCommand> => Taking.Commands,
         _ => throw new InvalidOperationException(
             $"'{field}' was written as {value.GetType().Name}, which is not a kind the format holds"),
     };

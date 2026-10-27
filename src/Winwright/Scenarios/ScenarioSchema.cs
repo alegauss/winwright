@@ -38,6 +38,9 @@ public enum Taking
 
     /// <summary>An array of files, each a path or an object naming where under the staged directory it lands.</summary>
     Placed,
+
+    /// <summary>An array of commands, each an object naming the program to run, what to give it and the exit that says it worked.</summary>
+    Commands,
 }
 
 /// <summary>
@@ -209,6 +212,7 @@ public static class ScenarioSchema
         new("files", false, Taking.Placed, "the files to put in a directory of this launch's own, each relative to the project's root, as an array — a variable or the working directory names that directory with '{files}', which is how a case gives the application a store of its own without the application growing a flag, or a step of a case in the same file does, such as a 'drop file' whose 'with' is '{files}/photo.png'; an entry may instead be an object with 'from' and 'to', where 'to' is a path under that directory such as quickshell/sessions.json, for an application whose store sits one folder down, and 'fill' set to true to have {reach0} and the staged directory's own token filled in its text, JSON-escaped where the file lands as .json and raw anywhere else; every staged copy is written now, as a file the application was just given, unless 'modified' names an age such as '-1d' to stage a stale one on purpose", []),
         new("opens", false, Taking.Text, "a folder to open in Explorer beside the window under test before the first step, relative to the project's root or naming '{files}' — created where it is not there, the two windows put side by side so a drop released over the folder lands in it, and the folder's window closed again when the case gives its window back; one still standing then is named as a survivor. Not beside 'shareable'", []),
         new("reaches", false, Taking.Words, "what the application connects to outside itself, each a host:port or a %VARIABLE% naming one, as an array — probed before every launch and never started; unreachable, every check on the fixture is a hole naming the address, and reachable, the arguments and variables name each as {reach0}, {reach1} and on", []),
+        new("before", false, Taking.Commands, "commands run once the files are staged and before the application launches, each an object: 'run', the program, written the way 'application' is; 'arguments', with the fixture's tokens filled; 'input', what it reads on its standard input; and 'expectExit', 0 unless said — each with the fixture's variables and working directory, and one that exits otherwise or does not finish within the launch timeout leaves every check of the case a hole naming it and the end of what it wrote", []),
         new("application", false, Taking.Text, "the executable this launch starts instead of the one winwright.json names, such as the copy an installer put in %LOCALAPPDATA%\\Programs — the environment expanded and the tokens filled, and relative to the project's root", []),
         new("unset", false, Taking.Words, "the variables the run inherited that the launch removes, by name, as an array — ELECTRON_RUN_AS_NODE, say, which VS Code exports and which makes an Electron window run as plain Node; a name also under 'variables' is refused", []),
     ]);
@@ -514,6 +518,24 @@ public static class ScenarioSchema
                             ["additionalProperties"] = false,
                         },
                     },
+                },
+            },
+            // WW582. A command a fixture runs before the launch.
+            Taking.Commands => new JsonObject
+            {
+                ["type"] = "array",
+                ["items"] = new JsonObject
+                {
+                    ["type"] = "object",
+                    ["properties"] = new JsonObject
+                    {
+                        ["run"] = new JsonObject { ["type"] = "string" },
+                        ["arguments"] = new JsonObject { ["type"] = "array", ["items"] = new JsonObject { ["type"] = "string" } },
+                        ["input"] = new JsonObject { ["type"] = "string" },
+                        ["expectExit"] = new JsonObject { ["type"] = "integer" },
+                    },
+                    ["required"] = new JsonArray { "run" },
+                    ["additionalProperties"] = false,
                 },
             },
             Taking.Cases => ArrayOf(Case),

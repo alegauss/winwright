@@ -306,7 +306,8 @@ public sealed class ScenarioFile
                 wrote.Text("opens"),
                 looked.Contains(wrote.Text("name") ?? ""),
                 wrote.Words("unset"),
-                wrote.Text("application")));
+                wrote.Text("application"),
+                wrote.Commands("before")));
 
             wrote.Handed("fixture");
 
@@ -452,6 +453,7 @@ public sealed class ScenarioFile
                 Taking.Words => Words(at, element, fields, field.Name),
                 Taking.Pairs => Pairs(at, element, fields, field.Name),
                 Taking.Placed => Placed(at, element, fields, field.Name),
+                Taking.Commands => Commands(at, element, fields, field.Name),
                 _ => shaped is not null
                     ? shaped(field)
                     : throw new InvalidOperationException(
@@ -602,6 +604,76 @@ public sealed class ScenarioFile
             return from is null
                 ? throw new ScenarioRefusedException($"{here}.from", "it is not there, and it has to be")
                 : new StagedFile(from, to, fill, modified);
+        }
+    }
+
+    /// <summary>
+    /// An array of commands, each <c>{ "run", "arguments", "input", "expectExit" }</c>. WW582. Every
+    /// key is refused by name where it is not one of those or not of its kind, for the reason
+    /// <see cref="Placed"/> refuses one.
+    /// </summary>
+    private static IReadOnlyList<BeforeCommand> Commands(string at, JsonElement element, IReadOnlyList<Field> fields, string key)
+    {
+        ScenarioSchema.Of(fields, key, Taking.Commands);
+        if (!element.TryGetProperty(key, out var value) || value.ValueKind == JsonValueKind.Null)
+            return [];
+
+        if (value.ValueKind != JsonValueKind.Array)
+            throw new ScenarioRefusedException($"{at}.{key}", $"it is {Kind(value)} and it has to be an array of commands");
+
+        var read = new List<BeforeCommand>();
+        var index = 0;
+        foreach (var one in value.EnumerateArray())
+        {
+            var here = $"{at}.{key}[{index}]";
+            if (one.ValueKind != JsonValueKind.Object)
+                throw new ScenarioRefusedException(here, $"it is {Kind(one)} and it has to be an object naming what to 'run'");
+
+            read.Add(Command(here, one));
+            index++;
+        }
+
+        return read;
+
+        static BeforeCommand Command(string here, JsonElement one)
+        {
+            string? run = null;
+            string? input = null;
+            var arguments = new List<string>();
+            var exit = 0;
+            foreach (var property in one.EnumerateObject())
+            {
+                switch (property.Name)
+                {
+                    case "run" or "input" when property.Value.ValueKind != JsonValueKind.String:
+                        throw new ScenarioRefusedException($"{here}.{property.Name}", $"it is {Kind(property.Value)} and it has to be text");
+                    case "run":
+                        run = property.Value.GetString();
+                        break;
+                    case "input":
+                        input = property.Value.GetString();
+                        break;
+                    case "arguments":
+                        if (property.Value.ValueKind != JsonValueKind.Array
+                            || property.Value.EnumerateArray().Any(item => item.ValueKind != JsonValueKind.String))
+                        {
+                            throw new ScenarioRefusedException($"{here}.arguments", "it has to be an array of text");
+                        }
+
+                        arguments.AddRange(property.Value.EnumerateArray().Select(item => item.GetString()!));
+                        break;
+                    case "expectExit":
+                        if (property.Value.ValueKind != JsonValueKind.Number || !property.Value.TryGetInt32(out exit))
+                            throw new ScenarioRefusedException($"{here}.expectExit", $"it is {Kind(property.Value)} and it has to be a whole number");
+                        break;
+                    default:
+                        throw new ScenarioRefusedException($"{here}.{property.Name}", "there is no such field; there is run, arguments, input, expectExit");
+                }
+            }
+
+            return string.IsNullOrWhiteSpace(run)
+                ? throw new ScenarioRefusedException($"{here}.run", "it is not there, and it has to be: a command runs something")
+                : new BeforeCommand(run.Trim(), arguments, input, exit);
         }
     }
 

@@ -1219,6 +1219,24 @@ error never names the variable. `"unset": ["ELECTRON_RUN_AS_NODE"]` gives the la
 environment a person's shell would have given it. A name under both `unset` and `variables` is
 refused, and the fixture's line in a report says what it unset.
 
+`before` is a list of commands a fixture runs once its files are staged and before its application
+launches. Use it when what the case is about is that one program's output reaches the window, such as
+a CLI writing a ledger the window reads. Each command is an object: `run` is the program, written the
+way `application` is; `arguments` are given with the fixture's tokens filled; `input` is what it reads
+on its standard input; and `expectExit` is the code that says it did its part, 0 when nothing is
+given. Each runs with the fixture's variables and working directory, so it writes where the
+application then reads:
+
+```json
+{ "name": "a window after its CLI", "variables": { "LOCALAPPDATA": "{files}" },
+  "before": [ { "run": "tools/cli/bin/Debug/cli.exe", "arguments": ["send", "cases/fixtures/photo.png"], "input": "test-key" } ] }
+```
+
+A command that exits with any other code, or does not finish within `timeouts.launch`, is stopped. The
+application is not launched, and every check of the case is a hole naming the command, the code and
+the last lines it wrote. Its output is kept off the runner's own streams. A fixture's line in a report
+counts the commands it ran first.
+
 `application` is the executable a fixture launches instead of the one `winwright.json` names. It is
 for the installed copy of an application, the one an installer put in `%LOCALAPPDATA%\Programs`,
 which is what a case about installing or updating has to drive and the build tree's is not. It is

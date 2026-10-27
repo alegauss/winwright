@@ -270,6 +270,15 @@ public static class Suite
             // way it does at every launch. Measured in the guest: opened after the launch, Explorer
             // kept the desk, and a drag's wait for the window under test ran out at ten seconds.
             var staged = fixture.Stage(project.Root);
+
+            // WW582. After the staging, which the commands may read and write, and before anything
+            // is launched: a command that did not do its part leaves nothing worth launching for.
+            if (Prepared(register, project, staged, one.Name) is { } unprepared)
+            {
+                ran.Add(CaseRun.NotOn(one, unprepared, lent: false));
+                continue;
+            }
+
             var folder = Folder(project, fixture, out var noFolder);
             if (noFolder is not null)
             {
@@ -365,6 +374,71 @@ public static class Suite
         }
 
         return folder;
+    }
+
+    /// <summary>
+    /// Run what a fixture runs before its application, in order, and answer the absence a case run
+    /// on this fixture would be a hole naming, or null where every command did its part. WW582.
+    /// <para>
+    /// Found by Modelado (MOD65): the claim was that a job its CLI sent shows in the window's About,
+    /// and no fixture could run the CLI, so the case staged a hand-written ledger instead. Each
+    /// command goes through the register like every process this run starts, so one that will not
+    /// finish is stopped rather than left, and its output is kept rather than written onto a runner's
+    /// own streams. A command that exits otherwise than it said is a hole and not a red: nothing about
+    /// the application was observed, and its last lines are the reason.
+    /// </para>
+    /// </summary>
+    private static Precondition? Prepared(ProcessRegister register, ProjectDeclaration project, StagedFixture staged, string named)
+    {
+        var fixture = staged.Fixture;
+        var deadline = project.Timeouts.For("launch");
+        foreach (var command in fixture.Before)
+        {
+            var start = fixture.Preparing(command, staged.Root);
+            LaunchedProcess ran;
+            try
+            {
+                ran = register.Launch(start, named);
+            }
+            catch (System.ComponentModel.Win32Exception refused)
+            {
+                throw new ScenarioRefusedException(
+                    named, $"'{fixture.Name}' runs '{start.FileName}' before its launch, which could not be started — {refused.Message}");
+            }
+
+            if (command.Input is { } input)
+            {
+                ran.Underlying.StandardInput.Write(input);
+                ran.Underlying.StandardInput.Close();
+            }
+
+            if (!ran.WaitForExit(deadline))
+            {
+                register.Stop(ran);
+                return Unprepared(fixture, command, $"did not finish within {deadline}ms and was stopped", ran);
+            }
+
+            // The output is drained on its own threads, so the exit is waited on once more with no
+            // bound, which is what lets those threads finish before what they kept is read.
+            ran.Underlying.WaitForExit();
+            var code = ran.ExitCode;
+            register.Finished(ran);
+
+            if (code != command.ExpectExit)
+                return Unprepared(fixture, command, $"exited {code} where {command.ExpectExit} was expected", ran);
+        }
+
+        return null;
+    }
+
+    /// <summary>The absence a command that did not do its part leaves, with the end of what it wrote. WW582.</summary>
+    private static Precondition Unprepared(FixtureDeclaration fixture, BeforeCommand command, string what, LaunchedProcess ran)
+    {
+        var wrote = ran.Wrote;
+        var tail = wrote.Count == 0 ? "; it wrote nothing" : $"; it wrote, last: {string.Join(" | ", wrote.TakeLast(5))}";
+        return Precondition.Absent(
+            $"what '{fixture.Name}' runs before its launch",
+            $"'{command}' {what}{tail}");
     }
 
     /// <summary>Close the folder a case opened, naming its window where it would not go. WW536.</summary>
