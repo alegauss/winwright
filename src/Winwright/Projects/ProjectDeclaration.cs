@@ -382,7 +382,21 @@ public sealed class ProjectDeclaration
     public IReadOnlyList<string> SourceIgnore { get; }
 
     /// <summary>How long this project waits, by name, with the engine's defaults folded under it.</summary>
-    public Timeouts Timeouts { get; }
+    public Timeouts Timeouts { get; private set; }
+
+    /// <summary>
+    /// This declaration as one step sees it when it names its own wait: everything the same, with the
+    /// named timeout standing in for <c>resolve</c> and <c>act</c>. WW577.
+    /// </summary>
+    /// <param name="wait">The timeout the step names.</param>
+    /// <exception cref="DeclarationMissingException">Where nothing declares it.</exception>
+    public ProjectDeclaration Waiting(string wait)
+    {
+        var stretched = Timeouts.Stretched(wait);
+        var copy = (ProjectDeclaration)MemberwiseClone();
+        copy.Timeouts = stretched;
+        return copy;
+    }
 
     /// <summary>
     /// The entries that end the run, named here because which one quits is a fact about the

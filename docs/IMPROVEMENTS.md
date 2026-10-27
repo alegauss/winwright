@@ -125,23 +125,6 @@ rather than a red step.
 
 ## Block D — Act — patterns before pointers
 
-### §WW577 A step's own named wait
-
-`timeouts.resolve` in winwright.json is the one wait every step's read takes, and a step
-cannot name a longer one. Modelado's real Meshy AI job takes minutes between Send and
-the result landing in the history, and the step that reads that version could only wait
-for it once the whole project's resolve was raised from 10 s to 10 min. That raise could
-not be committed: every `absent` step waits the full resolve, so the gate would run for
-hours.
-
-A step that waits on a slow, external result (a cloud job, a long local operation) needs
-its own named wait, declared once in `timeouts` (for example `"cloud": 600000`) and
-chosen by the step (`"waits": "cloud"`). That keeps the rule that no number is typed
-into a case. Modelado's MOD53 live case (a 50 s 3D Object on the guest) found a second
-wait: a read whose element is there but whose value has not arrived gives up after
-`timeouts.act` (one poll over 13 s), so `act` had to be raised as well as `resolve`. The
-named wait has to cover both.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW583 A render taken mid fade-in

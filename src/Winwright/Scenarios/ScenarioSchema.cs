@@ -289,6 +289,7 @@ public static class ScenarioSchema
         new("sameBytesAs", false, Taking.Text, "on a 'file' step, the file whose bytes it should hold, written the way 'file' is — waited for over the resolve timeout, and a file still missing or different then is a failure naming the path, the lengths and the first byte that differs", [], Claims: true),
         new("meansIt", false, Taking.Truth, "that this step means a destructive entry it names", []),
         new("popup", false, Taking.Text, "the popup inside this step's window whose tree the picture is of, by the name the application's own author gave it — for a capture, and the one surface no copy of the screen can ever take", []),
+        new("waits", false, Taking.Text, "a timeout the project declares under 'timeouts', by name, that this step waits instead of 'resolve' and 'act' — for a result that takes minutes, such as a cloud job, without every absent step in the gate waiting as long; a name the project does not declare is refused before the launch", []),
         new("named", false, Taking.Text, "what a report should call it, where the act and the locator will not do", []),
     ]);
 

@@ -53,6 +53,31 @@ public sealed class Timeouts
         return new Timeouts(new ReadOnlyDictionary<string, int>(folded), declaredIn);
     }
 
+    /// <summary>
+    /// The same timeouts with a step's own named wait standing in for both of the waits a step takes:
+    /// finding its element, and its value arriving once it is found. WW577.
+    /// <para>
+    /// Found by Modelado: a cloud job takes minutes between Send and the result, and the one step that
+    /// reads it could wait that long only once the whole project's <c>resolve</c> was raised — which
+    /// every <c>absent</c> step then waits out. And raising <c>resolve</c> was not enough: a value
+    /// still arriving gave up after <c>act</c>. So a named wait covers both, and no number is typed
+    /// into the case.
+    /// </para>
+    /// </summary>
+    /// <param name="name">The wait the step names, declared under <c>timeouts</c>.</param>
+    /// <exception cref="DeclarationMissingException">Where nothing declares it.</exception>
+    public Timeouts Stretched(string name)
+    {
+        var wait = For(name);
+        var folded = new Dictionary<string, int>(byName, StringComparer.Ordinal)
+        {
+            ["resolve"] = wait,
+            ["act"] = wait,
+        };
+
+        return new Timeouts(new ReadOnlyDictionary<string, int>(folded), declaredIn);
+    }
+
     /// <summary>How long to wait for <paramref name="name"/>, in milliseconds.</summary>
     /// <exception cref="DeclarationMissingException">
     /// Where nothing declares it. A default invented here would be a number that differs between

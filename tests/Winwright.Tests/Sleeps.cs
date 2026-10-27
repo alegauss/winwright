@@ -202,6 +202,10 @@ internal static class Sleeps
                 + "looking and before its deadline. The engine's own wait is what the case measures. "
                 + "The second is WW559's, and it is machinery: the pause between asks for the desktop "
                 + "root, a COM call that fails without a state anything could wait on"),
+        new("NamedWaitTests.cs", 1, Sleeping.UnderTest,
+            "WW577. The file arriving after the project's own resolve and before the step's named wait "
+                + "is the condition: whether the step waited the longer of the two is what the case "
+                + "measures, and a signal would be the case telling the engine when to look"),
         new("CaseRunTests.cs", 2, Sleeping.UnderTest,
             "WW401, and the delay is the condition: what that rule is about is a desk that moves "
                 + "while a reading is being taken, so the decoy has to arrive after the act landed "

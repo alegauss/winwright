@@ -198,6 +198,12 @@ public sealed record StepDeclaration
     /// </summary>
     public string? Process => Wrote.Trimmed("process");
 
+    /// <summary>
+    /// The timeout this step waits instead of <c>resolve</c> and <c>act</c>, by the name the project
+    /// declares it under, or null where it waits what every step does. WW577.
+    /// </summary>
+    public string? Waits => Wrote.Trimmed("waits");
+
     /// <summary>The application's process exits by its own choice. WW575.</summary>
     public const string Exits = "exits";
 

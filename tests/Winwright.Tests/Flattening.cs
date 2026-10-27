@@ -116,6 +116,10 @@ internal static class Flattening
                 + "this rule, and a rule with nothing to find passes by arithmetic — so the one "
                 + "thing it must find is the defect it was written for"),
 
+        new($"{nameof(NamedWaitTests)}.Arriving", Flattened.NotTheObservation,
+            "WW577. It reads the desktop root only because the suite asks for one, and a file step "
+                + "never resolves under it; the verdict it answers is the run's own, which carries "
+                + "every state a step reached, so nothing about a look is narrowed away"),
         new($"{nameof(AdoptedTrayTests)}.Placed", Flattened.ADoor,
             "WW451. It waits for the shell to place a launched tray's icon, and the bool is the "
                 + "door and not the answer: every third state it meets is taken as an excuse before "

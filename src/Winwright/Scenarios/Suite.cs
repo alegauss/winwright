@@ -560,6 +560,12 @@ public static class Suite
         {
             foreach (var step in one.Steps)
             {
+                // WW577. A step's own wait is a key the project declares too, and one it does not is
+                // refused here for the reason the verb's is: the file and the declaration already say
+                // so together, and a run would launch the application to find it out.
+                if (step.Waits is { } wait && !project.Timeouts.All.ContainsKey(wait))
+                    found.Add(new UndeclaredNeed(one.Name, step.Name, "waits", $"timeouts.{wait}"));
+
                 // Asked of the verb rather than decided here, so the suite never learns which act
                 // needs which key: a second verb needing a second declaration is refused by this same
                 // loop the day it is added to the vocabulary.

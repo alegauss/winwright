@@ -14,8 +14,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW577** (deps: —) **A step cannot wait longer than the project's resolve timeout, so a minutes-long result has no case** — Modelado's live Meshy case had to raise resolve for the whole project to 10 minutes, which every absent step would then wait out in the gate. → §WW577
-
 ## Block E — Capture — the picture that proves what it photographed
 
 - 📋 **WW583** (deps: —) **an in-app render taken while the page is still fading in writes a washed-out picture and the case passes** — An adopter reads a picture the engine certified and sees nothing, so the visual check falls back to the app's own capture flag, which WW480 meant to retire. → §WW583

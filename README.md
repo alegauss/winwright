@@ -336,6 +336,13 @@ a developer's runner gets the file's default without saying anything. A path nam
 `configuration` key and the variable, so a run never launches a path with a brace in it, or a Debug
 build left over from another job.
 
+`timeouts` holds the waits every step takes (`resolve` to find an element, `act` for its value to
+arrive) and any wait of the project's own, by name. A step whose result takes longer than the rest,
+such as a cloud job that takes minutes, names one in **`waits`**: `"timeouts": { "cloud": 600000 }` in
+the declaration and `"waits": "cloud"` on the step. That step then waits the named timeout for both,
+and every other step keeps the project's own, so an `absent` step in the gate does not wait ten
+minutes too. A name the project does not declare is refused before the launch.
+
 `loading` names the **keys** of the strings your application shows while a page is still computing,
 never the text: a phrase written here is one a translation rewrites, and a check comparing against it
 starts matching nothing the day somebody ships another language. `Loading.In` resolves each key out

@@ -569,6 +569,10 @@ public static class CaseRun
             // directory are known, and nowhere earlier.
             var step = running[index].Rooted(project.Root, staged);
 
+            // WW577. The declaration as this step sees it: its own named wait standing in for resolve
+            // and act, where it names one, and every other step untouched.
+            var seeing = step.Waits is { } wait ? project.Waiting(wait) : project;
+
             // WW575. The fourth kind of subject, answered before a subject is built for the file's
             // reason: a process is in no window's tree. A wait that did not end where the case said
             // stops it, as an act never sent does: every step after was written for a window that is
@@ -577,7 +581,7 @@ public static class CaseRun
             {
                 try
                 {
-                    var (held, window) = Awaited(step, awaited, following!, project, trace, results);
+                    var (held, window) = Awaited(step, awaited, following!, seeing, trace, results);
                     while (claims.Count < results.Count)
                         claims.Add(step.Claimed);
 
@@ -607,7 +611,7 @@ public static class CaseRun
             // every one of them may still assume a locator.
             if (step.Tray is { } icon)
             {
-                if (Trayed(step, icon, project, trace, results) is { } menu)
+                if (Trayed(step, icon, seeing, trace, results) is { } menu)
                     opened.Add(menu);
 
                 while (claims.Count < results.Count)
@@ -624,7 +628,7 @@ public static class CaseRun
             {
                 try
                 {
-                    ReadFile(step, staged, project, trace, results);
+                    ReadFile(step, staged, seeing, trace, results);
                     while (claims.Count < results.Count)
                         claims.Add(step.Claimed);
                 }
@@ -638,7 +642,7 @@ public static class CaseRun
                 continue;
             }
 
-            var subject = new Subject(root, step.Locator!, project);
+            var subject = new Subject(root, step.Locator!, seeing);
             if (step.MeansIt)
                 subject = subject.MeaningIt();
 
@@ -650,7 +654,7 @@ public static class CaseRun
                 // claude-tray, where a click that was never delivered left the case red about a text
                 // box on a page that had never been opened.
                 var went = Perform(
-                step, subject, project, budget, pictures, trace, results, root, pointedAt, recalled, speaking, sampling);
+                step, subject, seeing, budget, pictures, trace, results, root, pointedAt, recalled, speaking, sampling);
                 while (claims.Count < results.Count)
                     claims.Add(step.Claimed);
 
