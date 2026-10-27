@@ -74,6 +74,9 @@ public partial class MainWindow : Window
         if (Shapes.Has("handles"))
             HandlesPane.AddTo(panes);
 
+        if (Shapes.Has("relaunch"))
+            RelaunchPane.AddTo(panes, Shapes.Has("relaunched"));
+
         if (Shapes.Has("layout"))
             LayoutPane.AddTo(panes);
 

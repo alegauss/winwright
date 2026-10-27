@@ -114,6 +114,10 @@ internal static class DeskVerbs
         new("TopLevelWindows.Largest", Touching.FilteredToWhatTheCallerNamed,
             "the same walk, answering the largest of them. It reaches the desk only through "
                 + "OfProcess and inherits the whole of its argument"),
+        new("Following.Relaunch", Touching.FilteredToWhatTheCallerNamed,
+            "WW575. It asks Largest of each new process of the executable the case was launched with, "
+                + "so it inherits OfProcess's argument: somebody else's windows are not that executable's, "
+                + "and a relaunch that has not drawn yet is what its deadline is for"),
 
         // WW462 gave this its right name. It is declared on `TrayMenu` and called as
         // `menu.PutBack()`, and the sweep keyed it to the file it sits in — `NotificationArea` —

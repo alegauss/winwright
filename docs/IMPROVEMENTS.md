@@ -4,33 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW575 Installed apps and relaunches
-
-Met in Modelado (MOD31). The update's evidence is a click in the installed app: About's
-"Update and restart" downloads the newer installer, starts it silently and exits, and
-the installer starts Modelado again at the new version. A case wanted three things:
-
-- a fixture whose application is the copy an installer put in
-  `%LOCALAPPDATA%\Programs\Modelado\Modelado.exe`, not the build tree's that
-  `winwright.json` names;
-- steps that go on after the application exits by its own choice, without that reading as
-  a crash;
-- a claim that a new process of the same executable came up afterwards, and a locator
-  that reaches its window.
-
-None of these can be written, so `build\check-update.ps1` drives the windows itself with
-System.Windows.Automation from Windows PowerShell. It finds elements by AutomationId
-under the process's window, polls until they are enabled, invokes them, reads a
-TextBlock's Name and polls `Get-Process` for the relaunched copy, about 40 lines that
-duplicate what winwright's locators and waits already do. It runs on the guest through
-`-Run` with the staged tree WW574 describes.
-
-The first of the three landed as the fixture field `application` (WW575, installed
-copy), resolved in `FixtureDeclaration.Launches`. What is left: an act or expectation
-that the application exited by its own choice, which the register today reads as an
-early exit, and an `await relaunch` that rebinds the case to a new process of the same
-executable, with a deadline, so the steps after it resolve in the relaunched window.
-
 ### §WW576 A chained -Run
 
 `run-tests-vm.ps1` writes the guest script line `call $script:Run >

@@ -86,6 +86,7 @@ internal static class Surfaces
         new("DialogsPane", Carrying.AShape, "dialogs"),
         new("ToolbarPane", Carrying.AShape, "toolbar"),
         new("HandlesPane", Carrying.AShape, "handles"),
+        new("RelaunchPane", Carrying.AShape, "relaunch"),
         new("LayoutPane", Carrying.AShape, "layout"),
         new("Screen", Carrying.AShape, "screen"),
         new("SelectionsPane", Carrying.AShape, "selections"),

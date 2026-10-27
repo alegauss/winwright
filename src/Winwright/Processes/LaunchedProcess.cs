@@ -49,6 +49,14 @@ public sealed class LaunchedProcess
     public bool Handed { get; internal init; }
 
     /// <summary>
+    /// Whether the register took this process on rather than starting it: the copy an application
+    /// started of itself, which a case followed. WW575. Windows names no exit code to a handle that
+    /// did not start the process, and its going is not a launch of this run leaving early, so no
+    /// departure is recorded for one.
+    /// </summary>
+    public bool Adopted { get; internal init; }
+
+    /// <summary>
     /// The clause every line about this launch carries after its executable: which case it was
     /// launched for, and that it was lent where it was. Empty where no case was named. WW531.
     /// </summary>

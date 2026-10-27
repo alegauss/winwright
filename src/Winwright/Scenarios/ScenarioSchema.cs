@@ -238,6 +238,16 @@ public static class ScenarioSchema
                 + "dropped onto an Explorer folder; it takes 'read' and claims 'sameBytesAs' or 'image'",
             [],
             Subject),
+        new(
+            "process",
+            false,
+            Taking.Text,
+            "what the application's process does next, waited for over the launch timeout and claimed by "
+                + "the step: 'exits', by its own choice, or 'relaunches', a new process of the same "
+                + "executable whose window the steps after it then read — for an application that exits to "
+                + "update and is started again; it takes 'read' and claims nothing else",
+            ["exits", "relaunches"],
+            Subject),
         new("act", true, Taking.Text, "what to do to it", ActVerb.All.Select(verb => verb.Name).ToList()),
         new("with", false, Taking.Text, "what the act needs said, where it needs anything — '{root}' is filled with the project's root, '{root/}' with the same path as Windows OpenSSH spells it (/C:/src/app), and '{files}' with the fixture's staged directory; a brace shaped like a token that is none of those is refused", []),
         new("holding", false, Taking.Text, "a key a 'click' holds down across it — ctrl adds a row to a list's selection and shift takes the range to it, for an application that answers the gesture and offers no pattern", ["ctrl", "shift"]),

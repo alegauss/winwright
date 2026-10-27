@@ -573,6 +573,26 @@ decoded as an image. Windows' own imaging decodes it: PNG, JPEG, BMP, GIF and TI
 the system has that codec. A fact it does not know is refused where it is written, and so is a claim
 that is both `transparent` and `opaque`.
 
+The application's own process is the fourth thing a step can be about. A step naming **`process`**
+takes `read` and waits, over `timeouts.launch`, for one of two things. `exits` means the process the
+case's window belongs to exits, by its own choice. `relaunches` means a new process of the same
+executable draws a window, and the steps after it resolve in that window. This is for an application
+that exits to update and is started again by its installer:
+
+```json
+{ "locator": "Button#UpdateAndRestart", "act": "invoke" },
+{ "process": "exits", "act": "read", "named": "the application exits to update" },
+{ "process": "relaunches", "act": "read", "named": "the application is started again" },
+{ "locator": "Text#Version", "act": "read", "reads": "name", "expect": "1.4.0" }
+```
+
+A claimed exit is not reported as the application having gone early. The process the case followed
+is stopped when the case ends, the way the launch is, so it does not outlive the run. A wait that did
+not end the way the step said is red and stops the case, because every step after it was written for
+a window that is either still the old one or not there. A `process` step carries no other claim, and a
+case that says `onlyReads` may not have one, since it leaves no window to lend. A case whose window
+belongs to no process the run can follow, such as a resident fixture's desktop, is refused.
+
 `click tray icon` is a pointer at the icon's centre, and on purpose: every taskbar button refuses a
 clickable point, so the rectangle is the only address an icon has. What it claims is the click — sent
 at the icon, with the icon the thing standing at that point — and what the application did with it is

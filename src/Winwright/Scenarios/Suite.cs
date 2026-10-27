@@ -317,9 +317,21 @@ public static class Suite
             // process that had left before the case finished is what a reading full of missing
             // locators is actually about. A borrowed launch is not stopped here and gets this at the
             // end of the run instead, where no one case can claim it.
+            // WW575. What the case followed after the application relaunched itself is this run's to
+            // stop, as the launch was; and a launch whose exit a step claimed left on purpose, so its
+            // being gone is the claim and not an early exit.
+            foreach (var pid in result.Relaunched)
+            {
+                if (register.Adopt(pid, one.Name) is { } adopted)
+                    register.Stop(adopted);
+            }
+
+            if (result.ClaimedExit)
+                register.Claimed(process);
+
             // WW563. What the launch wrote, which the register kept off the runner's own streams.
             result = result.Hearing(process);
-            ran.Add(process.Departed is { } departed ? result.After(departed) : result);
+            ran.Add(process.Departed is { } departed && !result.ClaimedExit ? result.After(departed) : result);
         }
 
         return Remembered(asked, ran, skipped, project);

@@ -4,7 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- ⏳ **WW575** (deps: —) **A case cannot drive the installed copy of an app, nor follow it when it exits and relaunches itself to update** — A step cannot claim the application exited by its own choice, nor follow a new process of the same executable after a relaunch. → §WW575
 - 📋 **WW576** (deps: —) **A -Run holding & or && logs only its last command and can lose the guest's exit code** — The runner writes call <Run> > vm-run.log, so cmd binds the redirection to one command; modelado had to wrap -Run in cmd /c to see a Blender test fail. → §WW576
 - 📋 **WW578** (deps: —) **Through run-tests-vm.cmd, -Bring a,b arrives as one file name, so only a single file can come back from the guest** — Modelado had to tar its two demo files on the guest to bring them back, since powershell -File binds a comma list as one string. → §WW578
 - 📋 **WW579** (deps: —) **The guest's Search or Start flyout holding the foreground is read as a question and refuses the run** — Modelado's operator had to close Windows Search by hand on the VM console; the overlay closes on Escape and asks nothing. → §WW579
@@ -163,15 +162,6 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
-
-## Done when — WW575
-
-- **A step claims the application exited by its own choice** A case presses an update
-  that exits the process, and a step after it reads the exit as the claim, green, rather
-  than the register reporting an early exit.
-- **A relaunched process is followed by the steps after it** A case awaits a new process
-  of the same executable within a deadline, and its next locator resolves in the
-  relaunched window; none arriving is a red naming the wait.
 
 ## Non-goals
 

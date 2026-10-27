@@ -291,6 +291,18 @@ public sealed record Flags
             "a pane holding a crop rectangle drawn on a surface, whose top-left handle is pixels and no element, with a read-out of the crop",
             "a crop handle drawn on a GPU surface had no case, because a drag went only from one element onto another"),
         new Flag(
+            "relaunch",
+            "",
+            "a pane whose one button starts a new copy of this executable and exits, as an update does, and whose other only exits, with a read-out saying which copy this is",
+            "an application that exits to update and is started again had no case, because a step could neither claim the exit nor follow the new process"),
+        new Flag(
+            "relaunched",
+            "",
+            "say in the relaunch pane's read-out that this is the copy a restart started",
+            "a step after a relaunch had nothing to read that told the new window from the old one",
+            Needs: "relaunch",
+            Alone: "mark"),
+        new Flag(
             "layout",
             "",
             "a pane of three buttons in three boxes: one with room, one spilling past the right edge of a box too narrow for it, and one laid out zero wide",

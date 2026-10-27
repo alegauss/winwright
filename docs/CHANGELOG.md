@@ -118,7 +118,7 @@
 - 🗑 **WW565** **an Electron app in development cannot be declared: its exe is node_modules' electron and the app is an argument** — abandoned: Already possible: executable resolves against winwright.json's folder and an argument takes {root} (WW542); with WW564's unset an Electron app is an ordinary executable.
 - ✅ **WW564** **a fixture cannot remove an inherited environment variable, so an Electron app launched from VS Code runs as Node** — A fixture's unset names inherited variables the launch removes, case-blind and refused beside variables, so an Electron app started from VS Code opens as a window.
 - ✅ **WW574** **The guest runner carries only the tree's git listing, so a build output such as an installer cannot reach the guest** — The guest runner takes -Carry, paths or wildcards relative to the tree, ignored or not, so a build output such as an installer reaches the guest at its own path.
-- ✅ **WW575 (installed copy)** **A case cannot drive the installed copy of an app, nor follow it when it exits and relaunches itself to update** — A fixture names the executable it launches in 'application', such as the installed copy under %LOCALAPPDATA%, and its report line says which binary it drove.
+- ✅ **WW575** **A case cannot drive the installed copy of an app, nor follow it when it exits and relaunches itself to update** — A step waits on the application's process: 'exits' claims the exit an update makes, and 'relaunches' follows the new copy into its window, which the run stops with the case.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

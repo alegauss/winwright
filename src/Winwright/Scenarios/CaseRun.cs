@@ -111,7 +111,25 @@ public sealed class CaseResult
     /// </summary>
     /// <param name="departure">What the register found.</param>
     internal CaseResult After(Departure departure) =>
-        new(Declared, Verdict, Trace, NotReached, Lent, Across, departure) { Said = Said, SaidLines = SaidLines };
+        new(Declared, Verdict, Trace, NotReached, Lent, Across, departure)
+        {
+            Said = Said,
+            SaidLines = SaidLines,
+            Relaunched = Relaunched,
+            ClaimedExit = ClaimedExit,
+        };
+
+    /// <summary>
+    /// Every process a step followed after the application relaunched itself, by pid, which the run
+    /// takes on and stops where the case ends. Empty where no step relaunched. WW575.
+    /// </summary>
+    public IReadOnlyList<int> Relaunched { get; internal init; } = [];
+
+    /// <summary>
+    /// Whether a step claimed the application the case was launched with exited, so its being gone
+    /// when the run came to stop it is the claim and not an early exit. WW575.
+    /// </summary>
+    public bool ClaimedExit { get; internal init; }
 
     /// <summary>
     /// The last lines the application this case launched wrote on its output and error streams,
@@ -137,6 +155,8 @@ public sealed class CaseResult
         {
             Said = launched.Wrote,
             SaidLines = launched.Lines,
+            Relaunched = Relaunched,
+            ClaimedExit = ClaimedExit,
         };
 
     /// <summary>
@@ -357,12 +377,17 @@ public static class CaseRun
         var expanded = new List<Subject>();
         var finished = false;
 
+        // WW575. The process the case's window belongs to, read before a step can make it exit.
+        // Only where a step asks: a look at every process of the same name costs a case that never
+        // follows one for nothing.
+        var following = running.Exists(one => one.Process is not null) ? Following.Of(root) : null;
+
         try
         {
             Stepping(
                 running, root, project, budget, pictures, trace, results, broke, claims,
                 pointedAt, recalled, speaking, sampling, opened, expanded,
-                declared.Fixture.StagedInto(project.Root), out stopped);
+                declared.Fixture.StagedInto(project.Root), following, out stopped);
             finished = stopped < 0;
         }
         finally
@@ -390,7 +415,11 @@ public static class CaseRun
             new ReadOnlyCollection<TraceStep>(trace),
             new ReadOnlyCollection<StepDeclaration>(notReached),
             lent,
-            members.Count);
+            members.Count)
+        {
+            Relaunched = following?.Relaunched.ToArray() ?? [],
+            ClaimedExit = following?.ClaimedExit ?? false,
+        };
     }
 
     /// <summary>What an expand or a collapse step does to the list the tidy closes. WW525.</summary>
@@ -511,6 +540,7 @@ public static class CaseRun
     /// <param name="opened">Where a tray menu this case opened is kept, for the restore.</param>
     /// <param name="expanded">Where an element this case expanded is kept, for the tidy. WW525.</param>
     /// <param name="staged">The directory the case's fixture stages into, which a file step's <c>{files}</c> names. WW535.</param>
+    /// <param name="following">The application's process, where a step waits on it, or null. WW575.</param>
     /// <param name="stopped">The index of the step that stopped the case, or -1.</param>
     private static void Stepping(
         List<StepDeclaration> running,
@@ -529,6 +559,7 @@ public static class CaseRun
         List<TrayMenu> opened,
         List<Subject> expanded,
         string staged,
+        Following? following,
         out int stopped)
     {
         stopped = -1;
@@ -537,6 +568,37 @@ public static class CaseRun
             // WW542. The tokens in a step's argument are filled here, where the root and the staged
             // directory are known, and nowhere earlier.
             var step = running[index].Rooted(project.Root, staged);
+
+            // WW575. The fourth kind of subject, answered before a subject is built for the file's
+            // reason: a process is in no window's tree. A wait that did not end where the case said
+            // stops it, as an act never sent does: every step after was written for a window that is
+            // either still the old one or is not there.
+            if (step.Process is { } awaited)
+            {
+                try
+                {
+                    var (held, window) = Awaited(step, awaited, following!, project, trace, results);
+                    while (claims.Count < results.Count)
+                        claims.Add(step.Claimed);
+
+                    if (window is not null)
+                        root = window;
+
+                    if (!held)
+                    {
+                        stopped = index;
+                        break;
+                    }
+                }
+                catch (Exception thrown) when (thrown is not (OutOfMemoryException or StackOverflowException))
+                {
+                    Threw(step, thrown, trace, results, broke, claims);
+                    stopped = index;
+                    break;
+                }
+
+                continue;
+            }
 
             // WW258. The second kind of subject, answered before a subject is built rather than
             // inside one: the notification area is in the shell's tree and not in the window's, and a
@@ -608,6 +670,70 @@ public static class CaseRun
                 break;
             }
         }
+    }
+
+    /// <summary>
+    /// A step waiting on the application's process: for it to exit, or for a new one of the same
+    /// executable to draw a window. WW575. Waited for over the launch timeout, because a relaunch is a
+    /// launch, and an update may download its installer before it exits.
+    /// </summary>
+    /// <returns>Whether the wait ended the way the step said, and the new window where it relaunched.</returns>
+    /// <exception cref="ScenarioRefusedException">Where the case's window belongs to no process it can follow.</exception>
+    private static (bool Held, AutomationElement? Window) Awaited(
+        StepDeclaration step,
+        string awaited,
+        Following following,
+        ProjectDeclaration project,
+        List<TraceStep> trace,
+        List<AssertionResult> results)
+    {
+        if (following.Pid == 0 || following.Executable is null)
+        {
+            throw new ScenarioRefusedException(
+                step.Name,
+                "it waits on the application's process, and the case's window belongs to none this run can "
+                    + "follow — a resident fixture's root is the desktop, and a process Windows will not name "
+                    + "the executable of cannot be told from another");
+        }
+
+        var deadline = project.Timeouts.For("launch");
+        var poll = project.Timeouts.For("poll");
+        var was = following.Pid;
+
+        bool held;
+        string detail;
+        AutomationElement? window = null;
+        int waited;
+        if (awaited == StepDeclaration.Exits)
+        {
+            (held, waited) = following.Exit(deadline, poll);
+            detail = held
+                ? $"{following.Named} (pid {was}) exited after {waited}ms"
+                : $"{following.Named} (pid {was}) was still running after {waited}ms";
+        }
+        else
+        {
+            int pid;
+            (window, pid, waited) = following.Relaunch(deadline, poll);
+            held = window is not null;
+            detail = held
+                ? $"{following.Named} came back as pid {pid} after {waited}ms, and the steps after this read its window"
+                : $"no new process of {following.Executable} drew a window in {waited}ms";
+        }
+
+        trace.Add(new TraceStep
+        {
+            Step = trace.Count + 1,
+            Verb = step.Verb.Name,
+            Locator = step.Addressed,
+            Verdict = held ? StepVerdict.Ok : StepVerdict.Failed,
+            Detail = detail,
+            WaitedMs = waited,
+            Asserted = step.Name,
+        });
+
+        results.Add((held ? AssertionResult.Pass(step.Name, detail) : AssertionResult.Fail(step.Name, detail)).At(trace.Count));
+        return (held, window);
     }
 
     /// <summary>A step that threw, recorded as the trace line and the harness error a reader looks for.</summary>

@@ -105,6 +105,9 @@ internal static class Deadlines
             + "monitor (WW548). Each look rebuilds its own list every poll, the file is read whole and decoded afresh and both rectangles are "
             + "measured again each time, so what makes it false is what is there now rather than what "
             + "an earlier look kept"),
+        new("Following.cs", 2, "false while the process a case follows is still running, and false while "
+            + "no new process of the same executable draws a window (WW575). Each look asks Windows for "
+            + "the process and the windows again, so an exit or a relaunch is seen as it is now"),
         new("FolderWindow.cs", 2, "false while no Explorer window's title holds the folder's name, and "
             + "false while the window a case opened still exists after the close was posted (WW536). "
             + "Each look enumerates the desk again, so a window that arrives late or goes late is "

@@ -259,6 +259,16 @@ public sealed record CaseDeclaration
 
         Pointing(called, collected);
 
+        // WW575. A case that waits for the application to exit or relaunch changes the window a case
+        // borrowing it would read, which is the one thing a case that only reads promises not to do.
+        if (onlyReads && collected.Find(step => step.Process is not null) is { } process)
+        {
+            throw new ScenarioRefusedException(
+                called,
+                $"it says it only reads, and '{process.Name}' waits for the application to {process.Process}, "
+                    + "which leaves no window for the next case to borrow");
+        }
+
         // WW263. A case repeating over a set no step reaches would run its steps N times against the
         // same window and report N times the confidence for one reading — which is the unearned green
         // this project exists to refuse, arriving as arithmetic.

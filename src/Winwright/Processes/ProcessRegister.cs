@@ -254,7 +254,10 @@ public sealed class ProcessRegister : IDisposable
             // window deadline WW257 removed.
             // WW286. Collected as well as recorded on the launch, so the run can read what no one
             // case can claim. At a case boundary, which is what makes this one attributable.
-            departed.Add(registered.Left(DepartureSeen.WhereItsCaseEnded));
+            // WW575. Not for a process taken on: its going is no launch of this run leaving early.
+            if (!registered.Adopted)
+                departed.Add(registered.Left(DepartureSeen.WhereItsCaseEnded));
+
             return null;
         }
 
@@ -268,6 +271,51 @@ public sealed class ProcessRegister : IDisposable
         var refused = new Survivor(pid, registered.Executable, SurvivorFate.WouldNotStop, registered.Case, registered.Lent);
         outlived.Add(refused);
         return refused;
+    }
+
+    /// <summary>
+    /// Take on a process this run did not start but a case of it caused: the copy an application
+    /// started of itself after it exited to update. WW575.
+    /// <para>
+    /// Held from here like any launch, so it is stopped where its case ends and named if it will not
+    /// go: the criterion that no process outlives the run is about what the run brought about, and a
+    /// relaunch a case waited for is that. Null where the process has already gone.
+    /// </para>
+    /// </summary>
+    /// <param name="pid">The process the case followed.</param>
+    /// <param name="forCase">The case that followed it.</param>
+    internal LaunchedProcess? Adopt(int pid, string? forCase)
+    {
+        ObjectDisposedException.ThrowIf(survivors is not null, this);
+
+        Process found;
+        string executable;
+        try
+        {
+            found = Process.GetProcessById(pid);
+            executable = found.MainModule?.FileName ?? found.ProcessName;
+        }
+        catch (Exception gone) when (gone is ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception)
+        {
+            return null;
+        }
+
+        var adopted = new LaunchedProcess(found, executable, forCase) { Adopted = true };
+        launched.Add(adopted);
+        AnyLaunch[adopted.Pid] = adopted;
+        return adopted;
+    }
+
+    /// <summary>
+    /// Take back the early exit a stop recorded for a launch whose case claimed that exit. WW575: an
+    /// application that exits to update has done what the case said it would, and a run reading that
+    /// as a launch gone before it was asked would report the claim as a fault.
+    /// </summary>
+    /// <param name="registered">The launch whose exit the case claimed.</param>
+    internal void Claimed(LaunchedProcess registered)
+    {
+        ArgumentNullException.ThrowIfNull(registered);
+        departed.RemoveAll(one => one.Pid == registered.Pid);
     }
 
     /// <summary>
@@ -319,7 +367,7 @@ public sealed class ProcessRegister : IDisposable
                 // WW286. The list rather than only the launch, and `WhereTheRunEnded` because that is
                 // all this look can support: a lent fixture was held across several cases and none of
                 // them can say which it went during.
-                if (registered.Departed is null)
+                if (registered.Departed is null && !registered.Adopted)
                     departed.Add(registered.Left(DepartureSeen.WhereTheRunEnded));
 
                 continue;

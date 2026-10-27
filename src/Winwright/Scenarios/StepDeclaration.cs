@@ -184,7 +184,25 @@ public sealed record StepDeclaration
     /// path. WW258: what a trace line and a refusal want, and the one accessor that cannot be wrong
     /// about which kind of subject a step has.
     /// </summary>
-    public string Addressed => Locator?.Text ?? (Tray is not null ? $"tray icon '{Tray}'" : $"file '{File}'");
+    public string Addressed => Locator?.Text
+        ?? (Tray is not null ? $"tray icon '{Tray}'" : Process is not null ? $"the application {Process}" : $"file '{File}'");
+
+    /// <summary>
+    /// What this step waits for the application's process to do, <see cref="Exits"/> or
+    /// <see cref="Relaunches"/>, or null on every step about something else. WW575.
+    /// <para>
+    /// The fourth kind of subject. Found by Modelado (MOD31): an update exits the application and
+    /// the installer starts it again, and a case could neither say the exit was the point nor follow
+    /// the new process, so the project drove both with hand-written UI Automation.
+    /// </para>
+    /// </summary>
+    public string? Process => Wrote.Trimmed("process");
+
+    /// <summary>The application's process exits by its own choice. WW575.</summary>
+    public const string Exits = "exits";
+
+    /// <summary>A new process of the same executable comes up, and the steps after it read its window. WW575.</summary>
+    public const string Relaunches = "relaunches";
 
     /// <summary>
     /// The popup inside this step's window whose tree the capture is of, by the name the
@@ -964,6 +982,9 @@ public sealed record StepDeclaration
     /// </summary>
     public bool Checkable =>
         Tray is not null
+        // WW575. A process step is checkable for the tray's reason: its claim is the subject itself
+        // — the application exited, or came back — and the wait answers pass or fail on its own.
+        || Process is not null
         // WW336. A capture is checkable making no claim of its own, for the reason a tray step is:
         // the claim is the receipt — this picture is of this window, out of this process,
         // started this way, with nothing standing over it and nothing showing through it — and the
@@ -1102,15 +1123,21 @@ public sealed record StepDeclaration
         var called = wrote.Trimmed("named");
         var tray = wrote.Trimmed("tray");
         var file = wrote.Trimmed("file");
+        var process = wrote.Trimmed("process");
         var locator = wrote.Text("locator");
         var verb = wrote.Text("act");
-        var subject = called ?? Describing(verb, locator ?? (tray is not null ? $"tray icon '{tray}'" : $"file '{file}'"));
+        var subject = called ?? Describing(
+            verb,
+            locator ?? (tray is not null ? $"tray icon '{tray}'" : process is not null ? $"the application {process}" : $"file '{file}'"));
 
-        RefusesTwoSubjects(subject, locator, tray, file);
+        RefusesTwoSubjects(subject, locator, tray, file, process);
 
         // Not null past the guard above, which refuses a step that named nothing to act on — and
         // blank is refused by the verb itself, naming the vocabulary there is.
         var act = ActVerb.Named(verb!);
+
+        // WW575. The process step's own refusals, ahead of every claim for the file step's reason.
+        RefusesProcessVerb(subject, process, act);
 
         // WW535. The file step's own two refusals, ahead of the tray's for the reason the tray's are
         // ahead of everything else: a step about a file that named a pressing act is refused for that
@@ -1216,6 +1243,13 @@ public sealed record StepDeclaration
             return step;
         }
 
+        // WW575. Finished the same way: a process step carries its subject, 'read' and nothing else.
+        if (process is not null)
+        {
+            RefusesProcessClaims(step, subject);
+            return step;
+        }
+
         // WW365. Every refusal from here reads the step rather than the locals that built it, which
         // is what lets each family be a method instead of six hundred lines in one verb. They ran in
         // this order before they moved and they run in it now: this suite asserts which refusal wins
@@ -1284,7 +1318,8 @@ public sealed record StepDeclaration
     /// <param name="locator">The locator, where the step named one.</param>
     /// <param name="tray">The notification-area icon, where the step named one.</param>
     /// <param name="file">The file on disk, where the step named one. WW535.</param>
-    private static void RefusesTwoSubjects(string subject, string? locator, string? tray, string? file)
+    /// <param name="process">What the application's process does, where the step named it. WW575.</param>
+    private static void RefusesTwoSubjects(string subject, string? locator, string? tray, string? file, string? process)
     {
         var named = new List<string>();
         if (!string.IsNullOrWhiteSpace(locator))
@@ -1293,6 +1328,8 @@ public sealed record StepDeclaration
             named.Add("a tray icon");
         if (file is not null)
             named.Add("a file");
+        if (process is not null)
+            named.Add("the application's process");
 
         if (named.Count == 0)
             throw new ScenarioRefusedException(subject, "a step acts on something, and this one names nothing");
@@ -1304,7 +1341,7 @@ public sealed record StepDeclaration
         // a pair with a file says the same thing about a path, which no locator reaches either.
         throw new ScenarioRefusedException(
             subject,
-            named.Count == 2 && tray is not null && file is null
+            named.Count == 2 && tray is not null && file is null && process is null
                 ? "a step acts on one thing, and this one names a locator and a tray icon; a tray icon is "
                     + "not in the window's tree, so no locator reaches it and naming both names two subjects"
                 : $"a step acts on one thing, and this one names {string.Join(" and ", named)}; each is "
@@ -1494,6 +1531,57 @@ public sealed record StepDeclaration
             subject,
             "it carries 'sameBytesAs', which is a claim about a file on disk; a step that makes it "
                 + "names that file in 'file' and carries no locator");
+    }
+
+    /// <summary>
+    /// A process step naming anything but <c>read</c>, or a word that is not one of the two things it
+    /// waits for. WW575: a process is not an element, so there is nothing to press, and what it waits
+    /// for is a closed pair.
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="process">What it said the process does, or null.</param>
+    /// <param name="act">The verb.</param>
+    private static void RefusesProcessVerb(string subject, string? process, ActVerb act)
+    {
+        if (process is null)
+            return;
+
+        if (process is not (Exits or Relaunches))
+        {
+            throw new ScenarioRefusedException(
+                subject, $"its 'process' is '{process}', and a step waits for the application's process to '{Exits}' or to '{Relaunches}'");
+        }
+
+        if (!act.Reads)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it is about the application's process and names '{act.Name}'; a process is not an element, "
+                    + "so nothing in it takes a pattern or a pointer — the one act it takes is 'read'");
+        }
+    }
+
+    /// <summary>
+    /// Every claim a process step may not carry. WW575: its claim is the wait itself, and a reading
+    /// beside it would be about a window that is going or not yet there.
+    /// </summary>
+    /// <param name="step">The step as the case wrote it.</param>
+    /// <param name="subject">What a refusal calls it.</param>
+    private static void RefusesProcessClaims(StepDeclaration step, string subject)
+    {
+        var claimed = step.Claims.Select(one => $"'{one.Field}'").ToList();
+        if (step.NamedReading is not null)
+            claimed.Add("'reads'");
+        if (step.MeansIt)
+            claimed.Add("'meansIt'");
+
+        if (claimed.Count > 0)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it waits for the application to {step.Process} and carries {string.Join(", ", claimed)}; "
+                    + "the wait is its claim, and a reading belongs on a step of its own after it");
+        }
     }
 
     /// <summary>
