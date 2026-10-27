@@ -125,6 +125,7 @@
 - ✅ **WW580** **A taskbar holding the guest's foreground refuses the run, though the remedy is a shell restart the runner could do** — A taskbar holding the guest desk is cleared by restarting explorer once under the run's own desk claim and asking again, and -KeepShell forbids the restart.
 - ✅ **WW581** **A -Run that opens no window is still refused over a held guest desk** — A -Run that opens no window says -NoDesk, so the guest foreground is not read, tidied or asked for, while the desk claim still keeps two runs from interleaving.
 - ✅ **WW582** **A fixture cannot run a command, such as the project's own CLI, with its variables before the application launches** — A fixture's 'before' commands run after staging with its variables, input and expected exit, so a case reads what a CLI wrote, and one that fails leaves the case a hole naming it.
+- 🗑 **WW584** **The runner's shell restart over a held taskbar has never run against a guest desk that was really held** — abandoned: Neither a raised foreground lock timeout nor LockSetForegroundWindow holds the guest desk against the runner's input, so nothing known provokes the held desk the restart is for.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
