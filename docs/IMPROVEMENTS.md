@@ -4,29 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW581 A desk-free run
-
-Modelado runs CLI-only work on the guest through run-tests-vm.cmd -Run: model downloads,
-modelado-cli reconstructions for the site's demo (MOD33), a CPU probe (MOD34). None of
-them opens a window. On 2026-10-26 two such runs were refused before anything ran:
-
-    run-tests-vm: the guest's desk is waiting for an answer: SearchHost ... 'Pesquisar' held the foreground
-    run-tests-vm: nothing may take the foreground on the guest desk: explorer (pid 6928, Shell_TrayWnd) '' is holding it
-
-The refusals are right for a suite of UI cases, and the reason a person reads them is to
-restart the guest shell. For a -Run that drives no window they stop work that the desk
-does not touch, and the operator had to close the Search window and restart explorer by
-hand.
-
-The runner offers no way to say so: the parameters are -Screenshot, -CommittedOnly,
--NoGate, -Vmx, -Tree, -Name, -Run, -ResultsIn, -Bring and -Bound, and none skips the
-desk claim and the foreground check.
-
-What winwright should offer: a -NoDesk (or -Headless) switch that skips the foreground
-check and the desk claim, still holding the guest so two runs do not interleave, and
-says in its first lines that the run takes no desk. A refusal over the desk could then
-name that switch for a run whose command is not the suite.
-
 ### §WW582 Commands before the launch
 
 Met in modelado, MOD65 (2026-10-26). modelado-cli gained `cloud image-to-3d`, which

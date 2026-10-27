@@ -123,6 +123,7 @@
 - ✅ **WW578** **Through run-tests-vm.cmd, -Bring a,b arrives as one file name, so only a single file can come back from the guest** — The runner splits -Bring on commas, so a list through run-tests-vm.cmd brings each file back, and an adopter's -Run gets them whether it passed or not.
 - ✅ **WW579** **The guest's Search or Start flyout holding the foreground is read as a question and refuses the run** — The desk clearer dismisses the shell's Search, Start and action centre overlays with Escape and says so, so a run goes on; any other window with no minimise button still refuses it.
 - ✅ **WW580** **A taskbar holding the guest's foreground refuses the run, though the remedy is a shell restart the runner could do** — A taskbar holding the guest desk is cleared by restarting explorer once under the run's own desk claim and asking again, and -KeepShell forbids the restart.
+- ✅ **WW581** **A -Run that opens no window is still refused over a held guest desk** — A -Run that opens no window says -NoDesk, so the guest foreground is not read, tidied or asked for, while the desk claim still keeps two runs from interleaving.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

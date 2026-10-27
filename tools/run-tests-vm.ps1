@@ -119,6 +119,11 @@ param(
     # refuses only where that did not clear the desk.
     [switch] $KeepShell,
 
+    # WW581. This run opens no window, so the guest desk is not its concern: the foreground is not
+    # read, tidied or asked for, and nothing about it refuses the run. The desk claim is still taken,
+    # so two runs never interleave in the guest. For a -Run that is a CLI, a download or a build.
+    [switch] $NoDesk,
+
     # WW574. Files to carry beside the tree's git listing, as paths or wildcards relative to the
     # tree, ignored by git or not: a build output such as an installer, which .gitignore rightly keeps
     # out of the listing. Each lands at the same path under the tree in the guest. A pattern that
@@ -1238,6 +1243,16 @@ $null = New-Item -ItemType Directory -Path $stage
 # WW311. Before the carry and after the session, because those are the two things this costs: it
 # needs a desk to have a foreground at all, and it is worth nothing once the twenty minutes are
 # already spent. The stage exists by here and the sync directory does not, so the probe makes it.
+#
+# WW581. None of it for a run that says it takes no desk: from here to where the desk it started on is
+# kept, every reading and repair is about a foreground, and a -Run that opens no window - a model
+# download, a CLI reconstruction - was refused over a desk it never touches. The claim above is still
+# held, so two runs do not interleave in the guest.
+if ($NoDesk) {
+    Write-Host '  foreground  not asked: -NoDesk says this run opens no window, so the desk is not this run''s concern'
+    $desk = [pscustomobject]@{ State = 'not asked' }
+}
+else {
 $desk = Read-GuestDesk -Vmx $vmxPath -Stage $stage
 
 # WW388. The desks a run is willing to tidy before it starts, and the sentence the two readings had
@@ -1353,6 +1368,7 @@ switch ($desk.State) {
                 "$($desk.Class)) '$($desk.Detail)' held the foreground for every look, and it is " +
                 "still there after the run tried to put it away — $cleared"
             ) (
+                $(if ($Run) { 'If this -Run opens no window, say -NoDesk and the desk is not asked. ' } else { '' }) +
                 'Answer it at the guest console and run again. Waiting does not clear a question, ' +
                 'and killing its owner cost the tray the last time it was tried: the window belongs ' +
                 'to ShellExperienceHost, and the run after that went red with no icon anywhere. ' +
@@ -1427,6 +1443,7 @@ switch ($taking.State) {
             $(if ($taking.Process -eq 'explorer' -and -not $KeepShell) {
                 'The run restarted the guest shell once and the desk is still held: look at the guest console. '
             } else { '' }) +
+            $(if ($Run) { 'If this -Run opens no window, say -NoDesk and the desk is not asked. ' } else { '' }) +
             'Restart the guest shell and run again. This is the desk that cost two runs of 24 and ' +
             '30 minutes: no case here can take a foreground Windows is refusing, so the suite ' +
             'would excuse its desk checks wholesale and red the few that cannot — which reads as a ' +
@@ -1444,6 +1461,8 @@ switch ($taking.State) {
 # about the desk this run starts on; that sentence is about the one it ended on, and they are two
 # things: a desk takeable at the asking can be lost to something that arrives in the next twenty
 # minutes, and the reader meeting reds from that still needs to be told where to look.
+}
+
 $script:DeskWhenItStarted = $desk.State
 
 Push-Location $script:Tree

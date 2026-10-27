@@ -1619,7 +1619,10 @@ A desk held by the taskbar refuses every fixture, so the runner restarts the gue
 under its own desk claim, and asks again. It refuses only if the desk is still held, and the run's
 lines say what it did. **`-KeepShell`** forbids the restart, for a run that must not touch the shell.
 The shell's Search and Start overlays holding the desk are closed with Escape, since they ask
-nothing. Any other window with no minimise button is a question, and the run refuses on it.
+nothing. Any other window with no minimise button is a question, and the run refuses on it. A `-Run`
+that opens no window, such as a CLI, a download or a build, says **`-NoDesk`**: the foreground is not
+read, tidied or asked for, and nothing about the desk refuses it. The desk claim is still taken, so two
+runs never interleave in the guest.
 
 This matters more for an adopter than it does here. Every reason this exists — a host run that
 reported eight failures of which two were only the desk, and a negative control that passed because

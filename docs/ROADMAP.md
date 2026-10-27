@@ -4,7 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW581** (deps: —) **A -Run that opens no window is still refused over a held guest desk** — Modelado's CLI-only guest runs (model downloads, demo reconstructions) stopped on a desk they never touch. → §WW581
 - 📋 **WW582** (deps: —) **A fixture cannot run a command, such as the project's own CLI, with its variables before the application launches** — A case cannot prove that what a CLI writes reaches the window, so the adopter tests the file instead and the window never reads it. → §WW582
 - 📋 **WW584** (deps: —) **The runner's shell restart over a held taskbar has never run against a guest desk that was really held** — The gate run that shipped WW580 found the desk takeable, so the restart and the second asking are reasoned rather than measured. → §WW584
 
