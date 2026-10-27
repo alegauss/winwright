@@ -299,6 +299,10 @@ What the in-app half adds is what a harness cannot take from outside the process
   every window the application ever shows is covered, including the ones it has not shown yet;
   `Renders.Answer(window)` covers exactly the window you name and nothing else, which is a second
   window — a dialog, a wizard page — coming back as an application that does not take the message.
+  A window in which an animation is still carrying an element's opacity, such as a page fading in,
+  is not drawn: the picture would be washed out. The run asks again until the fade stops, within the
+  render's own budget, and a fade that never stops is a refusal saying so. A fade that finished and
+  holds an element dimmed is drawn, because it no longer moves.
 - `Freezables` / `Apartment` — a brush that may cross to a capture thread, and bounded work on the
   application's own dispatcher.
 

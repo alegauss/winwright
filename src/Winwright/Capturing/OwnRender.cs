@@ -191,6 +191,9 @@ public static class OwnRender
 
         /// <summary>It is, and it has laid out to nothing.</summary>
         public const int NothingToDraw = 5;
+
+        /// <summary>It is, and something in it is still fading. WW583: asked again, not believed.</summary>
+        public const int StillAnimating = 6;
     }
 
     /// <summary>
@@ -331,7 +334,15 @@ public static class OwnRender
             if (Settled(window))
                 return said(0);
 
-            if (waited.ElapsedMilliseconds >= HookedWithinMs || !NotYet(WhyCode(window, full, withinMs)))
+            // WW583. A window still fading is asked again for as long as the ask's own budget, and
+            // never remembered as silent: it is answering, and what it said is "not yet, it moves".
+            var why = WhyCode(window, full, withinMs);
+            if (why == Refusals.StillAnimating)
+            {
+                if (waited.ElapsedMilliseconds >= withinMs)
+                    return said(0);
+            }
+            else if (waited.ElapsedMilliseconds >= HookedWithinMs || !NotYet(why))
             {
                 Remember(window);
                 return said(0);
@@ -543,6 +554,13 @@ public static class OwnRender
                 false,
                 "the window has laid out to nothing, so there is no picture to take rather than an "
                     + "empty one to write"),
+
+            // WW583. Said only once the ask's own budget ran out with the window still moving.
+            Refusals.StillAnimating => new RenderAsked(
+                false,
+                "something in the window was still fading — an animation carrying an element's opacity — "
+                    + "for the whole time it was asked, so a picture would have been washed out rather "
+                    + "than of the window as it settles"),
 
             // WouldDraw, and anything this engine has no name for. Both are an application saying
             // something a run cannot act on, so what it gets is the sentence about the ask it made.

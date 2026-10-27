@@ -269,6 +269,7 @@
 - ✅ **WW402** **a render of a surface that is genuinely one colour is refused as a display that was drawing nothing** — A rendered surface may be one colour and says so on the pass; a window that rendered flat is refused exactly as it was (design recorded in `src/Winwright/Capturing/CaptureReceipt.cs`).
 - ✅ **WW465** **a screen copy of a window whose pixels are not in the rectangle yet passes every question a capture is asked** — A copy is of a rectangle, so the frame is read either side of the take and a window that moved out of it is refused naming both — which is the wallpaper that passed.
 - ✅ **WW552** **A Mica window whose picture is drawn by Direct3D has no capture route at all** — A render copies each shown hosted region from its window, so a Mica window with Direct3D yields a picture; an empty D3DImage is refused (design recorded in `src/Winwright.InApp/Render.cs`).
+- ✅ **WW583** **an in-app render taken while the page is still fading in writes a washed-out picture and the case passes** — An in-app render is not drawn while an animation still moves an element's opacity, so the harness asks again until the fade stops and refuses one that never does.
 
 ## Block F — Assert — the expectation is derived, never typed
 

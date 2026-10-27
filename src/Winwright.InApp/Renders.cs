@@ -204,6 +204,12 @@ public enum RenderRefusal
 
     /// <summary>It is, and it has laid out to nothing, so there is no picture to take.</summary>
     NothingToDraw = 5,
+
+    /// <summary>
+    /// It is, and an element in it is still fading, so a picture now would be washed out. WW583. A
+    /// harness asks again a moment later rather than taking the refusal as final.
+    /// </summary>
+    StillAnimating = 6,
 }
 
 /// <summary>
@@ -502,6 +508,11 @@ public static class Renders
         if (HwndSource.FromHwnd(window)?.RootVisual is not FrameworkElement tree)
             return false;
 
+        // WW583. Not while something in it is fading: the picture would be the page at a fraction of
+        // its opacity, and a harness asks again a moment later. See Fading for why two looks.
+        if (Fading.Moving(tree) is not null)
+            return false;
+
         try
         {
             // The size it is already showing, and never the one it asks for. A root visual measured
@@ -555,9 +566,11 @@ public static class Renders
         if (HwndSource.FromHwnd(window)?.RootVisual is not FrameworkElement tree)
             return RenderRefusal.NotOurWindow;
 
-        return tree.RenderSize is { Width: > 0, Height: > 0 }
-            ? RenderRefusal.WouldDraw
-            : RenderRefusal.NothingToDraw;
+        if (tree.RenderSize is not { Width: > 0, Height: > 0 })
+            return RenderRefusal.NothingToDraw;
+
+        // WW583. Read without remembering, so asking why does not change what the next render sees.
+        return Fading.Away(tree) is null ? RenderRefusal.WouldDraw : RenderRefusal.StillAnimating;
     }
 
     /// <summary>

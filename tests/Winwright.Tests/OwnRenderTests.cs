@@ -38,6 +38,54 @@ public sealed class OwnRenderTests : IDisposable
     }
 
     [Fact]
+    public void A_window_still_fading_in_is_asked_again_until_it_settles_and_then_drawn()
+    {
+        // WW583. claude-tray's page fades in when shown, and a render asked for in that moment drew
+        // it at a tenth of its opacity. The ask now goes on while the fade runs and draws after it.
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "faded-in.png");
+        application.Fade(0.1, 1, TimeSpan.FromMilliseconds(1200));
+
+        var waited = System.Diagnostics.Stopwatch.StartNew();
+        var asked = OwnRender.Into(application.Handle, path);
+
+        Assert.True(asked.Answered, asked.Sentence());
+        Assert.True(waited.ElapsedMilliseconds >= 600, $"it drew after {waited.ElapsedMilliseconds}ms, before the fade could have run");
+        Assert.False(Colours.In(path).IsFlat);
+    }
+
+    [Fact]
+    public void A_window_that_never_stops_fading_is_refused_saying_so_rather_than_drawn_washed_out()
+    {
+        // The control: a fade longer than the ask's budget. A render that drew whatever the tree was
+        // would answer green here with a faint picture, and the file must not be there.
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "faint.png");
+        application.Fade(0.05, 1, TimeSpan.FromSeconds(60));
+
+        var asked = OwnRender.Into(application.Handle, path, withinMs: 1500);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(path));
+        Assert.Contains("still fading", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_window_an_animation_holds_dimmed_is_drawn_once_it_is_seen_to_hold()
+    {
+        // A fade that finished away from where the element settles is a look the application chose,
+        // and refusing it would refuse that window for good. Held, it is drawn after one more look.
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "dimmed.png");
+        application.Fade(1, 0.4, TimeSpan.FromMilliseconds(1));
+
+        var asked = OwnRender.Into(application.Handle, path);
+
+        Assert.True(asked.Answered, asked.Sentence());
+        Assert.True(File.Exists(path));
+    }
+
+    [Fact]
     public void An_application_that_does_not_take_the_message_says_so_rather_than_being_waited_on()
     {
         // Every application that has not called Renders.Answer, which is every application until

@@ -320,6 +320,31 @@ internal sealed class AnsweringWindow : IDisposable
         return new WindowInteropHelper(second).Handle;
     });
 
+    /// <summary>
+    /// Animate the window's content from one opacity to another, on its own thread, where the
+    /// animation then runs as it would in an application. WW583.
+    /// </summary>
+    /// <param name="from">Where it starts.</param>
+    /// <param name="to">Where it ends and holds.</param>
+    /// <param name="over">How long it takes.</param>
+    internal void Fade(double from, double to, TimeSpan over)
+    {
+        dispatcher.Invoke(() =>
+            ((Panel)window.Content).BeginAnimation(
+                UIElement.OpacityProperty,
+                new System.Windows.Media.Animation.DoubleAnimation(from, to, over)));
+
+        // Until the animation has ticked once, which is when the fade starts showing. Before that the
+        // opacity reads as the value it settles at, and a render then is a crisp picture rather than
+        // a faint one: a full guest run asked in that gap, drew at 37ms, and the case read the race
+        // as the defect. The state each case is about is a fade under way, so it waits for one.
+        Waits.Until(
+            "draw",
+            "the fade never started ticking",
+            () => dispatcher.Invoke(() => DependencyPropertyHelper
+                .GetValueSource((Panel)window.Content, UIElement.OpacityProperty).IsAnimated));
+    }
+
     /// <summary>Close it and let its thread go.</summary>
     public void Dispose()
     {

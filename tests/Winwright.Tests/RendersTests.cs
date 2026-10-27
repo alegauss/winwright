@@ -67,6 +67,7 @@ public sealed class RendersTests : IDisposable
         Assert.Equal((int)RenderRefusal.PathRefused, OwnRender.Refusals.PathRefused);
         Assert.Equal((int)RenderRefusal.NotOurWindow, OwnRender.Refusals.NotOurWindow);
         Assert.Equal((int)RenderRefusal.NothingToDraw, OwnRender.Refusals.NothingToDraw);
+        Assert.Equal((int)RenderRefusal.StillAnimating, OwnRender.Refusals.StillAnimating);
 
         // Zero is the answer a window that does not take the message gives, so no refusal may be it.
         Assert.DoesNotContain(
