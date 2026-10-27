@@ -122,6 +122,7 @@
 - ✅ **WW576** **A -Run holding & or && logs only its last command and can lose the guest's exit code** — The guest hands -Run to cmd as a prompt line through tools/run-command.ps1, so a chain logs every command, a for %B works, and the exit code is the prompt's.
 - ✅ **WW578** **Through run-tests-vm.cmd, -Bring a,b arrives as one file name, so only a single file can come back from the guest** — The runner splits -Bring on commas, so a list through run-tests-vm.cmd brings each file back, and an adopter's -Run gets them whether it passed or not.
 - ✅ **WW579** **The guest's Search or Start flyout holding the foreground is read as a question and refuses the run** — The desk clearer dismisses the shell's Search, Start and action centre overlays with Escape and says so, so a run goes on; any other window with no minimise button still refuses it.
+- ✅ **WW580** **A taskbar holding the guest's foreground refuses the run, though the remedy is a shell restart the runner could do** — A taskbar holding the guest desk is cleared by restarting explorer once under the run's own desk claim and asking again, and -KeepShell forbids the restart.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

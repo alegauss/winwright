@@ -4,25 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW580 Restart the guest shell once before refusing
-
-Right after Search was closed on Modelado's guest (2026-10-26), the next run was
-refused:
-
-    run-tests-vm: nothing may take the foreground on the guest desk: explorer (pid 6928, Shell_TrayWnd) '' is holding it, and a window put up on that desk was refused for the whole deadline
-
-The refusal's remedy is "Restart the guest shell and run again", and WW472 measured that
-this is what clears it. The runner already holds the guest's credentials and runs
-programs there through vmrun, so the remedy is one it can apply itself; instead every
-adopter opens the console, or writes their own vmrun call, each time it happens.
-
-What winwright should do: when the taskbar (explorer, Shell_TrayWnd) holds the
-foreground for the whole deadline, restart explorer in the guest session once (taskkill
-explorer, start explorer, wait for the session's shell), read the desk again, and go on
-if it is now takeable. Say so in the run's lines. Refuse as today only when the restart
-did not clear it, so the refusal means a desk that is really held. A switch to forbid
-the restart keeps a run that must not touch the shell possible.
-
 ### §WW581 A desk-free run
 
 Modelado runs CLI-only work on the guest through run-tests-vm.cmd -Run: model downloads,
@@ -78,6 +59,28 @@ winwright should offer: a fixture's `before` list of commands, each run with the
 fixture's variables and working directory, its standard input given, its exit code
 checked, and its output in the report, so a failing setup reads as a setup failure
 rather than a red step.
+
+### §WW584 Provoke a held desk to prove the shell restart
+
+WW580 made the runner restart the guest's explorer once when the taskbar holds the desk
+and nothing may take the foreground, and ask the desk again before refusing. The
+decision is held by RunnerWaitsTests (the `shell` wait) and the run's own lines, but the
+restart itself has never run: the full guest run that gated WW580 found the taskbar
+selected and the desk takeable after 8 ms, so the arm did not fire. `Restart-GuestShell`
+kills explorer through `vmrun runProgramInGuest -interactive`, starts it again with
+`-noWait` (it does not come back on its own in this guest), and waits on
+`listProcessesInGuest` for `explorer.exe`.
+
+What is unproven: that the second `Read-GuestTake` after the restart reads `takeable` on
+a desk that really was held, and that the three seconds left for the taskbar to draw are
+enough.
+
+What to build: a way to provoke a held desk on the guest on purpose, so the arm runs
+under a probe. Two candidates, to measure first: a guest helper calling
+`LockSetForegroundWindow` (LSFW_LOCK) while the taskbar is focused, or raising
+`ForegroundLockTimeout` back to its default and restarting the shell without input,
+which is how the desk stuck in October. The probe must hold the desk claim, because
+quickshell shares the guest.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

@@ -114,6 +114,11 @@ param(
     # repository's trx, and saying that none came back described a case run it never was.
     [string[]] $Bring,
 
+    # WW580. Never restart the guest shell, even over a taskbar holding the desk: for a run that must
+    # not touch explorer. Without it the run restarts the shell once, under its own desk claim, and
+    # refuses only where that did not clear the desk.
+    [switch] $KeepShell,
+
     # WW574. Files to carry beside the tree's git listing, as paths or wildcards relative to the
     # tree, ignored by git or not: a build output such as an installer, which .gitignore rightly keeps
     # out of the listing. Each lands at the same path under the tree in the guest. A pattern that
@@ -222,6 +227,14 @@ $script:Waits = @(
         Seconds = 4
         For = 'asking the guest desk for the foreground the way a fixture asks, once, before the carry'
         Giving = 'nothing may take the foreground on the guest desk'
+    }
+    # WW580. Explorer started again after the run restarted it, which does not happen on its own in
+    # this guest: listProcessesInGuest reads zero after the kill until something starts it.
+    [pscustomobject]@{
+        Named = 'shell'
+        Seconds = 30
+        For = 'the guest shell to come back after the run restarted it over a taskbar holding the desk'
+        Giving = 'the guest shell did not come back within'
     }
     # WW534. Another run's whole bound and a quarter of an hour over, because what it waits on is
     # another runner's run: shorter, and a run that is fine is called stuck.
@@ -778,6 +791,43 @@ function Clear-GuestDesk {
     if (-not (Test-Path -LiteralPath $answerFile)) { return 'the desk clearer wrote no answer in the guest' }
 
     return (Read-ConsoleText $answerFile).Trim()
+}
+
+function Restart-GuestShell {
+    <#
+      WW580. Restart explorer in the guest session, which is the remedy the held-taskbar refusal names
+      and the one WW472 measured clearing it. Found by Modelado, whose every run after Search was
+      closed was refused this way and had to be cleared at the console.
+
+      Only ever called while this run holds the desk claim, which is the condition the restart needs:
+      quickshell shares this guest and takes the same claim, so a restart made from outside a run
+      lands on whichever run holds the desk. Inside one, the desk is this run's to repair.
+
+      Explorer does not come back on its own in this guest, so it is started again and waited for.
+      What this answers is what it did; the caller asks the desk again and refuses on that.
+    #>
+    param([Parameter(Mandatory)] [string] $Vmx)
+
+    $null = Invoke-VmRun -Guest -Arguments @(
+        'runProgramInGuest', $Vmx, '-interactive', 'C:\Windows\System32\taskkill.exe', '/F', '/IM', 'explorer.exe')
+    $null = Invoke-VmRun -Guest -Arguments @(
+        'runProgramInGuest', $Vmx, '-interactive', '-noWait', 'C:\Windows\explorer.exe')
+
+    $wait = Waited 'shell'
+    $deadline = (Get-Date).AddSeconds($wait.Seconds)
+    while ((Get-Date) -lt $deadline) {
+        $listed = Invoke-VmRun -Guest -Arguments @('listProcessesInGuest', $Vmx)
+        if ($listed.Ok -and $listed.Output -match 'explorer\.exe') {
+            # A moment for the taskbar to draw, so the asking after this meets the shell it restarted
+            # rather than the one still starting.
+            Start-Sleep -Seconds 3
+            return 'restarted explorer in the guest session, and it is back'
+        }
+
+        Start-Sleep -Seconds 1
+    }
+
+    return "the guest shell did not come back within $($wait.Seconds)s"
 }
 
 function Read-GuestTake {
@@ -1349,6 +1399,20 @@ switch ($desk.State) {
 # mouse move of zero pixels, and `tools/desk-take.ps1` is where that is argued.
 $taking = Read-GuestTake -Vmx $vmxPath -Stage $stage
 
+# WW580. A taskbar holding the desk is the one held desk whose remedy this run can apply: restart the
+# shell once, under the claim it already holds, and ask again. Anything else holding it, or the same
+# taskbar still there afterwards, refuses as before - and -KeepShell refuses without trying.
+if ($taking.State -eq 'held' -and $taking.Process -eq 'explorer' -and -not $KeepShell) {
+    Write-Host (
+        "  foreground  explorer (pid $($taking.Pid), $($taking.Class)) holds the desk and nothing may " +
+        'take it. Restarting the guest shell once, under this run''s desk claim.') -ForegroundColor Yellow
+
+    $restarted = Restart-GuestShell -Vmx $vmxPath
+    Write-Host "  shell       $restarted"
+
+    $taking = Read-GuestTake -Vmx $vmxPath -Stage $stage
+}
+
 switch ($taking.State) {
     'takeable' {
         Write-Host "  foreground  $($taking.Detail), so a fixture may have this desk"
@@ -1360,6 +1424,9 @@ switch ($taking.State) {
             'up on that desk was refused for the whole deadline — after making itself the last ' +
             'thing to send input, which is the one advantage every fixture in this suite has.'
         ) (
+            $(if ($taking.Process -eq 'explorer' -and -not $KeepShell) {
+                'The run restarted the guest shell once and the desk is still held: look at the guest console. '
+            } else { '' }) +
             'Restart the guest shell and run again. This is the desk that cost two runs of 24 and ' +
             '30 minutes: no case here can take a foreground Windows is refusing, so the suite ' +
             'would excuse its desk checks wholesale and red the few that cannot — which reads as a ' +

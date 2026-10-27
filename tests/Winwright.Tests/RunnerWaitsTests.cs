@@ -60,7 +60,7 @@ public sealed class RunnerWaitsTests
         // matched nothing would make every check below pass about an empty list.
         Assert.True(rows.Count >= 4, $"only {rows.Count} wait(s) were read out of the runner's list");
         Assert.Equal(
-            ["claim", "desk", "run", "session", "take", "tools"],
+            ["claim", "desk", "run", "session", "shell", "take", "tools"],
             rows.Select(one => one.Named).Order(StringComparer.Ordinal));
 
         Assert.All(

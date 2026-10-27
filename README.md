@@ -1614,6 +1614,13 @@ adopter with a runner of its own takes the same mutex. Inside a run, a foregroun
 window says whether that window is a process the run launched (and for which case) or one **no case
 in this run started**, which on a shared desk is the other runner.
 
+Before it carries the tree, the runner asks the guest desk whether a window may take the foreground.
+A desk held by the taskbar refuses every fixture, so the runner restarts the guest's explorer once,
+under its own desk claim, and asks again. It refuses only if the desk is still held, and the run's
+lines say what it did. **`-KeepShell`** forbids the restart, for a run that must not touch the shell.
+The shell's Search and Start overlays holding the desk are closed with Escape, since they ask
+nothing. Any other window with no minimise button is a question, and the run refuses on it.
+
 This matters more for an adopter than it does here. Every reason this exists — a host run that
 reported eight failures of which two were only the desk, and a negative control that passed because
 the host wrote a file faster than the guest could — applies to anybody driving a window from a test,
