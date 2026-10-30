@@ -66,7 +66,10 @@ public sealed class RelaunchTests : IDisposable
     [Theory]
     [Trait(NoDesk.Key, NoDesk.Free)]
     [InlineData("""{ "process": "exits", "act": "invoke" }""", "the one act it takes is 'read'")]
-    [InlineData("""{ "process": "crashes", "act": "read" }""", "to 'exits' or to 'relaunches'")]
+    [InlineData("""{ "process": "crashes", "act": "read" }""", "to 'exits', to 'relaunches' or to 'starts' a program")]
+    [InlineData("""{ "process": "starts", "act": "read" }""", "a program and says none; 'matches'")]
+    [InlineData("""{ "process": "starts", "act": "read", "matches": "x", "expect": "x" }""", "the wait is its claim")]
+    [InlineData("""{ "process": "exits", "act": "read", "matches": "x" }""", "the wait is its claim")]
     [InlineData("""{ "process": "exits", "act": "read", "expect": "x" }""", "the wait is its claim")]
     [InlineData("""{ "process": "exits", "locator": "Button", "act": "read" }""", "a step acts on one thing")]
     public void What_a_process_step_cannot_say_is_refused_where_it_is_written(string step, string because)
@@ -101,7 +104,57 @@ public sealed class RelaunchTests : IDisposable
     /// window; or null where this desk cannot observe. What outlived the run is kept in
     /// <see cref="survivors"/>.
     /// </summary>
-    private SuiteVerdict? Run(string pressed)
+    private SuiteVerdict? Run(string pressed) => Run($$"""
+        { "locator": "Text#relaunchSaid", "act": "read", "reads": "name", "expect": "first start", "named": "the first copy is up" },
+        { "locator": "{{pressed}}", "act": "invoke", "named": "the update is asked for" },
+        { "process": "exits", "act": "read", "named": "the application exits to update" },
+        { "process": "relaunches", "act": "read", "named": "the application is started again" },
+        { "locator": "Text#relaunchSaid", "act": "read", "reads": "name", "expect": "started again", "named": "the window is the new copy's" }
+        """, pressed);
+
+    [Fact]
+    public void A_program_the_application_starts_is_read_with_its_arguments_and_stopped_with_the_case()
+    {
+        // WW586. Found by modelado (MOD46): "Open in Blender" starts Blender on the model shown, and
+        // no case could say it had, nor stop it after.
+        var verdict = Run("""
+            { "locator": "Button#startsHelper", "act": "invoke", "named": "the helper is asked for" },
+            { "process": "starts", "act": "read", "matches": "^cmd\\.exe /c .ping -n 60 127", "named": "the helper starts on its arguments" }
+            """, "Button#startsHelper");
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        var said = Said(verdict);
+        Assert.True(verdict.Outcome == RunOutcome.Passed, said);
+        Assert.Contains("started cmd.exe /c", said, StringComparison.Ordinal);
+
+        // The helper ran past the case's end on its own and was stopped with it: nothing outlived the run.
+        Assert.Empty(survivors);
+    }
+
+    [Fact]
+    public void A_program_the_application_never_started_is_red_after_its_wait()
+    {
+        // The control: the same helper started, and a claim naming arguments it was not given.
+        var verdict = Run("""
+            { "locator": "Button#startsHelper", "act": "invoke", "named": "the helper is asked for" },
+            { "process": "starts", "act": "read", "matches": "^cmd\\.exe .*cube\\.glb", "named": "the helper starts on the model" }
+            """, "Button#startsHelper", launchMs: 8000);
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        var said = Said(verdict);
+        Assert.Equal(RunOutcome.Failed, verdict.Outcome);
+        Assert.Contains("matched ^cmd\\.exe .*cube\\.glb", said, StringComparison.Ordinal);
+        Assert.Contains("what it started reads 'cmd.exe /c", said, StringComparison.Ordinal);
+        Assert.Empty(survivors);
+    }
+
+    /// <summary>
+    /// Run <paramref name="steps"/> against the relaunch pane; or null where this desk cannot observe.
+    /// What outlived the run is kept in <see cref="survivors"/>.
+    /// </summary>
+    private SuiteVerdict? Run(string steps, string pressed, int launchMs = 15000)
     {
         if (!Desk.Read().CanObserve)
             return null;
@@ -112,7 +165,7 @@ public sealed class RelaunchTests : IDisposable
             $$"""
             {
               "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
-              "timeouts": { "launch": 15000, "resolve": 4000, "act": 4000, "poll": 50 }
+              "timeouts": { "launch": {{launchMs}}, "resolve": 4000, "act": 4000, "poll": 50 }
             }
             """);
 
@@ -122,14 +175,10 @@ public sealed class RelaunchTests : IDisposable
               "cases": [
                 {
                   "name": "an update restarts the application",
-                  "catches": "an update that exits and starts the application again, which no case could follow",
+                  "catches": "what the application's process does after {{pressed}}, which no case could follow",
                   "fixture": "an application that updates",
                   "steps": [
-                    { "locator": "Text#relaunchSaid", "act": "read", "reads": "name", "expect": "first start", "named": "the first copy is up" },
-                    { "locator": "{{pressed}}", "act": "invoke", "named": "the update is asked for" },
-                    { "process": "exits", "act": "read", "named": "the application exits to update" },
-                    { "process": "relaunches", "act": "read", "named": "the application is started again" },
-                    { "locator": "Text#relaunchSaid", "act": "read", "reads": "name", "expect": "started again", "named": "the window is the new copy's" }
+                    {{steps}}
                   ]
                 }
               ]

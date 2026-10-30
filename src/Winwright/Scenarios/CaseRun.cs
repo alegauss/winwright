@@ -708,7 +708,11 @@ public static class CaseRun
         string detail;
         AutomationElement? window = null;
         int waited;
-        if (awaited == StepDeclaration.Exits)
+        if (awaited == StepDeclaration.Starts)
+        {
+            (held, detail, waited) = Started(step, following, deadline, poll);
+        }
+        else if (awaited == StepDeclaration.Exits)
         {
             (held, waited) = following.Exit(deadline, poll);
             detail = held
@@ -738,6 +742,48 @@ public static class CaseRun
 
         results.Add((held ? AssertionResult.Pass(step.Name, detail) : AssertionResult.Fail(step.Name, detail)).At(trace.Count));
         return (held, window);
+    }
+
+    /// <summary>
+    /// A step waiting for the application to start a program its <c>matches</c> says: a member of the
+    /// launch's job whose file name and arguments match. WW586.
+    /// <para>
+    /// Asked of the job and not of the desk, so a program of the same name that something else
+    /// started, or that was running before the case, can never be the one this reads.
+    /// </para>
+    /// </summary>
+    /// <exception cref="ScenarioRefusedException">Where the case's window belongs to no launch of this run.</exception>
+    private static (bool Held, string Detail, int Waited) Started(StepDeclaration step, Following following, int deadline, int poll)
+    {
+        if (ProcessRegister.Running(following.Pid) is not { } launched)
+        {
+            throw new ScenarioRefusedException(
+                step.Name,
+                $"it waits for the application to {StepDeclaration.Starts} a program, and the case's window "
+                    + $"belongs to pid {following.Pid}, which this run did not launch — what a program it did not "
+                    + "start goes on to start is nothing this run holds");
+        }
+
+        IReadOnlyDictionary<int, string> seen = new Dictionary<int, string>();
+        var match = "";
+        var found = Attempt.UntilTrue(
+            () =>
+            {
+                seen = StartedProgram.Of(launched);
+                match = seen.Values.FirstOrDefault(one => step.Matches!.IsMatch(one)) ?? "";
+                return match.Length > 0;
+            },
+            deadline,
+            poll);
+
+        var waited = found.WaitedMs;
+        if (found.Happened)
+            return (true, $"{following.Named} started {match} after {waited}ms", waited);
+
+        var running = seen.Count == 0
+            ? "it started nothing that is still running"
+            : $"what it started reads {string.Join(", ", seen.Values.Select(one => $"'{one}'"))}";
+        return (false, $"nothing {following.Named} started matched {step.Matches} in {waited}ms; {running}", waited);
     }
 
     /// <summary>A step that threw, recorded as the trace line and the harness error a reader looks for.</summary>

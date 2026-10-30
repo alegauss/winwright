@@ -604,6 +604,20 @@ a window that is either still the old one or not there. A `process` step carries
 case that says `onlyReads` may not have one, since it leaves no window to lend. A case whose window
 belongs to no process the run can follow, such as a resident fixture's desktop, is refused.
 
+`starts` is the third thing a `process` step waits for: the application starts a program, such as an
+editor or a viewer it opens. The step's **`matches`** is required, and it is read against the
+program's file name and its arguments, written as `blender.exe --python cube.glb`:
+
+```json
+{ "locator": "Button#OpenInBlender", "act": "invoke" },
+{ "process": "starts", "act": "read", "matches": "^blender\\.exe .*cube\\.glb", "named": "Blender opens on the model" }
+```
+
+Only programs this launch started count, so a copy of the same program that was already running, or
+that something else started, never matches. A red names what the application did start. What it
+starts is stopped with the case. To keep a real application's window from coming up, point the
+application at a stub in the fixture.
+
 `click tray icon` is a pointer at the icon's centre, and on purpose: every taskbar button refuses a
 clickable point, so the rectangle is the only address an icon has. What it claims is the click — sent
 at the icon, with the icon the thing standing at that point — and what the application did with it is

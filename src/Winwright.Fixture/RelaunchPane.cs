@@ -14,6 +14,10 @@ namespace Winwright.Fixture;
 /// Automation. The copy started again carries <c>--relaunched</c>, and its read-out says so, which is
 /// what a step after the relaunch reads to prove it is looking at the new window.
 /// </para>
+/// <para>
+/// A third button starts a helper and leaves it running, which is the other thing an application's
+/// process does that a case has to see: WW586, a program it opens that must not outlive the case.
+/// </para>
 /// </summary>
 public static class RelaunchPane
 {
@@ -46,9 +50,21 @@ public static class RelaunchPane
 
         quit.Click += (_, _) => Application.Current.Shutdown();
 
+        // WW586. A helper the application starts and leaves running, with arguments a case can name:
+        // modelado's "Open in Blender" (MOD46), with a program every Windows desk has and no window.
+        var helper = new Button { Name = "startsHelper", Content = "Open in helper", Width = 160, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
+        helper.Click += (_, _) =>
+        {
+            var start = new ProcessStartInfo("cmd.exe") { UseShellExecute = false, CreateNoWindow = true };
+            start.ArgumentList.Add("/c");
+            start.ArgumentList.Add("ping -n 60 127.0.0.1");
+            Process.Start(start)?.Dispose();
+        };
+
         var rows = new StackPanel { Name = "relaunchRows", Margin = new Thickness(12) };
         rows.Children.Add(restart);
         rows.Children.Add(quit);
+        rows.Children.Add(helper);
         rows.Children.Add(said);
 
         var pane = new TabItem { Name = "relaunchPane", Header = "Relaunch", Content = rows };

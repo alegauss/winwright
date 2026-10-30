@@ -211,6 +211,13 @@ public sealed record StepDeclaration
     public const string Relaunches = "relaunches";
 
     /// <summary>
+    /// The application starts a program whose file name and arguments, read as
+    /// <c>blender.exe --python cube.glb</c>, match the step's <c>matches</c>. WW586: modelado's "Open
+    /// in Blender" (MOD46), whose evidence is that Blender started on the model shown.
+    /// </summary>
+    public const string Starts = "starts";
+
+    /// <summary>
     /// The popup inside this step's window whose tree the capture is of, by the name the
     /// application's own author gave it. Null on every step but a capture that names one. WW372.
     /// <para>
@@ -1560,10 +1567,12 @@ public sealed record StepDeclaration
         if (process is null)
             return;
 
-        if (process is not (Exits or Relaunches))
+        if (process is not (Exits or Relaunches or Starts))
         {
             throw new ScenarioRefusedException(
-                subject, $"its 'process' is '{process}', and a step waits for the application's process to '{Exits}' or to '{Relaunches}'");
+                subject,
+                $"its 'process' is '{process}', and a step waits for the application's process to '{Exits}', "
+                    + $"to '{Relaunches}' or to '{Starts}' a program");
         }
 
         if (!act.Reads)
@@ -1583,7 +1592,21 @@ public sealed record StepDeclaration
     /// <param name="subject">What a refusal calls it.</param>
     private static void RefusesProcessClaims(StepDeclaration step, string subject)
     {
-        var claimed = step.Claims.Select(one => $"'{one.Field}'").ToList();
+        // WW586. A start is the one wait that names something: which program, and on what, said by
+        // 'matches' over the program's file name and its arguments. It means nothing to the other two.
+        var starts = step.Process == Starts;
+        if (starts && step.Matches is null)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it waits for the application to {Starts} a program and says none; 'matches' is read against "
+                    + "the program's file name and its arguments, such as 'blender\\.exe .*cube\\.glb'");
+        }
+
+        var claimed = step.Claims
+            .Where(one => !(starts && one.Field == "matches"))
+            .Select(one => $"'{one.Field}'")
+            .ToList();
         if (step.NamedReading is not null)
             claimed.Add("'reads'");
         if (step.MeansIt)

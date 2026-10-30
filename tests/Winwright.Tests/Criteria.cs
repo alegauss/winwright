@@ -233,9 +233,9 @@ internal static class Criteria
         // WW575's two criteria stood here and went with the line, both checked: RelaunchTests claims the
         // exit an update makes green, follows the copy started again into its window, and stops it with
         // the case; the exit with no restart is the control, claimed green and red at the relaunch.
-        new("WW586", "A case reads what the application started", "", Unshown.NotBuilt,
-            "the job half landed and ProcessRegisterTests reads LaunchedProcess.Started, but no process "
-                + "step reads a started program's executable and arguments yet"),
+
+        // WW586's criterion stood here and went with the line, checked: RelaunchTests reads the helper the
+        // fixture starts by its file name and arguments, and a claim naming arguments it was not given is red.
 
         // --- K, the proving ground -----------------------------------------------------------------------
         new("K", "Every refusal has something that provokes it",
