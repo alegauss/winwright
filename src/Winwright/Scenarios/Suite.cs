@@ -246,7 +246,9 @@ public static class Suite
                 continue;
             }
 
-            var fixture = one.Fixture;
+            // WW585. Said once, here, so every field the fixture resolves fills {configuration} from
+            // the one place WW521 ranks its sources.
+            var fixture = one.Fixture.Configured(project.Configuration);
             var borrowing = lending.Contains(fixture.Name);
             if (borrowing && lent.TryGetValue(fixture.Name, out var already))
             {

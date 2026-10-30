@@ -4,37 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW585 Configuration in before commands
-
-Met in modelado, MOD67 (2026-10-30), the first adopter of WW582. The case reads in the
-window's About a cloud job that modelado-cli sent before the launch, so its fixture runs
-the CLI the same build produced:
-
-```json
-{ "name": "a window after a Meshy job sent from modelado-cli",
-  "variables": { "LOCALAPPDATA": "{files}" },
-  "before": [
-    { "run": "tools/Modelado.Cli/bin/{configuration}/net10.0/modelado-cli.exe",
-      "arguments": ["cloud", "image-to-3d", "{root}/cases/fixtures/photo.png", "-o", "{files}/meshy.glb"] } ] }
-```
-
-The project's `executable` fills `{configuration}` (WW521: the caller's configuration,
-then WINWRIGHT_CONFIGURATION, then winwright.json's `configuration`), but a fixture's
-`before.run` is resolved with the fixture tokens ({files}, {root}, {root/}) and the
-environment only (FixtureDeclaration.Preparing), so `{configuration}` stays a literal
-brace and the command cannot start. modelado pins `bin/Debug/`, with WW585's id beside
-it in cases/window.cases.json: a Release run of the cases would launch the Release
-window and the Debug CLI, or a CLI left over from another build, which is the mismatch
-WW521 removed for the executable.
-
-The seam is FixtureDeclaration.Rooted, the one door WW542 made for every token: it fills
-a fixture's `run`, arguments, variables, `application`, `workingDirectory` and `opens`,
-and a step's `with` and file paths. `{configuration}` goes there and into `Tokens`,
-filled from ProjectDeclaration.Configuration (WW521's three sources), so every field
-takes it at once. Tests: a `with` naming it loads, where today it is refused as an
-unknown token; one left unfilled refuses at the run, naming the field and
-WINWRIGHT_CONFIGURATION; it matches case-insensitively, as the executable's does.
-
 ### §WW586 Processes the application starts
 
 Met in modelado, MOD46 (2026-10-30). The Export card is to gain "Open in Blender", which

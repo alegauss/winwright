@@ -306,24 +306,32 @@ public sealed record StepDeclaration
     /// what is left made relative to the root, the rule a file step's path follows, so a drop names
     /// the file the same way the step that reads it back does.
     /// </remarks>
+    /// <remarks>
+    /// WW585. And <c>{configuration}</c>, which a run that has none refuses here naming this step,
+    /// rather than typing the brace into the application.
+    /// </remarks>
     /// <param name="root">The project's root.</param>
     /// <param name="staged">The directory the case's fixture stages into.</param>
-    public StepDeclaration Rooted(string root, string staged)
+    /// <param name="configuration">What the configuration token means for this run, or null where nothing said.</param>
+    public StepDeclaration Rooted(string root, string staged, string? configuration)
     {
         if (Argument is not { } written)
             return this;
+
+        if (configuration is null && FixtureDeclaration.Configures(written))
+            throw new ScenarioRefusedException(Name, $"its 'with' {FixtureDeclaration.Unfilled}");
 
         if (Verb.TakesAPath)
         {
             return this with
             {
                 FilledArgument = System.IO.Path.GetFullPath(
-                    System.Environment.ExpandEnvironmentVariables(FixtureDeclaration.Rooted(written, root, staged)), root),
+                    System.Environment.ExpandEnvironmentVariables(FixtureDeclaration.Rooted(written, root, staged, configuration)), root),
             };
         }
 
         return written.Contains('{', StringComparison.Ordinal)
-            ? this with { FilledArgument = FixtureDeclaration.Rooted(written, root, staged) }
+            ? this with { FilledArgument = FixtureDeclaration.Rooted(written, root, staged, configuration) }
             : this;
     }
 

@@ -253,7 +253,7 @@ public static class ScenarioSchema
             ["exits", "relaunches"],
             Subject),
         new("act", true, Taking.Text, "what to do to it", ActVerb.All.Select(verb => verb.Name).ToList()),
-        new("with", false, Taking.Text, "what the act needs said, where it needs anything — '{root}' is filled with the project's root, '{root/}' with the same path as Windows OpenSSH spells it (/C:/src/app), and '{files}' with the fixture's staged directory; a brace shaped like a token that is none of those is refused", []),
+        new("with", false, Taking.Text, "what the act needs said, where it needs anything — '{root}' is filled with the project's root, '{root/}' with the same path as Windows OpenSSH spells it (/C:/src/app), '{files}' with the fixture's staged directory, and '{configuration}' with the build the project declaration names; a brace shaped like a token that is none of those is refused", []),
         new("holding", false, Taking.Text, "a key a 'click' holds down across it — ctrl adds a row to a list's selection and shift takes the range to it, for an application that answers the gesture and offers no pattern", ["ctrl", "shift"]),
         // Spelled as literals and not read off StepDeclaration, because the documentation area reads
         // this source as text and knows only literals and the two vocabularies it names; a property

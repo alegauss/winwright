@@ -108,7 +108,7 @@ public sealed class DialogTests : IDisposable
         Assert.Contains("'choose file'", bare.Because, StringComparison.Ordinal);
 
         var step = Wrote.Step(Dialog, "choose file", ("with", "{files}/photo.png"));
-        Assert.Equal(Path.Combine(root, "staged", "photo.png"), step.Rooted(root, Path.Combine(root, "staged")).Argument);
+        Assert.Equal(Path.Combine(root, "staged", "photo.png"), step.Rooted(root, Path.Combine(root, "staged"), null).Argument);
         Assert.False(step.Verb.Synthesises);
         Assert.False(step.Verb.Repeatable);
     }

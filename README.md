@@ -1233,8 +1233,12 @@ application then reads:
 
 ```json
 { "name": "a window after its CLI", "variables": { "LOCALAPPDATA": "{files}" },
-  "before": [ { "run": "tools/cli/bin/Debug/cli.exe", "arguments": ["send", "cases/fixtures/photo.png"], "input": "test-key" } ] }
+  "before": [ { "run": "tools/cli/bin/{configuration}/cli.exe", "arguments": ["send", "cases/fixtures/photo.png"], "input": "test-key" } ] }
 ```
+
+`{configuration}` in `run` names the CLI the same build produced, so a Release run of the cases drives
+the Release window beside the Release CLI. It is filled the way the executable's is (see
+[Declaring a project](#declaring-a-project)), and a run that has none refuses naming the field.
 
 A command that exits with any other code, or does not finish within `timeouts.launch`, is stopped. The
 application is not launched, and every check of the case is a hole naming the command, the code and
@@ -1325,10 +1329,14 @@ slashes and a slash before the drive, `/C:/src/yourapp`, which is how Windows Op
 { "locator": "Edit#remotePath", "act": "set value", "with": "{root/}/cases/fixtures", "reads": "value", "answers": true }
 ```
 
+`{configuration}` is filled in the same places, with the build the project declaration names, matched
+in any case. A run that has no configuration refuses the field that names it rather than passing the
+brace on.
+
 The tokens in `with` are filled when the step runs, because the root and the staged directory are
-facts about the machine running it. A brace shaped like a token that is none of `{files}`, `{root}`
-and `{root/}` is refused where it is written, naming the three. Any other brace, such as a line of
-JSON a case types, is typed as written.
+facts about the machine running it. A brace shaped like a token that is none of `{files}`, `{root}`,
+`{root/}` and `{configuration}` is refused where it is written, naming the four. Any other brace, such
+as a line of JSON a case types, is typed as written.
 
 A plain path lands at the top of that directory under its own name. Where the application's store sits
 a folder down, as `%AppData%\YourApp\sessions.json` does, say where it lands instead:

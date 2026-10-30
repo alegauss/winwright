@@ -188,7 +188,7 @@ public sealed record FixtureDeclaration
 
         return Application.Length == 0
             ? declared
-            : System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(Resolved(Application, root)), root);
+            : System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(Resolved(Application, root, "application")), root);
     }
 
     /// <summary>
@@ -298,7 +298,7 @@ public sealed record FixtureDeclaration
 
         return Opens.Length == 0
             ? null
-            : System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(Resolved(Opens, root)), root);
+            : System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(Resolved(Opens, root, "opens")), root);
     }
 
     /// <summary>The token the arguments and variables name <see cref="Reaches"/>' first address by. WW522.</summary>
@@ -372,11 +372,11 @@ public sealed record FixtureDeclaration
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var run = System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(Resolved(command.Run, root)), root);
+        var run = System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(Resolved(command.Run, root, "before.run")), root);
         var start = Starting(run, root);
         start.ArgumentList.Clear();
         foreach (var argument in command.Arguments)
-            start.ArgumentList.Add(Offered(Resolved(argument, root)));
+            start.ArgumentList.Add(Offered(Resolved(argument, root, "before.arguments")));
 
         start.RedirectStandardInput = command.Input is not null;
         return start;
@@ -710,7 +710,7 @@ public sealed record FixtureDeclaration
         return WorkingDirectory.Length == 0
             ? System.IO.Path.GetFullPath(root)
             : System.IO.Path.GetFullPath(
-                System.Environment.ExpandEnvironmentVariables(Resolved(WorkingDirectory, root)), root);
+                System.Environment.ExpandEnvironmentVariables(Resolved(WorkingDirectory, root, "workingDirectory")), root);
     }
 
     /// <summary>
@@ -871,8 +871,34 @@ public sealed record FixtureDeclaration
             System.IO.File.WriteAllText(staged, filled, strict);
     }
 
-    /// <summary><paramref name="value"/> with every token swapped: where the files went, and the project's root.</summary>
-    private string Resolved(string value, string root) => Rooted(value, root, StagedInto(root));
+    /// <summary>
+    /// What <see cref="Projects.ProjectDeclaration.ConfigurationToken"/> means for this run, or null
+    /// where nothing said. WW585.
+    /// <para>
+    /// Found by modelado (MOD67): a fixture running the CLI the same build produced pinned
+    /// <c>bin/Debug/</c>, because a <c>before</c> command could not name the configuration the
+    /// executable already did, so a Release run drove the Release window beside a Debug CLI. Carried
+    /// by the fixture rather than read from the environment here, because WW521 gave the
+    /// configuration three sources and the project declaration is the one that ranks them.
+    /// </para>
+    /// </summary>
+    public string? Configuration { get; private init; }
+
+    /// <summary>This fixture with <see cref="Configuration"/> said, as the project's declaration ranks it. WW585.</summary>
+    /// <param name="configuration">The project's configuration, or null where it has none.</param>
+    public FixtureDeclaration Configured(string? configuration) => this with { Configuration = configuration };
+
+    /// <summary><paramref name="value"/> with every token swapped: where the files went, the project's root and its configuration.</summary>
+    /// <param name="value">What was written.</param>
+    /// <param name="root">The project's root.</param>
+    /// <param name="field">The field it was written in, as a refusal names it.</param>
+    private string Resolved(string value, string root, string field)
+    {
+        if (Configuration is null && Configures(value))
+            throw new ScenarioRefusedException(Name, $"its '{field}' {Unfilled}");
+
+        return Rooted(value, root, StagedInto(root), Configuration);
+    }
 
     /// <summary>
     /// The token naming the project's root, the directory <c>winwright.json</c> sits in. WW542.
@@ -892,21 +918,37 @@ public sealed record FixtureDeclaration
     public const string RootSlashed = "{root/}";
 
     /// <summary>Every token a path or a step's <c>with</c> may name, as a refusal lists them. WW542.</summary>
-    public static IReadOnlyList<string> Tokens { get; } = new ReadOnlyCollection<string>([Staged, Root, RootSlashed]);
+    public static IReadOnlyList<string> Tokens { get; } =
+        new ReadOnlyCollection<string>([Staged, Root, RootSlashed, Projects.ProjectDeclaration.ConfigurationToken]);
 
     /// <summary>
-    /// <paramref name="value"/> with <see cref="Root"/>, <see cref="RootSlashed"/> and
-    /// <see cref="Staged"/> swapped for what they name. WW542: one door for every place a token is
-    /// filled, so a fixture's variable and a step's argument cannot be given two spellings of one root.
+    /// <paramref name="value"/> with <see cref="Root"/>, <see cref="RootSlashed"/>,
+    /// <see cref="Staged"/> and <see cref="Projects.ProjectDeclaration.ConfigurationToken"/> swapped for
+    /// what they name. WW542: one door for every place a token is filled, so a fixture's variable and a
+    /// step's argument cannot be given two spellings of one root. WW585 put the configuration through
+    /// the same door, matched without regard to case as the executable's is.
     /// </summary>
     /// <param name="value">What was written.</param>
     /// <param name="root">The project's root.</param>
     /// <param name="staged">The directory the fixture's files were staged into.</param>
-    public static string Rooted(string value, string root, string staged)
+    /// <param name="configuration">What the configuration token means for this run, or null where nothing said.</param>
+    /// <exception cref="ScenarioRefusedException">
+    /// Where <paramref name="value"/> names the configuration and <paramref name="configuration"/> is
+    /// null: carried on, the brace would reach a path or an argument as written.
+    /// </exception>
+    public static string Rooted(string value, string root, string staged, string? configuration)
     {
         ArgumentNullException.ThrowIfNull(value);
         if (!value.Contains('{', StringComparison.Ordinal))
             return value;
+
+        if (Configures(value))
+        {
+            if (configuration is null)
+                throw new ScenarioRefusedException($"'{value}'", Unfilled);
+
+            value = value.Replace(Projects.ProjectDeclaration.ConfigurationToken, configuration, StringComparison.OrdinalIgnoreCase);
+        }
 
         var full = System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(root));
         return value
@@ -914,6 +956,15 @@ public sealed record FixtureDeclaration
             .Replace(Root, full, StringComparison.Ordinal)
             .Replace(Staged, staged, StringComparison.Ordinal);
     }
+
+    /// <summary>Whether <paramref name="value"/> names the configuration token, in any case. WW585.</summary>
+    internal static bool Configures(string value) =>
+        value.Contains(Projects.ProjectDeclaration.ConfigurationToken, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>What a refusal says a configuration token nothing filled needed. WW585.</summary>
+    internal static string Unfilled =>
+        $"names {Projects.ProjectDeclaration.ConfigurationToken}, and filling it needs one — winwright.json's "
+            + $"'configuration', or {Projects.ProjectDeclaration.ConfigurationVariable} set for this run";
 
     /// <summary>A name a directory can be called, for the one in temp a person has to recognise.</summary>
     private static string Legible(string name)
@@ -966,13 +1017,13 @@ public sealed record FixtureDeclaration
         // photo-boost's --open and --export had no variable to name the staged directory through, so
         // its fixture started inside that directory and staged every other file it needed there too.
         foreach (var argument in Launching())
-            start.ArgumentList.Add(Offered(Resolved(argument, root)));
+            start.ArgumentList.Add(Offered(Resolved(argument, root, "arguments")));
 
         // WW509. The token resolves here and not in the declaration: where the files go is a fact
         // about this machine, and a declaration read on one machine is the same declaration on the
         // next. A value naming no token is handed over exactly as written.
         foreach (var variable in Variables)
-            start.Environment[variable.Key] = Offered(Resolved(variable.Value, root));
+            start.Environment[variable.Key] = Offered(Resolved(variable.Value, root, $"variables.{variable.Key}"));
 
         // WW564. Removed from what this process passes on, which is what the launch would inherit.
         foreach (var variable in Unset)

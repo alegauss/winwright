@@ -126,6 +126,7 @@
 - ✅ **WW581** **A -Run that opens no window is still refused over a held guest desk** — A -Run that opens no window says -NoDesk, so the guest foreground is not read, tidied or asked for, while the desk claim still keeps two runs from interleaving.
 - ✅ **WW582** **A fixture cannot run a command, such as the project's own CLI, with its variables before the application launches** — A fixture's 'before' commands run after staging with its variables, input and expected exit, so a case reads what a CLI wrote, and one that fails leaves the case a hole naming it.
 - 🗑 **WW584** **The runner's shell restart over a held taskbar has never run against a guest desk that was really held** — abandoned: Neither a raised foreground lock timeout nor LockSetForegroundWindow holds the guest desk against the runner's input, so nothing known provokes the held desk the restart is for.
+- ✅ **WW585** **A fixture's before command cannot name {configuration}, so it runs a pinned build's CLI beside the window under test** — A fixture's before command, and every field a token fills, names {configuration} and gets the project's build; unfilled, the run refuses naming the field and WINWRIGHT_CONFIGURATION.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

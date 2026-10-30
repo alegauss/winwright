@@ -253,8 +253,8 @@ public sealed class DragTests : IDisposable
         var step = Wrote.Step("Text#fileZone", "drop file", ("with", "data/photo.png"));
         var fromStage = Wrote.Step("Text#fileZone", "drop file", ("with", "{files}/photo.png"));
 
-        Assert.Equal(Path.Combine(root, "data", "photo.png"), step.Rooted(root, staged).Argument);
-        Assert.Equal(Path.Combine(staged, "photo.png"), fromStage.Rooted(root, staged).Argument);
+        Assert.Equal(Path.Combine(root, "data", "photo.png"), step.Rooted(root, staged, null).Argument);
+        Assert.Equal(Path.Combine(staged, "photo.png"), fromStage.Rooted(root, staged, null).Argument);
         Assert.True(step.Verb.Synthesises);
         Assert.False(step.Verb.Repeatable);
     }

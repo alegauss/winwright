@@ -567,7 +567,7 @@ public static class CaseRun
         {
             // WW542. The tokens in a step's argument are filled here, where the root and the staged
             // directory are known, and nowhere earlier.
-            var step = running[index].Rooted(project.Root, staged);
+            var step = running[index].Rooted(project.Root, staged, project.Configuration);
 
             // WW577. The declaration as this step sees it: its own named wait standing in for resolve
             // and act, where it names one, and every other step untouched.
@@ -789,12 +789,12 @@ public static class CaseRun
     {
         if (step.Image is { } image)
         {
-            ReadImage(step, image, OnDisk(step.File!, staged, project.Root), project, trace, results);
+            ReadImage(step, image, OnDisk(step, "file", step.File!, staged, project), project, trace, results);
             return;
         }
 
-        var path = OnDisk(step.File!, staged, project.Root);
-        var against = OnDisk(step.SameBytesAs!, staged, project.Root);
+        var path = OnDisk(step, "file", step.File!, staged, project);
+        var against = OnDisk(step, "sameBytesAs", step.SameBytesAs!, staged, project);
 
         // The case's own fault and never the application's: a comparison with a file that does not
         // exist is wrong on every machine, so it stops the case rather than reading as a red.
@@ -894,12 +894,19 @@ public static class CaseRun
     /// <summary>
     /// A path a file step wrote, resolved: <c>{files}</c> is the fixture's staged directory, the
     /// environment is expanded, and what is left is relative to the project's root — the rule every
-    /// other path the project declares follows. WW535.
+    /// other path the project declares follows. WW535. <c>{configuration}</c> is the project's, and a
+    /// run that has none refuses naming the step and the field. WW585.
     /// </summary>
-    private static string OnDisk(string written, string staged, string root) =>
-        System.IO.Path.GetFullPath(
-            System.Environment.ExpandEnvironmentVariables(FixtureDeclaration.Rooted(written, root, staged)),
-            root);
+    private static string OnDisk(StepDeclaration step, string field, string written, string staged, ProjectDeclaration project)
+    {
+        if (project.Configuration is null && FixtureDeclaration.Configures(written))
+            throw new ScenarioRefusedException(step.Name, $"its '{field}' {FixtureDeclaration.Unfilled}");
+
+        return System.IO.Path.GetFullPath(
+            System.Environment.ExpandEnvironmentVariables(
+                FixtureDeclaration.Rooted(written, project.Root, staged, project.Configuration)),
+            project.Root);
+    }
 
     /// <summary>The file's bytes, or null where it is not there or is still held by whoever writes it.</summary>
     private static byte[]? Contents(string path)
