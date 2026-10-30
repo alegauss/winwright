@@ -56,6 +56,132 @@ public class ProcessRegisterTests
         }
     }
 
+    /// <summary>A launch that starts a helper and goes, leaving the helper running: MOD46's Blender.</summary>
+    private static ProcessStartInfo LeavesAHelper()
+    {
+        var start = new ProcessStartInfo("cmd.exe")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+        };
+        start.ArgumentList.Add("/c");
+        // No quoted title: ArgumentList escapes a quote as \", which start then hands to the shell
+        // as a path to open — a dialog on the desk, not a helper.
+        start.ArgumentList.Add("start /b ping -n 120 127.0.0.1");
+        return start;
+    }
+
+    /// <summary>
+    /// What a launch started, less the console host Windows gives a console program: a member of the
+    /// job, and nothing the launch itself asked for.
+    /// </summary>
+    private static List<int> Programs(LaunchedProcess launched) =>
+        launched.Started.Where(pid => !IsConsoleHost(pid)).ToList();
+
+    private static bool IsConsoleHost(int pid)
+    {
+        var hosts = Process.GetProcessesByName("conhost");
+        try
+        {
+            return hosts.Any(one => one.Id == pid);
+        }
+        finally
+        {
+            foreach (var one in hosts)
+                one.Dispose();
+        }
+    }
+
+    /// <summary>The helper a launch started, once the launch itself has gone.</summary>
+    private static int Helper(LaunchedProcess launched)
+    {
+        var helper = 0;
+        var left = Winwright.Locating.Attempt.UntilTrue(
+            () =>
+            {
+                launched.Refresh();
+                if (!launched.HasExited || Programs(launched) is not [var only])
+                    return false;
+
+                helper = only;
+                return true;
+            },
+            10_000,
+            50);
+
+        return left.Happened
+            ? helper
+            : throw new Xunit.Sdk.XunitException("the launch did not go leaving one helper, so this proves nothing");
+    }
+
+    [Fact]
+    public void A_helper_a_launch_started_is_stopped_with_its_case_after_the_launch_went()
+    {
+        // WW586. Found by modelado (MOD46): the application closed cleanly, the Blender it had
+        // opened stayed, and nothing named it.
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LeavesAHelper(), "opens in Blender");
+        var helper = Helper(launched);
+
+        Assert.True(StillRunning(helper));
+        Assert.Null(register.Stop(launched));
+
+        Assert.False(StillRunning(helper), "the helper outlived the case that started it");
+        Assert.Empty(register.StopAll());
+    }
+
+    [Fact]
+    public void A_lent_launch_has_its_helpers_stopped_where_the_run_ends()
+    {
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LeavesAHelper(), "the first reader", lent: true);
+        var helper = Helper(launched);
+
+        register.StopAll();
+
+        Assert.False(StillRunning(helper));
+    }
+
+    [Fact]
+    public void A_process_older_than_the_case_is_never_stopped_with_it()
+    {
+        // WW586. What a job holds is decided as a process is created, so an instance that was
+        // already running, which a single-instance application hands its work to, is no member.
+        using var older = Process.Start(LongRunning())!;
+        try
+        {
+            using (var register = new ProcessRegister())
+            {
+                register.Launch(LeavesAHelper());
+                register.StopAll();
+            }
+
+            Assert.True(StillRunning(older.Id), "a process this run never started was stopped");
+        }
+        finally
+        {
+            older.Kill(entireProcessTree: true);
+        }
+    }
+
+    [Fact]
+    public void What_a_launch_started_is_read_while_it_runs()
+    {
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning());
+
+        // cmd starts ping at once, so this is the child the assignment may have raced.
+        Winwright.Locating.Attempt.UntilTrue(() => Programs(launched).Count > 0, 10_000, 50);
+
+        var child = Assert.Single(Programs(launched));
+        using (var ping = Process.GetProcessById(child))
+            Assert.Equal("PING", ping.ProcessName, ignoreCase: true);
+
+        register.StopAll();
+        Assert.Empty(launched.Started);
+    }
+
     [Fact]
     public void A_case_that_returns_early_still_has_its_process_stopped()
     {

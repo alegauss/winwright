@@ -35,6 +35,12 @@ public sealed class ProcessRegister : IDisposable
     private readonly List<LaunchedProcess> launched = [];
 
     /// <summary>
+    /// Commands a fixture ran before its application that finished, kept for the job holding what
+    /// they started, which their case's stop ends. WW586.
+    /// </summary>
+    private readonly List<LaunchedProcess> finished = [];
+
+    /// <summary>
     /// What a per-case <see cref="Stop(LaunchedProcess)"/> found still running after it asked.
     /// <para>
     /// WW215. A case that gives its process back is not a leftover, so a stop that worked adds
@@ -174,8 +180,11 @@ public sealed class ProcessRegister : IDisposable
         var started = Process.Start(start)
             ?? throw new InvalidOperationException($"{start.FileName} started nothing this run can hold");
 
+        // WW586. The job straight after the start, so what the application starts from here on is
+        // this launch's to stop as well — and a helper it opens is never left holding the desk.
         var registered = new LaunchedProcess(started, start.FileName, forCase, lent)
         {
+            Job = ProcessJob.Holding(started),
             Handed = lifted && Windowing.ForegroundLock.Hand(started.Id),
         };
         registered.Draining(taking);
@@ -258,6 +267,8 @@ public sealed class ProcessRegister : IDisposable
             if (!registered.Adopted)
                 departed.Add(registered.Left(DepartureSeen.WhereItsCaseEnded));
 
+            // WW586. Gone itself, and the helper it opened may not be: that is the Blender MOD46 met.
+            outlived.AddRange(Started(registered));
             return null;
         }
 
@@ -265,12 +276,56 @@ public sealed class ProcessRegister : IDisposable
         // one, and a leftover reported without the number a file lock names is a leftover a reader
         // cannot act on.
         var pid = registered.Pid;
-        if (Ending(registered) == SurvivorFate.Stopped)
+        var fate = Ending(registered);
+        outlived.AddRange(Started(registered));
+        if (fate == SurvivorFate.Stopped)
             return null;
 
         var refused = new Survivor(pid, registered.Executable, SurvivorFate.WouldNotStop, registered.Case, registered.Lent);
         outlived.Add(refused);
         return refused;
+    }
+
+    /// <summary>
+    /// End what <paramref name="registered"/> started, and of what its case ran before it, and answer
+    /// each one still running after the stop budget. WW586.
+    /// <para>
+    /// The members that went are no survivors, for the reason a launch that stopped is none: they
+    /// ended with their case. One that would not go has outlived it, and is named by the program it
+    /// is and the launch that started it, because its pid is the one the next file lock names.
+    /// </para>
+    /// </summary>
+    private List<Survivor> Started(LaunchedProcess registered)
+    {
+        var jobs = new List<LaunchedProcess> { registered };
+        if (registered.Case is { } forCase)
+            jobs.AddRange(finished.Where(one => one != registered && one.Case == forCase));
+
+        var left = new List<Survivor>();
+        foreach (var one in jobs)
+        {
+            if (one.Job is not { } job)
+                continue;
+
+            foreach (var pid in job.End(stopTimeoutMs).Where(pid => pid != one.Pid))
+                left.Add(new Survivor(pid, $"{Named(pid)}, started by {one.Executable}", SurvivorFate.WouldNotStop, one.Case, one.Lent));
+        }
+
+        return left;
+    }
+
+    /// <summary>What a member of a job is called, for a survivor line, or its pid where it will not say.</summary>
+    private static string Named(int pid)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(pid);
+            return process.ProcessName + ".exe";
+        }
+        catch (Exception gone) when (gone is ArgumentException or InvalidOperationException)
+        {
+            return $"process {pid}";
+        }
     }
 
     /// <summary>
@@ -322,6 +377,11 @@ public sealed class ProcessRegister : IDisposable
             throw new InvalidOperationException($"pid {registered.Pid} is still running, so it is the register's to stop and not to let go of");
 
         launched.Remove(registered);
+
+        // WW586. The command has gone and what it started may not have: a server the window then
+        // talks to is the command doing its part. Held until its case ends, where it is stopped.
+        if (registered.Job is not null)
+            finished.Add(registered);
     }
 
     /// <summary>
@@ -388,12 +448,18 @@ public sealed class ProcessRegister : IDisposable
                 if (registered.Departed is null && !registered.Adopted)
                     departed.Add(registered.Left(DepartureSeen.WhereTheRunEnded));
 
+                left.AddRange(Started(registered));
                 continue;
             }
 
             var pid = registered.Pid;
             left.Add(new Survivor(pid, registered.Executable, Ending(registered), registered.Case, registered.Lent));
+            left.AddRange(Started(registered));
         }
+
+        // WW586. A command whose case never stopped its launch, such as one lent to the cases after.
+        foreach (var command in finished)
+            left.AddRange(Started(command));
 
         survivors = new ReadOnlyCollection<Survivor>(left);
         return survivors;
@@ -404,7 +470,13 @@ public sealed class ProcessRegister : IDisposable
     {
         StopAll();
         foreach (var registered in launched)
+        {
+            registered.Job?.Dispose();
             registered.Underlying.Dispose();
+        }
+
+        foreach (var command in finished)
+            command.Job?.Dispose();
     }
 
     /// <summary>Which of a launch's three streams the register took, rather than the caller. WW563.</summary>

@@ -127,6 +127,7 @@
 - ✅ **WW582** **A fixture cannot run a command, such as the project's own CLI, with its variables before the application launches** — A fixture's 'before' commands run after staging with its variables, input and expected exit, so a case reads what a CLI wrote, and one that fails leaves the case a hole naming it.
 - 🗑 **WW584** **The runner's shell restart over a held taskbar has never run against a guest desk that was really held** — abandoned: Neither a raised foreground lock timeout nor LockSetForegroundWindow holds the guest desk against the runner's input, so nothing known provokes the held desk the restart is for.
 - ✅ **WW585** **A fixture's before command cannot name {configuration}, so it runs a pinned build's CLI beside the window under test** — A fixture's before command, and every field a token fills, names {configuration} and gets the project's build; unfilled, the run refuses naming the field and WINWRIGHT_CONFIGURATION.
+- ✅ **WW586 (job half)** **A program the application under test starts outlives the case, untracked, and a case cannot read that it was started** — Every launch holds a Windows job: what the application starts is asked to close and ended with its case, one that will not go is named, and an older instance is left alone.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

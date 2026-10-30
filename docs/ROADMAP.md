@@ -4,7 +4,7 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW586** (deps: —) **A program the application under test starts outlives the case, untracked, and a case cannot read that it was started** — A helper an application opens, an editor or a viewer, outlives the case and holds the desk for every later one, and no case can assert it was started. → §WW586
+- ⏳ **WW586** (deps: —) **A program the application under test starts outlives the case, untracked, and a case cannot read that it was started** — A case cannot yet read a started program's executable and arguments (NtQueryInformationProcess, never WMI). → §WW586
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -153,6 +153,12 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
+
+## Done when — WW586
+
+- **A case reads what the application started** A process step reads a started program's
+  executable and arguments; a fixture button starting a child with known arguments reads
+  green, and a program never started reads red after its wait.
 
 ## Non-goals
 

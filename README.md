@@ -251,7 +251,7 @@ just took can be trusted.
 | --- | --- |
 | `AppTarget` | attach to a running application by process or by window, or launch one and keep what it was launched with |
 | `TopLevelWindows` | every top-level window a process owns, and the largest of them, which is the frame where there is one |
-| `ProcessRegister` | what this run started, and stopping it inside the budget the project declares. A process that outlived its case is named with the case it was launched for, and with whether that launch was lent to the cases after it |
+| `ProcessRegister` | what this run started, and stopping it inside the budget the project declares. A process that outlived its case is named with the case it was launched for, and with whether that launch was lent to the cases after it. What the application starts, such as an editor or a viewer it opens, belongs to the launch through a Windows job: it is asked to close and then ended with its case, and one that will not go is named as started by the launch. `LaunchedProcess.Started` lists the ones still running |
 | `Desk` | whether there is an interactive desk to drive at all, and whether a throw is that desk refusing rather than the code failing |
 | `Foreground` | what holds the keyboard, read straight from Windows, and whether a named window does |
 | `ForeignInput` | whether anybody but this run touched the machine while a case was working |

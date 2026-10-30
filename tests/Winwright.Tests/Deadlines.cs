@@ -112,11 +112,17 @@ internal static class Deadlines
             + "false while the window a case opened still exists after the close was posted (WW536). "
             + "Each look enumerates the desk again, so a window that arrives late or goes late is "
             + "seen as it is now"),
+        new("ProcessJob.cs", 2, "false while any process in a launch's job is still running after its "
+            + "windows were asked to close, and after the job was ended (WW586). Each look asks Windows for the members again, so one that went "
+            + "is seen gone, and what is left at the deadline is the survivor it names"),
 
         // --- the suite ----------------------------------------------------------------------------
         new("AttemptTests.cs", 7, "null on most, and deliberately never on one: a look that is always "
             + "answered is what proves a thing already there costs no sleep"),
         new("FixtureTests.cs", 1, "null, until the fixture has written the dump this is waiting on"),
+        new("ProcessRegisterTests.cs", 2, "false while the launch has not started the child it starts "
+            + "(WW586), and false while it has not gone leaving the one helper a test then stops; each "
+            + "look asks the launch's job again"),
         new("NotificationAreaTests.cs", 2, "null, while no Menu on the desktop holds this fixture's "
             + "entries — a menu the verb has reported open is a window the tree may not have caught "
             + "up with, and nothing found is what that looks like. WW446's second is false while the "

@@ -57,6 +57,18 @@ public sealed class LaunchedProcess
     public bool Adopted { get; internal init; }
 
     /// <summary>
+    /// The job this launch and everything it starts belong to, or null where Windows gave none, or
+    /// where the register took the process on rather than starting it. WW586.
+    /// </summary>
+    internal ProcessJob? Job { get; init; }
+
+    /// <summary>
+    /// The processes this launch started that are still running, by pid, itself left out. WW586.
+    /// Empty where nothing it started is running, and where it has no job to ask.
+    /// </summary>
+    public IReadOnlyList<int> Started => Job is { } job ? [.. job.Members().Where(pid => pid != Pid)] : [];
+
+    /// <summary>
     /// The clause every line about this launch carries after its executable: which case it was
     /// launched for, and that it was lent where it was. Empty where no case was named. WW531.
     /// </summary>
