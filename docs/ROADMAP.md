@@ -4,6 +4,9 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW585** (deps: —) **A fixture's before command cannot name {configuration}, so it runs a pinned build's CLI beside the window under test** — A Release run of the cases pairs the Release window with a Debug CLI or a stale one, the mismatch WW521 removed for the executable. → §WW585
+- 📋 **WW586** (deps: —) **A program the application under test starts outlives the case, untracked, and a case cannot read that it was started** — A helper an application opens, an editor or a viewer, outlives the case and holds the desk for every later one, and no case can assert it was started. → §WW586
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
