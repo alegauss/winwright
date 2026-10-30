@@ -16,9 +16,13 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
+- 📋 **WW587** (deps: —) **After the two install commands the plugin has no tools until the adopter builds its clone with the .NET SDK** — Two commands is the promise on the README's first screen, and a build step in a cache directory, repeated after each update, breaks it. → §WW587
+
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
+
+- 💭 **WW588** (deps: —) **A team whose app is on .NET 8 LTS cannot reference the in-app half or run the harness without a second runtime** — Most line-of-business WPF and WinForms code sits on the LTS, and whether the cost of a second target is worth it has never been measured. → §WW588
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
