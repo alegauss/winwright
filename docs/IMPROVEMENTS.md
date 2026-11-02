@@ -89,13 +89,17 @@ NuGet cannot rename a package, so after WW590 the tree packs `Paneproof` and
 `Paneproof.InApp` under new ids, and `Winwright` and `Winwright.InApp` on nuget.org stop
 receiving versions. An adopter restoring the old ids sees nothing that says they moved.
 
-What it should do: one last release of each old id, cut from the commit before the
-rename (the parent of WW590's commit) with only `<Description>` and the README's first
-line changed to say the package is now `Paneproof` / `Paneproof.InApp` and where to read
-the move. Its version is the next patch after the last one published, so `publish.yml`'s
-"nuget.org has not got it" rule is not needed. It goes out after the first `Paneproof`
-release, so the description points at something that exists.
+What it should do: one last release of each old id, `1.1.8`, cut from the parent of
+WW590's commit with only the descriptions and the README's top changed. That commit is
+ready on the local branch `release/winwright-1.1.8` (89fe490, worktree
+`..\winwright-last`): push it, then dispatch `publish.yml --ref` that branch with
+`version=1.1.8`, and after the run mark `v1.2.0` latest again.
 
-Deprecating the old ids on nuget.org is not this line: it waits for the adopters
-(WW594). Cutting a release is a person's decision and runs from the publish workflow, so
-this line waits for that person.
+It goes out after the first `Paneproof` release, `1.2.0`. That version is named because
+the tree declares `1.1.7`, which already has the tag `v1.1.7`. On 2026-11-02 that run
+(41545402718) was refused at the push with 403: nuget.org's trusted-publishing key may
+not create the new id. A person registers `Paneproof` and `Paneproof.InApp` on the
+account (a first push with their own key, or a policy that covers new ids), then
+re-runs.
+
+Deprecating the old ids is not this line: it waits for the adopters (WW594).
