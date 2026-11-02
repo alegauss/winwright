@@ -83,7 +83,7 @@ public sealed record SurfaceReading
 public static class SurfaceReport
 {
     /// <summary>The variable the harness names the report file in, which the in-app half reads.</summary>
-    public const string PathVariable = "WINWRIGHT_SURFACES";
+    public const string PathVariable = "PANEPROOF_SURFACES";
 
     /// <summary>
     /// Every surface in the report, by name. The <em>last</em> line for a name wins: a surface
@@ -155,7 +155,8 @@ public static class SurfaceReport
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
-        var path = Environment.GetEnvironmentVariable(PathVariable);
+        // WW591. The new name, then the old one an adopter's harness may still set.
+        var path = Projects.Renamed.Variable(PathVariable);
         return string.IsNullOrWhiteSpace(path)
             ? new SurfaceReading(name.Trim(), null, $"nothing set {PathVariable}, so no application was asked to report")
             : Of(path, name);

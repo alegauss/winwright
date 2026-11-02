@@ -164,8 +164,8 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         // nothing this repository set. A fixture needing any of those is one more thing to set up
         // by hand, which is the cost it exists to remove.
         var start = new ProcessStartInfo(Executable()) { WorkingDirectory = Path.GetTempPath() };
-        start.Environment.Remove("WINWRIGHT_SURFACES");
-        start.Environment.Remove("WINWRIGHT_GEOMETRY");
+        start.Environment.Remove("PANEPROOF_SURFACES");
+        start.Environment.Remove("PANEPROOF_GEOMETRY");
 
         var launched = Attachable.Launch(register, start);
 

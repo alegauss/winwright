@@ -632,3 +632,4 @@
 ## Block N — The name — winwright becomes paneproof
 
 - ✅ **WW590** **The assemblies, namespaces, executables and NuGet packages carry the name of an older Windows automation MCP server** — Assemblies, namespaces, the solution, executables and package ids are Paneproof; the plugin, winwright.json and WINWRIGHT_* names are unchanged until WW591 and WW592.
+- ✅ **WW591** **Renaming the code would break every adopter's winwright.json and WINWRIGHT_* variables in one release** — paneproof.json and PANEPROOF_* are read first; the old names still load and the report says so, both at once is refused, and launches set both in-app names.

@@ -118,7 +118,7 @@ public static class Geometry
     /// users is not under test, and one writing files because it once was is worse than one that
     /// never dumped at all.
     /// </summary>
-    public const string PathVariable = "WINWRIGHT_GEOMETRY";
+    public const string PathVariable = "PANEPROOF_GEOMETRY";
 
     /// <summary>How deep a walk goes unless told otherwise.</summary>
     public const int DefaultDepth = 12;
@@ -132,7 +132,7 @@ public static class Geometry
     /// <summary>Where dumps are being written, or null where nothing asked for any.</summary>
     public static string? Where()
     {
-        var named = Environment.GetEnvironmentVariable(PathVariable);
+        var named = Variables.Read(PathVariable);
         return string.IsNullOrWhiteSpace(named) ? null : Path.GetFullPath(named.Trim());
     }
 

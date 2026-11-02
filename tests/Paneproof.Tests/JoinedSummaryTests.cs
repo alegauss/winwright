@@ -107,7 +107,7 @@ public sealed class JoinedSummaryTests
         var store = Directory.CreateDirectory(Path.Combine(root, "store")).FullName;
         File.WriteAllText(Path.Combine(store, "settings.json"), """{ "profile": "alpha" }""");
 
-        var path = Path.Combine(root, "winwright.json");
+        var path = Path.Combine(root, "paneproof.json");
         File.WriteAllText(
             path,
             $$"""

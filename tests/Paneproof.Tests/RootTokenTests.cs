@@ -47,7 +47,7 @@ public sealed class RootTokenTests
         var refused = Assert.Throws<ScenarioRefusedException>(
             () => FixtureDeclaration.Rooted("bin/{configuration}/cli.exe", Root, Staged, null));
 
-        Assert.Contains("WINWRIGHT_CONFIGURATION", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("PANEPROOF_CONFIGURATION", refused.Because, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public sealed class RootTokenTests
 
         Assert.Equal("after its CLI", refused.Subject);
         Assert.Contains("its 'before.run' names {configuration}", refused.Because, StringComparison.Ordinal);
-        Assert.Contains("WINWRIGHT_CONFIGURATION", refused.Because, StringComparison.Ordinal);
+        Assert.Contains("PANEPROOF_CONFIGURATION", refused.Because, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -15,7 +15,7 @@ There are three things to write, and two of them you write once per repository.
 
 ## 1. Declare the project
 
-`winwright.json`, found by walking up from wherever a run starts. Every key is optional, and
+`paneproof.json`, found by walking up from wherever a run starts. Every key is optional, and
 that matters more than it sounds: a reading that needs a key this file does not declare is
 **recorded as not taken**, never quietly skipped. The reading is still in the report, marked
 absent, which is what stops an unasked question from reading like an answered one.
@@ -149,7 +149,7 @@ as a pass, and the pass is about nothing.
 <Aside title="Why this is a method in your project and not a command">
 Everything a runner would have decided for itself — how long to wait, how many attempts an act
 gets, what a missing read-back does to the exit code — is not in that code because it is not a
-property of the run. It is in `winwright.json`, where the project declares it once.
+property of the run. It is in `paneproof.json`, where the project declares it once.
 </Aside>
 
 ## 4. Read what came back

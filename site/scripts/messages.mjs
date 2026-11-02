@@ -54,7 +54,7 @@ const rows = [
       + "so over the protocol — it either speaks it or exits — so this goes to stderr, where the "
       + "harness shows it beside the failed server, with the reason on the line before.",
     clears:
-      "let the session reach github.com, or set WINWRIGHT_RELEASES to a folder or mirror holding "
+      "let the session reach github.com, or set PANEPROOF_RELEASES to a folder or mirror holding "
       + "the release's zip and its .sha256, then restart the session. Building the plugin's clone "
       + "once in Release also clears it.",
     page: "/winwright/docs/installing/",

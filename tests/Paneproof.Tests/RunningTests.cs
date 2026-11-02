@@ -64,11 +64,11 @@ public sealed class RunningTests : IDisposable
             return;
 
         var answered = Running.Over(
-            new JsonObject { ["project"] = Path.Combine(root, "winwright.json"), ["cases"] = root },
+            new JsonObject { ["project"] = Path.Combine(root, "paneproof.json"), ["cases"] = root },
             desk);
 
         Assert.True(answered.Refused);
-        Assert.Contains("winwright.json", answered.Text, StringComparison.Ordinal);
+        Assert.Contains("paneproof.json", answered.Text, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public sealed class RunningTests : IDisposable
             return;
 
         Assert.Contains(
-            "no winwright.json was named",
+            "no paneproof.json was named",
             Running.Over(new JsonObject { ["cases"] = root }, desk).Text,
             StringComparison.Ordinal);
 
@@ -249,7 +249,7 @@ public sealed class RunningTests : IDisposable
 
     private static JsonObject Arguments() => new()
     {
-        ["project"] = Path.Combine(Path.GetTempPath(), "winwright.json"),
+        ["project"] = Path.Combine(Path.GetTempPath(), "paneproof.json"),
         ["cases"] = Path.GetTempPath(),
     };
 }

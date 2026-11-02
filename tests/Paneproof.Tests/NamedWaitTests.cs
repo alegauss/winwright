@@ -58,7 +58,7 @@ public sealed class NamedWaitTests : IDisposable
     [Fact]
     public void A_named_wait_stands_in_for_both_waits_a_step_takes_and_for_nothing_else()
     {
-        var timeouts = Timeouts.Declared(new Dictionary<string, int> { ["cloud"] = 600000 }, "winwright.json");
+        var timeouts = Timeouts.Declared(new Dictionary<string, int> { ["cloud"] = 600000 }, "paneproof.json");
 
         var stretched = timeouts.Stretched("cloud");
 

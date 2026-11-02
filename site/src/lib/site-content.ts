@@ -660,7 +660,7 @@ export const scenario = {
 export const project = {
   eyebrow: "Declaring a project",
   heading: [
-    { code: "winwright.json" },
+    { code: "paneproof.json" },
     ", found by walking up from where a run starts",
   ] as Rich,
   intro: [
@@ -894,7 +894,7 @@ export const claudeCode = {
     ", so committing that file wires every clone. The server and the guard are .NET processes the release carries built: the first session after an install or an update downloads them for the plugin's version, checks them against the published SHA-256, and needs only the Windows Desktop Runtime 10 to run them. ",
     { b: "Where that fails you are told, not left guessing" },
     ": each launcher writes the missing surface and the way round it — ",
-    { code: "WINWRIGHT_RELEASES" },
+    { code: "PANEPROOF_RELEASES" },
     " pointing at a mirror, or ",
     { code: "dotnet build -c Release" },
     " in the plugin's clone — to stderr and exits 1. Never 2 — denying every write because a binary is missing would put the guard in front of everything instead of in front of a harness script.",

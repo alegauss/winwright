@@ -121,7 +121,7 @@ is answered with the nearest name UI Automation actually has.
   `catches` (the defect it exists for), `filed`, `forEach` (the key whose every declared
   string it runs once for) and `onlyReads`; a fixture may carry `environment`, `flag`,
   `arguments`, `variables`, `language`, `shareable` and `resident`.
-- **The project declaration** — `winwright.json`, found by walking up from where a run
+- **The project declaration** — `paneproof.json`, found by walking up from where a run
   starts. Every key is optional; a reading that needs one this file does not declare is
   recorded as not taken, never quietly skipped. `destructive` names the entries that end the
   run, and a bare name is refused where the project ships more than one language, because a
@@ -130,7 +130,7 @@ is answered with the nearest name UI Automation actually has.
   (`claude plugin marketplace add alegauss/winwright --scope project`, then
   `claude plugin install winwright@winwright --scope project`), and the server and guard are
   .NET processes the release carries built: the first session downloads them for the plugin's
-  version and needs only the Windows Desktop Runtime 10 (`WINWRIGHT_RELEASES` names a mirror,
+  version and needs only the Windows Desktop Runtime 10 (`PANEPROOF_RELEASES` names a mirror,
   and `dotnet build -c Release` in the plugin's clone still wins). Four
   MCP tools: `winwright_format` (every field of a file, a case, a step and a fixture),
   `winwright_vocabulary` (every act and what each needs said beside it), `winwright_check`

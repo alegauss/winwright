@@ -66,14 +66,14 @@ public static class Surfaces
     /// shipped to its users is not under test, and one writing files because it once was is worse
     /// than one that never reported at all.
     /// </summary>
-    public const string PathVariable = "WINWRIGHT_SURFACES";
+    public const string PathVariable = "PANEPROOF_SURFACES";
 
     private static readonly Lock Gate = new();
 
     /// <summary>Where reports are being written, or null where nothing asked for any.</summary>
     public static string? Where()
     {
-        var named = Environment.GetEnvironmentVariable(PathVariable);
+        var named = Variables.Read(PathVariable);
         return string.IsNullOrWhiteSpace(named) ? null : Path.GetFullPath(named.Trim());
     }
 

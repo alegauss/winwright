@@ -74,6 +74,12 @@ public sealed class SuiteVerdict
     /// </summary>
     public RanBefore Compared { get; internal init; } = RanBefore.NotAsked;
 
+    /// <summary>
+    /// The old names the project was read under, each as the sentence that says so. WW591: a
+    /// finding, so it never moves <see cref="Outcome"/>.
+    /// </summary>
+    public IReadOnlyList<string> OldNames { get; internal init; } = [];
+
     /// <summary>The process exit code, which is the outcome itself and not a second mapping.</summary>
     public int ExitCode => (int)Outcome;
 
@@ -150,6 +156,12 @@ public sealed class SuiteVerdict
                 $"{one.Cases} that ran {one.Say} what {one.They} {one.Catch} in words that begin or end with "
                 + $"{one.Their} own name, so a comparison of claims across runs may be reading the name again:");
             lines.AddRange(Echoing.Select(each => $"  {each.Name}: {each.Catches}"));
+        }
+
+        if (OldNames.Count > 0)
+        {
+            lines.Add("the project was read under names it has moved away from:");
+            lines.AddRange(OldNames.Select(each => $"  {each}"));
         }
 
         return new ReadOnlyCollection<string>(lines);
@@ -512,8 +524,12 @@ public static class Suite
         // After the fixture's own variables and not before: a fixture that names this deliberately
         // is a fixture saying something about where its renders go, and a run overwriting that would
         // be the launch quietly disagreeing with the declaration it was started from.
-        if (project.Declares("captures") && !start.Environment.ContainsKey(Capturing.OwnRender.RendersInto))
+        if (project.Declares("captures") && !start.Environment.ContainsKey(Capturing.OwnRender.RendersInto)
+            && !start.Environment.ContainsKey(Renamed.Old(Capturing.OwnRender.RendersInto)))
             start.Environment[Capturing.OwnRender.RendersInto] = project.Captures;
+
+        // WW591. And under the old names too, so an application still on the old in-app half answers.
+        Renamed.Both(start, Capturing.OwnRender.RendersInto, Capturing.SurfaceReport.PathVariable, Capturing.GeometryDump.PathVariable);
 
         // WW531. The register is told which case this is for, so a process that outlives it is named
         // by that case and not by a pid that has gone by the time anybody reads it.
@@ -729,6 +745,7 @@ public static class Suite
         return new SuiteVerdict(asked, cases, new ReadOnlyCollection<NotRun>(skipped))
         {
             Compared = RanBefore.Of(asked, cases.Select(one => (one.Declared.Name, one.Declared.Catches)), project),
+            OldNames = project.OldNames,
         };
     }
 }

@@ -130,7 +130,7 @@ public sealed class PluginTests : IDisposable
     public void With_nothing_built_the_server_fetches_the_release_and_the_guard_answers_from_it()
     {
         // WW587. The tree the two install commands leave, with plugin.json naming a version and a
-        // mirror holding that version's release - a folder, through WINWRIGHT_RELEASES, which is the
+        // mirror holding that version's release - a folder, through PANEPROOF_RELEASES, which is the
         // same door an adopter behind a proxy uses. The zip is this build's own two outputs, so what
         // runs at the end is a real server and a real guard.
         var tree = Unbuilt();
@@ -140,7 +140,7 @@ public sealed class PluginTests : IDisposable
         // A version an update left behind, which the fetch is to take away.
         Directory.CreateDirectory(Path.Combine(local, "winwright", "plugin", "0.0.1"));
 
-        var environment = new Dictionary<string, string> { ["LOCALAPPDATA"] = local, ["WINWRIGHT_RELEASES"] = mirror };
+        var environment = new Dictionary<string, string> { ["LOCALAPPDATA"] = local, ["PANEPROOF_RELEASES"] = mirror };
         var served = Run(Path.Combine(tree.Root, "tools", "winwright-mcp.cmd"), tree.Root, environment);
 
         // The server ran and met the closed input it was handed: exit 0, and nothing on stdout but
@@ -175,7 +175,7 @@ public sealed class PluginTests : IDisposable
         var ran = Run(
             Path.Combine(tree.Root, "tools", "winwright-mcp.cmd"),
             tree.Root,
-            new Dictionary<string, string> { ["LOCALAPPDATA"] = local, ["WINWRIGHT_RELEASES"] = mirror });
+            new Dictionary<string, string> { ["LOCALAPPDATA"] = local, ["PANEPROOF_RELEASES"] = mirror });
 
         Assert.Equal(1, ran.ExitCode);
         Assert.Contains("so it was not unpacked", ran.Said, StringComparison.Ordinal);

@@ -235,7 +235,7 @@ public static class OwnRender
     /// by a case that reads both, which is where a drift of one letter goes red.
     /// </para>
     /// </summary>
-    public const string RendersInto = "WINWRIGHT_RENDERS";
+    public const string RendersInto = "PANEPROOF_RENDERS";
 
     /// <summary>How long an application is given to draw it, unless the caller says otherwise.</summary>
     public const int DefaultBudgetMs = 8000;

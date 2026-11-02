@@ -69,7 +69,7 @@ public sealed class DestructiveEntryTests : IDisposable
     /// <summary>A project naming what ends the run, which is where that fact belongs.</summary>
     private ProjectDeclaration Declared(params string[] destructive)
     {
-        var path = Path.Combine(root, "winwright.json");
+        var path = Path.Combine(root, "paneproof.json");
         File.WriteAllText(
             path,
             $$"""

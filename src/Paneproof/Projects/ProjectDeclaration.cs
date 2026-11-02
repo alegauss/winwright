@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace Paneproof.Projects;
 
 /// <summary>
-/// One key <c>winwright.json</c> may carry: what it declares, what its absence means, and what it
+/// One key <c>paneproof.json</c> may carry: what it declares, what its absence means, and what it
 /// refuses. WW490.
 /// <para>
 /// The file is the first thing an adopting repository writes, and what described it was an example.
@@ -48,16 +48,16 @@ public sealed record DeclaredKey(
 /// What is true of a project rather than of a case: the executable, the source root the staleness
 /// check compares against, the language files, the default timeouts and the store to fingerprint.
 /// A scenario carrying one of these is a scenario that runs on exactly one checkout, which is how
-/// a harness becomes unmovable and then unowned — so they are declared once, in <c>winwright.json</c>
+/// a harness becomes unmovable and then unowned — so they are declared once, in <c>paneproof.json</c>
 /// at the project root, and every relative path in it resolves against that file's own directory.
 /// </summary>
 public sealed class ProjectDeclaration
 {
     /// <summary>The file a project declares itself in, looked for by walking up from a directory.</summary>
-    public const string FileName = "winwright.json";
+    public const string FileName = "paneproof.json";
 
     /// <summary>
-    /// Every key this build reads out of <c>winwright.json</c>, in the order a reader meets them:
+    /// Every key this build reads out of <c>paneproof.json</c>, in the order a reader meets them:
     /// what the application is, what it ships, how long to wait, and what a run must not do quietly.
     /// <para>
     /// WW490. Held against <see cref="Shape"/> in both directions by the suite, so a key this build
@@ -87,7 +87,7 @@ public sealed class ProjectDeclaration
             "",
             "a build configuration, such as Debug",
             "what {configuration} means in a declared path, so one declaration serves every build a "
-                + "project tests; WINWRIGHT_CONFIGURATION set for a run overrides it",
+                + "project tests; PANEPROOF_CONFIGURATION set for a run overrides it",
             "a path naming {configuration} refuses when it is asked for, naming this key and the "
                 + "variable, rather than launching a path with a brace in it",
             ""),
@@ -258,22 +258,33 @@ public sealed class ProjectDeclaration
     public const string ConfigurationToken = "{configuration}";
 
     /// <summary>The variable that tells a run which configuration it is driving. WW521.</summary>
-    public const string ConfigurationVariable = "WINWRIGHT_CONFIGURATION";
+    public const string ConfigurationVariable = "PANEPROOF_CONFIGURATION";
 
     /// <summary>The paths whose token nothing filled, by key, refused when one is asked for.</summary>
     private readonly HashSet<string> unfilled = new(StringComparer.Ordinal);
+
+    /// <summary>What this declaration was read under an old name for. WW591.</summary>
+    private readonly List<string> oldNames = [];
 
     private ProjectDeclaration(string path, Shape shape, string? asked)
     {
         Path = path;
         Root = System.IO.Path.GetDirectoryName(path)!;
 
+        // WW591. A declaration found or named under the old file name still loads, and says so.
+        if (string.Equals(System.IO.Path.GetFileName(path), Renamed.OldDeclaration, StringComparison.OrdinalIgnoreCase))
+        {
+            oldNames.Add(
+                $"{Renamed.OldDeclaration} was read as the project's declaration; it is the old name of "
+                    + $"{FileName} and is accepted for now, so rename it");
+        }
+
         // WW521. What the caller asked for first, then the variable, then the file. The first two
         // are how a runner says what it built — CI exports the variable for the Release job — and
         // the value in the file is the default a developer's own runner gets without saying anything.
         var told = asked;
         if (string.IsNullOrWhiteSpace(told))
-            told = System.Environment.GetEnvironmentVariable(ConfigurationVariable);
+            told = Renamed.Variable(ConfigurationVariable, oldNames);
 
         if (string.IsNullOrWhiteSpace(told))
             told = shape.Configuration;
@@ -537,6 +548,12 @@ public sealed class ProjectDeclaration
     public string LastRun =>
         Require(lastRun, "lastRun", "comparing the cases a run ran with the ones the last run ran");
 
+    /// <summary>
+    /// Each name this declaration was read under that is an old one: its file, its configuration
+    /// variable. Said in a run's report and never moving its outcome. WW591.
+    /// </summary>
+    public IReadOnlyList<string> OldNames => oldNames.AsReadOnly();
+
     /// <summary>Whether the project declared a value for that key at all, without refusing.</summary>
     public bool Declares(string key) => key switch
     {
@@ -596,9 +613,22 @@ public sealed class ProjectDeclaration
         var directory = new DirectoryInfo(System.IO.Path.GetFullPath(startingAt));
         for (var walking = directory; walking is not null; walking = walking.Parent)
         {
+            // WW591. The new name, then the old one, and never both: two declarations in one
+            // directory are two answers to what this project drives, and choosing is the adopter's.
             var candidate = System.IO.Path.Combine(walking.FullName, FileName);
+            var old = System.IO.Path.Combine(walking.FullName, Renamed.OldDeclaration);
+            if (File.Exists(candidate) && File.Exists(old))
+            {
+                throw new InvalidOperationException(
+                    $"{walking.FullName} holds both {FileName} and {Renamed.OldDeclaration}; "
+                        + $"{Renamed.OldDeclaration} is the old name of the same declaration, so keep one");
+            }
+
             if (File.Exists(candidate))
                 return Load(candidate);
+
+            if (File.Exists(old))
+                return Load(old);
         }
 
         throw new DeclarationMissingException(

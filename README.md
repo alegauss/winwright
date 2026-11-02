@@ -54,7 +54,7 @@ Release, checks the zip against its published SHA-256, and unpacks it into
 it), not the SDK itself. The guard reads that folder and downloads nothing, so in the first few
 seconds of the first session it may say it is not there yet.
 
-A network that cannot reach github.com can point `WINWRIGHT_RELEASES` at a folder or a mirror
+A network that cannot reach github.com can point `PANEPROOF_RELEASES` at a folder or a mirror
 holding the release's `winwright-plugin-<version>-win-x64.zip` and its `.sha256`. Where the
 download fails, or the runtime is missing, stderr names what is missing, and building the plugin's
 clone with `dotnet build -c Release` is the way round it: a local build is always preferred over a
@@ -95,7 +95,7 @@ removed.
 
 ## First session
 
-Declare the application once, in `winwright.json` at the repository root (every key is optional;
+Declare the application once, in `paneproof.json` at the repository root (every key is optional;
 [Declaring a project](#declaring-a-project) has them all):
 
 ```json
@@ -301,7 +301,7 @@ What the in-app half adds is what a harness cannot take from outside the process
   layers a popup for the drop shadow it draws itself, and the soft edge of that is the desktop.
 - `Renders` — one line that answers a harness asking for a render, over the message loop the
   application already runs. No thread, no watched directory, and nothing at all unless the run that
-  started it set `WINWRIGHT_RENDERS` to somewhere it may write — and where a render does not happen,
+  started it set `PANEPROOF_RENDERS` to somewhere it may write — and where a render does not happen,
   the run asks the application why and prints its answer, so "no in-app half" and "the half is here
   and nobody set the variable" stop reading alike. That matters most on an attached run, which
   launched nothing and so can only ever have the second. Write `Renders.Everywhere()` and
@@ -317,8 +317,16 @@ What the in-app half adds is what a harness cannot take from outside the process
 
 ## Declaring a project
 
-`winwright.json`, found by walking up from where a run starts. Every key is optional; a reading that
+`paneproof.json`, found by walking up from where a run starts. Every key is optional; a reading that
 needs one this file does not declare is **recorded as not taken**, never quietly skipped.
+
+**The old names still work, for now.** A suite written before the rename keeps `winwright.json` and
+the `WINWRIGHT_*` variables (`WINWRIGHT_CONFIGURATION`, the runner's `WINWRIGHT_VMX` and the rest):
+each is read where its `paneproof`/`PANEPROOF_*` name is absent, and the run's report says which
+old names it read, so renaming them is something you find out about rather than something that
+breaks. A directory holding both declarations, or both spellings of one variable set at once, is
+refused, naming both. A launch sets the in-app variables under both names, so an application on an
+older in-app package still answers. The release notes say how long the old names are accepted.
 
 ```json
 {
@@ -342,7 +350,7 @@ needs one this file does not declare is **recorded as not taken**, never quietly
 
 `{configuration}` in a declared path stands for the build being tested, so one declaration serves a
 local Debug run and a Release run in CI. A run fills it from, in order: the configuration a caller
-passes to `ProjectDeclaration.Load(path, configuration)`, then the `WINWRIGHT_CONFIGURATION`
+passes to `ProjectDeclaration.Load(path, configuration)`, then the `PANEPROOF_CONFIGURATION`
 environment variable, then `configuration` in this file. CI sets the variable for its Release job, and
 a developer's runner gets the file's default without saying anything. A path naming
 `{configuration}` that none of the three fills **refuses when it is asked for**, naming the
@@ -1229,7 +1237,7 @@ every expectation in that file describes an environment nothing set up. Same rul
 level up.
 
 `workingDirectory` is the directory the application is started in. The default is the one thing worth
-saying about it: **the project's root**, the directory `winwright.json` sits in, which is already what
+saying about it: **the project's root**, the directory `paneproof.json` sits in, which is already what
 every path that file declares resolves against. Before that default the launch set no directory at
 all, so it inherited whichever one the test runner happened to be in — and a fixture passing
 `"arguments": ["--import", "cases/fixtures/MobaXterm.ini"]` meant three different files under
@@ -1268,7 +1276,7 @@ application is not launched, and every check of the case is a hole naming the co
 the last lines it wrote. Its output is kept off the runner's own streams. A fixture's line in a report
 counts the commands it ran first.
 
-`application` is the executable a fixture launches instead of the one `winwright.json` names. It is
+`application` is the executable a fixture launches instead of the one `paneproof.json` names. It is
 for the installed copy of an application, the one an installer put in `%LOCALAPPDATA%\Programs`,
 which is what a case about installing or updating has to drive and the build tree's is not. It is
 written the way `workingDirectory` is: the environment is expanded, the tokens are filled, and what is
@@ -1343,7 +1351,7 @@ always do:
 }
 ```
 
-**`{root}`** is the other token, and it names the project's root, the directory `winwright.json` sits
+**`{root}`** is the other token, and it names the project's root, the directory `paneproof.json` sits
 in. It is filled wherever `{files}` is, and also in a step's **`with`**, so a case can type a path in
 the checkout without spelling one desk's checkout whole. `{root/}` is the same path with forward
 slashes and a slash before the drive, `/C:/src/yourapp`, which is how Windows OpenSSH names a path:

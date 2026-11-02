@@ -145,7 +145,7 @@ public sealed record ReadGeometry(IReadOnlyList<DrawnElement> Elements, int Elid
 public static class GeometryDump
 {
     /// <summary>The variable the harness names the dump file in, which the in-app half reads.</summary>
-    public const string PathVariable = "WINWRIGHT_GEOMETRY";
+    public const string PathVariable = "PANEPROOF_GEOMETRY";
 
     /// <summary>The line the dump uses to say what its walk did not reach.</summary>
     public const string ElidedMarker = "#elided";
@@ -192,7 +192,7 @@ public static class GeometryDump
     /// <summary>The same, using the file the variable names.</summary>
     public static ReadGeometry Read()
     {
-        var path = Environment.GetEnvironmentVariable(PathVariable);
+        var path = Projects.Renamed.Variable(PathVariable);
         return string.IsNullOrWhiteSpace(path)
             ? new ReadGeometry(new ReadOnlyCollection<DrawnElement>([]), 0, 0)
             : Read(path);

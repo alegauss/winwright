@@ -12,7 +12,7 @@ namespace Paneproof.Tests;
 /// WW575, its first slice. A fixture that launches another executable than the project's.
 /// <para>
 /// Found by Modelado (MOD31): the update's evidence is a click in the copy an installer put in
-/// <c>%LOCALAPPDATA%\Programs</c>, not the build tree's that <c>winwright.json</c> names, and no case
+/// <c>%LOCALAPPDATA%\Programs</c>, not the build tree's that <c>paneproof.json</c> names, and no case
 /// could launch that one. Here the project names an executable that is not there and the fixture
 /// names the real one, so the window that opens can only be the fixture's.
 /// </para>

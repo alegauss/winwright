@@ -154,7 +154,7 @@ public sealed class NotesInStringsTests : IDisposable
         // by accident — the derivation's hazard was taking every key under a prefix, and asking for
         // "labels.//" is asking for that note on purpose.
         var file = Strings("""{ "labels": { "//": "a note", "heading": "winwright" } }""");
-        var project = Path.Combine(root, "winwright.json");
+        var project = Path.Combine(root, "paneproof.json");
         File.WriteAllText(
             project,
             $$"""

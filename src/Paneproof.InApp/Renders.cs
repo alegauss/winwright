@@ -171,7 +171,7 @@ public enum PopupRendered
 /// Why a render did not happen, asked of the application after it did not happen. WW362.
 /// <para>
 /// The render ask answers one bit, and a run that reads zero cannot tell an application without the
-/// in-app half from one that has it and was started without <c>WINWRIGHT_RENDERS</c>. Those want
+/// in-app half from one that has it and was started without <c>PANEPROOF_RENDERS</c>. Those want
 /// opposite things done: the first is a line somebody adds to the application, the second is the
 /// environment it was launched in — and at the attach door, where the run did not launch it, the
 /// second is the only one that ever applies and the harness was printing the first.
@@ -239,7 +239,7 @@ public static class Renders
     /// The variable naming the directory renders may be written into. Unset means answer nothing,
     /// for the reason <see cref="Surfaces.PathVariable" /> means report nothing.
     /// </summary>
-    public const string PathVariable = "WINWRIGHT_RENDERS";
+    public const string PathVariable = "PANEPROOF_RENDERS";
 
     /// <summary>The name both halves register, which is how this message is told from any other.</summary>
     public const string Registered = "Paneproof.OwnRender";
@@ -340,7 +340,7 @@ public static class Renders
     /// <summary>Where renders may be written, or null where nothing asked for any.</summary>
     public static string? Where()
     {
-        var named = Environment.GetEnvironmentVariable(PathVariable);
+        var named = Variables.Read(PathVariable);
         return string.IsNullOrWhiteSpace(named) ? null : Path.GetFullPath(named.Trim());
     }
 

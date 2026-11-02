@@ -41,21 +41,6 @@ rename is caught by the gate rather than by an adopter.
 
 ## Block N — The name — winwright becomes paneproof
 
-### §WW591 The old file and variable names keep working
-
-An existing suite is written against `winwright.json`, `winwright.read-back.json` and
-the variables winwright owns. Renaming them in one release breaks every adopter at once,
-and silently where a variable is only read when present.
-
-They come in two directions, and each needs its own rule:
-
-- **What the adopter writes**: the two files, `WINWRIGHT_CONFIGURATION`, and the runner's `WINWRIGHT_VM_ENV`, `WINWRIGHT_VMX`, `WINWRIGHT_VM_PASSWORD`, `WINWRIGHT_GUEST_USER` and `WINWRIGHT_GUEST_PASSWORD`. Read `paneproof.json` and `PANEPROOF_*` first; accept the old name when the new one is absent and say so in the run's output, naming both; when both are present, refuse and name both.
-- **What the engine writes for the in-app half**: `WINWRIGHT_SURFACES`, `WINWRIGHT_RENDERS` and `WINWRIGHT_GEOMETRY`, set on the launched app and read by `Winwright.InApp` inside it. The engine and the in-app package are upgraded separately, so an engine that set only the new names would leave an app on the old in-app half without its own render, with nothing said. During the period the engine sets both names, and `Paneproof.InApp` reads the new one, then the old.
-
-A variable the author names in a fixture (`WINWRIGHT_ROLE` in the tests) is the
-author's, not the product's, and is left alone. The release notes state how long the old
-names are accepted.
-
 ### §WW592 The plugin moves to paneproof
 
 The marketplace, the plugin, the MCP server (`winwright` in `.claude-plugin/mcp.json`,

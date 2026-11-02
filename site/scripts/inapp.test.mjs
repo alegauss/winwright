@@ -45,7 +45,7 @@ test("every surface the package guards is on the page", () => {
   );
 
   for (const one of inapp.surfaces) {
-    assert.match(one.variable, /^WINWRIGHT_[A-Z]+$/, `${one.surface} is armed by ${one.variable}`);
+    assert.match(one.variable, /^PANEPROOF_[A-Z]+$/, `${one.surface} is armed by ${one.variable}`);
     assert.ok(one.answers.length > 0, `${one.surface} says nothing about what it answers`);
     assert.ok(one.unset.length > 0, `${one.surface} says nothing about what leaving it unset does`);
   }

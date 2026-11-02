@@ -31,7 +31,7 @@ test("the files the page shows are the files the sample carries", () => {
   // stale against a sample somebody edited afterwards.
   assert.equal(
     walkthrough.declaration.replace(/\r\n/g, "\n").trimEnd(),
-    carried("winwright.json"),
+    carried("paneproof.json"),
     "the declaration on the page is not the one samples/Walkthrough carries",
   );
   assert.equal(

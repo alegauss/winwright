@@ -84,7 +84,7 @@ public sealed class TranslatedGuardTests : IDisposable
     /// <summary>A project declaring what ends the run, and however many languages it ships.</summary>
     private ProjectDeclaration Declared(string destructive, int languages = 3)
     {
-        var path = Path.Combine(root, "winwright.json");
+        var path = Path.Combine(root, "paneproof.json");
         var files = Shipped().Take(languages).ToList();
         File.WriteAllText(
             path,

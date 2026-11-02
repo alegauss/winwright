@@ -1,6 +1,6 @@
 // The project declaration, read out of the type that decides it. WW490.
 //
-// `winwright.json` is the first file an adopting repository writes, and what described it was an
+// `paneproof.json` is the first file an adopting repository writes, and what described it was an
 // example. An example is a good start and a bad reference: it cannot say which keys exist beside
 // the ones it shows, what each one falls back to when it is absent, or which of them refuse a
 // value that looks perfectly reasonable.

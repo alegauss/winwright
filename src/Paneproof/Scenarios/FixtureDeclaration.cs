@@ -157,7 +157,7 @@ public sealed record FixtureDeclaration
     /// </para>
     /// <para>
     /// The default is the fix and this field is the exception to it: an adopter who declares nothing
-    /// gets the directory <c>winwright.json</c> sits in, which is what every other path the project
+    /// gets the directory <c>paneproof.json</c> sits in, which is what every other path the project
     /// declares already resolves against. The two workarounds that field was worth removing were
     /// setting the runner process's own current directory before a launch, which is global state in a
     /// test assembly, and committing an absolute path into a file read on other machines.
@@ -167,7 +167,7 @@ public sealed record FixtureDeclaration
 
     /// <summary>
     /// The executable this launch starts instead of the project's, as the fixture declares it, or
-    /// empty where it starts the one <c>winwright.json</c> names. WW575.
+    /// empty where it starts the one <c>paneproof.json</c> names. WW575.
     /// <para>
     /// Found by Modelado (MOD31): the update's evidence is a click in the copy an installer put in
     /// <c>%LOCALAPPDATA%\Programs</c>, not the build tree's, and no case could launch that one, so the
@@ -901,7 +901,7 @@ public sealed record FixtureDeclaration
     }
 
     /// <summary>
-    /// The token naming the project's root, the directory <c>winwright.json</c> sits in. WW542.
+    /// The token naming the project's root, the directory <c>paneproof.json</c> sits in. WW542.
     /// <para>
     /// Found by quickshell (QS292): a file the guest's own sshd serves to a second account has to be one
     /// that account can read, which the staged directory under the runner's temp is not and the
@@ -963,7 +963,7 @@ public sealed record FixtureDeclaration
 
     /// <summary>What a refusal says a configuration token nothing filled needed. WW585.</summary>
     internal static string Unfilled =>
-        $"names {Projects.ProjectDeclaration.ConfigurationToken}, and filling it needs one — winwright.json's "
+        $"names {Projects.ProjectDeclaration.ConfigurationToken}, and filling it needs one — paneproof.json's "
             + $"'configuration', or {Projects.ProjectDeclaration.ConfigurationVariable} set for this run";
 
     /// <summary>A name a directory can be called, for the one in temp a person has to recognise.</summary>
