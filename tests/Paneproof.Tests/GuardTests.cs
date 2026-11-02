@@ -104,6 +104,38 @@ public sealed class GuardTests
     }
 
     [Fact]
+    public void A_script_naming_the_namespaces_before_the_rename_is_denied_too()
+    {
+        // WW597. An adopter still on the Winwright package spells the engine the old way, and a guard
+        // that read only the new spellings let their harness script straight through.
+        foreach (var old in new[] { "Winwright.Acting", "Winwright.Locating", "Winwright.Asserting" })
+        {
+            var verdict = Guard.On(Writing("D:/adopter/tests/Smoke.cs", $"using {old};\nclass Smoke {{ }}"), _ => Adopter);
+
+            Assert.True(verdict.Denied, old);
+            Assert.Contains(old, verdict.Because, StringComparison.Ordinal);
+        }
+
+        // Derived, not typed: each old spelling is one of the watched namespaces with its prefix swapped.
+        Assert.Equal(Guard.Driving.Select(one => "Winwright" + one["Paneproof".Length..]), Guard.DrivingBefore);
+    }
+
+    [Fact]
+    public void The_old_name_on_its_own_and_an_engine_vendored_before_the_rename_are_both_allowed()
+    {
+        // The control: the word alone is not a namespace that drives a window.
+        Assert.False(Guard.On(Writing("D:/adopter/README.md", "Winwright is now Paneproof."), _ => Adopter).Denied);
+
+        // And a copy of the engine taken before the rename is still the engine.
+        const string vendored = """
+            <Project Sdk="Microsoft.NET.Sdk">
+              <ItemGroup><ProjectReference Include="../../vendor/Winwright/Winwright.csproj" /></ItemGroup>
+            </Project>
+            """;
+        Assert.False(Guard.On(Writing("D:/vendored/tests/PickTests.cs", "using Winwright.Acting;"), _ => vendored).Denied);
+    }
+
+    [Fact]
     public void A_rename_does_not_get_a_script_past_the_guard()
     {
         // The one thing an author can change without changing what they wrote. It reads the content,

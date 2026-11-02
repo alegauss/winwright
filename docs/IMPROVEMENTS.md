@@ -83,24 +83,6 @@ Only then are `Winwright` and `Winwright.InApp` deprecated on nuget.org, pointin
 `Paneproof` and `Paneproof.InApp` (done by Alexandre on the site), and the
 `winwright-friction` skill is renamed.
 
-### §WW597 The guard knows the old namespaces too
-
-WW590 renamed the engine's namespaces to `Paneproof.*`, and the guard reads the
-namespaces it denies off the engine assembly (`Guard.Driving`), so after the rename it
-denies `Paneproof.Acting`, `Paneproof.Locating` and `Paneproof.Asserting` and nothing
-else. An adopter still on the `Winwright` package who installs the renamed plugin can
-write a harness script naming `Winwright.Acting` and the guard lets it through, which is
-the hand-written harness the guard exists to stop.
-
-What it should do: for as long as WW591 accepts the old file and variable names, the
-guard also denies the old spellings, derived from the read-off list by swapping the
-prefix rather than typed as a second list, and the denial names the case file and
-`winwright_check` as it does today. The project above the path is recognised as the
-engine by `Paneproof.csproj` or `Winwright.csproj`, so an older vendored copy is not
-denied for driving windows on purpose. `GuardTests` gains a case for each old spelling
-and the control that an unrelated `Winwright` word is still allowed. The old spellings
-leave with the rest of WW591's period.
-
 ### §WW598 The old ids' last release points at Paneproof
 
 NuGet cannot rename a package, so after WW590 the tree packs `Paneproof` and

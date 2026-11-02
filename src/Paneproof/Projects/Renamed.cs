@@ -30,6 +30,25 @@ public static class Renamed
     /// <summary>The project declaration's old file name.</summary>
     public const string OldDeclaration = "winwright.json";
 
+    /// <summary>What every namespace, assembly and package id began with. WW597.</summary>
+    public const string OldName = "Winwright";
+
+    /// <summary>What they begin with now.</summary>
+    public const string Name = "Paneproof";
+
+    /// <summary>
+    /// The old spelling of one of the product's namespaces or project files: <c>Paneproof.Acting</c>
+    /// was <c>Winwright.Acting</c>. WW597.
+    /// </summary>
+    /// <param name="named">The name as it is spelled now.</param>
+    public static string OldSpelling(string named)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(named);
+        return named.StartsWith(Name + ".", StringComparison.Ordinal)
+            ? OldName + named[Name.Length..]
+            : throw new ArgumentException($"'{named}' is not one of the product's names", nameof(named));
+    }
+
     /// <summary>The old spelling of one of the product's variables.</summary>
     /// <param name="variable">The variable under its new name.</param>
     public static string Old(string variable)

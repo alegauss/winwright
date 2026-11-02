@@ -135,8 +135,8 @@ without a second run. [Writing a case](#writing-a-case) is the full format.
 
 A hand-written harness script is always faster in the moment, and that is how a 2,732-line one
 happens. So the plugin's `PreToolUse` hook **denies** a write whose content names
-`Paneproof.Acting`, `Paneproof.Locating` or `Paneproof.Asserting`, and names the case file and
-`winwright_check` that replace it. It never denies a `.cases.json` write, never denies a project
+`Paneproof.Acting`, `Paneproof.Locating` or `Paneproof.Asserting` (or their `Winwright.*` spellings
+from before the rename), and names the case file and `winwright_check` that replace it. It never denies a `.cases.json` write, never denies a project
 that references the engine's *source*, and allows anything it cannot read: a hook that denies
 what it did not understand is one that gets removed.
 

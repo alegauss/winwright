@@ -61,6 +61,14 @@ public static class Guard
         "Paneproof.Asserting",
     ]);
 
+    /// <summary>
+    /// The same namespaces as an adopter still on the <c>Winwright</c> package spells them. WW597:
+    /// derived rather than typed, so a namespace added to <see cref="Driving"/> is denied under both
+    /// names, and they leave together with the rest of the old names.
+    /// </summary>
+    public static IReadOnlyList<string> DrivingBefore { get; } = new ReadOnlyCollection<string>(
+        Driving.Select(Projects.Renamed.OldSpelling).ToList());
+
     /// <summary>The tools a write arrives through.</summary>
     public static IReadOnlyList<string> Writing { get; } = new ReadOnlyCollection<string>(
     [
@@ -102,16 +110,21 @@ public static class Guard
             return Verdict.Allowed;
 
         var written = Written(input);
-        var driving = Driving.Where(one => written.Contains(one, StringComparison.Ordinal)).ToList();
+        var driving = Driving.Concat(DrivingBefore).Where(one => written.Contains(one, StringComparison.Ordinal)).ToList();
         if (driving.Count == 0)
             return Verdict.Allowed;
 
         // The engine's own tree drives windows on purpose. Recognised by a reference to the engine's
         // source and not by a path, because a path is this repository's shape and the guard has to
-        // read the same in a clone that vendored it somewhere else.
+        // read the same in a clone that vendored it somewhere else. WW597: under either name, so a
+        // copy vendored before the rename is still the engine.
         var project = owning(path);
-        if (project is not null && project.Contains(Engine, StringComparison.Ordinal))
+        if (project is not null
+            && (project.Contains(Engine, StringComparison.Ordinal)
+                || project.Contains(Projects.Renamed.OldName + ".csproj", StringComparison.Ordinal)))
+        {
             return Verdict.Allowed;
+        }
 
         return new Verdict(true, Because(path, driving));
     }
