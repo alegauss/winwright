@@ -1587,6 +1587,7 @@ machine of whoever ran it, a verdict assembled wrongly, and a trace that is not 
 - No recorder that turns clicks into a scenario.
 - No service, no daemon, no database.
 - A green never covers an assertion that did not run.
+- No target older than the current .NET LTS.
 
 ### And what a run deliberately does not keep
 
@@ -1688,7 +1689,7 @@ For Claude Code:
 
 For Windows developers:
 
-- **[FreeWilly](https://alegauss.github.io/freewilly/)**: Docker on Windows without Docker Desktop, with no admin prompt and no telemetry.
+- **[FreeHarbor](https://alegauss.github.io/freeharbor/)**: Docker on Windows without Docker Desktop, with no admin prompt and no telemetry.
 - **[Quickshell](https://alegauss.github.io/quickshell/)**: an SSH client for Windows with sessions, keys, SFTP and tunnels, and without the rest of the suite.
 
 All of them: [alegauss.github.io](https://alegauss.github.io/)

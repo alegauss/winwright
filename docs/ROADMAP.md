@@ -4,6 +4,8 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW589** (deps: —) **run-tests-vm -CommittedOnly reports HEAD only, yet tracked files reach the guest with their uncommitted bytes** — An adopter gating a release at HEAD in a checkout another session is editing gets a build of a tree that exists nowhere, labelled as HEAD. → §WW589
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
@@ -22,13 +24,19 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- 💭 **WW588** (deps: —) **A team whose app is on .NET 8 LTS cannot reference the in-app half or run the harness without a second runtime** — Most line-of-business WPF and WinForms code sits on the LTS, and whether the cost of a second target is worth it has never been measured. → §WW588
-
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 
 ## Block M — The site on the shared design system
+
+## Block N — The name — winwright becomes paneproof
+
+- 📋 **WW590** (deps: —) **The assemblies, namespaces, executables and NuGet packages carry the name of an older Windows automation MCP server** — civyk-winwright came six months earlier in the same space, so a search or an assistant cannot tell the two apart, and Paneproof is the name chosen to replace it. → §WW590
+- 📋 **WW591** (deps: WW590) **Renaming the code would break every adopter's winwright.json and WINWRIGHT_* variables in one release** — They are the public contract an existing suite is written against, so the new names come first and the old ones are still accepted, with a warning, for a stated period. → §WW591
+- 📋 **WW592** (deps: WW590) **The plugin, its MCP server, its skill and its guard hook are all named winwright** — An adopter who installs the renamed plugin beside the old one would have two servers driving the same desktop, so the move needs its own path. → §WW592
+- 📋 **WW593** (deps: WW590, WW591, WW592) **The repository, the site and the README still introduce the product as winwright** — A reader only meets the new name where they land, and the old page has to redirect instead of returning 404 as /freewilly/ did. → §WW593
+- 📋 **WW594** (deps: WW593) **Five adopting repositories still reference the Winwright packages, plugin and file names** — They are the adoption proof, and the old NuGet ids can only be deprecated once each of them has moved to Paneproof. → §WW594
 
 ## Done when — Block A
 
@@ -178,3 +186,7 @@
 - **A green never covers an assertion that did not run** This is the third verdict's
   whole reason to exist. Any proposal that collapses DEGRADED into a pass or into a
   failure is undoing the central finding, however much simplicity it offers in exchange.
+- **No target older than the current .NET LTS** A second target binds every change to
+  the older runtime until it ends. .NET 10 has been the LTS since November 2025 and .NET
+  8 support ends on 10/11/2026, so a team moving to a supported runtime moves to the one
+  this already targets.
