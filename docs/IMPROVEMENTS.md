@@ -56,6 +56,14 @@ session start, that it was renamed and how to move. The notes also say that the
 adopter's permission rules naming `mcp__plugin_winwright_winwright__*` stop matching the
 renamed tools without a word, and give the new prefix.
 
+Set aside on 02/11/2026, open question first: an adopter's settings name
+`winwright@winwright`, and this repository's `marketplace.json` is that marketplace.
+What Claude Code does with an installed plugin when its marketplace's manifest changes
+its name, and whether one marketplace can offer `paneproof` beside a `winwright` stub
+whose SessionStart hook announces the move, has to be tried on a real install before the
+tree changes. Pushing the rename without that answer breaks every adopter's plugin at
+its next marketplace refresh.
+
 ### §WW593 The repository, the site and the README say paneproof
 
 The rename is only real for a reader once the places they land on say paneproof: the
