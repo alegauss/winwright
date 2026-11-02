@@ -16,8 +16,6 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-- 📋 **WW595** (deps: —) **The site's install page still prints winwright@alegauss, the marketplace WW554 renamed** — An adopter who installs from the docs instead of the README meets the per-project conflict WW554 was filed to remove. → §WW595
-
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion

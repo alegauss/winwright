@@ -16,19 +16,6 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW595 The install command the docs print
-
-WW554 renamed the marketplace to `winwright`, and the README, `llms.txt` and the site's
-landing section moved to `claude plugin install winwright@winwright`. The area page
-`site/docs/src/content/docs/installing.mdx` still prints `winwright@alegauss` under
-"Wiring Claude Code", which is the marketplace WW554 left, so an adopter who installs
-from the docs gets the per-project conflict WW554 was filed for.
-
-The fix is the one word. What keeps it fixed is a site test that reads every `claude
-plugin install` command the site and the README publish and requires each to name the
-plugin and the marketplace `.claude-plugin/marketplace.json` declares, so the next
-rename is caught by the gate rather than by an adopter.
-
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion

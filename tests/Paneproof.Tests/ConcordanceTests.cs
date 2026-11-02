@@ -275,6 +275,22 @@ public sealed class ConcordanceTests : IDisposable
             File.ReadAllText(Path.Combine(Checkout.Root, "README.md")),
             StringComparison.Ordinal);
 
+        // WW595. And every other install line this repository publishes: the site's area page went on
+        // printing winwright@alegauss after WW554, because only the README was read here.
+        var published = new[] { Path.Combine(Checkout.Root, "README.md") }
+            .Concat(Directory.EnumerateFiles(Path.Combine(Checkout.Root, "site"), "*", SearchOption.AllDirectories)
+                .Where(one => !one.Contains($"{Path.DirectorySeparatorChar}node_modules{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                    && !one.Contains($"{Path.DirectorySeparatorChar}dist{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                    && new[] { ".md", ".mdx", ".txt", ".ts", ".tsx", ".astro", ".mjs" }.Contains(Path.GetExtension(one))));
+
+        var lines = published
+            .SelectMany(file => System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(file), @"claude plugin install (\S+)")
+                .Select(match => (File: Path.GetRelativePath(Checkout.Root, file), Installs: match.Groups[1].Value)))
+            .ToList();
+
+        Assert.True(lines.Count > 2, $"only {lines.Count} install line(s) were found, so this read nothing");
+        Assert.All(lines, one => Assert.True(one.Installs == $"{named}@{market}", $"{one.File} installs {one.Installs}"));
+
         // Where the plugin lives inside the marketplace's own repository, which is this one.
         Assert.Equal(
             "./",
