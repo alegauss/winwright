@@ -18,7 +18,8 @@
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-- 📋 **WW587** (deps: —) **After the two install commands the plugin has no tools until the adopter builds its clone with the .NET SDK** — Two commands is the promise on the README's first screen, and a build step in a cache directory, repeated after each update, breaks it. → §WW587
+- 🛠 **WW587** (deps: —) **After the two install commands the plugin has no tools until the adopter builds its clone with the .NET SDK** — Two commands is the promise on the README's first screen, and a build step in a cache directory, repeated after each update, breaks it. → §WW587
+- 📋 **WW595** (deps: —) **The site's install page still prints winwright@alegauss, the marketplace WW554 renamed** — An adopter who installs from the docs instead of the README meets the per-project conflict WW554 was filed to remove. → §WW595
 
 ## Block I — The in-app half — the app cooperates with the harness
 

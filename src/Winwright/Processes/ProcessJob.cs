@@ -119,19 +119,40 @@ internal sealed class ProcessJob : IDisposable
         if (members.Count == 0)
             return [];
 
-        // The register's own two-stage stop: a member with a window is asked to close it first, the
-        // way a person would, so a copy the application started of itself writes its store and lets
-        // go of its files before anything is ended under it. Measured with the relaunch fixture: a
-        // copy ended outright still held its directory when the case went to delete it.
-        var half = Math.Max(1, timeoutMs / 2);
-        // Every member is asked, so this is a list and not Any: Any would stop at the first window.
-        var asked = members.Where(Closing).ToList();
-        if (asked.Count > 0)
-            Locating.Attempt.UntilTrue(() => Members().Count == 0, half, pollMs);
+        // WW596. Opened before anything ends, because the job's list is not the answer: a member
+        // leaves it before its handles are closed, and its working directory is one of them. A
+        // process object is signalled only once they are, so that is what the stop waits on last.
+        var opened = members.Select(Held).OfType<Process>().ToList();
+        var budget = Stopwatch.StartNew();
 
-        TerminateJobObject(handle, 1);
-        Locating.Attempt.UntilTrue(() => Members().Count == 0, Math.Max(1, timeoutMs - half), pollMs);
-        return Members();
+        try
+        {
+            // The register's own two-stage stop: a member with a window is asked to close it first,
+            // the way a person would, so a copy the application started of itself writes its store and
+            // lets go of its files before anything is ended under it. Measured with the relaunch
+            // fixture: a copy ended outright still held its directory when the case went to delete it.
+            var half = Math.Max(1, timeoutMs / 2);
+            // Every member is asked, so this is a list and not Any: Any would stop at the first window.
+            var asked = members.Where(Closing).ToList();
+            if (asked.Count > 0)
+                Locating.Attempt.UntilTrue(() => Members().Count == 0, half, pollMs);
+
+            TerminateJobObject(handle, 1);
+            Locating.Attempt.UntilTrue(() => Members().Count == 0, Math.Max(1, timeoutMs - half), pollMs);
+
+            // Within what is left of the same budget: one still unsignalled at its end has not gone,
+            // however the list reads, and is answered with the ones still listed.
+            var unsignalled = opened
+                .Where(one => !one.WaitForExit(Math.Max(0, timeoutMs - (int)budget.ElapsedMilliseconds)))
+                .Select(one => one.Id);
+
+            return Members().Union(unsignalled).ToList();
+        }
+        finally
+        {
+            foreach (var one in opened)
+                one.Dispose();
+        }
     }
 
     /// <summary>Ask one member's window to close. False where it has none, or has gone.</summary>
@@ -139,6 +160,26 @@ internal sealed class ProcessJob : IDisposable
     {
         using var process = Opened(pid);
         return process is not null && process.MainWindowHandle != 0 && process.CloseMainWindow();
+    }
+
+    /// <summary>
+    /// The process under <paramref name="pid"/> with its handle open now, or null where it has gone or
+    /// will not be opened. <see cref="Process.GetProcessById(int)"/> opens nothing until it is asked,
+    /// and a handle asked for after the exit is a pid that names nothing, so this asks at once.
+    /// </summary>
+    private static Process? Held(int pid)
+    {
+        var process = Opened(pid);
+        try
+        {
+            _ = process?.SafeHandle;
+            return process;
+        }
+        catch (Exception refused) when (refused is InvalidOperationException or System.ComponentModel.Win32Exception)
+        {
+            process?.Dispose();
+            return null;
+        }
     }
 
     /// <summary>The process under <paramref name="pid"/>, or null where it has gone: nothing to close.</summary>

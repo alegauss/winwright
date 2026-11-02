@@ -132,6 +132,29 @@ public class ProcessRegisterTests
     }
 
     [Fact]
+    public void A_helper_stopped_with_its_case_has_let_go_of_its_directory_when_the_stop_answers()
+    {
+        // WW596. The job's list empties before a member's handles close, and RelaunchTests met it as
+        // a case folder that would not delete two runs in three. Five rounds, because one is a race
+        // that usually goes the right way.
+        for (var round = 0; round < 5; round++)
+        {
+            var folder = Directory.CreateTempSubdirectory("winwright-job-").FullName;
+            using var register = new ProcessRegister();
+
+            var starting = LeavesAHelper();
+            starting.WorkingDirectory = folder;
+            var launched = register.Launch(starting, "opens in Blender");
+            Helper(launched);
+
+            Assert.Null(register.Stop(launched));
+
+            // At once, with no wait of its own: the stop's answer is the claim being read.
+            Directory.Delete(folder, recursive: true);
+        }
+    }
+
+    [Fact]
     public void A_lent_launch_has_its_helpers_stopped_where_the_run_ends()
     {
         using var register = new ProcessRegister();
