@@ -52,7 +52,7 @@ test("a generator that reads the engine's C# reads it through the shared one", (
 
   for (const { name, text } of others) {
     if (exceptions.has(name) || name.endsWith(".test.mjs")) continue;
-    if (!text.includes('"src", "Winwright"') && !text.includes("src/Winwright")) continue;
+    if (!text.includes('"src", "Paneproof"') && !text.includes("src/Paneproof")) continue;
 
     assert.match(
       text,

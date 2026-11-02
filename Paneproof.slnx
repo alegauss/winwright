@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Paneproof/Paneproof.csproj" />
+    <Project Path="src/Paneproof.InApp/Paneproof.InApp.csproj" />
+    <Project Path="src/Paneproof.Fixture/Paneproof.Fixture.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Paneproof.RollCall/Paneproof.RollCall.csproj" />
+    <Project Path="tools/Paneproof.Typing/Paneproof.Typing.csproj" />
+    <Project Path="tools/Paneproof.Concordance/Paneproof.Concordance.csproj" />
+    <Project Path="tools/Paneproof.Mcp/Paneproof.Mcp.csproj" />
+    <Project Path="tools/Paneproof.Guard/Paneproof.Guard.csproj" />
+    <Project Path="tools/Paneproof.Blame/Paneproof.Blame.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Paneproof.Tests/Paneproof.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -89,7 +89,7 @@ export const verdictTerminal = `this run measured 5 conditions, 1 not read: an a
   ok      a binary built from this source: sources unchanged since the build
   <span class="pass">agrees</span>  the application is in the language this scenario is written for: pt-BR, from settings.json
   ok      the foreground belongs to the window under test: App — Relatorios
-  <span class="c">not read an application that renders its own tree when asked: it does not take Winwright.InApp</span>
+  <span class="c">not read an application that renders its own tree when asked: it does not take Paneproof.InApp</span>
 <span class="sum">DEGRADED (exit 2) - 4 assertions: 3 passed, 0 failed, 1 unchecked (all the desk's)</span>
   <span class="deg">unchecked</span> step 4  report.pt-BR - <span class="rem">'an overflow flyout this run can work' absent
                           (the desk's): the shell would not open the flyout, so

@@ -13,8 +13,8 @@ claude plugin install winwright@winwright --scope project
 
 Windows · .NET 10 · two NuGet packages, no external dependency · Apache-2.0
 
-[![Winwright on nuget.org](https://img.shields.io/nuget/v/Winwright?label=Winwright)](https://www.nuget.org/packages/Winwright)
-[![Winwright.InApp on nuget.org](https://img.shields.io/nuget/v/Winwright.InApp?label=Winwright.InApp)](https://www.nuget.org/packages/Winwright.InApp)
+[![Paneproof on nuget.org](https://img.shields.io/nuget/v/Paneproof?label=Paneproof)](https://www.nuget.org/packages/Paneproof)
+[![Paneproof.InApp on nuget.org](https://img.shields.io/nuget/v/Paneproof.InApp?label=Paneproof.InApp)](https://www.nuget.org/packages/Paneproof.InApp)
 
 **[alegauss.github.io/winwright](https://alegauss.github.io/winwright/)**: the short version of
 the argument. This file is the long one.
@@ -70,13 +70,13 @@ Windows only, .NET 10 (`net10.0-windows`). The in-app half needs `<UseWPF>true</
 
 ```xml
 <!-- In the test project that drives the application. -->
-<PackageReference Include="Winwright" Version="1.1.7" />
+<PackageReference Include="Paneproof" Version="1.1.7" />
 
 <!-- In the application under test, only if you want the readings it can only take from inside. -->
-<PackageReference Include="Winwright.InApp" Version="1.1.7" />
+<PackageReference Include="Paneproof.InApp" Version="1.1.7" />
 ```
 
-`Winwright.InApp` is optional: every reading and every pattern act runs against an application
+`Paneproof.InApp` is optional: every reading and every pattern act runs against an application
 that references nothing. See [what needs cooperation](#what-needs-the-application-to-cooperate).
 The badges above are read from the feed; the version in these lines is typed, so trust the badge
 where the two disagree.
@@ -135,7 +135,7 @@ without a second run. [Writing a case](#writing-a-case) is the full format.
 
 A hand-written harness script is always faster in the moment, and that is how a 2,732-line one
 happens. So the plugin's `PreToolUse` hook **denies** a write whose content names
-`Winwright.Acting`, `Winwright.Locating` or `Winwright.Asserting`, and names the case file and
+`Paneproof.Acting`, `Paneproof.Locating` or `Paneproof.Asserting`, and names the case file and
 `winwright_check` that replace it. It never denies a `.cases.json` write, never denies a project
 that references the engine's *source*, and allows anything it cannot read: a hook that denies
 what it did not understand is one that gets removed.
@@ -267,7 +267,7 @@ just took can be trusted.
 | `Obstruction` | what stands over a region, read off the z order |
 | `DropShadows` | whether this desk draws the shadow a menu asks for — a setting of the machine, off on a runner tuned for speed, so a menu with no shadow behind it is the desk and not the application |
 | `PaintedFrame` | what a window actually paints inside the rectangle it owns |
-| `OwnRender` | ask the application to draw its own tree into a named file, and read back whether it did — the one verb here that needs `Winwright.InApp` on the other end |
+| `OwnRender` | ask the application to draw its own tree into a named file, and read back whether it did — the one verb here that needs `Paneproof.InApp` on the other end |
 | `Loading` | whether a page has finished computing, against the loading label the project declares |
 | `CaseRun` | one declared case, run: the loop, the waits, the attempts and the verdict, none of which the case carries |
 | `Suite` | the cases a selection asked for, run, with every case it left alone named rather than counted |
@@ -279,7 +279,7 @@ than discovered on a red run.
 
 ## What needs the application to cooperate
 
-One verb in the list above needs `Winwright.InApp` — `OwnRender`, and it is the whole reason the
+One verb in the list above needs `Paneproof.InApp` — `OwnRender`, and it is the whole reason the
 default capture route works. Everything else answers against an application that references nothing.
 What the in-app half adds is what a harness cannot take from outside the process:
 
@@ -290,7 +290,7 @@ What the in-app half adds is what a harness cannot take from outside the process
   the verb exists: a tree that was measured and never arranged renders as a fully transparent
   picture of exactly the right size, which looks like a drawing bug and is a calling bug.
 - `Backgrounds` — what a capture should be drawn on, from a brush the application declares under
-  `WinwrightCaptureBackground`, or the window's own. The system palette is not consulted at all: it
+  `PaneproofCaptureBackground`, or the window's own. The system palette is not consulted at all: it
   answers white on a machine whose window is dark.
 - `Geometry` / `Surfaces` — the laid-out tree and what was drawn, written only where the harness
   asked. An application shipped to its users reports nothing and writes no file, which is what makes
@@ -650,7 +650,7 @@ declaration, and the folder inside it is the case's name — so no case carries 
 same rule every other field here follows. Its claim is the receipt and it takes no `expect` and no
 `reads`. A window a render could reach is a **hole** rather than a picture: a render draws the
 application's own visual tree and only the application can take one, so the answer names
-`Winwright.InApp` instead of reaching for the screen.
+`Paneproof.InApp` instead of reaching for the screen.
 
 A capture may also name a **`popup`** — the surface inside the window whose tree the picture is of,
 by the name the application's own author gave it. It is the one picture no copy of the screen can

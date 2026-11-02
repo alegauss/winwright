@@ -1,6 +1,6 @@
-using Winwright.Processes;
-using Winwright.Projects;
-using Winwright.Scenarios;
+using Paneproof.Processes;
+using Paneproof.Projects;
+using Paneproof.Scenarios;
 
 namespace Adopter.Driving;
 

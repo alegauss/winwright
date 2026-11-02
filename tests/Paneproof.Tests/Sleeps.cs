@@ -1,0 +1,335 @@
+using System.Collections.ObjectModel;
+
+using Xunit;
+
+namespace Paneproof.Tests;
+
+/// <summary>What a sleep is doing, where one is not a wait.</summary>
+internal enum Sleeping
+{
+    /// <summary>The interval between looks. This is what a deadline is made of.</summary>
+    Machinery,
+
+    /// <summary>The interval is the resolution of a measurement, so a deadline would delete it.</summary>
+    Resolution,
+
+    /// <summary>The sleep is the thing being reproduced, not a way of waiting for it.</summary>
+    UnderTest,
+
+    /// <summary>
+    /// A wait, and it stays one. There is nothing observable to wait on, and a condition that goes
+    /// true too early is worse than the sleep it replaced because it reads as a wait that was
+    /// proved. Counted here, and never silently.
+    /// </summary>
+    StillAWait,
+
+    /// <summary>
+    /// Parked on a signal another thread sets, with a deadline. WW198: the opposite of a sleep and
+    /// counted anyway, because the point of this catalogue is to see every way of parking a thread
+    /// and then say which is which — an unseen one cannot be called right.
+    /// </summary>
+    OnASignal,
+
+    /// <summary>
+    /// The looking is what disturbs the thing being looked at, so the interval is not a wait for a
+    /// condition — it is the condition's own precondition. WW329, and it is the arm this catalogue
+    /// did not have: a deadline that polled from the first millisecond would be the defect rather
+    /// than the way of avoiding one.
+    /// </summary>
+    Undisturbed,
+}
+
+/// <summary>
+/// One file that sleeps, and why its sleeping is not a scenario waiting.
+/// </summary>
+/// <param name="File">The source file, by name.</param>
+/// <param name="Sleeps">How many times it calls it.</param>
+/// <param name="Kind">What the sleeping is doing.</param>
+/// <param name="Because">Why it is that rather than a wait.</param>
+internal sealed record Sleep(string File, int Sleeps, Sleeping Kind, string Because)
+{
+    public override string ToString() => $"{File,-22} {Sleeps}x {Kind,-11} {Because}";
+}
+
+/// <summary>
+/// WW184. Block C's second criterion says no scenario carries a sleep: every wait is a deadline on
+/// a condition, and how long it took is in the trace for whoever wants to tune it. Nothing checked
+/// it, and seven files call <c>Thread.Sleep</c>.
+/// <para>
+/// Several are certainly right, and their being right is the point. <c>Attempt</c> sleeps between
+/// polls, which is the deadline machinery itself. <c>FrameRun</c> paces frames, and WW143 argued
+/// that case in writing: the interval is the resolution of the measurement, so turning it into a
+/// deadline would delete the observation. The fixture sleeps because a thread parked without
+/// pumping is the defect <c>--pump=none</c> exists to reproduce.
+/// </para>
+/// <para>
+/// One is a wait and stays one, with the measurement written beside it. That entry is the reason
+/// this is a catalogue rather than a ban: a rule that admitted no exceptions would be answered by
+/// somebody spelling the sleep differently, and then nothing would know about it at all.
+/// </para>
+/// <para>
+/// The call and never the words. <c>Thread.Sleep(</c> with its bracket, because two files discuss
+/// sleeping in prose — this one and <c>Waits</c> — and a scan that counted those would report a
+/// criterion broken by a comment explaining why it is not.
+/// </para>
+/// <para>
+/// WW437 gave it the third tree. It walked <c>src</c> and <c>tests</c>, and the repository has
+/// <c>tools</c> as well — five files of it park a thread, among them the one this project parks most
+/// deliberately: <c>Paneproof.Blame</c> holds a thread so that a dump has a hang in it. Found by
+/// writing that entry and being told the file sleeps nowhere, which is this catalogue blind from
+/// both sides at once.
+/// </para>
+/// <para>
+/// No kind of its own for them, and that is the answer to what the design asked. The question this
+/// catalogue puts is what a parking is doing, and reading the eight sites says: three are the
+/// interval between one look and the next, four are the arm or the spacing an experiment is
+/// measuring, and one is a thread held still to be photographed. Every one of those is a kind
+/// already written down — and a kind meaning <em>this file is in tools</em> would say which
+/// directory it is in rather than what its sleeping is for, which is the one thing this list exists
+/// to say.
+/// </para>
+/// </summary>
+internal static class Sleeps
+{
+    /// <summary>
+    /// Every way of parking a thread this reading knows, matched in the sources exactly as written.
+    /// <para>
+    /// WW198. This was one spelling, and the doc above argued for a catalogue over a ban in these
+    /// words: a rule admitting no exceptions "would be answered by somebody spelling the sleep
+    /// differently, and then nothing would know about it at all". It was answered from inside.
+    /// <c>FrameRun</c> parks twice — <c>Thread.Sleep</c> for the bulk of the interval and
+    /// <c>Thread.SpinWait</c> for the last sixteen milliseconds — and the count said one.
+    /// </para>
+    /// <para>
+    /// Six now, of which three are in the tree and three are what a reader reaches for next. The
+    /// empty ones are the cheap half: a spelling written down before anybody uses it costs nothing,
+    /// and the one that was not written down cost a count being quietly wrong.
+    /// </para>
+    /// </summary>
+    internal static IReadOnlyList<string> Spellings { get; } = new ReadOnlyCollection<string>(
+    [
+        "Thread.Sleep(",
+        "Thread.SpinWait(",
+        "Task.Delay(",
+        "SpinWait.SpinUntil(",
+        ".WaitOne(",
+        ".Wait(",
+    ]);
+
+    internal static IReadOnlyList<Sleep> Known { get; } = new ReadOnlyCollection<Sleep>(
+    [
+        // --- the engine ---------------------------------------------------------------------------
+        new("Attempt.cs", 2, Sleeping.Machinery,
+            "the interval between one look and the next, in both the sighting deadline and the "
+                + "condition one — a deadline that did not sleep would be a spin"),
+        new("Expectation.cs", 1, Sleeping.Machinery,
+            "the same interval, in the poll an expectation takes while it watches a subject"),
+        new("FrameRun.cs", 2, Sleeping.Resolution,
+            "frames are paced, and WW143 wrote the argument down: the interval is the resolution of "
+                + "the measurement, and the last sixteen milliseconds are spun because the scheduler "
+                + "overshoots by more than a third of an interval at twenty-five frames a second. "
+                + "WW198: two, and the second is that spin — it was described here and counted "
+                + "nowhere, which is the whole of what that task was about"),
+        new("Program.cs", 1, Sleeping.UnderTest,
+            "the fixture parks a thread without pumping, which is the whole of what --pump=none "
+                + "reproduces: a single-threaded apartment that blocks any other way keeps answering "
+                + "messages and is not dead at all"),
+        new("Pointer.cs", 1, Sleeping.Undisturbed,
+            "WW353, and WW329's measurement rather than a second one: the click was the one "
+                + "synthesised verb that sent and read on the next line, where its "
+                + "neighbours each wait for a named thing to happen. It has no such thing to wait "
+                + "for — a click is as often a navigation whose effect is elsewhere — so it takes "
+                + "the pause WW329 priced instead of a poll that would spend the act budget on "
+                + "every click that correctly changes nothing. Priced with WW341's arm at 150 "
+                + "rounds each way on the guest: 382ms a click round without it and 455ms with, of "
+                + "which about 36 is the guest — press and nudge moved 234 to 268 and 196 to 235 "
+                + "between the same two runs without being touched. Both read 0 late of 150, so "
+                + "what this bought is the shape and not a fault removed"),
+        new("Reaching.cs", 1, Sleeping.OnASignal,
+            "WW522. The connect is a task the socket completes, and the probe parks on it with the "
+                + "deadline the project declares: a server that answers ends the wait at once, and "
+                + "one that never does is the absence it reports"),
+        new("Drag.cs", 2, Sleeping.Resolution,
+            "WW520. A drag is a press, a run of moves and a release, and the pause between them is "
+                + "the resolution of the gesture: sent in one call they reach the application as a "
+                + "jump, and a framework starts a drag only after it has seen moves past the "
+                + "threshold one message at a time. A deadline would have no condition to watch, "
+                + "since nothing reports a message as handled. The second is WW353's pause before "
+                + "the read, taken as the click takes it"),
+        new("FileDrop.cs", 3, Sleeping.OnASignal,
+            "WW550. The drop's source window and its drag loop live on a thread of their own, and the "
+                + "act parks on what that thread signals, with the act deadline: once for the window to "
+                + "be up before anything is pressed, and once for the loop to answer after the release — "
+                + "a second time only where it had to be told to cancel. The loop returns after the "
+                + "target's own drop handler has, so no pause is taken before the read"),
+        new("Keyboard.cs", 1, Sleeping.Undisturbed,
+            "WW329, and the one entry here where the sleeping is the repair: the engine's own poll "
+                + "was provoking the substitution it then resent. Measured on the guest over 1200 "
+                + "rounds each — 31 substitutions with no pause, none at 50ms, none at 150ms. WW355 "
+                + "asked whether a cheaper read would do instead, and the answer is most of one: "
+                + "every reader short of the whole pass provoked 0 of 400 twice over where the pass "
+                + "read 5 and 4, so the settle asks one pattern of the element the admission already "
+                + "found — but the real act still read 1 of 1200 with the pause taken out, against 0 "
+                + "of 1200 with it. So the pause stays, guarding a fault thirty times rarer, and a "
+                + "round costs 92ms where WW329 priced it at 153"),
+        new("OwnRender.cs", 1, Sleeping.Machinery,
+            "WW374, and it is a poll rather than a pause: an application answers renders from the "
+                + "moment it hooks the message, `Suite.Launch` waits only for a window, and a "
+                + "capture asked for in that gap answered nothing. So this is the interval between "
+                + "one ask and the next while a window that is up starts answering — the same "
+                + "machinery a deadline is made of, spent only where the ask already failed and "
+                + "ended the moment the application replies"),
+        new("Finished.cs", 1, Sleeping.Machinery,
+            "WW218's move into place needs delete access to the destination, and a harness polling "
+                + "that file has it open — so this is the interval between one attempt and the next, "
+                + "the same machinery a deadline is made of, against a collision that clears in "
+                + "milliseconds because the thing holding the file is a poll"),
+
+        // --- the suite ----------------------------------------------------------------------------
+        new("ForegroundTests.cs", 1, Sleeping.UnderTest,
+            "WW470. The fixture is a window that comes forward late, so the interval before it takes "
+                + "the desk is the thing being reproduced and not a way of waiting for it — what the "
+                + "case measures against it is the engine's own wait, which is a deadline"),
+        new("FixtureTests.cs", 1, Sleeping.Resolution,
+            "the sampler that watches an animation, where the interval is again the resolution of "
+                + "what is being measured rather than a wait for it"),
+        new("FrameRunTests.cs", 2, Sleeping.UnderTest,
+            "a writer made deliberately slow so the capture falls behind — the sleeping is the "
+                + "condition under test and waiting for it would be waiting for the case's own hand"),
+        new("FileSubjectTests.cs", 2, Sleeping.UnderTest,
+            "WW535. A file that arrives while the step is waiting is the condition: Explorer writes a "
+                + "dropped file after the release returns, so the copy has to land after the step began "
+                + "looking and before its deadline. The engine's own wait is what the case measures. "
+                + "The second is WW559's, and it is machinery: the pause between asks for the desktop "
+                + "root, a COM call that fails without a state anything could wait on"),
+        new("NamedWaitTests.cs", 1, Sleeping.UnderTest,
+            "WW577. The file arriving after the project's own resolve and before the step's named wait "
+                + "is the condition: whether the step waited the longer of the two is what the case "
+                + "measures, and a signal would be the case telling the engine when to look"),
+        new("CaseRunTests.cs", 2, Sleeping.UnderTest,
+            "WW401, and the delay is the condition: what that rule is about is a desk that moves "
+                + "while a reading is being taken, so the decoy has to arrive after the act landed "
+                + "and before the expectation gives up. There is nothing to wait on — the thing "
+                + "being reproduced is the timing itself, and a signal would be the case telling "
+                + "itself when to fire. The second parking is the opposite and is why the count is "
+                + "two: disposal waits on that thread's own signal before closing the decoy, because "
+                + "one still opening would outlive the case and take the desk from whatever runs "
+                + "next, which is the fault WW384 spent two guest runs on"),
+        new("LaunchStreamsTests.cs", 2, Sleeping.Machinery,
+            "WW563. One is the interval between looks while a launch's drained lines arrive, which "
+                + "they do after the exit and not with it, under a ten-second deadline; the other is "
+                + "the server's next line read with a minute's deadline, so a server that went quiet "
+                + "is a red rather than a hung suite"),
+        // --- parked on a signal, which WW198 widened the reading to see ------------------------------
+        new("ApartmentTests.cs", 2, Sleeping.UnderTest,
+            "an event nobody ever sets, waited on twice so the apartment's own deadline has something "
+                + "that genuinely never finishes to time out on — the parking is the condition under "
+                + "test, and a signal that arrived would delete the case"),
+        new("PumpedDialog.cs", 1, Sleeping.OnASignal,
+            "the thread that owns the window sets this once the window exists, so the constructor "
+                + "hands back a dialog that is really there rather than one that will be shortly — "
+                + "with a ten-second deadline, so a thread that never starts is a refusal and not a hang"),
+        new("PumpedFlyout.cs", 1, Sleeping.OnASignal,
+            "WW347: the same shape for a WPF popup, and set in a finally so a flyout that would not "
+                + "open is reported as the refusal it is rather than parking the case for the whole "
+                + "deadline — which is the difference between a red naming what WPF said and a hang"),
+        new("AnsweringWindow.cs", 1, Sleeping.OnASignal,
+            "WW349: the same shape again, for the window that answers a render. The thread has to be "
+                + "pumping before the send goes out, so what this parks on is the hook being on — a "
+                + "send to a window that is not yet answering would spend the whole ask being declined"),
+        new("FinishedTests.cs", 3, Sleeping.OnASignal,
+            "two signals and one delay, and the shape is the point: a reader takes the destination "
+                + "and parks until it is told to let go, so the case knows the file really is open "
+                + "rather than about to be — and the letting go is delayed rather than triggered by "
+                + "the move, because a collision that had already cleared would not be one"),
+        new("Injections.cs", 1, Sleeping.OnASignal,
+            "the hook's own thread signals once SetWindowsHookEx has answered, either way, so the "
+                + "window is never typed at by a run whose recorder is still being installed — with "
+                + "a five-second deadline, because a thread that never starts has to be reported "
+                + "rather than hang the fixture on the failure this parking exists to catch"),
+        new("TrayIconFixture.cs", 1, Sleeping.OnASignal,
+            "the same shape for the icon: the shell is asked and the add is signalled, which is what "
+                + "lets every case look straight after Add rather than waiting a guessed interval"),
+
+        new("ParkedTitleTests.cs", 2, Sleeping.UnderTest,
+            "WW436, and the parking is the defect: a window whose thread never pumps is what made a "
+                + "title read a wait with no end on it, so a thread that came back on its own would "
+                + "delete the case. The second is the opposite and is why the count is two — the "
+                + "constructor waits on that thread's own signal, with a ten-second deadline, so a "
+                + "window that never opened is a refusal rather than a case parked on its own fixture"),
+
+        // --- the tools, which WW437 brought into the sweep --------------------------------------------
+        new("Parked.cs", 1, Sleeping.UnderTest,
+            "WW406's reader needs a hang to read, and a hang dump cannot be arranged any other way: "
+                + "this thread is held in a method named on purpose so the frame the reader blames is "
+                + "one a case can assert on. The parking is the thing being imaged, and it is released "
+                + "when the tool's own input closes"),
+        new("Disturbance.cs", 2, Sleeping.UnderTest,
+            "the arms of WW355's rig, which is what the numbers in Keyboard's entry above were "
+                + "measured with. `quiet` does nothing for the whole drain, so its sleep is the arm "
+                + "itself; the others poke the window every 25ms for the same 300, which is how hard "
+                + "each arm disturbs — the intervals are the experiment and not a wait for it"),
+        new("FirstRead.cs", 1, Sleeping.UnderTest,
+            "the pause between batches is the variable this arm sweeps: it answers what a first read "
+                + "costs at each spacing, so waiting on a condition instead would delete the reading"),
+        new("Sweep.cs", 4, Sleeping.Machinery,
+            "three are the interval between one look and the next while a control is read or settles, "
+                + "which is what a deadline is made of; the fourth is the spacing between code units "
+                + "and is the thing being swept, taken after each one including the last so no "
+                + "character of a round is the one nothing followed"),
+        new("Transfer.cs", 3, Sleeping.Machinery,
+            "two are the same poll-and-drain intervals; the third is the engine's own guard pause put "
+                + "back at one rung of WW368's ladder, so the two rungs either side of it are the same "
+                + "act with the pause in two places rather than two experiments"),
+
+        new("TraversalTests.cs", 1, Sleeping.StillAWait,
+            "there is nothing out here to observe: the state a traversal settles into is the one "
+                + "after the change, and a condition true too early reads as a wait that was proved. "
+                + "It stays a sleep, with the measurement, until there is something to wait on"),
+    ]);
+
+    /// <summary>The ones that are still waits, counted rather than left off.</summary>
+    internal static IReadOnlyList<Sleep> Waiting() =>
+        new ReadOnlyCollection<Sleep>(Known.Where(one => one.Kind == Sleeping.StillAWait).ToList());
+
+    /// <summary>Every file that calls it, and how many times, read out of the sources.</summary>
+    internal static IReadOnlyList<Sleep> Found() => scanned.Value;
+
+    private static readonly Lazy<IReadOnlyList<Sleep>> scanned = new(Scan);
+
+    private static IReadOnlyList<Sleep> Scan()
+    {
+        var found = new List<Sleep>();
+
+        // WW193. Checkout's walk, so the exclusions are settled in one place — and its own note on
+        // leaving a catalogue's own file out is the same reason this one had.
+        foreach (var file in Checkout.Sources(Checkout.Everything, except: $"{nameof(Sleeps)}.cs"))
+        {
+            // WW198. Code and never prose, which this file's own doc has claimed since WW184 and now
+            // does: the call with its bracket was chosen so a comment about sleeping was not counted,
+            // and stripping the comment says the same thing without relying on how it was spelled.
+            var calls = File.ReadLines(file)
+                .Select(Checkout.Code)
+                .Sum(line => Spellings.Sum(one => Occurrences(line, one)));
+
+            if (calls > 0)
+                found.Add(new Sleep(Path.GetFileName(file), calls, Sleeping.Machinery, ""));
+        }
+
+        return found.OrderBy(one => one.File, StringComparer.Ordinal).ToList();
+    }
+
+    private static int Occurrences(string text, string what)
+    {
+        var count = 0;
+        var at = text.IndexOf(what, StringComparison.Ordinal);
+        while (at >= 0)
+        {
+            count++;
+            at = text.IndexOf(what, at + what.Length, StringComparison.Ordinal);
+        }
+
+        return count;
+    }
+
+}

@@ -69,7 +69,7 @@ first, and this site followed. Three things about that are worth knowing before 
 
 - `Directory.Build.props` — the one declared version of every assembly here.
 - the two `.csproj` files — the package ids, and which half takes which.
-- `src/Winwright/Verdicts/RunOutcome.cs` — the outcomes **and their exit codes**.
+- `src/Paneproof/Verdicts/RunOutcome.cs` — the outcomes **and their exit codes**.
 
 The last is the reason it exists at all. The enum's member values *are* the process exit
 codes — that is the product's own decision — so a table of codes typed onto a web page would

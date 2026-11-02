@@ -7,10 +7,10 @@
 // predicate added, and wrong in the direction nothing reports.
 //
 // Four sources, and each answers a different half of the page:
-//   src/Winwright/Locating/Locator.cs                  the forms, the keys, and which
+//   src/Paneproof/Locating/Locator.cs                  the forms, the keys, and which
 //                                                      refusals the parser actually throws
-//   src/Winwright/Locating/LocatorStep.cs              what each key matches, and the orders
-//   src/Winwright/Locating/LocatorSyntaxException.cs   every way a locator can fail to parse
+//   src/Paneproof/Locating/LocatorStep.cs              what each key matches, and the orders
+//   src/Paneproof/Locating/LocatorSyntaxException.cs   every way a locator can fail to parse
 //
 // What is NOT derivable here, and is said in prose on the page instead: the control types and
 // the patterns. `UiaVocabulary` reads both off UI Automation itself at run time — deliberately,
@@ -30,7 +30,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const siteDir = join(here, "..");
 const repoDir = join(siteDir, "..");
 
-const read = (...parts) => readFileSync(join(repoDir, "src", "Winwright", "Locating", ...parts), "utf8");
+const read = (...parts) => readFileSync(join(repoDir, "src", "Paneproof", "Locating", ...parts), "utf8");
 
 /** The first sentence of a member's summary, which is the one line a table cell is.
  *

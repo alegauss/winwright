@@ -1,6 +1,6 @@
 // The in-app half, read out of the package an adopter would ship. WW492.
 //
-// `Winwright.InApp` is the only thing this project asks anybody to put inside an application
+// `Paneproof.InApp` is the only thing this project asks anybody to put inside an application
 // their users run, and that is a different decision from taking a test dependency. The README
 // answers it with a list of types. The question actually being asked is what this does in a
 // release nobody is testing, and the answer is a property of the code rather than a claim:
@@ -9,7 +9,7 @@
 // So what this reads is the guards. One source per surface, each a type declaring a
 // `PathVariable` and saying in its own summary what it answers and why it is off by default.
 //
-//   src/Winwright.InApp/*.cs   every surface, and the variable that arms it
+//   src/Paneproof.InApp/*.cs   every surface, and the variable that arms it
 //
 // The verbs that need this half and the condition a run without it answers are generated
 // already, by `verbs.mjs` and `holes.mjs` — the page reads those rather than a third copy.
@@ -22,7 +22,7 @@ import { plain } from "./csharp.mjs";
 const here = dirname(fileURLToPath(import.meta.url));
 const siteDir = join(here, "..");
 const repoDir = join(siteDir, "..");
-const half = join(repoDir, "src", "Winwright.InApp");
+const half = join(repoDir, "src", "Paneproof.InApp");
 
 const sources = readdirSync(half, { withFileTypes: true })
   .filter((one) => one.isFile() && one.name.endsWith(".cs"))
@@ -99,7 +99,7 @@ const inapp = {
   surfaces: surfaces.sort((a, b) => (a.surface < b.surface ? -1 : 1)),
   registered,
   // Which framework the package needs, off the project file rather than off a sentence.
-  wpf: /<UseWPF>true<\/UseWPF>/.test(readFileSync(join(half, "Winwright.InApp.csproj"), "utf8")),
+  wpf: /<UseWPF>true<\/UseWPF>/.test(readFileSync(join(half, "Paneproof.InApp.csproj"), "utf8")),
 };
 
 const out = join(siteDir, "docs", "src", "data", "inapp.generated.json");

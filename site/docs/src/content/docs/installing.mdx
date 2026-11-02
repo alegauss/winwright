@@ -77,7 +77,7 @@ is.
 
 ## The in-app half, and when you do not need it
 
-`Winwright.InApp` goes in the **application under test**, never in the project that drives it,
+`Paneproof.InApp` goes in the **application under test**, never in the project that drives it,
 and it is optional. Every locator, every reading and every pattern act works against an
 application that references nothing at all.
 
@@ -131,7 +131,7 @@ agent loaded once and then typed a key out of:
 | `winwright_run` | The cases a selection asks for, run: the verdict, a line per case that ran and per case it left alone, the exit code, and what outlived the run. |
 
 It also registers a `PreToolUse` hook that **denies** a write whose content names
-`Winwright.Acting`, `Winwright.Locating` or `Winwright.Asserting`, and names the case file and
+`Paneproof.Acting`, `Paneproof.Locating` or `Paneproof.Asserting`, and names the case file and
 `winwright_check` that replace it. A hand-written harness script is always available and always
 faster in the moment, and that is exactly how a 2,732-line one happens. The refusal arrives
 before the work rather than after it.

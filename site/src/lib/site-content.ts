@@ -700,7 +700,7 @@ export const inApp = {
     [
       { b: "Backgrounds" },
       " — what a capture is drawn on, from a brush the application declares under ",
-      { code: "WinwrightCaptureBackground" },
+      { code: "PaneproofCaptureBackground" },
       ", or the window's own. The system palette is not consulted at all: it answers white on a machine whose window is dark.",
     ] as Rich,
     [

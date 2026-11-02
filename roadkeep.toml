@@ -41,6 +41,11 @@ held = 60
 # reading and never a line count reaching zero
 [criteria]
 
+# what a line can need present and no session can conjure: `release` is a person cutting
+# a release through publish.yml, which `pick` offers only to a caller passing --have release
+[requirements]
+declared = ["release"]
+
 [project]
 name = "winwright"
 description = "Drives a Windows desktop app from a test and reports what was actually observed."

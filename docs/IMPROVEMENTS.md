@@ -41,32 +41,6 @@ rename is caught by the gate rather than by an adopter.
 
 ## Block N — The name — winwright becomes paneproof
 
-### §WW590 Paneproof in the code and the package ids
-
-Decided on 02/11/2026, in the visibility repository, before winwright goes to any
-channel.
-
-`civyk-official/civyk-winwright` was created on 28/02/2026, six months before this
-repository (21/08/2026). It is a "Playwright-style MCP server for Windows desktop,
-system, and browser automation", with 21 stars, already used in other people's
-repositories. It is the same space, the same audience (agents driving Windows desktop
-apps over MCP) and the same pun on Playwright, so a search, a reader or an AI assistant
-cannot tell the two apart. Holding the `Winwright` id on NuGet keeps the package, not
-the name. The rename will never be cheaper than now: 1 star, no external adopter, no
-post published.
-
-The new name is **paneproof**: *pane*, the glass of a window and a pane of an interface,
-and *proof*, which is the promise that a green never covers a check that did not run. On
-02/11/2026 there was no `Paneproof` package on NuGet, no repository with that name on
-GitHub and no product by that name on the web. A trademark search was not done.
-
-This line is the code: assemblies, namespaces, the solution, the executables
-(`Winwright.Mcp.exe`, `Winwright.Blame.exe`, ...) and the package ids, which become
-`Paneproof` and `Paneproof.InApp`. NuGet cannot rename a package, so the first Paneproof
-release is a new id, and the old ids get one last release whose description points to
-the new ones. Deprecating the old ids on nuget.org waits for the adopters (Block N, last
-line). The roadkeep prefix `WW` stays: the ids are history.
-
 ### §WW591 The old file and variable names keep working
 
 An existing suite is written against `winwright.json`, `winwright.read-back.json` and
@@ -128,3 +102,38 @@ here, and the line closes when each has shipped.
 Only then are `Winwright` and `Winwright.InApp` deprecated on nuget.org, pointing to
 `Paneproof` and `Paneproof.InApp` (done by Alexandre on the site), and the
 `winwright-friction` skill is renamed.
+
+### §WW597 The guard knows the old namespaces too
+
+WW590 renamed the engine's namespaces to `Paneproof.*`, and the guard reads the
+namespaces it denies off the engine assembly (`Guard.Driving`), so after the rename it
+denies `Paneproof.Acting`, `Paneproof.Locating` and `Paneproof.Asserting` and nothing
+else. An adopter still on the `Winwright` package who installs the renamed plugin can
+write a harness script naming `Winwright.Acting` and the guard lets it through, which is
+the hand-written harness the guard exists to stop.
+
+What it should do: for as long as WW591 accepts the old file and variable names, the
+guard also denies the old spellings, derived from the read-off list by swapping the
+prefix rather than typed as a second list, and the denial names the case file and
+`winwright_check` as it does today. The project above the path is recognised as the
+engine by `Paneproof.csproj` or `Winwright.csproj`, so an older vendored copy is not
+denied for driving windows on purpose. `GuardTests` gains a case for each old spelling
+and the control that an unrelated `Winwright` word is still allowed. The old spellings
+leave with the rest of WW591's period.
+
+### §WW598 The old ids' last release points at Paneproof
+
+NuGet cannot rename a package, so after WW590 the tree packs `Paneproof` and
+`Paneproof.InApp` under new ids, and `Winwright` and `Winwright.InApp` on nuget.org stop
+receiving versions. An adopter restoring the old ids sees nothing that says they moved.
+
+What it should do: one last release of each old id, cut from the commit before the
+rename (the parent of WW590's commit) with only `<Description>` and the README's first
+line changed to say the package is now `Paneproof` / `Paneproof.InApp` and where to read
+the move. Its version is the next patch after the last one published, so `publish.yml`'s
+"nuget.org has not got it" rule is not needed. It goes out after the first `Paneproof`
+release, so the description points at something that exists.
+
+Deprecating the old ids on nuget.org is not this line: it waits for the adopters
+(WW594). Cutting a release is a person's decision and runs from the publish workflow, so
+this line waits for that person.

@@ -63,7 +63,7 @@ try {
     }
     catch {
         # Somebody else's rename landed first. Theirs is the same release, so it is the answer too.
-        if (-not (Test-Path (Join-Path $Into 'mcp\Winwright.Mcp.dll'))) { throw }
+        if (-not (Test-Path (Join-Path $Into 'mcp\Paneproof.Mcp.dll'))) { throw }
     }
 
     # An update replaces: the versions beside this one are no plugin's any more. One still open in a

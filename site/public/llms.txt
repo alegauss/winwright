@@ -140,7 +140,7 @@ is answered with the nearest name UI Automation actually has.
   first three launch nothing. The skill loads when a window is in play rather than on every
   turn, and a `PreToolUse` hook denies a hand-written harness script and names the case file
   and the tool that replace it. There is no `winwright` executable and no slash commands.
-- **The in-app half (optional)** — `Winwright.InApp`, taken by the application under test
+- **The in-app half (optional)** — `Paneproof.InApp`, taken by the application under test
   only if you want the readings a harness cannot take from outside the process: whether this
   process's idea of the display is trustworthy, an element rendered to a PNG (measured,
   arranged and updated in that order), the background a capture is drawn on from a brush the
@@ -162,14 +162,14 @@ Both halves are published on nuget.org at `{{version}}` under the Apache-2.0 lic
 harness half goes in the project that drives the application:
 
 ```xml
-<PackageReference Include="Winwright" Version="{{version}}" />
+<PackageReference Include="Paneproof" Version="{{version}}" />
 ```
 
 The in-app half goes in the application under test, and only if you want the readings it can
 only take from inside:
 
 ```xml
-<PackageReference Include="Winwright.InApp" Version="{{version}}" />
+<PackageReference Include="Paneproof.InApp" Version="{{version}}" />
 ```
 
 Windows, .NET 10, `net10.0-windows`. The in-app half needs `<UseWPF>true</UseWPF>`. Neither
@@ -185,14 +185,14 @@ the driving project into the application:
 
 ## Layout
 
-- `src/Winwright` — the engine: locating, acting, asserting, capturing, tracing, verdicts,
+- `src/Paneproof` — the engine: locating, acting, asserting, capturing, tracing, verdicts,
   windowing, projects and scenarios. No package reference, deliberately.
-- `src/Winwright.InApp` — the in-app half. No reference to the engine, deliberately.
-- `src/Winwright.Fixture` — an application built to be hard to test, which is what every
+- `src/Paneproof.InApp` — the in-app half. No reference to the engine, deliberately.
+- `src/Paneproof.Fixture` — an application built to be hard to test, which is what every
   refusal in the engine is paired against.
-- `tools/Winwright.RollCall` — the roll call, so a run short of what discovery found is not
+- `tools/Paneproof.RollCall` — the roll call, so a run short of what discovery found is not
   reported as a pass.
-- `tools/Winwright.Mcp` — the MCP server the Claude Code plugin wires; `tools/Winwright.Guard`
+- `tools/Paneproof.Mcp` — the MCP server the Claude Code plugin wires; `tools/Paneproof.Guard`
   is the hook.
 - `site/` — this site (Vite + React + Tailwind); its build emits this file, a Markdown twin
   per route and `manifest.json`.
@@ -219,8 +219,8 @@ organisations with a lot to publish — run on your own servers, with no per-use
 
 - [Website](https://alegauss.github.io/winwright/): the product page
 - [Manifest](https://alegauss.github.io/winwright/manifest.json): the routes and their Markdown twins
-- [Winwright on nuget.org](https://www.nuget.org/packages/Winwright): the harness half
-- [Winwright.InApp on nuget.org](https://www.nuget.org/packages/Winwright.InApp): the optional in-app half
+- [Paneproof on nuget.org](https://www.nuget.org/packages/Paneproof): the harness half
+- [Paneproof.InApp on nuget.org](https://www.nuget.org/packages/Paneproof.InApp): the optional in-app half
 - [GitHub repository](https://github.com/alegauss/winwright): source code and the full reference
 - [Changelog](https://github.com/alegauss/winwright/blob/main/docs/CHANGELOG.md): what has shipped
 - [Issues](https://github.com/alegauss/winwright/issues): where to say something is wrong

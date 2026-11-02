@@ -1070,7 +1070,7 @@ function Show-Blame {
     #>
     param([Parameter(Mandatory)] [string] $Dump, [string] $Configuration = 'Debug')
 
-    $project = Join-Path $PSScriptRoot 'Winwright.Blame\Winwright.Blame.csproj'
+    $project = Join-Path $PSScriptRoot 'Paneproof.Blame\Paneproof.Blame.csproj'
     if (-not (Test-Path -LiteralPath $project)) { return }
 
     # Not stopping on what the reader writes to stderr, for the reason the gate gives at its own
@@ -1088,7 +1088,7 @@ function Show-Blame {
         return
     }
 
-    # Winwright.Blame's own Unreadable. Held to the reader's constant by a case, because a number
+    # Paneproof.Blame's own Unreadable. Held to the reader's constant by a case, because a number
     # spelled at both ends of a protocol is the drift WW439 took out of the sync's.
     if ($code -eq 2) {
         Write-Host '              the dump came back and could not be read' -ForegroundColor Yellow
@@ -1145,11 +1145,11 @@ Write-Host "  waits       $(Waiting)"
 # so a red is a red the guest would have given, arrived at sooner.
 #
 # Skippable, and off for anything but this repository's own shape: an adopter's tree has no
-# Winwright.Tests, and a gate that cannot find its project says so once rather than refusing a run
+# Paneproof.Tests, and a gate that cannot find its project says so once rather than refusing a run
 # it knows nothing about.
 if (-not $NoGate) {
     $gate = Join-Path $PSScriptRoot 'host-gate.ps1'
-    $project = Join-Path $script:Tree 'tests\Winwright.Tests\Winwright.Tests.csproj'
+    $project = Join-Path $script:Tree 'tests\Paneproof.Tests\Paneproof.Tests.csproj'
 
     if ((Test-Path -LiteralPath $gate) -and (Test-Path -LiteralPath $project)) {
         . $gate -DefineOnly

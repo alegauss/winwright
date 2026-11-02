@@ -125,9 +125,9 @@ the application reads last wins while the expectations still describe the other.
 Four calls, and that is the whole of an adopting project's driving half:
 
 ```csharp
-using Winwright.Processes;
-using Winwright.Projects;
-using Winwright.Scenarios;
+using Paneproof.Processes;
+using Paneproof.Projects;
+using Paneproof.Scenarios;
 
 var project = ProjectDeclaration.Find(repository);
 var declared = ScenarioFile.Across(ScenarioFile.LoadAll(Path.Combine(repository, "cases")));

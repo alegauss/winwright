@@ -1,0 +1,501 @@
+using System.Collections.ObjectModel;
+using System.Windows.Automation;
+
+using Paneproof.Locating;
+using Paneproof.Tracing;
+using Paneproof.Verdicts;
+using Paneproof.Windowing;
+
+namespace Paneproof.Acting;
+
+/// <summary>Which way a value was reached.</summary>
+public enum PickRoute
+{
+    /// <summary>Through the selection pattern, which is one change and no keys.</summary>
+    Pattern,
+
+    /// <summary>Through the keyboard, anchored at an end and walked.</summary>
+    Keyboard,
+}
+
+/// <summary>What picking a value did, and how many switches it took to get there.</summary>
+public sealed record PickResult
+{
+    internal PickResult(
+        string wanted,
+        ElementFacts container,
+        PickRoute route,
+        IReadOnlyList<string> passed,
+        string? selected,
+        string? patternRefused,
+        Precondition foreground)
+    {
+        Wanted = wanted;
+        Container = container;
+        Route = route;
+        Passed = passed;
+        Selected = selected;
+        PatternRefused = patternRefused;
+        Foreground = foreground;
+    }
+
+    /// <summary>The value that was asked for.</summary>
+    public string Wanted { get; }
+
+    /// <summary>The picker it was asked of.</summary>
+    public ElementFacts Container { get; }
+
+    /// <summary>Which route was taken.</summary>
+    public PickRoute Route { get; }
+
+    /// <summary>
+    /// Every value the picker stopped on, in order. This is the route itself: each stop is a
+    /// selection change of its own, and a line observed at one of them belongs to that value.
+    /// </summary>
+    public IReadOnlyList<string> Passed { get; }
+
+    /// <summary>What is selected now.</summary>
+    public string? Selected { get; }
+
+    /// <summary>Why the pattern route was not used, where it was tried and refused.</summary>
+    public string? PatternRefused { get; }
+
+    /// <summary>Whether the window owned the desktop, on the route that needed it.</summary>
+    public Precondition Foreground { get; }
+
+    /// <summary>
+    /// How many times the selection changed. An observation about one switch is void when this is
+    /// more than one, which is the whole reason it is reported rather than assumed.
+    /// </summary>
+    public int SelectionChanges => Passed.Count;
+
+    /// <summary>Whether the picker ended up on the value that was asked for.</summary>
+    public bool Landed => string.Equals(Selected, Wanted, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Which door this went through and how many switches it took, as one phrase.
+    /// <para>
+    /// WW254. A case naming <c>pick</c> gets a step reported in the same field a pattern act reports
+    /// its pattern in, so the count has to travel with the route or it reaches nothing a reader sees.
+    /// <see cref="AsTraceStep"/> puts it in <c>Polls</c>, which is a trace field and not a line — and
+    /// the person a hop count is for is the one reading whether the claim beside it still holds.
+    /// </para>
+    /// </summary>
+    public string Door
+    {
+        get
+        {
+            var door = Route == PickRoute.Pattern ? "SelectionItem" : Synthesised.ByKeyboard;
+            var by = SelectionChanges == 1 ? "1 change" : $"{SelectionChanges} changes";
+            return $"{door} in {by}";
+        }
+    }
+
+    /// <summary>What happened, with the route and the count both in it.</summary>
+    public override string ToString()
+    {
+        if (!Foreground.Satisfied)
+            return $"{Container} was not walked: {Foreground.Absence}.";
+
+        var route = Route == PickRoute.Pattern ? "the selection pattern" : "the keyboard";
+        var refused = PatternRefused is null ? "" : $" (the pattern refused: {PatternRefused})";
+        var by = SelectionChanges == 1 ? "1 change" : $"{SelectionChanges} changes";
+        return $"{Container} reached \"{Selected}\" by {route} in {by}: "
+            + $"{string.Join(" -> ", Passed)}{refused}.";
+    }
+
+    /// <summary>
+    /// The result a verdict counts. A desk that refused the foreground is a <em>hole</em> and never
+    /// a failure.
+    /// <para>
+    /// WW133. Input synthesised into somebody else's window is not a weaker version of this act, it
+    /// is a different act against a window nobody asked about — so nothing is sent, and what a case
+    /// then reports has to be that the check did not run rather than that the application is wrong.
+    /// This block's criterion says it outright: nothing about the desk is reported as a defect in
+    /// the code.
+    /// </para>
+    /// </summary>
+    /// <param name="named">What the assertion claims, as the scenario spells it.</param>
+    public AssertionResult AsAssertion(string named)
+    {
+        if (!Foreground.Satisfied)
+            return AssertionResult.Unchecked(named, Foreground);
+
+        return Landed
+            ? AssertionResult.Pass(named, ToString())
+            : AssertionResult.Fail(named, ToString());
+    }
+
+    /// <summary>The step a trace records, carrying the hop count where it is more than one.</summary>
+    public TraceStep AsTraceStep() => new()
+    {
+        Verb = "pick",
+        Locator = Container.ToString(),
+        Resolved = Selected,
+        Pattern = Route == PickRoute.Pattern ? "SelectionItem" : "synthesized keyboard",
+        ReadBack = Selected,
+        Polls = SelectionChanges,
+        Verdict = !Foreground.Satisfied ? StepVerdict.Unchecked : Landed ? StepVerdict.Ok : StepVerdict.Failed,
+        Detail = Landed && SelectionChanges == 1 ? null : ToString(),
+    };
+}
+
+/// <summary>
+/// Reaching a value in a picker, and saying how many switches it took.
+/// <para>
+/// A claim about one switch is void when the walk made several, because each intermediate stop is
+/// a switch of its own and the line observed belongs to some other value. claude-tray's picker
+/// normalised to the top and walked down, which silently voided the timing assertion whenever the
+/// pattern route threw — and that fallback exists precisely because the pattern route sometimes
+/// does. Anchoring at whichever end is nearer costs at most one change for a two-item picker, so
+/// the assertion holds on both routes, and the count is reported so a reader can tell which was
+/// taken.
+/// </para>
+/// </summary>
+public static class Pick
+{
+    /// <summary>
+    /// Select <paramref name="wanted"/> in a picker, by pattern where that works and by keyboard
+    /// where it does not.
+    /// </summary>
+    /// <param name="container">The picker.</param>
+    /// <param name="wanted">The value to reach, by name.</param>
+    /// <param name="byKeyboard">Take the keyboard route deliberately, which is its own claim.</param>
+    /// <exception cref="NotActionableException">
+    /// Where the picker cannot take the act, or where it holds no value by that name — and then
+    /// the refusal lists what it does hold, which is what a reader needs next.
+    /// </exception>
+    public static PickResult Value(Subject container, string wanted, bool byKeyboard = false)
+    {
+        ArgumentNullException.ThrowIfNull(container);
+        ArgumentException.ThrowIfNullOrWhiteSpace(wanted);
+
+        // Picking is several acts against the one picker — read its items, press one, read what it
+        // ended up on — so the admission is taken once and the picker is used for the length of it.
+        var admitted = Admitted.To(container, "Selection");
+        var facts = admitted.Facts;
+        var element = admitted.Do(picker => picker);
+
+        // WW265. Opened where it holds nothing, and put back after. A Win32 combo holds its items
+        // whether or not it is dropped down; a WPF one realises them when its popup opens and has
+        // none in the tree before that — so reading a shut picker's items answers "it holds nothing"
+        // about a picker that holds two, which is the refusal this walk gave the one case it was
+        // built for.
+        var opened = Opening(container, element);
+        try
+        {
+            var items = Items(element);
+            var index = items.FindIndex(item => string.Equals(item.Name, wanted, StringComparison.Ordinal));
+            if (index < 0)
+            {
+                throw new NotActionableException(
+                    container.Locator.Text,
+                    Actionable.NotInTree,
+                    $"{facts} holds no \"{wanted}\"; it holds "
+                    + (items.Count == 0 ? "nothing" : string.Join(", ", items.Select(item => $"\"{item.Name}\""))));
+            }
+
+            return Reaching(container, admitted, element, facts, items, index, wanted, byKeyboard);
+        }
+        finally
+        {
+            // Owed whether the walk landed, refused or threw. A picker left dropped down holds the
+            // desk in a way that outlives the step, and the next one finds a foreground it cannot
+            // name — which is the failure Surface.AsFound exists for one floor up.
+            Shutting(container, element, opened);
+        }
+    }
+
+    /// <summary>
+    /// Drop the picker down where it holds nothing, and say whether this opened it.
+    /// <para>
+    /// WW265. Only where it holds nothing: a picker whose items are already in the tree is one where
+    /// opening buys nothing and costs a state change the case did not ask for. The wait is the
+    /// container's own, because how long a popup takes to realise its items is a property of the
+    /// application rather than a number this file should carry.
+    /// </para>
+    /// </summary>
+    /// <param name="container">The picker, for its budget.</param>
+    /// <param name="element">The picker itself.</param>
+    /// <returns>Whether this call opened it, which is what decides whether it owes a close.</returns>
+    private static bool Opening(Subject container, AutomationElement element)
+    {
+        if (Items(element).Count > 0)
+            return false;
+
+        try
+        {
+            if (element.GetCurrentPattern(ExpandCollapsePattern.Pattern) is not ExpandCollapsePattern expand)
+                return false;
+
+            if (expand.Current.ExpandCollapseState == ExpandCollapseState.Expanded)
+                return false;
+
+            expand.Expand();
+        }
+        catch (Exception cannot)
+            when (cannot is InvalidOperationException or ElementNotAvailableException)
+        {
+            // A picker that offers no ExpandCollapse and holds nothing is a picker that holds
+            // nothing, which is what the refusal below will say. Nothing was changed, so nothing
+            // is owed.
+            return false;
+        }
+
+        Attempt.UntilTrue(() => Items(element).Count > 0, container.ActMs, container.PollMs);
+        return true;
+    }
+
+    /// <summary>Put a picker this walk dropped down back the way it was found.</summary>
+    /// <param name="container">The picker, for its budget.</param>
+    /// <param name="element">The picker itself.</param>
+    /// <param name="opened">Whether this walk was the one that opened it.</param>
+    private static void Shutting(Subject container, AutomationElement element, bool opened)
+    {
+        if (!opened)
+            return;
+
+        try
+        {
+            if (element.GetCurrentPattern(ExpandCollapsePattern.Pattern) is ExpandCollapsePattern expand)
+            {
+                expand.Collapse();
+                Attempt.UntilTrue(
+                    () => expand.Current.ExpandCollapseState != ExpandCollapseState.Expanded,
+                    container.ActMs,
+                    container.PollMs);
+            }
+        }
+        catch (Exception gone)
+            when (gone is InvalidOperationException or ElementNotAvailableException)
+        {
+            // The picker went while it was being put back. There is nothing left to close and
+            // nothing a caller could do about it, and throwing here would replace whatever the walk
+            // was actually reporting with a sentence about the tidying up.
+        }
+    }
+
+    /// <summary>
+    /// Reach whatever sits at <paramref name="index"/> in a picker, by pattern where that works and
+    /// by keyboard where it does not.
+    /// <para>
+    /// WW267. `Value` is right wherever the values are the application's own vocabulary. A profile
+    /// picker's are not: measured on one desk it held two, and the selected one was the name of a
+    /// Claude Code profile that exists there and nowhere else — so a case naming it passes on one
+    /// machine and fails on every other. A position is what the picker's own order supplies and no
+    /// machine's data changes.
+    /// </para>
+    /// <para>
+    /// What it reached is still reported by name, because the engine can read it even where the case
+    /// could not have written it — and <see cref="PickResult.Landed"/> is then the same claim it is
+    /// for `Value`, checked against the value the position turned out to hold.
+    /// </para>
+    /// </summary>
+    /// <param name="container">The picker.</param>
+    /// <param name="index">Which position, counted from the top and from zero.</param>
+    /// <param name="byKeyboard">Take the keyboard route deliberately, which is its own claim.</param>
+    /// <exception cref="NotActionableException">
+    /// Where the picker cannot take the act, or holds no such position — and then the refusal says
+    /// how many it does hold, which is what a reader needs next.
+    /// </exception>
+    public static PickResult At(Subject container, int index, bool byKeyboard = false)
+    {
+        ArgumentNullException.ThrowIfNull(container);
+        ArgumentOutOfRangeException.ThrowIfNegative(index);
+
+        var admitted = Admitted.To(container, "Selection");
+        var facts = admitted.Facts;
+        var element = admitted.Do(picker => picker);
+
+        var opened = Opening(container, element);
+        try
+        {
+            var items = Items(element);
+            if (index >= items.Count)
+            {
+                throw new NotActionableException(
+                    container.Locator.Text,
+                    Actionable.NotInTree,
+                    $"{facts} has no position {index}; it holds {items.Count} value(s)");
+            }
+
+            return Reaching(container, admitted, element, facts, items, index, items[index].Name, byKeyboard);
+        }
+        finally
+        {
+            Shutting(container, element, opened);
+        }
+    }
+
+    /// <summary>
+    /// Every value a picker holds, in the order it holds them.
+    /// <para>
+    /// WW265. Opens one that holds nothing and shuts it again, for the reason <see cref="Value"/>
+    /// does: a WPF picker has no items in the tree until its popup opens, and answering <em>nothing</em>
+    /// about a picker holding two is worse than answering slowly.
+    /// </para>
+    /// </summary>
+    /// <param name="container">The picker.</param>
+    public static IReadOnlyList<string> Values(Subject container)
+    {
+        ArgumentNullException.ThrowIfNull(container);
+
+        var element = container.ReadOnce().Resolution.Element;
+        if (element is null)
+            return [];
+
+        var opened = Opening(container, element);
+        try
+        {
+            return Items(element).Select(item => item.Name).ToList();
+        }
+        finally
+        {
+            Shutting(container, element, opened);
+        }
+    }
+
+    /// <summary>
+    /// The pattern route, then the keyboard one, once something has decided which item is wanted.
+    /// <para>
+    /// WW267. Both doors are the same door: `Value` finds the index by name and `At` is handed one,
+    /// and everything after that — the pattern attempt, the foreground the fallback needs, the walk
+    /// anchored at the nearer end — is one route with two ways in. Two copies of it would be two
+    /// places for the hole this walk already had to be fixed in.
+    /// </para>
+    /// </summary>
+    private static PickResult Reaching(
+        Subject container,
+        Admitted admitted,
+        AutomationElement element,
+        ElementFacts facts,
+        List<(string Name, AutomationElement Element)> items,
+        int index,
+        string wanted,
+        bool byKeyboard)
+    {
+        var met = Precondition.Met(Windowing.Foreground.PreconditionName);
+        string? refused = null;
+        if (!byKeyboard && TryThePattern(items[index].Element, out refused))
+            return new PickResult(wanted, facts, PickRoute.Pattern, [wanted], Selected(element), null, met);
+
+        // The keyboard route needs the desktop; the pattern one never did. WW470: waited for rather
+        // than read once, since a window still coming forward is not a desk somebody else holds.
+        var foreground = Windowing.Foreground
+            .Waited(admitted.Window, Windowing.DeskWait.Of(container.DeadlineMs, container.PollMs))
+            .AsPrecondition();
+
+        if (!foreground.Satisfied)
+            return new PickResult(wanted, facts, PickRoute.Keyboard, [], Selected(element), refused, foreground);
+
+        return Walked(container, element, facts, items, index, wanted, refused, foreground);
+    }
+
+    private static PickResult Walked(
+        Subject container,
+        AutomationElement element,
+        ElementFacts facts,
+        List<(string Name, AutomationElement Element)> items,
+        int index,
+        string wanted,
+        string? refused,
+        Precondition foreground)
+    {
+        // Anchor at whichever end is nearer. Normalising to one end always is what voided the
+        // observation on a long picker; from the nearer end a two-item picker costs one change.
+        var fromTheTop = index <= (items.Count - 1) / 2;
+        var hops = fromTheTop ? index : items.Count - 1 - index;
+        var walk = fromTheTop ? TraversalKey.Down : TraversalKey.Up;
+
+        element.SetFocus();
+        Keys.SendHomeOrEnd(fromTheTop);
+
+        var passed = new List<string>();
+        Record(container, element, passed);
+
+        for (var hop = 0; hop < hops; hop++)
+        {
+            Keys.Send(walk);
+            Record(container, element, passed);
+        }
+
+        return new PickResult(
+            wanted,
+            facts,
+            PickRoute.Keyboard,
+            new ReadOnlyCollection<string>(passed),
+            Selected(element),
+            refused,
+            foreground);
+    }
+
+    private static void Record(Subject container, AutomationElement element, List<string> passed)
+    {
+        Attempt.UntilTrue(
+            () => Selected(element) is { } now && (passed.Count == 0 || now != passed[^1]),
+            container.ActMs,
+            container.PollMs);
+
+        var settled = Selected(element);
+        if (settled is not null && (passed.Count == 0 || settled != passed[^1]))
+            passed.Add(settled);
+    }
+
+    private static bool TryThePattern(AutomationElement item, out string? refused)
+    {
+        try
+        {
+            ((SelectionItemPattern)item.GetCurrentPattern(SelectionItemPattern.Pattern)).Select();
+            refused = null;
+            return true;
+        }
+        catch (Exception thrown)
+            when (thrown is InvalidOperationException or ElementNotAvailableException or ArgumentException)
+        {
+            refused = thrown.Message;
+            return false;
+        }
+    }
+
+    private static string? Selected(AutomationElement container)
+    {
+        try
+        {
+            if (container.GetCurrentPattern(SelectionPattern.Pattern) is not SelectionPattern selection)
+                return null;
+
+            var chosen = selection.Current.GetSelection();
+            return chosen.Length == 0 ? null : chosen[0].Current.Name;
+        }
+        catch (Exception unreadable)
+            when (unreadable is InvalidOperationException or ElementNotAvailableException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// The values, read through the container rather than through each item's own actionability.
+    /// An item of a shut picker is offscreen by design, and that is a property of the picker being
+    /// shut rather than of the item being unreachable — the container is what has to be actionable.
+    /// </summary>
+    private static List<(string Name, AutomationElement Element)> Items(AutomationElement container)
+    {
+        var found = new List<(string, AutomationElement)>();
+        try
+        {
+            foreach (AutomationElement item in container.FindAll(
+                TreeScope.Descendants,
+                new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ListItem)))
+            {
+                found.Add((item.Current.Name ?? "", item));
+            }
+        }
+        catch (ElementNotAvailableException)
+        {
+            // The picker went while it was being read; what was found stands.
+        }
+
+        return found;
+    }
+}

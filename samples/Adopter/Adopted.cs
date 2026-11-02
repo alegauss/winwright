@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Media;
 
-using Winwright.InApp;
+using Paneproof.InApp;
 
 namespace Adopter;
 
@@ -34,5 +34,5 @@ public static class Adopted
     /// because the package's own type shares a name with the presentation stack's, which is a
     /// thing an adopting application meets on its first line and not in a note.
     /// </summary>
-    public static GeometryDumped Geometry(UIElement root) => Winwright.InApp.Geometry.Of(root);
+    public static GeometryDumped Geometry(UIElement root) => Paneproof.InApp.Geometry.Of(root);
 }

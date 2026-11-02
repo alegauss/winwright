@@ -34,7 +34,7 @@ before(() => {
  *  slipping past it. */
 function outcomes() {
   const src = readFileSync(
-    join(repoDir, "src", "Winwright", "Verdicts", "RunOutcome.cs"),
+    join(repoDir, "src", "Paneproof", "Verdicts", "RunOutcome.cs"),
     "utf8",
   );
 
@@ -78,7 +78,7 @@ test("the package references on the page carry the version the tree declares", (
   const version = /<Version>([^<]+)<\/Version>/.exec(props)?.[1];
   assert.ok(version, "Directory.Build.props no longer declares a Version");
 
-  for (const csproj of ["Winwright/Winwright.csproj", "Winwright.InApp/Winwright.InApp.csproj"]) {
+  for (const csproj of ["Paneproof/Paneproof.csproj", "Paneproof.InApp/Paneproof.InApp.csproj"]) {
     const xml = readFileSync(join(repoDir, "src", ...csproj.split("/")), "utf8");
     const id = /<PackageId>([^<]+)<\/PackageId>/.exec(xml)?.[1];
     assert.ok(id, `${csproj} no longer declares a PackageId`);

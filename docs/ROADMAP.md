@@ -30,11 +30,12 @@
 
 ## Block N — The name — winwright becomes paneproof
 
-- 📋 **WW590** (deps: —) **The assemblies, namespaces, executables and NuGet packages carry the name of an older Windows automation MCP server** — civyk-winwright came six months earlier in the same space, so a search or an assistant cannot tell the two apart, and Paneproof is the name chosen to replace it. → §WW590
-- 📋 **WW591** (deps: WW590) **Renaming the code would break every adopter's winwright.json and WINWRIGHT_* variables in one release** — They are the public contract an existing suite is written against, so the new names come first and the old ones are still accepted, with a warning, for a stated period. → §WW591
-- 📋 **WW592** (deps: WW590) **The plugin, its MCP server, its skill and its guard hook are all named winwright** — An adopter who installs the renamed plugin beside the old one would have two servers driving the same desktop, so the move needs its own path. → §WW592
-- 📋 **WW593** (deps: WW590, WW591, WW592) **The repository, the site and the README still introduce the product as winwright** — A reader only meets the new name where they land, and the old page has to redirect instead of returning 404 as /freewilly/ did. → §WW593
+- 📋 **WW591** (deps: WW590 ✅) **Renaming the code would break every adopter's winwright.json and WINWRIGHT_* variables in one release** — They are the public contract an existing suite is written against, so the new names come first and the old ones are still accepted, with a warning, for a stated period. → §WW591
+- 📋 **WW592** (deps: WW590 ✅) **The plugin, its MCP server, its skill and its guard hook are all named winwright** — An adopter who installs the renamed plugin beside the old one would have two servers driving the same desktop, so the move needs its own path. → §WW592
+- 📋 **WW593** (deps: WW590 ✅, WW591, WW592) **The repository, the site and the README still introduce the product as winwright** — A reader only meets the new name where they land, and the old page has to redirect instead of returning 404 as /freewilly/ did. → §WW593
 - 📋 **WW594** (deps: WW593) **Five adopting repositories still reference the Winwright packages, plugin and file names** — They are the adoption proof, and the old NuGet ids can only be deprecated once each of them has moved to Paneproof. → §WW594
+- 📋 **WW597** (deps: WW590 ✅) **The guard no longer denies a harness script naming the old Winwright.Acting, Locating or Asserting namespaces** — An adopter still on the Winwright package can hand-write the harness the guard exists to stop once the renamed plugin is installed. → §WW597
+- 📋 **WW598** (deps: WW590 ✅) (requires: release) **The Winwright and Winwright.InApp ids on nuget.org say nothing about having moved to Paneproof** — NuGet cannot rename a package, so an adopter restoring the old ids is never told the new ones exist. → §WW598
 
 ## Done when — Block A
 

@@ -17,11 +17,11 @@ setlocal
 
 set "ROOT=%~dp0.."
 set "TFM=net10.0-windows"
-set "DLL=%ROOT%\tools\Winwright.Guard\bin\Release\%TFM%\Winwright.Guard.dll"
+set "DLL=%ROOT%\tools\Paneproof.Guard\bin\Release\%TFM%\Paneproof.Guard.dll"
 
 rem Release first, then Debug: an adopter builds Release and a developer here builds Debug, and
 rem preferring Release means a stale Debug build never quietly answers for a fresh Release one.
-if not exist "%DLL%" set "DLL=%ROOT%\tools\Winwright.Guard\bin\Debug\%TFM%\Winwright.Guard.dll"
+if not exist "%DLL%" set "DLL=%ROOT%\tools\Paneproof.Guard\bin\Debug\%TFM%\Paneproof.Guard.dll"
 if exist "%DLL%" goto run
 
 rem WW587. Then the release's own copy, in the folder tools\winwright-mcp.cmd fetches into for the
@@ -33,11 +33,11 @@ if exist "%ROOT%\.claude-plugin\plugin.json" (
 )
 if defined VERSION set "VERSION=%VERSION: =%"
 if defined VERSION set "VERSION=%VERSION:"=%"
-if defined VERSION set "DLL=%LOCALAPPDATA%\winwright\plugin\%VERSION%\guard\Winwright.Guard.dll"
+if defined VERSION set "DLL=%LOCALAPPDATA%\winwright\plugin\%VERSION%\guard\Paneproof.Guard.dll"
 
 if not exist "%DLL%" (
   echo winwright: the guard is not built, so nothing in this session is refusing a hand-written harness.>&2
-  echo winwright: the MCP server fetches it with its own binaries when a session starts, or build it once - dotnet build -c Release "%ROOT%\Winwright.slnx">&2
+  echo winwright: the MCP server fetches it with its own binaries when a session starts, or build it once - dotnet build -c Release "%ROOT%\Paneproof.slnx">&2
   exit /b 1
 )
 

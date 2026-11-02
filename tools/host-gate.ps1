@@ -90,7 +90,7 @@ function Get-HostFilter {
     $named = Get-GatedClasses -Suite $Suite
     if ($named.Count -eq 0) { return '' }
 
-    return ((($named | ForEach-Object { "FullyQualifiedName~Winwright.Tests.$_." }) -join '|') + '|desk=free')
+    return ((($named | ForEach-Object { "FullyQualifiedName~Paneproof.Tests.$_." }) -join '|') + '|desk=free')
 }
 
 function Get-GateSummary {

@@ -66,9 +66,9 @@ test("the case the page shows is one the loader would accept", () => {
   const declared = JSON.parse(walkthrough.case);
   assert.ok(Array.isArray(declared.cases) && declared.cases.length > 0, "the published case file declares no cases");
 
-  const readings = [...readFileSync(join(repoDir, "src", "Winwright", "Scenarios", "ReadBack.cs"), "utf8")
+  const readings = [...readFileSync(join(repoDir, "src", "Paneproof", "Scenarios", "ReadBack.cs"), "utf8")
     .matchAll(/^ {8}new\("([^"]+)"/gm)].map((m) => m[1]);
-  const verbs = [...readFileSync(join(repoDir, "src", "Winwright", "Scenarios", "ActVerb.cs"), "utf8")
+  const verbs = [...readFileSync(join(repoDir, "src", "Paneproof", "Scenarios", "ActVerb.cs"), "utf8")
     .matchAll(/^ {8}new\(\s*"([^"]+)"/gm)].map((m) => m[1]);
   assert.ok(readings.length > 0 && verbs.length > 0, "neither vocabulary could be read out of the engine");
 

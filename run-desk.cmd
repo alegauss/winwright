@@ -19,11 +19,11 @@ setlocal
 set CONFIG=%1
 if "%CONFIG%"=="" set CONFIG=Debug
 
-dotnet build "%~dp0Winwright.slnx" --configuration %CONFIG% --nologo || exit /b 1
+dotnet build "%~dp0Paneproof.slnx" --configuration %CONFIG% --nologo || exit /b 1
 
 rem `-v normal`, because a run of one case that excused itself reads exactly like a run of one case
 rem that proved something - and what the case read is written to the console for that reason.
-dotnet test "%~dp0tests\Winwright.Tests\Winwright.Tests.csproj" ^
+dotnet test "%~dp0tests\Paneproof.Tests\Paneproof.Tests.csproj" ^
   --configuration %CONFIG% --no-build --nologo -v normal ^
   --filter "desk=alone"
 

@@ -1,0 +1,142 @@
+using System.Globalization;
+using System.IO;
+using System.Text.Json;
+
+namespace Paneproof.Fixture;
+
+/// <summary>
+/// The fixture's own strings, in several languages.
+/// <para>
+/// The label rule needs more than one language to be developed at all, and it needs one specific
+/// pathological case: a key whose value carries a placeholder. An exact-name read can never match
+/// that, and a rule that skipped it would report a green about a control nobody could have
+/// checked. Real products have the languages and rarely have the pathological key on purpose.
+/// </para>
+/// <para>
+/// Read from files beside the executable rather than from constants, because that is where an
+/// adopting project keeps its own and the point is to be the thing they copy.
+/// </para>
+/// </summary>
+public sealed class Strings
+{
+    private readonly JsonElement root;
+
+    private Strings(JsonElement root, string culture, string file)
+    {
+        this.root = root;
+        Culture = culture;
+        File = file;
+    }
+
+    /// <summary>The language tags the fixture ships, in the order the catalogue prints them.</summary>
+    public static IReadOnlyList<string> Cultures { get; } = ["en", "pt-BR", "de"];
+
+    /// <summary>The key whose value carries a placeholder, which the label rule has to refuse.</summary>
+    public const string PlaceholderKey = "labels.profileName";
+
+    /// <summary>
+    /// The same placeholder at the other end of the value. WW475: a begins-with claim reads the
+    /// fixed front of <see cref="PlaceholderKey" /> and an ends-with claim reads the fixed back of
+    /// this one, so the rule that lets those two past a placeholder has a label for each direction
+    /// rather than one and an assumption about the mirror.
+    /// </summary>
+    public const string MirroredPlaceholderKey = "labels.inUseBy";
+
+    /// <summary>
+    /// The key the loading note carries. WW43: a check that a page is still computing reads the
+    /// loading strings out of the project's own language files, so the note has to be one of them
+    /// rather than a caption typed into the markup — a fixture whose text nothing declares cannot
+    /// drive the check it exists for.
+    /// </summary>
+    public const string LoadingKey = "labels.loading";
+
+    /// <summary>The language these strings are in.</summary>
+    public string Culture { get; }
+
+    /// <summary>The file they came out of, so a check can be pointed at the same one.</summary>
+    public string File { get; }
+
+    /// <summary>Where the fixture keeps them, beside its own executable.</summary>
+    public static string Directory =>
+        Path.Combine(Path.GetDirectoryName(Environment.ProcessPath) ?? AppContext.BaseDirectory, "strings");
+
+    /// <summary>The file one language is in, whether or not it is there.</summary>
+    /// <param name="culture">The language tag.</param>
+    public static string FileFor(string culture)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(culture);
+        return Path.Combine(Directory, $"strings.{culture.Trim()}.json");
+    }
+
+    /// <summary>
+    /// Load one language. A tag the fixture does not ship falls back to the first it does, and
+    /// says which it loaded — a window silently in another language is the defect the whole label
+    /// rule exists over.
+    /// </summary>
+    /// <param name="culture">The language tag to ask for.</param>
+    public static Strings Load(string culture)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(culture);
+
+        var asked = culture.Trim();
+        var wanted = Cultures.Contains(asked, StringComparer.OrdinalIgnoreCase) ? asked : Cultures[0];
+        var file = FileFor(wanted);
+
+        using var document = JsonDocument.Parse(System.IO.File.ReadAllText(file));
+        return new Strings(document.RootElement.Clone(), wanted, file);
+    }
+
+    /// <summary>What one dotted key says, or the key itself where the file does not carry it.</summary>
+    /// <param name="key">The dotted key.</param>
+    public string Says(string key)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+        var element = root;
+        foreach (var step in key.Split('.', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (element.ValueKind != JsonValueKind.Object || !element.TryGetProperty(step, out element))
+                return key;
+        }
+
+        return element.ValueKind == JsonValueKind.String ? element.GetString() ?? key : key;
+    }
+
+    /// <summary>
+    /// Every string under one key, in the order the file spells them.
+    /// <para>
+    /// WW468. What a read-out needs to answer a <em>set</em> in the language it was asked for, and
+    /// deliberately the same key the strings well derives from: asked the same language the two must
+    /// agree, and asked different ones they must not — which is the whole of the claim and neither
+    /// half of it can be written by typing a word.
+    /// </para>
+    /// <para>
+    /// Strings only, and a key that is not an object answers nothing. The placeholder and note rules
+    /// belong to the derivation and never here: this is what the application says it has, and a
+    /// fixture that pre-filtered its own answer would be agreeing with the rule under test.
+    /// </para>
+    /// </summary>
+    /// <param name="key">The dotted key the values sit under.</param>
+    public IReadOnlyList<string> Under(string key)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+        var element = root;
+        foreach (var step in key.Split('.', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (element.ValueKind != JsonValueKind.Object || !element.TryGetProperty(step, out element))
+                return [];
+        }
+
+        return element.ValueKind != JsonValueKind.Object
+            ? []
+            : element.EnumerateObject()
+                .Where(one => one.Value.ValueKind == JsonValueKind.String)
+                .Select(one => one.Value.GetString()!)
+                .ToList();
+    }
+
+    /// <summary>The one line a run prints about which language it is in.</summary>
+    public string Sentence() => string.Create(
+        CultureInfo.InvariantCulture, $"showing {Culture} from {Path.GetFileName(File)}");
+}

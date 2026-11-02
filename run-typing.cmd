@@ -92,6 +92,6 @@ setlocal
 set CONFIG=Debug
 if not "%3"=="" set CONFIG=%3
 
-dotnet build "%~dp0Winwright.slnx" --configuration %CONFIG% --nologo || exit /b 1
-dotnet "%~dp0tools\Winwright.Typing\bin\%CONFIG%\net10.0-windows\Winwright.Typing.dll" %1 %2
+dotnet build "%~dp0Paneproof.slnx" --configuration %CONFIG% --nologo || exit /b 1
+dotnet "%~dp0tools\Paneproof.Typing\bin\%CONFIG%\net10.0-windows\Paneproof.Typing.dll" %1 %2
 exit /b %ERRORLEVEL%

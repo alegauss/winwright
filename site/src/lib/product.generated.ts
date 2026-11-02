@@ -20,14 +20,14 @@ export interface Package {
 }
 
 export const product = {
-  version: "1.1.5",
+  version: "1.1.7",
   packages: [
     {
-      "id": "Winwright",
+      "id": "Paneproof",
       "takenBy": "harness"
     },
     {
-      "id": "Winwright.InApp",
+      "id": "Paneproof.InApp",
       "takenBy": "app"
     }
   ] as readonly Package[],

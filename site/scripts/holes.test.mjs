@@ -16,7 +16,7 @@ import { bodyOf, code, members } from "./csharp.mjs";
 
 const siteDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = join(siteDir, "..");
-const engine = join(repoDir, "src", "Winwright");
+const engine = join(repoDir, "src", "Paneproof");
 
 const payload = join(siteDir, "docs", "src", "data", "holes.generated.json");
 if (!existsSync(payload)) {
