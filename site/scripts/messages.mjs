@@ -49,10 +49,14 @@ const rows = [
     at: "tools/winwright-mcp.cmd",
     finds: "winwright: the MCP server is not built, so this session has no winwright tools.",
     means:
-      "the plugin is installed and the server it launches has never been compiled. A stdio "
-      + "server cannot say so over the protocol — it either speaks it or exits — so this goes to "
-      + "stderr, where the harness shows it beside the failed server.",
-    clears: "build the solution once in Release. The two install commands do not do it for you.",
+      "the plugin is installed, nothing in its clone was built, and the release's own binaries "
+      + "could not be downloaded or did not match their published hash. A stdio server cannot say "
+      + "so over the protocol — it either speaks it or exits — so this goes to stderr, where the "
+      + "harness shows it beside the failed server, with the reason on the line before.",
+    clears:
+      "let the session reach github.com, or set WINWRIGHT_RELEASES to a folder or mirror holding "
+      + "the release's zip and its .sha256, then restart the session. Building the plugin's clone "
+      + "once in Release also clears it.",
     page: "/winwright/docs/installing/",
   },
   {

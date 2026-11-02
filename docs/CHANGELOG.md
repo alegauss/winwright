@@ -423,6 +423,7 @@
 - ✅ **WW563** **an application winwright launches writes onto the MCP server's stdout, breaking the protocol stream** — Every launch's stdin is closed and its stdout/stderr drained into the launch, so nothing reaches the MCP channel; a red case ends with the last lines the application wrote.
 - ✅ **WW567** **an exception a tool did not foresee ends the MCP server, so the session loses every winwright tool** — A tool that throws answers a refusal naming the exception and the server stays up; an executable that cannot start is refused naming the path it was looked for at.
 - ✅ **WW568** **a derived set's read-out launch inherits the MCP server's stdin, so the application can read the protocol's input** — A derived set's read-out closes its input and drains its error stream, so it cannot read the protocol, and a failed read-out names what it wrote there.
+- ✅ **WW587** **After the two install commands the plugin has no tools until the adopter builds its clone with the .NET SDK** — Each release now carries the MCP server and guard as a hashed zip the first session fetches, so only the Desktop Runtime is needed (design recorded in `tools/winwright-fetch.ps1`).
 
 ## Block I — The in-app half — the app cooperates with the harness
 

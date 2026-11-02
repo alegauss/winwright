@@ -46,10 +46,19 @@ the argument. This file is the long one.
 Run the two commands above in the repository that drives the application. Both write into that
 repository's `.claude/settings.json`, so **committing that file wires every clone**.
 
-The MCP server and the guard are .NET processes, so they need building once, in the plugin's own
-clone: `dotnet build -c Release`. That is the one step the two commands do not cover. Skip it and
-you are told which surface is missing and the command to run, rather than left with a guard that
-silently refuses nothing.
+The MCP server and the guard are .NET processes, and the release carries them built. The first
+session after an install or an update downloads them for the plugin's version from the GitHub
+Release, checks the zip against its published SHA-256, and unpacks it into
+`%LOCALAPPDATA%\winwright\plugin\<version>`, outside the plugin's clone. The machine needs the
+[Windows Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0) (the SDK carries
+it), not the SDK itself. The guard reads that folder and downloads nothing, so in the first few
+seconds of the first session it may say it is not there yet.
+
+A network that cannot reach github.com can point `WINWRIGHT_RELEASES` at a folder or a mirror
+holding the release's `winwright-plugin-<version>-win-x64.zip` and its `.sha256`. Where the
+download fails, or the runtime is missing, stderr names what is missing, and building the plugin's
+clone with `dotnet build -c Release` is the way round it: a local build is always preferred over a
+downloaded one.
 
 The marketplace is named `winwright`, after the plugin, so it sits beside roadkeep's `alegauss`
 instead of replacing it. If your settings still carry `winwright@alegauss`, remove that entry and

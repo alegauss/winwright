@@ -136,16 +136,29 @@ It also registers a `PreToolUse` hook that **denies** a write whose content name
 faster in the moment, and that is exactly how a 2,732-line one happens. The refusal arrives
 before the work rather than after it.
 
-### The one step the two commands do not cover
+### Where the server and the guard come from
 
-The server and the guard are .NET processes the plugin launches, so they need building once —
-`dotnet build -c Release` in the plugin's own clone.
+The server and the guard are .NET processes the plugin launches, and each release carries them
+built. The first session after an install or an update downloads them for the version the
+plugin declares from its GitHub Release, checks the zip against the SHA-256 published beside it,
+and unpacks it into `%LOCALAPPDATA%\winwright\plugin\<version>`, outside the plugin's clone. An
+update brings a new version, so the next session downloads again and removes the old folder.
 
-Skip it and you are told rather than left guessing: both are wired through a launcher that
-looks for its assembly, Release first and then Debug, and where there is none it writes the
-missing surface and the build command to stderr and exits 1. It exits 1 and never 2, because
-denying every write over a missing build would put the guard in front of everything instead of
-in front of a harness script.
+The machine needs the **Windows Desktop Runtime 10**, not the SDK: the binaries are
+framework-dependent and the engine uses WPF. The SDK carries the runtime, so a machine that
+builds .NET 10 already has it.
+
+- **Behind a proxy or offline**, set `WINWRIGHT_RELEASES` to a folder or a mirror holding the
+  release's `winwright-plugin-<version>-win-x64.zip` and its `.sha256`.
+- **Working on winwright itself**, build the plugin's clone with `dotnet build -c Release`. A
+  local build, Release first and then Debug, is always preferred over a downloaded one.
+
+The guard never downloads, because it runs on every write under a ten-second timeout: it reads
+the folder the server filled. Where nothing is there, because the download failed, the runtime
+is missing, or the first session has only just started, each launcher writes the missing surface
+and the way round it to stderr and exits 1. It exits 1 and never 2, because denying every write
+over a missing binary would put the guard in front of everything instead of in front of a
+harness script.
 
 ## Checking that it took
 

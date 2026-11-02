@@ -129,7 +129,9 @@ is answered with the nearest name UI Automation actually has.
 - **The Claude Code plugin** — two commands in the repository wire every clone
   (`claude plugin marketplace add alegauss/winwright --scope project`, then
   `claude plugin install winwright@winwright --scope project`), and the server and guard are
-  .NET processes built once with `dotnet build -c Release` in the plugin's own clone. Four
+  .NET processes the release carries built: the first session downloads them for the plugin's
+  version and needs only the Windows Desktop Runtime 10 (`WINWRIGHT_RELEASES` names a mirror,
+  and `dotnet build -c Release` in the plugin's clone still wins). Four
   MCP tools: `winwright_format` (every field of a file, a case, a step and a fixture),
   `winwright_vocabulary` (every act and what each needs said beside it), `winwright_check`
   (a case read back before the file exists — its input schema **is** the loader's schema, so

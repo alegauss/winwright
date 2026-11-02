@@ -882,7 +882,7 @@ export const claudeCode = {
   status: [
     "Which is the difference between a refusal and a guess: an agent that writes a case field by field is corrected at insertion, where the fix costs a retry, rather than at run time, where it costs a red run somebody has to read.",
   ] as Rich,
-  setupHeading: "The two commands, and the one step they do not cover",
+  setupHeading: "The two commands, and nothing to build",
   setupLead: "Run once, in the repository that drives the application:",
   setupCommands: [
     "claude plugin marketplace add alegauss/winwright --scope project",
@@ -891,11 +891,13 @@ export const claudeCode = {
   setupNote: [
     "Both write into that repository's ",
     { code: ".claude/settings.json" },
-    ", so committing that file wires every clone. The server and the guard are .NET processes the plugin launches, so they are built once — ",
+    ", so committing that file wires every clone. The server and the guard are .NET processes the release carries built: the first session after an install or an update downloads them for the plugin's version, checks them against the published SHA-256, and needs only the Windows Desktop Runtime 10 to run them. ",
+    { b: "Where that fails you are told, not left guessing" },
+    ": each launcher writes the missing surface and the way round it — ",
+    { code: "WINWRIGHT_RELEASES" },
+    " pointing at a mirror, or ",
     { code: "dotnet build -c Release" },
-    " in the plugin's own clone. ",
-    { b: "Skip it and you are told, not left guessing" },
-    ": each is wired through a launcher that looks for its assembly, and where there is none it writes the missing surface and the build command to stderr and exits 1. Never 2 — denying every write because a build is missing would put the guard in front of everything instead of in front of a harness script.",
+    " in the plugin's clone — to stderr and exits 1. Never 2 — denying every write because a binary is missing would put the guard in front of everything instead of in front of a harness script.",
   ] as Rich,
   readHeading: "Reading — nothing is launched, nothing is pressed",
   read: [

@@ -42,25 +42,6 @@ tracked file deleted on disk arrives; `-Carry` beside `-CommittedOnly` carries b
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook
 
-### §WW587 The plugin brings its binaries
-
-The README promises the plugin in two commands, then says the MCP server and the guard
-need `dotnet build -c Release` in the plugin's clone. WW221 made the failure readable,
-but the step is still there: the adopter needs the .NET 10 SDK, finds the plugin's cache
-directory, builds it, and does it again after each plugin update. The portfolio review
-of 30/10/2026 found this breaks the promise on the README's first screen.
-
-The design:
-
-- **The binaries come with the release.** The release workflow publishes the MCP server and the guard as framework-dependent `win-x64` builds, one zip with a published SHA-256, attached to the GitHub Release of each NuGet version.
-- **The MCP launcher fetches what it does not find**, for itself and the guard, into a per-version folder outside the plugin clone, which an update replaces, unpacked and then renamed into place so two sessions starting together do not race.
-- **The guard never downloads.** It runs on every write under a 10-second timeout; without binaries it keeps today's loud, non-blocking exit 1.
-- **The runtime is the Windows Desktop Runtime 10**, not the base runtime: the engine uses WPF. A missing runtime, or a failed download (offline, proxy), goes to stderr naming what is missing, the URL, and the build fallback.
-- **A local build still wins.** The README keeps the build under "working on winwright".
-
-Done means a machine with only the Desktop Runtime runs the two commands and gets every
-tool in the first session.
-
 ### §WW595 The install command the docs print
 
 WW554 renamed the marketplace to `winwright`, and the README, `llms.txt` and the site's

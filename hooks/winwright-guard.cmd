@@ -22,12 +22,26 @@ set "DLL=%ROOT%\tools\Winwright.Guard\bin\Release\%TFM%\Winwright.Guard.dll"
 rem Release first, then Debug: an adopter builds Release and a developer here builds Debug, and
 rem preferring Release means a stale Debug build never quietly answers for a fresh Release one.
 if not exist "%DLL%" set "DLL=%ROOT%\tools\Winwright.Guard\bin\Debug\%TFM%\Winwright.Guard.dll"
+if exist "%DLL%" goto run
+
+rem WW587. Then the release's own copy, in the folder tools\winwright-mcp.cmd fetches into for the
+rem version plugin.json names. Read and never fetched: this runs on every write under a ten-second
+rem timeout, and the server's launcher fetches once per session for both of them.
+set "VERSION="
+if exist "%ROOT%\.claude-plugin\plugin.json" (
+  for /f "tokens=2 delims=:," %%v in ('findstr /c:"\"version\"" "%ROOT%\.claude-plugin\plugin.json"') do set "VERSION=%%~v"
+)
+if defined VERSION set "VERSION=%VERSION: =%"
+if defined VERSION set "VERSION=%VERSION:"=%"
+if defined VERSION set "DLL=%LOCALAPPDATA%\winwright\plugin\%VERSION%\guard\Winwright.Guard.dll"
 
 if not exist "%DLL%" (
   echo winwright: the guard is not built, so nothing in this session is refusing a hand-written harness.>&2
-  echo winwright: build it once - dotnet build -c Release "%ROOT%\Winwright.slnx">&2
+  echo winwright: the MCP server fetches it with its own binaries when a session starts, or build it once - dotnet build -c Release "%ROOT%\Winwright.slnx">&2
   exit /b 1
 )
+
+:run
 
 dotnet exec "%DLL%"
 exit /b %ERRORLEVEL%
