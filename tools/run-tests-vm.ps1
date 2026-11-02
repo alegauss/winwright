@@ -40,6 +40,8 @@
 .PARAMETER CommittedOnly
   Carry HEAD alone. By default the guest gets the working tree - uncommitted and untracked included -
   because testing a tree nobody has in front of them is the failure this whole project is about.
+  With this, both the list and the bytes are HEAD's, so a checkout somebody is editing still gives
+  the guest the commit it names; files named by -Carry come from disk beside it.
 
 .PARAMETER Bound
   How many minutes the guest run may take before this stops waiting on it, sixty by default. WW386:
@@ -1465,44 +1467,25 @@ switch ($taking.State) {
 
 $script:DeskWhenItStarted = $desk.State
 
-Push-Location $script:Tree
-try {
-    # -c and -o together, minus what .gitignore covers: tracked files plus the untracked ones that
-    # are really part of the tree. A sync built from `git diff` alone carries neither an untracked
-    # test file nor a new fixture, and a suite that never saw them is green about nothing.
-    if ($CommittedOnly) { $files = @(& git ls-files -c) } else { $files = @(& git ls-files -c -o --exclude-standard) }
-    if ($LASTEXITCODE -ne 0) { Refuse 'git would not list this tree' }
-}
-finally { Pop-Location }
+. (Join-Path $PSScriptRoot 'carry.ps1') -DefineOnly
 
 # WW574. What the listing leaves out and the run needs: a build output, ignored as it should be.
 # Forward slashes, as git lists, so a file both listed and carried goes into the archive once.
 $carried = @()
 if ($Carry) {
-    . (Join-Path $PSScriptRoot 'carry.ps1') -DefineOnly
     try { $carried = @(Get-Carried -Tree $script:Tree -Pattern $Carry | ForEach-Object { $_ -replace '\\', '/' }) }
     catch { Refuse $_.Exception.Message 'Name files under the tree, by a path or a wildcard relative to it, that are there before the run starts.' }
-
-    $files = @($files) + @($carried | Where-Object { $files -notcontains $_ })
 }
 
+# WW589. HEAD's bytes with -CommittedOnly, not the disk's under HEAD's list: see carry.ps1.
 $zip = Join-Path $stage 'source.zip'
-Add-Type -AssemblyName System.IO.Compression.FileSystem | Out-Null
-$archive = [IO.Compression.ZipFile]::Open($zip, 'Create')
-try {
-    foreach ($relative in $files) {
-        $full = Join-Path $script:Tree $relative
-        if (Test-Path -LiteralPath $full -PathType Leaf) {
-            $null = [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $full, $relative)
-        }
-    }
-}
-finally { $archive.Dispose() }
+try { $count = New-CarriedArchive -Tree $script:Tree -Zip $zip -CommittedOnly:$CommittedOnly -Carried $carried }
+catch { Refuse $_.Exception.Message }
 
 $size = [math]::Round((Get-Item -LiteralPath $zip).Length / 1MB, 1)
 $carrying = if ($CommittedOnly) { 'HEAD only' } else { 'the working tree' }
 if ($carried.Count -gt 0) { $carrying += ", and $($carried.Count) carried: $(($carried | Select-Object -First 5) -join ', ')" }
-Write-Host "  carrying    $($files.Count) files, $size MB ($carrying)"
+Write-Host "  carrying    $count files, $size MB ($carrying)"
 
 # --- the scripts the guest runs, generated here so nothing is quoted through vmrun ---------------
 #

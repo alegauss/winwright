@@ -129,6 +129,7 @@
 - ✅ **WW585** **A fixture's before command cannot name {configuration}, so it runs a pinned build's CLI beside the window under test** — A fixture's before command, and every field a token fills, names {configuration} and gets the project's build; unfilled, the run refuses naming the field and WINWRIGHT_CONFIGURATION.
 - ✅ **WW586** **A program the application under test starts outlives the case, untracked, and a case cannot read that it was started** — A process step 'starts' reads what the application started as file name and arguments, from the launch's job, and what it starts ends with the case.
 - ✅ **WW596** **A helper a case's job ended still holds its working directory for a moment after the stop says it is gone** — Ending a case's job now waits on each member's own handle, so the stop answers only once every helper has exited and let go of its working directory.
+- ✅ **WW589** **run-tests-vm -CommittedOnly reports HEAD only, yet tracked files reach the guest with their uncommitted bytes** — -CommittedOnly now carries HEAD's own list and bytes through git archive, with -Carry files from disk beside it, so the guest builds the commit the label names.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

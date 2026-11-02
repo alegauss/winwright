@@ -4,32 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW589 CommittedOnly carries the working tree's bytes
-
-Met in revelei on 30/10/2026, gating the v0.4.0 release at HEAD in a checkout that
-carried another session's uncommitted work:
-
-    run-tests-vm.cmd -Tree D:\Git\alegauss\revelei -CommittedOnly -Run run-tests.cmd -ResultsIn TestResults
-
-The runner printed `carrying 289 files, 1.7 MB (HEAD only)`, and the guest build failed
-with CS0234: a modified tracked file referenced a type that only an untracked file
-declares. HEAD itself does not reference it.
-
-The cause is in `tools/run-tests-vm.ps1`. `-CommittedOnly` narrows the listing to `git
-ls-files -c`, but the zip is built from each path's file on disk
-(`CreateEntryFromFile`). The listing is wrong too: `ls-files -c` is the index, not HEAD,
-so a file only staged is carried, and a tracked file deleted on disk is skipped by the
-`Test-Path` check without a word.
-
-What it should do: with `-CommittedOnly`, both the list and the bytes come from HEAD
-(`git archive HEAD`, or `git ls-tree -r HEAD` with each blob read through `git show`),
-so the label is true. Not a refusal on a dirty tree: carrying HEAD from a checkout
-somebody is editing is the case the flag exists for. Files named by `-Carry` still come
-from disk and stay labelled as carried.
-
-Tests: a modified tracked file arrives as HEAD has it; a staged new file is absent; a
-tracked file deleted on disk arrives; `-Carry` beside `-CommittedOnly` carries both.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

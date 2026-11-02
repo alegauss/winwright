@@ -4,8 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW589** (deps: —) **run-tests-vm -CommittedOnly reports HEAD only, yet tracked files reach the guest with their uncommitted bytes** — An adopter gating a release at HEAD in a checkout another session is editing gets a build of a tree that exists nowhere, labelled as HEAD. → §WW589
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
