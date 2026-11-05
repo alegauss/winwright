@@ -242,6 +242,32 @@ name a reading it must see change before it returns, waiting for the change and 
 the change to settle. Either way the wait belongs to the engine, as every other wait
 here does.
 
+### §WW610 Enter and Space on a focused element
+
+Met in claude-tray T438, which made the Sessions rows, the live chart's project strip
+and the Context overview's rows reachable from the keyboard: Tab focuses one, and Enter
+or Space opens it. The case it wanted, against `--main --observing --lang en` under the
+tray's WinForms pump (the only host where a keyboard bug shows, claude-tray's T135):
+
+```json
+{ "locator": "TabItem#SessionsPane", "act": "select", "expect": "selected", "reads": "selected" },
+{ "locator": "#SessionList > DataItem[order=top]", "act": "press", "with": "Enter" },
+{ "locator": "#SessionList > DataItem[order=top]", "act": "read", "reads": "expanded", "expect": "expanded" }
+```
+
+`press` takes a `TraversalKey` (Tab, Shift+Tab and the four arrows) and sends it at the
+window, not at an element. So the case has no way to say "with focus on this row", and
+Enter and Space are not keys it can name at all. Tab-walking the window to the row would
+make the case depend on the focus order of every control before it.
+
+The claim settled for: the code ships, and the keyboard path is unproven by any case.
+Pointer clicks and the `invoke` pattern were already covered, so the one route T438
+added is the route nothing checks.
+
+What would close it: `press` accepting Enter and Space (and Escape, which a dialog's
+case needs too), and an element locator on `press` meaning "take focus there first, then
+send", the way `type` already takes focus before it sends (Keyboard.TakeFocus).
+
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
