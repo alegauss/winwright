@@ -24,6 +24,8 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
+- 📋 **WW611** (deps: —) **An in-app render of a window whose background is the system backdrop draws dark-theme text on white** — Every preview of a dark-themed Fluent window is unreadable, yet the case passes, so a layout check by picture checks nothing. → §WW611
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file

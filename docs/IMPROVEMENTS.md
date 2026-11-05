@@ -278,6 +278,30 @@ or a chord from wherever focus stands, so the press keeps its meaning.
 
 ## Block E — Capture — the picture that proves what it photographed
 
+### §WW611 A backdrop window rendered in-app
+
+Met in claude-tray T449, in dark mode: the app's windows set `ThemeMode="System"`, which
+leaves their background to the system backdrop (Mica). Every in-app render of them is
+washed out: `preview.cmd shell`, `panels` and `context` all write a white page with
+near-white labels. Only controls that paint their own fill (an accent button, a selected
+row) read. The cases pass.
+
+Seen with the harness at 0.1.0-alpha.18 and again at 1.1.7, which carries WW583's wait
+for a fade, so it is not a picture taken mid-animation. The window's own background is
+transparent under the backdrop, and DWM draws the backdrop outside the WPF tree the
+render reads. Dark-theme foreground brushes are then composed onto white, because white
+is what an empty pixel becomes.
+
+What would close it, in the order a reader of the picture would want:
+- When the render's root is a window whose background is transparent or a backdrop, paint the
+  theme's window background (the resolved `ApplicationBackgroundBrush`, or the system window colour
+  for the active theme) under the tree before rendering it. That is what a person sees there.
+- Failing that, refuse the picture as one the engine cannot vouch for, which is the rule `capture`
+  already states, instead of writing it and passing.
+
+No workaround in claude-tray: giving the windows an opaque background would change what
+users see (no Mica) only to make pictures right, which is the wrong way round.
+
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file
