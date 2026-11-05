@@ -4,29 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW599 Name the guest log's host path
-
-Met in wintimeline on 2026-11-04 (WT160, the clip copy and paste task). Its
-run-tests-vm.cmd calls winwright's runner with -Run "run-tests.cmd Debug" and -ResultsIn
-"TestResults\reports". The guest run went red in WinTimeline.Cases. The console the
-session read was filtered (Select-String on "com falha|bem-sucedido|suites|desk"), so
-the lines naming the broken case and its step were dropped, and the run looked as if it
-had left nothing behind. The session searched the tree's bin and .cache folders, found
-no log, and started the ten-minute guest run again only to read the failure.
-
-The full guest log was on the host all along, at TestResults\vm\vm-run.log.
-tools/run-tests-vm.ps1 copies it there (copyFileFromGuestToHost into $results, lines
-1739-1740) and prints its text whole, but no Write-Host ever names the file or the
-folder. A reader who has the console cut short, by a filter, a terminal's scrollback or
-a tool that keeps the last lines, has no way to learn that a complete copy exists.
-
-What winwright should offer: the runner's last lines name where the guest log was kept
-(and the screenshot and every -Bring file, which already have a line of their own for
-the picture), for a red run above all. Something like "  log
-D:\...\TestResults\vm\vm-run.log (the guest's console, whole)" printed after the
-verdict, so the path survives any tail of the output. Done when a red run's final lines
-name the log's host path, with a test over the runner's closing lines.
-
 ### §WW600 The desk note claims only what the run can show
 
 Met twice in wintimeline on 2026-11-04. Both guest runs started on a desk read as

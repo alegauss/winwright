@@ -1737,7 +1737,11 @@ if ($said -notmatch '^-?\d+$') {
 $code = [int]$said
 
 $logFile = Join-Path $results 'vm-run.log'
-$null = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\vm-run.log", $logFile)
+$logBack = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\vm-run.log", $logFile)
+
+# WW599. What this run fetched, named at its end. Only what came back now: the folder outlives runs,
+# so a file sitting there may be an earlier run's, and naming it would point at the wrong evidence.
+$fetchedHere = [Collections.Generic.List[string]]::new()
 
 $guestResults = "$script:GuestRepo\$script:ResultsIn"
 
@@ -1748,6 +1752,7 @@ if ($script:Bring.Count -gt 0) {
     $first = $script:Bring[0]
     $got = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$guestResults\$first", (Join-Path $results $first))
     if (-not $got.Ok) { Write-Host "  no $first came back from the guest" -ForegroundColor Yellow }
+    else { $fetchedHere.Add((Join-Path $results $first)) }
 }
 
 # WW430. What the gate's half costs in the guest, which nothing had ever measured.
@@ -1840,6 +1845,7 @@ if ($code -eq 0 -or $Run) {
             $when = if ($code -eq 0) { 'the run passed and ' } else { '' }
             Write-Host "  ${when}no $also came back from the guest" -ForegroundColor Yellow
         }
+        else { $fetchedHere.Add((Join-Path $results $also)) }
     }
 }
 
@@ -1888,7 +1894,7 @@ if ($code -ne 0) {
     }
 }
 
-if (Test-Path -LiteralPath $logFile) {
+if ($logBack.Ok -and (Test-Path -LiteralPath $logFile)) {
     Write-Host ''
     foreach ($line in ((Read-ConsoleText $logFile) -split "`r?`n")) { Write-Host $line }
 }
@@ -1920,4 +1926,12 @@ if ($code -ne 0 -and $script:DeskWhenItStarted -in @('shell', 'stale')) {
 Write-Host ''
 if ($code -eq 0) { Write-Host 'run-tests-vm: the guest run passed.' -ForegroundColor Green }
 else { Write-Host "run-tests-vm: the guest run exited $code." -ForegroundColor Red }
+
+# WW599. Where the evidence was kept, as the run's last lines. The guest's log is printed whole above,
+# and a console read through a filter, a scrollback or a tool that keeps only the tail loses the lines
+# naming the broken case - wintimeline reran a ten-minute guest run to read a log already on disk. So
+# the paths come after the verdict, where any tail of the output still holds them.
+if ($logBack.Ok) { Write-Host "  log         $logFile (the guest's console, whole)" }
+else { Write-Host "  log         none came back from the guest; the console above is all this run has" -ForegroundColor Yellow }
+foreach ($path in $fetchedHere) { Write-Host "  kept        $path" }
 exit $code
