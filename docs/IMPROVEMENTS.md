@@ -15,10 +15,10 @@ had left nothing behind. The session searched the tree's bin and .cache folders,
 no log, and started the ten-minute guest run again only to read the failure.
 
 The full guest log was on the host all along, at TestResults\vm\vm-run.log.
-tools/run-tests-vm.ps1 copies it there (copyFileFromGuestToHost into $results, line
-1771) and prints its text whole, but no Write-Host ever names the file or the folder. A
-reader who has the console cut short, by a filter, a terminal's scrollback or a tool
-that keeps the last lines, has no way to learn that a complete copy exists.
+tools/run-tests-vm.ps1 copies it there (copyFileFromGuestToHost into $results, lines
+1739-1740) and prints its text whole, but no Write-Host ever names the file or the
+folder. A reader who has the console cut short, by a filter, a terminal's scrollback or
+a tool that keeps the last lines, has no way to learn that a complete copy exists.
 
 What winwright should offer: the runner's last lines name where the guest log was kept
 (and the screenshot and every -Bring file, which already have a line of their own for
@@ -27,7 +27,7 @@ D:\...\TestResults\vm\vm-run.log (the guest's console, whole)" printed after the
 verdict, so the path survives any tail of the output. Done when a red run's final lines
 name the log's host path, with a test over the runner's closing lines.
 
-### §WW600 Blame the desk only on an excused count that shows it
+### §WW600 The desk note claims only what the run can show
 
 Met twice in wintimeline on 2026-11-04. Both guest runs started on a desk read as
 'shell' and went red. tools/run-tests-vm.ps1 then printed its WW472 note (line 1941).
@@ -44,10 +44,12 @@ The note prints on every non-zero exit after a 'shell' or 'stale' start. Its hed
 compare the excused count with earlier runs, leaves the reader a comparison whose
 numbers the runner holds.
 
-What winwright should offer: the runner blames the desk only when the excused count is
-well above the usual (WW472 measured 136 and 137 against nine), and names both numbers.
-Otherwise it says the desk started as 'shell' with an ordinary excused count, so the red
-is the suite's to read. Done when both arms have a test.
+Blaming the desk only on a high excused count cannot be built for an adopter: that count
+comes from winwright's own roll call (Roll.cs, Against), the runner never parses it, and
+wintimeline writes no excused.txt. So the note stops claiming the tree is not broken. It
+says the desk started as 'shell' or 'stale', quotes the roll call's excused line where
+vm-run.log holds one, and otherwise says the runner cannot tell and the red is the
+suite's to read first. Done when a log with that line and one without each have a test.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
@@ -87,7 +89,7 @@ wanted:
 "PointerIsTheAct", "clicks": 2, "named": "the compound is double-clicked" }
 
 The engine already has the gesture: Pointer.DoubleClick in
-src/Paneproof/Acting/Pointer.cs (PointerAct.Clicks, "which is how a double click is
+src/Winwright/Acting/Pointer.cs (PointerAct.Clicks, "which is how a double click is
 said"). But nothing in the case grammar reaches it. Scenarios has no clicks key and no
 "double click" act, so a case file cannot say it. The workaround in wintimeline is a
 second route to the same command: Enter on a selected compound opens it. The case
@@ -161,7 +163,7 @@ The case loaded, since Chord.TryParse accepts a bare digit. But the step broke a
 "InvalidOperationException: '2' reached the act and is not a traversal key, so the load
 accepted what the act cannot run".
 
-The cause is in src/Paneproof/Scenarios/ActVerb.cs. Chorded starts with
+The cause is in src/Winwright/Scenarios/ActVerb.cs. Chorded starts with
 Enum.TryParse<TraversalKey>(argument, ignoreCase: true, out _), and Enum.TryParse takes
 a numeric string as an enum value, so "2" parses as the third traversal key and Chorded
 returns null. Press then calls Traversing("2"), which matches by name and throws.
@@ -187,11 +189,14 @@ sidecar's bytes with a fixture instead, which ties the case to the JSON's layout
 line endings rather than to what the user sees.
 
 Build a step that starts the application again the way the fixture launched it, with the
-same staged files and arguments, and lets the steps after it read the new window:
-'process: starts again' or an act 'relaunch' on a process subject. It is refused before
-an exit has been claimed, so a case cannot kill a live window by accident. The fixture's
-'before' and 'files' do not run again, because the point is to read what the previous
-run left behind.
+same staged files and arguments, and lets the steps after it read the new window: an act
+such as 'launch again' on a process subject, never a spelling that starts with 'starts',
+which WW586 already gives to a program the application starts. It is refused before an
+exit has been claimed, so a case cannot kill a live window by accident. The new process
+joins the list the run stops at its end (Following.Relaunched), and a single-instance
+application whose mutex outlived the exit is a named refusal, not a timeout. The
+fixture's 'before' and 'files' do not run again, because the point is to read what the
+previous run left behind.
 
 ### §WW607 Every dump a hung run wrote comes back
 
@@ -204,11 +209,13 @@ deadlocked or just slow, and only the application's dump answers it, so it staye
 guest. The project then had to reason about the cause from the client side and rerun the
 whole gate.
 
-Bring back every dump the run wrote, under its own name (WinTimeline_4436_hang.dmp,
-WinTimeline.Cases_7108_hang.dmp), together with the hang logs beside them. The final
-report should name each one and say which process it is: the application from the
-project's declared executable, or the test host. A size cap per run can keep the copy
-bounded, with the report naming what it left behind.
+Bring back every dump the run wrote, together with the hang logs beside them. The test
+host's dump keeps the name hangdump.dmp, which Show-Blame, Winwright.Blame,
+runner-arms.ps1 and four test classes read; every other dump comes back beside it under
+its own name (WinTimeline_4436_hang.dmp). The final report should name each one and say
+which process it is: the application from the project's declared executable, or the test
+host. A size cap per run can keep the copy bounded, with the report naming what it left
+behind.
 
 ### §WW608 Waiting out what an invoke started
 
@@ -236,11 +243,11 @@ It selects through `SelectionItemPattern`, invokes, sleeps 4 s and reads `IsSele
 It went red on the old logic and green on the fix, but no case in `cases\` holds it, so
 the next rescan regression ships.
 
-What would close it: a step that waits for a reading to pass through a value and leave
-it, such as `"passes": "{context.scanning}"` on `Text#ScanInfo`. Or an `invoke` that can
-name a reading it must see change before it returns, waiting for the change and then for
-the change to settle. Either way the wait belongs to the engine, as every other wait
-here does.
+What would close it: the claim rides on the act step, armed before `Invoke`, since a
+later read cannot see a value that already passed. Something like `"passes":
+"context.scanning"` (a key, as `never` takes) on the invoke, read at a second locator
+such as `Text#ScanInfo` through UI Automation events, since polls miss a short flash. A
+value never seen is a failure naming it.
 
 ### §WW610 Enter and Space on a focused element
 
@@ -255,18 +262,19 @@ tray's WinForms pump (the only host where a keyboard bug shows, claude-tray's T1
 { "locator": "#SessionList > DataItem[order=top]", "act": "read", "reads": "expanded", "expect": "expanded" }
 ```
 
-`press` takes a `TraversalKey` (Tab, Shift+Tab and the four arrows) and sends it at the
-window, not at an element. So the case has no way to say "with focus on this row", and
-Enter and Space are not keys it can name at all. Tab-walking the window to the row would
+`press` sends its key at the window, not at an element, so the case has no way to say
+"with focus on this row". Enter, Space and Escape are already keys it can name: a chord
+may be a bare key (Chord.cs, the Named table). Tab-walking the window to the row would
 make the case depend on the focus order of every control before it.
 
 The claim settled for: the code ships, and the keyboard path is unproven by any case.
 Pointer clicks and the `invoke` pattern were already covered, so the one route T438
 added is the route nothing checks.
 
-What would close it: `press` accepting Enter and Space (and Escape, which a dialog's
-case needs too), and an element locator on `press` meaning "take focus there first, then
-send", the way `type` already takes focus before it sends (Keyboard.TakeFocus).
+What would close it: a `focus` act that takes focus on its element the way `type`
+already does (Keyboard.TakeFocus) and reads `focused` back, followed by the `press` of
+today. Making `press` take focus first would change every existing case that sends Tab
+or a chord from wherever focus stands, so the press keeps its meaning.
 
 ## Block E — Capture — the picture that proves what it photographed
 
