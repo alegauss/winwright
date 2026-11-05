@@ -4,7 +4,7 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW599** (deps: —) **A red guest run prints the guest's log whole but never names the file it kept on the host** — A console cut short by a filter or scrollback loses the failing case, and the reader reruns a ten-minute guest run to read a log that was already on disk. → §WW599
+- 🛠 **WW599** (deps: —) **A red guest run prints the guest's log whole but never names the file it kept on the host** — A console cut short by a filter or scrollback loses the failing case, and the reader reruns a ten-minute guest run to read a log that was already on disk. → §WW599
 - 📋 **WW600** (deps: —) **The note after a red run on a 'shell' desk says the tree is not broken, whatever the run excused** — A real defect gets blamed on the desk, so a session restarts the guest shell and reruns instead of reading its own failure. → §WW600
 
 ## Block C — Locate — the locator grammar and the tree an agent reads

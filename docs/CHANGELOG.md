@@ -599,6 +599,7 @@
 - ✅ **WW453** **no menu this fixture puts up has a submenu, so the verb an adopter's next step calls is driven against nothing** — `--tray` puts up a submenu in both kinds, and driving it found `Subject.Window` asking the root — which answers nothing for a tray, and is the sentence an adopter's third step reports.
 - ✅ **WW485** **the fixture wears the generic executable icon, so every window a run puts up is unmarked on the desk and in captures** — The mark is built in at 16, 32, 48 and 256, so every fixture window and its tray entry wear it (design recorded in `src/Winwright.Fixture/Winwright.Fixture.csproj`).
 - ✅ **WW557** **No fixture shape replaces an element between looks, so the act's vanished-match arm is provoked by nothing** — The fixture's --vanishing buttons are found and refuse to be read, so undoing WW555 turns two guest cases red with photo-boost's own message.
+- ✅ **WW612** **The settles-late case gives the act 400 ms before the box commits, so a slow guest reads the settled value** — The settles-late box commits 1500 ms after the write, so a loaded guest's act still reads what it wrote and the case reds only when the read-back is wrong.
 
 ## Block L — The documentation area — written for a reader who has installed nothing
 

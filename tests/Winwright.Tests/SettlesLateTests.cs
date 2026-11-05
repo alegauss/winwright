@@ -32,8 +32,14 @@ public sealed class SettlesLateTests : IDisposable
     /// <summary>
     /// How long the box takes to have its own say. Long enough that the act cannot read the settled
     /// value by luck, short enough that the expectation's own budget is never the thing under test.
+    /// <para>
+    /// WW612. It was 400, and a loaded guest on 2026-11-05 took longer than that to write the box and
+    /// read it back, so the act read the settled value and the case went red over a read-back that
+    /// had done nothing wrong. 1500 gives the act several times the margin and still leaves the
+    /// expectation most of its 4000 ms act budget to poll after the commit.
+    /// </para>
     /// </summary>
-    private const int LateMs = 400;
+    private const int LateMs = 1500;
 
     /// <summary>
     /// What the box is called. Spelled here rather than referenced: the fixture is an application
