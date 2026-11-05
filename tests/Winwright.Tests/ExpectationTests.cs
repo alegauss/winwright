@@ -90,7 +90,10 @@ public sealed class ExpectationTests
 
         // Answers 'a' three times, then 'b' three times, then stops changing. Six polls, three
         // readings: the changes are the story and the repeats are one fact each.
-        var expectation = Expect.That("the field", "never", () => ++polls <= 3 ? "a" : polls <= 6 ? "b" : "c", 200, 5);
+        //
+        // WW613. The budget was 200 ms, and a loaded host fit fewer than the seven polls 'c' needs
+        // into it. The expectation never holds, so this costs the case its whole budget: one second.
+        var expectation = Expect.That("the field", "never", () => ++polls <= 3 ? "a" : polls <= 6 ? "b" : "c", 1000, 5);
 
         Assert.Equal(["a", "b", "c"], expectation.Readings.Select(reading => reading.Read));
         Assert.True(expectation.Polls > expectation.Readings.Count, expectation.Sentence());
