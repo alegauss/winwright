@@ -23,7 +23,7 @@ about whether it works the same way twice.
 A case is a data file the engine runs, not a script you repeat. The engine owns the waits, the
 retries and the verdict — write those yourself and you write them differently every time.
 
-A write naming `Paneproof.Acting`, `Paneproof.Locating` or `Paneproof.Asserting` (or `Winwright.*`) is **denied** by the
+A write naming `Winwright.Acting`, `Winwright.Locating` or `Winwright.Asserting` is **denied** by the
 plugin's hook. That is not an obstacle to route around; it is the format arriving before the work.
 
 Instead:

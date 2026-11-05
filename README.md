@@ -13,8 +13,8 @@ claude plugin install winwright@winwright --scope project
 
 Windows · .NET 10 · two NuGet packages, no external dependency · Apache-2.0
 
-[![Paneproof on nuget.org](https://img.shields.io/nuget/v/Paneproof?label=Paneproof)](https://www.nuget.org/packages/Paneproof)
-[![Paneproof.InApp on nuget.org](https://img.shields.io/nuget/v/Paneproof.InApp?label=Paneproof.InApp)](https://www.nuget.org/packages/Paneproof.InApp)
+[![Winwright on nuget.org](https://img.shields.io/nuget/v/Winwright?label=Winwright)](https://www.nuget.org/packages/Winwright)
+[![Winwright.InApp on nuget.org](https://img.shields.io/nuget/v/Winwright.InApp?label=Winwright.InApp)](https://www.nuget.org/packages/Winwright.InApp)
 
 **[alegauss.github.io/winwright](https://alegauss.github.io/winwright/)**: the short version of
 the argument. This file is the long one.
@@ -54,7 +54,7 @@ Release, checks the zip against its published SHA-256, and unpacks it into
 it), not the SDK itself. The guard reads that folder and downloads nothing, so in the first few
 seconds of the first session it may say it is not there yet.
 
-A network that cannot reach github.com can point `PANEPROOF_RELEASES` at a folder or a mirror
+A network that cannot reach github.com can point `WINWRIGHT_RELEASES` at a folder or a mirror
 holding the release's `winwright-plugin-<version>-win-x64.zip` and its `.sha256`. Where the
 download fails, or the runtime is missing, stderr names what is missing, and building the plugin's
 clone with `dotnet build -c Release` is the way round it: a local build is always preferred over a
@@ -70,13 +70,13 @@ Windows only, .NET 10 (`net10.0-windows`). The in-app half needs `<UseWPF>true</
 
 ```xml
 <!-- In the test project that drives the application. -->
-<PackageReference Include="Paneproof" Version="1.1.7" />
+<PackageReference Include="Winwright" Version="1.1.7" />
 
 <!-- In the application under test, only if you want the readings it can only take from inside. -->
-<PackageReference Include="Paneproof.InApp" Version="1.1.7" />
+<PackageReference Include="Winwright.InApp" Version="1.1.7" />
 ```
 
-`Paneproof.InApp` is optional: every reading and every pattern act runs against an application
+`Winwright.InApp` is optional: every reading and every pattern act runs against an application
 that references nothing. See [what needs cooperation](#what-needs-the-application-to-cooperate).
 The badges above are read from the feed; the version in these lines is typed, so trust the badge
 where the two disagree.
@@ -95,7 +95,7 @@ removed.
 
 ## First session
 
-Declare the application once, in `paneproof.json` at the repository root (every key is optional;
+Declare the application once, in `winwright.json` at the repository root (every key is optional;
 [Declaring a project](#declaring-a-project) has them all):
 
 ```json
@@ -135,8 +135,8 @@ without a second run. [Writing a case](#writing-a-case) is the full format.
 
 A hand-written harness script is always faster in the moment, and that is how a 2,732-line one
 happens. So the plugin's `PreToolUse` hook **denies** a write whose content names
-`Paneproof.Acting`, `Paneproof.Locating` or `Paneproof.Asserting` (or their `Winwright.*` spellings
-from before the rename), and names the case file and `winwright_check` that replace it. It never denies a `.cases.json` write, never denies a project
+`Winwright.Acting`, `Winwright.Locating` or `Winwright.Asserting`, and names the case file and
+`winwright_check` that replace it. It never denies a `.cases.json` write, never denies a project
 that references the engine's *source*, and allows anything it cannot read: a hook that denies
 what it did not understand is one that gets removed.
 
@@ -267,7 +267,7 @@ just took can be trusted.
 | `Obstruction` | what stands over a region, read off the z order |
 | `DropShadows` | whether this desk draws the shadow a menu asks for — a setting of the machine, off on a runner tuned for speed, so a menu with no shadow behind it is the desk and not the application |
 | `PaintedFrame` | what a window actually paints inside the rectangle it owns |
-| `OwnRender` | ask the application to draw its own tree into a named file, and read back whether it did — the one verb here that needs `Paneproof.InApp` on the other end |
+| `OwnRender` | ask the application to draw its own tree into a named file, and read back whether it did — the one verb here that needs `Winwright.InApp` on the other end |
 | `Loading` | whether a page has finished computing, against the loading label the project declares |
 | `CaseRun` | one declared case, run: the loop, the waits, the attempts and the verdict, none of which the case carries |
 | `Suite` | the cases a selection asked for, run, with every case it left alone named rather than counted |
@@ -279,7 +279,7 @@ than discovered on a red run.
 
 ## What needs the application to cooperate
 
-One verb in the list above needs `Paneproof.InApp` — `OwnRender`, and it is the whole reason the
+One verb in the list above needs `Winwright.InApp` — `OwnRender`, and it is the whole reason the
 default capture route works. Everything else answers against an application that references nothing.
 What the in-app half adds is what a harness cannot take from outside the process:
 
@@ -290,7 +290,7 @@ What the in-app half adds is what a harness cannot take from outside the process
   the verb exists: a tree that was measured and never arranged renders as a fully transparent
   picture of exactly the right size, which looks like a drawing bug and is a calling bug.
 - `Backgrounds` — what a capture should be drawn on, from a brush the application declares under
-  `PaneproofCaptureBackground`, or the window's own. The system palette is not consulted at all: it
+  `WinwrightCaptureBackground`, or the window's own. The system palette is not consulted at all: it
   answers white on a machine whose window is dark.
 - `Geometry` / `Surfaces` — the laid-out tree and what was drawn, written only where the harness
   asked. An application shipped to its users reports nothing and writes no file, which is what makes
@@ -301,7 +301,7 @@ What the in-app half adds is what a harness cannot take from outside the process
   layers a popup for the drop shadow it draws itself, and the soft edge of that is the desktop.
 - `Renders` — one line that answers a harness asking for a render, over the message loop the
   application already runs. No thread, no watched directory, and nothing at all unless the run that
-  started it set `PANEPROOF_RENDERS` to somewhere it may write — and where a render does not happen,
+  started it set `WINWRIGHT_RENDERS` to somewhere it may write — and where a render does not happen,
   the run asks the application why and prints its answer, so "no in-app half" and "the half is here
   and nobody set the variable" stop reading alike. That matters most on an attached run, which
   launched nothing and so can only ever have the second. Write `Renders.Everywhere()` and
@@ -317,16 +317,8 @@ What the in-app half adds is what a harness cannot take from outside the process
 
 ## Declaring a project
 
-`paneproof.json`, found by walking up from where a run starts. Every key is optional; a reading that
+`winwright.json`, found by walking up from where a run starts. Every key is optional; a reading that
 needs one this file does not declare is **recorded as not taken**, never quietly skipped.
-
-**The old names still work, for now.** A suite written before the rename keeps `winwright.json` and
-the `WINWRIGHT_*` variables (`WINWRIGHT_CONFIGURATION`, the runner's `WINWRIGHT_VMX` and the rest):
-each is read where its `paneproof`/`PANEPROOF_*` name is absent, and the run's report says which
-old names it read, so renaming them is something you find out about rather than something that
-breaks. A directory holding both declarations, or both spellings of one variable set at once, is
-refused, naming both. A launch sets the in-app variables under both names, so an application on an
-older in-app package still answers. The release notes say how long the old names are accepted.
 
 ```json
 {
@@ -350,7 +342,7 @@ older in-app package still answers. The release notes say how long the old names
 
 `{configuration}` in a declared path stands for the build being tested, so one declaration serves a
 local Debug run and a Release run in CI. A run fills it from, in order: the configuration a caller
-passes to `ProjectDeclaration.Load(path, configuration)`, then the `PANEPROOF_CONFIGURATION`
+passes to `ProjectDeclaration.Load(path, configuration)`, then the `WINWRIGHT_CONFIGURATION`
 environment variable, then `configuration` in this file. CI sets the variable for its Release job, and
 a developer's runner gets the file's default without saying anything. A path naming
 `{configuration}` that none of the three fills **refuses when it is asked for**, naming the
@@ -658,7 +650,7 @@ declaration, and the folder inside it is the case's name — so no case carries 
 same rule every other field here follows. Its claim is the receipt and it takes no `expect` and no
 `reads`. A window a render could reach is a **hole** rather than a picture: a render draws the
 application's own visual tree and only the application can take one, so the answer names
-`Paneproof.InApp` instead of reaching for the screen.
+`Winwright.InApp` instead of reaching for the screen.
 
 A capture may also name a **`popup`** — the surface inside the window whose tree the picture is of,
 by the name the application's own author gave it. It is the one picture no copy of the screen can
@@ -1237,7 +1229,7 @@ every expectation in that file describes an environment nothing set up. Same rul
 level up.
 
 `workingDirectory` is the directory the application is started in. The default is the one thing worth
-saying about it: **the project's root**, the directory `paneproof.json` sits in, which is already what
+saying about it: **the project's root**, the directory `winwright.json` sits in, which is already what
 every path that file declares resolves against. Before that default the launch set no directory at
 all, so it inherited whichever one the test runner happened to be in — and a fixture passing
 `"arguments": ["--import", "cases/fixtures/MobaXterm.ini"]` meant three different files under
@@ -1276,7 +1268,7 @@ application is not launched, and every check of the case is a hole naming the co
 the last lines it wrote. Its output is kept off the runner's own streams. A fixture's line in a report
 counts the commands it ran first.
 
-`application` is the executable a fixture launches instead of the one `paneproof.json` names. It is
+`application` is the executable a fixture launches instead of the one `winwright.json` names. It is
 for the installed copy of an application, the one an installer put in `%LOCALAPPDATA%\Programs`,
 which is what a case about installing or updating has to drive and the build tree's is not. It is
 written the way `workingDirectory` is: the environment is expanded, the tokens are filled, and what is
@@ -1351,7 +1343,7 @@ always do:
 }
 ```
 
-**`{root}`** is the other token, and it names the project's root, the directory `paneproof.json` sits
+**`{root}`** is the other token, and it names the project's root, the directory `winwright.json` sits
 in. It is filled wherever `{files}` is, and also in a step's **`with`**, so a case can type a path in
 the checkout without spelling one desk's checkout whole. `{root/}` is the same path with forward
 slashes and a slash before the drive, `/C:/src/yourapp`, which is how Windows OpenSSH names a path:
@@ -1605,6 +1597,7 @@ machine of whoever ran it, a verdict assembled wrongly, and a trace that is not 
 - No service, no daemon, no database.
 - A green never covers an assertion that did not run.
 - No target older than the current .NET LTS.
+- Renaming winwright is off the table: the NuGet ids, the plugin and every adopter keep this name.
 
 ### And what a run deliberately does not keep
 

@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 const siteDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = join(siteDir, "..");
 
-const source = (...parts) => readFileSync(join(repoDir, "src", "Paneproof", ...parts), "utf8");
+const source = (...parts) => readFileSync(join(repoDir, "src", "Winwright", ...parts), "utf8");
 
 const payload = join(siteDir, "docs", "src", "data", "project.generated.json");
 if (!existsSync(payload)) {

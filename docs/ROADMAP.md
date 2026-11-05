@@ -4,9 +4,22 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW599** (deps: —) **A red guest run prints the guest's log whole but never names the file it kept on the host** — A console cut short by a filter or scrollback loses the failing case, and the reader reruns a ten-minute guest run to read a log that was already on disk. → §WW599
+- 📋 **WW600** (deps: —) **The note after a red run on a 'shell' desk says the tree is not broken, whatever the run excused** — A real defect gets blamed on the desk, so a session restarts the guest shell and reruns instead of reading its own failure. → §WW600
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+- 📋 **WW601** (deps: —) **A locator miss lists every shut menu and tab in the window with a bare state word that reads as their current state** — A tab named '(selected)' reads as selected though it is not, and doors that cannot hold the element send the reader after a fault that is not there. → §WW601
+
 ## Block D — Act — patterns before pointers
+
+- 📋 **WW602** (deps: —) **A case cannot double-click, though the engine's pointer can, so what opens on a double click has no case** — Adopters add a second route such as Enter only so a case can reach the command, and the double click itself goes unproven. → §WW602
+- 📋 **WW603** (deps: —) **A click lands only on an element's clickable point, so a spot on a canvas is reached by a drag** — A drag standing in for a click passes only where the app acts on the press, and reds for the wrong reason anywhere else. → §WW603
+- 📋 **WW604** (deps: —) **A drag cannot hold Ctrl, Alt or Ctrl+Alt, so a drop whose edit depends on the key held has no case** — Editors pick insert, swap or duplicate by the key held across the drag, and only the plain drag can be proven. → §WW604
+- 📋 **WW605** (deps: —) **A press of a bare digit loads and then breaks: Enum.TryParse reads it as a traversal key's number** — Number keys that pick an angle, a tool or a rating have no case, and the break reads as the harness's fault, not the case's. → §WW605
+- 📋 **WW606** (deps: —) **A case cannot start the application again after it exits, to read what a clean close left for the next run** — State kept on close, such as a layout or a reopened tab, can only be proved by reading files rather than the window. → §WW606
+- 📋 **WW607** (deps: —) **A hung guest run brings back only its largest dump, so the application's own dump stays in the guest** — Whether the app deadlocked or the test host waited on it is answered only by the app's dump, which the run leaves behind. → §WW607
+- 📋 **WW608** (deps: —) **A read after an invoke can run before the handler, and no step waits for a reading to pass through a value** — A case after an invoke races the handler, so a check meant to catch what an asynchronous act does passes on the build that breaks it. → §WW608
 
 ## Block E — Capture — the picture that proves what it photographed
 
@@ -27,10 +40,6 @@
 ## Block M — The site on the shared design system
 
 ## Block N — The name — winwright becomes paneproof
-
-- 📋 **WW593** (deps: WW590 ✅, WW591 ✅, WW592 ⏸) **The repository, the site and the README still introduce the product as winwright** — A reader only meets the new name where they land, and the old page has to redirect instead of returning 404 as /freewilly/ did. → §WW593
-- 📋 **WW594** (deps: WW593) **Five adopting repositories still reference the Winwright packages, plugin and file names** — They are the adoption proof, and the old NuGet ids can only be deprecated once each of them has moved to Paneproof. → §WW594
-- 📋 **WW598** (deps: WW590 ✅) (requires: release) **The Winwright and Winwright.InApp ids on nuget.org say nothing about having moved to Paneproof** — NuGet cannot rename a package, so an adopter restoring the old ids is never told the new ones exist. → §WW598
 
 ## Done when — Block A
 
@@ -184,3 +193,7 @@
   the older runtime until it ends. .NET 10 has been the LTS since November 2025 and .NET
   8 support ends on 10/11/2026, so a team moving to a supported runtime moves to the one
   this already targets.
+- **Renaming winwright** Visits, downloads, the nuget.org ids and five adopters all
+  carry the name winwright, and NuGet cannot rename a package. WW590 renamed the code to
+  Paneproof and WW609 undid it before any release shipped. A new name splits that
+  history for nothing an adopter can see.

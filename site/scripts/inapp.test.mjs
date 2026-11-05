@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 
 const siteDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = join(siteDir, "..");
-const half = join(repoDir, "src", "Paneproof.InApp");
+const half = join(repoDir, "src", "Winwright.InApp");
 
 const payload = join(siteDir, "docs", "src", "data", "inapp.generated.json");
 if (!existsSync(payload)) {
@@ -45,7 +45,7 @@ test("every surface the package guards is on the page", () => {
   );
 
   for (const one of inapp.surfaces) {
-    assert.match(one.variable, /^PANEPROOF_[A-Z]+$/, `${one.surface} is armed by ${one.variable}`);
+    assert.match(one.variable, /^WINWRIGHT_[A-Z]+$/, `${one.surface} is armed by ${one.variable}`);
     assert.ok(one.answers.length > 0, `${one.surface} says nothing about what it answers`);
     assert.ok(one.unset.length > 0, `${one.surface} says nothing about what leaving it unset does`);
   }
@@ -76,7 +76,7 @@ test("both halves agree on the messages they find each other by", () => {
 
   // The engine sends what this answers. A page naming a message only one half knows would be
   // describing a protocol that cannot connect.
-  const engine = readFileSync(join(repoDir, "src", "Paneproof", "Capturing", "OwnRender.cs"), "utf8");
+  const engine = readFileSync(join(repoDir, "src", "Winwright", "Capturing", "OwnRender.cs"), "utf8");
   for (const one of inapp.registered) {
     assert.ok(
       engine.includes(one.named) || engine.includes(`Renders.${one.ask}`),
@@ -86,7 +86,7 @@ test("both halves agree on the messages they find each other by", () => {
 });
 
 test("the framework the page asks for is the one the project file declares", () => {
-  const project = readFileSync(join(half, "Paneproof.InApp.csproj"), "utf8");
+  const project = readFileSync(join(half, "Winwright.InApp.csproj"), "utf8");
   assert.equal(
     inapp.wpf,
     /<UseWPF>true<\/UseWPF>/.test(project),

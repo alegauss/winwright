@@ -50,11 +50,9 @@
   killed by hand.
 
 .NOTES
-  Secrets are never parameters and never printed. KEY=VALUE lines in a file, searched in order
-  (WW591: each WINWRIGHT_ spelling below is still accepted where the PANEPROOF_ one is unset, and
-  said so; both at once is refused):
+  Secrets are never parameters and never printed. KEY=VALUE lines in a file, searched in order:
 
-    1. whatever PANEPROOF_VM_ENV points at
+    1. whatever WINWRIGHT_VM_ENV points at
     2. d:\tmp\winwright-vm.env
     3. winwright-vm.env in the repository root
 
@@ -62,12 +60,12 @@
   of the two: `git add -f` stages it anyway and `git clean -xdf` deletes it without asking, so the
   out-of-tree location is the default on purpose.
 
-    PANEPROOF_VMX              full path to the .vmx
-    PANEPROOF_VM_PASSWORD      the VM *encryption* password. A Windows 11 guest needs a TPM, a TPM
+    WINWRIGHT_VMX              full path to the .vmx
+    WINWRIGHT_VM_PASSWORD      the VM *encryption* password. A Windows 11 guest needs a TPM, a TPM
                                means an encrypted VM, and vmrun opens nothing without this. It is
                                not the Windows login, and confusing the two costs an afternoon.
-    PANEPROOF_GUEST_USER       an account inside the guest
-    PANEPROOF_GUEST_PASSWORD   its password - a local account with a non-empty one, since vmrun
+    WINWRIGHT_GUEST_USER       an account inside the guest
+    WINWRIGHT_GUEST_PASSWORD   its password - a local account with a non-empty one, since vmrun
                                cannot authenticate a Microsoft account signed in with Hello or a PIN
 #>
 [CmdletBinding()]
@@ -365,37 +363,11 @@ function Refuse {
     exit 3
 }
 
-function Use-NewNames {
-    <#
-      WW591. Each variable under its PANEPROOF_ name, taking the WINWRIGHT_ one an existing env file
-      or shell still sets, and saying so. Both at once is refused: two values for one setting is a
-      choice this cannot make, and the values themselves are never printed, since some are secrets.
-    #>
-    param([string[]] $Names)
-
-    foreach ($name in $Names) {
-        $new = "PANEPROOF_$name"
-        $old = "WINWRIGHT_$name"
-        $now = [Environment]::GetEnvironmentVariable($new)
-        $then = [Environment]::GetEnvironmentVariable($old)
-
-        if ($now -and $then) {
-            Refuse "both $new and $old are set, and they name one setting" "$old is its old name: unset it, or remove it from the env file, and keep $new."
-        }
-
-        if ($then -and -not $now) {
-            Set-Item -Path "env:$new" -Value $then
-            Write-Host "  old name    $old was read because $new is not set; it is accepted for now, so rename it" -ForegroundColor Yellow
-        }
-    }
-}
-
 function Import-EnvFile {
-    Use-NewNames 'VM_ENV'
-    if ($env:PANEPROOF_VM_ENV) {
+    if ($env:WINWRIGHT_VM_ENV) {
         # Honoured even when absent: a typo in it reads as "that file is not there" rather than
         # silently falling through to another file and reaching a VM nobody named.
-        if (Test-Path -LiteralPath $env:PANEPROOF_VM_ENV) { $path = $env:PANEPROOF_VM_ENV } else { return $null }
+        if (Test-Path -LiteralPath $env:WINWRIGHT_VM_ENV) { $path = $env:WINWRIGHT_VM_ENV } else { return $null }
     }
     else {
         $path = $script:EnvFileCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
@@ -416,9 +388,6 @@ function Import-EnvFile {
     }
     return $path
 }
-
-# Written as a script variable so a reader of the help above and of this line sees the same four.
-$script:RenamedVariables = @('VMX', 'VM_PASSWORD', 'GUEST_USER', 'GUEST_PASSWORD')
 
 function Find-VmRun {
     $candidates = @(
@@ -448,10 +417,10 @@ function Get-VmRunArguments {
 
     $argv = New-Object System.Collections.ArrayList
     $null = $argv.Add('-T'); $null = $argv.Add('ws')
-    if ($env:PANEPROOF_VM_PASSWORD) { $null = $argv.Add('-vp'); $null = $argv.Add($env:PANEPROOF_VM_PASSWORD) }
+    if ($env:WINWRIGHT_VM_PASSWORD) { $null = $argv.Add('-vp'); $null = $argv.Add($env:WINWRIGHT_VM_PASSWORD) }
     if ($Guest) {
-        $null = $argv.Add('-gu'); $null = $argv.Add($env:PANEPROOF_GUEST_USER)
-        $null = $argv.Add('-gp'); $null = $argv.Add($env:PANEPROOF_GUEST_PASSWORD)
+        $null = $argv.Add('-gu'); $null = $argv.Add($env:WINWRIGHT_GUEST_USER)
+        $null = $argv.Add('-gp'); $null = $argv.Add($env:WINWRIGHT_GUEST_PASSWORD)
     }
     foreach ($argument in $Arguments) { $null = $argv.Add($argument) }
     return $argv.ToArray()
@@ -978,7 +947,7 @@ function Start-Guest {
     # which the child inherits and expands itself, so the secret is not on disk and is not quoted by
     # anybody - the second cold run answered `Incorrect password` when it was.
     $line = ($argv | ForEach-Object {
-        if ($env:PANEPROOF_VM_PASSWORD -and $_ -ceq $env:PANEPROOF_VM_PASSWORD) { '$env:PANEPROOF_VM_PASSWORD' }
+        if ($env:WINWRIGHT_VM_PASSWORD -and $_ -ceq $env:WINWRIGHT_VM_PASSWORD) { '$env:WINWRIGHT_VM_PASSWORD' }
         elseif ($_ -match '\s') { '"' + $_ + '"' }
         else { $_ }
     }) -join ' '
@@ -1101,7 +1070,7 @@ function Show-Blame {
     #>
     param([Parameter(Mandatory)] [string] $Dump, [string] $Configuration = 'Debug')
 
-    $project = Join-Path $PSScriptRoot 'Paneproof.Blame\Paneproof.Blame.csproj'
+    $project = Join-Path $PSScriptRoot 'Winwright.Blame\Winwright.Blame.csproj'
     if (-not (Test-Path -LiteralPath $project)) { return }
 
     # Not stopping on what the reader writes to stderr, for the reason the gate gives at its own
@@ -1119,7 +1088,7 @@ function Show-Blame {
         return
     }
 
-    # Paneproof.Blame's own Unreadable. Held to the reader's constant by a case, because a number
+    # Winwright.Blame's own Unreadable. Held to the reader's constant by a case, because a number
     # spelled at both ends of a protocol is the drift WW439 took out of the sync's.
     if ($code -eq 2) {
         Write-Host '              the dump came back and could not be read' -ForegroundColor Yellow
@@ -1135,24 +1104,23 @@ function Show-Blame {
 # --- what this needs, named before anything is started ------------------------------------------
 
 $envFile = Import-EnvFile
-Use-NewNames $script:RenamedVariables
 $script:VmRun = Find-VmRun
 if (-not $script:VmRun) {
     Refuse 'vmrun.exe was not found on this host' 'Install VMware Workstation, or put vmrun.exe on PATH.'
 }
 
-if ($Vmx) { $env:PANEPROOF_VMX = $Vmx }
-if (-not $env:PANEPROOF_VMX) {
-    Refuse 'no .vmx is configured' "Set PANEPROOF_VMX, or put it in $($script:EnvFileCandidates[0])."
+if ($Vmx) { $env:WINWRIGHT_VMX = $Vmx }
+if (-not $env:WINWRIGHT_VMX) {
+    Refuse 'no .vmx is configured' "Set WINWRIGHT_VMX, or put it in $($script:EnvFileCandidates[0])."
 }
-if (-not (Test-Path -LiteralPath $env:PANEPROOF_VMX)) {
-    Refuse "PANEPROOF_VMX points at $env:PANEPROOF_VMX, which does not exist" 'A path that is not there is a typo, not a stopped VM.'
+if (-not (Test-Path -LiteralPath $env:WINWRIGHT_VMX)) {
+    Refuse "WINWRIGHT_VMX points at $env:WINWRIGHT_VMX, which does not exist" 'A path that is not there is a typo, not a stopped VM.'
 }
-if (-not $env:PANEPROOF_GUEST_USER -or -not $env:PANEPROOF_GUEST_PASSWORD) {
-    Refuse 'no guest credentials are configured' 'Set PANEPROOF_GUEST_USER and PANEPROOF_GUEST_PASSWORD.'
+if (-not $env:WINWRIGHT_GUEST_USER -or -not $env:WINWRIGHT_GUEST_PASSWORD) {
+    Refuse 'no guest credentials are configured' 'Set WINWRIGHT_GUEST_USER and WINWRIGHT_GUEST_PASSWORD.'
 }
 
-$vmxPath = $env:PANEPROOF_VMX
+$vmxPath = $env:WINWRIGHT_VMX
 Write-Host "run-tests-vm  $vmxPath" -ForegroundColor Cyan
 if ($envFile) { Write-Host "  settings    $envFile" }
 
@@ -1177,11 +1145,11 @@ Write-Host "  waits       $(Waiting)"
 # so a red is a red the guest would have given, arrived at sooner.
 #
 # Skippable, and off for anything but this repository's own shape: an adopter's tree has no
-# Paneproof.Tests, and a gate that cannot find its project says so once rather than refusing a run
+# Winwright.Tests, and a gate that cannot find its project says so once rather than refusing a run
 # it knows nothing about.
 if (-not $NoGate) {
     $gate = Join-Path $PSScriptRoot 'host-gate.ps1'
-    $project = Join-Path $script:Tree 'tests\Paneproof.Tests\Paneproof.Tests.csproj'
+    $project = Join-Path $script:Tree 'tests\Winwright.Tests\Winwright.Tests.csproj'
 
     if ((Test-Path -LiteralPath $gate) -and (Test-Path -LiteralPath $project)) {
         . $gate -DefineOnly
@@ -1232,10 +1200,10 @@ $snapshots = Invoke-VmRun -Arguments @('listSnapshots', $vmxPath)
 if (-not $snapshots.Ok) {
     $said = ($snapshots.Output -split "`r?`n" | Where-Object { $_.Trim() }) -join ' '
     if ($said -match 'password is required') {
-        Refuse 'the VM is encrypted and no password was supplied' 'Set PANEPROOF_VM_PASSWORD to the VM encryption password - not the guest login.'
+        Refuse 'the VM is encrypted and no password was supplied' 'Set WINWRIGHT_VM_PASSWORD to the VM encryption password - not the guest login.'
     }
     if ($said -match 'ncorrect password') {
-        Refuse 'the VM is encrypted and the password supplied was refused' 'PANEPROOF_VM_PASSWORD is the password VMware asks for when opening the VM, not the Windows login inside it.'
+        Refuse 'the VM is encrypted and the password supplied was refused' 'WINWRIGHT_VM_PASSWORD is the password VMware asks for when opening the VM, not the Windows login inside it.'
     }
     Refuse "vmrun could not open the VM: $said"
 }

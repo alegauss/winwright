@@ -1,0 +1,607 @@
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace Winwright.Windowing;
+
+/// <summary>
+/// The user32 entry points this project reaches for. They are in-box, which is why the engine
+/// needs no package to see a window the process object does not report.
+/// </summary>
+internal static class Win32
+{
+    internal delegate bool EnumWindowsProc(nint window, nint parameter);
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct Rect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool EnumWindows(EnumWindowsProc callback, nint parameter);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern uint GetWindowThreadProcessId(nint window, out uint processId);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool IsWindowVisible(nint window);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetWindowRect(nint window, out Rect rectangle);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern int GetWindowTextW(nint window, StringBuilder text, int capacity);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern int GetClassNameW(nint window, StringBuilder name, int capacity);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern nint GetWindow(nint window, uint command);
+
+    /// <summary>
+    /// What the desk's input state is, which is the one place Windows says a menu is up. WW457.
+    /// <para>
+    /// Laid out whole rather than trimmed to the two fields read: <c>cbSize</c> is what the call
+    /// validates itself against, and a short structure is a call that fails rather than a call that
+    /// answers less.
+    /// </para>
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct GuiThreadInfo
+    {
+        public int Size;
+        public uint Flags;
+        public nint Active;
+        public nint Focus;
+        public nint Capture;
+        public nint MenuOwner;
+        public nint MoveSize;
+        public nint Caret;
+        public Rect CaretRect;
+    }
+
+    /// <summary>The thread's input state. Thread zero is the foreground thread's. WW457.</summary>
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetGUIThreadInfo(uint thread, ref GuiThreadInfo info);
+
+    /// <summary>The flag that says a menu is being worked right now. WW457.</summary>
+    internal const uint GuiInMenuMode = 0x00000004;
+
+    [DllImport("user32.dll")]
+    internal static extern nint GetForegroundWindow();
+
+    /// <summary>
+    /// WW330. Best effort and known to be: Windows refuses this to a process that does not already
+    /// own the foreground, so what it is for is putting back a desk this run itself took — where the
+    /// refusal is unlikely and the alternative is leaving the taskbar selected for the next run.
+    /// </summary>
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SetForegroundWindow(nint window);
+
+    /// <summary>Let another process take the foreground, where this one may. WW549.</summary>
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool AllowSetForegroundWindow(uint processId);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern nint FindWindowW(string? className, string? title);
+
+    /// <summary>
+    /// WW387. The same search under a named parent, which is the one way to reach a message-only
+    /// window: those hang off <c>HWND_MESSAGE</c> and are not enumerated, so nothing that walks the
+    /// desktop ever sees one.
+    /// </summary>
+    /// <param name="parent">The parent to search under.</param>
+    /// <param name="after">The child to start after, or zero for the first.</param>
+    /// <param name="className">The class to match, or null for any.</param>
+    /// <param name="title">The window's name.</param>
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern nint FindWindowExW(nint parent, nint after, string? className, string? title);
+
+    /// <summary>
+    /// What <c>WM_COPYDATA</c> carries: a tag, a length and a buffer. WW349.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct CopyData
+    {
+        public nint Data;
+        public int Size;
+        public nint Buffer;
+    }
+
+    /// <summary>WM_COPYDATA, which is how a string crosses to another process with Windows marshalling it.</summary>
+    internal const uint WmCopyData = 0x004A;
+
+    /// <summary>SMTO_ABORTIFHUNG, so a wedged application is a reading rather than a run that stopped.</summary>
+    internal const uint AbortIfHung = 0x0002;
+
+    /// <summary>
+    /// Sent rather than posted, and with a budget. WW349: the answer is the whole point of the ask,
+    /// so the call waits for the other window's thread to produce one.
+    /// </summary>
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern nint SendMessageTimeoutW(
+        nint window, uint message, nint wParam, ref CopyData lParam, uint flags, uint timeoutMs, out nint answer);
+
+    /// <summary>
+    /// The same call where what comes back is text. WW436, and it is the deadline
+    /// <c>GetWindowTextW</c> has no way to be given.
+    /// </summary>
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "SendMessageTimeoutW")]
+    internal static extern nint SendMessageTimeoutText(
+        nint window, uint message, nint wParam, StringBuilder lParam, uint flags, uint timeoutMs, out nint answer);
+
+    /// <summary>WM_GETTEXT: the message a window answers its own title with.</summary>
+    internal const uint WmGetText = 0x000D;
+
+    /// <summary>The same call where both parameters are numbers. WW561: a character typed into an edit.</summary>
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SendMessageTimeoutW")]
+    internal static extern nint SendMessageTimeoutValue(
+        nint window, uint message, nint wParam, nint lParam, uint flags, uint timeoutMs, out nint answer);
+
+    /// <summary>WM_CHAR: one character, as an edit takes a keystroke once it has been translated.</summary>
+    internal const uint WmChar = 0x0102;
+
+    /// <summary>EM_SETSEL: select a range of an edit's text; 0 to -1 is all of it, which a typed character replaces.</summary>
+    internal const uint EmSetSel = 0x00B1;
+
+    /// <summary>
+    /// SPI_GETDROPSHADOW: whether the desk draws the shadow a menu asks for. WW450, and read rather
+    /// than inferred from a shadow turning up: WinForms asks for <c>CS_DROPSHADOW</c> only where this
+    /// answers true, so a desk with it off draws no shadow window behind any menu at all.
+    /// </summary>
+    internal const uint SpiGetDropShadow = 0x1024;
+
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SystemParametersInfoW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SystemParametersInfoBool(
+        uint action, uint uiParam, [MarshalAs(UnmanagedType.Bool)] ref bool pvParam, uint winIni);
+
+    /// <summary>
+    /// The same number in every process for the same string, and one nobody else can collide with —
+    /// which is the promise a magic constant cannot make. WW349.
+    /// </summary>
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern uint RegisterWindowMessageW([MarshalAs(UnmanagedType.LPWStr)] string name);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern nint GetAncestor(nint window, uint what);
+
+    /// <summary>GA_ROOT: the top-level window a control belongs to, which is what owns a foreground.</summary>
+    internal const uint GaRoot = 2;
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct MouseInput
+    {
+        public int Dx;
+        public int Dy;
+        public uint MouseData;
+        public uint Flags;
+        public uint Time;
+        public nint ExtraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct KeyInput
+    {
+        public ushort VirtualKey;
+        public ushort Scan;
+        public uint Flags;
+        public uint Time;
+        public nint ExtraInfo;
+    }
+
+    /// <summary>INPUT is a union, and writing it as one is what keeps its size right on x64.</summary>
+    [StructLayout(LayoutKind.Explicit)]
+    internal struct InputPayload
+    {
+        [FieldOffset(0)]
+        public MouseInput Mouse;
+
+        [FieldOffset(0)]
+        public KeyInput Key;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct Input
+    {
+        public uint Type;
+        public InputPayload Payload;
+    }
+
+    internal const uint InputMouse = 0;
+    internal const uint InputKeyboard = 1;
+
+    internal const uint KeyUp = 0x0002;
+    internal const uint KeyUnicode = 0x0004;
+
+    internal const ushort VkBack = 0x08;
+    internal const ushort VkEnd = 0x23;
+    internal const uint MouseMove = 0x0001;
+    internal const uint MouseAbsolute = 0x8000;
+    internal const uint MouseVirtualDesk = 0x4000;
+    internal const uint MouseLeftDown = 0x0002;
+    internal const uint MouseLeftUp = 0x0004;
+    internal const uint MouseRightDown = 0x0008;
+    internal const uint MouseRightUp = 0x0010;
+    internal const uint MouseMiddleDown = 0x0020;
+    internal const uint MouseMiddleUp = 0x0040;
+
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SendInput")]
+    private static extern uint SendInputRaw(uint count, Input[] inputs, int size);
+
+    /// <summary>
+    /// Synthesise input, and record that this run was the one that did it.
+    /// <para>
+    /// WW157. The stamp is here rather than at the three call sites because here is the only place
+    /// input leaves this process: a fourth caller added later gets the stamp by construction, and
+    /// one that had to remember would eventually be the one that forgot — at which point the
+    /// reading stops noticing the operator and nobody finds out.
+    /// </para>
+    /// <para>
+    /// Stamped before the call and not after. SendInput returns once the events are queued, so a
+    /// long batch would leave a window in which the operating system has already recorded the
+    /// input and this run has not yet claimed it, which reads exactly like a person.
+    /// </para>
+    /// </summary>
+    internal static uint SendInput(uint count, Input[] inputs, int size)
+    {
+        ForeignInput.Sent();
+        return SendInputRaw(count, inputs, size);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct LastInput
+    {
+        internal uint Size;
+        internal uint Ticks;
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetLastInputInfo(ref LastInput info);
+
+    [DllImport("user32.dll")]
+    internal static extern int GetSystemMetrics(int index);
+
+    [DllImport("user32.dll")]
+    internal static extern uint MapVirtualKeyW(uint code, uint mapping);
+
+    /// <summary>MAPVK_VK_TO_VSC: the scan code a virtual key has on the layout in force.</summary>
+    internal const uint VirtualKeyToScan = 0;
+
+    internal const int VirtualScreenX = 76;
+    internal const int VirtualScreenY = 77;
+    internal const int VirtualScreenWidth = 78;
+    internal const int VirtualScreenHeight = 79;
+
+    /// <summary>SM_CXDRAG: how far the pointer moves sideways, button down, before a drag starts. WW520.</summary>
+    internal const int DragWidth = 68;
+
+    /// <summary>SM_CYDRAG: the same, up or down. WW520.</summary>
+    internal const int DragHeight = 69;
+
+    /// <summary>SM_CMONITORS: how many displays are attached. Zero is a desk that draws nothing.</summary>
+    internal const int MonitorCount = 80;
+
+    /// <summary>SM_REMOTESESSION: whether this session is being served over a remote connection.</summary>
+    internal const int RemoteSession = 0x1000;
+
+    /// <summary>
+    /// WW158. Whether the desktop is being composed at all. A desk that is not composing draws
+    /// nothing, whatever the monitor count says about displays being attached.
+    /// </summary>
+    [DllImport("dwmapi.dll")]
+    internal static extern int DwmIsCompositionEnabled([MarshalAs(UnmanagedType.Bool)] out bool enabled);
+
+    /// <summary>WTS_CURRENT_SERVER_HANDLE: this machine, which is the only one this ever asks about.</summary>
+    internal static readonly nint CurrentServer = 0;
+
+    /// <summary>WTS_CURRENT_SESSION: the session this process is in.</summary>
+    internal const uint CurrentSession = unchecked((uint)-1);
+
+    /// <summary>WTSConnectState: what the session is doing, which is the fact a monitor count proxies for.</summary>
+    internal const int SessionConnectState = 8;
+
+    /// <summary>
+    /// WTS_CONNECTSTATE_CLASS, in the order the header declares. Only two of them mean a desk that
+    /// somebody could be looking at.
+    /// </summary>
+    internal enum ConnectState
+    {
+        Active = 0,
+        Connected = 1,
+        ConnectQuery = 2,
+        Shadow = 3,
+        Disconnected = 4,
+        Idle = 5,
+        Listen = 6,
+        Reset = 7,
+        Down = 8,
+        Init = 9,
+    }
+
+    [DllImport("wtsapi32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool WTSQuerySessionInformationW(
+        nint server, uint session, int what, out nint buffer, out uint bytes);
+
+    [DllImport("wtsapi32.dll")]
+    internal static extern void WTSFreeMemory(nint memory);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern nint GetProcessWindowStation();
+
+    /// <summary>UOI_FLAGS: the flags of a window station or desktop, which is where WSF_VISIBLE lives.</summary>
+    internal const int UserObjectFlags = 1;
+
+    /// <summary>WSF_VISIBLE: the station has a visible desktop. A service's station does not.</summary>
+    internal const int StationVisible = 0x0001;
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct UserObjectFlagsInfo
+    {
+        public int Inherit;
+        public int Reserved;
+        public int Flags;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetUserObjectInformationW(
+        nint handle, int index, out UserObjectFlagsInfo info, int length, out int needed);
+
+    /// <summary>DESKTOP_READOBJECTS: the least this run can ask for and still have opened the desktop.</summary>
+    internal const uint DesktopReadObjects = 0x0001;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern nint OpenInputDesktop(uint flags, [MarshalAs(UnmanagedType.Bool)] bool inherit, uint access);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool CloseDesktop(nint desktop);
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct Point
+    {
+        public int X;
+        public int Y;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetCursorPos(out Point point);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SetCursorPos(int x, int y);
+
+    /// <summary>GW_OWNER: the window that owns this one, which is what a toast or a menu has.</summary>
+    internal const uint GwOwner = 4;
+
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "GetWindowLongPtrW")]
+    internal static extern nint GetWindowLongPtrW(nint window, int index);
+
+    /// <summary>GWL_STYLE: the style bits, which is where WS_POPUP and WS_CAPTION are.</summary>
+    internal const int WindowStyle = -16;
+
+    /// <summary>WS_POPUP: the window is a popup rather than something with a frame of its own.</summary>
+    internal const long StylePopup = 0x8000_0000L;
+
+    /// <summary>
+    /// WS_CAPTION: it has a title bar, which is the thing a popup does not have. Two bits and not
+    /// one — WS_BORDER and WS_DLGFRAME together — which is why the test below is against the whole
+    /// mask rather than against any bit of it.
+    /// </summary>
+    internal const long StyleCaption = 0x00C0_0000L;
+
+    /// <summary>
+    /// Whether a window is drawn as a popup: WS_POPUP, and not a title bar.
+    /// <para>
+    /// WW87. The ownership question answers a menu and a toast and does not answer a drop-down that
+    /// nothing owns. Measured in freewilly, whose menu verb shows a context menu with no window
+    /// behind it: the menu came back <c>WindowsForms10.Window.20808.app.0.5c39d4_r3_ad1</c>, owner 0,
+    /// style 0x96000000 — WS_POPUP and no WS_CAPTION. The class name carries a per-thread number in
+    /// it, so it is not something a rule can match on; the style bits are what the framework actually
+    /// set.
+    /// </para>
+    /// <para>
+    /// WS_EX_TOOLWINDOW would have been the tighter rule and is not one: measured on the same menu it
+    /// is clear, and set on the SysShadow window drawn behind it. So the caption is the discriminator
+    /// — a window with a title bar is a window somebody sized and moved, and a window without one
+    /// that also declares itself a popup is a surface a framework put up.
+    /// </para>
+    /// <para>
+    /// The test is <c>!= StyleCaption</c> and not <c>== 0</c>, which is a measurement rather than a
+    /// nicety: the first draft asked whether any caption bit was set, and a real <c>#32768</c> menu
+    /// on the guest carries WS_BORDER without WS_DLGFRAME. So the one window the whole route exists
+    /// for read as a window with a title bar, and the suite said so.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The window to ask about.</param>
+    internal static bool IsPopup(nint window)
+    {
+        var style = (long)GetWindowLongPtrW(window, WindowStyle);
+        return (style & StylePopup) != 0 && (style & StyleCaption) != StyleCaption;
+    }
+
+    /// <summary>
+    /// How long a window this process owns gets to answer for its own title before it is read as
+    /// having none. WW436.
+    /// <para>
+    /// The first number here deciding whether a window is described or passed over, so it argues
+    /// itself like the others. Above the engine's own resolve budget of 400ms, because a window
+    /// whose thread is merely busy is a window that will answer and a title dropped for load is a
+    /// listing that quietly changes under a loaded machine. Below a second, because it is spent once
+    /// per parked window in a listing and the listing is what a capture waits on.
+    /// </para>
+    /// <para>
+    /// It is never spent on a window of another process: that read is answered from the caption
+    /// Windows has already cached, and an application that has stopped answering is exactly the one
+    /// this engine has to go on describing.
+    /// </para>
+    /// </summary>
+    internal const uint TitleWithinMs = 500;
+
+    /// <summary>
+    /// A window's title, and never a wait without an end on it.
+    /// <para>
+    /// WW436. <c>GetWindowTextW</c> is two calls wearing one name. For a window of another process
+    /// it reads the cached caption and returns; for a window of the <em>calling</em> process it sends
+    /// <c>WM_GETTEXT</c> and does not come back until that window's own thread pumps for it — with no
+    /// deadline, and no argument that could give it one.
+    /// </para>
+    /// <para>
+    /// This suite hosts its fixture windows inside the test host and parks threads on purpose,
+    /// because a window that stops answering is a thing this engine exists to test. So the read was a
+    /// wait on a thread this very process had stopped: two kept hang dumps name it in the same words,
+    /// <c>Win32.TextOf</c> under the <c>EnumWindows</c> callback, and each time the bound killed the
+    /// host and took nine hundred cases with it.
+    /// </para>
+    /// </summary>
+    /// <param name="window">The window to ask.</param>
+    internal static string TextOf(nint window)
+    {
+        var text = new StringBuilder(512);
+        if (!Ours(window))
+        {
+            var read = GetWindowTextW(window, text, text.Capacity);
+            return read > 0 ? text.ToString() : "";
+        }
+
+        // Nothing back and no title are one answer on purpose, and it is the answer this reading
+        // already gave for a window that answers with nothing. A caller listing windows wants the
+        // listing; a window that would not say what it is called is described by everything else.
+        var answered = SendMessageTimeoutText(
+            window, WmGetText, text.Capacity, text, AbortIfHung, TitleWithinMs, out var length);
+
+        return answered != 0 && length != 0 ? text.ToString() : "";
+    }
+
+    /// <summary>Whether this process owns the window, which is what makes a title read a wait.</summary>
+    /// <param name="window">The window to ask about.</param>
+    private static bool Ours(nint window)
+    {
+        GetWindowThreadProcessId(window, out var owner);
+        return owner == (uint)System.Environment.ProcessId;
+    }
+
+    /// <summary>Whether a handle still names a window. WW536: how a closed folder window is told from one left open.</summary>
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool IsWindow(nint window);
+
+    /// <summary>Whether a window is maximised, which a placement has to undo before it can size one. WW536.</summary>
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool IsZoomed(nint window);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool ShowWindow(nint window, int command);
+
+    /// <summary>SW_RESTORE: back to its normal size from maximised or minimised. WW536.</summary>
+    internal const int ShowRestore = 9;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SetWindowPos(nint window, nint after, int x, int y, int width, int height, uint flags);
+
+    /// <summary>SWP_NOZORDER | SWP_NOACTIVATE: move and size, and leave the stacking and the desk alone. WW536.</summary>
+    internal const uint PlaceOnly = 0x0004 | 0x0010;
+
+    /// <summary>SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE: size alone, where it stands. WW570.</summary>
+    internal const uint SizeOnly = 0x0002 | 0x0004 | 0x0010;
+
+    /// <summary>SWP_NOSIZE | SWP_NOACTIVATE: move and restack, keep the size and leave the desk alone. WW550.</summary>
+    internal const uint MoveOnTop = 0x0001 | 0x0010;
+
+    /// <summary>HWND_TOPMOST: above every window that is not topmost itself. WW550.</summary>
+    internal const nint Topmost = -1;
+
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SetWindowLongPtrW")]
+    internal static extern nint SetWindowLongPtrW(nint window, int index, nint value);
+
+    /// <summary>GWL_EXSTYLE: the extended style bits. WW550.</summary>
+    internal const int ExtendedStyle = -20;
+
+    /// <summary>
+    /// WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW: a window a click does not activate and the taskbar does
+    /// not list. WW550: the source a file drop starts from, which must take the press without taking
+    /// the desk from the window under test.
+    /// </summary>
+    internal const long StyleNeverActive = 0x0800_0000L | 0x0000_0080L;
+
+    /// <summary>
+    /// Posted rather than sent. WW536: a window of the shell's answers its close on its own thread,
+    /// and a send would wait on that thread with no deadline.
+    /// </summary>
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool PostMessageW(nint window, uint message, nint wParam, nint lParam);
+
+    /// <summary>WM_CLOSE: what a person's click on the close button sends.</summary>
+    internal const uint WmClose = 0x0010;
+
+    /// <summary>SPI_GETWORKAREA: the primary display less the taskbar. WW536.</summary>
+    internal const uint SpiGetWorkArea = 0x0030;
+
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SystemParametersInfoW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SystemParametersInfoRect(uint action, uint uiParam, out Rect pvParam, uint winIni);
+
+    /// <summary>MONITOR_DEFAULTTONEAREST: a rectangle on no monitor is answered with the nearest one.</summary>
+    internal const uint MonitorDefaultToNearest = 0x0000_0002;
+
+    /// <summary>MONITORINFO: a monitor's whole rectangle, and the part of it the taskbar leaves. WW548.</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct MonitorInfo
+    {
+        public int Size;
+        public Rect Monitor;
+        public Rect Work;
+        public uint Flags;
+    }
+
+    [DllImport("user32.dll")]
+    internal static extern nint MonitorFromRect(ref Rect rectangle, uint flags);
+
+    [DllImport("user32.dll", EntryPoint = "GetMonitorInfoW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetMonitorInfo(nint monitor, ref MonitorInfo info);
+
+    [DllImport("user32.dll")]
+    internal static extern nint MonitorFromWindow(nint window, uint flags);
+
+    /// <summary>MDT_EFFECTIVE_DPI: the scale a person set for the display, as a DPI. WW570.</summary>
+    internal const int EffectiveDpi = 0;
+
+    [DllImport("shcore.dll")]
+    internal static extern int GetDpiForMonitor(nint monitor, int kind, out uint dpiX, out uint dpiY);
+
+    /// <summary>
+    /// Physical pixels per device-independent pixel on the display a window is on. WW570, and WW572
+    /// reads it for a point a case wrote in pixels. The display's scale and not the window's own: a
+    /// window unaware of scaling answers 96 for itself and is still drawn scaled.
+    /// </summary>
+    internal static double ScaleOf(nint window)
+    {
+        var monitor = MonitorFromWindow(window, MonitorDefaultToNearest);
+        return GetDpiForMonitor(monitor, EffectiveDpi, out var dpi, out _) == 0 && dpi > 0 ? dpi / 96.0 : 1.0;
+    }
+
+    internal static string ClassOf(nint window)
+    {
+        var name = new StringBuilder(256);
+        var read = GetClassNameW(window, name, name.Capacity);
+        return read > 0 ? name.ToString() : "";
+    }
+}

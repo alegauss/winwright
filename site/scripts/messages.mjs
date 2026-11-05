@@ -54,7 +54,7 @@ const rows = [
       + "so over the protocol — it either speaks it or exits — so this goes to stderr, where the "
       + "harness shows it beside the failed server, with the reason on the line before.",
     clears:
-      "let the session reach github.com, or set PANEPROOF_RELEASES to a folder or mirror holding "
+      "let the session reach github.com, or set WINWRIGHT_RELEASES to a folder or mirror holding "
       + "the release's zip and its .sha256, then restart the session. Building the plugin's clone "
       + "once in Release also clears it.",
     page: "/winwright/docs/installing/",
@@ -62,7 +62,7 @@ const rows = [
   {
     id: "no-foreground",
     when: "a run answers 2 and names holes",
-    at: "src/Paneproof/Windowing/Foreground.cs",
+    at: "src/Winwright/Windowing/Foreground.cs",
     finds: "the foreground belongs to the window under test",
     means:
       "the assertions never ran, because an act that synthesises input needs the foreground and "
@@ -76,21 +76,21 @@ const rows = [
   {
     id: "no-in-app-half",
     when: "a capture asks the application to render itself",
-    at: "src/Paneproof/Capturing/OwnRender.cs",
+    at: "src/Winwright/Capturing/OwnRender.cs",
     finds: "an application that renders its own tree when asked",
     means:
-      "the application under test does not reference Paneproof.InApp, or the run that started it "
+      "the application under test does not reference Winwright.InApp, or the run that started it "
       + "did not arm the surface. Nothing quietly took a copy of the screen instead — that is the "
       + "substitution this refuses.",
     clears:
-      "reference Paneproof.InApp in the application, arm it where the application starts, and "
+      "reference Winwright.InApp in the application, arm it where the application starts, and "
       + "launch it from a run that names somewhere to write.",
     page: "/winwright/docs/in-app/",
   },
   {
     id: "selector-matches-nothing",
     when: "you run one case by name",
-    at: "src/Paneproof/Scenarios/Selection.cs",
+    at: "src/Winwright/Scenarios/Selection.cs",
     finds: "no case is called that; there is",
     means:
       "the selector matched no case, and the run was refused rather than run. A run of no cases "
@@ -103,7 +103,7 @@ const rows = [
   {
     id: "name-declared-twice",
     when: "the cases load",
-    at: "src/Paneproof/Scenarios/ScenarioFile.cs",
+    at: "src/Winwright/Scenarios/ScenarioFile.cs",
     finds: "is declared twice, so a case naming it names two",
     means:
       "two cases across the suite carry the same name, so selecting one by name would select "
@@ -114,7 +114,7 @@ const rows = [
   {
     id: "environment-reaches-nowhere",
     when: "a fixture loads",
-    at: "src/Paneproof/Scenarios/FixtureDeclaration.cs",
+    at: "src/Winwright/Scenarios/FixtureDeclaration.cs",
     finds: "and nothing carries it to the launch",
     means:
       "the fixture names an environment and nothing passes it to the application, so the "

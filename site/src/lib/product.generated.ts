@@ -23,11 +23,11 @@ export const product = {
   version: "1.1.7",
   packages: [
     {
-      "id": "Paneproof",
+      "id": "Winwright",
       "takenBy": "harness"
     },
     {
-      "id": "Paneproof.InApp",
+      "id": "Winwright.InApp",
       "takenBy": "app"
     }
   ] as readonly Package[],

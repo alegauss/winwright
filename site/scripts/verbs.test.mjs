@@ -24,7 +24,7 @@ if (!existsSync(payload)) {
 }
 
 const published = JSON.parse(readFileSync(payload, "utf8"));
-const catalogue = readFileSync(join(repoDir, "tests", "Paneproof.Tests", "Cooperating.cs"), "utf8");
+const catalogue = readFileSync(join(repoDir, "tests", "Winwright.Tests", "Cooperating.cs"), "utf8");
 
 /** The `Known` list's body, by bracket balance. */
 function known() {

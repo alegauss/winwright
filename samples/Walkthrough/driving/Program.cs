@@ -1,7 +1,7 @@
-using Paneproof.Processes;
-using Paneproof.Projects;
-using Paneproof.Scenarios;
-using Paneproof.Verdicts;
+using Winwright.Processes;
+using Winwright.Projects;
+using Winwright.Scenarios;
+using Winwright.Verdicts;
 
 namespace Walkthrough.Run;
 

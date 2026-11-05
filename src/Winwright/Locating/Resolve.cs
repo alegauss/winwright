@@ -1,0 +1,617 @@
+using System.Windows.Automation;
+
+using Winwright.Projects;
+
+namespace Winwright.Locating;
+
+/// <summary>What resolving a locator found, or what it did not and why.</summary>
+public sealed record Resolution
+{
+    internal Resolution(
+        AutomationElement? element, ElementFacts? facts, LocatorMiss? miss, int waitedMs, int polls, int vanished = 0)
+    {
+        Element = element;
+        Facts = facts;
+        Miss = miss;
+        WaitedMs = waitedMs;
+        Polls = polls;
+        Vanished = vanished;
+    }
+
+    /// <summary>
+    /// The element, or null where nothing matched. Not public: an act reaches its element only
+    /// through <see cref="Admitted"/>, which has already judged actionability, the way a launch
+    /// reaches a process only through the register. Reading is what this stays open for inside the
+    /// engine — a read needs no actionability, and an act cannot be spelled from out here.
+    /// </summary>
+    internal AutomationElement? Element { get; }
+
+    /// <summary>What it says about itself, read once at the moment it was found.</summary>
+    public ElementFacts? Facts { get; }
+
+    /// <summary>Why nothing matched, diagnosed. Null where something did.</summary>
+    public LocatorMiss? Miss { get; }
+
+    /// <summary>How long resolving took, which is what a trace step records.</summary>
+    public int WaitedMs { get; }
+
+    /// <summary>How many looks it took.</summary>
+    public int Polls { get; }
+
+    /// <summary>
+    /// How many of those looks matched an element that was gone before it could be read. WW555.
+    /// <para>
+    /// A WPF combo box realises its items' containers a moment after it expands, and the peer a look
+    /// matched in between is replaced by the one that follows. Such a look is not a sighting and the
+    /// poll goes on; this counts them, so a resolve that ran out still says something matched.
+    /// </para>
+    /// </summary>
+    public int Vanished { get; }
+
+    /// <summary>Whether anything matched.</summary>
+    public bool Found => Element is not null;
+
+    /// <summary>
+    /// Why nothing was found, in the words an act's refusal uses. WW555: a locator that matched on
+    /// some looks and was gone each time is a race with the application, and saying only "nothing
+    /// matched" sent a reader to correct a locator that was right.
+    /// </summary>
+    public string Absence()
+    {
+        var looks = Polls == 1 ? "1 look" : $"{Polls} looks";
+        return Vanished == 0
+            ? $"nothing matched, in {looks} over {WaitedMs} ms"
+            : $"it matched on {Vanished} of {looks} over {WaitedMs} ms and was gone each time before it could be read, "
+                + "so the application was replacing it rather than the locator naming nothing";
+    }
+}
+
+/// <summary>
+/// Turning a locator into an element, and turning a miss into a route.
+/// <para>
+/// Each step is searched for among the descendants of the one before it, which is what
+/// <c>&gt;</c> means. When a step finds nothing the search stops there rather than guessing, and
+/// what it stopped at is diagnosed: the contents of a collapsed combo box or an unselected page
+/// are absent from the tree by design, and that reads exactly like a control that was renamed.
+/// </para>
+/// </summary>
+public static class Resolve
+{
+    /// <summary>Resolve with a single look, which is what asking whether something is gone needs.</summary>
+    public static Resolution Once(AutomationElement root, Locator locator)
+    {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(locator);
+
+        var vanished = 0;
+        var sighting = Attempt.Once(() => Sighted(root, locator, ref vanished));
+        return Answered(root, locator, sighting.Value, sighting.WaitedMs, sighting.Polls, vanished);
+    }
+
+    /// <summary>Resolve, polling until the deadline. The first look is taken before any waiting.</summary>
+    public static Resolution Until(AutomationElement root, Locator locator, int deadlineMs, int pollMs = 25)
+    {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(locator);
+
+        var vanished = 0;
+        var sighting = Attempt.Until(() => Sighted(root, locator, ref vanished), deadlineMs, pollMs);
+        return Answered(root, locator, sighting.Value, sighting.WaitedMs, sighting.Polls, vanished);
+    }
+
+    /// <summary>An element and what it said about itself, read in the same look.</summary>
+    private sealed record Sighting(AutomationElement Element, ElementFacts Facts);
+
+    /// <summary>
+    /// One look: the route walked and the match read. WW555.
+    /// <para>
+    /// The facts are read inside the look and not after the poll returned. A match that is gone before
+    /// it can be read was handed back as found, the poll stopped on it, and the act was refused for
+    /// an element that was not there — while the one replacing it arrived a moment later. Here it is
+    /// a look that saw nothing, so the poll goes on to the deadline the way it does for any absence.
+    /// </para>
+    /// </summary>
+    private static Sighting? Sighted(AutomationElement root, Locator locator, ref int vanished)
+    {
+        var found = Walk(root, locator);
+        if (found is null)
+            return null;
+
+        if (ElementFacts.Of(found) is { } facts)
+            return new Sighting(found, facts);
+
+        vanished++;
+        return null;
+    }
+
+    /// <summary>The same, with the deadline read from what the project declared.</summary>
+    public static Resolution Until(AutomationElement root, Locator locator, Timeouts timeouts, string named = "resolve")
+    {
+        ArgumentNullException.ThrowIfNull(timeouts);
+        return Until(root, locator, timeouts.For(named), timeouts.For("poll"));
+    }
+
+    /// <summary>
+    /// Every element under <paramref name="root"/> that one step matches, in tree order. Public
+    /// because the same read answers the ordering question and the ambiguity one.
+    /// </summary>
+    public static IReadOnlyList<AutomationElement> Matching(AutomationElement root, LocatorStep step)
+    {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(step);
+
+        var found = new List<AutomationElement>();
+        try
+        {
+            foreach (AutomationElement candidate in root.FindAll(TreeScope.Descendants, ConditionFor(step)))
+            {
+                // WW83. The prefix is filtered here rather than asked of UI Automation, because a
+                // PropertyCondition compares the whole value and there is no other kind. One extra
+                // read per candidate, and only where a step asked for one — the pattern beside it has
+                // been paying the same price since the grammar had a pattern.
+                if (step.NameStarts is { } beginning
+                    && !(ElementFacts.Of(candidate)?.Name.StartsWith(beginning, StringComparison.Ordinal) ?? false))
+                {
+                    continue;
+                }
+
+                if (step.Pattern is null || (ElementFacts.Of(candidate)?.Supports(step.Pattern) ?? false))
+                    found.Add(candidate);
+            }
+        }
+        catch (ElementNotAvailableException)
+        {
+            // The subtree went while it was being searched; what was found stands.
+        }
+
+        return Ordered(found, step.Order);
+    }
+
+    /// <summary>
+    /// Put matches in the order a step asked for. The tree's own order is whatever the application
+    /// happened to create things in; a rectangle is a real property of the window, which is what
+    /// makes the choice reviewable in the file rather than buried in a sort at one call site.
+    /// </summary>
+    private static IReadOnlyList<AutomationElement> Ordered(
+        List<AutomationElement> found, MatchOrder? order)
+    {
+        if (order is null or MatchOrder.Tree || found.Count < 2)
+            return found;
+
+        var bounds = found.ToDictionary(
+            element => element, element => ElementFacts.Of(element)?.Bounds ?? default);
+
+        found.Sort((left, right) => order switch
+        {
+            MatchOrder.Left => Compare(bounds[left].Left, bounds[right].Left, bounds[left].Top, bounds[right].Top),
+            MatchOrder.Right => Compare(bounds[right].Left, bounds[left].Left, bounds[left].Top, bounds[right].Top),
+            MatchOrder.Top => Compare(bounds[left].Top, bounds[right].Top, bounds[left].Left, bounds[right].Left),
+            _ => Compare(bounds[right].Top, bounds[left].Top, bounds[left].Left, bounds[right].Left),
+        });
+
+        return found;
+    }
+
+    private static int Compare(int first, int second, int tieFirst, int tieSecond)
+    {
+        var by = first.CompareTo(second);
+        return by != 0 ? by : tieFirst.CompareTo(tieSecond);
+    }
+
+    /// <summary>
+    /// What a sweep looks under: every element the steps before the last one reach, or
+    /// <paramref name="root"/> alone where the locator has one step. Empty where the route resolves
+    /// to nothing.
+    /// <para>
+    /// WW277. A sweep matches its last step, because that is the one the matches are of. It was
+    /// matching it against the whole window, so every step before it was decoration — a case scoping
+    /// a sweep to one panel got a sweep of the window, and the sentence beside it said the panel's
+    /// name. That is the unearned green with a scope written on it, and the documentation had said
+    /// the opposite of what the code did since the first sweep shipped.
+    /// </para>
+    /// <para>
+    /// A set and never one element, which is the difference between a route and a sweep. Resolving
+    /// refuses a step that matches several and says nothing about which, because an act would one day
+    /// land on the other one and be green. A sweep means the other one too: `Group[class=SettingsRow]
+    /// &gt; ComboBox` is every picker in every row, and demanding the case say <em>which row</em>
+    /// would be demanding it list the rows.
+    /// </para>
+    /// </summary>
+    /// <param name="root">The window, or whatever the case was launched against.</param>
+    /// <param name="locator">The whole locator. Its last step is the one being swept and is not walked.</param>
+    public static IReadOnlyList<AutomationElement> Beneath(AutomationElement root, Locator locator)
+    {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(locator);
+
+        var here = new List<AutomationElement> { root };
+        for (var index = 0; index < locator.Steps.Count - 1 && here.Count > 0; index++)
+        {
+            var step = locator.Steps[index];
+            var next = new List<AutomationElement>();
+            foreach (var one in here)
+            {
+                var matches = Matching(one, step);
+
+                // An index still picks one, per parent: a case saying `[index=2]` on the way is saying
+                // which of that parent's children it meant, and a sweep does not turn that into all.
+                if (step.Index is { } ordinal)
+                {
+                    if (ordinal - 1 < matches.Count)
+                        next.Add(matches[ordinal - 1]);
+                }
+                else
+                {
+                    next.AddRange(matches);
+                }
+            }
+
+            here = next.Distinct().ToList();
+        }
+
+        return here;
+    }
+
+    /// <summary>
+    /// The route, walked. WW458 made it a route rather than a chain of single elements.
+    /// <para>
+    /// The strictness is the same and it is applied at the end instead of at every step: a locator
+    /// matching several elements and saying nothing about which is a scenario that will one day run
+    /// against the other one and be green. What changed is where "several" is counted. It used to be
+    /// counted per step, so a step matching two was refused whether or not the rest of the route was
+    /// under only one of them — the route was unambiguous and the step was not.
+    /// </para>
+    /// <para>
+    /// Measured by an act that had just succeeded. WW457 made <c>open submenu</c> reach a menu
+    /// another process owns; the submenu it opened is a second top-level <c>Menu</c>, so
+    /// <c>Menu &gt; MenuItem[name="winwright profiles"]</c> — which resolved a moment earlier — threw
+    /// <c>Menu matches 2 elements</c>. Only one of those two held the entry. An adopter's own step is
+    /// spelled that way, and it would have met this the first run its submenu opened.
+    /// </para>
+    /// <para>
+    /// An index on the way still picks one per parent, which is what <see cref="Beneath" /> already
+    /// says about a sweep: <c>[index=2]</c> on an intermediate step is the case saying which of that
+    /// parent's children it meant, and it is not turned into all of them. At the last step it picks
+    /// from the whole set, because that is the set the locator is about.
+    /// </para>
+    /// </summary>
+    private static AutomationElement? Walk(AutomationElement root, Locator locator)
+    {
+        var here = new List<AutomationElement> { root };
+
+        for (var index = 0; index < locator.Steps.Count; index++)
+        {
+            var step = locator.Steps[index];
+            var last = index == locator.Steps.Count - 1;
+            var next = new List<AutomationElement>();
+
+            foreach (var parent in here)
+            {
+                var matches = Matching(parent, step);
+
+                // Per parent on the way, and over everything at the end. An ordinal that meant "the
+                // second of this parent's" cannot also mean "the second overall" without the locator
+                // changing meaning depending on how many parents happened to match.
+                if (!last && step.Index is { } ordinal)
+                {
+                    if (ordinal - 1 < matches.Count)
+                        next.Add(matches[ordinal - 1]);
+
+                    continue;
+                }
+
+                next.AddRange(matches);
+            }
+
+            here = next.Distinct().ToList();
+            if (here.Count == 0)
+                return null;
+
+            if (!last)
+                continue;
+
+            // Ordered over the whole set rather than within each parent, because a step saying
+            // `[order=left]` is naming the leftmost of what the locator matches and not the leftmost
+            // of whichever parent it happened to be found under.
+            here = Ordered(here, step.Order).ToList();
+
+            if (here.Count > 1 && !step.Disambiguated)
+                throw new AmbiguousLocatorException(step, here.Select(Named).ToList());
+
+            var wanted = (step.Index ?? 1) - 1;
+            return wanted < here.Count ? here[wanted] : null;
+        }
+
+        return here[0];
+    }
+
+    private static string Named(AutomationElement element)
+    {
+        var facts = ElementFacts.Of(element);
+        return facts is null ? "(gone)" : $"{facts.AsLocatorStep()}  {facts.Bounds}";
+    }
+
+    private static Resolution Answered(
+        AutomationElement root, Locator locator, Sighting? found, int waitedMs, int polls, int vanished)
+    {
+        if (found is not null)
+            return new Resolution(found.Element, found.Facts, null, waitedMs, polls, vanished);
+
+        return new Resolution(null, null, Diagnose(root, locator), waitedMs, polls, vanished);
+    }
+
+    /// <summary>
+    /// Why the route stopped, walked the way <see cref="Walk" /> walks it. WW459.
+    /// <para>
+    /// The frontier is the whole of what changed. This used to take one element per step — the first
+    /// match, or the one an index names — and report from there, which was harmless while a step
+    /// matching two threw rather than resolving: there was no second branch to be wrong about. WW458
+    /// made every match go forward, so there is one now, and a diagnosis that committed to whichever
+    /// came first in tree order would describe a parent nothing would have taken.
+    /// </para>
+    /// <para>
+    /// It matters because of what WW456 put in the sentence. `What it looked under was holding 2: …`
+    /// is precise, and precision about the wrong parent is worse than the vaguer line it replaced.
+    /// </para>
+    /// <para>
+    /// <see cref="LocatorMiss.Deepest" /> stays one element, which is right: what a reader wants is
+    /// something they can go and look at. It is the first of the last frontier that had anything —
+    /// a parent that really was on a route the resolver would have taken.
+    /// </para>
+    /// </summary>
+    private static LocatorMiss Diagnose(AutomationElement root, Locator locator)
+    {
+        var frontier = new List<AutomationElement> { root };
+        var here = root;
+        ElementFacts? deepest = null;
+        var reached = 0;
+
+        while (reached < locator.Steps.Count)
+        {
+            var step = locator.Steps[reached];
+            var next = new List<AutomationElement>();
+
+            // The same rule `Walk` follows on the way: every match goes forward, and an index picks
+            // one per parent. A branch left out here is a branch the resolver would have walked.
+            foreach (var parent in frontier)
+            {
+                var matches = Matching(parent, step);
+
+                if (step.Index is { } ordinal)
+                {
+                    if (ordinal - 1 < matches.Count)
+                        next.Add(matches[ordinal - 1]);
+
+                    continue;
+                }
+
+                next.AddRange(matches);
+            }
+
+            next = next.Distinct().ToList();
+            if (next.Count == 0)
+                break;
+
+            frontier = next;
+            here = frontier[0];
+            deepest = ElementFacts.Of(here);
+            reached++;
+        }
+
+        // WW252. Every step matched, which a diagnosis of a failed resolve cannot do unless the
+        // element arrived between the two. Answered rather than indexed past the end: a diagnosis is a
+        // page about a failure and never a second thing that can fail.
+        if (reached >= locator.Steps.Count)
+            return new LocatorMiss(locator, reached, deepest, MissKind.ArrivedLate, null, 0, []);
+
+        var stopped = locator.Steps[reached];
+
+        // WW456. What the walk stopped under was holding, read once and carried into whichever
+        // ending this takes. Every arm below says what was not found and none of them said what was,
+        // which is tolerable against a window somebody can go and look at and is not tolerable
+        // against the desktop — the root a resident fixture's steps resolve against.
+        var (held, holding) = Holding(here);
+
+        // Elsewhere first, and deliberately: if the thing is in this window under some other
+        // parent, the chain is wrong, and no amount of expanding what the chain named will help.
+        var elsewhere = reached == 0 ? 0 : Matching(root, stopped).Count;
+        if (elsewhere > 0)
+        {
+            return new LocatorMiss(locator, reached, deepest, MissKind.ElsewhereInTheWindow, null, elsewhere, [])
+            {
+                Held = held,
+                Holding = holding,
+            };
+        }
+
+        var route = LocatorMiss.RouteFrom(reached == 0 ? null : here, deepest);
+        if (route is not null)
+        {
+            return new LocatorMiss(locator, reached, deepest, MissKind.NavigationNeeded, route, 0, [])
+            {
+                Held = held,
+                Holding = holding,
+            };
+        }
+
+        return new LocatorMiss(locator, reached, deepest, MissKind.Absent, null, 0, ClosedDoors(root))
+        {
+            Held = held,
+            Holding = holding,
+            Overflowing = Overflowing(root),
+        };
+    }
+
+    /// <summary>
+    /// The toolbars under <paramref name="root"/> whose overflow holds items, each as
+    /// <c>ToolBar #bar (opened by Button #OverflowButton)</c>. WW571.
+    /// <para>
+    /// The overflow button is a child of its toolbar: <c>#OverflowButton</c> in WPF's own template,
+    /// whatever language the application speaks, and named <c>Overflow</c> on a WinForms tool strip.
+    /// WPF enables it only while the toolbar has items in its overflow, so an enabled one on screen is
+    /// the reading. A diagnosis is a page about a failure and never a second thing that can fail, so a
+    /// tree that goes while it is read answers what was found.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<string> Overflowing(AutomationElement root, int most = 3)
+    {
+        var found = new List<string>();
+        try
+        {
+            var bars = root.FindAll(
+                TreeScope.Descendants,
+                new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ToolBar));
+            foreach (AutomationElement bar in bars)
+            {
+                if (found.Count >= most)
+                    break;
+
+                foreach (AutomationElement child in bar.FindAll(TreeScope.Children, Condition.TrueCondition))
+                {
+                    if (ElementFacts.Of(child) is not { IsEnabled: true, IsOffscreen: false } facts
+                        || !(facts.AutomationId == "OverflowButton"
+                            || facts.Name.Contains("Overflow", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        continue;
+                    }
+
+                    if (ElementFacts.Of(bar) is { } owner)
+                        found.Add($"{owner} (opened by {facts})");
+
+                    break;
+                }
+            }
+        }
+        catch (Exception went) when (went is ElementNotAvailableException or System.Runtime.InteropServices.COMException)
+        {
+            // What was found stands, for the reason ClosedDoors gives.
+        }
+
+        return found;
+    }
+
+    /// <summary>
+    /// What an element is holding, named the way a locator names one. WW456.
+    /// <para>
+    /// Children and not descendants, which is both what keeps it cheap and what makes it readable:
+    /// under the desktop they are the top-level windows, and under a menu they are its entries. A
+    /// descendants walk of the whole desktop is the most expensive question this engine asks and
+    /// WW328 measured it failing outright on a guest.
+    /// </para>
+    /// <para>
+    /// Capped, for the reason <see cref="ClosedDoors" /> is capped: a list nobody reads to the end
+    /// is a list nobody reads. The total is carried beside it, so a reader is told they were shown
+    /// the first few rather than left to assume they were shown all of them.
+    /// </para>
+    /// </summary>
+    /// <param name="under">What the walk stopped under, which is the root where no step resolved.</param>
+    /// <param name="most">How many to name.</param>
+    /// <returns>
+    /// What it held, and how many — null where the walk was cut short, which is not the same as
+    /// nothing. A parent that really is empty is a finding: a menu that opened with no entries in it
+    /// is the defect an adopter's first tray case was written to catch.
+    /// </returns>
+    private static (IReadOnlyList<string> Named, int? Count) Holding(AutomationElement under, int most = 8)
+    {
+        var named = new List<string>();
+        var count = 0;
+
+        try
+        {
+            foreach (AutomationElement child in under.FindAll(TreeScope.Children, Condition.TrueCondition))
+            {
+                count++;
+                if (named.Count < most && ElementFacts.Of(child) is { } facts)
+                    named.Add(facts.ToString());
+            }
+        }
+        catch (Exception went) when (went is ElementNotAvailableException or System.Runtime.InteropServices.COMException)
+        {
+            // The rule `Diagnose` states in as many words, and the one WW328 paid for: a diagnosis is
+            // a page about a failure and never a second thing that can fail. What was read stands,
+            // and the count goes, because what is left of it is a floor rather than a total.
+            return (named, null);
+        }
+
+        return (named, count);
+    }
+
+    /// <summary>
+    /// What is shut in this window right now, at most a handful. Leads rather than an answer, and
+    /// the count is capped because a lead list nobody reads to the end is a lead list nobody reads.
+    /// </summary>
+    private static IReadOnlyList<ClosedDoor> ClosedDoors(AutomationElement root, int most = 6)
+    {
+        var doors = new List<ClosedDoor>();
+        try
+        {
+            foreach (AutomationElement candidate in root.FindAll(TreeScope.Descendants, Condition.TrueCondition))
+            {
+                if (doors.Count >= most)
+                    break;
+
+                var facts = ElementFacts.Of(candidate);
+                if (facts is null)
+                    continue;
+
+                var how = LocatorMiss.Shut(candidate, facts);
+                if (how is not null)
+                    doors.Add(new ClosedDoor(facts.ToString(), how));
+            }
+        }
+        catch (Exception went) when (went is ElementNotAvailableException or System.Runtime.InteropServices.COMException)
+        {
+            // The window went while it was being searched; what was found stands.
+            //
+            // WW328. Both, because UI Automation reports one fact two ways: an element that left
+            // during the walk comes back as ElementNotAvailable, and a provider that could not answer
+            // at all comes back as a bare COM failure — measured on a guest as
+            // `Catastrophic failure (0x8000FFFF)` out of a descendants walk of the whole desktop,
+            // which is the most expensive question this engine ever asks.
+            //
+            // Caught here rather than left to the caller, and this is the rule `Diagnose` states in
+            // as many words: a diagnosis is a page about a failure and never a second thing that can
+            // fail. It went out through Diagnose, through Until, through Subject.Read and out of the
+            // act being traced, so a case whose locator was correctly found to match nothing failed
+            // with a COM error from the code explaining why.
+        }
+
+        return doors;
+    }
+
+    private static Condition ConditionFor(LocatorStep step)
+    {
+        var conditions = new List<Condition>();
+
+        // WW274. An Or where the step names several types, which is the whole of what a union costs
+        // here: UI Automation takes the tree walk either way, so a family of controls is one search
+        // rather than one search per type with the answers stitched together afterwards.
+        var types = step.ControlTypes
+            .Select(one => (Condition)new PropertyCondition(
+                AutomationElement.ControlTypeProperty, UiaVocabulary.ControlTypeFor(one)))
+            .ToList();
+
+        if (types.Count == 1)
+            conditions.Add(types[0]);
+        else if (types.Count > 1)
+            conditions.Add(new OrCondition([.. types]));
+
+        if (step.AutomationId is not null)
+            conditions.Add(new PropertyCondition(AutomationElement.AutomationIdProperty, step.AutomationId));
+        if (step.Name is not null)
+            conditions.Add(new PropertyCondition(AutomationElement.NameProperty, step.Name));
+        if (step.ClassName is not null)
+            conditions.Add(new PropertyCondition(AutomationElement.ClassNameProperty, step.ClassName));
+
+        // WW523. Asked of UI Automation like the name, because it is matched whole.
+        if (step.Status is not null)
+            conditions.Add(new PropertyCondition(AutomationElement.ItemStatusProperty, step.Status));
+
+        return conditions.Count switch
+        {
+            0 => Condition.TrueCondition,
+            1 => conditions[0],
+            _ => new AndCondition([.. conditions]),
+        };
+    }
+}

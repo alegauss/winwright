@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WW117: this runs after the test host, including after a test host that died, so it is its
+       own process and shares nothing with the suite it is counting. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Winwright.RollCall</RootNamespace>
+    <AssemblyName>Winwright.RollCall</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,584 @@
+using Winwright.Capturing;
+
+using Xunit;
+
+namespace Winwright.Tests;
+
+/// <summary>
+/// WW349's message, across a real window boundary. The engine asks and an application answers, which
+/// is the one route to the picture this block calls its default and the engine cannot draw.
+/// <para>
+/// A window on its own pumping thread on the other end, because that is the whole of what is being
+/// proved: the ask is a send that waits for the window's own thread to draw the picture and say so,
+/// and a fixture built on the test thread would time out without ever taking the message.
+/// </para>
+/// </summary>
+[Collection(WindowFixture.Serial)]
+public sealed class OwnRenderTests : IDisposable
+{
+    private readonly string root = Directory.CreateTempSubdirectory("winwright-asked-").FullName;
+
+    public void Dispose() => Directory.Delete(root, recursive: true);
+
+    [Fact]
+    public void An_application_that_answers_draws_its_own_tree_into_the_file_it_was_given()
+    {
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "asked.png");
+
+        var asked = OwnRender.Into(application.Handle, path);
+
+        Assert.True(asked.Answered, asked.Sentence());
+        Assert.True(File.Exists(path), $"it said it drew one and {path} is not there");
+
+        // A picture of the window and not a rectangle, which is the one reading a render is still
+        // subject to: a flat file is not a picture of a window however it was got.
+        Assert.False(Colours.In(path).IsFlat);
+        Assert.Contains("rendered its own tree", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_window_still_fading_in_is_asked_again_until_it_settles_and_then_drawn()
+    {
+        // WW583. claude-tray's page fades in when shown, and a render asked for in that moment drew
+        // it at a tenth of its opacity. The ask now goes on while the fade runs and draws after it.
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "faded-in.png");
+        application.Fade(0.1, 1, TimeSpan.FromMilliseconds(1200));
+
+        var waited = System.Diagnostics.Stopwatch.StartNew();
+        var asked = OwnRender.Into(application.Handle, path);
+
+        Assert.True(asked.Answered, asked.Sentence());
+        Assert.True(waited.ElapsedMilliseconds >= 600, $"it drew after {waited.ElapsedMilliseconds}ms, before the fade could have run");
+        Assert.False(Colours.In(path).IsFlat);
+    }
+
+    [Fact]
+    public void A_window_that_never_stops_fading_is_refused_saying_so_rather_than_drawn_washed_out()
+    {
+        // The control: a fade longer than the ask's budget. A render that drew whatever the tree was
+        // would answer green here with a faint picture, and the file must not be there.
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "faint.png");
+        application.Fade(0.05, 1, TimeSpan.FromSeconds(60));
+
+        var asked = OwnRender.Into(application.Handle, path, withinMs: 1500);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(path));
+        Assert.Contains("still fading", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_window_an_animation_holds_dimmed_is_drawn_once_it_is_seen_to_hold()
+    {
+        // A fade that finished away from where the element settles is a look the application chose,
+        // and refusing it would refuse that window for good. Held, it is drawn after one more look.
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "dimmed.png");
+        application.Fade(1, 0.4, TimeSpan.FromMilliseconds(1));
+
+        var asked = OwnRender.Into(application.Handle, path);
+
+        Assert.True(asked.Answered, asked.Sentence());
+        Assert.True(File.Exists(path));
+    }
+
+    [Fact]
+    public void An_application_that_does_not_take_the_message_says_so_rather_than_being_waited_on()
+    {
+        // Every application that has not called Renders.Answer, which is every application until
+        // somebody adds the line. It has a window and a message loop, so the send succeeds — what
+        // comes back is its window procedure declining, and that has to be a reading rather than a
+        // budget spent waiting for a file nobody was ever going to write.
+        using var application = AnsweringWindow.Silent();
+        var path = Path.Combine(root, "never.png");
+
+        var asked = OwnRender.Into(application.Handle, path);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(path));
+        Assert.Contains("Renders.Answer", asked.Sentence(), StringComparison.Ordinal);
+        Assert.Contains(OwnRender.RendersInto, asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_file_outside_what_the_run_named_is_refused_by_the_application_and_reported_here()
+    {
+        // The guard is the application's, and this is the harness being told about it.
+        using var application = AnsweringWindow.Open(root);
+        var elsewhere = Path.Combine(Path.GetTempPath(), "winwright-not-asked-for.png");
+
+        var asked = OwnRender.Into(application.Handle, elsewhere);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(elsewhere));
+
+        // WW362. It used to read as the same answer as not taking the message, and from out here
+        // that looked right — both are the application declining to write the file. It is not: one
+        // is an application nobody has adopted the half in, and this is two runs that disagree about
+        // where pictures go, which is a thing somebody can go and reconcile.
+        Assert.Contains("disagree about where pictures go", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_application_told_nowhere_to_write_says_so_rather_than_that_it_takes_no_message()
+    {
+        // WW362, and the fault the attach door always has. A run that launches the application sets
+        // the variable from the project; a run attached to one already up launched nothing and has
+        // no moment left at which it could have — so the sentence about adding Renders.Answer was
+        // advice about a line this application already has, and the real remedy was never printed.
+        using var application = AnsweringWindow.Adopted();
+
+        var asked = OwnRender.Into(application.Handle, Path.Combine(root, "never.png"));
+
+        Assert.False(asked.Answered);
+        Assert.Contains("has the in-app half", asked.Sentence(), StringComparison.Ordinal);
+        Assert.Contains(OwnRender.RendersInto, asked.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("attached to one already up", asked.Sentence(), StringComparison.Ordinal);
+
+        // And it is not the other sentence, which is the whole of what this task moved.
+        Assert.DoesNotContain("Renders.Answer", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_application_carrying_no_half_at_all_still_gets_the_sentence_about_adopting_one()
+    {
+        // The other side of the same split, kept as a case: an application that answers nothing to
+        // the why ask either is one nobody has adopted anything in, and telling it about an
+        // environment variable would be the mirror of the mistake WW362 fixed.
+        using var application = AnsweringWindow.Silent();
+
+        var asked = OwnRender.Into(application.Handle, Path.Combine(root, "never.png"));
+
+        Assert.False(asked.Answered);
+        Assert.Contains("Renders.Answer", asked.Sentence(), StringComparison.Ordinal);
+        Assert.DoesNotContain("has the in-app half", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_window_that_is_not_there_is_a_reading_and_never_a_throw()
+    {
+        // A handle nothing owns. The engine is asking another process to do something and every way
+        // that can fail has to arrive as a reading a run can report: a throw here would be a case
+        // about the desk taking down a run about the application.
+        var asked = OwnRender.Into(0x1234, Path.Combine(root, "never.png"));
+
+        Assert.False(asked.Answered);
+        Assert.False(asked.Sentence().Contains("rendered", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void No_window_at_all_is_named_rather_than_sent_to()
+    {
+        var asked = OwnRender.Into(0, Path.Combine(root, "never.png"));
+
+        Assert.False(asked.Answered);
+        Assert.Contains("no window was named", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_answer_a_verdict_can_count_is_a_hole_and_never_a_red()
+    {
+        // An application that does not answer is a fact about how it was built rather than about
+        // what it drew, so a run says it could not look — a failure there would be a red about the
+        // harness's own wiring, reported against the application under test.
+        using var application = AnsweringWindow.Silent();
+
+        var asked = OwnRender.Into(application.Handle, Path.Combine(root, "never.png"));
+        var result = asked.AsAssertion("the window is photographed");
+
+        Assert.True(result.DidNotRun);
+        Assert.Equal(RenderAsked.PreconditionName, result.Missing?.Name);
+    }
+
+    [Fact]
+    public void An_application_that_answers_draws_the_tree_one_named_popup_is_holding()
+    {
+        // WW359, across the boundary the design is about. The popup is closed, so there is no window
+        // anywhere for a copy of the screen to reach — and this is the picture it could not take.
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "flyout.png");
+
+        var asked = OwnRender.PopupInto(application.Handle, AnsweringWindow.PopupNamed, path);
+
+        Assert.True(asked.Answered, asked.Sentence());
+        Assert.True(File.Exists(path), $"it said it drew one and {path} is not there");
+
+        // The popup's own child and not the window behind it, read off the file: the child is 90x40
+        // and the window is 240x160, so the pixel count says which tree crossed the boundary.
+        var picture = Pictures.Of(path);
+        Assert.Equal(90 * 40, picture.Pixels);
+        Assert.True(picture.HasInk, picture.Sentence());
+    }
+
+    [Fact]
+    public void A_popup_the_application_does_not_have_is_reported_by_name()
+    {
+        // Named in the absence rather than counted, because the fix is in the case: a run told only
+        // that a picture did not happen cannot tell a wrong name from an application that refused.
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "missing.png");
+
+        var asked = OwnRender.PopupInto(application.Handle, "summary", path);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(path));
+        Assert.Contains("summary", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_popup_holding_nothing_is_a_refusal_about_the_popup_and_not_about_the_file()
+    {
+        using var application = AnsweringWindow.Open(root);
+        var path = Path.Combine(root, "hollow.png");
+
+        var asked = OwnRender.PopupInto(application.Handle, AnsweringWindow.EmptyPopupNamed, path);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(path));
+        Assert.Contains("holding nothing", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_application_whose_half_predates_this_ask_declines_it_rather_than_mistaking_it()
+    {
+        // The reason WW359 is a second registered message rather than a second field on the first
+        // one's payload. An in-app half older than the harness driving it has no such message to
+        // match, so it leaves it unhandled and answers nothing — which is a reading, and is what a
+        // half that read `path\0name` as a path could not have given.
+        using var application = AnsweringWindow.Silent();
+        var path = Path.Combine(root, "never.png");
+
+        var asked = OwnRender.PopupInto(application.Handle, AnsweringWindow.PopupNamed, path);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(path));
+        Assert.Contains("Renders.Answer", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_popup_may_not_be_written_outside_what_the_run_named_and_the_refusal_says_which()
+    {
+        using var application = AnsweringWindow.Open(root);
+        var elsewhere = Path.Combine(Path.GetTempPath(), "winwright-popup-not-asked-for.png");
+
+        var asked = OwnRender.PopupInto(application.Handle, AnsweringWindow.PopupNamed, elsewhere);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(elsewhere));
+        Assert.Contains(OwnRender.RendersInto, asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_name_carrying_the_separator_is_refused_here_rather_than_sent()
+    {
+        // The one field that could break the payload apart. Sent, the half at the other end would
+        // read a shorter name and photograph whatever that matched — which is the wrong picture, and
+        // the whole thing this ask refuses to take.
+        var asked = OwnRender.PopupInto(1, "details\0extra", "x.png");
+
+        Assert.False(asked.Answered);
+        Assert.Contains("NUL", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void No_window_at_all_is_named_rather_than_sent_a_popup_ask()
+    {
+        var asked = OwnRender.PopupInto(0, AnsweringWindow.PopupNamed, Path.Combine(root, "never.png"));
+
+        Assert.False(asked.Answered);
+        Assert.Contains("no window was named", asked.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_second_window_is_answered_for_where_the_application_answers_for_itself()
+    {
+        // WW361, and the whole of it. The window is shown after the answering was arranged, so what
+        // covers it is the class handler rather than the enumeration of what was already up — the
+        // two halves of the fix, and a window opened first would exercise only one of them.
+        using var application = AnsweringWindow.Everywhere(root);
+        var second = application.AlsoOpen();
+        var path = Path.Combine(root, "second.png");
+
+        var asked = OwnRender.Into(second, path);
+
+        Assert.True(asked.Answered, $"{asked.Sentence()} — {application.Sentence()}");
+        Assert.True(File.Exists(path));
+
+        // The second window and not the first, read off the file: this one is 160x120 and the one
+        // the application opened with is 240x160.
+        Assert.Equal(160 * 120, Pictures.Of(path).Pixels);
+    }
+
+    [Fact]
+    public void A_second_window_is_not_answered_for_where_the_application_named_only_its_first()
+    {
+        // The negative control, and the defect WW361 was opened about, kept as a case rather than a
+        // memory. An adopter who writes the per-window line gets exactly this, and the sentence it
+        // comes back with is the one an application that never adopted the half at all gives — two
+        // different faults reading alike, which is why the other line had to exist.
+        using var application = AnsweringWindow.Open(root);
+        var second = application.AlsoOpen();
+        var path = Path.Combine(root, "unnamed.png");
+
+        var asked = OwnRender.Into(second, path);
+
+        Assert.False(asked.Answered);
+        Assert.False(File.Exists(path));
+
+        // And the first window still answers, so this is about which window and never about whether
+        // the application adopted anything.
+        Assert.True(OwnRender.Into(application.Handle, Path.Combine(root, "first.png")).Answered);
+    }
+
+    [Fact]
+    public void An_application_answering_for_itself_says_how_many_windows_that_is()
+    {
+        // The reading the design asked for. An adopter who hooked one window and meant the
+        // application had no way to find that out, and a count is what turns a silent gap into a
+        // number somebody can disagree with.
+        using var application = AnsweringWindow.Everywhere(root);
+        var before = application.Windows;
+
+        application.AlsoOpen();
+
+        Assert.True(application.Windows > before, application.Sentence());
+        Assert.Contains("answering renders for", application.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_popup_the_case_named_wrongly_is_a_red_and_not_a_hole()
+    {
+        // WW372, and the collapse it is about. Every absence this type carried was reported as
+        // unchecked, which was the whole truth while the only ask named a window the run had already
+        // found: an application that never adopted the in-app half has told the run nothing, and a
+        // red about that would be the harness's own wiring reported against the application.
+        //
+        // A name the case typed is the other kind. The run asked, the application answered, and
+        // nothing about the machine is unknown — so a hole here reports a typo as a desk that could
+        // not be looked at, which is a green-adjacent answer to a case that is wrong.
+        using var application = AnsweringWindow.Open(root);
+
+        var missing = OwnRender.PopupInto(application.Handle, "summary", Path.Combine(root, "missing.png"));
+        var hollow = OwnRender.PopupInto(
+            application.Handle, AnsweringWindow.EmptyPopupNamed, Path.Combine(root, "hollow.png"));
+
+        foreach (var asked in new[] { missing, hollow })
+        {
+            Assert.True(asked.Wrote, asked.Sentence());
+
+            var result = asked.AsAssertion("the flyout is photographed");
+            Assert.Equal(Winwright.Verdicts.AssertionOutcome.Failed, result.Outcome);
+            Assert.False(result.DidNotRun, asked.Sentence());
+
+            // And the trace line reads the way the verdict does, which is the join this project
+            // keeps everywhere else: a record that disagrees with the summary beside it sends its
+            // reader to the wrong half.
+            Assert.Equal(Winwright.Tracing.StepVerdict.Failed, asked.AsTraceStep("the flyout").Verdict);
+        }
+    }
+
+    [Fact]
+    public void The_wiring_the_case_did_not_write_stays_a_hole_on_both_asks()
+    {
+        // The other side of the same line, and the one the design drew differently: it listed the
+        // path refusal with the three about the name. It is not one of them. What refuses there is
+        // the project's `captures` and the application's own directory disagreeing — a harness fact
+        // WW362 already filed as one — and a case that never typed a path cannot be at fault for it.
+        using var application = AnsweringWindow.Open(root);
+        var elsewhere = Path.Combine(Path.GetTempPath(), "winwright-popup-not-asked-for.png");
+
+        var refused = OwnRender.PopupInto(application.Handle, AnsweringWindow.PopupNamed, elsewhere);
+
+        Assert.False(refused.Wrote, refused.Sentence());
+        Assert.True(refused.AsAssertion("the flyout is photographed").DidNotRun);
+
+        // And an application that never took the message at all, which is WW349's own absence and
+        // the reason this type reported holes to begin with.
+        using var silent = AnsweringWindow.Silent();
+        var unheard = OwnRender.PopupInto(silent.Handle, AnsweringWindow.PopupNamed, Path.Combine(root, "n.png"));
+
+        Assert.False(unheard.Wrote, unheard.Sentence());
+        Assert.True(unheard.AsAssertion("the flyout is photographed").DidNotRun);
+    }
+
+    [Fact]
+    public void A_window_that_is_up_and_not_hooked_yet_is_waited_for_rather_than_named_wrong()
+    {
+        // WW374. An application answers from the moment it hooks the message and not before, and
+        // nothing tells a harness when that is: `Suite.Launch` waits for a window, and the handle
+        // exists while the line that hooks it has not run. Found by a case rather than reasoned
+        // about — WW361's toast passed where it was written and failed in the guest, which got in
+        // between the toast appearing and the frame finishing.
+        //
+        // What made it worse than an ordinary race is the sentence. Every name the refusal has is
+        // about how the application was built or started, so a run that asked too early was told
+        // something untrue about the product and its reader went to check a line that was right.
+        using var application = AnsweringWindow.HooksLate(root, afterMs: 400);
+        var path = Path.Combine(root, "waited.png");
+
+        var asked = OwnRender.Into(application.Handle, path);
+
+        Assert.True(asked.Answered, asked.Sentence());
+        Assert.True(File.Exists(path), $"it said it drew one and {path} is not there");
+
+        // And the wait is bounded by what it is for, not by the render's own budget: it ends the
+        // moment the application starts answering.
+        Assert.Contains("answering renders for", application.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_application_that_never_answers_is_still_told_apart_from_one_that_had_not_yet()
+    {
+        // The other side of the same wait, and the reason it has a bound. A window with no half
+        // never starts answering, so the wait ends and the sentence that was always right about it
+        // is the one it gets — which is what would go wrong if a wait were allowed to be a hang.
+        using var application = AnsweringWindow.Silent();
+
+        var waited = System.Diagnostics.Stopwatch.StartNew();
+        var asked = OwnRender.Into(application.Handle, Path.Combine(root, "never.png"));
+        waited.Stop();
+
+        Assert.False(asked.Answered);
+        Assert.Contains("Renders.Answer", asked.Sentence(), StringComparison.Ordinal);
+
+        // Bounded, and generously: the check is that it ended, not how fast. A wait that ran to the
+        // render's own budget would be the harness hanging on a question it had already answered.
+        Assert.True(
+            waited.Elapsed.TotalMilliseconds < OwnRender.DefaultBudgetMs,
+            $"it took {waited.Elapsed.TotalSeconds:F1}s to conclude an application has no half");
+    }
+
+    [Fact]
+    public void An_application_with_no_half_is_waited_out_once_and_not_once_a_step()
+    {
+        // WW387. WW374's wait is spent by the applications it is not for: a product with no in-app
+        // half never starts answering, so every capture step pays two seconds to be told the
+        // sentence that was right the first time. At one step that is the honest price of not
+        // guessing; at the forty an adopting suite has it is eighty seconds of a run learning
+        // nothing.
+        //
+        // Read as two asks of one application rather than as a duration, because the number is the
+        // desk's and the claim is not: what this says is that the second cost less than the first,
+        // which is only true if the wait was skipped.
+        //
+        // WW418. Whether the memory stands is a reading about the window's owning process, and this
+        // window is built on a pumping thread here — so the owner is the test host, and an armed
+        // half anywhere in it sets the memory aside and the second ask pays the whole wait again.
+        // Said as a precondition rather than left to come out as a slow second ask, because that
+        // red reads as a defect in the skip and the cause is another class holding a half open.
+        //
+        // The same claim about an owner that is not this process is FixtureTests', which launches
+        // one application with the half and one without: two pids, and the ownership question with
+        // a real answer. This is the cheap half of the pair and not the whole of it.
+        Assert.False(Present(), "a half is armed in this process, so no silence recorded here can stand");
+
+        using var application = AnsweringWindow.Silent();
+
+        var first = System.Diagnostics.Stopwatch.StartNew();
+        var once = OwnRender.Into(application.Handle, Path.Combine(root, "never-1.png"));
+        first.Stop();
+
+        // Between the two asks, because that is where it would matter: a half arming here is the
+        // one thing the memory is built to notice, and it would be right to take the wait again.
+        Assert.False(Present(), "a half armed between the two asks, which is grounds for the wait to come back");
+
+        var again = System.Diagnostics.Stopwatch.StartNew();
+        var twice = OwnRender.Into(application.Handle, Path.Combine(root, "never-2.png"));
+        again.Stop();
+
+        // The same answer both times, which is the half of this that must not change: faster is
+        // worth nothing if what it says stops being true.
+        Assert.False(once.Answered);
+        Assert.False(twice.Answered);
+        Assert.Equal(once.Sentence(), twice.Sentence());
+
+        Assert.True(
+            again.ElapsedMilliseconds < OwnRender.HookedWithinMs,
+            $"the second ask spent {again.ElapsedMilliseconds}ms, which is the whole wait again"
+                + $" (the first spent {first.ElapsedMilliseconds}ms)");
+    }
+
+    [Fact]
+    public void A_window_that_arms_after_being_waited_out_is_asked_again_rather_than_remembered()
+    {
+        // WW387, and the reason the memory above is safe to have. What it may do is skip a wait, so
+        // the one thing it must never do is outlive the silence it recorded: a half that arms after
+        // the first capture step would otherwise be described for the rest of the run in a sentence
+        // that had stopped being true.
+        //
+        // Armed later than the wait is long, which is what makes this a different case from WW374's
+        // rather than a slower copy of it: there the arming lands inside the wait and the first ask
+        // answers, so nothing is ever remembered. Here the first ask spends the whole wait, records
+        // the silence, and the arming happens after it — which is the only way to put a memory in
+        // front of a window that is about to answer.
+        //
+        // WW418, from the other side: the reading that drops the memory is about this process, so a
+        // half already armed in it would make this case pass without its own fixture arming at all.
+        Assert.False(Present(), "a half is already armed in this process, so nothing here proves the arming");
+
+        using var application = AnsweringWindow.HooksLate(root, afterMs: OwnRender.HookedWithinMs + 800);
+
+        var early = OwnRender.Into(application.Handle, Path.Combine(root, "too-early.png"));
+        Assert.False(early.Answered, "the half armed inside the wait, so nothing was remembered");
+
+        // Given until it is answering, because what this case is about is what happens next and not
+        // how long the fixture takes to get there.
+        Assert.True(
+            Winwright.Locating.Attempt.UntilTrue(
+                () => application.Sentence().Contains("answering renders for", StringComparison.Ordinal),
+                4000,
+                50).Happened,
+            $"the fixture never started answering: {application.Sentence()}");
+
+        var path = Path.Combine(root, "after.png");
+        var asked = OwnRender.Into(application.Handle, path);
+
+        Assert.True(asked.Answered, asked.Sentence());
+        Assert.True(File.Exists(path), $"it said it drew one and {path} is not there");
+    }
+
+    [Fact]
+    public void The_window_saying_the_half_is_armed_goes_up_with_it_and_comes_down_with_it()
+    {
+        // WW387. The claim is its existence and nothing else — a handle cannot outlive the process
+        // that owns it, so a harness finding one is that process saying so and there is no reply to
+        // wait for. What has to be true is the pairing: up while answering, gone after.
+        Assert.False(Present(), "something was already saying a half is armed in this process");
+
+        using (var application = AnsweringWindow.Open(root))
+        {
+            Assert.True(Present(), $"nothing says the half is armed while it is: {application.Sentence()}");
+        }
+
+        Assert.False(Present(), "the half stopped answering and the window saying it can is still up");
+    }
+
+    /// <summary>
+    /// Whether this process has the window an armed half puts up — asked of the engine, which is
+    /// the only thing that knows.
+    /// <para>
+    /// WW440, and the deletion is the proof. This walked <c>HWND_MESSAGE</c> itself, with its own
+    /// P/Invokes and its own spelling of the parent, under a doc saying it was "read the way the
+    /// engine reads it" — which is a copy, and a copy that says so is still one. Where the window
+    /// hangs and which process counts as its owner are the engine's decisions, and this would have
+    /// gone on answering the old way after either of them moved, confidently, because the name it
+    /// looked for is held to the engine's by a case and the walk was held by nothing.
+    /// </para>
+    /// </summary>
+    private static bool Present() => OwnRender.ArmedIn(Environment.ProcessId);
+
+    [Fact]
+    public void Nothing_may_be_asked_for_by_passing_nothing()
+    {
+        Assert.Throws<ArgumentException>(() => OwnRender.Into(1, "  "));
+        Assert.Throws<ArgumentOutOfRangeException>(() => OwnRender.Into(1, "x.png", withinMs: 0));
+
+        Assert.Throws<ArgumentException>(() => OwnRender.PopupInto(1, "  ", "x.png"));
+        Assert.Throws<ArgumentException>(() => OwnRender.PopupInto(1, "details", "  "));
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => OwnRender.PopupInto(1, "details", "x.png", withinMs: 0));
+    }
+}

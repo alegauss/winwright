@@ -1,6 +1,6 @@
 # WW230. Where the engine's package comes to exist.
 #
-# Until this, the only copy of it was `Paneproof.0.1.0.nupkg` in a gitignored folder inside this
+# Until this, the only copy of it was `Winwright.0.1.0.nupkg` in a gitignored folder inside this
 # repository, so every adoption bootstrapped on a filesystem path across two clones — and a guest
 # that had the tree still could not restore, because the folder never travels. The measurement block
 # J's first criterion is about is a deletion: the day this runs, the adopting project's nuget.config
@@ -51,17 +51,17 @@ jobs:
       # cannot be named in the step that runs before it. The check appends them.
       #
       # `--package` is read left to right and stays until it is changed, so this ends by putting it
-      # back to Paneproof. Without that last flag the check's first `--packed` would silently be about
+      # back to Winwright. Without that last flag the check's first `--packed` would silently be about
       # the in-app half, and two copies of the wrong package agreeing is a green.
       COPIES: >-
         --declared Directory.Build.props
         --manifest .
         --pinned samples/Adopter/driving/Driving.csproj
         --documented README.md
-        --package Paneproof.InApp
+        --package Winwright.InApp
         --pinned samples/Adopter/Adopter.csproj
         --documented README.md
-        --package Paneproof
+        --package Winwright
 
     steps:
       - uses: actions/checkout@v7
@@ -103,7 +103,7 @@ jobs:
             # wrong half here spends a number, and a number is the one thing this workflow cannot take
             # back. The listing is versions only, so 404 is a package that has never been published —
             # which is the first release and a real answer rather than a failure.
-            $listing = 'https://api.nuget.org/v3-flatcontainer/paneproof/index.json'
+            $listing = 'https://api.nuget.org/v3-flatcontainer/winwright/index.json'
             try {
               $published = (Invoke-RestMethod -Uri $listing -MaximumRetryCount 3 -RetryIntervalSec 5).versions
             }
@@ -138,11 +138,11 @@ jobs:
 
       # Built before raising, because the tool that raises the copies is one of the things it builds.
       # It was already built before packing for a measured reason — `dotnet pack` on the solution
-      # builds only what it can pack, and Paneproof.Concordance sets IsPackable false, so it was never
+      # builds only what it can pack, and Winwright.Concordance sets IsPackable false, so it was never
       # compiled and the check failed with the assembly missing rather than with anything about the
       # versions. Now it is needed one step earlier still.
       - name: Build
-        run: dotnet build Paneproof.slnx --configuration Release -p:ContinuousIntegrationBuild=true
+        run: dotnet build Winwright.slnx --configuration Release -p:ContinuousIntegrationBuild=true
 
       # WW239. One list, and it says both things. It used to be two — five paths in a YAML array that
       # a PowerShell step rewrote, and four flags on a command line that the check read — with nothing
@@ -160,12 +160,12 @@ jobs:
       # would be the one thing worse than a stale pin.
       - name: Raise it in every copy
         run: >
-          dotnet exec tools/Paneproof.Concordance/bin/Release/net10.0-windows/Paneproof.Concordance.dll
+          dotnet exec tools/Winwright.Concordance/bin/Release/net10.0-windows/Winwright.Concordance.dll
           ${{ env.COPIES }}
           --raise ${{ steps.version.outputs.now }}
 
       - name: Pack
-        run: dotnet pack Paneproof.slnx --configuration Release --no-build --output artifacts -p:ContinuousIntegrationBuild=true
+        run: dotnet pack Winwright.slnx --configuration Release --no-build --output artifacts -p:ContinuousIntegrationBuild=true
 
       # WW142, and here it is load-bearing rather than a gate: it reads the copies the step above
       # rewrote against each other and against what was just built. A version raised in three files
@@ -176,10 +176,10 @@ jobs:
       # nothing could have rewritten them a step earlier.
       - name: Check every copy agrees
         run: >
-          dotnet exec tools/Paneproof.Concordance/bin/Release/net10.0-windows/Paneproof.Concordance.dll
+          dotnet exec tools/Winwright.Concordance/bin/Release/net10.0-windows/Winwright.Concordance.dll
           ${{ env.COPIES }}
           --packed artifacts
-          --package Paneproof.InApp
+          --package Winwright.InApp
           --packed artifacts
 
       # WW587. The plugin's two processes, published for the version just raised, so the two install
@@ -193,7 +193,7 @@ jobs:
         run: |
           $version = '${{ steps.version.outputs.now }}'
           $staging = 'artifacts/plugin'
-          foreach ($one in @(@{ Project = 'tools/Paneproof.Mcp'; Into = 'mcp' }, @{ Project = 'tools/Paneproof.Guard'; Into = 'guard' })) {
+          foreach ($one in @(@{ Project = 'tools/Winwright.Mcp'; Into = 'mcp' }, @{ Project = 'tools/Winwright.Guard'; Into = 'guard' })) {
             dotnet publish $one.Project --configuration Release --runtime win-x64 --self-contained false `
               --output "$staging/$($one.Into)" -p:ContinuousIntegrationBuild=true
             if ($LASTEXITCODE -ne 0) { throw "publishing $($one.Project) failed" }

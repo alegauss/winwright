@@ -10,9 +10,9 @@
 // So this parses the declaration rather than the prose, and refuses to build where it cannot.
 //
 // Three sources, because two fields' closed lists are not literals:
-//   src/Paneproof/Scenarios/ScenarioSchema.cs   the four shapes, and what a value may be
-//   src/Paneproof/Scenarios/ActVerb.cs          everything `act` accepts
-//   src/Paneproof/Scenarios/ReadBack.cs         everything `reads` accepts
+//   src/Winwright/Scenarios/ScenarioSchema.cs   the four shapes, and what a value may be
+//   src/Winwright/Scenarios/ActVerb.cs          everything `act` accepts
+//   src/Winwright/Scenarios/ReadBack.cs         everything `reads` accepts
 //
 // What is deliberately NOT here: what each verb needs of the desk. That is the catalogue the
 // suite checks in both directions, and publishing it is its own page.
@@ -27,7 +27,7 @@ const siteDir = join(here, "..");
 const repoDir = join(siteDir, "..");
 
 const read = (name) =>
-  readFileSync(join(repoDir, "src", "Paneproof", "Scenarios", name), "utf8");
+  readFileSync(join(repoDir, "src", "Winwright", "Scenarios", name), "utf8");
 
 /** A C# string expression as its value: a literal, a constant, an interpolation of constants, or
  *  any of those concatenated. Throws on anything else, because a description this cannot read is
@@ -76,7 +76,7 @@ function stringly(expression, consts, where) {
 /** Any source under the engine, by the type it declares. A verb named by a constant of another
  *  type is still the word a case writes, so the page has to follow the reference rather than
  *  print the constant. */
-const engine = join(repoDir, "src", "Paneproof");
+const engine = join(repoDir, "src", "Winwright");
 const sources = new Map(
   readdirSync(engine, { recursive: true, withFileTypes: true })
     .filter((one) => one.isFile() && one.name.endsWith(".cs"))

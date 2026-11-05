@@ -123,7 +123,7 @@ test("the feed's published version is what the page ends up stating", async () =
   assert.equal(bare, "2.5.0", "the page does not state the latest published release");
   assert.equal(substituted, "install 2.5.0 today", "the copy's token was not substituted with it");
   assert.equal(asked.length, 1, "the provider asked the feed more than once for one page load");
-  assert.match(asked[0], /^https:\/\/api\.nuget\.org\/v3-flatcontainer\/paneproof\/index\.json$/);
+  assert.match(asked[0], /^https:\/\/api\.nuget\.org\/v3-flatcontainer\/winwright\/index\.json$/);
 });
 
 test("a feed that declines leaves the reader the version this tree was built at", async () => {

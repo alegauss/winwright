@@ -212,7 +212,7 @@ test("the built grammar page publishes every predicate and every refusal the par
   assert.ok(existsSync(page), "dist/docs/locators/index.html is missing — run `npm run build` first");
   const rendered = readFileSync(page, "utf8");
 
-  const locator = read(repoDir, "src", "Paneproof", "Locating", "Locator.cs");
+  const locator = read(repoDir, "src", "Winwright", "Locating", "Locator.cs");
   const keys = /private const string Keys = "([^"]+)"/.exec(locator);
   assert.ok(keys, "Locator.cs no longer declares Keys");
 
@@ -242,7 +242,7 @@ test("the built format page publishes every field of every shape the loader read
   assert.ok(existsSync(page), "dist/docs/case-format/index.html is missing — run `npm run build` first");
   const rendered = readFileSync(page, "utf8");
 
-  const schema = read(repoDir, "src", "Paneproof", "Scenarios", "ScenarioSchema.cs");
+  const schema = read(repoDir, "src", "Winwright", "Scenarios", "ScenarioSchema.cs");
   const consts = new Map(
     [...schema.matchAll(/public const string ([A-Za-z]+) = "([^"]*)"/g)].map((m) => [m[1], m[2]]),
   );
@@ -293,7 +293,7 @@ test("the built verbs page carries a row per verb the catalogue enters, and its 
   assert.ok(existsSync(page), "dist/docs/verbs/index.html is missing — run `npm run build` first");
   const rendered = readFileSync(page, "utf8");
 
-  const catalogue = read(repoDir, "tests", "Paneproof.Tests", "Cooperating.cs");
+  const catalogue = read(repoDir, "tests", "Winwright.Tests", "Cooperating.cs");
   const entries = [...catalogue.matchAll(/new\("([A-Za-z]+)\.([A-Za-z]+)",\s*Cooperation\.([A-Za-z]+),\s*(true|false),/g)];
   assert.ok(entries.length > 20, `only ${entries.length} verbs could be read out of the catalogue`);
 
@@ -324,7 +324,7 @@ test("the built project page carries a row per key, and the defaults the engine 
   assert.ok(existsSync(page), "dist/docs/project/index.html is missing — run `npm run build` first");
   const rendered = readFileSync(page, "utf8");
 
-  const declaration = read(repoDir, "src", "Paneproof", "Projects", "ProjectDeclaration.cs");
+  const declaration = read(repoDir, "src", "Winwright", "Projects", "ProjectDeclaration.cs");
   const at = declaration.indexOf("public static IReadOnlyList<DeclaredKey> Keys");
   assert.ok(at >= 0, "ProjectDeclaration no longer declares Keys");
 
@@ -338,7 +338,7 @@ test("the built project page carries a row per key, and the defaults the engine 
 
   // The seeded waits, as the page writes them. A figure typed onto a page is right on the day
   // it is typed, which is the hazard every generator here exists for.
-  const seeded = [...read(repoDir, "src", "Paneproof", "Projects", "Timeouts.cs").matchAll(/\["([a-zA-Z]+)"\]\s*=\s*(\d+)/g)];
+  const seeded = [...read(repoDir, "src", "Winwright", "Projects", "Timeouts.cs").matchAll(/\["([a-zA-Z]+)"\]\s*=\s*(\d+)/g)];
   assert.ok(seeded.length > 0, "Timeouts.cs seeds nothing");
   for (const [, name, milliseconds] of seeded) {
     assert.ok(rendered.includes(`>${name}<`), `the project page never names the '${name}' timeout`);
@@ -357,7 +357,7 @@ test("the built verdict page shows every condition a hole can name", () => {
   assert.ok(existsSync(page), "dist/docs/verdicts/index.html is missing — run `npm run build` first");
   const rendered = readFileSync(page, "utf8");
 
-  const engine = join(repoDir, "src", "Paneproof");
+  const engine = join(repoDir, "src", "Winwright");
   const declared = new Set(
     readdirSync(engine, { recursive: true, withFileTypes: true })
       .filter((one) => one.isFile() && one.name.endsWith(".cs"))
@@ -387,7 +387,7 @@ test("the built in-app page names every guard, and the condition a run without i
   assert.ok(existsSync(page), "dist/docs/in-app/index.html is missing — run `npm run build` first");
   const rendered = readFileSync(page, "utf8");
 
-  const half = join(repoDir, "src", "Paneproof.InApp");
+  const half = join(repoDir, "src", "Winwright.InApp");
   const guarded = readdirSync(half, { withFileTypes: true })
     .filter((one) => one.isFile() && one.name.endsWith(".cs"))
     .flatMap((one) =>
@@ -402,7 +402,7 @@ test("the built in-app page names every guard, and the condition a run without i
 
   // The message that brought a reader here, spelled as the run spells it.
   const condition = /public const string PreconditionName = "([^"]+)"/.exec(
-    read(repoDir, "src", "Paneproof", "Capturing", "OwnRender.cs"),
+    read(repoDir, "src", "Winwright", "Capturing", "OwnRender.cs"),
   );
   assert.ok(condition, "OwnRender no longer declares the condition a run without the half answers");
   assert.ok(
@@ -466,7 +466,7 @@ test("the built format page says what each reading is about, not only that it ex
   assert.ok(existsSync(page), "dist/docs/case-format/index.html is missing — run `npm run build` first");
   const rendered = readFileSync(page, "utf8");
 
-  const vocabulary = read(repoDir, "src", "Paneproof", "Scenarios", "ReadBack.cs");
+  const vocabulary = read(repoDir, "src", "Winwright", "Scenarios", "ReadBack.cs");
   const entries = [...vocabulary.matchAll(/new\(\s*"([^"]+)",\s*"([^"]+)"/g)];
   assert.ok(entries.length > 6, `only ${entries.length} reading(s) could be read out of ReadBack`);
 
@@ -480,7 +480,7 @@ test("the built format page says what each reading is about, not only that it ex
 });
 
 test("the built area names every outcome the enum declares, with its code", () => {
-  const src = read(repoDir, "src", "Paneproof", "Verdicts", "RunOutcome.cs");
+  const src = read(repoDir, "src", "Winwright", "Verdicts", "RunOutcome.cs");
   const body = /enum\s+RunOutcome\s*\{([\s\S]*)\}/.exec(src);
   assert.ok(body, "RunOutcome.cs no longer declares an enum RunOutcome");
   const members = [...body[1].matchAll(/^\s*([A-Z][A-Za-z]*)\s*=\s*(\d+)\s*,?$/gm)];

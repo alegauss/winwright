@@ -1,0 +1,212 @@
+using System.Collections.ObjectModel;
+using System.Windows.Automation;
+
+using Winwright.Locating;
+
+namespace Winwright.Typing;
+
+/// <summary>
+/// The fixture an arm measures, resolved once. WW367.
+/// <para>
+/// One shape all four arms fit, which is what lets an arm carry the code it runs. They wanted four
+/// different argument sets — two want the box and the two captions, one wants the root, one wants
+/// the window handle as well — and four signatures is what kept the dispatch a chain of name
+/// comparisons in <c>Program</c>, so an arm could be in the list and in no branch.
+/// </para>
+/// <para>
+/// What is here is what the arms already share, and <see cref="Root"/> is the door to the rest: the
+/// three subjects below are <c>On(root, ...)</c> calls, so an arm wanting a fourth control resolves
+/// it the same way rather than waiting for this record to grow a field for it.
+/// </para>
+/// </summary>
+/// <param name="Root">The fixture's window, which is what anything not already resolved comes from.</param>
+/// <param name="Box">The text box every typing arm drives.</param>
+/// <param name="Arrived">What the window's own thread pulled off the queue.</param>
+/// <param name="Injected">The code unit each of those was injected as, read before the queue had it.</param>
+/// <param name="Window">
+/// The window's handle. Two of <c>provoke</c>'s arms deliberately never go through automation, and
+/// the one that touches the window without waking its thread has no element to touch.
+/// </param>
+/// <param name="Rounds">How many rounds this run was asked for.</param>
+/// <param name="About">
+/// The rate the arm running this is about, carried down so the runner's verdict is guarded by the
+/// arm's own floor rather than by the shared one. WW426.
+/// </param>
+public sealed record TypingRun(
+    AutomationElement Root, Subject Box, Subject Arrived, Subject Injected, nint Window, int Rounds, double About);
+
+/// <summary>
+/// One experiment this tool can run, as data. WW354.
+/// </summary>
+/// <param name="Name">The second word a person types, and the one thing spelled once.</param>
+/// <param name="Task">The task it was built for, so a reader can find why it exists.</param>
+/// <param name="Drives">What it drives and what it reports, in the sentence a person reads.</param>
+/// <param name="Run">
+/// The code this arm is. WW367: the half WW354 left in <c>Program</c> as a comparison per name, so
+/// an arm added to <see cref="Arms.All"/> and to no branch there was recognised, launched, and
+/// answered by the bare typing run — the failure WW354 was about, one level down. Declared here, an
+/// arm without one does not compile.
+/// <para>
+/// A method group and never a lambda, which is WW380's whole change. WW367 guaranteed that an arm
+/// carries <em>a</em> delegate and nothing said which: <c>sweep</c> pointing at <c>FirstRead.Run</c>
+/// would compile, pass every case, and print the wrong experiment's numbers under the word a person
+/// typed — WW354's failure again by another route, an arm wired to the wrong branch rather than to
+/// none. A lambda is a compiler-generated method on a display class, so reflection could see four
+/// delegates and nothing about which runner any of them reached.
+/// </para>
+/// <para>
+/// Written this way the runner is readable at the list and nameable by a case. Each takes the run
+/// and unpacks what it needs, so the four signatures are adapted where they are implemented rather
+/// than in the row that names them — which is what makes the row a name and not a body.
+/// </para>
+/// </param>
+/// <param name="About">
+/// The rate this arm is about, as a fraction of its unit of rounds, and the measurement it comes from
+/// is argued beside the row. WW426.
+/// <para>
+/// WW410's floor was one number for every arm off one argument about 3/n, and each arm already knew
+/// more about itself than that: <c>transfer</c> is about one fault in twelve hundred, so thirty rounds
+/// was a rounding error for it and a run of a hundred passed the floor and concluded nothing worth
+/// reading. The arithmetic stays shared — a clean run of n rounds bounds a rate at about 3/n — and
+/// what an arm declares is the rate it has to be able to rule out, which is a fact about the arm and
+/// sits where <see cref="NeedsRanges" /> does rather than in a branch of its runner.
+/// </para>
+/// <para>
+/// Required, which is WW367's argument applied to one more property: an arm declared without it does
+/// not compile, so the next arm cannot inherit a floor argued for a different rate.
+/// </para>
+/// </param>
+/// <param name="NeedsRanges">
+/// Whether the fixture has to be launched with <c>--ranges</c>. It is a property of the arm rather
+/// than a branch beside the launch: the pane is built when the window is, so a run that asked for it
+/// afterwards would be measuring a window that had just been rebuilt.
+/// </param>
+public sealed record TypingArm(
+    string Name, string Task, string Drives, Action<TypingRun> Run, double About, bool NeedsRanges = false)
+{
+    /// <summary>How many rounds this arm needs before it concludes anything. WW426.</summary>
+    public int Floor => Enough.Floor(About);
+
+    /// <summary>The line a listing shows, which is what a refusal prints and what the .cmd echoes.</summary>
+    public override string ToString() => $"{Name,-8} {Task}: {Drives}";
+}
+
+/// <summary>
+/// Every arm there is, named once. WW354.
+/// <para>
+/// The words were in two places and neither knew about the other: a paragraph each in
+/// <c>run-typing.cmd</c>, where a person reads what the tool can do, and a <c>string.Equals</c> each
+/// in <c>Program</c>, where the second word is parsed. WW341 added the fourth by editing both by
+/// hand.
+/// </para>
+/// <para>
+/// A word in the switch and not the .cmd is a measurement nobody can find. The other way round is
+/// worse, and so is a typo: the word matched nothing, nothing refused it, and the tool ran its
+/// default experiment and printed that experiment's numbers under the run a person started for
+/// something else. This is the shape the verbs, the fixture flags, the desk facts, the capture arms
+/// and the renderings are each already held to, reached at last by the one tool that sits outside
+/// the suite.
+/// </para>
+/// <para>
+/// The default is not in this list and that is deliberate. It is what a bare run does — the engine's
+/// own send, measured against itself — so it is the absence of an arm rather than one of them, and
+/// putting it here would make "no second word" a name somebody could misspell.
+/// </para>
+/// </summary>
+public static class Arms
+{
+    /// <summary>Every arm, in the order <c>run-typing.cmd</c> introduces them.</summary>
+    public static IReadOnlyList<TypingArm> All { get; } = new ReadOnlyCollection<TypingArm>(
+    [
+        new(
+            "sweep",
+            "WW312",
+            "one SendInput per code unit at six spacings, reading what was injected beside what "
+                + "arrived, so a fault inside WW310's band can be attributed to the send or to what "
+                + "happens after it",
+            Sweep.Run,
+            // WW310's band, at its lowest: 7.2% at 48ms. The rounds are per cell, and the band is
+            // what the sweep is about — a cell that cannot rule that out has said nothing about it.
+            About: 0.072),
+        new(
+            "delay",
+            "WW329",
+            "the send the engine does have with the pause it did not take — erase and send in one "
+                + "act, then wait 0, 50 or 150ms before looking at the box — reporting the "
+                + "milliseconds a round beside the rate",
+            FirstRead.Run,
+            // WW312 read 1 in 150 on this exact arm, which FirstRead's own comment is argued from.
+            About: 1.0 / 150),
+        new(
+            "acts",
+            "WW341",
+            "the only arm that types nothing: a click, a traversal key and a nudge, each compared "
+                + "against a reading taken afterwards with time to settle, which separates an act "
+                + "read too early from one that never arrived",
+            Landing.Run,
+            // WW329's rate for the same provocation on the send, which Landing holds as the rate a
+            // clean run of these verbs has to be able to rule out.
+            About: Landing.Typed,
+            NeedsRanges: true),
+        new(
+            "provoke",
+            "WW342",
+            "the read taken apart rather than delayed — quiet, peek, poke and read — so what the "
+                + "fifty milliseconds pay for is attributable to the call out of this process or to "
+                + "the message loop run on the target's thread",
+            Disturbance.Run,
+            // The same rate, on the same shape: which half of WW329's 2.58% the read carries.
+            About: Landing.Typed),
+        new(
+            "transfer",
+            "WW368",
+            "the walk from the arm to the act, one difference a rung — the focus taken every round, "
+                + "End sent in a call of its own, and the read stopped the moment the box says what "
+                + "was sent — so the rung where a rate appears is what the arm was not doing, and "
+                + "one rung past the act with the pause moved above the send rather than below it",
+            Transfer.Run,
+            // WW355 read the act at 1 in 1200, and Transfer's own comment says a rung of a few
+            // hundred expects a fraction of a fault — so its floor is thousands, not thirty.
+            About: 1.0 / 1200),
+    ]);
+
+    /// <summary>
+    /// The arm that word names, or null where it names none.
+    /// <para>
+    /// Null for an empty word too, which is the default experiment and not a miss —
+    /// <see cref="Unrecognised" /> is what tells the two apart, because they are answered
+    /// differently and a caller that could not separate them would refuse a bare run.
+    /// </para>
+    /// </summary>
+    /// <param name="word">The second word a run was given.</param>
+    public static TypingArm? Named(string? word)
+    {
+        if (string.IsNullOrWhiteSpace(word))
+            return null;
+
+        var wanted = word.Trim();
+        foreach (var arm in All)
+        {
+            if (string.Equals(arm.Name, wanted, StringComparison.OrdinalIgnoreCase))
+                return arm;
+        }
+
+        return null;
+    }
+
+    /// <summary>Whether a word was given and names no arm, which is the one case that is refused.</summary>
+    /// <param name="word">The second word a run was given.</param>
+    public static bool Unrecognised(string? word) =>
+        !string.IsNullOrWhiteSpace(word) && Named(word) is null;
+
+    /// <summary>What a refusal says, with every arm there is under it.</summary>
+    /// <param name="word">The word that named none.</param>
+    public static IReadOnlyList<string> Refusing(string? word) => new ReadOnlyCollection<string>(
+    [
+        $"'{word?.Trim()}' is not an experiment this tool has, so nothing was run. A word it does "
+            + "not recognise used to fall through to the default, which printed the engine's own "
+            + "typing numbers under a run started for something else.",
+        "There are these, and a bare run with none of them measures the engine's own send:",
+        .. All.Select(one => $"  {one}"),
+    ]);
+}

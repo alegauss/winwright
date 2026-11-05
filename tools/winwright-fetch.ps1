@@ -18,10 +18,10 @@ $ErrorActionPreference = 'Stop'
 
 function Say([string] $line) { [Console]::Error.WriteLine("winwright: $line") }
 
-# PANEPROOF_RELEASES points somewhere else: a mirror, for a network that cannot reach github.com,
+# WINWRIGHT_RELEASES points somewhere else: a mirror, for a network that cannot reach github.com,
 # and a folder for the suite. It names the folder that holds the release's assets, so the tag is
 # appended to the default and never to the override.
-$releases = $env:PANEPROOF_RELEASES
+$releases = $env:WINWRIGHT_RELEASES
 if (-not $releases) { $releases = "https://github.com/alegauss/winwright/releases/download/v$Version" }
 
 $asset = "winwright-plugin-$Version-win-x64.zip"
@@ -63,7 +63,7 @@ try {
     }
     catch {
         # Somebody else's rename landed first. Theirs is the same release, so it is the answer too.
-        if (-not (Test-Path (Join-Path $Into 'mcp\Paneproof.Mcp.dll'))) { throw }
+        if (-not (Test-Path (Join-Path $Into 'mcp\Winwright.Mcp.dll'))) { throw }
     }
 
     # An update replaces: the versions beside this one are no plugin's any more. One still open in a

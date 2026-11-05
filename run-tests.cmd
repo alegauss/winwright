@@ -21,6 +21,6 @@ setlocal
 set CONFIG=%1
 if "%CONFIG%"=="" set CONFIG=Debug
 
-dotnet build "%~dp0Paneproof.slnx" --configuration %CONFIG% --nologo || exit /b 1
-dotnet msbuild "%~dp0tests\Paneproof.Tests\Paneproof.Tests.csproj" -t:TestAndRoll -p:Configuration=%CONFIG% -p:VSTestNoBuild=true -nologo
+dotnet build "%~dp0Winwright.slnx" --configuration %CONFIG% --nologo || exit /b 1
+dotnet msbuild "%~dp0tests\Winwright.Tests\Winwright.Tests.csproj" -t:TestAndRoll -p:Configuration=%CONFIG% -p:VSTestNoBuild=true -nologo
 exit /b %ERRORLEVEL%

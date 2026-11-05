@@ -1,0 +1,539 @@
+using System.Diagnostics;
+
+using Winwright.Processes;
+
+using Xunit;
+
+namespace Winwright.Tests;
+
+/// <summary>
+/// WW8. Two trays a failing case had started were still alive afterwards, the next build died on
+/// a file lock naming their process ids, and the command after that ran the previous executable.
+/// These drive real processes, because a register that is only unit-tested proves nothing about
+/// what is running on the desk afterwards.
+/// </summary>
+[Collection(WindowFixture.Serial)]
+public class ProcessRegisterTests
+{
+    /// <summary>Something that stays alive on its own and needs no console or window.</summary>
+    private static ProcessStartInfo LongRunning()
+    {
+        var start = new ProcessStartInfo("cmd.exe")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+        };
+        start.ArgumentList.Add("/c");
+        start.ArgumentList.Add("ping -n 120 127.0.0.1");
+        return start;
+    }
+
+    private static ProcessStartInfo Brief()
+    {
+        var start = new ProcessStartInfo("cmd.exe")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+        };
+        start.ArgumentList.Add("/c");
+        start.ArgumentList.Add("exit 0");
+        return start;
+    }
+
+    private static bool StillRunning(int pid)
+    {
+        try
+        {
+            using var found = Process.GetProcessById(pid);
+            found.Refresh();
+            return !found.HasExited;
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>A launch that starts a helper and goes, leaving the helper running: MOD46's Blender.</summary>
+    private static ProcessStartInfo LeavesAHelper()
+    {
+        var start = new ProcessStartInfo("cmd.exe")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+        };
+        start.ArgumentList.Add("/c");
+        // No quoted title: ArgumentList escapes a quote as \", which start then hands to the shell
+        // as a path to open — a dialog on the desk, not a helper.
+        start.ArgumentList.Add("start /b ping -n 120 127.0.0.1");
+        return start;
+    }
+
+    /// <summary>
+    /// What a launch started, less the console host Windows gives a console program: a member of the
+    /// job, and nothing the launch itself asked for.
+    /// </summary>
+    private static List<int> Programs(LaunchedProcess launched) =>
+        launched.Started.Where(pid => !IsConsoleHost(pid)).ToList();
+
+    private static bool IsConsoleHost(int pid)
+    {
+        var hosts = Process.GetProcessesByName("conhost");
+        try
+        {
+            return hosts.Any(one => one.Id == pid);
+        }
+        finally
+        {
+            foreach (var one in hosts)
+                one.Dispose();
+        }
+    }
+
+    /// <summary>The helper a launch started, once the launch itself has gone.</summary>
+    private static int Helper(LaunchedProcess launched)
+    {
+        var helper = 0;
+        var left = Winwright.Locating.Attempt.UntilTrue(
+            () =>
+            {
+                launched.Refresh();
+                if (!launched.HasExited || Programs(launched) is not [var only])
+                    return false;
+
+                helper = only;
+                return true;
+            },
+            10_000,
+            50);
+
+        return left.Happened
+            ? helper
+            : throw new Xunit.Sdk.XunitException("the launch did not go leaving one helper, so this proves nothing");
+    }
+
+    [Fact]
+    public void A_helper_a_launch_started_is_stopped_with_its_case_after_the_launch_went()
+    {
+        // WW586. Found by modelado (MOD46): the application closed cleanly, the Blender it had
+        // opened stayed, and nothing named it.
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LeavesAHelper(), "opens in Blender");
+        var helper = Helper(launched);
+
+        Assert.True(StillRunning(helper));
+        Assert.Null(register.Stop(launched));
+
+        Assert.False(StillRunning(helper), "the helper outlived the case that started it");
+        Assert.Empty(register.StopAll());
+    }
+
+    [Fact]
+    public void A_helper_stopped_with_its_case_has_let_go_of_its_directory_when_the_stop_answers()
+    {
+        // WW596. The job's list empties before a member's handles close, and RelaunchTests met it as
+        // a case folder that would not delete two runs in three. Five rounds, because one is a race
+        // that usually goes the right way.
+        for (var round = 0; round < 5; round++)
+        {
+            var folder = Directory.CreateTempSubdirectory("winwright-job-").FullName;
+            using var register = new ProcessRegister();
+
+            var starting = LeavesAHelper();
+            starting.WorkingDirectory = folder;
+            var launched = register.Launch(starting, "opens in Blender");
+            Helper(launched);
+
+            Assert.Null(register.Stop(launched));
+
+            // At once, with no wait of its own: the stop's answer is the claim being read.
+            Directory.Delete(folder, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void A_lent_launch_has_its_helpers_stopped_where_the_run_ends()
+    {
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LeavesAHelper(), "the first reader", lent: true);
+        var helper = Helper(launched);
+
+        register.StopAll();
+
+        Assert.False(StillRunning(helper));
+    }
+
+    [Fact]
+    public void A_process_older_than_the_case_is_never_stopped_with_it()
+    {
+        // WW586. What a job holds is decided as a process is created, so an instance that was
+        // already running, which a single-instance application hands its work to, is no member.
+        using var older = Process.Start(LongRunning())!;
+        try
+        {
+            using (var register = new ProcessRegister())
+            {
+                register.Launch(LeavesAHelper());
+                register.StopAll();
+            }
+
+            Assert.True(StillRunning(older.Id), "a process this run never started was stopped");
+        }
+        finally
+        {
+            older.Kill(entireProcessTree: true);
+        }
+    }
+
+    [Fact]
+    public void What_a_launch_started_is_read_while_it_runs()
+    {
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning());
+
+        // cmd starts ping at once, so this is the child the assignment may have raced.
+        Winwright.Locating.Attempt.UntilTrue(() => Programs(launched).Count > 0, 10_000, 50);
+
+        var child = Assert.Single(Programs(launched));
+        using (var ping = Process.GetProcessById(child))
+            Assert.Equal("PING", ping.ProcessName, ignoreCase: true);
+
+        register.StopAll();
+        Assert.Empty(launched.Started);
+    }
+
+    [Fact]
+    public void A_case_that_returns_early_still_has_its_process_stopped()
+    {
+        int pid;
+
+        // The case: it launches, and then returns down a path that stops nothing.
+        using (var register = new ProcessRegister())
+        {
+            pid = register.Launch(LongRunning()).Pid;
+            Assert.True(StillRunning(pid));
+        }
+
+        Assert.False(StillRunning(pid));
+    }
+
+    [Fact]
+    public void What_outlived_the_case_is_named_rather_than_cleaned_up_in_silence()
+    {
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning());
+
+        var survivors = register.StopAll();
+
+        var survivor = Assert.Single(survivors);
+        Assert.Equal(launched.Pid, survivor.Pid);
+        Assert.Equal("cmd.exe", survivor.Executable);
+        Assert.Equal(SurvivorFate.Stopped, survivor.Fate);
+        Assert.Contains($"pid {launched.Pid} cmd.exe - outlived its case and was stopped", survivor.ToString());
+    }
+
+    [Fact]
+    public void A_case_that_gives_its_process_back_gives_it_back_before_the_run_ends()
+    {
+        // WW215. The claim is about when, not whether: StopAll already stopped everything, and a
+        // suite of nine held nine windows until the last case was done.
+        using var register = new ProcessRegister();
+        var first = register.Launch(LongRunning());
+        var second = register.Launch(LongRunning());
+
+        Assert.Null(register.Stop(first));
+
+        Assert.False(StillRunning(first.Pid));
+        Assert.True(StillRunning(second.Pid), "the other case's process was stopped along with it");
+        Assert.Equal(2, register.Launched.Count);
+    }
+
+    [Fact]
+    public void A_process_given_back_did_not_outlive_its_case_and_is_not_reported_as_having()
+    {
+        // The whole vocabulary of Survivor is about outliving a case. Nine cases each cleanly
+        // ending their own process must not read as nine leftovers, which is what a stop that
+        // recorded itself would say.
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning());
+
+        register.Stop(launched);
+
+        Assert.Empty(register.StopAll());
+        Assert.Equal("no process outlived the run that started it.", ProcessSummary.Sentence(register.Survivors));
+        Assert.True(register.AsFinding().Holds);
+    }
+
+    [Fact]
+    public void Stopping_one_twice_is_the_second_call_finding_it_already_gone()
+    {
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning());
+
+        Assert.Null(register.Stop(launched));
+        Assert.Null(register.Stop(launched));
+    }
+
+    [Fact]
+    public void A_process_this_register_never_launched_is_refused_rather_than_stopped()
+    {
+        // Otherwise the one list there is stops being the one list there is.
+        using var mine = new ProcessRegister();
+        using var theirs = new ProcessRegister();
+        var elsewhere = theirs.Launch(LongRunning());
+
+        var refused = Assert.Throws<ArgumentException>(() => mine.Stop(elsewhere));
+
+        Assert.Contains($"pid {elsewhere.Pid} was not launched by this register", refused.Message);
+        Assert.True(StillRunning(elsewhere.Pid), "refusing to stop it stopped it");
+    }
+
+    [Fact]
+    public void Giving_a_process_back_after_the_roll_is_taken_is_refused()
+    {
+        // The same rule Launch keeps: after the roll, the reading is what it is, and a register that
+        // let one more process through would answer a question it had already answered.
+        var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning());
+        register.StopAll();
+
+        Assert.Throws<ObjectDisposedException>(() => register.Stop(launched));
+        register.Dispose();
+    }
+
+    [Fact]
+    public void A_process_that_went_on_its_own_is_not_a_survivor()
+    {
+        using var register = new ProcessRegister();
+        var launched = register.Launch(Brief());
+        Assert.True(launched.WaitForExit(10000));
+
+        Assert.Empty(register.StopAll());
+    }
+
+    [Fact]
+    public void The_register_is_total_because_every_launch_goes_through_it()
+    {
+        using var register = new ProcessRegister();
+        register.Launch(LongRunning());
+        register.Launch(LongRunning());
+
+        Assert.Equal(2, register.Launched.Count);
+        Assert.Equal(2, register.StopAll().Count);
+    }
+
+    [Fact]
+    public void A_survivor_names_the_case_it_was_launched_for()
+    {
+        // WW531. Found by quickshell (QS298): one survivor in a sixteen-case run, named by a pid that
+        // was gone by the time anybody read it, so nothing said which case had started it.
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning(), "connected tab reads its bars");
+
+        var survivor = Assert.Single(register.StopAll());
+
+        Assert.Equal("connected tab reads its bars", launched.Case);
+        Assert.Equal("connected tab reads its bars", survivor.Case);
+        Assert.False(survivor.Lent);
+        Assert.Contains(", launched for 'connected tab reads its bars' - outlived", survivor.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_foreground_held_by_a_process_this_run_launched_names_the_case_it_was_launched_for()
+    {
+        // WW534. A window an earlier case left behind, holding the desk the next case needs.
+        using var register = new ProcessRegister();
+        var launched = register.Launch(LongRunning(), "the case that opened a dialog");
+
+        var holder = new Winwright.Windowing.WindowOwner(1, launched.Pid, "cmd", "a dialog", 1);
+        var wanted = new Winwright.Windowing.WindowOwner(2, Environment.ProcessId, "testhost", "the window under test", 2);
+        var desk = Winwright.Windowing.Foreground.Between(holder, wanted);
+
+        Assert.Contains(
+            "which this run launched for 'the case that opened a dialog'",
+            desk.AsPrecondition().Absence,
+            StringComparison.Ordinal);
+        Assert.Contains("which this run launched for", desk.Sentence(), StringComparison.Ordinal);
+
+        // And once it has gone, its pid is no longer this run's to claim.
+        register.StopAll();
+        Assert.Contains(
+            "which no case in this run started",
+            Winwright.Windowing.Foreground.Between(holder, wanted).AsPrecondition().Absence,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_foreground_held_by_a_process_no_case_started_says_so()
+    {
+        // WW534. Found by quickshell (QS302): another runner on the same guest desk, named by its
+        // window alone, read as a defect in the cases.
+        var holder = new Winwright.Windowing.WindowOwner(1, Environment.ProcessId, "quickshell", "Files", 1);
+        var wanted = new Winwright.Windowing.WindowOwner(2, Environment.ProcessId + 1, "Winwright.Fixture", "winwright fixture", 2);
+
+        var desk = Winwright.Windowing.Foreground.Between(holder, wanted).AsPrecondition();
+
+        Assert.False(desk.Satisfied);
+        Assert.Contains("quickshell (pid", desk.Absence, StringComparison.Ordinal);
+        Assert.Contains("which no case in this run started", desk.Absence, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_survivor_from_a_lent_launch_says_it_was_lent_and_one_that_named_no_case_says_nothing_more()
+    {
+        var lent = new Survivor(1234, "ClaudeTray.exe", SurvivorFate.WouldNotStop, "the first reader", Lent: true);
+        var unnamed = new Survivor(1235, "ClaudeTray.exe", SurvivorFate.WouldNotStop);
+
+        Assert.Equal(
+            "pid 1234 ClaudeTray.exe, launched for 'the first reader' and lent to the cases after it - outlived its case and would not stop",
+            lent.ToString());
+        Assert.Equal("pid 1235 ClaudeTray.exe - outlived its case and would not stop", unnamed.ToString());
+    }
+
+    [Fact]
+    public void A_launched_process_cannot_be_constructed_any_other_way()
+    {
+        var constructors = typeof(LaunchedProcess).GetConstructors();
+
+        Assert.Empty(constructors);
+    }
+
+    [Fact]
+    public void Stopping_twice_answers_what_the_first_stop_found()
+    {
+        using var register = new ProcessRegister();
+        register.Launch(LongRunning());
+
+        var first = register.StopAll();
+
+        Assert.Same(first, register.StopAll());
+        Assert.Same(first, register.Survivors);
+    }
+
+    [Fact]
+    public void Launching_after_the_run_ended_is_refused_rather_than_left_unregistered()
+    {
+        var register = new ProcessRegister();
+        register.StopAll();
+
+        Assert.Throws<ObjectDisposedException>(() => register.Launch(LongRunning()));
+    }
+
+    [Fact]
+    public void Nothing_left_behind_still_says_so()
+    {
+        using var register = new ProcessRegister();
+
+        Assert.Empty(register.StopAll());
+        Assert.Equal("no process outlived the run that started it.", ProcessSummary.Sentence(register.Survivors));
+        Assert.Empty(ProcessSummary.Detail(register.Survivors));
+    }
+
+    [Fact]
+    public void The_summary_counts_what_stopped_apart_from_what_would_not()
+    {
+        var survivors = new[]
+        {
+            new Survivor(1234, "ClaudeTray.exe", SurvivorFate.Stopped),
+            new Survivor(1235, "ClaudeTray.exe", SurvivorFate.WouldNotStop),
+        };
+
+        Assert.Equal("2 outlived the run: 1 stopped, 1 would not stop.", ProcessSummary.Sentence(survivors));
+        Assert.Equal(
+            ["  survived   pid 1234 ClaudeTray.exe - outlived its case and was stopped",
+             "  survived   pid 1235 ClaudeTray.exe - outlived its case and would not stop"],
+            ProcessSummary.Detail(survivors));
+    }
+
+    [Fact]
+    public void A_process_given_no_time_to_stop_is_refused_at_construction()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new ProcessRegister(0));
+    }
+
+    [Fact]
+    public void The_stop_timeout_comes_from_the_project_declaration()
+    {
+        var root = Directory.CreateTempSubdirectory("winwright-stop-").FullName;
+        try
+        {
+            File.WriteAllText(
+                Path.Combine(root, Winwright.Projects.ProjectDeclaration.FileName),
+                """{ "timeouts": { "stop": 900 } }""");
+
+            var declaration = Winwright.Projects.ProjectDeclaration.Find(root);
+            Assert.Equal(900, declaration.Timeouts.For("stop"));
+
+            using var register = ProcessRegister.For(declaration);
+            var pid = register.Launch(LongRunning()).Pid;
+            register.StopAll();
+
+            Assert.False(StillRunning(pid));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void A_register_nobody_stopped_has_taken_no_roll_rather_than_found_nothing()
+    {
+        // WW152. Survivors answers an empty list twice over, and the two are a reading not taken
+        // and a reading that came back clean. A caller that could not tell them apart would print
+        // "nothing outlived the run" about a run whose processes are all still going — which is
+        // this project's founding defect with a different subject.
+        using var register = new ProcessRegister();
+        var pid = register.Launch(LongRunning()).Pid;
+
+        Assert.False(register.Stopped);
+        Assert.Empty(register.Survivors);
+
+        var before = register.AsFinding();
+
+        Assert.False(before.Was);
+        Assert.Null(before.Holds);
+        Assert.Contains("never asked to stop", before.Sentence, StringComparison.Ordinal);
+        Assert.StartsWith("  not read ", before.ToString(), StringComparison.Ordinal);
+
+        // And the process really is still going, which is what makes the empty list a lie a caller
+        // could have told.
+        Assert.True(StillRunning(pid), "the long-running process was not running, so this proves nothing");
+    }
+
+    [Fact]
+    public void A_run_that_had_to_stop_something_says_so_where_the_rest_of_the_run_is_read()
+    {
+        // The case the criterion was written for: a process still alive at the end is the
+        // difference between a scenario that tidied up and one that left the machine in a state
+        // the next run inherits, and both used to print the same nothing.
+        using var register = new ProcessRegister();
+        register.Launch(LongRunning());
+        register.StopAll();
+
+        var finding = register.AsFinding();
+
+        Assert.True(finding.Was);
+        Assert.False(finding.Holds);
+        Assert.Contains("outlived the run", finding.Sentence, StringComparison.Ordinal);
+        Assert.StartsWith("  differs ", finding.ToString(), StringComparison.Ordinal);
+        Assert.Equal(ProcessSummary.Sentence(register.Survivors), finding.Sentence);
+    }
+
+    [Fact]
+    public void A_run_that_left_nothing_behind_says_that_rather_than_saying_nothing()
+    {
+        using var register = new ProcessRegister();
+        register.Launch(Brief()).WaitForExit(10_000);
+        register.StopAll();
+
+        var finding = register.AsFinding();
+
+        Assert.True(finding.Holds);
+        Assert.Empty(register.Survivors);
+        Assert.Equal("no process outlived the run that started it.", finding.Sentence);
+    }
+}

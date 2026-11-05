@@ -18,7 +18,7 @@ setlocal
 set CONFIG=%1
 if "%CONFIG%"=="" set CONFIG=Release
 
-dotnet pack "%~dp0Paneproof.slnx" --configuration %CONFIG% --output "%~dp0packages" --nologo || exit /b 1
+dotnet pack "%~dp0Winwright.slnx" --configuration %CONFIG% --output "%~dp0packages" --nologo || exit /b 1
 
 rem The declared version, read rather than typed: a copy of it here is the fifth place it lives, and
 rem the copy list was already wrong once (WW239). Token 3 because the line splits as indent, tag
@@ -33,14 +33,14 @@ if "%DECLARED%"=="" (
 rem What proves the parse: the pack above just wrote this file, so a name that does not match it is a
 rem version this script read wrongly - and evicting the wrong folder is indistinguishable from
 rem evicting nothing. Checked rather than assumed, because the failure is silent either way.
-if not exist "%~dp0packages\Paneproof.%DECLARED%.nupkg" (
-    echo pack-local: read the version as '%DECLARED%' and packed no Paneproof.%DECLARED%.nupkg, 1>&2
+if not exist "%~dp0packages\Winwright.%DECLARED%.nupkg" (
+    echo pack-local: read the version as '%DECLARED%' and packed no Winwright.%DECLARED%.nupkg, 1>&2
     echo             so nothing would have been evicted and the adopter would go on reading the old one 1>&2
     exit /b 1
 )
 
 rem Both packages, because an adopter driving a cooperating application restores the in-app half too.
-for %%p in (paneproof paneproof.inapp) do (
+for %%p in (winwright winwright.inapp) do (
     if exist "%USERPROFILE%\.nuget\packages\%%p\%DECLARED%" (
         rmdir /s /q "%USERPROFILE%\.nuget\packages\%%p\%DECLARED%"
         echo pack-local: evicted %%p %DECLARED% from the global packages folder

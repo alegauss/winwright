@@ -1,6 +1,6 @@
 // The project declaration, read out of the type that decides it. WW490.
 //
-// `paneproof.json` is the first file an adopting repository writes, and what described it was an
+// `winwright.json` is the first file an adopting repository writes, and what described it was an
 // example. An example is a good start and a bad reference: it cannot say which keys exist beside
 // the ones it shows, what each one falls back to when it is absent, or which of them refuse a
 // value that looks perfectly reasonable.
@@ -11,9 +11,9 @@
 // does not show is a red in the suite before it is a row missing here.
 //
 // Three sources, and the last two are the defaults the catalogue points at rather than repeats:
-//   src/Paneproof/Projects/ProjectDeclaration.cs   the keys, and what a project ignores by default
-//   src/Paneproof/Projects/Timeouts.cs             the waits a project gets without declaring any
-//   src/Paneproof/Acting/Retry.cs                  how many attempts an act gets by default
+//   src/Winwright/Projects/ProjectDeclaration.cs   the keys, and what a project ignores by default
+//   src/Winwright/Projects/Timeouts.cs             the waits a project gets without declaring any
+//   src/Winwright/Acting/Retry.cs                  how many attempts an act gets by default
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,7 +24,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const siteDir = join(here, "..");
 const repoDir = join(siteDir, "..");
 
-const read = (...parts) => readFileSync(join(repoDir, "src", "Paneproof", ...parts), "utf8");
+const read = (...parts) => readFileSync(join(repoDir, "src", "Winwright", ...parts), "utf8");
 
 const declaration = read("Projects", "ProjectDeclaration.cs");
 

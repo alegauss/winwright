@@ -17,10 +17,10 @@ setlocal
 
 set "ROOT=%~dp0.."
 set "TFM=net10.0-windows"
-set "DLL=%ROOT%\tools\Paneproof.Mcp\bin\Release\%TFM%\Paneproof.Mcp.dll"
+set "DLL=%ROOT%\tools\Winwright.Mcp\bin\Release\%TFM%\Winwright.Mcp.dll"
 
 rem A local build wins, Release first, so working on winwright never runs a downloaded copy.
-if not exist "%DLL%" set "DLL=%ROOT%\tools\Paneproof.Mcp\bin\Debug\%TFM%\Paneproof.Mcp.dll"
+if not exist "%DLL%" set "DLL=%ROOT%\tools\Winwright.Mcp\bin\Debug\%TFM%\Winwright.Mcp.dll"
 if exist "%DLL%" goto runtime
 
 rem The version is the one line of plugin.json that names it; the folder is per version, so an
@@ -34,12 +34,12 @@ if defined VERSION set "VERSION=%VERSION:"=%"
 
 if not defined VERSION (
   echo winwright: the MCP server is not built, so this session has no winwright tools.>&2
-  echo winwright: no plugin.json beside this launcher names a version to fetch, so build it once - dotnet build -c Release "%ROOT%\Paneproof.slnx">&2
+  echo winwright: no plugin.json beside this launcher names a version to fetch, so build it once - dotnet build -c Release "%ROOT%\Winwright.slnx">&2
   exit /b 1
 )
 
 set "FETCHED=%LOCALAPPDATA%\winwright\plugin\%VERSION%"
-set "DLL=%FETCHED%\mcp\Paneproof.Mcp.dll"
+set "DLL=%FETCHED%\mcp\Winwright.Mcp.dll"
 if exist "%DLL%" goto runtime
 
 rem Everything the fetch says is moved to stderr, because stdout from here on is the protocol.
@@ -48,7 +48,7 @@ powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%~dp0winwri
 if not exist "%DLL%" (
   echo winwright: the MCP server is not built, so this session has no winwright tools.>&2
   echo winwright: the release binaries for %VERSION% could not be fetched into %FETCHED%.>&2
-  echo winwright: build it instead - dotnet build -c Release "%ROOT%\Paneproof.slnx">&2
+  echo winwright: build it instead - dotnet build -c Release "%ROOT%\Winwright.slnx">&2
   exit /b 1
 )
 

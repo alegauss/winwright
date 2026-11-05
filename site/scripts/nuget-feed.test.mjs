@@ -9,7 +9,7 @@
 // The second half asserts the other side of the token: that nothing shipped into dist/ still
 // carries an unsubstituted `{{version}}`. A section that forgets to substitute renders the
 // token literally, and this is what turns that into a red instead of a page saying
-// "Paneproof {{version}}" to whoever reads it next.
+// "Winwright {{version}}" to whoever reads it next.
 import { test, before } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
@@ -30,8 +30,8 @@ test("the flat-container url is the package id lowercased", () => {
   // That endpoint is the one part of the API that requires it, and the ids here are mixed
   // case — so a url built from the id as written 404s and the page silently stays behind.
   assert.equal(
-    feedUrl("Paneproof.InApp"),
-    "https://api.nuget.org/v3-flatcontainer/paneproof.inapp/index.json",
+    feedUrl("Winwright.InApp"),
+    "https://api.nuget.org/v3-flatcontainer/winwright.inapp/index.json",
   );
 });
 

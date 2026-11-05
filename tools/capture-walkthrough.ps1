@@ -84,7 +84,7 @@ $steps += Ran 'building the project that drives it' $sample @('build', 'driving/
 $steps += Ran 'running every case this sample declares' $sample @('run', '--project', 'driving/Walkthrough.Run.csproj', '--no-build')
 
 $capture = [ordered]@{
-    declaration = (Get-Content -LiteralPath (Join-Path $sample 'paneproof.json') -Raw).TrimEnd()
+    declaration = (Get-Content -LiteralPath (Join-Path $sample 'winwright.json') -Raw).TrimEnd()
     case        = (Get-Content -LiteralPath (Join-Path $sample 'cases/walkthrough.cases.json') -Raw).TrimEnd()
     sdk         = (& dotnet --version).Trim()
     steps       = $steps

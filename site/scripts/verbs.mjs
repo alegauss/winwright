@@ -10,7 +10,7 @@
 // one that only runs at somebody's desk, and today it is discovered on a red run.
 //
 // One source, and it is in the suite rather than the engine:
-//   tests/Paneproof.Tests/Cooperating.cs   every verb, against what it needs
+//   tests/Winwright.Tests/Cooperating.cs   every verb, against what it needs
 //
 // That is the point rather than an accident. The catalogue is checked against the engine in
 // both directions — a verb added without an entry is a red — so this page is a read of a list
@@ -26,7 +26,7 @@ const siteDir = join(here, "..");
 const repoDir = join(siteDir, "..");
 
 const catalogue = readFileSync(
-  join(repoDir, "tests", "Paneproof.Tests", "Cooperating.cs"),
+  join(repoDir, "tests", "Winwright.Tests", "Cooperating.cs"),
   "utf8",
 );
 

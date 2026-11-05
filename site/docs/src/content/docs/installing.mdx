@@ -77,7 +77,7 @@ is.
 
 ## The in-app half, and when you do not need it
 
-`Paneproof.InApp` goes in the **application under test**, never in the project that drives it,
+`Winwright.InApp` goes in the **application under test**, never in the project that drives it,
 and it is optional. Every locator, every reading and every pattern act works against an
 application that references nothing at all.
 
@@ -131,8 +131,8 @@ agent loaded once and then typed a key out of:
 | `winwright_run` | The cases a selection asks for, run: the verdict, a line per case that ran and per case it left alone, the exit code, and what outlived the run. |
 
 It also registers a `PreToolUse` hook that **denies** a write whose content names
-`Paneproof.Acting`, `Paneproof.Locating` or `Paneproof.Asserting` (or their `Winwright.*` spellings
-from before the rename), and names the case file and `winwright_check` that replace it. A hand-written harness script is always available and always
+`Winwright.Acting`, `Winwright.Locating` or `Winwright.Asserting`, and names the case file and
+`winwright_check` that replace it. A hand-written harness script is always available and always
 faster in the moment, and that is exactly how a 2,732-line one happens. The refusal arrives
 before the work rather than after it.
 
@@ -148,7 +148,7 @@ The machine needs the **Windows Desktop Runtime 10**, not the SDK: the binaries 
 framework-dependent and the engine uses WPF. The SDK carries the runtime, so a machine that
 builds .NET 10 already has it.
 
-- **Behind a proxy or offline**, set `PANEPROOF_RELEASES` to a folder or a mirror holding the
+- **Behind a proxy or offline**, set `WINWRIGHT_RELEASES` to a folder or a mirror holding the
   release's `winwright-plugin-<version>-win-x64.zip` and its `.sha256`.
 - **Working on winwright itself**, build the plugin's clone with `dotnet build -c Release`. A
   local build, Release first and then Debug, is always preferred over a downloaded one.

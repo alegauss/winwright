@@ -1,0 +1,734 @@
+using System.Collections.ObjectModel;
+using System.Windows.Automation;
+
+using Winwright.Asserting;
+using Winwright.Locating;
+using Winwright.Processes;
+using Winwright.Projects;
+using Winwright.Verdicts;
+using Winwright.Windowing;
+
+namespace Winwright.Scenarios;
+
+/// <summary>One case a run left alone, and why it did.</summary>
+/// <param name="Case">The case, by the name it is declared under.</param>
+/// <param name="Because">Why it was not run, in the sentence a reader acts on.</param>
+public sealed record NotRun(string Case, string Because)
+{
+    /// <summary>The one line a report shows.</summary>
+    public override string ToString() => $"{Case} — {Because}";
+}
+
+/// <summary>
+/// The reading of a run over several cases: the ones that ran, the ones that did not, and the
+/// outcome that follows.
+/// <para>
+/// WW59. <see cref="Skipped"/> is why this type exists rather than a list of
+/// <see cref="CaseResult"/>. A filtered run reporting success without qualification is the same
+/// silent pass the third verdict exists to prevent, one level up — so what did not run is a field,
+/// it is in the sentence, and the sentence says it whether or not anything failed.
+/// </para>
+/// <para>
+/// The outcome is the worst reading any case earned, for the same reason a run's is the worst
+/// reading any assertion earned. It is not degraded by a case being left out: a case nobody asked
+/// for is not a hole, and collapsing the two would make every filtered run look damaged. What the
+/// filter costs is stated instead.
+/// </para>
+/// </summary>
+public sealed class SuiteVerdict
+{
+    internal SuiteVerdict(Selection asked, IReadOnlyList<CaseResult> ran, IReadOnlyList<NotRun> skipped)
+    {
+        Asked = asked;
+        Ran = ran;
+        Skipped = skipped;
+
+        // The same precedence a single run reads, and not the enum's order — those differ. A run
+        // that broke outranks everything, then a failure outranks a hole, and a hole is never a
+        // pass. Taking the largest member value would rank a hole above a failure, which is the
+        // one comparison the numbers happen to get backwards.
+        var readings = ran.Select(one => one.Verdict.Outcome).ToList();
+        Outcome = readings.Contains(RunOutcome.Broken) ? RunOutcome.Broken
+            : readings.Contains(RunOutcome.Failed) ? RunOutcome.Failed
+            : readings.Contains(RunOutcome.Degraded) ? RunOutcome.Degraded
+            : readings.Count > 0 ? RunOutcome.Passed
+            : RunOutcome.Degraded;
+    }
+
+    /// <summary>What the run was asked for.</summary>
+    public Selection Asked { get; }
+
+    /// <summary>Every case that ran, in the order it ran.</summary>
+    public IReadOnlyList<CaseResult> Ran { get; }
+
+    /// <summary>Every case that did not, each carrying why.</summary>
+    public IReadOnlyList<NotRun> Skipped { get; }
+
+    /// <summary>The one of four readings the whole run earned.</summary>
+    public RunOutcome Outcome { get; }
+
+    /// <summary>
+    /// Whether the cases that ran are the ones the last run over the same selection ran. WW532: a
+    /// count notices a subtraction, and only this notices a substitution. A finding, so it never
+    /// moves <see cref="Outcome"/>.
+    /// </summary>
+    public RanBefore Compared { get; internal init; } = RanBefore.NotAsked;
+
+    /// <summary>The process exit code, which is the outcome itself and not a second mapping.</summary>
+    public int ExitCode => (int)Outcome;
+
+    /// <summary>Every case that did not pass, in the order it ran.</summary>
+    public IReadOnlyList<CaseResult> Unhappy => new ReadOnlyCollection<CaseResult>(
+        Ran.Where(one => one.Verdict.Outcome != RunOutcome.Passed).ToList());
+
+    /// <summary>How many assertions actually ran across every case.</summary>
+    public int Assertions => Ran.Sum(one => one.Verdict.Ran);
+
+    /// <summary>
+    /// The one line a report opens with. It states what did not run before it states the outcome,
+    /// because that is the order the reader needs them in: a pass over two of nine cases is a
+    /// different claim from a pass, and putting the qualification second is how it gets skimmed.
+    /// </summary>
+    public string Sentence()
+    {
+        var total = Ran.Count + Skipped.Count;
+        var of = Skipped.Count == 0
+            ? $"all {total} case{(total == 1 ? "" : "s")}"
+            : $"{Ran.Count} of {total} cases, {Skipped.Count} not run";
+
+        return $"{Outcome}: {of}, {Assertions} assertion{(Assertions == 1 ? "" : "s")} over {Asked}.";
+    }
+
+    /// <summary>
+    /// Every case that ran without saying what it exists to catch, in the order it ran.
+    /// <para>
+    /// WW63. A check nobody can justify is a check nobody dares delete and nobody dares change, so
+    /// the count is on the reading rather than left to whoever last looked. It never changes the
+    /// outcome: a case that ran and passed did what it said, and an unjustified pass is a problem
+    /// about the suite rather than about the build.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<CaseDeclaration> Unjustified => CaseDeclaration.Unjustified(Ran.Select(one => one.Declared));
+
+    /// <summary>
+    /// Every case that ran whose claim begins or ends with its own name, in the order it ran. WW541:
+    /// named beside the unjustified ones and for the same kind of reason, and never moving the outcome,
+    /// because a claim that may be the name again is a question for a person rather than a failure.
+    /// </summary>
+    public IReadOnlyList<CaseDeclaration> Echoing => CaseDeclaration.Echoing(Ran.Select(one => one.Declared));
+
+    /// <summary>The whole reading as a report prints it: the sentence, then a line for each case.</summary>
+    public IReadOnlyList<string> Render()
+    {
+        // WW532. Second, beside the count it qualifies: a total that held is read as nothing changed,
+        // and this is the line that says whether that is so.
+        var lines = new List<string> { Sentence(), Compared.Sentence() };
+
+        // WW562. Under the case and not in a section of their own, so the step that failed is read
+        // beside the case it failed in — an agent told only "1 of 1 check(s)" goes back to the source.
+        foreach (var one in Ran)
+        {
+            lines.Add($"  {one}");
+            lines.AddRange(one.Unmet().Select(each => $"  {each}"));
+        }
+
+        lines.AddRange(Skipped.Select(one => $"  {one}"));
+
+        if (Unjustified.Count > 0)
+        {
+            var one = new Agreement(Unjustified.Count);
+            lines.Add(
+                $"{one.Cases} that ran {one.Say} nothing about what {one.They} {one.Catch}, so nothing says "
+                + $"what deleting {one.Them} would cost:");
+            lines.AddRange(Unjustified.Select(each => $"  {each.Name}"));
+        }
+
+        if (Echoing.Count > 0)
+        {
+            var one = new Agreement(Echoing.Count);
+            lines.Add(
+                $"{one.Cases} that ran {one.Say} what {one.They} {one.Catch} in words that begin or end with "
+                + $"{one.Their} own name, so a comparison of claims across runs may be reading the name again:");
+            lines.AddRange(Echoing.Select(each => $"  {each.Name}: {each.Catches}"));
+        }
+
+        return new ReadOnlyCollection<string>(lines);
+    }
+
+    /// <summary>The sentence, which is what a caller printing one line wants.</summary>
+    public override string ToString() => Sentence();
+
+    /// <summary>
+    /// WW547. The words of a sentence about some cases that change with how many there are. The noun
+    /// alone used to be inflected, so one case read "1 case that ran say what they catch" — the
+    /// verb and every pronoun after it have to follow the count too, and spelling them in one place
+    /// is what keeps a sentence from agreeing in half its words.
+    /// </summary>
+    /// <param name="Count">How many cases the sentence is about.</param>
+    private readonly record struct Agreement(int Count)
+    {
+        private bool One => Count == 1;
+
+        public string Cases => One ? "1 case" : $"{Count} cases";
+
+        public string Say => One ? "says" : "say";
+
+        public string Catch => One ? "catches" : "catch";
+
+        public string They => One ? "it" : "they";
+
+        public string Them => One ? "it" : "them";
+
+        public string Their => One ? "its" : "their";
+    }
+}
+
+/// <summary>
+/// Running the cases a selection asked for, and saying what it left alone.
+/// <para>
+/// Two doors. <see cref="Run"/> drives every case against a window the caller already has, which is
+/// what a case run against something attached needs. <see cref="Launch"/> starts the application
+/// under test per case, out of the fixture that case declares — and lends one window to several
+/// cases only where the fixture says it may be lent, every case using it says it only reads, and the
+/// invocation asked for sharing. All three, because each answers a different question and no two of
+/// them are the same person's to answer.
+/// </para>
+/// </summary>
+public static class Suite
+{
+    /// <summary>How long a launched window is waited for before the case is a harness error.</summary>
+    public const string WindowTimeout = "launch";
+
+    /// <summary>
+    /// Launch the application under test per fixture and run what <paramref name="asked"/> selects.
+    /// <para>
+    /// Sharing is opted into here rather than declared by the cases, and that is the property WW62
+    /// is careful about: three cases in claude-tray drive the same window and each used to pay the
+    /// launch, the first layout pass and the first poll, for a window none of them leaves in a state
+    /// the next would reject. Merging them into one case would have fixed the seconds and lost the
+    /// thing worth having — a case that still runs alone, owning its process and its first paint.
+    /// </para>
+    /// </summary>
+    /// <param name="declared">Every case there is, in declared order.</param>
+    /// <param name="asked">What to run.</param>
+    /// <param name="register">What launches and stops the processes. Nothing is started outside it.</param>
+    /// <param name="project">The declaration the executable, the waits and the attempts come from.</param>
+    /// <param name="sharing">That this invocation will lend one window to the cases that only read it.</param>
+    /// <param name="measured">What this machine turned out to have.</param>
+    /// <exception cref="ScenarioRefusedException">Where there is nothing to run, or a selector matches no case.</exception>
+    public static SuiteVerdict Launch(
+        IReadOnlyList<CaseDeclaration> declared,
+        Selection asked,
+        ProcessRegister register,
+        ProjectDeclaration project,
+        bool sharing = false,
+        PreconditionSet? measured = null)
+    {
+        ArgumentNullException.ThrowIfNull(declared);
+        ArgumentNullException.ThrowIfNull(asked);
+        ArgumentNullException.ThrowIfNull(register);
+        ArgumentNullException.ThrowIfNull(project);
+
+        Something(declared);
+        RefuseUndeclared(declared, project);
+        _ = asked.Over(declared);
+
+        var lending = sharing ? Lendable(declared, asked) : [];
+        var lent = new Dictionary<string, AutomationElement>(StringComparer.Ordinal);
+        var ran = new List<CaseResult>();
+        var skipped = new List<NotRun>();
+
+        foreach (var one in declared)
+        {
+            if (asked.Leaves(one) is { } because)
+            {
+                skipped.Add(new NotRun(one.Name, because));
+                continue;
+            }
+
+            // WW585. Said once, here, so every field the fixture resolves fills {configuration} from
+            // the one place WW521 ranks its sources.
+            var fixture = one.Fixture.Configured(project.Configuration);
+            var borrowing = lending.Contains(fixture.Name);
+            if (borrowing && lent.TryGetValue(fixture.Name, out var already))
+            {
+                ran.Add(CaseRun.Of(one, already, project, Diagnosis.DefaultBudget, measured, lent: true));
+                continue;
+            }
+
+            // WW522. Before the launch, so an application that needed a server and was not given one
+            // is never started against its absence: every check is a hole naming the address, and the
+            // lent window is not lent, because there is no window. Asked per case, which is per launch.
+            var timeout = project.Declares("timeouts.reach") ? project.Timeouts.For("reach") : Processes.Reaching.DefaultTimeoutMs;
+            if (fixture.Unreachable(timeout) is { } unreachable)
+            {
+                ran.Add(CaseRun.NotOn(one, unreachable, lent: false));
+                continue;
+            }
+
+            // WW509, and WW515 for the order: staged before anything reads the directory. WW536 puts
+            // the folder between the two — after staging, which empties the directory the folder may
+            // be inside, and before the launch, so the application comes forward over Explorer the
+            // way it does at every launch. Measured in the guest: opened after the launch, Explorer
+            // kept the desk, and a drag's wait for the window under test ran out at ten seconds.
+            var staged = fixture.Stage(project.Root);
+
+            // WW582. After the staging, which the commands may read and write, and before anything
+            // is launched: a command that did not do its part leaves nothing worth launching for.
+            if (Prepared(register, project, staged, one.Name) is { } unprepared)
+            {
+                ran.Add(CaseRun.NotOn(one, unprepared, lent: false));
+                continue;
+            }
+
+            var folder = Folder(project, fixture, out var noFolder);
+            if (noFolder is not null)
+            {
+                ran.Add(CaseRun.NotOn(one, noFolder, lent: false));
+                continue;
+            }
+
+            var (window, process) = Opened(register, project, staged, one.Name, borrowing);
+            if (borrowing)
+                lent[fixture.Name] = window;
+
+            // Asked of the window rather than of the process: a resident fixture's root is the
+            // desktop, whose handle is no window this may move.
+            if (folder is not null && window != AutomationElement.RootElement)
+                folder.Beside(window);
+
+            // The first case through a lent fixture pays the launch and does not borrow it: it is
+            // the one that owns the window until the run ends, so the reading it takes is the same
+            // reading it would take alone.
+            CaseResult result;
+            try
+            {
+                result = CaseRun.Of(one, window, project, Diagnosis.DefaultBudget, measured, lent: false);
+            }
+            finally
+            {
+                // WW536. Closed where the case's own window is given back, and before it, so the
+                // folder is never left standing over a desk with nothing under test on it.
+                Closed(register, project, folder, one.Name);
+
+                // WW215. Given back here and not at the end of the run: a case that owns its process
+                // owns it for as long as it is running and no longer. A lent window is the exception
+                // and not the rule — it is held precisely as long as it is being lent, which is
+                // until the run ends, so that is the one launch not stopped where it was made.
+                //
+                // In a finally for the reason the register is total by construction rather than by
+                // discipline: a case that throws on the way out still finished, and the promise is
+                // about the window being gone, not about how the case ended.
+                if (!borrowing)
+                    register.Stop(process);
+            }
+
+            // WW279. After the stop, because the stop is where the register looks: a resident launch
+            // draws no window and so has nothing whose absence would have noticed it going, and a
+            // process that had left before the case finished is what a reading full of missing
+            // locators is actually about. A borrowed launch is not stopped here and gets this at the
+            // end of the run instead, where no one case can claim it.
+            // WW575. What the case followed after the application relaunched itself is this run's to
+            // stop, as the launch was; and a launch whose exit a step claimed left on purpose, so its
+            // being gone is the claim and not an early exit.
+            foreach (var pid in result.Relaunched)
+            {
+                if (register.Adopt(pid, one.Name) is { } adopted)
+                    register.Stop(adopted);
+            }
+
+            if (result.ClaimedExit)
+                register.Claimed(process);
+
+            // WW563. What the launch wrote, which the register kept off the runner's own streams.
+            result = result.Hearing(process);
+            ran.Add(process.Departed is { } departed && !result.ClaimedExit ? result.After(departed) : result);
+        }
+
+        return Remembered(asked, ran, skipped, project);
+    }
+
+    /// <summary>
+    /// The folder a fixture opens, opened, or null where it opens none. WW536. Put beside the window
+    /// under test once that window exists, which is after this.
+    /// </summary>
+    /// <param name="project">The declaration, for the root and the budgets.</param>
+    /// <param name="fixture">The fixture, which says whether it opens one.</param>
+    /// <param name="absent">
+    /// Where the fixture opens a folder and no window showing it arrived: the absence a case run on
+    /// this desk is a hole naming. A folder that did not come up is the desk's and never the
+    /// application's, which is why this is not a red.
+    /// </param>
+    private static FolderWindow? Folder(ProjectDeclaration project, FixtureDeclaration fixture, out Precondition? absent)
+    {
+        absent = null;
+        if (fixture.Opening(project.Root) is not { } opening)
+            return null;
+
+        var deadline = project.Timeouts.For(WindowTimeout);
+        var folder = FolderWindow.Open(opening, deadline, project.Timeouts.For("poll"));
+        if (folder is null)
+        {
+            absent = Precondition.Absent(
+                $"an Explorer window on {opening}",
+                $"'{fixture.Name}' opens it, and no window showing it arrived in {deadline}ms");
+            return null;
+        }
+
+        return folder;
+    }
+
+    /// <summary>
+    /// Run what a fixture runs before its application, in order, and answer the absence a case run
+    /// on this fixture would be a hole naming, or null where every command did its part. WW582.
+    /// <para>
+    /// Found by Modelado (MOD65): the claim was that a job its CLI sent shows in the window's About,
+    /// and no fixture could run the CLI, so the case staged a hand-written ledger instead. Each
+    /// command goes through the register like every process this run starts, so one that will not
+    /// finish is stopped rather than left, and its output is kept rather than written onto a runner's
+    /// own streams. A command that exits otherwise than it said is a hole and not a red: nothing about
+    /// the application was observed, and its last lines are the reason.
+    /// </para>
+    /// </summary>
+    private static Precondition? Prepared(ProcessRegister register, ProjectDeclaration project, StagedFixture staged, string named)
+    {
+        var fixture = staged.Fixture;
+        var deadline = project.Timeouts.For("launch");
+        foreach (var command in fixture.Before)
+        {
+            var start = fixture.Preparing(command, staged.Root);
+            LaunchedProcess ran;
+            try
+            {
+                ran = register.Launch(start, named);
+            }
+            catch (System.ComponentModel.Win32Exception refused)
+            {
+                throw new ScenarioRefusedException(
+                    named, $"'{fixture.Name}' runs '{start.FileName}' before its launch, which could not be started — {refused.Message}");
+            }
+
+            if (command.Input is { } input)
+            {
+                ran.Underlying.StandardInput.Write(input);
+                ran.Underlying.StandardInput.Close();
+            }
+
+            if (!ran.WaitForExit(deadline))
+            {
+                register.Stop(ran);
+                return Unprepared(fixture, command, $"did not finish within {deadline}ms and was stopped", ran);
+            }
+
+            // The output is drained on its own threads, so the exit is waited on once more with no
+            // bound, which is what lets those threads finish before what they kept is read.
+            ran.Underlying.WaitForExit();
+            var code = ran.ExitCode;
+            register.Finished(ran);
+
+            if (code != command.ExpectExit)
+                return Unprepared(fixture, command, $"exited {code} where {command.ExpectExit} was expected", ran);
+        }
+
+        return null;
+    }
+
+    /// <summary>The absence a command that did not do its part leaves, with the end of what it wrote. WW582.</summary>
+    private static Precondition Unprepared(FixtureDeclaration fixture, BeforeCommand command, string what, LaunchedProcess ran)
+    {
+        var wrote = ran.Wrote;
+        var tail = wrote.Count == 0 ? "; it wrote nothing" : $"; it wrote, last: {string.Join(" | ", wrote.TakeLast(5))}";
+        return Precondition.Absent(
+            $"what '{fixture.Name}' runs before its launch",
+            $"'{command}' {what}{tail}");
+    }
+
+    /// <summary>Close the folder a case opened, naming its window where it would not go. WW536.</summary>
+    private static void Closed(ProcessRegister register, ProjectDeclaration project, FolderWindow? folder, string forCase)
+    {
+        if (folder is not null && !folder.Close(project.Timeouts.For("stop"), project.Timeouts.For("poll")))
+            register.LeftOpen(folder.Pid, folder.ToString(), forCase);
+    }
+
+    /// <summary>
+    /// The fixtures this invocation may lend, by name: shareable, asked for by more than one
+    /// selected case, and every one of those cases saying it only reads.
+    /// <para>
+    /// Every one of those three. A fixture two cases share where one of them acts is a fixture that
+    /// hands the second case whatever the first left behind, and the red it produces is about the
+    /// order the run happened to walk them in.
+    /// </para>
+    /// </summary>
+    private static HashSet<string> Lendable(IReadOnlyList<CaseDeclaration> declared, Selection asked)
+    {
+        var wanted = declared.Where(one => asked.Takes(one)).ToList();
+        var lendable = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var group in wanted.GroupBy(one => one.Fixture.Name, StringComparer.Ordinal))
+        {
+            if (group.Count() > 1 && group.First().Fixture.Shareable && group.All(one => one.OnlyReads))
+                lendable.Add(group.Key);
+        }
+
+        return lendable;
+    }
+
+    /// <summary>
+    /// Launch that fixture and wait for the window it draws.
+    /// <para>
+    /// Hands back the process as well as the window. WW215: a caller that only gets the window has
+    /// no way to give the launch back, and the register is the only thing allowed to end one — so
+    /// discarding it here was what made a run hold every window it had ever opened.
+    /// </para>
+    /// </summary>
+    /// <exception cref="ScenarioRefusedException">
+    /// Where the launch draws no window inside the project's own launch budget. A refusal rather
+    /// than a red: nothing about the case was observed, so nothing about the application was.
+    /// </exception>
+    private static (AutomationElement Window, LaunchedProcess Process) Opened(
+        ProcessRegister register, ProjectDeclaration project, StagedFixture staged, string named, bool lent)
+    {
+        // WW509, and WW515 for the order. Staging comes first because the directory the token
+        // resolves to has to be the directory the files are actually in by the time the process
+        // reads it — and the launch is composed from what staging hands back rather than from the
+        // declaration again, so the two cannot be given two different roots. A fixture declaring
+        // no files still gets an emptied directory, which is what makes the store this launch's
+        // own rather than whatever the last one left. WW536 moved the staging to the caller, so a
+        // folder inside the staged directory can be opened between the two.
+        //
+        // WW508 is the other half: the directory it starts in is the project's root, so a fixture
+        // argument naming a file in the project means the same thing under every runner. Before
+        // that the launch set none and inherited whichever one the test runner happened to be in.
+        var fixture = staged.Fixture;
+
+        // WW575. The fixture's own executable where it names one, such as the installed copy.
+        var start = staged.Starting(fixture.Launches(project.Executable, staged.Root));
+
+        // WW349. Where pictures go is the project's, and it is also the one directory this run may
+        // ask the application to write into — so the launch says so rather than an operator setting
+        // it by hand. The application still decides whether to answer at all, and a build that never
+        // called Renders.Answer answers nothing however this is set.
+        //
+        // After the fixture's own variables and not before: a fixture that names this deliberately
+        // is a fixture saying something about where its renders go, and a run overwriting that would
+        // be the launch quietly disagreeing with the declaration it was started from.
+        if (project.Declares("captures") && !start.Environment.ContainsKey(Capturing.OwnRender.RendersInto))
+            start.Environment[Capturing.OwnRender.RendersInto] = project.Captures;
+
+        // WW531. The register is told which case this is for, so a process that outlives it is named
+        // by that case and not by a pid that has gone by the time anybody reads it.
+        // WW567. The declaration being wrong, and said as that: an executable Windows cannot start
+        // is the same on every run, and the throw it was ended the MCP server that ran it.
+        LaunchedProcess launched;
+        try
+        {
+            launched = register.Launch(start, named, lent);
+        }
+        catch (System.ComponentModel.Win32Exception refused)
+        {
+            throw new ScenarioRefusedException(
+                named,
+                $"'{start.FileName}' could not be started from {start.WorkingDirectory} — {refused.Message}; "
+                    + (fixture.Application.Length > 0
+                        ? $"the fixture's 'application' resolves against the project's root, {staged.Root}"
+                        : $"the executable in {project.Path} resolves against the directory it sits in"));
+        }
+
+        var deadline = project.Timeouts.For(WindowTimeout);
+
+        // WW257. A tray draws no window, and the window in that case is what a click on the icon is
+        // supposed to produce — so waiting for one makes the thing being asserted a reason not to run.
+        // The desktop is what its locators resolve against, because that is where a tray icon lives.
+        //
+        // What this does not do is judge whether the process is still there. Asking once at the launch
+        // is a race — a process that exits takes a moment to do it — and asking with a wait is the
+        // window deadline paid by every tray that behaves. A resident launch that died is reported by
+        // the case's own reds, which name locators that found nothing, and telling that apart from a
+        // tray that is running and wrong is its own task.
+        if (fixture.Resident)
+            return (AutomationElement.RootElement, launched);
+
+        var drawn = Attempt.UntilTrue(
+            () => TopLevelWindows.Largest(launched.Pid) is not null,
+            deadline,
+            project.Timeouts.For("poll"));
+
+        if (!drawn.Happened)
+        {
+            throw new ScenarioRefusedException(
+                named,
+                $"'{fixture.Name}' drew no window in {deadline}ms, so nothing about this case was observed");
+        }
+
+        return (AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle), launched);
+    }
+
+    /// <summary>
+    /// One step whose verb needs a project key nothing declares. WW348 found them, WW360 made them
+    /// something a caller can read rather than only something a run throws.
+    /// </summary>
+    /// <param name="Case">The case holding the step.</param>
+    /// <param name="Step">The step, as its author named it.</param>
+    /// <param name="Verb">The act it names.</param>
+    /// <param name="Key">The declaration that act needs.</param>
+    public sealed record UndeclaredNeed(string Case, string Step, string Verb, string Key)
+    {
+        /// <summary>
+        /// Why this stops a run, in the sentence the run itself refuses with.
+        /// <para>
+        /// Written here rather than at either caller, because there are two of them now: the door of
+        /// a run throws it and <c>winwright_check</c> prints it, and an author who met one and then
+        /// the other would be reading two accounts of one fact.
+        /// </para>
+        /// </summary>
+        /// <param name="path">Where the project declaration is, which is where the fix goes.</param>
+        public string Because(string path) =>
+            $"'{Step}' names '{Verb}', which needs a '{Key}' this project does not "
+                + $"declare — add it to {path}, because a run would launch the application "
+                + "and drive it to that step to say what these two files already say together";
+    }
+
+    private static void Something(IReadOnlyList<CaseDeclaration> declared)
+    {
+        if (declared.Count == 0)
+            throw new ScenarioRefusedException("<no cases>", "there is nothing to run, which is not the same as a run that passed");
+    }
+
+    /// <summary>
+    /// Refuse a step whose verb needs a declaration the project does not carry. WW348.
+    /// <para>
+    /// This format's founding rule is that a case which could not run anywhere is refused before it
+    /// runs here — an unparseable locator, a verb that does not exist, an argument beside a verb that
+    /// takes none. A capture step in a project with nowhere to put pictures is the same kind of fact:
+    /// it is about the file and the declaration beside it rather than about the desk, and it is
+    /// knowable the moment both have been read. What kept it at run time was only where the reading
+    /// happens — <c>StepDeclaration.Of</c> judges a step and is handed no project, and
+    /// <c>ScenarioFile.LoadAll</c> reads files and is handed no project either. This is the first
+    /// place that has both, and it is still before a window is launched, which is what the rule buys.
+    /// </para>
+    /// <para>
+    /// Over every case and not only the ones the selection takes, because that is what the rule
+    /// claims: the file is wrong whoever asked for what, and a run narrowed to one case would
+    /// otherwise pass while the same declaration is still missing for the next one. The run-time hole
+    /// WW336 wrote stays where it is — a caller reaching <c>CaseRun.Of</c> without coming through
+    /// here still gets an answer rather than a throw, and this is the earlier of two rather than a
+    /// replacement for it.
+    /// </para>
+    /// <para>
+    /// A reading rather than the refusal it was, which is WW360. The refusal below is still the door
+    /// of a run, and it is not the only caller that wants this question asked: <c>winwright_check</c>
+    /// answers an author before a run exists, and a tool that reports has to be handed every gap
+    /// rather than thrown at the first. Both come from this one walk, so the two answers cannot drift
+    /// — which is the property a second copy inside the tool would have lost.
+    /// </para>
+    /// </summary>
+    /// <param name="declared">Every case there is.</param>
+    /// <param name="project">The declaration to hold them against.</param>
+    /// <returns>Every step needing a key this project does not declare, in declared order.</returns>
+    public static IReadOnlyList<UndeclaredNeed> Undeclared(
+        IReadOnlyList<CaseDeclaration> declared, ProjectDeclaration project)
+    {
+        ArgumentNullException.ThrowIfNull(declared);
+        ArgumentNullException.ThrowIfNull(project);
+
+        var found = new List<UndeclaredNeed>();
+        foreach (var one in declared)
+        {
+            foreach (var step in one.Steps)
+            {
+                // WW577. A step's own wait is a key the project declares too, and one it does not is
+                // refused here for the reason the verb's is: the file and the declaration already say
+                // so together, and a run would launch the application to find it out.
+                if (step.Waits is { } wait && !project.Timeouts.All.ContainsKey(wait))
+                    found.Add(new UndeclaredNeed(one.Name, step.Name, "waits", $"timeouts.{wait}"));
+
+                // Asked of the verb rather than decided here, so the suite never learns which act
+                // needs which key: a second verb needing a second declaration is refused by this same
+                // loop the day it is added to the vocabulary.
+                if (step.Verb.Needs is not { Length: > 0 } key || project.Declares(key))
+                    continue;
+
+                found.Add(new UndeclaredNeed(one.Name, step.Name, step.Verb.Name, key));
+            }
+        }
+
+        return new ReadOnlyCollection<UndeclaredNeed>(found);
+    }
+
+    /// <summary>
+    /// The same walk, as the refusal a run makes of it: the first gap stops the run.
+    /// <para>
+    /// The first and not all of them, because this is a door rather than a report. An author reading
+    /// <c>winwright_check</c> wants the list; a run wants to stop, and stopping on the first is what
+    /// it did before this was split in two.
+    /// </para>
+    /// </summary>
+    /// <param name="declared">Every case there is.</param>
+    /// <param name="project">The declaration to hold them against.</param>
+    /// <exception cref="ScenarioRefusedException">Where a step needs a key the project has not declared.</exception>
+    private static void RefuseUndeclared(IReadOnlyList<CaseDeclaration> declared, ProjectDeclaration project)
+    {
+        if (Undeclared(declared, project) is [var first, ..])
+            throw new ScenarioRefusedException(first.Case, first.Because(project.Path));
+    }
+
+    /// <summary>
+    /// Run what <paramref name="asked"/> selects out of <paramref name="declared"/>.
+    /// </summary>
+    /// <param name="declared">Every case there is, in declared order.</param>
+    /// <param name="asked">What to run. <see cref="Selection.All"/> for all of it.</param>
+    /// <param name="root">What every case's locators resolve under.</param>
+    /// <param name="project">The declaration the waits, the attempts and the refusals come from.</param>
+    /// <param name="budget">How many elements a red's control view may show.</param>
+    /// <param name="measured">What this machine turned out to have, read by every case declaring a requirement.</param>
+    /// <exception cref="ScenarioRefusedException">
+    /// Where there is nothing to run, or a selector matches no case. Both are refused rather than
+    /// run, because a run of no cases has no failure in it and reads as a pass.
+    /// </exception>
+    public static SuiteVerdict Run(
+        IReadOnlyList<CaseDeclaration> declared,
+        Selection asked,
+        AutomationElement root,
+        ProjectDeclaration project,
+        int budget = Diagnosis.DefaultBudget,
+        PreconditionSet? measured = null)
+    {
+        ArgumentNullException.ThrowIfNull(declared);
+        ArgumentNullException.ThrowIfNull(asked);
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(project);
+
+        Something(declared);
+        RefuseUndeclared(declared, project);
+
+        // Called for its refusal and not for its answer: a selector matching nothing has to stop the
+        // run before the first case, or the run is a green about the cases the typo left out.
+        _ = asked.Over(declared);
+
+        var ran = new List<CaseResult>();
+        var skipped = new List<NotRun>();
+        foreach (var one in declared)
+        {
+            if (asked.Leaves(one) is { } because)
+                skipped.Add(new NotRun(one.Name, because));
+            else
+                ran.Add(CaseRun.Of(one, root, project, budget, measured));
+        }
+
+        return Remembered(asked, ran, skipped, project);
+    }
+
+    /// <summary>
+    /// The verdict, with the cases that ran held against the last run over the same selection and
+    /// written down for the next one. WW532: both doors end here, so neither can forget to compare.
+    /// </summary>
+    private static SuiteVerdict Remembered(
+        Selection asked, List<CaseResult> ran, List<NotRun> skipped, ProjectDeclaration project)
+    {
+        var cases = new ReadOnlyCollection<CaseResult>(ran);
+        return new SuiteVerdict(asked, cases, new ReadOnlyCollection<NotRun>(skipped))
+        {
+            Compared = RanBefore.Of(asked, cases.Select(one => (one.Declared.Name, one.Declared.Catches)), project),
+        };
+    }
+}

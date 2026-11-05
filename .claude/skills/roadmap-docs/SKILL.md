@@ -158,7 +158,7 @@ closed that way was reopened six times. A definition of done written into a rati
   second time to somebody who had watched the first. The order is **ship → pair it in
   `Criteria.Known` or delete the entry → run**, and the run is `tools/host-gate.ps1`, which answers
   in seconds and has `CriteriaTests` in it. Never a second guest run for this.
-- **WW176 wrote the reading down.** `tests/Paneproof.Tests/Criteria.cs` pairs every criterion the
+- **WW176 wrote the reading down.** `tests/Winwright.Tests/Criteria.cs` pairs every criterion the
   roadmap declares with the case that demonstrates it, checked against `docs/ROADMAP.md` in both
   directions, and a criterion added later is red until somebody says what shows it. **Read it beside
   `criterion list`, not instead of it** — it records what the last reading concluded, and whether

@@ -31,11 +31,11 @@ jobs:
           global-json-file: global.json
 
       - name: Restore
-        run: dotnet restore Paneproof.slnx
+        run: dotnet restore Winwright.slnx
 
       # TreatWarningsAsErrors is on in Directory.Build.props, so a warning fails here on purpose.
       - name: Build
-        run: dotnet build Paneproof.slnx --configuration Release --no-restore
+        run: dotnet build Winwright.slnx --configuration Release --no-restore
 
       # WW117 and WW138: one step, because the roll call is part of running the suite rather than a
       # step beside it. A host that dies mid-run takes its remaining tests with it and the runner
@@ -66,16 +66,16 @@ jobs:
       - name: Test
         shell: powershell
         run: |
-          $filter = & ./tools/host-gate.ps1 -Suite tests/Paneproof.Tests
+          $filter = & ./tools/host-gate.ps1 -Suite tests/Winwright.Tests
           Write-Host "the desk-free half, derived from the serial collection: $filter"
-          dotnet test tests/Paneproof.Tests/Paneproof.Tests.csproj --configuration Release --no-build --filter $filter
+          dotnet test tests/Winwright.Tests/Winwright.Tests.csproj --configuration Release --no-build --filter $filter
 
       # WW122: the two halves are packages or they are a path into this repository, and a path is
       # unpinnable by construction. Packing here is what makes the claim checkable rather than
       # intended. WW230 decided where they go — nuget.org, from publish.yml — and this still packs on
       # every push, because a pack that only happens at release time is one that first fails there.
       - name: Pack
-        run: dotnet pack Paneproof.slnx --configuration Release --no-build --output packages
+        run: dotnet pack Winwright.slnx --configuration Release --no-build --output packages
 
       # The block's first criterion, as a project rather than a paragraph: an application under
       # test takes the in-app half by one package reference and by nothing else. It restores from
@@ -107,11 +107,11 @@ jobs:
       # two questions is not.
       - name: Check the copies of the engine agree
         run: >
-          dotnet exec tools/Paneproof.Concordance/bin/Release/net10.0-windows/Paneproof.Concordance.dll
+          dotnet exec tools/Winwright.Concordance/bin/Release/net10.0-windows/Winwright.Concordance.dll
           --declared Directory.Build.props
           --running
           --packed packages
-          --package Paneproof.InApp
+          --package Winwright.InApp
           --packed packages
           --pinned samples/Adopter/Adopter.csproj
 

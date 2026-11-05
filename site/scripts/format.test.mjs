@@ -17,7 +17,7 @@ const siteDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = join(siteDir, "..");
 
 const source = (name) =>
-  readFileSync(join(repoDir, "src", "Paneproof", "Scenarios", name), "utf8");
+  readFileSync(join(repoDir, "src", "Winwright", "Scenarios", name), "utf8");
 
 const payload = join(siteDir, "docs", "src", "data", "format.generated.json");
 if (!existsSync(payload)) {

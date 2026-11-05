@@ -27,5 +27,3 @@
 ## Block M — The site on the shared design system
 
 ## Block N — The name — winwright becomes paneproof
-
-- ⏸ **WW592** (deps: WW590 ✅) **The plugin, its MCP server, its skill and its guard hook are all named winwright** — set aside (a person decides how old installs move): An adopter who installs the renamed plugin beside the old one would have two servers driving the same desktop, so the move needs its own path. → §WW592

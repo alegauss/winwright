@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WW302: the experiment WW249 needs and the suite must not carry. It types for minutes at a real
+       window, which is a cost every guest run would otherwise pay for a question asked once.
+
+       Its own process, and the engine's own public path: both arms call `Keyboard.Type`, so neither
+       is a reimplementation of the send that could differ from it in some way nobody wrote down. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Winwright.Typing</RootNamespace>
+    <AssemblyName>Winwright.Typing</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Winwright\Winwright.csproj" />
+  </ItemGroup>
+
+</Project>

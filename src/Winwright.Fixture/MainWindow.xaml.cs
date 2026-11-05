@@ -1,0 +1,273 @@
+﻿using System.Windows;
+
+namespace Winwright.Fixture;
+
+/// <summary>
+/// The fixture's window.
+/// <para>
+/// Every loop in this framework was developed against somebody's shipping product, which means a
+/// real account, a real transcript directory, a real controller and a machine somebody set up by
+/// hand. This removes all of it. It is not a demo and not a sample: it is the surface this
+/// framework's own tests drive, and its design goal is to be hard to test in the specific ways
+/// Windows is hard.
+/// </para>
+/// <para>
+/// Nothing here reads a clock, a machine name, a setting or a file. That is the property the
+/// later shapes lean on — a byte-identical render has nothing to be identical to unless two runs
+/// on two desks draw the same pixels.
+/// </para>
+/// </summary>
+public partial class MainWindow : Window
+{
+    /// <summary>Build the window in whatever shape this run was asked for.</summary>
+    /// <param name="shapes">The flags the run carried, or null for the default surface.</param>
+    public MainWindow(Flags? shapes = null)
+    {
+        Shapes = shapes ?? Flags.Read([]);
+        InitializeComponent();
+
+        if (Shapes.Value("title") is string named)
+            Title = named;
+
+        // WW335. Before the source exists, because the style bits a chromeless window ends up with
+        // are what the window is created with. A frame with no chrome is the shape a capture route
+        // reading WS_POPUP was suspected of mistaking for a drop-down, and the fixture is where that
+        // suspicion is answered rather than argued about.
+        if (Shapes.Has("chromeless"))
+            WindowStyle = WindowStyle.None;
+
+        // WW548. Here for the reason chromeless is: the frame a full screen goes without is decided
+        // before the source exists. Sized once the handle does, below.
+        if (Shapes.Value("screen") is not null)
+            Screen.Strip(this);
+
+        if (Shapes.Has("names"))
+            NamesPane.AddTo(panes);
+
+        if (Shapes.Has("chords"))
+            ChordsPane.AddTo(panes);
+
+        if (Shapes.Has("announces"))
+            AnnouncesPane.AddTo(panes);
+
+        if (Shapes.Has("absences"))
+            AbsencesPane.AddTo(panes);
+
+        if (Shapes.Has("ranges"))
+            RangesPane.AddTo(panes);
+
+        if (Shapes.Has("pickers"))
+            PickersPane.AddTo(panes);
+
+        if (Shapes.Has("vanishing"))
+            VanishingPane.AddTo(panes);
+
+        if (Shapes.Has("drags"))
+            DragsPane.AddTo(panes);
+
+        if (Shapes.Has("dialogs"))
+            DialogsPane.AddTo(panes);
+
+        if (Shapes.Has("toolbar"))
+            ToolbarPane.AddTo(panes);
+
+        if (Shapes.Has("handles"))
+            HandlesPane.AddTo(panes);
+
+        if (Shapes.Has("relaunch"))
+            RelaunchPane.AddTo(panes, Shapes.Has("relaunched"));
+
+        if (Shapes.Has("layout"))
+            LayoutPane.AddTo(panes);
+
+        if (Shapes.Has("selections"))
+            SelectionsPane.AddTo(panes);
+
+        if (Shapes.Has("status"))
+            StatusPane.AddTo(panes);
+
+        if (Shapes.Value("rows") is string rows)
+            RowsPane.AddTo(panes, rows);
+
+        if (Shapes.Has("peerless"))
+            Peerless.AddTo(panes);
+
+        if (Shapes.Value("settles") is string howLate)
+        {
+            SettlesPane.AddTo(
+                panes, int.Parse(howLate, System.Globalization.CultureInfo.InvariantCulture));
+        }
+
+        if (Shapes.Value("loading") is string howLong)
+            LoadFor(int.Parse(howLong, System.Globalization.CultureInfo.InvariantCulture));
+
+        if (Shapes.Value("language") is string tag)
+            Speak(Strings.Load(tag));
+
+        if (Shapes.Value("animate") is string everySoOften)
+        {
+            // On the Status pane and selected, because a pane nobody picked is realised into no
+            // tree at all - which would be an animation running where nothing can read it.
+            panes.SelectedItem = statusPane;
+            animation = Animation.On(
+                animationState, int.Parse(everySoOften, System.Globalization.CultureInfo.InvariantCulture));
+        }
+    }
+
+    /// <summary>Held so it is not collected while it is still meant to be running.</summary>
+    private Animation? animation;
+
+    /// <summary>The same, for the recorder: a hook whose owner has gone is a reading that stops.</summary>
+    private Arrivals? arrivals;
+
+    /// <summary>What language this window is in, where a run asked for one.</summary>
+    public Strings? Speaking { get; private set; }
+
+    /// <summary>
+    /// Label the window from a set of strings. Every label comes from the file, including the one
+    /// carrying a placeholder — a fixture that quietly left that one out would be a fixture the
+    /// rule it exists for could never be developed against.
+    /// </summary>
+    private void Speak(Strings said)
+    {
+        Speaking = said;
+
+        reportPane.Header = said.Says("tabs.report");
+        statusPane.Header = said.Says("tabs.status");
+        configPane.Header = said.Says("tabs.config");
+        save.Content = said.Says("buttons.save");
+        close.Content = said.Says("buttons.close");
+        localizedLabel.Text = said.Says(Strings.PlaceholderKey);
+
+        // WW475. Filled in with a profile this fixture already has, so the reading is the shape a
+        // real window draws: fixed text on one side of something that moves. The front one is what
+        // `beginsWithLabel` reads and the back one what `endsWithLabel` does, and having both is
+        // what keeps the rule from being proved in one direction and assumed in the other.
+        filledFrontLabel.Text = said.Says(Strings.PlaceholderKey).Replace("{name}", Store.Profiles[0], StringComparison.Ordinal);
+        filledBackLabel.Text = said.Says(Strings.MirroredPlaceholderKey).Replace("{name}", Store.Profiles[0], StringComparison.Ordinal);
+
+        // WW43: the loading note is a declared string like every other caption here, so a check
+        // reading the project's language files finds it rather than matching a hard-coded phrase.
+        loadingNote.Text = said.Says(Strings.LoadingKey);
+    }
+
+    /// <summary>Held for the window's life, because letting go puts every popup back.</summary>
+    private Winwright.InApp.PopupsHeld? popups;
+
+    /// <summary>
+    /// Held for the window's life too, and for the mirror of that reason: letting go takes the hook
+    /// back off, and a harness asking after that would be told the application does not answer. WW349.
+    /// </summary>
+    private Winwright.InApp.RendersAnswered? renders;
+
+    /// <inheritdoc />
+    protected override void OnContentRendered(EventArgs e)
+    {
+        base.OnContentRendered(e);
+
+        // Here and not on Loaded: content rendered is the first moment every rectangle is the one
+        // that was actually drawn, and a surface reported before that is a surface nobody saw.
+        // Asked for and never assumed: the window is unactivated by default so a suite raising it
+        // thirty times a run does not decide the foreground, and a person driving it by hand says
+        // so once and gets the window in front of them.
+        if (Shapes.Has("show"))
+        {
+            Activate();
+            Topmost = true;
+            Topmost = false;
+        }
+
+        // WW199. Here and not where the backdrop is set, which was measured rather than reasoned
+        // about: DWMWA_CLOAK on a window the compositor has not composed yet is accepted and reports
+        // NotCloaked afterwards. Content rendered is the first moment there is something to stop
+        // drawing, which is the same reason the surface is reported here and not on Loaded.
+        if (Shapes.Has("cloak"))
+            Cloak.Set(new System.Windows.Interop.WindowInteropHelper(this).Handle);
+
+        popups ??= Protocol.Hold(this);
+
+        // WW349, and WW361 made it the whole application rather than this window. Here for the
+        // reason the surface is reported here: the window has a handle to hook by now, and a harness
+        // that asked before this would be asking a window that was not up.
+        //
+        // No argument, which is the point. Named, it answered for this window and for nothing else,
+        // so the toast this fixture raises beside it was a window a harness was told the application
+        // did not take the message for — the same sentence as an application that never adopted the
+        // half at all, and a different fault.
+        //
+        // WW405: unless this run was asked to be that application. Every window here answers, so an
+        // application with no half at all was a thing the suite could only build inside its own
+        // process — and a reading the engine holds per application is exactly what one process
+        // cannot prove. This is the other half, in a process of its own.
+        if (!Shapes.Has("unadopted"))
+            renders ??= Protocol.Renders();
+
+        Protocol.Report(this, panes, panes.SelectedContent as FrameworkElement);
+    }
+
+    /// <summary>
+    /// Show the loading note in the report page's place, and swap the real content in after the
+    /// duration this run asked for.
+    /// <para>
+    /// The note replaces the content rather than sitting beside it: a page showing both is not a
+    /// page that is still loading, and a check reading it would be right to say so.
+    /// </para>
+    /// </summary>
+    /// <param name="milliseconds">How long to stay loading. Zero finishes on the first tick.</param>
+    private void LoadFor(int milliseconds)
+    {
+        loadingNote.Text = (Speaking ?? Strings.Load("en")).Says(Strings.LoadingKey);
+        loadingNote.Visibility = Visibility.Visible;
+        reportNote.Visibility = Visibility.Collapsed;
+        reportSwatch.Visibility = Visibility.Collapsed;
+
+        var timer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(milliseconds),
+        };
+
+        timer.Tick += (sender, _) =>
+        {
+            ((System.Windows.Threading.DispatcherTimer)sender!).Stop();
+            loadingNote.Visibility = Visibility.Collapsed;
+            reportNote.Visibility = Visibility.Visible;
+            reportSwatch.Visibility = Visibility.Visible;
+        };
+
+        timer.Start();
+    }
+
+    /// <inheritdoc />
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+
+        // Here and nowhere earlier: a window has no handle until its source exists, and the
+        // compositor is asked about a handle.
+        var window = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+
+        if (Shapes.Value("backdrop") is string kind)
+            Backdrop.Set(window, kind);
+
+        // WW334. Beside the backdrop and for the same reason it is here: a window has no handle
+        // until its source exists, and both of these are set on a handle. The two are independent —
+        // a window can be layered without a backdrop and the other way round — so neither is an
+        // else of the other.
+        if (Shapes.Value("layered") is string layer)
+            Layered.Set(window, layer);
+
+        // WW548. The monitor is asked about a handle, so it is sized here and stripped above.
+        if (Shapes.Value("screen") is string screen)
+            Screen.Size(window, screen);
+
+        // WW249. On every surface and behind no flag, because what it reads is a property of the
+        // window rather than of anything a run asked to be drawn — and a flake nobody can provoke on
+        // purpose is one the recording has to be running for already.
+        arrivals = Arrivals.On(this, arrived, injected, waited);
+    }
+
+    /// <summary>What this run was asked to be.</summary>
+    public Flags Shapes { get; }
+
+    private void OnClose(object sender, RoutedEventArgs e) => Close();
+}

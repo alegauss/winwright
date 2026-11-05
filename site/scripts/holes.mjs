@@ -11,9 +11,9 @@
 // they cannot explain.
 //
 // Three sources:
-//   src/Paneproof/Verdicts/Holes.cs       the three buckets, and what a reader does about each
-//   src/Paneproof/Verdicts/DeskFacts.cs   the conditions that are the desk's, and why each is
-//   src/Paneproof/**/*.cs                 every condition this engine declares
+//   src/Winwright/Verdicts/Holes.cs       the three buckets, and what a reader does about each
+//   src/Winwright/Verdicts/DeskFacts.cs   the conditions that are the desk's, and why each is
+//   src/Winwright/**/*.cs                 every condition this engine declares
 //
 // That last sweep is the one worth being careful about, because it is a second reading of what
 // `Holes.Declared` gets by reflection and Node has no assembly to reflect over. `DeskFactTests`
@@ -28,7 +28,7 @@ import { bodyOf, code, constructions, documented, splitTop } from "./csharp.mjs"
 const here = dirname(fileURLToPath(import.meta.url));
 const siteDir = join(here, "..");
 const repoDir = join(siteDir, "..");
-const engine = join(repoDir, "src", "Paneproof");
+const engine = join(repoDir, "src", "Winwright");
 
 const read = (...parts) => readFileSync(join(engine, ...parts), "utf8");
 
@@ -133,7 +133,7 @@ const underTest = declared.filter((one) => !deskNames.has(one));
 // Not the enum's order, and the difference matters: taking the largest member value would rank a
 // hole above a failure. Read off the fold a suite verdict makes rather than typed beside it.
 const fold = bodyOf(
-  code(readFileSync(join(repoDir, "src", "Paneproof", "Scenarios", "Suite.cs"), "utf8")),
+  code(readFileSync(join(repoDir, "src", "Winwright", "Scenarios", "Suite.cs"), "utf8")),
   "internal SuiteVerdict(",
   "{",
   "}",
