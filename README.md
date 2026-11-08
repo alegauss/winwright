@@ -425,7 +425,19 @@ button, which is how a person opens what a tray application opens on a left-clic
 a control through its patterns, and a step naming one against a `tray` is refused where it was written;
 the two tray acts named against a `locator` are refused the same way, since there is no control to hand
 them. `act` is one of `read`, `invoke`, `toggle`,
-`set value`, `set range`, `select`, `add to selection`, `remove from selection`, `choose file`, `expand`, `collapse`, `resize`, `type`, `click`, `drag`, `drop file`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
+`set value`, `set range`, `select`, `add to selection`, `remove from selection`, `choose file`, `expand`, `collapse`, `focus`, `resize`, `type`, `click`, `drag`, `drop file`, `nudge`, `press`, `pick`, `pick at`, `open submenu`, `open tray menu`, `click tray icon`, `capture`.
+
+**`focus`** puts the keyboard focus on its element through UI Automation, and `"reads": "focused"` reads
+it back. A `press` sends its key at the window, so it lands wherever focus already is. To open a row
+the way a keyboard user does, focus the row and then press the key, instead of walking Tab to it
+through every control before it:
+
+```json
+{ "locator": "#SessionList > DataItem[order=top]", "act": "focus", "reads": "focused", "expect": "focused" },
+{ "locator": "#SessionList > DataItem[order=top]", "act": "press", "with": "Enter" }
+```
+
+An element that will not take the focus is refused, naming it.
 
 `select` replaces whatever its list had selected. A list that takes several rows at once, such as a
 sidebar where Ctrl+click adds a row, takes **`add to selection`** and **`remove from selection`**,

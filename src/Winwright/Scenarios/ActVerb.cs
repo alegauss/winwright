@@ -73,6 +73,9 @@ public sealed record ActVerb
         new(ChoosesFile, Takes.Text, repeatable: false, (subject, argument) => Act.ChooseFile(subject, argument!)),
         new(Expands, Takes.Nothing, repeatable: true, (subject, _) => Act.Expand(subject)),
         new(Collapses, Takes.Nothing, repeatable: true, (subject, _) => Act.Collapse(subject)),
+        // WW610. The keyboard focus, put on the element so the 'press' after it lands there. Repeatable,
+        // because focusing what holds the focus arrives where it was.
+        new(Focuses, Takes.Nothing, repeatable: true, (subject, _) => Act.Focus(subject)),
         // WW570. The window the subject is in, to a size. Repeatable, because sizing a window to the
         // size it already has arrives where it was.
         new(
@@ -256,6 +259,9 @@ public sealed record ActVerb
 
     /// <summary>The pointer click, the one verb a step may say the button of. WW538.</summary>
     public const string Clicks = "click";
+
+    /// <summary>The verb that puts the keyboard focus on its element. WW610.</summary>
+    public const string Focuses = "focus";
 
     /// <summary>Whether a step may name the button this verb presses. WW538.</summary>
     public bool PressesAButton => Name == Clicks;

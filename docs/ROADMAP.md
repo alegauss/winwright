@@ -10,13 +10,13 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW610** (deps: —) **A case cannot put focus on an element before a press, so Enter or Space on a row goes wherever focus already is** — A control opened from the keyboard has no case, so the route a keyboard user takes is the one route nothing checks. → §WW610
-
 ## Block E — Capture — the picture that proves what it photographed
 
 - 📋 **WW611** (deps: —) **An in-app render of a window whose background is the system backdrop draws dark-theme text on white** — Every preview of a dark-themed Fluent window is unreadable, yet the case passes, so a layout check by picture checks nothing. → §WW611
 
 ## Block F — Assert — the expectation is derived, never typed
+
+- 📋 **WW615** (deps: —) **The file-arrives case writes its file from the pool 300 ms in and waits 3 s, so a loaded guest reds it** — A red about a file that never came, on a run whose change touched no file step, sends the reader after a defect that is not there. → §WW615
 
 ## Block G — The scenario — a case is a data file
 

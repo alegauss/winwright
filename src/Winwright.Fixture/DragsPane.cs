@@ -87,6 +87,7 @@ public static class DragsPane
         readOuts.Children.Add(digit);
         Rescanning(readOuts);
         rows.Children.Add(readOuts);
+        rows.Children.Add(Keyed());
         rows.Loaded += (_, _) => CountsDigits(Window.GetWindow(rows), digit);
 
         Reorderable(strip, order);
@@ -264,6 +265,36 @@ public static class DragsPane
             Said(order, strip);
             e.Handled = true;
         };
+    }
+
+    /// <summary>
+    /// Two buttons that say which of them a key pressed, for a case that focuses one and presses Enter
+    /// or Space. WW610.
+    /// <para>
+    /// Found by claude-tray (T438): a row opens on Enter or Space once it has the focus, and a press
+    /// lands wherever focus already is. Two targets and not one, so a key that went to whatever held the
+    /// focus before reads as the wrong button rather than as a pass.
+    /// </para>
+    /// </summary>
+    private static StackPanel Keyed()
+    {
+        var said = new TextBlock { Name = "keySaid", Text = "nothing pressed", Margin = new Thickness(24, 8, 0, 0) };
+        System.Windows.Automation.AutomationProperties.SetName(said, said.Text);
+
+        var row = new StackPanel { Orientation = Orientation.Horizontal };
+        foreach (var name in new[] { "A", "B" })
+        {
+            var button = new Button { Name = $"key{name}", Content = $"Key {name}", Margin = new Thickness(8, 4, 0, 0) };
+            button.Click += (_, _) =>
+            {
+                said.Text = $"pressed: {name}";
+                System.Windows.Automation.AutomationProperties.SetName(said, said.Text);
+            };
+            row.Children.Add(button);
+        }
+
+        row.Children.Add(said);
+        return row;
     }
 
     /// <summary>The line a rescan shows while it works, and takes away when it is done. WW608.</summary>

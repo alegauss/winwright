@@ -113,6 +113,48 @@ public static class Act
         subject, "expand", "ExpandCollapse",
         element => ((ExpandCollapsePattern)element.GetCurrentPattern(ExpandCollapsePattern.Pattern)).Expand());
 
+    /// <summary>
+    /// Put the keyboard focus on it, through UI Automation, and read back whether it holds it. WW610.
+    /// <para>
+    /// Found by claude-tray (T438): a row opens on Enter or Space once Tab has focused it, and a
+    /// <c>press</c> sends its key at the window, so it lands wherever focus already is. Walking Tab to
+    /// the row would tie the case to the order of every control before it. This is the half
+    /// <c>type</c> already did before it typed, as a step of its own; the <c>press</c> after it keeps
+    /// its meaning. Refused where the element will not take the focus.
+    /// </para>
+    /// </summary>
+    /// <exception cref="NotActionableException">Where the element is not there, or will not take the focus.</exception>
+    public static ActResult Focus(Subject subject)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+
+        var admitted = Admitted.To(subject);
+        var before = admitted.Reading;
+
+        try
+        {
+            admitted.Do(element => element.SetFocus());
+        }
+        catch (InvalidOperationException refused)
+        {
+            throw new NotActionableException(
+                subject.Locator.Text,
+                Actionable.PatternMissing,
+                $"{admitted.Facts} would not take the focus: {refused.Message}");
+        }
+
+        var after = subject.Read();
+        return new ActResult(
+            "focus",
+            subject.Locator,
+            "SetFocus",
+            admitted.Facts,
+            before.Values,
+            after.Values,
+            before.Resolution.WaitedMs,
+            before.Resolution.Polls);
+    }
+
     /// <summary>Shut it again.</summary>
     public static ActResult Collapse(Subject subject) => Through(
         subject, "collapse", "ExpandCollapse",

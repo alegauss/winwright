@@ -22,33 +22,6 @@ message, beside a test that the four names still parse.
 
 ## Block D — Act — patterns before pointers
 
-### §WW610 Enter and Space on a focused element
-
-Met in claude-tray T438, which made the Sessions rows, the live chart's project strip
-and the Context overview's rows reachable from the keyboard: Tab focuses one, and Enter
-or Space opens it. The case it wanted, against `--main --observing --lang en` under the
-tray's WinForms pump (the only host where a keyboard bug shows, claude-tray's T135):
-
-```json
-{ "locator": "TabItem#SessionsPane", "act": "select", "expect": "selected", "reads": "selected" },
-{ "locator": "#SessionList > DataItem[order=top]", "act": "press", "with": "Enter" },
-{ "locator": "#SessionList > DataItem[order=top]", "act": "read", "reads": "expanded", "expect": "expanded" }
-```
-
-`press` sends its key at the window, not at an element, so the case has no way to say
-"with focus on this row". Enter, Space and Escape are already keys it can name: a chord
-may be a bare key (Chord.cs, the Named table). Tab-walking the window to the row would
-make the case depend on the focus order of every control before it.
-
-The claim settled for: the code ships, and the keyboard path is unproven by any case.
-Pointer clicks and the `invoke` pattern were already covered, so the one route T438
-added is the route nothing checks.
-
-What would close it: a `focus` act that takes focus on its element the way `type`
-already does (Keyboard.TakeFocus) and reads `focused` back, followed by the `press` of
-today. Making `press` take focus first would change every existing case that sends Tab
-or a chord from wherever focus stands, so the press keeps its meaning.
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ### §WW611 A backdrop window rendered in-app
@@ -76,6 +49,23 @@ No workaround in claude-tray: giving the windows an opaque background would chan
 users see (no Mica) only to make pictures right, which is the wrong way round.
 
 ## Block F — Assert — the expectation is derived, never typed
+
+### §WW615 The file-arrives case has room for a loaded guest
+
+Met in the guest on 2026-11-08, in the full run that gated WW610 (a change that touches
+no file step): FileSubjectTests.A_file_that_arrives_while_the_step_waits_passes failed
+after 3 s, and every full guest run before it that day had passed it.
+
+The case writes the file from Task.Run after Task.Delay(300) and gives the step a 3000
+ms resolve budget. ReadFile polls every 50 ms up to that deadline and compares the whole
+bytes, so the engine side is sound. What can miss is the writer: a pool continuation on
+a guest busy with the whole suite can arrive after the budget, and the step then reads
+as a file that never came.
+
+What to build: give the case a budget a loaded guest cannot miss, as WW612 and WW613 did
+for their windows (the step returns as soon as the bytes match, so a wider budget costs
+nothing on a pass), and write the file from a dedicated thread rather than the pool.
+Keep the control beside it: the same step with nothing arriving still fails.
 
 ## Block G — The scenario — a case is a data file
 
