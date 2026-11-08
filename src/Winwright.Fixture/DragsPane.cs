@@ -72,10 +72,21 @@ public static class DragsPane
         };
         System.Windows.Automation.AutomationProperties.SetName(opened, opened.Text);
 
+        // WW605. The last digit key the window took, for a case pressing a bare number key.
+        var digit = new TextBlock
+        {
+            Name = "digitSaid",
+            Text = "no digit",
+            Margin = new Thickness(24, 8, 0, 0),
+        };
+        System.Windows.Automation.AutomationProperties.SetName(digit, digit.Text);
+
         var readOuts = new StackPanel { Orientation = Orientation.Horizontal };
         readOuts.Children.Add(order);
         readOuts.Children.Add(opened);
+        readOuts.Children.Add(digit);
         rows.Children.Add(readOuts);
+        rows.Loaded += (_, _) => CountsDigits(Window.GetWindow(rows), digit);
 
         Reorderable(strip, order);
         ClosedByTheMiddleButton(strip, order);
@@ -251,6 +262,28 @@ public static class DragsPane
             strip.Items.Remove(tab);
             Said(order, strip);
             e.Handled = true;
+        };
+    }
+
+    /// <summary>
+    /// Say the last digit key the window took, as an editor's number keys pick an angle. WW605.
+    /// <para>
+    /// Found by wintimeline (WT81): a press of "2" loaded and then broke, because the press read it as
+    /// the third traversal key. A letter is the control: it is no digit, so it leaves this as it was.
+    /// </para>
+    /// </summary>
+    private static void CountsDigits(Window? window, TextBlock said)
+    {
+        if (window is null)
+            return;
+
+        window.PreviewKeyDown += (_, e) =>
+        {
+            if (e.Key is < Key.D0 or > Key.D9)
+                return;
+
+            said.Text = $"digit: {e.Key - Key.D0}";
+            System.Windows.Automation.AutomationProperties.SetName(said, said.Text);
         };
     }
 

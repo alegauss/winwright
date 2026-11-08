@@ -6,35 +6,21 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+### §WW614 A locator's order is read by name
+
+Found while fixing WW605, which was the same defect in the press verb. Locator.cs parses
+a step's order with Enum.TryParse<MatchOrder>(value, ignoreCase: true, ...), and
+Enum.TryParse takes a numeric string as an enum value. So [order=1] parses as Left, and
+[order=9] parses as the undefined value 9, which no sort handles. The refusal beside it
+only turns away Tree, so neither number is refused, and the message that lists the
+orders (left, right, top, bottom) is never reached for them.
+
+What to build: read the order by name only, the way ActVerb.Traversal now reads a
+traversal key, and refuse anything else with the existing LocatorFault.UnknownOrder
+message. Done when [order=1], [order=9] and [order=-1] are each refused with that
+message, beside a test that the four names still parse.
+
 ## Block D — Act — patterns before pointers
-
-### §WW605 Digits pressed alone
-
-Met in wintimeline on 2026-11-05 (WT81, multicam). The number keys cut a multicam clip
-to an angle, and the case pressed one:
-
-{ "locator": "Pane#ViewerSurface", "act": "press", "with": "2", "named": "2 is pressed"
-}
-
-The case loaded, since Chord.TryParse accepts a bare digit. But the step broke at run:
-"InvalidOperationException: '2' reached the act and is not a traversal key, so the load
-accepted what the act cannot run".
-
-The cause is in src/Winwright/Scenarios/ActVerb.cs. Chorded starts with
-Enum.TryParse<TraversalKey>(argument, ignoreCase: true, out _), and Enum.TryParse takes
-a numeric string as an enum value, so "2" parses as the third traversal key and Chorded
-returns null. Press then calls Traversing("2"), which matches by name and throws.
-Letters are not numbers, which is why "A", "B", "M" and "S" press fine. Every digit 0 to
-9 (and any number within the enum's range) takes this path.
-
-The workaround in wintimeline is Edit > Cut to angle menu items, which the app has a use
-for anyway. But the number keys themselves, the gesture an editor uses during playback,
-have no case, and the case file says so with this line's id.
-
-What winwright should offer: Chorded and Traversing agree on what a name is.
-Enum.IsDefined on the parsed value, or a name-only match like Traversing's, keeps a
-digit a chord. Done when a case presses "2" on a window that counts its digit keys, with
-a test over "0" to "9" and a number outside the enum.
 
 ### §WW606 Starting the application again after an exit
 

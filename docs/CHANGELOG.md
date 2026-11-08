@@ -245,6 +245,7 @@
 - ✅ **WW602** **A case cannot double-click, though the engine's pointer can, so what opens on a double click has no case** — A click step takes "clicks": 2 and double-clicks in one batch at one point; other counts are refused, and the fixture's strip opens a tab on a double click only (design recorded in `README.md`).
 - ✅ **WW603** **A click lands only on an element's clickable point, so a spot on a canvas is reached by a drag** — A click step takes "at": "x,y" in drag's point grammar and presses there; a point past the element is refused naming its size, and nothing is pressed (design recorded in `README.md`).
 - ✅ **WW604** **A drag cannot hold Ctrl, Alt or Ctrl+Alt, so a drop whose edit depends on the key held has no case** — A drag takes "holding" (ctrl, shift, alt, ctrl+alt), down from the press to after the release, with Alt's release masked by a Ctrl tap so no menu opens (design recorded in `README.md`).
+- ✅ **WW605** **A press of a bare digit loads and then breaks: Enum.TryParse reads it as a traversal key's number** — A press of a bare digit is a chord and reaches the window as that digit; the press reads traversal keys by name only, never by number.
 
 ## Block E — Capture — the picture that proves what it photographed
 

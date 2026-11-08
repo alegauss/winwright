@@ -600,15 +600,26 @@ public sealed record ActVerb
     /// reaching here with anything else means the two lists disagree.
     /// </summary>
     /// <exception cref="InvalidOperationException">Where the name is not a traversal key.</exception>
-    private static TraversalKey Traversing(string argument)
+    private static TraversalKey Traversing(string argument) =>
+        Traversal(argument) ?? throw new InvalidOperationException(
+            $"'{argument.Trim()}' reached the act and is not a traversal key, so the load accepted what the act cannot run");
+
+    /// <summary>
+    /// The traversal key an argument names, by name and never by number, or null where it names none.
+    /// <para>
+    /// WW605. The one reading both sides of a press ask. <see cref="Chorded"/> used to ask
+    /// <c>Enum.TryParse</c>, which takes "2" as the third traversal key, while <see cref="Traversing"/>
+    /// matched names — so a bare digit was neither a chord nor a key, and loaded and then broke.
+    /// </para>
+    /// </summary>
+    private static TraversalKey? Traversal(string argument)
     {
         var wanted = argument.Trim();
         foreach (var key in Enum.GetValues<TraversalKey>())
             if (string.Equals(key.ToString(), wanted, StringComparison.OrdinalIgnoreCase))
                 return key;
 
-        throw new InvalidOperationException(
-            $"'{wanted}' reached the act and is not a traversal key, so the load accepted what the act cannot run");
+        return null;
     }
 
     /// <summary>What this verb wants said, as the refusal words it.</summary>
@@ -668,7 +679,7 @@ public sealed record ActVerb
     /// </para>
     /// </summary>
     private static Chord? Chorded(string argument) =>
-        Enum.TryParse<TraversalKey>(argument.Trim(), ignoreCase: true, out _)
+        Traversal(argument) is not null
             ? null
             : Chord.TryParse(argument, out var chord, out _) ? chord : null;
 }

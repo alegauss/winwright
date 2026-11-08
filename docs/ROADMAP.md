@@ -6,9 +6,10 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
+- 📋 **WW614** (deps: —) **A locator's order written as a number parses, so [order=1] means left and [order=9] an order that does not exist** — A typo in a locator selects by a sort nobody chose, or by none, instead of being refused where it was written. → §WW614
+
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW605** (deps: —) **A press of a bare digit loads and then breaks: Enum.TryParse reads it as a traversal key's number** — Number keys that pick an angle, a tool or a rating have no case, and the break reads as the harness's fault, not the case's. → §WW605
 - 📋 **WW606** (deps: —) **A case cannot start the application again after it exits, to read what a clean close left for the next run** — State kept on close, such as a layout or a reopened tab, can only be proved by reading files rather than the window. → §WW606
 - 📋 **WW607** (deps: —) **A hung guest run brings back only its largest dump, so the application's own dump stays in the guest** — Whether the app deadlocked or the test host waited on it is answered only by the app's dump, which the run leaves behind. → §WW607
 - 📋 **WW608** (deps: —) **A read after an invoke can run before the handler, and no step waits for a reading to pass through a value** — A case after an invoke races the handler, so a check meant to catch what an asynchronous act does passes on the build that breaks it. → §WW608
