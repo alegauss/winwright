@@ -10,7 +10,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW606** (deps: —) **A case cannot start the application again after it exits, to read what a clean close left for the next run** — State kept on close, such as a layout or a reopened tab, can only be proved by reading files rather than the window. → §WW606
 - 📋 **WW607** (deps: —) **A hung guest run brings back only its largest dump, so the application's own dump stays in the guest** — Whether the app deadlocked or the test host waited on it is answered only by the app's dump, which the run leaves behind. → §WW607
 - 📋 **WW608** (deps: —) **A read after an invoke can run before the handler, and no step waits for a reading to pass through a value** — A case after an invoke races the handler, so a check meant to catch what an asynchronous act does passes on the build that breaks it. → §WW608
 - 📋 **WW610** (deps: —) **A case cannot put focus on an element before a press, so Enter or Space on a row goes wherever focus already is** — A control opened from the keyboard has no case, so the route a keyboard user takes is the one route nothing checks. → §WW610

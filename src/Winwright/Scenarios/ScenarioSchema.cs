@@ -254,8 +254,10 @@ public static class ScenarioSchema
                 + "executable whose window the steps after it then read — for an application that exits to "
                 + "update and is started again; or 'starts', a program it starts whose file name and "
                 + "arguments, read as 'blender.exe --python cube.glb', match the step's 'matches', which it "
-                + "then requires; it takes 'read' and claims nothing else",
-            ["exits", "relaunches", "starts"],
+                + "then requires; or 'launched again', the run starting the application the way its fixture "
+                + "did, after an earlier step claimed 'exits', without staging its files again, so the steps "
+                + "after it read what the closed copy left; it takes 'read' and claims nothing else",
+            ["exits", "relaunches", "starts", "launched again"],
             Subject),
         new("act", true, Taking.Text, "what to do to it", ActVerb.All.Select(verb => verb.Name).ToList()),
         new("with", false, Taking.Text, "what the act needs said, where it needs anything — '{root}' is filled with the project's root, '{root/}' with the same path as Windows OpenSSH spells it (/C:/src/app), '{files}' with the fixture's staged directory, and '{configuration}' with the build the project declaration names; a brace shaped like a token that is none of those is refused", []),

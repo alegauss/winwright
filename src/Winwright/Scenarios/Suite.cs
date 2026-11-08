@@ -300,13 +300,32 @@ public static class Suite
             // The first case through a lent fixture pays the launch and does not borrow it: it is
             // the one that owns the window until the run ends, so the reading it takes is the same
             // reading it would take alone.
+            // WW606. What a step saying the application is launched again starts, through the launch
+            // this case already made: the same staged fixture and the same register, and neither its
+            // files nor its 'before' run again. A lent window is never handed this, because a case that
+            // borrows one only reads.
+            var again = new List<LaunchedProcess>();
+            Func<(AutomationElement Window, int Pid)>? relaunching = borrowing
+                ? null
+                : () =>
+                {
+                    var (drawn, launched) = Opened(register, project, staged, one.Name, lent: false);
+                    again.Add(launched);
+                    return (drawn, launched.Pid);
+                };
+
             CaseResult result;
             try
             {
-                result = CaseRun.Of(one, window, project, Diagnosis.DefaultBudget, measured, lent: false);
+                result = CaseRun.Of(one, window, project, Diagnosis.DefaultBudget, measured, lent: false, relaunching);
             }
             finally
             {
+                // WW606. Stopped with the case, as the first launch is: a copy the case started again
+                // is this case's and no other's.
+                foreach (var launched in again)
+                    register.Stop(launched);
+
                 // WW536. Closed where the case's own window is given back, and before it, so the
                 // folder is never left standing over a desk with nothing under test on it.
                 Closed(register, project, folder, one.Name);
@@ -555,9 +574,15 @@ public static class Suite
 
         if (!drawn.Happened)
         {
+            // WW606. A process that left without a window is said as that, and not as a wait that ran
+            // out: a single-instance application whose last copy still held its lock exits at once.
+            var gone = launched.HasExited
+                ? $"; its process exited with code {launched.ExitCode} without drawing one, which a "
+                    + "single-instance application does where a copy before it still holds its lock"
+                : "";
             throw new ScenarioRefusedException(
                 named,
-                $"'{fixture.Name}' drew no window in {deadline}ms, so nothing about this case was observed");
+                $"'{fixture.Name}' drew no window in {deadline}ms, so nothing about this case was observed{gone}");
         }
 
         return (AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle), launched);

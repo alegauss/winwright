@@ -639,6 +639,26 @@ that something else started, never matches. A red names what the application did
 starts is stopped with the case. To keep a real application's window from coming up, point the
 application at a stub in the fixture.
 
+`launched again` is the one `process` value the run does rather than waits for. After an earlier step
+has claimed `exits`, the run starts the application the way the fixture launched it, with the same
+executable, arguments and variables, and the steps after it read the new window. The fixture's
+`files` and `before` do not run again, so what the new copy reads is what the closed one left: the tab
+it reopens on, the layout it kept.
+
+```json
+{ "locator": "TabItem#Reports", "act": "select" },
+{ "locator": "Button#Close", "act": "invoke" },
+{ "process": "exits", "act": "read", "named": "the window is closed" },
+{ "process": "launched again", "act": "read", "named": "the application is opened again" },
+{ "locator": "TabItem#Reports", "act": "read", "reads": "selected", "expect": "selected" }
+```
+
+A `launched again` with no `exits` claimed since the last launch is refused when the file loads, because
+launching over a window still standing would read a second copy. The copy it starts is stopped with
+the case. A launch that draws no window is a refusal, as the first launch's is. Where its process
+exited without drawing one, the refusal gives the exit code and says so. That is what a single-instance
+application does when the copy before it still holds its lock.
+
 `click tray icon` is a pointer at the icon's centre, and on purpose: every taskbar button refuses a
 clickable point, so the rectangle is the only address an icon has. What it claims is the click — sent
 at the icon, with the icon the thing standing at that point — and what the application did with it is

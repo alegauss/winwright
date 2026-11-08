@@ -269,6 +269,8 @@ public sealed record CaseDeclaration
                     + "which leaves no window for the next case to borrow");
         }
 
+        ExitedFirst(called, collected);
+
         // WW263. A case repeating over a set no step reaches would run its steps N times against the
         // same window and report N times the confidence for one reading — which is the unearned green
         // this project exists to refuse, arriving as arithmetic.
@@ -309,6 +311,43 @@ public sealed record CaseDeclaration
         var tagged = Tags.Count == 0 ? "" : $" [{string.Join(" ", Tags)}]";
         var needed = Needs.Count == 0 ? "" : $" (needs {string.Join(", ", Needs)})";
         return $"{Name}: {Steps.Count} step{(Steps.Count == 1 ? "" : "s")}, {Checks} checked{tagged}{needed}";
+    }
+
+    /// <summary>
+    /// Refuse a step that launches the application again with no claimed exit since the last launch.
+    /// WW606.
+    /// <para>
+    /// The run starts the application again only once it is gone by its own choice, which an earlier
+    /// step has to have claimed. Launched over a window still standing, a second copy is what the case
+    /// reads, or a single-instance application hands its arguments to the first and the case reads that.
+    /// </para>
+    /// </summary>
+    /// <param name="called">The case, for the refusal.</param>
+    /// <param name="steps">Its steps, in declared order.</param>
+    private static void ExitedFirst(string called, IReadOnlyList<StepDeclaration> steps)
+    {
+        var exited = false;
+        foreach (var step in steps)
+        {
+            if (step.Process == StepDeclaration.Exits)
+            {
+                exited = true;
+                continue;
+            }
+
+            if (step.Process != StepDeclaration.LaunchedAgain)
+                continue;
+
+            if (!exited)
+            {
+                throw new ScenarioRefusedException(
+                    called,
+                    $"'{step.Name}' launches the application again and no step before it claims it "
+                        + $"'{StepDeclaration.Exits}'; the run starts a new copy only once the last one is gone");
+            }
+
+            exited = false;
+        }
     }
 
     /// <summary>

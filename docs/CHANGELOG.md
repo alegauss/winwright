@@ -246,6 +246,7 @@
 - ✅ **WW603** **A click lands only on an element's clickable point, so a spot on a canvas is reached by a drag** — A click step takes "at": "x,y" in drag's point grammar and presses there; a point past the element is refused naming its size, and nothing is pressed (design recorded in `README.md`).
 - ✅ **WW604** **A drag cannot hold Ctrl, Alt or Ctrl+Alt, so a drop whose edit depends on the key held has no case** — A drag takes "holding" (ctrl, shift, alt, ctrl+alt), down from the press to after the release, with Alt's release masked by a Ctrl tap so no menu opens (design recorded in `README.md`).
 - ✅ **WW605** **A press of a bare digit loads and then breaks: Enum.TryParse reads it as a traversal key's number** — A press of a bare digit is a chord and reaches the window as that digit; the press reads traversal keys by name only, never by number.
+- ✅ **WW606** **A case cannot start the application again after it exits, to read what a clean close left for the next run** — A process step "launched again" starts the app the way its fixture did after a claimed exit, without restaging files, so later steps read what the close kept (design recorded in `README.md`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

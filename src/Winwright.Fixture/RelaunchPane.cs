@@ -67,11 +67,40 @@ public static class RelaunchPane
         rows.Children.Add(helper);
         rows.Children.Add(said);
 
+        if (Kept() is { } kept)
+            rows.Children.Add(kept);
+
         var pane = new TabItem { Name = "relaunchPane", Header = "Relaunch", Content = rows };
         panes.Items.Add(pane);
 
         // Selected, because a pane nobody picked is in no tree for a case to reach.
         panes.SelectedItem = pane;
         return pane;
+    }
+
+    /// <summary>The variable naming the file a clean close counts itself into. WW606.</summary>
+    public const string KeepsIn = "WINWRIGHT_KEEP";
+
+    /// <summary>
+    /// How many clean closes the file <see cref="KeepsIn"/> names has counted, said on the pane, and one
+    /// more written when this copy closes; or null where the variable names no file. WW606.
+    /// <para>
+    /// Found by WinTimeline (WT164): what a clean close keeps, a tab or a layout, is read by the next
+    /// copy, and a case could not start one. This is that state at its smallest: a count only the copy
+    /// before can have written, so a case reading 1 after launching again read what the close left.
+    /// </para>
+    /// </summary>
+    private static TextBlock? Kept()
+    {
+        if (Environment.GetEnvironmentVariable(KeepsIn) is not { Length: > 0 } path)
+            return null;
+
+        var closes = System.IO.File.Exists(path) && int.TryParse(System.IO.File.ReadAllText(path).Trim(), out var read) ? read : 0;
+        var text = $"closed before: {closes}";
+        var kept = new TextBlock { Name = "keptSaid", Text = text, Margin = new Thickness(0, 8, 0, 0) };
+        System.Windows.Automation.AutomationProperties.SetName(kept, text);
+
+        Application.Current.Exit += (_, _) => System.IO.File.WriteAllText(path, $"{closes + 1}");
+        return kept;
     }
 }

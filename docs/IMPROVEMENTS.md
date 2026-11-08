@@ -22,25 +22,6 @@ message, beside a test that the four names still parse.
 
 ## Block D — Act — patterns before pointers
 
-### §WW606 Starting the application again after an exit
-
-Found by WinTimeline (WT164): a tab chosen and the window closed without saving should
-reopen on that tab. The evidence the rule wants is the reopened window, but a case can
-only follow a process that relaunches itself ('process: relaunches'). After 'process:
-exits' the case can read files and nothing else. The project had to compare the
-sidecar's bytes with a fixture instead, which ties the case to the JSON's layout and
-line endings rather than to what the user sees.
-
-Build a step that starts the application again the way the fixture launched it, with the
-same staged files and arguments, and lets the steps after it read the new window: an act
-such as 'launch again' on a process subject, never a spelling that starts with 'starts',
-which WW586 already gives to a program the application starts. It is refused before an
-exit has been claimed, so a case cannot kill a live window by accident. The new process
-joins the list the run stops at its end (Following.Relaunched), and a single-instance
-application whose mutex outlived the exit is a named refusal, not a timeout. The
-fixture's 'before' and 'files' do not run again, because the point is to read what the
-previous run left behind.
-
 ### §WW607 Every dump a hung run wrote comes back
 
 Found by WinTimeline (WT168). The run hung at the test's hang timeout. The hangdump step

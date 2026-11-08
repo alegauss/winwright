@@ -119,6 +119,42 @@ internal sealed class Following
         return (AutomationElement.FromHandle(window), found, (int)watch.ElapsedMilliseconds);
     }
 
+    /// <summary>
+    /// What starts the application again the way its fixture did, and answers its window and pid, or
+    /// null where the run that holds this case cannot. WW606. Handed in by the run, because only the
+    /// run holds the register, the staged fixture and the launch it composed.
+    /// </summary>
+    public Func<(AutomationElement Window, int Pid)>? Again { get; set; }
+
+    /// <summary>
+    /// Start the application again and follow the new copy: its window is what the steps after it
+    /// resolve under. WW606. Refused where the copy before it is still running, or where nothing was
+    /// handed in to launch with.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Where it cannot launch, with the sentence that says why.</exception>
+    public (AutomationElement Window, int Pid, int WaitedMs) LaunchAgain()
+    {
+        if (Again is null)
+        {
+            throw new InvalidOperationException(
+                "this run cannot start the application again: the case was given a window it does not own, "
+                    + "so no fixture of its own is there to launch");
+        }
+
+        if (Alive(Pid))
+        {
+            throw new InvalidOperationException(
+                $"{Named} (pid {Pid}) is still running, so a second copy would be what the case reads; the "
+                    + "run starts the application again only once the last copy is gone");
+        }
+
+        var watch = Stopwatch.StartNew();
+        var (window, pid) = Again();
+        seen.Add(pid);
+        Pid = pid;
+        return (window, pid, (int)watch.ElapsedMilliseconds);
+    }
+
     /// <summary>The executable, as a sentence names it.</summary>
     public string Named => Executable is null ? $"pid {Pid}" : System.IO.Path.GetFileName(Executable);
 

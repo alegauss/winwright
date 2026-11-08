@@ -81,6 +81,59 @@ public sealed class RelaunchTests : IDisposable
     }
 
     [Fact]
+    public void A_case_launches_the_application_again_and_reads_what_its_clean_close_left()
+    {
+        // WW606. WinTimeline's WT164: what a clean close keeps is read by the next copy. The count
+        // is 0 on the first start and only the closed copy can have written the 1 the second reads,
+        // and a run that staged the files again would have emptied the directory and read 0.
+        var verdict = Run(
+            """
+            { "locator": "Text#keptSaid", "act": "read", "reads": "name", "expect": "closed before: 0", "named": "nothing was closed before" },
+            { "locator": "Button#exitOnly", "act": "invoke", "named": "the application is closed" },
+            { "process": "exits", "act": "read", "named": "the application exits" },
+            { "process": "launched again", "act": "read", "named": "the application is opened again" },
+            { "locator": "Text#keptSaid", "act": "read", "reads": "name", "expect": "closed before: 1", "named": "the new copy read what the close kept" }
+            """,
+            "Button#exitOnly",
+            variables: """, "variables": { "WINWRIGHT_KEEP": "{files}/kept.txt" }""");
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        var said = Said(verdict);
+        Assert.True(verdict.Outcome == RunOutcome.Passed, said);
+        Assert.Contains("was launched again as pid", said, StringComparison.Ordinal);
+
+        // The copy the case started again was stopped with it: nothing outlived the run.
+        Assert.Empty(survivors);
+    }
+
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void Launching_again_with_no_claimed_exit_before_it_is_refused_where_it_is_written()
+    {
+        var refusal = Assert.Throws<ScenarioRefusedException>(() => ScenarioFile.Read("relaunch.cases.json", """
+            { "cases": [ { "name": "a reopen", "steps": [
+              { "process": "launched again", "act": "read", "named": "opened again" },
+              { "locator": "Text#keptSaid", "act": "read", "reads": "name", "expect": "closed before: 1" }
+            ] } ] }
+            """));
+
+        Assert.Contains("no step before it claims it 'exits'", refusal.Because, StringComparison.Ordinal);
+
+        // And a second launch needs a second exit: the first exit was spent on the first launch.
+        var twice = Assert.Throws<ScenarioRefusedException>(() => ScenarioFile.Read("relaunch.cases.json", """
+            { "cases": [ { "name": "a reopen", "steps": [
+              { "process": "exits", "act": "read" },
+              { "process": "launched again", "act": "read", "named": "opened again" },
+              { "process": "launched again", "act": "read", "named": "opened a third time" },
+              { "locator": "Text#keptSaid", "act": "read", "reads": "name", "expect": "closed before: 1" }
+            ] } ] }
+            """));
+
+        Assert.Contains("'opened a third time' launches the application again", twice.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
     [Trait(NoDesk.Key, NoDesk.Free)]
     public void A_case_that_only_reads_cannot_wait_for_the_application_to_go()
     {
@@ -154,7 +207,7 @@ public sealed class RelaunchTests : IDisposable
     /// Run <paramref name="steps"/> against the relaunch pane; or null where this desk cannot observe.
     /// What outlived the run is kept in <see cref="survivors"/>.
     /// </summary>
-    private SuiteVerdict? Run(string steps, string pressed, int launchMs = 15000)
+    private SuiteVerdict? Run(string steps, string pressed, int launchMs = 15000, string variables = "")
     {
         if (!Desk.Read().CanObserve)
             return null;
@@ -171,7 +224,7 @@ public sealed class RelaunchTests : IDisposable
 
         var cases = $$"""
             {
-              "fixtures": [ { "name": "an application that updates", "arguments": ["--relaunch"] } ],
+              "fixtures": [ { "name": "an application that updates", "arguments": ["--relaunch"]{{variables}} } ],
               "cases": [
                 {
                   "name": "an update restarts the application",

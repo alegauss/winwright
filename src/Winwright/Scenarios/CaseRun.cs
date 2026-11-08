@@ -291,7 +291,27 @@ public static class CaseRun
         ProjectDeclaration project,
         int budget = Diagnosis.DefaultBudget,
         PreconditionSet? measured = null,
-        bool lent = false)
+        bool lent = false) => Of(declared, root, project, budget, measured, lent, again: null);
+
+    /// <summary>
+    /// The same run, with what starts the application again for a step that says it is
+    /// <see cref="StepDeclaration.LaunchedAgain"/>. WW606.
+    /// </summary>
+    /// <param name="declared">The case.</param>
+    /// <param name="root">What its locators resolve under, usually the window under test.</param>
+    /// <param name="project">The declaration the waits, the attempts and the refusals come from.</param>
+    /// <param name="budget">How many elements a red's control view may show.</param>
+    /// <param name="measured">What this machine turned out to have, or null.</param>
+    /// <param name="lent">That <paramref name="root"/> is a window this case borrowed rather than owns.</param>
+    /// <param name="again">What launches the case's fixture again, answering its window and pid, or null.</param>
+    internal static CaseResult Of(
+        CaseDeclaration declared,
+        AutomationElement root,
+        ProjectDeclaration project,
+        int budget,
+        PreconditionSet? measured,
+        bool lent,
+        Func<(AutomationElement Window, int Pid)>? again)
     {
         ArgumentNullException.ThrowIfNull(declared);
         ArgumentNullException.ThrowIfNull(root);
@@ -381,6 +401,8 @@ public static class CaseRun
         // Only where a step asks: a look at every process of the same name costs a case that never
         // follows one for nothing.
         var following = running.Exists(one => one.Process is not null) ? Following.Of(root) : null;
+        if (following is not null)
+            following.Again = again;
 
         try
         {
@@ -711,6 +733,23 @@ public static class CaseRun
         if (awaited == StepDeclaration.Starts)
         {
             (held, detail, waited) = Started(step, following, deadline, poll);
+        }
+        else if (awaited == StepDeclaration.LaunchedAgain)
+        {
+            // WW606. The run acting rather than waiting: a launch that draws no window throws the
+            // refusal the first launch would, and a copy still running is refused before anything starts.
+            try
+            {
+                int pid;
+                (window, pid, waited) = following.LaunchAgain();
+                held = true;
+                detail = $"{following.Named} was launched again as pid {pid} after {was} exited, in {waited}ms, "
+                    + "and the steps after this read its window";
+            }
+            catch (InvalidOperationException cannot)
+            {
+                throw new ScenarioRefusedException(step.Name, cannot.Message);
+            }
         }
         else if (awaited == StepDeclaration.Exits)
         {

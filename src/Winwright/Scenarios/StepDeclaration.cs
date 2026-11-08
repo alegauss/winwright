@@ -218,6 +218,19 @@ public sealed record StepDeclaration
     public const string Starts = "starts";
 
     /// <summary>
+    /// The run starts the application again the way its fixture launched it, after an earlier step
+    /// claimed it <see cref="Exits"/>, and the steps after it read the new window. WW606.
+    /// <para>
+    /// Found by WinTimeline (WT164): a tab chosen and the window closed should reopen on that tab, and
+    /// a case could follow only a process that started itself again, so the project compared a
+    /// sidecar's bytes instead of reading the reopened window. Unlike the other three this is the run
+    /// acting rather than waiting, and the fixture's 'files' and 'before' do not run again: what the
+    /// case is about is what the closed copy left behind.
+    /// </para>
+    /// </summary>
+    public const string LaunchedAgain = "launched again";
+
+    /// <summary>
     /// The popup inside this step's window whose tree the capture is of, by the name the
     /// application's own author gave it. Null on every step but a capture that names one. WW372.
     /// <para>
@@ -1658,12 +1671,12 @@ public sealed record StepDeclaration
         if (process is null)
             return;
 
-        if (process is not (Exits or Relaunches or Starts))
+        if (process is not (Exits or Relaunches or Starts or LaunchedAgain))
         {
             throw new ScenarioRefusedException(
                 subject,
                 $"its 'process' is '{process}', and a step waits for the application's process to '{Exits}', "
-                    + $"to '{Relaunches}' or to '{Starts}' a program");
+                    + $"to '{Relaunches}' or to '{Starts}' a program, or says it is '{LaunchedAgain}' by the run");
         }
 
         if (!act.Reads)
