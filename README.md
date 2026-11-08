@@ -1589,7 +1589,9 @@ the Mica under it is drawn outside the tree. A render of it would be transparent
 Mica, which a viewer shows as white under dark-theme text. So the in-app render composes, under a window
 whose background is not opaque: the application's `WinwrightCaptureBackground` where it declares one,
 then the theme's `ApplicationBackgroundBrush`, then the base colour Windows draws Mica from in the
-system's light or dark mode. A window with an opaque background is drawn on its own.
+system's light or dark mode. A window with an opaque background is drawn on its own. The picture is
+the window's client area at its client size, which is what its tree draws. The frame is not in it, so
+there is no blank band along the right and bottom edges where the frame would be.
 
 A region drawn by a window of its own is not in the visual tree. That covers an `HwndHost` holding
 a Direct3D swapchain, a WinForms control or a browser. The render copies each such region from its

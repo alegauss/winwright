@@ -308,8 +308,9 @@ public sealed class OwnRenderTests : IDisposable
         Assert.True(File.Exists(path));
 
         // The second window and not the first, read off the file: this one is 160x120 and the one
-        // the application opened with is 240x160.
-        Assert.Equal(160 * 120, Pictures.Of(path).Pixels);
+        // the application opened with is 240x160. WW616: the picture is the client area inside the
+        // frame, so it is under 160x120 — and the first window's client area is over it.
+        Assert.InRange(Pictures.Of(path).Pixels, 1, 160 * 120);
     }
 
     [Fact]

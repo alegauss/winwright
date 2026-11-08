@@ -30,24 +30,6 @@ the click.
 
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW616 An in-app render the size of what the tree drew
-
-Seen while building WW611, in RendersTests: a 240x160 WPF window with an opaque orange
-background, rendered through Renders.Drawn, read fully transparent at pixel (238, 158).
-Drawn renders the root visual at its RenderSize, and for a Window that size is the outer
-size, frame included, while the tree draws only the client area. So the strip the frame
-takes, along the right and bottom edges, is transparent in every in-app picture of a
-window, and a viewer shows it as white.
-
-Measured so far: that one pixel. Still to measure: the width of the band on each edge at
-100% and at a scaled display, and whether a window with no frame (WindowStyle None) has
-one at all.
-
-What to build: render the window's client area at its client size, or crop the picture
-to the area the tree drew, so the picture is the window a person sees inside its frame.
-The receipt's size should then be the client size, said as that. Done when a picture of
-an opaque window has no transparent pixel, with a test reading both bottom corners.
-
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file

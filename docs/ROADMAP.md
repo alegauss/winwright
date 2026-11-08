@@ -12,8 +12,6 @@
 
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW616** (deps: —) **An in-app render of a window is sized to its frame but drawn to its client area, so its right and bottom edges are blank** — Every in-app picture of a window carries a transparent band a viewer shows as white, and nothing on the receipt says so. → §WW616
-
 ## Block F — Assert — the expectation is derived, never typed
 
 ## Block G — The scenario — a case is a data file

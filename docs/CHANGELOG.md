@@ -288,6 +288,7 @@
 - ✅ **WW552** **A Mica window whose picture is drawn by Direct3D has no capture route at all** — A render copies each shown hosted region from its window, so a Mica window with Direct3D yields a picture; an empty D3DImage is refused (design recorded in `src/Winwright.InApp/Render.cs`).
 - ✅ **WW583** **an in-app render taken while the page is still fading in writes a washed-out picture and the case passes** — An in-app render is not drawn while an animation still moves an element's opacity, so the harness asks again until the fade stops and refuses one that never does.
 - ✅ **WW611** **An in-app render of a window whose background is the system backdrop draws dark-theme text on white** — An in-app render of a backdrop window composes what shows there: the capture key, the theme's ApplicationBackgroundBrush, or the Mica base (design recorded in `src/Winwright.InApp/Renders.cs`).
+- ✅ **WW616** **An in-app render of a window is sized to its frame but drawn to its client area, so its right and bottom edges are blank** — An in-app render of a window draws its client area at its client size, so no blank band runs down the right and bottom where its frame is (design recorded in `README.md`).
 
 ## Block F — Assert — the expectation is derived, never typed
 

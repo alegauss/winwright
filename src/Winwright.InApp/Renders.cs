@@ -518,8 +518,13 @@ public static class Renders
             // The size it is already showing, and never the one it asks for. A root visual measured
             // against infinite room is a window laid out as though it had no edges, which is a
             // picture of a layout this application has never drawn.
-            var settled = tree.RenderSize is { Width: > 0, Height: > 0 } shown ? shown : (Size?)null;
-            Render.ToFile(tree, path, settled, Underneath(tree));
+            // WW616. A window's own render size takes in its frame, which its tree never draws, so a
+            // picture at that size had a transparent band down the right and along the bottom. The
+            // window's template root is the client area at the client size, and it is what paints the
+            // window's background; the backdrop question is still asked of the window (WW611).
+            var drawn = Client(tree);
+            var settled = drawn.RenderSize is { Width: > 0, Height: > 0 } shown ? shown : (Size?)null;
+            Render.ToFile(drawn, path, settled, Underneath(tree));
             return true;
         }
         catch (UnrenderableException)
@@ -571,6 +576,16 @@ public static class Renders
         system.Freeze();
         return system;
     }
+
+    /// <summary>
+    /// What of a window's tree its client area is: the template root of a window, which a person sees
+    /// inside the frame, and the tree itself for anything that is not a window. WW616.
+    /// </summary>
+    /// <param name="tree">The window's root visual.</param>
+    internal static FrameworkElement Client(FrameworkElement tree) =>
+        tree is Window && VisualTreeHelper.GetChildrenCount(tree) > 0 && VisualTreeHelper.GetChild(tree, 0) is FrameworkElement inner
+            ? inner
+            : tree;
 
     /// <summary>The Fluent theme's own window background, resolved for the mode in force. WW611.</summary>
     internal const string ThemeBackgroundKey = "ApplicationBackgroundBrush";

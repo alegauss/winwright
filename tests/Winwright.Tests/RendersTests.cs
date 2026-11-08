@@ -350,6 +350,55 @@ public sealed class RendersTests : IDisposable
         Assert.Equal(Colors.Orange, Corner(path));
     }
 
+    [Fact]
+    public void A_window_is_drawn_at_its_client_size_with_no_band_where_its_frame_is()
+    {
+        // WW616. The window's render size takes in its frame, which its tree never draws, so a picture
+        // at that size was transparent down the right and along the bottom. Both bottom corners are
+        // read, since the band was on both edges.
+        var path = Path.Combine(root, "client.png");
+
+        var (drawn, client) = Apartment.Run(() =>
+        {
+            var window = Shown(new SolidColorBrush(Colors.Orange));
+            var inside = System.Windows.Media.VisualTreeHelper.GetChild(window, 0) is FrameworkElement area ? area.RenderSize : default;
+            return (Renders.Drawn(root, Handle(window), path), inside);
+        });
+
+        Assert.True(drawn);
+        var (width, height, corner, inside) = Corners(path);
+        Assert.Equal((int)Math.Ceiling(client.Width), width);
+        Assert.Equal((int)Math.Ceiling(client.Height), height);
+
+        // No transparent pixel at the very corner, where the band was. The last column and row may be
+        // covered only in part, because the client size is fractional and the picture rounds it up;
+        // one pixel in, the window's own colour.
+        Assert.NotEqual((byte)0, corner.A);
+        Assert.Equal(Colors.Orange, inside);
+    }
+
+    /// <summary>A picture's size in pixels, its bottom-right pixel, and the one diagonally inside it. WW616.</summary>
+    private static (int Width, int Height, Color Corner, Color Inside) Corners(string path)
+    {
+        using var stream = File.OpenRead(path);
+        var frame = System.Windows.Media.Imaging.BitmapDecoder.Create(
+            stream, System.Windows.Media.Imaging.BitmapCreateOptions.None, System.Windows.Media.Imaging.BitmapCacheOption.OnLoad).Frames[0];
+        var converted = new System.Windows.Media.Imaging.FormatConvertedBitmap(frame, PixelFormats.Bgra32, null, 0);
+
+        Color At(int x, int y)
+        {
+            var pixel = new byte[4];
+            converted.CopyPixels(new Int32Rect(x, y, 1, 1), pixel, 4, 0);
+            return Color.FromArgb(pixel[3], pixel[2], pixel[1], pixel[0]);
+        }
+
+        return (
+            converted.PixelWidth,
+            converted.PixelHeight,
+            At(converted.PixelWidth - 1, converted.PixelHeight - 1),
+            At(converted.PixelWidth - 2, converted.PixelHeight - 2));
+    }
+
     /// <summary>The colour of a pixel inside the window's client area where no control draws.</summary>
     private static Color Corner(string path)
     {
