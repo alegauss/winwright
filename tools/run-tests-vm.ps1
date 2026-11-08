@@ -1909,18 +1909,17 @@ if ($Screenshot) {
     else { Write-Host "  captureScreen failed: $($capture.Output)" -ForegroundColor Yellow }
 }
 
-# WW472. Said beside the failure and never instead of reading it: a run carried onto a desk
-# something was holding can be red about that desk, and the exit code says nothing about which.
-# Only where it failed, because a run that passed on such a desk has already answered the question.
-if ($code -ne 0 -and $script:DeskWhenItStarted -in @('shell', 'stale')) {
-    Write-Host (
-        "  desk        this run was carried onto a desk that read '$script:DeskWhenItStarted' " +
-        'rather than clear, and the foreground was never this run''s to start with. A shell or a ' +
-        'window that keeps it refuses it to every fixture, so the run excuses its desk checks and ' +
-        'reds the few that cannot excuse one — which reads as a broken tree and is not. Read the ' +
-        'excused count above against the runs before it; a number several times theirs is this. ' +
-        'Restarting the guest shell is what cleared it when WW472 measured this twice.'
-    ) -ForegroundColor Yellow
+# WW472, and WW600 for what it may claim. Said beside the failure and never instead of reading it:
+# a run carried onto a held desk can be red about that desk, and the exit code says nothing about
+# which. The note never says the tree is not broken - wintimeline met it twice on reds that were
+# its own defects. It quotes the roll call's excused count where the log holds one, and otherwise
+# says the runner cannot tell. Only where it failed: a pass on such a desk has answered already.
+if ($code -ne 0) {
+    . (Join-Path $PSScriptRoot 'desk-note.ps1') -DefineOnly
+    $consoleText = if ($logBack.Ok -and (Test-Path -LiteralPath $logFile)) { Read-ConsoleText $logFile } else { '' }
+    foreach ($line in (Get-DeskNote -Desk $script:DeskWhenItStarted -Log $consoleText)) {
+        Write-Host $line -ForegroundColor Yellow
+    }
 }
 
 Write-Host ''

@@ -4,8 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW600** (deps: —) **The note after a red run on a 'shell' desk says the tree is not broken, whatever the run excused** — A real defect gets blamed on the desk, so a session restarts the guest shell and reruns instead of reading its own failure. → §WW600
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 - 📋 **WW601** (deps: —) **A locator miss lists every shut menu and tab in the window with a bare state word that reads as their current state** — A tab named '(selected)' reads as selected though it is not, and doors that cannot hold the element send the reader after a fault that is not there. → §WW601

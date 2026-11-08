@@ -4,30 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW600 The desk note claims only what the run can show
-
-Met twice in wintimeline on 2026-11-04. Both guest runs started on a desk read as
-'shell' and went red. tools/run-tests-vm.ps1 then printed its WW472 note (line 1941).
-The note says the run "excuses its desk checks and reds the few that cannot excuse one,
-which reads as a broken tree and is not."
-
-Neither red was the desk. In WT52 the app's automation peer kept a stale selected flag,
-and the app fix turned the next run green on the same kind of desk. In WT160 a case
-selected a tab before its document had finished opening. vm-run.log says so: "broke
-[step 2] ... nothing matched ... TabItem #TimelineTab0 (selected)". Every other case
-passed both times, so the fixtures had the foreground.
-
-The note prints on every non-zero exit after a 'shell' or 'stale' start. Its hedge, to
-compare the excused count with earlier runs, leaves the reader a comparison whose
-numbers the runner holds.
-
-Blaming the desk only on a high excused count cannot be built for an adopter: that count
-comes from winwright's own roll call (Roll.cs, Against), the runner never parses it, and
-wintimeline writes no excused.txt. So the note stops claiming the tree is not broken. It
-says the desk started as 'shell' or 'stale', quotes the roll call's excused line where
-vm-run.log holds one, and otherwise says the runner cannot tell and the red is the
-suite's to read first. Done when a log with that line and one without each have a test.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ### §WW601 Shut doors that say what would open them

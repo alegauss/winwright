@@ -131,6 +131,7 @@
 - ✅ **WW596** **A helper a case's job ended still holds its working directory for a moment after the stop says it is gone** — Ending a case's job now waits on each member's own handle, so the stop answers only once every helper has exited and let go of its working directory.
 - ✅ **WW589** **run-tests-vm -CommittedOnly reports HEAD only, yet tracked files reach the guest with their uncommitted bytes** — -CommittedOnly now carries HEAD's own list and bytes through git archive, with -Carry files from disk beside it, so the guest builds the commit the label names.
 - ✅ **WW599** **A red guest run prints the guest's log whole but never names the file it kept on the host** — A guest run's last lines, after the verdict, name the host path of the guest's log and of each file it brought back this run, so any tail of the console still points at the evidence.
+- ✅ **WW600** **The note after a red run on a 'shell' desk says the tree is not broken, whatever the run excused** — A red run on a 'shell' or 'stale' desk no longer calls the tree fine: the note quotes vm-run.log's excused count, or says the runner cannot tell (design recorded in `tools/desk-note.ps1`).
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

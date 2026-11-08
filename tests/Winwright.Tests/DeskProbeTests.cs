@@ -702,16 +702,13 @@ public sealed class DeskProbeTests
 
         Assert.Contains("DeskWhenItStarted", runner, StringComparison.Ordinal);
 
-        // Only where it failed, and only for the two states a run is carried onto. A desk that read
-        // clear has nothing to explain, and a run that passed has already answered the question.
+        // Only where it failed. Which desks earn a note, and what the note may claim, is WW600's
+        // desk-note.ps1, driven by DeskNoteTests rather than read here.
+        Assert.Contains("if ($code -ne 0) {", runner, StringComparison.Ordinal);
         Assert.Contains(
-            "if ($code -ne 0 -and $script:DeskWhenItStarted -in @('shell', 'stale'))",
+            "Get-DeskNote -Desk $script:DeskWhenItStarted -Log $consoleText",
             runner,
             StringComparison.Ordinal);
-
-        // And it points at the count that settles it rather than asserting the desk was to blame,
-        // which is a thing this file cannot know and the reader can.
-        Assert.Contains("excused count above against the runs before it", runner, StringComparison.Ordinal);
     }
 
     [Fact]
