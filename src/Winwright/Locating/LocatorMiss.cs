@@ -45,8 +45,23 @@ public enum MissKind
 /// <param name="How">What would open it — expanded, or selected.</param>
 public sealed record ClosedDoor(string What, string How)
 {
+    /// <summary>
+    /// The state it is in now: collapsed, or not selected. WW601.
+    /// <para>
+    /// The list used to carry <see cref="How" /> in brackets, and a bracketed state word beside a
+    /// name reads as that element's current state: wintimeline read <c>TabItem #TimelineTab0
+    /// (selected)</c> as tab 0 being selected, which it was not, and spent two guest runs on it.
+    /// </para>
+    /// </summary>
+    public string Now => How switch
+    {
+        "expanded" => "collapsed",
+        "selected" => "not selected",
+        _ => $"not {How}",
+    };
+
     /// <summary>The one phrase a sentence lists it by.</summary>
-    public override string ToString() => $"{What} ({How})";
+    public override string ToString() => $"{What}, {Now}";
 }
 
 /// <summary>
@@ -217,15 +232,28 @@ public sealed record LocatorMiss
                 + (Overflowing.Count == 1 ? "holds items in its overflow" : "hold items in their overflow")
                 + ", which the tree does not show until it is opened: a window narrower than the one the "
                 + "case was written on moves a toolbar's last items there."
-                + (ClosedDoors.Count == 0 ? "" : $" Also shut: {string.Join(", ", ClosedDoors)}."),
+                + (ClosedDoors.Count == 0 ? "" : $" Also shut{DoorsUnder()}: {Doors()}."),
             _ when ClosedDoors.Count > 0 =>
                 $"nothing in the window matches {Stopped}: it was renamed, removed, or it is behind "
-                + $"something that is not showing — {string.Join(", ", ClosedDoors)} "
-                + (ClosedDoors.Count == 1 ? "is shut." : "are shut."),
-            _ => $"nothing in the window matches {Stopped}, and nothing in it is shut: "
+                + $"something that is not showing. Shut{DoorsUnder()}: {Doors()}.",
+            _ => $"nothing in the window matches {Stopped}, and nothing"
+                + (DoorsUnder().Length == 0 ? " in it" : DoorsUnder()) + " is shut: "
                 + "it was renamed, removed, or never there.",
         };
     }
+
+    /// <summary>
+    /// The doors, one after another. Semicolons, because each door already carries a comma between
+    /// its name and its state.
+    /// </summary>
+    private string Doors() => string.Join("; ", ClosedDoors);
+
+    /// <summary>
+    /// Where the doors were looked for, where that was narrower than the window. WW601: a miss under
+    /// a step that resolved can only be hiding under what that step resolved to, so the doors are
+    /// read there, and the sentence says so rather than reading as the whole window's.
+    /// </summary>
+    private string DoorsUnder() => Reached > 0 && Deepest is not null ? $" under {Deepest}" : "";
 
     /// <summary>
     /// Read the route off a live element: the thing that has to happen before its contents can be

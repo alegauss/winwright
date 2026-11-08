@@ -486,12 +486,44 @@ public sealed class FixtureTests(ITestOutputHelper output) : IDisposable
         // Leads rather than an answer: each is a true statement about the window, and none of them
         // claims to hold what was looked for.
         var doors = miss.ClosedDoors.Select(one => one.ToString()).ToList();
-        Assert.Contains(doors, one => one.Contains("collapsedPane (expanded)", StringComparison.Ordinal));
-        Assert.Contains(doors, one => one.Contains("fileMenu (expanded)", StringComparison.Ordinal));
+        Assert.Contains(doors, one => one.Contains("collapsedPane, collapsed", StringComparison.Ordinal));
+        Assert.Contains(doors, one => one.Contains("fileMenu, collapsed", StringComparison.Ordinal));
 
         // The panes nobody picked are doors too, and they open a different way. Two kinds of shut
         // in one list is exactly why the lead says how rather than only what.
-        Assert.Contains(doors, one => one.Contains("statusPane (selected)", StringComparison.Ordinal));
+        Assert.Contains(doors, one => one.Contains("statusPane, not selected", StringComparison.Ordinal));
+
+        // WW601. Each door says the state it is in, never a bare word in brackets: wintimeline read
+        // "TabItem #TimelineTab0 (selected)" as that tab being selected, which it was not.
+        Assert.DoesNotContain("(selected)", miss.Sentence(), StringComparison.Ordinal);
+        Assert.DoesNotContain("(expanded)", miss.Sentence(), StringComparison.Ordinal);
+        Assert.Contains("statusPane, not selected", miss.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_miss_under_a_step_that_resolved_names_only_the_doors_under_it()
+    {
+        // WW601. Met in wintimeline: a miss under a resolved Pane listed every shut menu and tab in
+        // the window, none of which could hold the element, and the reader went after them. The
+        // menu resolves here, so only what is shut inside it is a lead.
+        var miss = Resolve.Once(Absences(), Locator.Parse("""Menu#absenceMenu > Button[name="Nowhere"]""")).Miss!;
+
+        Assert.Equal(MissKind.Absent, miss.Kind);
+        Assert.Contains(miss.ClosedDoors, one => one.What.Contains("fileMenu", StringComparison.Ordinal));
+        Assert.DoesNotContain(miss.ClosedDoors, one => one.What.Contains("collapsedPane", StringComparison.Ordinal));
+        Assert.DoesNotContain(miss.ClosedDoors, one => one.What.Contains("TabItem", StringComparison.Ordinal));
+        Assert.Contains("Shut under Menu", miss.Sentence(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_miss_under_a_step_with_nothing_shut_under_it_says_so_whatever_the_window_holds()
+    {
+        // The window holds a collapsed pane, a shut menu and unpicked tabs; the button holds none.
+        var miss = Resolve.Once(Absences(), Locator.Parse("""Button#showing > Text[name="Nowhere"]""")).Miss!;
+
+        Assert.Equal(MissKind.Absent, miss.Kind);
+        Assert.Empty(miss.ClosedDoors);
+        Assert.Contains("nothing under Button", miss.Sentence(), StringComparison.Ordinal);
     }
 
     [Fact]

@@ -434,7 +434,10 @@ public static class Resolve
             };
         }
 
-        return new LocatorMiss(locator, reached, deepest, MissKind.Absent, null, 0, ClosedDoors(root))
+        // WW601. The doors under what the chain resolved, never the whole window's: a step under a
+        // pane that was found can only be hiding inside that pane, and listing every shut menu and
+        // tab in the window sent wintimeline after doors that could not hold the element.
+        return new LocatorMiss(locator, reached, deepest, MissKind.Absent, null, 0, ClosedDoors(frontier))
         {
             Held = held,
             Holding = holding,
@@ -537,26 +540,34 @@ public static class Resolve
     }
 
     /// <summary>
-    /// What is shut in this window right now, at most a handful. Leads rather than an answer, and
-    /// the count is capped because a lead list nobody reads to the end is a lead list nobody reads.
+    /// What is shut under <paramref name="under"/> right now, at most a handful. Leads rather than an
+    /// answer, and the count is capped because a lead list nobody reads to the end is a lead list
+    /// nobody reads.
     /// </summary>
-    private static IReadOnlyList<ClosedDoor> ClosedDoors(AutomationElement root, int most = 6)
+    /// <param name="under">
+    /// The window where no step resolved, and otherwise every element the last resolved step matched.
+    /// </param>
+    /// <param name="most">How many to name.</param>
+    private static IReadOnlyList<ClosedDoor> ClosedDoors(IReadOnlyList<AutomationElement> under, int most = 6)
     {
         var doors = new List<ClosedDoor>();
         try
         {
-            foreach (AutomationElement candidate in root.FindAll(TreeScope.Descendants, Condition.TrueCondition))
+            foreach (var parent in under)
             {
-                if (doors.Count >= most)
-                    break;
+                foreach (AutomationElement candidate in parent.FindAll(TreeScope.Descendants, Condition.TrueCondition))
+                {
+                    if (doors.Count >= most)
+                        return doors;
 
-                var facts = ElementFacts.Of(candidate);
-                if (facts is null)
-                    continue;
+                    var facts = ElementFacts.Of(candidate);
+                    if (facts is null)
+                        continue;
 
-                var how = LocatorMiss.Shut(candidate, facts);
-                if (how is not null)
-                    doors.Add(new ClosedDoor(facts.ToString(), how));
+                    var how = LocatorMiss.Shut(candidate, facts);
+                    if (how is not null)
+                        doors.Add(new ClosedDoor(facts.ToString(), how));
+                }
             }
         }
         catch (Exception went) when (went is ElementNotAvailableException or System.Runtime.InteropServices.COMException)

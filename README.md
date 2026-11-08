@@ -906,7 +906,10 @@ application replacing the element.
 
 Where nothing matched, the refusal goes on to say why, the way a red expectation does: the step
 is under a different parent somewhere else in the window, or something it would sit behind is shut
-(a collapsed drop-down, a tab not selected). A toolbar holding items in its **overflow** is named
+(a collapsed drop-down, a tab not selected). Each shut element is listed with the state it is in now,
+*TabItem #reportTab, not selected; MenuItem #FileMenu, collapsed*, and where an earlier step of the
+locator resolved, only what is shut under that step is listed: a miss inside a pane never sends you
+to the window's menus. A toolbar holding items in its **overflow** is named
 first, with the button that opens it: *ToolBar #editorToolbar (opened by Button #OverflowButton)
 holds items in its overflow*. A toolbar's overflow is in no tree until it is opened, so a button a
 narrower window pushed there reads as missing. That usually means the desk running the case is

@@ -162,6 +162,7 @@
 - ✅ **WW458** **a route unambiguous as a whole is refused where one step matches two, and an act throws reading itself back** — A route resolves where one step matches two and only one holds the rest, and the tray case drives the locator an adopter writes rather than one written around it.
 - ✅ **WW477** **a locator substituting a label asks for the whole of it, so nameStarts cannot take the one whose end moves** — A nameStarts locator takes the fixed part a trailing placeholder leaves, so a label whose end moves can be addressed; `name` stays equality and the brace must be the whole value.
 - ✅ **WW571** **A locator for a toolbar item moved into its overflow says nothing matched, with no word of the overflow** — A step refused for matching nothing now says why, and names a toolbar holding items in its overflow with the button that opens it, so a narrower desk reads as one.
+- ✅ **WW601** **A locator miss lists every shut menu and tab in the window with a bare state word that reads as their current state** — A miss names each shut door by its state ('not selected', 'collapsed') and lists only the doors under the step that resolved (design recorded in `README.md`).
 
 ## Block D — Act — patterns before pointers
 

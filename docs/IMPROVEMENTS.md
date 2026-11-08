@@ -6,29 +6,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW601 Shut doors that say what would open them
-
-Met in wintimeline on 2026-11-04 (WT160). A case clicked TabItem#TimelineTab1, read
-"Showing reel2" in the status bar, and then clicked Pane#TimelineSurface >
-ListItem#V1-2. The click missed with: "nothing in the window matches ListItem#V1-2: it
-was renamed, removed, or it is behind something that is not showing - MenuItem #Item 1
-(expanded), MenuItem #FileMenu (expanded), MenuItem #EditMenu (expanded), MenuItem
-#ViewMenu (expanded), MenuItem #HelpMenu (expanded), TabItem #TimelineTab0 (selected)
-are shut."
-
-The words in brackets name the state each door would have to reach (LocatorMiss.cs
-returns "expanded" for a collapsed menu and "selected" for an unselected tab). They read
-as each door's current state. "TabItem #TimelineTab0 (selected)" was read as tab 0 being
-selected, and two more ten-minute guest runs went into chasing a tab that switched back
-on its own. The real fault was the app's surface keeping the last timeline's automation
-children. The list also names every shut menu and tab in the window, though none of them
-contains the pane the locator went through. What winwright should offer: say the act
-that would open each door, not a bare state word ("TabItem #TimelineTab0, not selected;
-MenuItem #FileMenu, collapsed"). Leave out doors that are not ancestors-to-be of the
-locator's resolved prefix, so a miss under a pane that was found names only what could
-hide inside that pane. Done when a miss under a resolved Pane does not list the window's
-menus and tabs, and each door says its state unambiguously, with tests over both.
-
 ## Block D — Act — patterns before pointers
 
 ### §WW602 Double click from a case

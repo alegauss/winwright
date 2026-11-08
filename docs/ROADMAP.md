@@ -6,8 +6,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-- 📋 **WW601** (deps: —) **A locator miss lists every shut menu and tab in the window with a bare state word that reads as their current state** — A tab named '(selected)' reads as selected though it is not, and doors that cannot hold the element send the reader after a fault that is not there. → §WW601
-
 ## Block D — Act — patterns before pointers
 
 - 📋 **WW602** (deps: —) **A case cannot double-click, though the engine's pointer can, so what opens on a double click has no case** — Adopters add a second route such as Enter only so a case can reach the command, and the double click itself goes unproven. → §WW602
