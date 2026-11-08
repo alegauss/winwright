@@ -22,25 +22,6 @@ message, beside a test that the four names still parse.
 
 ## Block D — Act — patterns before pointers
 
-### §WW607 Every dump a hung run wrote comes back
-
-Found by WinTimeline (WT168). The run hung at the test's hang timeout. The hangdump step
-wrote two dumps in the guest's results folder: one of the application under test and one
-of the test process that drives it. run-tests-vm.ps1 brings back only the largest
-'*.dmp' as hangdump.dmp. Here that was the test process, stuck in winwright's
-Resolve.Diagnose waiting on UiaFind. The question was whether the application was
-deadlocked or just slow, and only the application's dump answers it, so it stayed in the
-guest. The project then had to reason about the cause from the client side and rerun the
-whole gate.
-
-Bring back every dump the run wrote, together with the hang logs beside them. The test
-host's dump keeps the name hangdump.dmp, which Show-Blame, Winwright.Blame,
-runner-arms.ps1 and four test classes read; every other dump comes back beside it under
-its own name (WinTimeline_4436_hang.dmp). The final report should name each one and say
-which process it is: the application from the project's declared executable, or the test
-host. A size cap per run can keep the copy bounded, with the report naming what it left
-behind.
-
 ### §WW608 Waiting out what an invoke started
 
 Met in claude-tray T435 (a Context rescan used to drop the "All projects" selection).

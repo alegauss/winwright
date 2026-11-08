@@ -1589,34 +1589,10 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'run-command.ps1') -Destination 
 # host's pid and the minute it gave up. Nothing on the host can spell that. So the guest finds them
 # and puts them where the host already knows to look.
 #
-# The largest dump and the newest sequence, one each. The collector writes both twice, once in place
-# and once under an `In\<machine>` folder it copies to, and two of the same file is not two readings.
-@"
-`$ErrorActionPreference = 'Stop'
-foreach (`$stale in @('blame.dmp', 'blame-sequence.xml', 'blame.txt')) {
-    `$at = Join-Path '$script:GuestSync' `$stale
-    if (Test-Path -LiteralPath `$at) { Remove-Item -LiteralPath `$at -Force }
-}
-
-`$said = @()
-
-`$dump = Get-ChildItem -LiteralPath '$script:GuestRepo\$script:ResultsIn' -Recurse -File -Filter '*.dmp' -ErrorAction SilentlyContinue |
-    Sort-Object Length -Descending | Select-Object -First 1
-if (`$dump) {
-    Copy-Item -LiteralPath `$dump.FullName -Destination (Join-Path '$script:GuestSync' 'blame.dmp') -Force
-    `$said += "`$(`$dump.Name) (`$([math]::Round(`$dump.Length / 1MB, 1)) MB)"
-}
-
-`$order = Get-ChildItem -LiteralPath '$script:GuestRepo\$script:ResultsIn' -Recurse -File -Filter 'Sequence_*.xml' -ErrorAction SilentlyContinue |
-    Sort-Object LastWriteTime -Descending | Select-Object -First 1
-if (`$order) {
-    Copy-Item -LiteralPath `$order.FullName -Destination (Join-Path '$script:GuestSync' 'blame-sequence.xml') -Force
-    `$said += `$order.Name
-}
-
-if (`$said.Count -eq 0) { `$said = @('nothing') }
-(`$said -join '; ') | Set-Content -LiteralPath (Join-Path '$script:GuestSync' 'blame.txt') -Encoding ascii
-"@ | Set-Content -LiteralPath (Join-Path $stage 'blame.ps1') -Encoding ascii
+# WW607. Every dump and not only the largest: a hang leaves the application's dump beside the test
+# host's, and the application's is the one that says whether it deadlocked. What is gathered, and
+# under which names, is tools/blame-gather.ps1's to say, a script of its own so the suite drives it.
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'blame-gather.ps1') -Destination (Join-Path $stage 'blame-gather.ps1') -Force
 
 # --- into the guest ------------------------------------------------------------------------------
 
@@ -1634,11 +1610,11 @@ $null = Invoke-VmRun -Guest -Arguments @('createDirectoryInGuest', $vmxPath, $sc
 # WW406: and the three the blame gather leaves, for exactly that reason one file further out. They
 # live beside the sync and outlive the tree, so a run that ends cleanly would otherwise copy back the
 # dump of the run before it - which is worse than no dump, because it is a dump with a date on it.
-foreach ($stale in @('vm-exit.txt', 'vm-run.log', 'sync.log', 'blame.dmp', 'blame-sequence.xml', 'blame.txt')) {
+foreach ($stale in @('vm-exit.txt', 'vm-run.log', 'sync.log', 'blame.dmp', 'blame-sequence.xml', 'blame.txt', 'blame-dumps.txt')) {
     $null = Invoke-VmRun -Guest -Arguments @('deleteFileInGuest', $vmxPath, "$script:GuestSync\$stale")
 }
 
-foreach ($file in @('source.zip', 'sync.ps1', 'sync.cmd', 'run.cmd', 'run-command.ps1', 'run-command.txt', 'blame.ps1')) {
+foreach ($file in @('source.zip', 'sync.ps1', 'sync.cmd', 'run.cmd', 'run-command.ps1', 'run-command.txt', 'blame-gather.ps1')) {
     $sent = Invoke-VmRun -Guest -Arguments @('copyFileFromHostToGuest', $vmxPath, (Join-Path $stage $file), "$script:GuestSync\$file")
     if (-not $sent.Ok) { Refuse "could not copy $file into the guest: $($sent.Output)" }
 }
@@ -1861,7 +1837,9 @@ if ($code -ne 0) {
         'runProgramInGuest', $vmxPath,
         'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe',
         '-NoProfile', '-ExecutionPolicy', 'Bypass',
-        '-File', "$script:GuestSync\blame.ps1")
+        '-File', "$script:GuestSync\blame-gather.ps1",
+        '-Results', "$script:GuestRepo\$script:ResultsIn",
+        '-Sync', $script:GuestSync)
 
     $note = Join-Path $stage 'blame.txt'
     $null = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\blame.txt", $note)
@@ -1885,6 +1863,33 @@ if ($code -ne 0) {
             if ($fetched.Ok) {
                 Write-Host "              $kept"
                 if ($pair[1] -eq 'hangdump.dmp') { $read = $kept }
+            }
+        }
+
+        # WW607. Every other dump, by the list the guest wrote, under its own name and named for the
+        # process it is - and what the cap left in the guest said as that, so nobody goes looking for
+        # a file that never came.
+        $list = Join-Path $stage 'blame-dumps.txt'
+        $listed = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\blame-dumps.txt", $list)
+        if ($listed.Ok -and (Test-Path -LiteralPath $list)) {
+            foreach ($row in ((Read-ConsoleText $list) -split "`r?`n" | Where-Object { $_ })) {
+                $sent, $name, $size, $fate = $row -split '\|'
+
+                # In a scope of its own: dot-sourced here, the gather's own parameters would bind over
+                # this script's variables, and its -Results is this script's $results.
+                $owner = & { . (Join-Path $PSScriptRoot 'blame-gather.ps1') -DefineOnly; Get-DumpOwner -Name $args[0] } $name
+                if ($fate -ne 'kept') {
+                    Write-Host "              $name ($owner, $([math]::Round([long]$size / 1MB, 1)) MB) was left in the guest: past the cap on what one run brings back" -ForegroundColor Yellow
+                    continue
+                }
+
+                $kept = Join-Path $results $name
+                $fetched = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\$sent", $kept)
+                if ($fetched.Ok) {
+                    Write-Host "              $kept ($owner)"
+                    $fetchedHere.Add($kept)
+                }
+                else { Write-Host "              $name ($owner) did not come back: $($fetched.Output)" -ForegroundColor Yellow }
             }
         }
 

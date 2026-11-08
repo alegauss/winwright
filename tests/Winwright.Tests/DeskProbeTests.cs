@@ -377,29 +377,91 @@ public sealed class DeskProbeTests
         }
     }
 
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void Every_dump_a_hang_wrote_comes_back_and_the_test_hosts_keeps_its_name()
+    {
+        // WW607. WinTimeline's WT168: a hang wrote the application's dump beside the test host's, and
+        // the gather took only the largest, which was the test host's. Here the application's is the
+        // larger, so a gather that took the largest as the test host's would hand Show-Blame the wrong one.
+        var where = Directory.CreateTempSubdirectory("winwright-ww607-").FullName;
+        var sync = Directory.CreateTempSubdirectory("winwright-ww607-sync-").FullName;
+        var script = Path.Combine(Path.GetTempPath(), $"winwright-ww607-{Guid.NewGuid():N}.ps1");
+
+        try
+        {
+            File.WriteAllBytes(Path.Combine(where, "testhost_10400_hangdump.dmp"), new byte[2048]);
+            File.WriteAllBytes(Path.Combine(where, "WinTimeline_4436_hang.dmp"), new byte[8192]);
+            File.WriteAllBytes(Path.Combine(where, "dotnet_77_hang.dmp"), new byte[4096]);
+
+            // A cap the application's fits under and the third does not.
+            File.WriteAllText(script, Gathering(where, sync, capBytes: 10000));
+            Answered(script);
+
+            Assert.Equal(2048, new FileInfo(Path.Combine(sync, "blame.dmp")).Length);
+            Assert.Equal(8192, new FileInfo(Path.Combine(sync, "blame-also-1.dmp")).Length);
+            Assert.False(File.Exists(Path.Combine(sync, "blame-also-2.dmp")));
+
+            var listed = File.ReadAllLines(Path.Combine(sync, "blame-dumps.txt"));
+            Assert.Equal(
+                ["blame-also-1.dmp|WinTimeline_4436_hang.dmp|8192|kept", "blame-also-2.dmp|dotnet_77_hang.dmp|4096|left"],
+                listed);
+
+            // And the runner fetches by that list, under each dump's own name.
+            var runner = Runner();
+            Assert.Contains("blame-dumps.txt", runner, StringComparison.Ordinal);
+            Assert.Contains("$kept = Join-Path $results $name", runner, StringComparison.Ordinal);
+            Assert.Contains("was left in the guest", runner, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(script);
+            Directory.Delete(where, recursive: true);
+            Directory.Delete(sync, recursive: true);
+        }
+    }
+
+    [Theory]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    [InlineData("testhost_10400_hangdump.dmp", "the test host")]
+    [InlineData("WinTimeline_4436_hang.dmp", "WinTimeline, a process the run drove")]
+    public void A_dump_is_named_for_the_process_it_is(string name, string owner)
+    {
+        var script = Path.Combine(Path.GetTempPath(), $"winwright-ww607-{Guid.NewGuid():N}.ps1");
+        try
+        {
+            File.WriteAllText(
+                script,
+                $"""
+                . '{Checkout.At("tools", "blame-gather.ps1")}' -DefineOnly
+                Get-DumpOwner -Name '{name}' | Set-Content -LiteralPath '{script}.said' -Encoding ascii
+                """);
+            Answered(script);
+
+            Assert.Equal(owner, File.ReadAllText($"{script}.said").Trim());
+        }
+        finally
+        {
+            File.Delete(script);
+            File.Delete($"{script}.said");
+        }
+    }
+
     /// <summary>
-    /// The gather the runner generates for the guest, aimed at two directories of this case's own.
-    /// WW406.
+    /// A script running the gather the runner sends to the guest, aimed at two directories of this
+    /// case's own. WW406, WW607.
     /// <para>
-    /// Read out of the runner rather than copied here. A case carrying its own copy passes over a
-    /// guest that lost this one, which is the failure the whole step exists to stop.
+    /// The runner's own <c>tools/blame-gather.ps1</c> and not a copy. A case carrying its own copy
+    /// passes over a guest that lost this one, which is the failure the whole step exists to stop.
     /// </para>
     /// </summary>
     /// <param name="results">Where the collector's files are, standing in for the guest's results.</param>
     /// <param name="sync">Where the gather puts what it found, standing in for the sync folder.</param>
-    private static string Gathering(string results, string sync)
+    /// <param name="capBytes">The cap on other dumps, where the case is about it.</param>
+    private static string Gathering(string results, string sync, long capBytes = 2L * 1024 * 1024 * 1024)
     {
-        var runner = Runner();
-        var ends = runner.IndexOf("\"@ | Set-Content -LiteralPath (Join-Path $stage 'blame.ps1')", StringComparison.Ordinal);
-
-        Assert.True(ends > 0, "the runner no longer generates a gather for the guest to run");
-
-        var opens = runner.LastIndexOf("@\"", ends, StringComparison.Ordinal);
-
-        return runner[(opens + 2)..ends]
-            .Replace("$script:GuestRepo\\$script:ResultsIn", results, StringComparison.Ordinal)
-            .Replace("$script:GuestSync", sync, StringComparison.Ordinal)
-            .Replace("`$", "$", StringComparison.Ordinal);
+        Assert.Contains("'blame-gather.ps1') -Destination", Runner(), StringComparison.Ordinal);
+        return $"& '{Checkout.At("tools", "blame-gather.ps1")}' -Results '{results}' -Sync '{sync}' -CapBytes {capBytes}";
     }
 
     [Fact]
