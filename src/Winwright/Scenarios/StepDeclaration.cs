@@ -390,13 +390,14 @@ public sealed record StepDeclaration
 
     /// <summary>The keys a click may hold, as the format spells them. WW540.</summary>
     public static IReadOnlyList<string> HeldKeys { get; } =
-        Enum.GetValues<Acting.HeldKey>().Select(one => one.ToString().ToLowerInvariant()).ToList();
+        Enum.GetValues<Acting.HeldKey>().Select(Acting.Pointer.Spelled).ToList();
 
     /// <summary>The key a written name means, or null where it means none.</summary>
     private static Acting.HeldKey? Held(string? written) =>
-        written is not null && HeldKeys.Contains(written, StringComparer.OrdinalIgnoreCase)
-            ? Enum.Parse<Acting.HeldKey>(written, ignoreCase: true)
-            : null;
+        Enum.GetValues<Acting.HeldKey>()
+            .Where(one => string.Equals(Acting.Pointer.Spelled(one), written, StringComparison.OrdinalIgnoreCase))
+            .Select(one => (Acting.HeldKey?)one)
+            .FirstOrDefault();
 
     /// <summary>The buttons a step may name, as the format spells them. WW538.</summary>
     public static IReadOnlyList<string> Buttons { get; } =
@@ -1260,7 +1261,7 @@ public sealed record StepDeclaration
 
         // WW540. The key in front of all of it, the way a person says it: "ctrl click".
         if (called is null && holding is { } key)
-            described = $"{key.ToString().ToLowerInvariant()} {described}";
+            described = $"{Acting.Pointer.Spelled(key)} {described}";
 
         var step = new StepDeclaration(called ?? described, act, reading, wrote)
         {
@@ -1493,8 +1494,9 @@ public sealed record StepDeclaration
     }
 
     /// <summary>
-    /// The key a step holds across its click, judged against its verb. WW540. Refused beside any verb
-    /// but <c>click</c>, and a name that is not one of the keys is refused with the ones there are.
+    /// The key a step holds across its click or its drag, judged against its verb. WW540, and WW604
+    /// for the drag. Refused beside any other verb, and a name that is not one of the keys is refused
+    /// with the ones there are.
     /// </summary>
     /// <param name="subject">What a refusal calls this step.</param>
     /// <param name="act">The verb.</param>
@@ -1504,17 +1506,17 @@ public sealed record StepDeclaration
         if (written is null)
             return null;
 
-        if (!act.PressesAButton)
+        if (!act.HoldsAKey)
         {
             throw new ScenarioRefusedException(
                 subject,
                 $"it holds '{written}' and acts with '{act.Name}'; 'holding' is a key held across a "
-                    + $"'{ActVerb.Clicks}', and no other act holds one");
+                    + $"'{ActVerb.Clicks}' or a 'drag', and no other act holds one");
         }
 
         return Held(written) ?? throw new ScenarioRefusedException(
             subject,
-            $"it holds '{written}', and a click holds {string.Join(" or ", HeldKeys.Select(one => $"'{one}'"))}");
+            $"it holds '{written}', and a {act.Name} holds {string.Join(", ", HeldKeys.Select(one => $"'{one}'"))}");
     }
 
     /// <summary>

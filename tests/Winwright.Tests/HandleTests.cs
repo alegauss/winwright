@@ -62,6 +62,36 @@ public sealed class HandleTests : IDisposable
         Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
     }
 
+    [Theory]
+    [InlineData("ctrl", "held: ctrl")]
+    [InlineData("alt", "held: alt")]
+    [InlineData("ctrl+alt", "held: ctrl+alt")]
+    [InlineData(null, "held: none")]
+    public void A_drag_holds_its_key_until_the_release_and_lets_it_go_after(string? key, string expected)
+    {
+        // WW604. wintimeline's WT70: an editor reads insert, duplicate or swap off the key held at the
+        // release. The fixture says what it read there, and the case without a key is the control.
+        var verdict = Dragged(key, expected);
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void A_drag_names_its_key_and_any_other_key_is_refused()
+    {
+        var step = Wrote.Step("Pane#cropSurface", "drag", ("from", "10%,10%"), ("to", "40%,40%"), ("holding", "ctrl+alt"));
+        Assert.Equal(HeldKey.CtrlAlt, step.Holding);
+        Assert.Equal("ctrl+alt drag Pane#cropSurface", step.Name);
+
+        Assert.Contains(
+            "a drag holds 'ctrl', 'shift', 'alt', 'ctrl+alt'",
+            Assert.Throws<ScenarioRefusedException>(
+                () => Wrote.Step("Pane#cropSurface", "drag", ("from", "10%,10%"), ("to", "40%,40%"), ("holding", "win"))).Because,
+            StringComparison.Ordinal);
+    }
+
     [Fact]
     public void A_click_at_a_point_inside_the_crop_lands_there()
     {
@@ -177,6 +207,56 @@ public sealed class HandleTests : IDisposable
             .Concat(verdict.Ran.SelectMany(one => one.Verdict.Results.Select(each => each.ToString())))
             .Concat(verdict.Ran.SelectMany(one => one.Verdict.Broke.Select(each => each.ToString())))
             .Concat(verdict.Ran.SelectMany(one => one.Trace.Select(each => each.ToString()))));
+
+    /// <summary>
+    /// Drag the crop's handle holding <paramref name="key"/>, or none, and read what the surface says
+    /// was held at the release, then that nothing is held after it. WW604.
+    /// </summary>
+    private SuiteVerdict? Dragged(string? key, string expected)
+    {
+        if (!Desk.Read().CanObserve)
+            return null;
+
+        var declaration = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            declaration,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "timeouts": { "launch": 30000, "resolve": 4000, "act": 4000, "poll": 25 }
+            }
+            """);
+
+        var holding = key is null ? "" : $", \"holding\": \"{key}\"";
+
+        // The second drag holds nothing, so a key the first one left down reads here as a red.
+        var cases = $$"""
+            {
+              "fixtures": [ { "name": "a crop drawn on a surface", "arguments": ["--handles", "--show"] } ],
+              "cases": [
+                {
+                  "name": "the handle is dragged with a key held",
+                  "catches": "a drop whose edit depends on the key held, with no drag that could hold one",
+                  "fixture": "a crop drawn on a surface",
+                  "steps": [
+                    { "locator": "Pane#cropSurface", "act": "drag", "from": "10%,10%", "to": "40%,40%"{{holding}}, "named": "the handle is dragged" },
+                    { "locator": "Text#heldSaid", "act": "read", "reads": "name", "expect": "{{expected}}", "named": "the surface says what was held" },
+                    { "locator": "Pane#cropSurface", "act": "drag", "from": "40%,40%", "to": "20%,20%", "named": "the handle is dragged back" },
+                    { "locator": "Text#heldSaid", "act": "read", "reads": "name", "expect": "held: none", "named": "nothing is held after" }
+                  ]
+                }
+              ]
+            }
+            """;
+
+        var project = ProjectDeclaration.Load(declaration);
+        using var register = ProcessRegister.For(project);
+
+        var verdict = Suite.Launch(ScenarioFile.Read("drag-held.cases.json", cases), Selection.All, register, project);
+
+        register.StopAll();
+        return verdict;
+    }
 
     /// <summary>
     /// Click the crop surface at <paramref name="at"/> and read where the click landed expecting

@@ -442,8 +442,20 @@ replace that reads as an add.
 An application may answer the gesture and offer no pattern. For that, a `click` takes **`holding`**:
 `ctrl`, which adds the row to the selection, or `shift`, which takes the range to it. The key goes down
 and up in the same batch of input as the click, so nothing can arrive between them, and the step's name
-in the report says the key (`ctrl click List#sessions > ListItem[name="Beta"]`). A key that is not one
-of the two is refused, and `holding` beside any act but `click` is refused.
+in the report says the key (`ctrl click List#sessions > ListItem[name="Beta"]`).
+
+A `drag` takes `holding` too, because editors decide what a drop does by the key held: `ctrl` to
+insert, `alt` to duplicate, `ctrl+alt` to swap. The key goes down in the same send as the press, stays
+down across every move, and comes up in the same send as the release. Before Alt comes up, Ctrl is
+pressed and released, so the release is not read as Alt tapped alone, which would open the window's
+menu bar:
+
+```json
+{ "locator": "Pane#TimelineSurface", "act": "drag", "from": "52.9%,48", "to": "88.2%,48", "holding": "ctrl" }
+```
+
+The keys are `ctrl`, `shift`, `alt` and `ctrl+alt`. Any other key is refused, and so is `holding`
+beside any act but `click` and `drag`.
 
 **`resize`** sizes the window the step's `locator` is in. `with` is the outer width and height in
 device-independent pixels, written `640x720`, so the case means the same size on a display scaled to

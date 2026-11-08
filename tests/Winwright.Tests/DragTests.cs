@@ -344,6 +344,54 @@ public sealed class DragTests : IDisposable
     }
 
     [Fact]
+    public void Alt_held_across_a_drag_is_not_read_as_alt_tapped()
+    {
+        // WW604. Alt that goes down and up with only a mouse between is Alt tapped to Windows and to
+        // this pane, which shows its menu bar on a tap (WW544). The drag masks the release, so the
+        // drag still reorders and the bar stays hidden.
+        if (!Desk.Read().CanObserve)
+            return;
+
+        var declaration = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            declaration,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "timeouts": { "launch": 30000, "resolve": 4000, "act": 4000, "poll": 25 }
+            }
+            """);
+
+        var cases = """
+            {
+              "fixtures": [ { "name": "a strip beside a bar shown by Alt", "arguments": ["--drags", "--show"] } ],
+              "cases": [
+                {
+                  "name": "a tab dragged with Alt held",
+                  "catches": "Alt held across a drag released as a tap, opening a menu the case never asked for",
+                  "fixture": "a strip beside a bar shown by Alt",
+                  "steps": [
+                    { "locator": "TabItem#firstTab", "act": "drag", "to": "TabItem#thirdTab", "holding": "alt" },
+                    { "locator": "Text#dragOrder", "act": "read", "reads": "name", "expect": "Second, Third, First", "named": "the drag reordered" },
+                    { "locator": "MenuItem#altFile", "act": "read", "absent": true, "named": "the bar is still hidden" }
+                  ]
+                }
+              ]
+            }
+            """;
+
+        var project = ProjectDeclaration.Load(declaration);
+        using var register = ProcessRegister.For(project);
+
+        var verdict = Suite.Launch(ScenarioFile.Read("alt-drag.cases.json", cases), Selection.All, register, project);
+        register.StopAll();
+        if (BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
     public void A_left_click_on_the_same_tab_closes_nothing()
     {
         // The control: the same step on the primary button selects the tab and leaves the strip whole.

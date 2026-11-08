@@ -2861,7 +2861,7 @@ public static class CaseRun
         // WW572. A drag that names its points stays inside its own element, so there is no second
         // subject to hand the vocabulary and the two points go straight to the act.
         var acted = step.Verb.Reads ? null
-            : step.From is { } from ? Acting.Synthesised.DragWithin(subject, from, step.ToPoint!)
+            : step.From is { } from ? Acting.Synthesised.DragWithin(subject, from, step.ToPoint!, step.Holding)
             : step.Verb.Perform(subject, step.Argument, to, step.Button, step.Holding, step.Clicks, step.At);
 
         if (step.Moves)

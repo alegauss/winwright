@@ -116,7 +116,7 @@ public sealed record ActVerb
             repeatable: false,
             null,
             synthesises: true,
-            onto: (subject, to) => Synthesised.Drag(subject, to)),
+            onto: (subject, to, holding) => Synthesised.Drag(subject, to, holding)),
         // WW550. A file dragged in from outside the application and released over the subject, which
         // is how a drop zone is reached from Explorer. The argument is the file, filled and made whole
         // against the root before it gets here. Not repeatable, because a second drop is a second
@@ -260,6 +260,12 @@ public sealed record ActVerb
     /// <summary>Whether a step may name the button this verb presses. WW538.</summary>
     public bool PressesAButton => Name == Clicks;
 
+    /// <summary>
+    /// Whether a key may be held across this verb: a click (WW540) or a drag (WW604), the two pointer
+    /// gestures an application reads the keyboard state beside.
+    /// </summary>
+    public bool HoldsAKey => PressesAButton || EndsElsewhere;
+
     /// <summary>The verb that drops a file from outside the application onto its subject. WW550.</summary>
     public const string DropsFile = "drop file";
 
@@ -273,7 +279,7 @@ public sealed record ActVerb
     public const string ChoosesFile = "choose file";
 
     private readonly Func<Subject, string?, ActResult>? doing;
-    private readonly Func<Subject, Subject, ActResult>? onto;
+    private readonly Func<Subject, Subject, HeldKey?, ActResult>? onto;
     private readonly bool onATray;
 
     private ActVerb(
@@ -288,7 +294,7 @@ public sealed record ActVerb
         string alsoTakes = "",
         bool captures = false,
         string needs = "",
-        Func<Subject, Subject, ActResult>? onto = null)
+        Func<Subject, Subject, HeldKey?, ActResult>? onto = null)
     {
         this.onto = onto;
         AlsoTakes = alsoTakes;
@@ -553,7 +559,8 @@ public sealed record ActVerb
                 subject,
                 to ?? throw new InvalidOperationException(
                     $"'{Name}' ends on a second element and reached the act without one, so the load "
-                        + "accepted what the act cannot run"));
+                        + "accepted what the act cannot run"),
+                holding);
         }
 
         return doing is null

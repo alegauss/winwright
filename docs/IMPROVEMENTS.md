@@ -8,30 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-### §WW604 Keys held across a drag
-
-Met in wintimeline on 2026-11-04 (WT70, moving clips on the GPU-drawn timeline). A plain
-drag of a clip overwrites where it lands. The same drag with Ctrl held at release
-inserts, rippling what follows. Ctrl+Alt swaps it with the clip it lands on, and Alt
-held at the press drops a copy and leaves the original. The line's done-when asks for a
-case of each. The steps wanted:
-
-{ "locator": "Pane#TimelineSurface", "act": "drag", "from": "52.9%,48", "to":
-"88.2%,48", "holding": "ctrl", "named": "c3 is dragged and dropped as an insert" }
-
-WW540 gave click a holding key (ctrl or shift, sent in one batch with the click), and
-the README says holding beside any act but click is refused. So a case can only make a
-plain drag. In wintimeline only the plain drag has a case. Insert, swap and duplicate
-are proven by model tests of the same edits (TrackEditTests), and the gesture that picks
-the edit by the key held has none.
-
-What winwright should offer: drag takes holding as click does, and the key list widens
-to alt and ctrl+alt (alt alone is the duplicate gesture). The keys go down before the
-press, stay held across the move and come up after the release, all in one input batch
-so nothing arrives between them, with the step's name in the report saying them ("ctrl
-drag Pane#TimelineSurface from 52.9%,48 to 88.2%,48"). Done when a case drags with each
-key on a canvas whose drop differs by the key held.
-
 ### §WW605 Digits pressed alone
 
 Met in wintimeline on 2026-11-05 (WT81, multicam). The number keys cut a multicam clip

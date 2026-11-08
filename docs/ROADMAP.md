@@ -8,7 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW604** (deps: —) **A drag cannot hold Ctrl, Alt or Ctrl+Alt, so a drop whose edit depends on the key held has no case** — Editors pick insert, swap or duplicate by the key held across the drag, and only the plain drag can be proven. → §WW604
 - 📋 **WW605** (deps: —) **A press of a bare digit loads and then breaks: Enum.TryParse reads it as a traversal key's number** — Number keys that pick an angle, a tool or a rating have no case, and the break reads as the harness's fault, not the case's. → §WW605
 - 📋 **WW606** (deps: —) **A case cannot start the application again after it exits, to read what a clean close left for the next run** — State kept on close, such as a layout or a reopened tab, can only be proved by reading files rather than the window. → §WW606
 - 📋 **WW607** (deps: —) **A hung guest run brings back only its largest dump, so the application's own dump stays in the guest** — Whether the app deadlocked or the test host waited on it is answered only by the app's dump, which the run leaves behind. → §WW607

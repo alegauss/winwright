@@ -175,18 +175,24 @@ public static class Synthesised
     /// </summary>
     /// <param name="subject">What to press.</param>
     /// <param name="to">What to release over.</param>
-    public static ActResult Drag(Subject subject, Subject to)
+    public static ActResult Drag(Subject subject, Subject to) => Drag(subject, to, holding: null);
+
+    /// <summary>The same drag with a key held across it. WW604.</summary>
+    /// <param name="subject">What to press.</param>
+    /// <param name="to">What to release over.</param>
+    /// <param name="holding">The key held from before the press to after the release, or null.</param>
+    public static ActResult Drag(Subject subject, Subject to, HeldKey? holding)
     {
         ArgumentNullException.ThrowIfNull(subject);
         ArgumentNullException.ThrowIfNull(to);
 
         var before = subject.Read();
-        var dragged = Acting.Drag.Onto(subject, to);
+        var dragged = Acting.Drag.Onto(subject, to, holding);
 
         return Landed(
             subject,
             "drag",
-            $"synthesised pointer ({PointerReason.PointerIsTheAct}) onto {to.Locator}",
+            $"synthesised pointer ({PointerReason.PointerIsTheAct}{Held(holding)}) onto {to.Locator}",
             dragged.Element,
             before,
             dragged.Foreground);
@@ -199,21 +205,32 @@ public static class Synthesised
     /// <param name="subject">The control both points are in.</param>
     /// <param name="from">Where to press.</param>
     /// <param name="to">Where to release.</param>
-    public static ActResult DragWithin(Subject subject, ElementPoint from, ElementPoint to)
+    public static ActResult DragWithin(Subject subject, ElementPoint from, ElementPoint to) =>
+        DragWithin(subject, from, to, holding: null);
+
+    /// <summary>The same drag inside one control, with a key held across it. WW604.</summary>
+    /// <param name="subject">The control both points are in.</param>
+    /// <param name="from">Where to press.</param>
+    /// <param name="to">Where to release.</param>
+    /// <param name="holding">The key held from before the press to after the release, or null.</param>
+    public static ActResult DragWithin(Subject subject, ElementPoint from, ElementPoint to, HeldKey? holding)
     {
         ArgumentNullException.ThrowIfNull(subject);
 
         var before = subject.Read();
-        var dragged = Acting.Drag.Within(subject, from, to);
+        var dragged = Acting.Drag.Within(subject, from, to, holding);
 
         return Landed(
             subject,
             "drag",
-            $"synthesised pointer ({PointerReason.PointerIsTheAct}) from {from} to {to}",
+            $"synthesised pointer ({PointerReason.PointerIsTheAct}{Held(holding)}) from {from} to {to}",
             dragged.Element,
             before,
             dragged.Foreground);
     }
+
+    /// <summary>The key a drag held, as its route says it, or nothing where it held none. WW604.</summary>
+    private static string Held(HeldKey? holding) => holding is { } key ? $", {Pointer.Spelled(key)} held" : "";
 
     /// <summary>
     /// Drop a file onto a control from outside the application, as one dragged out of Explorer

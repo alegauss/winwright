@@ -46,13 +46,14 @@ public static class Drag
     /// another one (WW530). Only the release lands there: the foreground asked for is still the
     /// window the press is in.
     /// </param>
+    /// <param name="holding">A key held from before the press to after the release, or null. WW604.</param>
     /// <exception cref="NotActionableException">Where either element cannot take the pointer.</exception>
-    public static PointerResult Onto(Subject from, Subject to)
+    public static PointerResult Onto(Subject from, Subject to, HeldKey? holding = null)
     {
         ArgumentNullException.ThrowIfNull(from);
         ArgumentNullException.ThrowIfNull(to);
 
-        var act = new PointerAct("drag", from.Locator, PointerReason.PointerIsTheAct, $"onto {to.Locator}");
+        var act = new PointerAct("drag", from.Locator, PointerReason.PointerIsTheAct, $"onto {to.Locator}", Holding: holding);
         var admitted = Admitted.To(from);
         var facts = admitted.Facts;
         var onto = Admitted.To(to).Facts;
@@ -66,7 +67,7 @@ public static class Drag
         if (!foreground.Satisfied)
             return new PointerResult(act, facts, foreground, default, PatternValues.None);
 
-        Moved(Centre(facts.Bounds), Centre(onto.Bounds));
+        Moved(Centre(facts.Bounds), Centre(onto.Bounds), holding);
         return new PointerResult(act, facts, foreground, onto.Bounds, from.Read().Values);
     }
 
@@ -83,14 +84,15 @@ public static class Drag
     /// <param name="subject">The element both points are in.</param>
     /// <param name="from">Where to press.</param>
     /// <param name="to">Where to release.</param>
+    /// <param name="holding">A key held from before the press to after the release, or null. WW604.</param>
     /// <exception cref="NotActionableException">Where the element cannot take the pointer, or a point is outside it.</exception>
-    public static PointerResult Within(Subject subject, ElementPoint from, ElementPoint to)
+    public static PointerResult Within(Subject subject, ElementPoint from, ElementPoint to, HeldKey? holding = null)
     {
         ArgumentNullException.ThrowIfNull(subject);
         ArgumentNullException.ThrowIfNull(from);
         ArgumentNullException.ThrowIfNull(to);
 
-        var act = new PointerAct("drag", subject.Locator, PointerReason.PointerIsTheAct, $"from {from} to {to}");
+        var act = new PointerAct("drag", subject.Locator, PointerReason.PointerIsTheAct, $"from {from} to {to}", Holding: holding);
         var admitted = Admitted.To(subject);
         var facts = admitted.Facts;
 
@@ -105,15 +107,21 @@ public static class Drag
         if (!foreground.Satisfied)
             return new PointerResult(act, facts, foreground, default, PatternValues.None);
 
-        Moved(pressed, released);
+        Moved(pressed, released, holding);
         return new PointerResult(act, facts, foreground, facts.Bounds, subject.Read().Values);
     }
 
     /// <summary>
     /// Press at one point, move past the drag threshold and on to the other, and release there,
     /// each part its own message.
+    /// <para>
+    /// WW604. A held key goes down in the same send as the press and comes up in the same send as the
+    /// release, so it is down for every move between and nothing of anyone else's can arrive between
+    /// the key and the button at either end. One batch for the whole gesture is what a click does; a
+    /// drag cannot, for the reason its parts are paced at all.
+    /// </para>
     /// </summary>
-    private static void Moved((int X, int Y) from, (int X, int Y) to)
+    private static void Moved((int X, int Y) from, (int X, int Y) to, HeldKey? holding)
     {
         var (x, y) = from;
         var (toX, toY) = to;
@@ -126,7 +134,7 @@ public static class Drag
 
         try
         {
-            Paced(Absolute(x, y), Pointer.Mouse(Win32.MouseLeftDown, 0, 0));
+            Paced([.. Pointer.KeysDown(holding), Absolute(x, y), Pointer.Mouse(Win32.MouseLeftDown, 0, 0)]);
             Paced(Absolute(x + (sideways * nudge), y + (Math.Sign(toY - y) * nudge)));
             for (var step = 1; step <= DragSteps; step++)
                 Paced(Absolute(x + ((toX - x) * step / DragSteps), y + ((toY - y) * step / DragSteps)));
@@ -134,8 +142,8 @@ public static class Drag
         finally
         {
             // In a finally, so a throw between the press and here never leaves the button held down
-            // over a window the next case drives.
-            Paced(Absolute(toX, toY), Pointer.Mouse(Win32.MouseLeftUp, 0, 0));
+            // over a window the next case drives — nor a key.
+            Paced([Absolute(toX, toY), Pointer.Mouse(Win32.MouseLeftUp, 0, 0), .. Pointer.KeysUp(holding)]);
         }
 
         // WW353's pause, as the click takes it before its read, so the release is not read before

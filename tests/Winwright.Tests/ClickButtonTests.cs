@@ -68,9 +68,9 @@ public sealed class ClickButtonTests
     public void A_key_that_is_not_one_or_beside_another_act_is_refused()
     {
         Assert.Contains(
-            "a click holds 'ctrl' or 'shift'",
+            "a click holds 'ctrl', 'shift', 'alt', 'ctrl+alt'",
             Assert.Throws<ScenarioRefusedException>(
-                () => Wrote.Step("ListItem#row", "click", ("with", "PointerIsTheAct"), ("holding", "alt"))).Because,
+                () => Wrote.Step("ListItem#row", "click", ("with", "PointerIsTheAct"), ("holding", "win"))).Because,
             StringComparison.Ordinal);
 
         Assert.Contains(

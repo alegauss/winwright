@@ -71,6 +71,9 @@ public static class HandlesPane
         var clicked = new TextBlock { Name = "clickSaid", Text = "nothing clicked", Margin = new Thickness(0, 0, 0, 8) };
         System.Windows.Automation.AutomationProperties.SetName(clicked, clicked.Text);
 
+        var held = new TextBlock { Name = "heldSaid", Text = "nothing dragged", Margin = new Thickness(0, 0, 0, 8) };
+        System.Windows.Automation.AutomationProperties.SetName(held, held.Text);
+
         surface.MouseLeftButtonUp += (_, released) =>
         {
             if (!holding)
@@ -83,6 +86,11 @@ public static class HandlesPane
             holding = false;
             surface.ReleaseMouseCapture();
 
+            // WW604. The keys held at the release, which is where an editor reads insert, duplicate or
+            // swap off a drag, so a drag with each key answers differently.
+            held.Text = $"held: {HeldNow()}";
+            System.Windows.Automation.AutomationProperties.SetName(held, held.Text);
+
             // Snapped to five, so a pointer a pixel off on a scaled display reads the same.
             var at = released.GetPosition(surface);
             crop = Cornered(crop, new Point(Math.Round(at.X / 5) * 5, Math.Round(at.Y / 5) * 5));
@@ -94,6 +102,7 @@ public static class HandlesPane
         var page = new StackPanel { Name = "handlesRows", Margin = new Thickness(12) };
         page.Children.Add(said);
         page.Children.Add(clicked);
+        page.Children.Add(held);
         page.Children.Add(surface);
 
         var pane = new TabItem { Name = "handlesPane", Header = "Handles", Content = page };
@@ -102,6 +111,20 @@ public static class HandlesPane
         // Selected, because a pane nobody picked is in no tree for a case to reach.
         panes.SelectedItem = pane;
         return pane;
+    }
+
+    /// <summary>The modifier keys down now, as a case writes them: none, ctrl, alt, ctrl+alt, shift. WW604.</summary>
+    private static string HeldNow()
+    {
+        var keys = new List<string>();
+        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            keys.Add("ctrl");
+        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
+            keys.Add("alt");
+        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            keys.Add("shift");
+
+        return keys.Count == 0 ? "none" : string.Join("+", keys);
     }
 
     /// <summary>The crop with its top-left corner moved to a point, keeping its bottom-right where it was.</summary>

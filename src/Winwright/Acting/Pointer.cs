@@ -31,6 +31,18 @@ public enum HeldKey
 
     /// <summary>The shift key.</summary>
     Shift,
+
+    /// <summary>
+    /// The alt key. WW604: an editor duplicates what is dragged when Alt is held, and leaves the
+    /// original where it was.
+    /// </summary>
+    Alt,
+
+    /// <summary>
+    /// Ctrl and Alt together, written <c>ctrl+alt</c>. WW604: an editor swaps the dragged clip with
+    /// the one it lands on.
+    /// </summary>
+    CtrlAlt,
 }
 
 /// <summary>
@@ -483,13 +495,6 @@ public static class Pointer
     {
         // WW540. The key goes down and comes up in the same batch as the click, so nothing can arrive
         // between them — the reason a chord is one SendInput, applied to a click.
-        ushort? held = holding switch
-        {
-            HeldKey.Ctrl => 0x11,
-            HeldKey.Shift => 0x10,
-            _ => null,
-        };
-
         var (down, up) = button switch
         {
             MouseButton.Right => (Win32.MouseRightDown, Win32.MouseRightUp),
@@ -508,8 +513,7 @@ public static class Pointer
                 (x - left) * 65535 / width, (y - top) * 65535 / height),
         };
 
-        if (held is { } pressedFirst)
-            inputs.Add(Key(pressedFirst, 0));
+        inputs.AddRange(KeysDown(holding));
 
         for (var press = 0; press < clicks; press++)
         {
@@ -517,10 +521,66 @@ public static class Pointer
             inputs.Add(Mouse(up, 0, 0));
         }
 
-        if (held is { } releasedLast)
-            inputs.Add(Key(releasedLast, Win32.KeyUp));
+        inputs.AddRange(KeysUp(holding));
 
         Win32.SendInput((uint)inputs.Count, [.. inputs], System.Runtime.InteropServices.Marshal.SizeOf<Win32.Input>());
+    }
+
+    /// <summary>A held key as a case writes it: <c>ctrl</c>, <c>alt</c>, <c>ctrl+alt</c>. WW604.</summary>
+    /// <param name="key">The key.</param>
+    internal static string Spelled(HeldKey key) => key == HeldKey.CtrlAlt ? "ctrl+alt" : key.ToString().ToLowerInvariant();
+
+    /// <summary>The virtual keys a held key is, in the order they go down. WW540, WW604.</summary>
+    private static ushort[] VirtualKeys(HeldKey? holding) => holding switch
+    {
+        HeldKey.Ctrl => [VkControl],
+        HeldKey.Shift => [VkShift],
+        HeldKey.Alt => [VkMenu],
+        HeldKey.CtrlAlt => [VkControl, VkMenu],
+        _ => [],
+    };
+
+    private const ushort VkShift = 0x10;
+    private const ushort VkControl = 0x11;
+    private const ushort VkMenu = 0x12;
+
+    /// <summary>
+    /// The key pressed and released before Alt comes up, so its release is an ordinary one. WW604.
+    /// <para>
+    /// Alt that goes down and up with no key between is Alt tapped, which enters a window's menu bar
+    /// or shows a hidden one (WW544). A mouse button between them does not count as a key, so Alt held
+    /// across a drag opened the fixture's hidden bar on its release.
+    /// </para>
+    /// <para>
+    /// Ctrl and not an unassigned key. Measured on the guest: VK 0xE8, the mask AutoHotkey uses against
+    /// Win32 menus, left the WPF fixture's bar opening on the release, because WPF has no key for it and
+    /// saw nothing between. Ctrl is a key every framework sees, and Ctrl+Alt with nothing else pressed
+    /// is a shortcut for nothing.
+    /// </para>
+    /// </summary>
+    private const ushort VkMask = VkControl;
+
+    /// <summary>The keys going down, before the press. WW604.</summary>
+    internal static IEnumerable<Win32.Input> KeysDown(HeldKey? holding) =>
+        VirtualKeys(holding).Select(one => Key(one, 0));
+
+    /// <summary>
+    /// The keys coming up, after the release and in reverse, with Alt's release masked so it is not
+    /// read as Alt tapped. WW604.
+    /// </summary>
+    internal static IEnumerable<Win32.Input> KeysUp(HeldKey? holding)
+    {
+        var keys = VirtualKeys(holding);
+        // Where Ctrl is itself held (ctrl+alt), the mask's own release lets it go first, and the reverse
+        // below only repeats an up for a key already up — which changes nothing.
+        if (keys.Contains(VkMenu))
+        {
+            yield return Key(VkMask, 0);
+            yield return Key(VkMask, Win32.KeyUp);
+        }
+
+        foreach (var one in Enumerable.Reverse(keys))
+            yield return Key(one, Win32.KeyUp);
     }
 
     /// <summary>One key going down or up, for a key held across a click. WW540.</summary>
