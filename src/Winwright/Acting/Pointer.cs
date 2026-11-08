@@ -74,6 +74,10 @@ public enum PointerReason
 /// <param name="Button">Which button it presses.</param>
 /// <param name="Clicks">How many times, which is how a double click is said.</param>
 /// <param name="Holding">A key held down across the click, or null for none. WW540.</param>
+/// <param name="At">
+/// The point of the element it presses at, or null for its centre. WW603: a spot on a canvas is
+/// pixels and no element, and its centre is not where the spot is.
+/// </param>
 public sealed record PointerAct(
     string Verb,
     Locator Locator,
@@ -81,7 +85,8 @@ public sealed record PointerAct(
     string Note = "",
     MouseButton Button = MouseButton.Left,
     int Clicks = 1,
-    HeldKey? Holding = null)
+    HeldKey? Holding = null,
+    ElementPoint? At = null)
 {
     /// <summary>The reason as a person says it, with this act's own note where it has one.</summary>
     public string Reason => string.IsNullOrWhiteSpace(Note)
@@ -90,7 +95,8 @@ public sealed record PointerAct(
 
     /// <summary>The one line a report names it by.</summary>
     public override string ToString() =>
-        $"{Verb} {Locator} ({Clicks} {Button.ToString().ToLowerInvariant()} click{(Clicks == 1 ? "" : "s")})";
+        $"{Verb} {Locator}{(At is null ? "" : $" at {At}")} "
+        + $"({Clicks} {Button.ToString().ToLowerInvariant()} click{(Clicks == 1 ? "" : "s")})";
 }
 
 /// <summary>What a pointer act did, or the precondition that stopped it before it did anything.</summary>
@@ -250,16 +256,18 @@ public static class Pointer
     /// <param name="clicks">How many presses.</param>
     /// <param name="note">What is specific about this one, where the reason alone is not enough.</param>
     /// <param name="holding">A key held down across the click, or null for none. WW540.</param>
+    /// <param name="at">The point of the element to press at, or null for its centre. WW603.</param>
     public static PointerResult Click(
         Subject subject,
         PointerReason because,
         MouseButton button = MouseButton.Left,
         int clicks = 1,
         string note = "",
-        HeldKey? holding = null)
+        HeldKey? holding = null,
+        ElementPoint? at = null)
     {
         ArgumentNullException.ThrowIfNull(subject);
-        return Run(new PointerAct("click", subject.Locator, because, note, button, clicks, holding), subject);
+        return Run(new PointerAct("click", subject.Locator, because, note, button, clicks, holding, at), subject);
     }
 
     /// <summary>Press twice, which some templates need and no pattern expresses.</summary>
@@ -307,6 +315,13 @@ public static class Pointer
         var admitted = Admitted.To(subject);
         var facts = admitted.Facts;
 
+        // WW603. The point is placed before the desk is asked, so a point outside the element is
+        // refused as the fact about the window it is, on any desk, and nothing is pressed.
+        var at = facts.Bounds;
+        var (x, y) = act.At is { } point
+            ? Placed(subject, facts, point, Win32.ScaleOf(admitted.Window))
+            : (at.Left + (at.Width / 2), at.Top + (at.Height / 2));
+
         // WW470. Waited for rather than read once: a window that is still coming forward is not a
         // desk somebody else holds, and one look cannot tell them apart.
         var foreground = Foreground
@@ -316,8 +331,7 @@ public static class Pointer
         if (!foreground.Satisfied)
             return new PointerResult(act, facts, foreground, default, PatternValues.None);
 
-        var at = facts.Bounds;
-        Send(at.Left + (at.Width / 2), at.Top + (at.Height / 2), act.Button, act.Clicks, act.Holding);
+        Send(x, y, act.Button, act.Clicks, act.Holding);
 
         // WW353. The send is left alone before this reads what it did, which is the one thing every
         // other synthesised verb was doing and this one was not: typing pauses, and press, nudge and
@@ -349,6 +363,17 @@ public static class Pointer
 
         return new PointerResult(act, facts, foreground, at, subject.Read().Values);
     }
+
+    /// <summary>
+    /// A point of the subject on the screen, or the refusal naming the element's size. WW603, the
+    /// same refusal a drag inside its element gives (WW572).
+    /// </summary>
+    internal static (int X, int Y) Placed(Subject subject, ElementFacts facts, ElementPoint point, double scale) =>
+        point.On(facts.Bounds, scale) ?? throw new NotActionableException(
+            subject.Locator.Text,
+            Actionable.Offscreen,
+            $"'{point}' is outside it: it is {Math.Round(facts.Bounds.Width / scale)}x"
+                + $"{Math.Round(facts.Bounds.Height / scale)} device-independent pixels, and nothing was pressed");
 
     /// <summary>
     /// What in a scenario needs a real desktop, said out loud. This is the point of declaring

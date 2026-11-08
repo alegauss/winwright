@@ -124,16 +124,32 @@ public static class Synthesised
     /// <param name="button">Which button.</param>
     /// <param name="holding">The key held down, or null for none.</param>
     /// <param name="clicks">How many presses.</param>
-    public static ActResult Click(Subject subject, PointerReason because, MouseButton button, HeldKey? holding, int clicks)
+    public static ActResult Click(Subject subject, PointerReason because, MouseButton button, HeldKey? holding, int clicks) =>
+        Click(subject, because, button, holding, clicks, at: null);
+
+    /// <summary>
+    /// The same click pressed at a point of the element rather than its centre. WW603: a spot on a
+    /// canvas is pixels and no element, so its centre is not where the spot is.
+    /// </summary>
+    /// <param name="subject">What to press.</param>
+    /// <param name="because">Why the pattern route was unavailable.</param>
+    /// <param name="button">Which button.</param>
+    /// <param name="holding">The key held down, or null for none.</param>
+    /// <param name="clicks">How many presses.</param>
+    /// <param name="at">The point of the element to press at, or null for its centre.</param>
+    public static ActResult Click(
+        Subject subject, PointerReason because, MouseButton button, HeldKey? holding, int clicks, ElementPoint? at)
     {
         ArgumentNullException.ThrowIfNull(subject);
 
         var before = subject.Read();
-        var clicked = Pointer.Click(subject, because, button, clicks, holding: holding);
+        var clicked = Pointer.Click(subject, because, button, clicks, holding: holding, at: at);
 
         // The button, the key and the count are said only where they are not what every click used to
         // be, so a plain left click's line reads exactly as it did before any of them existed.
         var extra = new List<string>();
+        if (at is not null)
+            extra.Add($"at {at}");
         if (clicks == 2)
             extra.Add("double click");
         else if (clicks != 1)

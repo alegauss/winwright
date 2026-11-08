@@ -95,8 +95,8 @@ public static class Drag
         var facts = admitted.Facts;
 
         var scale = Win32.ScaleOf(admitted.Window);
-        var pressed = Placed(subject, facts, from, scale);
-        var released = Placed(subject, facts, to, scale);
+        var pressed = Pointer.Placed(subject, facts, from, scale);
+        var released = Pointer.Placed(subject, facts, to, scale);
 
         var foreground = Foreground
             .Waited(admitted.Window, DeskWait.Of(subject.DeadlineMs, subject.PollMs))
@@ -108,14 +108,6 @@ public static class Drag
         Moved(pressed, released);
         return new PointerResult(act, facts, foreground, facts.Bounds, subject.Read().Values);
     }
-
-    /// <summary>A point of the subject on the screen, or the refusal naming the element's size. WW572.</summary>
-    private static (int X, int Y) Placed(Subject subject, ElementFacts facts, ElementPoint point, double scale) =>
-        point.On(facts.Bounds, scale) ?? throw new NotActionableException(
-            subject.Locator.Text,
-            Actionable.Offscreen,
-            $"'{point}' is outside it: it is {Math.Round(facts.Bounds.Width / scale)}x"
-                + $"{Math.Round(facts.Bounds.Height / scale)} device-independent pixels, and nothing was pressed");
 
     /// <summary>
     /// Press at one point, move past the drag threshold and on to the other, and release there,

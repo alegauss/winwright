@@ -63,6 +63,64 @@ public sealed class HandleTests : IDisposable
     }
 
     [Fact]
+    public void A_click_at_a_point_inside_the_crop_lands_there()
+    {
+        // WW603. wintimeline's WT57: a spot on a canvas is clicked where it is, not at the centre.
+        var verdict = Clicked("50%,50%", "clicked: crop");
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void A_click_at_a_point_in_the_margin_answers_differently()
+    {
+        // The other point of the same surface. The centre is inside the crop, so a click that ignored
+        // its point would read 'crop' here and fail.
+        var verdict = Clicked("5,5", "clicked: margin");
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void A_click_at_a_point_outside_its_element_is_refused_and_presses_nothing()
+    {
+        // The surface is 300 wide, so 400 across is past its edge: the act refuses it naming the size,
+        // and the read after it still says nothing was clicked.
+        var verdict = Clicked("400,10", "nothing clicked");
+        if (verdict is null)
+            return;
+
+        var said = Said(verdict);
+        Assert.NotEqual(RunOutcome.Passed, verdict.Outcome);
+        Assert.Contains("'400,10' is outside it", said, StringComparison.Ordinal);
+        Assert.Contains("300x150 device-independent pixels", said, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_click_at_a_point_is_refused_where_it_is_written_wrongly()
+    {
+        var step = Wrote.Step("Pane#cropSurface", "click", ("with", "PointerIsTheAct"), ("at", "8.9%,6"));
+        Assert.Equal("8.9%,6", step.At!.Text);
+        Assert.Equal("click Pane#cropSurface at 8.9%,6", step.Name);
+        Assert.Null(Wrote.Step("Pane#cropSurface", "click", ("with", "PointerIsTheAct")).At);
+
+        Assert.Contains(
+            "'at' is '8.9%'",
+            Assert.Throws<ScenarioRefusedException>(
+                () => Wrote.Step("Pane#cropSurface", "click", ("with", "PointerIsTheAct"), ("at", "8.9%"))).Because,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "a drag says its points in 'from' and 'to'",
+            Assert.Throws<ScenarioRefusedException>(
+                () => Wrote.Step("Pane#cropSurface", "drag", ("to", "Pane#other"), ("at", "10%,10%"))).Because,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void A_point_is_read_the_way_a_case_writes_it()
     {
         var percent = ElementPoint.Parse(" 12.5%, 8% ");
@@ -119,6 +177,51 @@ public sealed class HandleTests : IDisposable
             .Concat(verdict.Ran.SelectMany(one => one.Verdict.Results.Select(each => each.ToString())))
             .Concat(verdict.Ran.SelectMany(one => one.Verdict.Broke.Select(each => each.ToString())))
             .Concat(verdict.Ran.SelectMany(one => one.Trace.Select(each => each.ToString()))));
+
+    /// <summary>
+    /// Click the crop surface at <paramref name="at"/> and read where the click landed expecting
+    /// <paramref name="expected"/>, or null where this desk cannot observe. WW603.
+    /// </summary>
+    private SuiteVerdict? Clicked(string at, string expected)
+    {
+        if (!Desk.Read().CanObserve)
+            return null;
+
+        var declaration = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            declaration,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "timeouts": { "launch": 30000, "resolve": 4000, "act": 4000, "poll": 25 }
+            }
+            """);
+
+        var cases = $$"""
+            {
+              "fixtures": [ { "name": "a crop drawn on a surface", "arguments": ["--handles", "--show"] } ],
+              "cases": [
+                {
+                  "name": "the surface is clicked at a point",
+                  "catches": "a spot drawn on a canvas, with no click that presses anywhere but the element's centre",
+                  "fixture": "a crop drawn on a surface",
+                  "steps": [
+                    { "locator": "Pane#cropSurface", "act": "click", "with": "PointerIsTheAct", "at": "{{at}}", "named": "the surface is clicked" },
+                    { "locator": "Text#clickSaid", "act": "read", "reads": "name", "expect": "{{expected}}", "named": "the surface says where" }
+                  ]
+                }
+              ]
+            }
+            """;
+
+        var project = ProjectDeclaration.Load(declaration);
+        using var register = ProcessRegister.For(project);
+
+        var verdict = Suite.Launch(ScenarioFile.Read("click-at.cases.json", cases), Selection.All, register, project);
+
+        register.StopAll();
+        return verdict;
+    }
 
     /// <summary>
     /// Drag on the crop surface from <paramref name="from"/> to <paramref name="to"/> and read the

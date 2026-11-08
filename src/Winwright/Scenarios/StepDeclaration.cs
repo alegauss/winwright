@@ -378,6 +378,16 @@ public sealed record StepDeclaration
     /// </summary>
     public int Clicks => Wrote.Whole("clicks") ?? 1;
 
+    /// <summary>
+    /// Where inside its element a <c>click</c> presses, or null for its centre. WW603.
+    /// <para>
+    /// Found by wintimeline (WT57): a heat lane on a GPU-drawn strip moves the playhead when clicked
+    /// near its hot spot, and the click could land only on the strip's centre, so the case dragged
+    /// from the spot instead — which passes only where the app acts on the press.
+    /// </para>
+    /// </summary>
+    public Acting.ElementPoint? At => Acting.ElementPoint.Parse(Wrote.Trimmed("at"));
+
     /// <summary>The keys a click may hold, as the format spells them. WW540.</summary>
     public static IReadOnlyList<string> HeldKeys { get; } =
         Enum.GetValues<Acting.HeldKey>().Select(one => one.ToString().ToLowerInvariant()).ToList();
@@ -1215,6 +1225,9 @@ public sealed record StepDeclaration
         // WW602. How many presses, judged the same way and for the same reasons.
         var clicks = Counts(subject, act, wrote.Whole("clicks"));
 
+        // WW603. Where it presses, judged the same way and for the same reasons.
+        var at = Aimed(subject, act, wrote.Trimmed("at"));
+
         var reading = ReadBack.Named(wrote.Text("reads"));
 
         // WW250. Compiled at the door for the timeout's sake, and because a pattern that does not
@@ -1234,6 +1247,10 @@ public sealed record StepDeclaration
         // WW538. A click with another button says so in the name a report shows, because a trace
         // reading "click Tab#second" about a middle click sends the reader to the wrong gesture.
         var described = parsed is null ? subject : Describing(act.Name, parsed.Text);
+
+        // WW603. "click Pane#strip at 8.9%,6", so a trace names the spot and not only the element.
+        if (called is null && at is not null)
+            described = $"{described} at {at}";
         // WW602. "double click", the way a person says it.
         if (called is null && clicks == 2)
             described = $"double {described}";
@@ -1498,6 +1515,32 @@ public sealed record StepDeclaration
         return Held(written) ?? throw new ScenarioRefusedException(
             subject,
             $"it holds '{written}', and a click holds {string.Join(" or ", HeldKeys.Select(one => $"'{one}'"))}");
+    }
+
+    /// <summary>
+    /// Where inside its element a step's click presses, judged against its verb. WW603. Refused beside
+    /// any verb but <c>click</c>, and where it is no point. Whether it falls inside the element is a
+    /// fact about the window, and the act refuses that.
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="act">The verb.</param>
+    /// <param name="written">The point as the case wrote it, or null.</param>
+    private static Acting.ElementPoint? Aimed(string subject, ActVerb act, string? written)
+    {
+        if (written is null)
+            return null;
+
+        if (!act.PressesAButton)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it names '{written}' in 'at' and acts with '{act.Name}'; 'at' is where a "
+                    + $"'{ActVerb.Clicks}' presses, and a drag says its points in 'from' and 'to'");
+        }
+
+        return Acting.ElementPoint.Parse(written)
+            ?? throw new ScenarioRefusedException(
+                subject, $"'at' is '{written}', which is no point: a point is {Acting.ElementPoint.Spelled}");
     }
 
     /// <summary>

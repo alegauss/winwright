@@ -8,30 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-### §WW603 Click at a point of an element
-
-Met in wintimeline on 2026-11-04 (WT57, heat lanes on the timeline's overview strip).
-The strip is drawn on a GPU surface, and a click within a few pixels of a hot spot moves
-the playhead there. The case wanted to click the strip at the first marker, 8.9% across
-and 6 pixels down:
-
-{ "locator": "Pane#TimelineSurface", "act": "click", "with": "PointerIsTheAct", "at":
-"8.9%,6", "named": "the strip is clicked at the first marker" }
-
-A click lands only on the element's clickable point, its centre for a pane, and no key
-moves it. WW572 gave drag a from and a to inside one element, in the same "x,y" grammar
-(a percentage or device-independent pixels per half), but click has nothing like it. The
-workaround in wintimeline is a drag from "8.9%,6" to "12%,6", which works only because
-the app acts on the press and ignores what follows. The case says so in a comment with
-this line's id. The claim is weaker: a drag is not a click, and an app that acts on
-release or treats a move as a drag would fail it for the wrong reason.
-
-What winwright should offer: click takes the same point as drag's from ("at": "x,y", a
-percentage or device-independent pixels from the element's top-left), with holding and
-button as they are, and the report naming the point ("click Pane#TimelineSurface at
-8.9%,6"). Done when a case clicks a canvas at two points that answer differently, with a
-test refusing a point outside the element.
-
 ### §WW604 Keys held across a drag
 
 Met in wintimeline on 2026-11-04 (WT70, moving clips on the GPU-drawn timeline). A plain

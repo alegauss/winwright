@@ -66,10 +66,19 @@ public static class HandlesPane
                 crop = Cornered(crop, moved.GetPosition(surface));
         };
 
+        // WW603. Where a press that took no handle landed: inside the crop or in the margin around it,
+        // so a click at two points of the one surface answers two ways, as a canvas's spots do.
+        var clicked = new TextBlock { Name = "clickSaid", Text = "nothing clicked", Margin = new Thickness(0, 0, 0, 8) };
+        System.Windows.Automation.AutomationProperties.SetName(clicked, clicked.Text);
+
         surface.MouseLeftButtonUp += (_, released) =>
         {
             if (!holding)
+            {
+                clicked.Text = crop.Contains(released.GetPosition(surface)) ? "clicked: crop" : "clicked: margin";
+                System.Windows.Automation.AutomationProperties.SetName(clicked, clicked.Text);
                 return;
+            }
 
             holding = false;
             surface.ReleaseMouseCapture();
@@ -84,6 +93,7 @@ public static class HandlesPane
 
         var page = new StackPanel { Name = "handlesRows", Margin = new Thickness(12) };
         page.Children.Add(said);
+        page.Children.Add(clicked);
         page.Children.Add(surface);
 
         var pane = new TabItem { Name = "handlesPane", Header = "Handles", Content = page };

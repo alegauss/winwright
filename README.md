@@ -1131,6 +1131,18 @@ on a double click and on nothing else, and the report names the step `double cli
 `clicks` is a number, not text. Any count but `1` and `2` is refused, and so is `clicks` beside any
 act but `click`.
 
+A click presses the element's centre unless the step says **`at`**: a point inside the element in the
+grammar a drag's `from` uses, `x,y`, each a percentage of the element (`8.9%`) or device-independent
+pixels from its top-left corner (`6`). It is for a spot drawn on a canvas, which is pixels and no
+element, and the report names the step `click Pane#TimelineSurface at 8.9%,6`:
+
+```json
+{ "locator": "Pane#TimelineSurface", "act": "click", "with": "PointerIsTheAct", "at": "8.9%,6" }
+```
+
+A point that is not one is refused when the file loads. A point past the element's edge is refused by
+the act, naming the element's size, and nothing is pressed. `at` beside any act but `click` is refused.
+
 `read` is the one verb that touches nothing. It resolves, reads, and claims what it read, which is
 what a case checking a label after a save actually wants — and what it stops the case from doing is
 naming `select` on a text label to get there, which says the case moved something and turns a check
