@@ -373,6 +373,7 @@
 - ✅ **WW569** **a set derived outside a run is asked in the machine's culture, so a runner's unshipped one is underivable** — Without `speaking`, a read-out's `{language}` is the language of the strings file that answers for the machine, then language.fallback, and a failed read-out names its arguments and stdout.
 - ✅ **WW573** **A file step claims only sameBytesAs, so an image the app wrote cannot be checked for its size or transparency** — A file step claims 'image', such as 'longSide 2048, transparent', decoded through Windows imaging, and a failure names the size and transparency it read.
 - ✅ **WW613** **The readings case needs seven polls inside a 200 ms budget, so a loaded host sees only two of its three readings** — The readings case polls for a second, so even a loaded host reaches the seventh poll and the case reds only when a change of reading is lost.
+- ✅ **WW615** **The file-arrives case writes its file from the pool 300 ms in and waits 3 s, so a loaded guest reds it** — The file-arrives case writes from a thread of its own and gives the step 15 s, so a loaded guest still sees the file and the case reds only when it never comes.
 
 ## Block G — The scenario — a case is a data file
 

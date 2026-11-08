@@ -16,8 +16,6 @@
 
 ## Block F — Assert — the expectation is derived, never typed
 
-- 📋 **WW615** (deps: —) **The file-arrives case writes its file from the pool 300 ms in and waits 3 s, so a loaded guest reds it** — A red about a file that never came, on a run whose change touched no file step, sends the reader after a defect that is not there. → §WW615
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

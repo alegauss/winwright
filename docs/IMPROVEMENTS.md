@@ -50,23 +50,6 @@ an opaque window has no transparent pixel, with a test reading both bottom corne
 
 ## Block F — Assert — the expectation is derived, never typed
 
-### §WW615 The file-arrives case has room for a loaded guest
-
-Met in the guest on 2026-11-08, in the full run that gated WW610 (a change that touches
-no file step): FileSubjectTests.A_file_that_arrives_while_the_step_waits_passes failed
-after 3 s, and every full guest run before it that day had passed it.
-
-The case writes the file from Task.Run after Task.Delay(300) and gives the step a 3000
-ms resolve budget. ReadFile polls every 50 ms up to that deadline and compares the whole
-bytes, so the engine side is sound. What can miss is the writer: a pool continuation on
-a guest busy with the whole suite can arrive after the budget, and the step then reads
-as a file that never came.
-
-What to build: give the case a budget a loaded guest cannot miss, as WW612 and WW613 did
-for their windows (the step returns as soon as the bytes match, so a wider budget costs
-nothing on a pass), and write the file from a dedicated thread rather than the pool.
-Keep the control beside it: the same step with nothing arriving still fails.
-
 ## Block G — The scenario — a case is a data file
 
 ## Block H — The Claude Code surface — plugin, tools, skill, hook

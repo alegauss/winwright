@@ -105,19 +105,24 @@ public sealed class FileSubjectTests : IDisposable
     }
 
     [Fact]
-    public async Task A_file_that_arrives_while_the_step_waits_passes()
+    public void A_file_that_arrives_while_the_step_waits_passes()
     {
         // Explorer writes a dropped file after the release returns, so the step is waited for as any
         // read-back is. The control is the case above: the same step with nothing arriving fails.
+        //
+        // WW615. A thread of its own and a budget a loaded guest cannot miss: a pool continuation on a
+        // guest busy with the whole suite arrived after a 3 s budget, and the case read as a file that
+        // never came. The step returns the moment the bytes match, so the budget costs a pass nothing.
         var bytes = Written("data/report.bin", 1024);
-        var later = Task.Run(async () =>
+        var later = new Thread(() =>
         {
-            await Task.Delay(300);
+            Thread.Sleep(300);
             Written("out/report.bin", bytes);
-        });
+        }) { IsBackground = true };
+        later.Start();
 
-        var verdict = Run("""{ "file": "out/report.bin", "act": "read", "sameBytesAs": "data/report.bin" }""", resolveMs: 3000);
-        await later;
+        var verdict = Run("""{ "file": "out/report.bin", "act": "read", "sameBytesAs": "data/report.bin" }""", resolveMs: 15000);
+        later.Join();
 
         Assert.Equal(RunOutcome.Passed, verdict.Outcome);
     }
