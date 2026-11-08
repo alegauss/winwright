@@ -246,6 +246,31 @@ public sealed class MatchOrderTests : IDisposable
         Assert.Contains("they are left, right, top, bottom", refusal.Because);
     }
 
+    [Theory]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    [InlineData("1")]
+    [InlineData("9")]
+    [InlineData("-1")]
+    public void An_order_written_as_a_number_is_refused_with_the_names_there_are(string written)
+    {
+        // WW614. Enum.TryParse took "1" as left and "9" as an order that does not exist, so a typo
+        // selected by a sort nobody chose. An order is read by its name only.
+        var refusal = Assert.Throws<LocatorSyntaxException>(() => Locator.Parse($"Button[order={written}]"));
+
+        Assert.Contains("they are left, right, top, bottom", refusal.Because);
+    }
+
+    [Theory]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    [InlineData("left", MatchOrder.Left)]
+    [InlineData("Right", MatchOrder.Right)]
+    [InlineData("top", MatchOrder.Top)]
+    [InlineData("BOTTOM", MatchOrder.Bottom)]
+    public void The_four_orders_are_read_by_name(string written, MatchOrder order)
+    {
+        Assert.Equal(order, Locator.Parse($"[order={written}]").Steps[0].Order);
+    }
+
     [Fact]
     public void The_tree_order_is_not_something_a_locator_can_ask_for_by_name()
     {

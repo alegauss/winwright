@@ -6,8 +6,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-- 📋 **WW614** (deps: —) **A locator's order written as a number parses, so [order=1] means left and [order=9] an order that does not exist** — A typo in a locator selects by a sort nobody chose, or by none, instead of being refused where it was written. → §WW614
-
 ## Block D — Act — patterns before pointers
 
 - 📋 **WW617** (deps: —) **An invoke whose handler exits the application can throw, since the process dies while UI Automation is returning** — A case about an exit breaks on the act before its exit claim is read, and the red names a COM error instead of the application. → §WW617

@@ -6,20 +6,6 @@
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
-### §WW614 A locator's order is read by name
-
-Found while fixing WW605, which was the same defect in the press verb. Locator.cs parses
-a step's order with Enum.TryParse<MatchOrder>(value, ignoreCase: true, ...), and
-Enum.TryParse takes a numeric string as an enum value. So [order=1] parses as Left, and
-[order=9] parses as the undefined value 9, which no sort handles. The refusal beside it
-only turns away Tree, so neither number is refused, and the message that lists the
-orders (left, right, top, bottom) is never reached for them.
-
-What to build: read the order by name only, the way ActVerb.Traversal now reads a
-traversal key, and refuse anything else with the existing LocatorFault.UnknownOrder
-message. Done when [order=1], [order=9] and [order=-1] are each refused with that
-message, beside a test that the four names still parse.
-
 ## Block D — Act — patterns before pointers
 
 ### §WW617 An act whose application exits during it has landed

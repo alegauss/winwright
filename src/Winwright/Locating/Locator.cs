@@ -282,8 +282,11 @@ public sealed record Locator
                     break;
                 case "order":
                     Once(text, opened, order?.ToString(), "order");
-                    if (!Enum.TryParse<MatchOrder>(value, ignoreCase: true, out var sorted)
-                        || sorted == MatchOrder.Tree)
+                    // WW614. By name and never by number: Enum.TryParse takes "1" as Left and "9" as an
+                    // order that does not exist, so a typo selected by a sort nobody chose.
+                    var sorted = Enum.GetValues<MatchOrder>()
+                        .FirstOrDefault(one => string.Equals(one.ToString(), value.Trim(), StringComparison.OrdinalIgnoreCase));
+                    if (sorted == MatchOrder.Tree)
                     {
                         throw new LocatorSyntaxException(
                             LocatorFault.UnknownOrder, text, opened, $"'{value}' is no order here; they are left, right, top, bottom");
