@@ -630,6 +630,9 @@ that exits to update and is started again by its installer:
 { "locator": "Text#Version", "act": "read", "reads": "name", "expect": "1.4.0" }
 ```
 
+The act that closes the application can lose its own call with the process, since UI Automation is
+still answering when the application goes. That act lands, and its trace line says the application
+exited during it and that nothing was read after it. The `exits` step after it is the check.
 A claimed exit is not reported as the application having gone early. The process the case followed
 is stopped when the case ends, the way the launch is, so it does not outlive the run. A wait that did
 not end the way the step said is red and stops the case, because every step after it was written for

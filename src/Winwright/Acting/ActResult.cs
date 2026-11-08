@@ -109,6 +109,17 @@ public sealed record ActResult
     public string? Repaired { get; internal init; }
 
     /// <summary>
+    /// WW617. That the application exited during the act, in a sentence, or null where it did not.
+    /// <para>
+    /// An invoke whose handler exits the application can lose the call with the process: UI
+    /// Automation is still returning when the provider goes. The act was delivered, the exit is what
+    /// it did, and the step after it that claims the exit is the check — so the act lands, saying so,
+    /// with nothing read after it, since there is no element left to read.
+    /// </para>
+    /// </summary>
+    public string? Exited { get; internal init; }
+
+    /// <summary>
     /// Whether anything the element reports actually moved. False is a real answer and not an
     /// error: an act asked for is not an act that landed, and this is the difference.
     /// </summary>
@@ -129,7 +140,7 @@ public sealed record ActResult
         WaitedMs = WaitedMs,
         Polls = Polls,
         Verdict = Attempted ? StepVerdict.Ok : StepVerdict.Unchecked,
-        Detail = Attempted ? Repaired : Needed!.Absence,
+        Detail = Attempted ? Repaired ?? Exited : Needed!.Absence,
 
         // WW517. What the condition said about having been met, where it had something to say. An
         // act with no precondition at all, and one whose precondition being met says everything,
@@ -145,6 +156,10 @@ public sealed record ActResult
         // never performed is a sentence a reader acts on, and it would be describing the desk.
         if (!Attempted)
             return $"{Verb} {Named} was not attempted: {Needed!.Absence}";
+
+        // WW617. Nothing was read after an act the application exited during, so no reading is said.
+        if (Exited is not null)
+            return $"{Verb} {Named} via {Pattern}: {Exited}";
 
         var moved = Changed
             ? $"{Before.Reading() ?? "nothing"} -> {After.Reading() ?? "nothing"}"

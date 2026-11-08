@@ -8,8 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW617** (deps: —) **An invoke whose handler exits the application can throw, since the process dies while UI Automation is returning** — A case about an exit breaks on the act before its exit claim is read, and the red names a COM error instead of the application. → §WW617
-
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed

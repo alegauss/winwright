@@ -369,6 +369,39 @@ public static class Act
     /// act and not after it, so nothing here ever touches a control that could not take it.
     /// </summary>
     /// <exception cref="NotActionableException">Where the element cannot take the act.</exception>
+    /// <summary>The process an element belongs to, or zero where it will not say. WW617.</summary>
+    private static int Owner(AutomationElement element)
+    {
+        try
+        {
+            return element.Current.ProcessId;
+        }
+        catch (Exception unreadable) when (unreadable is ElementNotAvailableException or System.Runtime.InteropServices.COMException)
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>Whether a process has exited, waiting a moment for one that is on its way out. WW617.</summary>
+    private static bool Gone(int pid)
+    {
+        for (var look = 0; look < 20; look++)
+        {
+            try
+            {
+                using var process = System.Diagnostics.Process.GetProcessById(pid);
+                if (process.WaitForExit(50))
+                    return true;
+            }
+            catch (Exception exited) when (exited is ArgumentException or InvalidOperationException)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static ActResult Through(Subject subject, string verb, string pattern, Action<AutomationElement> doing)
     {
         ArgumentNullException.ThrowIfNull(subject);
@@ -377,11 +410,40 @@ public static class Act
         var admitted = Admitted.To(subject, pattern);
         var before = admitted.Reading;
 
-        admitted.Do(doing);
+        // WW617. Read before the act, because a process that has exited can no longer say which it was.
+        var pid = admitted.Do(Owner);
 
-        // Read again through the subject rather than through the element just used: the act may
-        // have replaced what it addressed, and a handle held across it is a handle to what was.
-        var after = subject.Read();
+        // WW617. The act and the read after it, both: a WPF invoke posts the click and returns, so the
+        // process a click closes is as likely to go during the read-back as during the call.
+        Reading after;
+        try
+        {
+            admitted.Do(doing);
+
+            // Read again through the subject rather than through the element just used: the act may
+            // have replaced what it addressed, and a handle held across it is a handle to what was.
+            after = subject.Read();
+        }
+        catch (Exception lost) when (lost is System.Runtime.InteropServices.COMException or ElementNotAvailableException
+            && pid > 0 && Gone(pid))
+        {
+            // The act was delivered and the application exited, which is what a button that closes it
+            // does; the call or the read went with the process. Landed, saying so, and nothing read
+            // after it, since there is no element left. Any other throw stays one.
+            return new ActResult(
+                verb,
+                subject.Locator,
+                pattern,
+                admitted.Facts,
+                before.Values,
+                PatternValues.None,
+                before.Resolution.WaitedMs,
+                before.Resolution.Polls)
+            {
+                Exited = $"the application (pid {pid}) exited during it, so nothing was read after it",
+            };
+        }
+
         return new ActResult(
             verb,
             subject.Locator,

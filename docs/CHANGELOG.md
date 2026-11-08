@@ -251,6 +251,7 @@
 - ✅ **WW607** **A hung guest run brings back only its largest dump, so the application's own dump stays in the guest** — A red guest run brings back every dump: the test host's as hangdump.dmp, each other under its own name and process, and what a size cap left is named (design recorded in `tools/blame-gather.ps1`).
 - ✅ **WW608** **A read after an invoke can run before the handler, and no step waits for a reading to pass through a value** — An act takes "passes": a key whose string must show after it, watched by UIA events and looks armed before it, so a flash is seen (design recorded in `src/Winwright/Asserting/Passing.cs`).
 - ✅ **WW610** **A case cannot put focus on an element before a press, so Enter or Space on a row goes wherever focus already is** — A "focus" act puts the keyboard focus on its element through UI Automation and reads it back, so the press after it lands on that row (design recorded in `README.md`).
+- ✅ **WW617** **An invoke whose handler exits the application can throw, since the process dies while UI Automation is returning** — An act whose application exits during the call or its read-back lands, saying the application exited, so the exit claim after it is what checks it (design recorded in `README.md`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

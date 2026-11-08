@@ -50,6 +50,11 @@ public static class RelaunchPane
 
         quit.Click += (_, _) => Application.Current.Shutdown();
 
+        // WW617. An exit inside the invoke itself: its automation peer exits the process before the
+        // provider call returns, so the client's call goes with the process every time, which a WPF
+        // button's own peer, posting the click and returning, makes happen only sometimes.
+        var now = new ExitingButton { Name = "exitNow", Content = "Exit at once", Width = 160, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
+
         // WW586. A helper the application starts and leaves running, with arguments a case can name:
         // modelado's "Open in Blender" (MOD46), with a program every Windows desk has and no window.
         var helper = new Button { Name = "startsHelper", Content = "Open in helper", Width = 160, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
@@ -64,6 +69,7 @@ public static class RelaunchPane
         var rows = new StackPanel { Name = "relaunchRows", Margin = new Thickness(12) };
         rows.Children.Add(restart);
         rows.Children.Add(quit);
+        rows.Children.Add(now);
         rows.Children.Add(helper);
         rows.Children.Add(said);
 
@@ -76,6 +82,21 @@ public static class RelaunchPane
         // Selected, because a pane nobody picked is in no tree for a case to reach.
         panes.SelectedItem = pane;
         return pane;
+    }
+
+    /// <summary>A button whose automation invoke exits the process inside the call. WW617.</summary>
+    private sealed class ExitingButton : Button
+    {
+        protected override System.Windows.Automation.Peers.AutomationPeer OnCreateAutomationPeer() => new ExitingPeer(this);
+    }
+
+    private sealed class ExitingPeer(Button owner)
+        : System.Windows.Automation.Peers.ButtonAutomationPeer(owner), System.Windows.Automation.Provider.IInvokeProvider
+    {
+        public override object GetPattern(System.Windows.Automation.Peers.PatternInterface patternInterface) =>
+            patternInterface == System.Windows.Automation.Peers.PatternInterface.Invoke ? this : base.GetPattern(patternInterface);
+
+        void System.Windows.Automation.Provider.IInvokeProvider.Invoke() => Environment.Exit(0);
     }
 
     /// <summary>The variable naming the file a clean close counts itself into. WW606.</summary>

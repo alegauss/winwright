@@ -108,6 +108,23 @@ public sealed class RelaunchTests : IDisposable
     }
 
     [Fact]
+    public void An_invoke_whose_click_exits_the_application_at_once_lands_and_the_exit_is_claimed()
+    {
+        // WW617. The click exits the process before it returns, so the invoke's call goes with the
+        // process. That used to break the step on a COM error before the exit claim was read.
+        var verdict = Run("""
+            { "locator": "Button#exitNow", "act": "invoke", "named": "the application is closed at once" },
+            { "process": "exits", "act": "read", "named": "the application exits" }
+            """, "Button#exitNow");
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        var said = Said(verdict);
+        Assert.True(verdict.Outcome == RunOutcome.Passed, said);
+        Assert.Empty(survivors);
+    }
+
+    [Fact]
     [Trait(NoDesk.Key, NoDesk.Free)]
     public void Launching_again_with_no_claimed_exit_before_it_is_refused_where_it_is_written()
     {
