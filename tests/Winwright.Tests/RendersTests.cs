@@ -300,6 +300,72 @@ public sealed class RendersTests : IDisposable
     }
 
     [Fact]
+    public void A_window_left_to_the_backdrop_is_drawn_on_the_themes_background_and_not_on_nothing()
+    {
+        // WW611. claude-tray's T449: a ThemeMode="System" window has a transparent background, the Mica
+        // under it is the compositor's, and the picture came out transparent there, which a viewer
+        // shows as white under dark-theme labels. The theme's own background is what a person sees.
+        var path = Path.Combine(root, "backdrop.png");
+
+        var drawn = Apartment.Run(() =>
+        {
+            var window = Shown(Brushes.Transparent);
+            window.Resources["ApplicationBackgroundBrush"] = new SolidColorBrush(Color.FromRgb(0x20, 0x20, 0x20));
+            return Renders.Drawn(root, Handle(window), path);
+        });
+
+        Assert.True(drawn);
+        Assert.Equal((byte)255, Corner(path).A);
+        Assert.Equal(Color.FromRgb(0x20, 0x20, 0x20), Corner(path) with { A = 255 });
+    }
+
+    [Fact]
+    public void A_backdrop_window_with_no_theme_brush_is_drawn_on_the_systems_base_colour()
+    {
+        var path = Path.Combine(root, "system.png");
+
+        var drawn = Apartment.Run(() => Renders.Drawn(root, Handle(Shown(Brushes.Transparent)), path));
+
+        Assert.True(drawn);
+        var corner = Corner(path);
+        Assert.Equal((byte)255, corner.A);
+        Assert.Contains(corner, new[] { Color.FromRgb(0x20, 0x20, 0x20), Color.FromRgb(0xF3, 0xF3, 0xF3) });
+    }
+
+    [Fact]
+    public void A_window_that_paints_its_own_background_keeps_it()
+    {
+        // The control: a window with an opaque background is drawn on its own colour, whatever the
+        // theme declares, because that is the colour it shows.
+        var path = Path.Combine(root, "opaque.png");
+
+        var drawn = Apartment.Run(() =>
+        {
+            var window = Shown(new SolidColorBrush(Colors.Orange));
+            window.Resources["ApplicationBackgroundBrush"] = new SolidColorBrush(Color.FromRgb(0x20, 0x20, 0x20));
+            return Renders.Drawn(root, Handle(window), path);
+        });
+
+        Assert.True(drawn);
+        Assert.Equal(Colors.Orange, Corner(path));
+    }
+
+    /// <summary>The colour of a pixel inside the window's client area where no control draws.</summary>
+    private static Color Corner(string path)
+    {
+        using var stream = File.OpenRead(path);
+        var frame = System.Windows.Media.Imaging.BitmapDecoder.Create(
+            stream, System.Windows.Media.Imaging.BitmapCreateOptions.None, System.Windows.Media.Imaging.BitmapCacheOption.OnLoad).Frames[0];
+        var converted = new System.Windows.Media.Imaging.FormatConvertedBitmap(frame, PixelFormats.Bgra32, null, 0);
+        var pixel = new byte[4];
+
+        // Below the page's text and its block, at the left: inside the client area and empty. Not a
+        // corner, because a window's render size takes in its frame, which its tree does not draw.
+        converted.CopyPixels(new Int32Rect(10, 100, 1, 1), pixel, 4, 0);
+        return Color.FromArgb(pixel[3], pixel[2], pixel[1], pixel[0]);
+    }
+
+    [Fact]
     public void A_file_outside_the_directory_the_run_named_is_refused_by_the_application()
     {
         // The whole of the guard, and it is the application's refusal rather than the harness's. A
@@ -402,7 +468,7 @@ public sealed class RendersTests : IDisposable
     }
 
     /// <summary>A window that is up and laid out, which is the state a harness would ask about.</summary>
-    private static Window Shown()
+    private static Window Shown(Brush? background = null)
     {
         var window = new Window
         {
@@ -410,7 +476,7 @@ public sealed class RendersTests : IDisposable
             Height = 160,
             Left = 40,
             Top = 40,
-            Background = new SolidColorBrush(Colors.White),
+            Background = background ?? new SolidColorBrush(Colors.White),
             Content = new StackPanel
             {
                 Children =

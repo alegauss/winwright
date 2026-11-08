@@ -1583,6 +1583,14 @@ route exists for them — and so is an off-screen render, which draws the visual
 compositor not involved and so carries nothing from behind the window at all. It is the screen copy
 that a backdrop reaches.
 
+What the render carries in its place is the colour a person sees there. A window that leaves its
+background to the backdrop, such as one set to `ThemeMode="System"`, has a transparent background, and
+the Mica under it is drawn outside the tree. A render of it would be transparent where the window is
+Mica, which a viewer shows as white under dark-theme text. So the in-app render composes, under a window
+whose background is not opaque: the application's `WinwrightCaptureBackground` where it declares one,
+then the theme's `ApplicationBackgroundBrush`, then the base colour Windows draws Mica from in the
+system's light or dark mode. A window with an opaque background is drawn on its own.
+
 A region drawn by a window of its own is not in the visual tree. That covers an `HwndHost` holding
 a Direct3D swapchain, a WinForms control or a browser. The render copies each such region from its
 window, asking the compositor for what it composed (so a DXGI swapchain is included), and draws it

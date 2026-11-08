@@ -22,31 +22,45 @@ message, beside a test that the four names still parse.
 
 ## Block D — Act — patterns before pointers
 
+### §WW617 An act whose application exits during it has landed
+
+Met in the guest on 2026-11-08, in the full run that gated WW611: WW606's own case
+invoked Button#exitOnly on the fixture's relaunch pane, whose click shuts the
+application down, and the step broke with "COMException: Could not open the process
+token". The process was gone while UI Automation was still returning from
+InvokePattern.Invoke. The same invoke had passed in the runs before, so it is a race the
+application wins or loses.
+
+An application whose button exits it is the case WW575 and WW606 exist for: the step
+after the invoke claims 'process: exits'. Breaking on the invoke stops the case before
+that claim is read, and reads as the harness failing.
+
+What to build: in Act.Through, read the element's process id before the act, and where
+the act throws a COMException or ElementNotAvailableException and that process is no
+longer running, return the act as landed with nothing read after it, saying the
+application exited during it. Any other throw stays a throw. Done when an invoke on a
+button that exits synchronously lands every time, with a test whose handler exits inside
+the click.
+
 ## Block E — Capture — the picture that proves what it photographed
 
-### §WW611 A backdrop window rendered in-app
+### §WW616 An in-app render the size of what the tree drew
 
-Met in claude-tray T449, in dark mode: the app's windows set `ThemeMode="System"`, which
-leaves their background to the system backdrop (Mica). Every in-app render of them is
-washed out: `preview.cmd shell`, `panels` and `context` all write a white page with
-near-white labels. Only controls that paint their own fill (an accent button, a selected
-row) read. The cases pass.
+Seen while building WW611, in RendersTests: a 240x160 WPF window with an opaque orange
+background, rendered through Renders.Drawn, read fully transparent at pixel (238, 158).
+Drawn renders the root visual at its RenderSize, and for a Window that size is the outer
+size, frame included, while the tree draws only the client area. So the strip the frame
+takes, along the right and bottom edges, is transparent in every in-app picture of a
+window, and a viewer shows it as white.
 
-Seen with the harness at 0.1.0-alpha.18 and again at 1.1.7, which carries WW583's wait
-for a fade, so it is not a picture taken mid-animation. The window's own background is
-transparent under the backdrop, and DWM draws the backdrop outside the WPF tree the
-render reads. Dark-theme foreground brushes are then composed onto white, because white
-is what an empty pixel becomes.
+Measured so far: that one pixel. Still to measure: the width of the band on each edge at
+100% and at a scaled display, and whether a window with no frame (WindowStyle None) has
+one at all.
 
-What would close it, in the order a reader of the picture would want:
-- When the render's root is a window whose background is transparent or a backdrop, paint the
-  theme's window background (the resolved `ApplicationBackgroundBrush`, or the system window colour
-  for the active theme) under the tree before rendering it. That is what a person sees there.
-- Failing that, refuse the picture as one the engine cannot vouch for, which is the rule `capture`
-  already states, instead of writing it and passing.
-
-No workaround in claude-tray: giving the windows an opaque background would change what
-users see (no Mica) only to make pictures right, which is the wrong way round.
+What to build: render the window's client area at its client size, or crop the picture
+to the area the tree drew, so the picture is the window a person sees inside its frame.
+The receipt's size should then be the client size, said as that. Done when a picture of
+an opaque window has no transparent pixel, with a test reading both bottom corners.
 
 ## Block F — Assert — the expectation is derived, never typed
 

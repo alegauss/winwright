@@ -10,9 +10,11 @@
 
 ## Block D — Act — patterns before pointers
 
+- 📋 **WW617** (deps: —) **An invoke whose handler exits the application can throw, since the process dies while UI Automation is returning** — A case about an exit breaks on the act before its exit claim is read, and the red names a COM error instead of the application. → §WW617
+
 ## Block E — Capture — the picture that proves what it photographed
 
-- 📋 **WW611** (deps: —) **An in-app render of a window whose background is the system backdrop draws dark-theme text on white** — Every preview of a dark-themed Fluent window is unreadable, yet the case passes, so a layout check by picture checks nothing. → §WW611
+- 📋 **WW616** (deps: —) **An in-app render of a window is sized to its frame but drawn to its client area, so its right and bottom edges are blank** — Every in-app picture of a window carries a transparent band a viewer shows as white, and nothing on the receipt says so. → §WW616
 
 ## Block F — Assert — the expectation is derived, never typed
 

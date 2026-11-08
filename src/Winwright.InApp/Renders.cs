@@ -519,7 +519,7 @@ public static class Renders
             // against infinite room is a window laid out as though it had no edges, which is a
             // picture of a layout this application has never drawn.
             var settled = tree.RenderSize is { Width: > 0, Height: > 0 } shown ? shown : (Size?)null;
-            Render.ToFile(tree, path, settled);
+            Render.ToFile(tree, path, settled, Underneath(tree));
             return true;
         }
         catch (UnrenderableException)
@@ -532,6 +532,86 @@ public static class Renders
         catch (IOException)
         {
             // Somewhere it may write and cannot. Same answer, same reason.
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// What a person sees under a window that leaves its background to the system backdrop, or null
+    /// where the window paints its own. WW611.
+    /// <para>
+    /// Found by claude-tray (T449): a window set to <c>ThemeMode="System"</c> has a transparent
+    /// background, and the Mica under it is drawn by the compositor, outside the tree a render reads.
+    /// So the picture was transparent where the window is Mica, a viewer showed that as white, and the
+    /// dark theme's near-white labels sat on it unreadable while every case passed.
+    /// </para>
+    /// <para>
+    /// In the order a reader of the picture would want: the application's own capture key, which is
+    /// how it says what it is painted on; then the theme's <c>ApplicationBackgroundBrush</c>, which the
+    /// Fluent theme resolves for the light or dark mode in force; then the base colour Windows draws
+    /// Mica from in the mode the system is in. A window with an opaque background is left alone, since
+    /// its own tree already paints what is under it.
+    /// </para>
+    /// </summary>
+    /// <param name="tree">The window's root visual.</param>
+    internal static Brush? Underneath(FrameworkElement tree)
+    {
+        var window = tree as Window ?? Window.GetWindow(tree);
+        if (window is null || Opaque(window.Background))
+            return null;
+
+        var chosen = Backgrounds.Choose(tree);
+        if (chosen.From == Backdrop.Theme && chosen.Brush is { } declared)
+            return declared;
+
+        if (Freezables.Shareable(Solid(tree.TryFindResource(ThemeBackgroundKey))) is { } themed)
+            return themed;
+
+        var system = new SolidColorBrush(SystemIsDark() ? DarkBase : LightBase);
+        system.Freeze();
+        return system;
+    }
+
+    /// <summary>The Fluent theme's own window background, resolved for the mode in force. WW611.</summary>
+    internal const string ThemeBackgroundKey = "ApplicationBackgroundBrush";
+
+    /// <summary>The colour Windows 11 draws dark Mica from. WW611.</summary>
+    internal static readonly Color DarkBase = Color.FromRgb(0x20, 0x20, 0x20);
+
+    /// <summary>The colour Windows 11 draws light Mica from. WW611.</summary>
+    internal static readonly Color LightBase = Color.FromRgb(0xF3, 0xF3, 0xF3);
+
+    /// <summary>Whether a window's background covers everything under it.</summary>
+    private static bool Opaque(Brush? background) => background switch
+    {
+        null => false,
+        SolidColorBrush solid => solid.Color.A == 255 && solid.Opacity >= 1,
+        _ => background.Opacity >= 1,
+    };
+
+    /// <summary>A resource as an opaque brush, or null where it is none.</summary>
+    private static Brush? Solid(object? value) => value switch
+    {
+        SolidColorBrush { Color.A: 0 } => null,
+        Brush brush => brush,
+        Color colour when colour.A != 0 => new SolidColorBrush(colour),
+        _ => null,
+    };
+
+    /// <summary>
+    /// Whether the system draws applications dark: <c>AppsUseLightTheme</c> set to zero. Read where
+    /// the setting is, and light where it cannot be read, which is the Windows default.
+    /// </summary>
+    private static bool SystemIsDark()
+    {
+        try
+        {
+            using var personalize = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            return personalize?.GetValue("AppsUseLightTheme") is int light && light == 0;
+        }
+        catch (Exception unreadable) when (unreadable is System.Security.SecurityException or UnauthorizedAccessException or IOException)
+        {
             return false;
         }
     }
