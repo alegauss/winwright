@@ -411,6 +411,10 @@ public sealed class McpTests : IDisposable
                 case Taking.Truth:
                     Assert.Equal("boolean", property["type"]!.GetValue<string>());
                     break;
+                // WW602. A number the loader reads as one, so an agent writes 2 and never "2".
+                case Taking.Whole:
+                    Assert.Equal("integer", property["type"]!.GetValue<string>());
+                    break;
                 case Taking.Words:
                     Assert.Equal("array", property["type"]!.GetValue<string>());
                     Assert.Equal("string", property["items"]!["type"]!.GetValue<string>());

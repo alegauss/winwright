@@ -8,7 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-- 📋 **WW602** (deps: —) **A case cannot double-click, though the engine's pointer can, so what opens on a double click has no case** — Adopters add a second route such as Enter only so a case can reach the command, and the double click itself goes unproven. → §WW602
 - 📋 **WW603** (deps: —) **A click lands only on an element's clickable point, so a spot on a canvas is reached by a drag** — A drag standing in for a click passes only where the app acts on the press, and reds for the wrong reason anywhere else. → §WW603
 - 📋 **WW604** (deps: —) **A drag cannot hold Ctrl, Alt or Ctrl+Alt, so a drop whose edit depends on the key held has no case** — Editors pick insert, swap or duplicate by the key held across the drag, and only the plain drag can be proven. → §WW604
 - 📋 **WW605** (deps: —) **A press of a bare digit loads and then breaks: Enum.TryParse reads it as a traversal key's number** — Number keys that pick an angle, a tool or a rating have no case, and the break reads as the harness's fault, not the case's. → §WW605

@@ -113,6 +113,14 @@ public sealed class Written
         return wrote.TryGetValue(field, out var value) && (bool)value;
     }
 
+    /// <summary>A whole number, null where the case wrote none. WW602.</summary>
+    /// <param name="field">The key, spelled as the file spells it.</param>
+    public int? Whole(string field)
+    {
+        Asked(field, Taking.Whole);
+        return wrote.TryGetValue(field, out var value) ? (int)value : null;
+    }
+
     /// <summary>An array of words, empty where the case wrote none.</summary>
     /// <param name="field">The key, spelled as the file spells it.</param>
     public IReadOnlyList<string> Words(string field)
@@ -161,7 +169,7 @@ public sealed class Written
     public IReadOnlyList<T> Shaped<T>(string field)
     {
         var row = ScenarioSchema.Row(fields, field);
-        if (row.Holds is Taking.Text or Taking.Truth or Taking.Words or Taking.Pairs or Taking.Commands)
+        if (row.Holds is Taking.Text or Taking.Truth or Taking.Whole or Taking.Words or Taking.Pairs or Taking.Commands)
         {
             throw new InvalidOperationException(
                 $"the schema says '{field}' holds {row.Holds}, which is a value and not shapes");
@@ -206,6 +214,7 @@ public sealed class Written
     {
         string => Taking.Text,
         bool => Taking.Truth,
+        int => Taking.Whole,
         IReadOnlyList<string> => Taking.Words,
         IReadOnlyDictionary<string, string> => Taking.Pairs,
         IReadOnlyList<StepDeclaration> => Taking.Steps,

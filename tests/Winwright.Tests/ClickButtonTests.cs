@@ -81,6 +81,69 @@ public sealed class ClickButtonTests
     }
 
     [Fact]
+    public void A_click_presses_once_unless_it_says_twice_and_its_name_says_double_click()
+    {
+        // WW602. wintimeline's WT56: a compound clip opens on a double click and on nothing else.
+        Assert.Equal(1, Wrote.Step("ListItem#row", "click", ("with", "PointerIsTheAct")).Clicks);
+
+        var step = Wrote.Step("ListItem#row", "click", ("with", "PointerIsTheAct"), ("clicks", 2));
+
+        Assert.Equal(2, step.Clicks);
+        Assert.Equal("double click ListItem#row", step.Name);
+        Assert.Equal(1, Wrote.Step("ListItem#row", "click", ("with", "PointerIsTheAct"), ("clicks", 1)).Clicks);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(3)]
+    [InlineData(-1)]
+    public void A_count_other_than_one_or_two_is_refused(int clicks)
+    {
+        var refused = Assert.Throws<ScenarioRefusedException>(
+            () => Wrote.Step("ListItem#row", "click", ("with", "PointerIsTheAct"), ("clicks", clicks)));
+
+        Assert.Contains("a click presses 1 time or 2", refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_count_beside_any_act_but_a_click_is_refused()
+    {
+        var refused = Assert.Throws<ScenarioRefusedException>(
+            () => Wrote.Step("Button#save", "invoke", ("clicks", 2)));
+
+        Assert.Contains("no other act presses", refused.Because, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_file_format_reads_clicks_as_a_number_and_refuses_it_written_as_text()
+    {
+        Assert.Equal(2, Cases("2").Steps[0].Clicks);
+
+        var refused = Assert.Throws<ScenarioRefusedException>(() => Cases("\"2\""));
+        Assert.Contains("has to be a whole number", refused.Because, StringComparison.Ordinal);
+
+        Assert.Throws<ScenarioRefusedException>(() => Cases("1.5"));
+
+        // And the schema an agent reads says so too.
+        Assert.Equal(Taking.Whole, ScenarioSchema.Step.Single(field => field.Name == "clicks").Holds);
+    }
+
+    /// <summary>A file holding one case whose click writes <paramref name="clicks"/> as given.</summary>
+    private static CaseDeclaration Cases(string clicks) => Assert.Single(ScenarioFile.Read("double.cases.json", $$"""
+        {
+          "cases": [
+            {
+              "name": "a row opens on a double click",
+              "steps": [
+                { "locator": "TabItem#secondTab", "act": "click", "with": "PointerIsTheAct", "clicks": {{clicks}} },
+                { "locator": "Text#openedSaid", "act": "read", "reads": "name", "expect": "opened: Second" }
+              ]
+            }
+          ]
+        }
+        """));
+
+    [Fact]
     public void The_file_format_reads_the_button_and_publishes_the_ones_there_are()
     {
         var step = Assert.Single(Assert.Single(ScenarioFile.Read("click.cases.json", """

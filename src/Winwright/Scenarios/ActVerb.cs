@@ -526,17 +526,24 @@ public sealed record ActVerb
     /// <param name="to">Where the act ends, for a verb that <see cref="EndsElsewhere"/>.</param>
     /// <param name="button">Which button a verb that <see cref="PressesAButton"/> presses. WW538.</param>
     /// <param name="holding">The key such a verb holds across its click, or null. WW540.</param>
+    /// <param name="clicks">How many times such a verb presses. WW602.</param>
     /// <exception cref="InvalidOperationException">
     /// Where this verb reads and there is no act to run, or ends elsewhere and was given nowhere —
     /// which the step refuses at load, so reaching it means the two disagree.
     /// </exception>
     internal ActResult Perform(
-        Subject subject, string? argument, Subject? to = null, MouseButton button = MouseButton.Left, HeldKey? holding = null)
+        Subject subject,
+        string? argument,
+        Subject? to = null,
+        MouseButton button = MouseButton.Left,
+        HeldKey? holding = null,
+        int clicks = 1)
     {
-        // WW538 and WW540. The one verb that presses a button and may hold a key; every other one
-        // ignores both, and the step refuses them beside any other verb before anything reaches here.
-        if (PressesAButton && (button != MouseButton.Left || holding is not null))
-            return Synthesised.Click(subject, Because(argument!), button, holding);
+        // WW538, WW540 and WW602. The one verb that presses a button, may hold a key and may press
+        // twice; every other one ignores all three, and the step refuses them beside any other verb
+        // before anything reaches here.
+        if (PressesAButton && (button != MouseButton.Left || holding is not null || clicks != 1))
+            return Synthesised.Click(subject, Because(argument!), button, holding, clicks);
 
         if (onto is not null)
         {

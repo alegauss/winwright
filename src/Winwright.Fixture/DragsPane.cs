@@ -62,10 +62,24 @@ public static class DragsPane
         // The read-out a case reads the order from, in the name as well as the text for WW238's reason.
         var order = new TextBlock { Name = "dragOrder", Margin = new Thickness(0, 8, 0, 0) };
         Said(order, strip);
-        rows.Children.Add(order);
+
+        // WW602. Beside the order and not under it, so nothing a drag case aims at moves.
+        var opened = new TextBlock
+        {
+            Name = "openedSaid",
+            Text = "nothing opened",
+            Margin = new Thickness(24, 8, 0, 0),
+        };
+        System.Windows.Automation.AutomationProperties.SetName(opened, opened.Text);
+
+        var readOuts = new StackPanel { Orientation = Orientation.Horizontal };
+        readOuts.Children.Add(order);
+        readOuts.Children.Add(opened);
+        rows.Children.Add(readOuts);
 
         Reorderable(strip, order);
         ClosedByTheMiddleButton(strip, order);
+        OpenedByADoubleClick(strip, opened);
 
         // WW530. A note dragged out of this window onto another one, and the read-out the drop is
         // reported in, here, where the case's next step can read it. Beside the title and above the
@@ -237,6 +251,26 @@ public static class DragsPane
             strip.Items.Remove(tab);
             Said(order, strip);
             e.Handled = true;
+        };
+    }
+
+    /// <summary>
+    /// A double click on a tab opens it, said in <paramref name="opened"/>. WW602.
+    /// <para>
+    /// Found by wintimeline (WT56): a compound clip opens on a double click and on nothing else, and a
+    /// case could not press twice. A single click selects the tab and opens nothing, which is the
+    /// control: a case that passes here pressed twice inside the system's double-click time.
+    /// </para>
+    /// </summary>
+    private static void OpenedByADoubleClick(TabControl strip, TextBlock opened)
+    {
+        strip.PreviewMouseLeftButtonDown += (_, e) =>
+        {
+            if (e.ClickCount != 2 || Under(strip, e.GetPosition(strip)) is not { } tab)
+                return;
+
+            opened.Text = $"opened: {tab.Header}";
+            System.Windows.Automation.AutomationProperties.SetName(opened, opened.Text);
         };
     }
 

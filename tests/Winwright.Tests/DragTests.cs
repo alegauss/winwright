@@ -321,6 +321,29 @@ public sealed class DragTests : IDisposable
     }
 
     [Fact]
+    public void A_double_click_on_a_tab_opens_it()
+    {
+        // WW602. wintimeline's WT56 gesture, on the fixture's strip: it opens on a double click only.
+        var verdict = DoubleClicked(2, "opened: Second");
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
+    public void A_single_click_on_the_same_tab_opens_nothing()
+    {
+        // The control: the same step pressing once selects the tab and opens nothing, so the case
+        // above passing means two presses landed inside the system's double-click time.
+        var verdict = DoubleClicked(1, "nothing opened");
+        if (verdict is null || BusyDesk.Excused(verdict))
+            return;
+
+        Assert.True(verdict.Outcome == RunOutcome.Passed, Said(verdict));
+    }
+
+    [Fact]
     public void A_left_click_on_the_same_tab_closes_nothing()
     {
         // The control: the same step on the primary button selects the tab and leaves the strip whole.
@@ -423,6 +446,51 @@ public sealed class DragTests : IDisposable
         using var register = ProcessRegister.For(project);
 
         var verdict = Suite.Launch(ScenarioFile.Read("click.cases.json", cases), Selection.All, register, project);
+
+        register.StopAll();
+        return verdict;
+    }
+
+    /// <summary>
+    /// Click the strip's second tab <paramref name="clicks"/> times and read what opened, or null
+    /// where this desk cannot observe. WW602.
+    /// </summary>
+    private SuiteVerdict? DoubleClicked(int clicks, string expected)
+    {
+        if (!Desk.Read().CanObserve)
+            return null;
+
+        var declaration = Path.Combine(root, ProjectDeclaration.FileName);
+        File.WriteAllText(
+            declaration,
+            $$"""
+            {
+              "executable": {{System.Text.Json.JsonSerializer.Serialize(Fixture.Executable())}},
+              "timeouts": { "launch": 30000, "resolve": 4000, "act": 4000, "poll": 25 }
+            }
+            """);
+
+        var cases = $$"""
+            {
+              "fixtures": [ { "name": "a strip opened by a double click", "arguments": ["--drags", "--show"] } ],
+              "cases": [
+                {
+                  "name": "a tab is clicked some number of times",
+                  "catches": "a tab opened by a double click, with no step that could press twice",
+                  "fixture": "a strip opened by a double click",
+                  "steps": [
+                    { "locator": "TabItem#secondTab", "act": "click", "with": "PointerIsTheAct", "clicks": {{clicks}} },
+                    { "locator": "Text#openedSaid", "act": "read", "reads": "name", "expect": "{{expected}}" }
+                  ]
+                }
+              ]
+            }
+            """;
+
+        var project = ProjectDeclaration.Load(declaration);
+        using var register = ProcessRegister.For(project);
+
+        var verdict = Suite.Launch(ScenarioFile.Read("double.cases.json", cases), Selection.All, register, project);
 
         register.StopAll();
         return verdict;

@@ -2862,7 +2862,7 @@ public static class CaseRun
         // subject to hand the vocabulary and the two points go straight to the act.
         var acted = step.Verb.Reads ? null
             : step.From is { } from ? Acting.Synthesised.DragWithin(subject, from, step.ToPoint!)
-            : step.Verb.Perform(subject, step.Argument, to, step.Button, step.Holding);
+            : step.Verb.Perform(subject, step.Argument, to, step.Button, step.Holding, step.Clicks);
 
         if (step.Moves)
             return Moved(step, subject, acted, was);

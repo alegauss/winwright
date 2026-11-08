@@ -450,6 +450,7 @@ public sealed class ScenarioFile
             {
                 Taking.Text => Text(at, element, fields, field.Name),
                 Taking.Truth => Truth(at, element, fields, field.Name),
+                Taking.Whole => Whole(at, element, fields, field.Name),
                 Taking.Words => Words(at, element, fields, field.Name),
                 Taking.Pairs => Pairs(at, element, fields, field.Name),
                 Taking.Placed => Placed(at, element, fields, field.Name),
@@ -700,6 +701,22 @@ public sealed class ScenarioFile
         }
 
         return read;
+    }
+
+    /// <summary>
+    /// A whole number, or null where the case wrote none. WW602. Boxed, because what the loader hands
+    /// on is the value or the absence of one, and an absent number is not zero.
+    /// </summary>
+    private static object? Whole(string at, JsonElement element, IReadOnlyList<Field> fields, string key)
+    {
+        ScenarioSchema.Of(fields, key, Taking.Whole);
+        if (!element.TryGetProperty(key, out var value) || value.ValueKind == JsonValueKind.Null)
+            return null;
+
+        if (value.ValueKind != JsonValueKind.Number || !value.TryGetInt32(out var whole))
+            throw new ScenarioRefusedException($"{at}.{key}", $"it is {Kind(value)} and it has to be a whole number");
+
+        return whole;
     }
 
     private static bool Truth(string at, JsonElement element, IReadOnlyList<Field> fields, string key)

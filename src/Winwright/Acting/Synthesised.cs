@@ -112,16 +112,32 @@ public static class Synthesised
     /// <param name="because">Why the pattern route was unavailable.</param>
     /// <param name="button">Which button.</param>
     /// <param name="holding">The key held down, or null for none.</param>
-    public static ActResult Click(Subject subject, PointerReason because, MouseButton button, HeldKey? holding)
+    public static ActResult Click(Subject subject, PointerReason because, MouseButton button, HeldKey? holding) =>
+        Click(subject, because, button, holding, clicks: 1);
+
+    /// <summary>
+    /// The same click pressed more than once. WW602: two presses in one batch at one point is a
+    /// double click, which is what opens a compound clip or a row on a double click and on nothing else.
+    /// </summary>
+    /// <param name="subject">What to press.</param>
+    /// <param name="because">Why the pattern route was unavailable.</param>
+    /// <param name="button">Which button.</param>
+    /// <param name="holding">The key held down, or null for none.</param>
+    /// <param name="clicks">How many presses.</param>
+    public static ActResult Click(Subject subject, PointerReason because, MouseButton button, HeldKey? holding, int clicks)
     {
         ArgumentNullException.ThrowIfNull(subject);
 
         var before = subject.Read();
-        var clicked = Pointer.Click(subject, because, button, holding: holding);
+        var clicked = Pointer.Click(subject, because, button, clicks, holding: holding);
 
-        // The button and the key are said only where they are not what every click used to be, so a
-        // plain left click's line reads exactly as it did before either existed.
+        // The button, the key and the count are said only where they are not what every click used to
+        // be, so a plain left click's line reads exactly as it did before any of them existed.
         var extra = new List<string>();
+        if (clicks == 2)
+            extra.Add("double click");
+        else if (clicks != 1)
+            extra.Add($"{clicks} clicks");
         if (button != MouseButton.Left)
             extra.Add($"{button.ToString().ToLowerInvariant()} button");
         if (holding is { } key)

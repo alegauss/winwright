@@ -8,31 +8,6 @@
 
 ## Block D — Act — patterns before pointers
 
-### §WW602 Double click from a case
-
-Met in wintimeline on 2026-11-04 (WT56, opening a compound clip). Its design says a
-double-click on a compound clip on the GPU-drawn timeline opens it in a sub-view, and
-the line's criterion asks for a UI case that double-clicks one. The step that was
-wanted:
-
-{ "locator": "Pane#TimelineSurface > ListItem#V1-1", "act": "click", "with":
-"PointerIsTheAct", "clicks": 2, "named": "the compound is double-clicked" }
-
-The engine already has the gesture: Pointer.DoubleClick in
-src/Winwright/Acting/Pointer.cs (PointerAct.Clicks, "which is how a double click is
-said"). But nothing in the case grammar reaches it. Scenarios has no clicks key and no
-"double click" act, so a case file cannot say it. The workaround in wintimeline is a
-second route to the same command: Enter on a selected compound opens it. The case
-presses Enter, and the double-click is left without a case, with this line's id beside
-it in the case file.
-
-What winwright should offer: a click step that takes "clicks": 2 (or an act "double
-click"), sent as one input batch at the system's double-click interval and distance,
-with the same holding, button and PointerIsTheAct rules as click, and the step's name in
-the report saying it ("double click Pane#... > ListItem#V1-1"). Done when a case
-double-clicks a list row that opens on a double click only, with a test over the refusal
-of clicks other than 1 and 2.
-
 ### §WW603 Click at a point of an element
 
 Met in wintimeline on 2026-11-04 (WT57, heat lanes on the timeline's overview strip).

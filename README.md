@@ -1120,6 +1120,17 @@ A button that is not one is refused with the three there are, rather than fallin
 one, because a typo that clicks with the primary button is a case about the wrong gesture that reads
 green. `button` beside any act but `click` is refused.
 
+A click presses once unless the step says **`clicks`**: `2` is a double click, both presses sent in
+one batch at the same point, so they land inside the system's double-click time. It is for what opens
+on a double click and on nothing else, and the report names the step `double click …`:
+
+```json
+{ "locator": "ListItem#V1-1", "act": "click", "with": "PointerIsTheAct", "clicks": 2 }
+```
+
+`clicks` is a number, not text. Any count but `1` and `2` is refused, and so is `clicks` beside any
+act but `click`.
+
 `read` is the one verb that touches nothing. It resolves, reads, and claims what it read, which is
 what a case checking a label after a save actually wants — and what it stops the case from doing is
 naming `select` on a text label to get there, which says the case moved something and turns a check

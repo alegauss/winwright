@@ -367,6 +367,17 @@ public sealed record StepDeclaration
     /// </summary>
     public Acting.HeldKey? Holding => Held(Wrote.Trimmed("holding"));
 
+    /// <summary>
+    /// How many times a <c>click</c> presses: 1 where the case named none, 2 for a double click.
+    /// WW602.
+    /// <para>
+    /// Found by wintimeline (WT56): a compound clip opens on a double click, the engine's pointer
+    /// already sent one, and a case could not say it, so the case pressed Enter instead and the
+    /// double click had no case.
+    /// </para>
+    /// </summary>
+    public int Clicks => Wrote.Whole("clicks") ?? 1;
+
     /// <summary>The keys a click may hold, as the format spells them. WW540.</summary>
     public static IReadOnlyList<string> HeldKeys { get; } =
         Enum.GetValues<Acting.HeldKey>().Select(one => one.ToString().ToLowerInvariant()).ToList();
@@ -1201,6 +1212,9 @@ public sealed record StepDeclaration
         // WW540. The key held across it, judged the same way and for the same reasons.
         var holding = Holds(subject, act, wrote.Trimmed("holding"));
 
+        // WW602. How many presses, judged the same way and for the same reasons.
+        var clicks = Counts(subject, act, wrote.Whole("clicks"));
+
         var reading = ReadBack.Named(wrote.Text("reads"));
 
         // WW250. Compiled at the door for the timeout's sake, and because a pattern that does not
@@ -1220,6 +1234,10 @@ public sealed record StepDeclaration
         // WW538. A click with another button says so in the name a report shows, because a trace
         // reading "click Tab#second" about a middle click sends the reader to the wrong gesture.
         var described = parsed is null ? subject : Describing(act.Name, parsed.Text);
+        // WW602. "double click", the way a person says it.
+        if (called is null && clicks == 2)
+            described = $"double {described}";
+
         if (called is null && button != Acting.MouseButton.Left)
             described = $"{button.ToString().ToLowerInvariant()} {described}";
 
@@ -1480,6 +1498,34 @@ public sealed record StepDeclaration
         return Held(written) ?? throw new ScenarioRefusedException(
             subject,
             $"it holds '{written}', and a click holds {string.Join(" or ", HeldKeys.Select(one => $"'{one}'"))}");
+    }
+
+    /// <summary>
+    /// How many times a step's click presses, judged against its verb. WW602. Refused beside any verb
+    /// but <c>click</c>, and any count but 1 and 2: a triple click selects a paragraph in some editors
+    /// and nothing in most, and a case is about a gesture somebody can name.
+    /// </summary>
+    /// <param name="subject">What a refusal calls this step.</param>
+    /// <param name="act">The verb.</param>
+    /// <param name="written">The count as the case wrote it, or null.</param>
+    private static int Counts(string subject, ActVerb act, int? written)
+    {
+        if (written is null)
+            return 1;
+
+        if (!act.PressesAButton)
+        {
+            throw new ScenarioRefusedException(
+                subject,
+                $"it presses {written} times and acts with '{act.Name}'; 'clicks' is how many times a "
+                    + $"'{ActVerb.Clicks}' presses, and no other act presses");
+        }
+
+        return written is 1 or 2
+            ? written.Value
+            : throw new ScenarioRefusedException(
+                subject,
+                $"it presses {written} times, and a click presses 1 time or 2, which is a double click");
     }
 
     /// <summary>
