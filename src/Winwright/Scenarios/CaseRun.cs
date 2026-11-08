@@ -1690,8 +1690,26 @@ public static class CaseRun
             ? read
             : null;
 
+        // WW608. Resolved once, before the attempts, for the reason a declared label is: a key that
+        // cannot be read is the case being wrong, and it says so before anything is pressed.
+        Label? passing = null;
+        if (step.Passes is { } passes)
+        {
+            try
+            {
+                passing = Labels.For(passes, project);
+            }
+            catch (UnusableLabelException unusable)
+            {
+                throw new ScenarioRefusedException(step.Name, unusable.Message);
+            }
+        }
+
         var cap = step.Retryable ? project.Attempts : 1;
-        var attempted = Retry.Bounded(() => Attempting(step, subject, backTo, declared), one => one.Held, cap);
+        var attempted = Retry.Bounded(
+            () => Attempting(step, subject, backTo, declared, passing is null ? null : (root, passing)),
+            one => one.Held,
+            cap);
         var landed = attempted.Last;
 
         // WW366. Where the act's own line is, so the expectation below can go back and say what the
@@ -2873,8 +2891,16 @@ public static class CaseRun
     }
 
     private static Landed Attempting(
-        StepDeclaration step, Subject subject, string? backTo = null, string? declared = null)
+        StepDeclaration step,
+        Subject subject,
+        string? backTo = null,
+        string? declared = null,
+        (AutomationElement Root, Label Label)? passing = null)
     {
+        // WW608. Armed before the act, and the one claim that has to be: what the act's handler shows
+        // and takes away again is gone before anything after the act could look.
+        using var watch = passing is { } watching ? Passing.Arm(watching.Root, watching.Label) : null;
+
         // WW229. Read before the act and only where a step claims movement, because that is the one
         // claim whose other half is a moment that has already gone. Everything else compares a
         // reading to a string the case wrote down, and needs no before.
@@ -2905,6 +2931,9 @@ public static class CaseRun
 
         if (step.Moves)
             return Moved(step, subject, acted, was);
+
+        if (watch is not null)
+            return Passed(step, subject, acted, watch);
 
         if (step.Answers)
             return Answered(step, subject, acted);
@@ -2957,6 +2986,37 @@ public static class CaseRun
             subject.PollMs);
 
         return new Landed(acted, expectation, saw);
+    }
+
+    /// <summary>
+    /// A step claiming its act made a declared string show somewhere in the window. WW608.
+    /// <para>
+    /// The watch was armed before the act, so this waits, over the act budget, for anything it heard
+    /// or a look finds. A string already showing before the act is a failure that says so: its
+    /// showing afterwards says nothing about what the act started.
+    /// </para>
+    /// </summary>
+    private static Landed Passed(StepDeclaration step, Subject subject, ActResult? acted, Passing watch)
+    {
+        var wanted = $"'{watch.Text}' ({watch.Key}) shown after the act";
+        if (watch.Before is { } already)
+        {
+            var before = $"'{watch.Text}' ({watch.Key}) was already showing as {already} before the act, so its showing after says nothing about it";
+            return new Landed(acted, Expect.That(step.Name, wanted, () => before, 1, 1), acted?.Element);
+        }
+
+        var notYet = watch.Listening
+            ? $"'{watch.Text}' ({watch.Key}) not seen, heard or looked for, since the act"
+            : $"'{watch.Text}' ({watch.Key}) not seen by any look since the act (the window took no listener, so a flash between looks was missed)";
+
+        var expectation = Expect.That(
+            step.Name,
+            wanted,
+            () => watch.Seen() is null ? notYet : wanted,
+            subject.ActMs,
+            subject.PollMs);
+
+        return new Landed(acted, expectation, acted?.Element);
     }
 
     /// <summary>

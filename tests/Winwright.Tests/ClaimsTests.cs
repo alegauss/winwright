@@ -72,6 +72,9 @@ public class ClaimsTests
         // No 'reads' beside it: the claim is about the window while the step waited rather than
         // about what the element ends up saying.
         ("never", () => Wrote.Step("Text", "read", ("never", "labels.stale"))),
+
+        // WW608. On an act and never a read: the claim is about what the act started.
+        ("passes", () => Wrote.Step("Button", "invoke", ("passes", "scan.scanning"))),
         ("covers", () => Wrote.Step("Text", "read", ("covers", "stats.tab"))),
         ("coversAtLeast", () => Wrote.Step("Text", "read", ("coversAtLeast", "stats.tab"))),
         ("coversWithin", () => Wrote.Step("MenuItem", "read", ("coversWithin", "profiles"))),

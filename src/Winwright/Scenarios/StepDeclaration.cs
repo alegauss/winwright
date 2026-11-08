@@ -501,6 +501,23 @@ public sealed record StepDeclaration
     public string? Never => Wrote.Trimmed("never");
 
     /// <summary>
+    /// The key whose string must show somewhere in the window after this step's act, watched from
+    /// before the act; or null where the step makes another claim. WW608.
+    /// <para>
+    /// Found by claude-tray (T435): a rescan's invoke returns before its handler runs, so a read after
+    /// it ran before the rescan and passed on the build that dropped the selection. The page shows
+    /// <c>Scanning…</c> while it works, and the claim that it did is the evidence the rescan happened.
+    /// It cannot be read afterwards, since the line is gone by then, so the watch is armed before the
+    /// act and listens for the window's names changing, which catches a flash a poll would miss.
+    /// </para>
+    /// <para>
+    /// <see cref="Never"/> turned around, and a key for the same reason: a phrase written in a case is
+    /// one a translation rewrites.
+    /// </para>
+    /// </summary>
+    public string? Passes => Wrote.Trimmed("passes");
+
+    /// <summary>
     /// Whether this step claims everything under the locator that announces anything announces a
     /// name — and that something does.
     /// <para>
@@ -1115,6 +1132,7 @@ public sealed record StepDeclaration
             Claiming(Discloses, "discloses", "the act put something under the locator");
             Claiming(PointsAt is not null, pointedAs, $"the reading is compared with '{PointsAt}'");
             Claiming(Never is not null, "never", $"'{Never}' is never shown while this waits");
+            Claiming(Passes is not null, "passes", $"'{Passes}' shows after the act");
             Claiming(Spoken, "spoken", "everything under the locator that speaks is named");
             Claiming(
                 stringed is not null,
@@ -2387,6 +2405,27 @@ public sealed record StepDeclaration
                 $"it claims '{forbidden}' never shows and names the '{named}' reading; the "
                     + "claim is about the window while this step waited, and the locator is what "
                     + "says when the waiting is over");
+        }
+
+        // WW608. A claim about what the act started, so a read, which starts nothing, has nothing for
+        // it to be about; and a reading beside it narrows nothing, for the reason it narrows 'never'.
+        if (step.Passes is { } passing)
+        {
+            if (step.Verb.Reads)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims '{passing}' shows after its act and acts with '{step.Verb.Name}', which "
+                        + "starts nothing; 'passes' rides on the act whose handler shows it, such as an 'invoke'");
+            }
+
+            if (named is not null)
+            {
+                throw new ScenarioRefusedException(
+                    subject,
+                    $"it claims '{passing}' shows after its act and names the '{named}' reading; the claim "
+                        + "is about the whole window, where the string may show anywhere");
+            }
         }
     }
 

@@ -85,6 +85,7 @@ public static class DragsPane
         readOuts.Children.Add(order);
         readOuts.Children.Add(opened);
         readOuts.Children.Add(digit);
+        Rescanning(readOuts);
         rows.Children.Add(readOuts);
         rows.Loaded += (_, _) => CountsDigits(Window.GetWindow(rows), digit);
 
@@ -263,6 +264,50 @@ public static class DragsPane
             Said(order, strip);
             e.Handled = true;
         };
+    }
+
+    /// <summary>The line a rescan shows while it works, and takes away when it is done. WW608.</summary>
+    public const string Scanning = "Scanning the projects";
+
+    /// <summary>
+    /// Two buttons whose work runs after the invoke returns, as a WPF click's handler does: one shows
+    /// <see cref="Scanning"/> for a moment before saying it is done, and the other only says it is done.
+    /// WW608.
+    /// <para>
+    /// Found by claude-tray (T435): a rescan's invoke returned before the rescan ran, so a read after it
+    /// read the state before the rescan, and the line the page shows while scanning was the one
+    /// evidence it ran. The quiet button is the control: the same end state, with the line never shown.
+    /// </para>
+    /// </summary>
+    private static void Rescanning(Panel into)
+    {
+        var said = new TextBlock { Name = "scanSaid", Text = "idle", Margin = new Thickness(24, 8, 0, 0) };
+        System.Windows.Automation.AutomationProperties.SetName(said, said.Text);
+
+        void Say(string text)
+        {
+            said.Text = text;
+            System.Windows.Automation.AutomationProperties.SetName(said, text);
+        }
+
+        var rescan = new Button { Name = "rescanButton", Content = "Rescan", Margin = new Thickness(24, 4, 0, 0) };
+        rescan.Click += (_, _) => rescan.Dispatcher.BeginInvoke(
+            async () =>
+            {
+                Say(Scanning);
+                await Task.Delay(150);
+                Say("scanned");
+            },
+            System.Windows.Threading.DispatcherPriority.Background);
+
+        var quiet = new Button { Name = "quietButton", Content = "Rescan quietly", Margin = new Thickness(8, 4, 0, 0) };
+        quiet.Click += (_, _) => quiet.Dispatcher.BeginInvoke(
+            () => Say("scanned"),
+            System.Windows.Threading.DispatcherPriority.Background);
+
+        into.Children.Add(rescan);
+        into.Children.Add(quiet);
+        into.Children.Add(said);
     }
 
     /// <summary>

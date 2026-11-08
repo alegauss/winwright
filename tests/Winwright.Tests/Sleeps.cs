@@ -130,6 +130,10 @@ internal static class Sleeps
                 + "overshoots by more than a third of an interval at twenty-five frames a second. "
                 + "WW198: two, and the second is that spin — it was described here and counted "
                 + "nowhere, which is the whole of what that task was about"),
+        new("DragsPane.cs", 1, Sleeping.UnderTest,
+            "WW608: the fixture's rescan holds its scanning line for a moment before it says it is done, "
+                + "which is the flash a 'passes' claim has to see; the application under test pausing, "
+                + "never a scenario waiting"),
         new("Program.cs", 1, Sleeping.UnderTest,
             "the fixture parks a thread without pumping, which is the whole of what --pump=none "
                 + "reproduces: a single-threaded apartment that blocks any other way keeps answering "

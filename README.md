@@ -924,6 +924,22 @@ that number is the whole strength of a negative claim. A locator that never arri
 holding on having seen nothing, and an absence found by a walk that did not reach the whole window is
 a hole and not a pass.
 
+**`passes`** is `never` turned around, and it rides on an act: it names a key whose string must show
+somewhere in the window after the act. It exists because a WPF `invoke` returns before the click's
+handler runs, so a read after it can run before the handler and pass on the build that broke it.
+claude-tray's rescan shows *Scanning…* while it works and takes the line away when it is done:
+
+```json
+{ "locator": "Button#RescanButton", "act": "invoke", "passes": "context.scanning" },
+{ "locator": "#ProjectList > ListItem[order=top]", "act": "read", "reads": "selected", "expect": "selected" }
+```
+
+The watch starts before the act. It listens for names changing anywhere in the window and for elements
+arriving, and it also looks on every poll, so a line shown for less than a poll is still seen. Seeing
+the string at any point up to the `act` deadline holds. Never seeing it fails, naming the key. A string
+that was already showing before the act fails too, because its showing afterwards says nothing about
+what the act did. `passes` beside a `read` is refused, since a read starts nothing.
+
 A step with no `expect` is an act and not a check: it moves the window into the state a later step
 reads. An act that survives being repeated is attempted again where its read-back does not arrive; one
 that does not — `toggle`, `invoke` — gets a single go, because a retried toggle fails about the

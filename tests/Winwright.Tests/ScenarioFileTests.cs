@@ -268,7 +268,7 @@ public class ScenarioFileTests
                 "locator", "tray", "file", "process", "act", "with", "holding", "button", "at", "clicks", "to", "from", "toDesktop", "expect", "reads", "moves", "answers", "empty", "matches", "discloses",
                 "sameAs", "unlike", "sameCountdownAs", "contains", "label", "expectReported", "notLabel", "beginsWithLabel",
                 "endsWithLabel", "notEndsWithLabel", "absent",
-                "ownHeader", "eachSpoken", "spoken", "never", "covers",
+                "ownHeader", "eachSpoken", "spoken", "never", "passes", "covers",
                 "coversAtLeast", "coversWithin", "within", "fillsMonitor", "image", "sameBytesAs", "meansIt", "popup", "waits", "named",
             ],
             ScenarioSchema.Step.Select(field => field.Name));

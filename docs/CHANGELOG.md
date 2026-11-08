@@ -248,6 +248,7 @@
 - ✅ **WW605** **A press of a bare digit loads and then breaks: Enum.TryParse reads it as a traversal key's number** — A press of a bare digit is a chord and reaches the window as that digit; the press reads traversal keys by name only, never by number.
 - ✅ **WW606** **A case cannot start the application again after it exits, to read what a clean close left for the next run** — A process step "launched again" starts the app the way its fixture did after a claimed exit, without restaging files, so later steps read what the close kept (design recorded in `README.md`).
 - ✅ **WW607** **A hung guest run brings back only its largest dump, so the application's own dump stays in the guest** — A red guest run brings back every dump: the test host's as hangdump.dmp, each other under its own name and process, and what a size cap left is named (design recorded in `tools/blame-gather.ps1`).
+- ✅ **WW608** **A read after an invoke can run before the handler, and no step waits for a reading to pass through a value** — An act takes "passes": a key whose string must show after it, watched by UIA events and looks armed before it, so a flash is seen (design recorded in `src/Winwright/Asserting/Passing.cs`).
 
 ## Block E — Capture — the picture that proves what it photographed
 

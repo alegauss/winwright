@@ -22,38 +22,6 @@ message, beside a test that the four names still parse.
 
 ## Block D — Act — patterns before pointers
 
-### §WW608 Waiting out what an invoke started
-
-Met in claude-tray T435 (a Context rescan used to drop the "All projects" selection).
-The case it wanted, against `--context --window --sample --observing --lang en`:
-
-```json
-{ "locator": "#ProjectList > ListItem[order=top]", "act": "select", "expect": "selected", "reads": "selected" },
-{ "locator": "Button#RescanButton", "act": "invoke" },
-{ "locator": "#ProjectList > ListItem[order=top]", "act": "read", "reads": "selected", "expect": "selected" }
-```
-
-The last read cannot tell a rescan that kept the row from one that has not happened yet.
-WPF's `InvokePattern.Invoke` posts the click, so the read can run before the handler
-starts, and the row is still selected then on the broken build too. The case passes on
-the defect it exists for.
-
-Nothing in the grammar waits for the act's consequence. The page shows `Scanning…` in
-`Text#ScanInfo` while it works, but `absent` on that text passes before the handler has
-set it, and `unlike` against the footer read before the click fails whenever the new
-footer is word for word the old one (a warm fixture scan often is).
-
-Workaround: a scratch UI Automation script in the session scratchpad, not in the repo.
-It selects through `SelectionItemPattern`, invokes, sleeps 4 s and reads `IsSelected`.
-It went red on the old logic and green on the fix, but no case in `cases\` holds it, so
-the next rescan regression ships.
-
-What would close it: the claim rides on the act step, armed before `Invoke`, since a
-later read cannot see a value that already passed. Something like `"passes":
-"context.scanning"` (a key, as `never` takes) on the invoke, read at a second locator
-such as `Text#ScanInfo` through UI Automation events, since polls miss a short flash. A
-value never seen is a failure naming it.
-
 ### §WW610 Enter and Space on a focused element
 
 Met in claude-tray T438, which made the Sessions rows, the live chart's project strip
