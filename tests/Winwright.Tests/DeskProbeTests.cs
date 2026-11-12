@@ -430,6 +430,117 @@ public sealed class DeskProbeTests
         }
     }
 
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void A_crash_report_written_during_the_run_comes_back_saying_what_faulted_and_an_older_one_does_not()
+    {
+        // WW623. The fixture died once in a guest run with 0xC0000409 after the Open dialog, and the
+        // run carried only the exit code. A fail-fast leaves no dump the collector writes; it leaves a
+        // Windows Error Reporting report, and that is where the faulting module is. Here two reports
+        // are laid out as WER lays them out, in UTF-16, one written before the run began and one after.
+        var where = Directory.CreateTempSubdirectory("winwright-ww623-").FullName;
+        var sync = Directory.CreateTempSubdirectory("winwright-ww623-sync-").FullName;
+        var wer = Directory.CreateTempSubdirectory("winwright-ww623-wer-").FullName;
+        var script = Path.Combine(Path.GetTempPath(), $"winwright-ww623-{Guid.NewGuid():N}.ps1");
+        var began = DateTime.Now.AddMinutes(-5);
+
+        try
+        {
+            // A fail-fast is reported as BEX64, which puts the offset before the code.
+            var now = Report(
+                wer, "BEX64_Winwright.Fixtu_new", "BEX64", @"C:\src\winwright\bin\Winwright.Fixture.exe",
+                ["Winwright.Fixture.exe", "1.0.0.0", "68a0", "ucrtbase.dll", "10.0.26100.1882", "1a2b", "000000000009e3ab", "c0000409", "0000000000000007"]);
+            File.SetLastWriteTime(now, began.AddMinutes(2));
+
+            // The guest's own .NET crash, as WER wrote it there: an exception type and no module code.
+            var managed = Report(
+                wer, "AppCrash_powershell.exe_mid", "CLR20r3", @"C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe",
+                ["powershell.exe", "10.0.26100.9818", "82dca377", "Anonymously Hosted DynamicMethods Assembly", "0.0.0.0", "0", "0", "ffffffff", "FatalError"]);
+            File.SetLastWriteTime(managed, began.AddMinutes(3));
+
+            var old = Report(
+                wer, "AppCrash_explorer.exe_old", "APPCRASH", @"C:\Windows\explorer.exe",
+                ["explorer.exe", "10.0.26100.1", "1", "shell32.dll", "10.0.26100.1", "2", "c0000005", "0000000000001234"]);
+            File.SetLastWriteTime(old, began.AddMinutes(-30));
+
+            File.WriteAllText(
+                script,
+                $"""
+                . '{Checkout.At("tools", "blame-gather.ps1")}' -DefineOnly
+                Invoke-BlameGather -Results '{where}' -Sync '{sync}' -Since ([datetime]'{began:o}') -WerRoots @('{wer}')
+                """);
+            Answered(script);
+
+            Assert.Equal(
+                [
+                    "blame-crash-1.wer|Winwright.Fixture.exe (BEX64): exception c0000409 in ucrtbase.dll 10.0.26100.1882 at offset 000000000009e3ab",
+                    "blame-crash-2.wer|powershell.exe (CLR20r3): FatalError in Anonymously Hosted DynamicMethods Assembly 0.0.0.0, method 0 at IL offset ffffffff",
+                ],
+                File.ReadAllLines(Path.Combine(sync, "blame-crashes.txt")));
+            Assert.Equal(File.ReadAllBytes(now), File.ReadAllBytes(Path.Combine(sync, "blame-crash-1.wer")));
+            Assert.False(File.Exists(Path.Combine(sync, "blame-crash-3.wer")), "a report from before the run came back as this run's");
+            Assert.Contains("2 crash report(s)", File.ReadAllText(Path.Combine(sync, "blame.txt")), StringComparison.Ordinal);
+
+            // And the runner hands the gather the tree its clock reads, and says each crash.
+            var runner = Runner();
+            Assert.Contains("'-Tree', $script:GuestRepo)", runner, StringComparison.Ordinal);
+            Assert.Contains("Write-Host \"  crash       $summary\"", runner, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(script);
+            Directory.Delete(where, recursive: true);
+            Directory.Delete(sync, recursive: true);
+            Directory.Delete(wer, recursive: true);
+        }
+    }
+
+    [Fact]
+    [Trait(NoDesk.Key, NoDesk.Free)]
+    public void A_gather_given_no_start_reads_no_crash_report_at_all()
+    {
+        // WW623, the control. The cases above run the gather on whatever machine runs the suite, and
+        // its real reports are not theirs: without a start the gather reads none.
+        var where = Directory.CreateTempSubdirectory("winwright-ww623-none-").FullName;
+        var sync = Directory.CreateTempSubdirectory("winwright-ww623-none-sync-").FullName;
+        var script = Path.Combine(Path.GetTempPath(), $"winwright-ww623-{Guid.NewGuid():N}.ps1");
+
+        try
+        {
+            File.WriteAllText(script, Gathering(where, sync));
+            Answered(script);
+
+            Assert.False(File.Exists(Path.Combine(sync, "blame-crashes.txt")));
+        }
+        finally
+        {
+            File.Delete(script);
+            Directory.Delete(where, recursive: true);
+            Directory.Delete(sync, recursive: true);
+        }
+    }
+
+    /// <summary>
+    /// A Report.wer as Windows Error Reporting writes one, UTF-16 with its mark, its signature named in
+    /// a pt-BR guest's words, which is why the gather reads positions and not names. WW623.
+    /// </summary>
+    private static string Report(string root, string folder, string eventType, string appPath, string[] signature)
+    {
+        var at = Directory.CreateDirectory(Path.Combine(root, folder)).FullName;
+        var path = Path.Combine(at, "Report.wer");
+        var lines = new List<string> { "Version=1", $"EventType={eventType}" };
+        for (var index = 0; index < signature.Length; index++)
+        {
+            lines.Add($"Sig[{index}].Name=Assinatura do Problema {index + 1:00}");
+            lines.Add($"Sig[{index}].Value={signature[index]}");
+        }
+
+        lines.Add("AppName=a friendly name");
+        lines.Add($"AppPath={appPath}");
+        File.WriteAllText(path, string.Join("\r\n", lines), System.Text.Encoding.Unicode);
+        return path;
+    }
+
     [Theory]
     [Trait(NoDesk.Key, NoDesk.Free)]
     [InlineData("testhost_10400_hangdump.dmp", "the test host")]

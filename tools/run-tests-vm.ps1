@@ -1662,7 +1662,7 @@ $null = Invoke-VmRun -Guest -Arguments @('createDirectoryInGuest', $vmxPath, $sc
 # WW406: and the three the blame gather leaves, for exactly that reason one file further out. They
 # live beside the sync and outlive the tree, so a run that ends cleanly would otherwise copy back the
 # dump of the run before it - which is worse than no dump, because it is a dump with a date on it.
-foreach ($stale in @('vm-exit.txt', 'vm-run.log', 'sync.log', 'blame.dmp', 'blame-sequence.xml', 'blame.txt', 'blame-dumps.txt')) {
+foreach ($stale in @('vm-exit.txt', 'vm-run.log', 'sync.log', 'blame.dmp', 'blame-sequence.xml', 'blame.txt', 'blame-dumps.txt', 'blame-crashes.txt')) {
     $null = Invoke-VmRun -Guest -Arguments @('deleteFileInGuest', $vmxPath, "$script:GuestSync\$stale")
 }
 
@@ -1921,7 +1921,8 @@ if ($code -ne 0) {
         '-NoProfile', '-ExecutionPolicy', 'Bypass',
         '-File', "$script:GuestSync\blame-gather.ps1",
         '-Results', "$script:GuestRepo\$script:ResultsIn",
-        '-Sync', $script:GuestSync)
+        '-Sync', $script:GuestSync,
+        '-Tree', $script:GuestRepo)
 
     $note = Join-Path $stage 'blame.txt'
     $null = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\blame.txt", $note)
@@ -1972,6 +1973,26 @@ if ($code -ne 0) {
                     $fetchedHere.Add($kept)
                 }
                 else { Write-Host "              $name ($owner) did not come back: $($fetched.Output)" -ForegroundColor Yellow }
+            }
+        }
+
+        # WW623. What crashed in the guest during this run, by Windows Error Reporting's own report:
+        # a fail-fast leaves no dump the collector writes, only an exit code a case reports, and
+        # the report is where the faulting module and offset are. Said one line each, and kept.
+        $crashList = Join-Path $stage 'blame-crashes.txt'
+        $crashed = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\blame-crashes.txt", $crashList)
+        if ($crashed.Ok -and (Test-Path -LiteralPath $crashList)) {
+            $crash = 0
+            foreach ($row in ((Read-ConsoleText $crashList) -split "`r?`n" | Where-Object { $_ })) {
+                $sent, $summary = $row -split '\|', 2
+                $crash++
+                $kept = Join-Path $results "crash-$crash.wer"
+                $fetched = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\$sent", $kept)
+                Write-Host "  crash       $summary" -ForegroundColor Yellow
+                if ($fetched.Ok) {
+                    Write-Host "              $kept"
+                    $fetchedHere.Add($kept)
+                }
             }
         }
 

@@ -22,8 +22,6 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
-- 📋 **WW623** (deps: —) **The fixture died once with 0xC0000409 right after a file was chosen in the Open dialog, and nothing kept why** — An intermittent fail-fast in the proving ground arrives as an exit code with no faulting module, so it cannot be told from a defect. → §WW623
-
 ## Block L — The documentation area — written for a reader who has installed nothing
 
 ## Block M — The site on the shared design system

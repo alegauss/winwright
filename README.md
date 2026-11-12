@@ -1792,7 +1792,10 @@ files under `-ResultsIn`, as a list or joined by commas (`-Bring robot.glb,robot
 through `run-tests-vm.cmd`). An adopter's `-Run` gets every one of them back whether it passed or not,
 and each that did not come back is named. `-Run` is run in the
 guest as a line typed at a prompt: a chain joined by `&` or `&&` is logged whole and exits with the
-code a prompt would give, and a `for %B` loop means what it means there. **That the runner can carry
+code a prompt would give, and a `for %B` loop means what it means there. On a red run, every
+Windows Error Reporting report the guest wrote during the run comes back as `crash-N.wer`, with a
+`crash` line saying what faulted (the executable, the exception, the module or the .NET exception type,
+and where), so a process that died arrives with more than its exit code. **That the runner can carry
 two trees is why it prints which one it took** — otherwise a green is a green about whichever tree
 the caller believed they named.
 
