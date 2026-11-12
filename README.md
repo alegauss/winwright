@@ -1368,6 +1368,24 @@ binary it drove:
 { "name": "the installed copy", "application": "%LOCALAPPDATA%\\Programs\\Modelado\\Modelado.exe" }
 ```
 
+`activates` starts the application through a file's association instead of an executable, the way
+Open with or a double-click in Explorer does, and `through` names the ProgID it goes through. The
+ProgID is required, because the default handler is the desk's choice and a case about whichever
+application this machine opens the file with is not a case about yours. The file is written the way
+`workingDirectory` is. The run refuses, before anything starts, a file that is not there, an extension
+with no association, a ProgID that is not registered, and one that does not claim the type (as the
+type's default or under its `OpenWithProgids`). The process the shell starts is held like a launch and
+stopped with the case; what that process starts in turn is not tracked, and the fixture's line in a
+report says so. An activation that starts no process of its own, or whose process exits before it can
+be held, which is how a single-instance application hands a file to its running copy, is refused and
+never attached to. `activates` beside `application`, `arguments`, `variables`, `unset`, an environment
+or `resident` is refused, since the activation carries none of them. A packaged application's user
+model ID is not accepted yet; name the ProgID the package registers for the type:
+
+```json
+{ "name": "opened the way Open with does", "activates": "cases/fixtures/cube.glb", "through": "Modelado.glb" }
+```
+
 `opens` is a folder the fixture opens in Explorer beside the window under test, for a case that drops
 something onto it. It is written the way `workingDirectory` is, relative to the project's root or
 naming `{files}`, and created where it is not there. After the launch the two windows are put side by

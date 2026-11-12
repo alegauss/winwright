@@ -520,38 +520,11 @@ public static class Suite
         // that the launch set none and inherited whichever one the test runner happened to be in.
         var fixture = staged.Fixture;
 
-        // WW575. The fixture's own executable where it names one, such as the installed copy.
-        var start = staged.Starting(fixture.Launches(project.Executable, staged.Root));
-
-        // WW349. Where pictures go is the project's, and it is also the one directory this run may
-        // ask the application to write into — so the launch says so rather than an operator setting
-        // it by hand. The application still decides whether to answer at all, and a build that never
-        // called Renders.Answer answers nothing however this is set.
-        //
-        // After the fixture's own variables and not before: a fixture that names this deliberately
-        // is a fixture saying something about where its renders go, and a run overwriting that would
-        // be the launch quietly disagreeing with the declaration it was started from.
-        if (project.Declares("captures") && !start.Environment.ContainsKey(Capturing.OwnRender.RendersInto))
-            start.Environment[Capturing.OwnRender.RendersInto] = project.Captures;
-
-        // WW531. The register is told which case this is for, so a process that outlives it is named
-        // by that case and not by a pid that has gone by the time anybody reads it.
-        // WW567. The declaration being wrong, and said as that: an executable Windows cannot start
-        // is the same on every run, and the throw it was ended the MCP server that ran it.
-        LaunchedProcess launched;
-        try
-        {
-            launched = register.Launch(start, named, lent);
-        }
-        catch (System.ComponentModel.Win32Exception refused)
-        {
-            throw new ScenarioRefusedException(
-                named,
-                $"'{start.FileName}' could not be started from {start.WorkingDirectory} — {refused.Message}; "
-                    + (fixture.Application.Length > 0
-                        ? $"the fixture's 'application' resolves against the project's root, {staged.Root}"
-                        : $"the executable in {project.Path} resolves against the directory it sits in"));
-        }
+        // WW619. A fixture that activates a file starts no executable of its own: the shell starts
+        // what the association says, and the process it started is taken on and waited for like any.
+        var launched = fixture.Activating(staged.Root) is { } activating
+            ? Activated(register, staged, activating, named)
+            : Started(register, project, staged, named, lent);
 
         var deadline = project.Timeouts.For(WindowTimeout);
 
@@ -576,8 +549,10 @@ public static class Suite
         {
             // WW606. A process that left without a window is said as that, and not as a wait that ran
             // out: a single-instance application whose last copy still held its lock exits at once.
+            // WW619. A process taken on rather than started here has no exit code this run may read:
+            // Windows answers one only to the object that started it, and asking threw.
             var gone = launched.HasExited
-                ? $"; its process exited with code {launched.ExitCode} without drawing one, which a "
+                ? $"; its process exited{(launched.Adopted ? "" : $" with code {launched.ExitCode}")} without drawing one, which a "
                     + "single-instance application does where a copy before it still holds its lock"
                 : "";
             throw new ScenarioRefusedException(
@@ -586,6 +561,96 @@ public static class Suite
         }
 
         return (AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle), launched);
+    }
+
+    /// <summary>Start the fixture's executable through the register. The launch <see cref="Opened"/> makes when nothing is activated.</summary>
+    private static LaunchedProcess Started(
+        ProcessRegister register, ProjectDeclaration project, StagedFixture staged, string named, bool lent)
+    {
+        var fixture = staged.Fixture;
+
+        // WW575. The fixture's own executable where it names one, such as the installed copy.
+        var start = staged.Starting(fixture.Launches(project.Executable, staged.Root));
+
+        // WW349. Where pictures go is the project's, and it is also the one directory this run may
+        // ask the application to write into — so the launch says so rather than an operator setting
+        // it by hand. The application still decides whether to answer at all, and a build that never
+        // called Renders.Answer answers nothing however this is set.
+        //
+        // After the fixture's own variables and not before: a fixture that names this deliberately
+        // is a fixture saying something about where its renders go, and a run overwriting that would
+        // be the launch quietly disagreeing with the declaration it was started from.
+        if (project.Declares("captures") && !start.Environment.ContainsKey(Capturing.OwnRender.RendersInto))
+            start.Environment[Capturing.OwnRender.RendersInto] = project.Captures;
+
+        // WW531. The register is told which case this is for, so a process that outlives it is named
+        // by that case and not by a pid that has gone by the time anybody reads it.
+        // WW567. The declaration being wrong, and said as that: an executable Windows cannot start
+        // is the same on every run, and the throw it was ended the MCP server that ran it.
+        try
+        {
+            return register.Launch(start, named, lent);
+        }
+        catch (System.ComponentModel.Win32Exception refused)
+        {
+            throw new ScenarioRefusedException(
+                named,
+                $"'{start.FileName}' could not be started from {start.WorkingDirectory} — {refused.Message}; "
+                    + (fixture.Application.Length > 0
+                        ? $"the fixture's 'application' resolves against the project's root, {staged.Root}"
+                        : $"the executable in {project.Path} resolves against the directory it sits in"));
+        }
+    }
+
+    /// <summary>
+    /// Activate the fixture's file through its ProgID and take on the process the shell started. WW619.
+    /// <para>
+    /// Every refusal here is about the declaration or the desk and never about the application: a
+    /// file that is not there, a type nothing claims, a ProgID that does not claim it, and an
+    /// activation the shell handed to a copy already running. The last is said and never attached
+    /// to, because a window this run did not cause is not the window the case is about.
+    /// </para>
+    /// </summary>
+    private static LaunchedProcess Activated(ProcessRegister register, StagedFixture staged, string file, string named)
+    {
+        var fixture = staged.Fixture;
+        if (!System.IO.File.Exists(file))
+            throw new ScenarioRefusedException(named, $"'{fixture.Name}' activates '{fixture.Activates}', which is not a file — it resolved to {file}");
+
+        if (Processes.Activation.Unclaimed(file, fixture.Through) is { } unclaimed)
+            throw new ScenarioRefusedException(named, $"'{fixture.Name}' cannot activate {file}: {unclaimed}");
+
+        // WW549, as a launch does it: the right to come forward is the creator's at the moment it creates.
+        var lifted = Windowing.ForegroundLock.Lift();
+
+        int? pid;
+        try
+        {
+            pid = Processes.Activation.Activate(file, fixture.Through, fixture.StartsIn(staged.Root));
+        }
+        catch (System.ComponentModel.Win32Exception refused)
+        {
+            throw new ScenarioRefusedException(
+                named, $"'{fixture.Name}' activated {file} through '{fixture.Through}' and the shell refused — {refused.Message}");
+        }
+
+        if (pid is not { } started)
+        {
+            throw new ScenarioRefusedException(
+                named,
+                $"'{fixture.Name}' activated {file} through '{fixture.Through}' and the shell started no process of its "
+                    + "own — the activation went to a copy already running, or to something answering without one, and "
+                    + "this run attaches to neither");
+        }
+
+        if (lifted)
+            Windowing.ForegroundLock.Hand(started);
+
+        return register.Adopt(started, named)
+            ?? throw new ScenarioRefusedException(
+                named,
+                $"'{fixture.Name}' activated {file} through '{fixture.Through}', and process {started} it started had "
+                    + "exited before it could be held — a single-instance application hands a file to its running copy that way");
     }
 
     /// <summary>

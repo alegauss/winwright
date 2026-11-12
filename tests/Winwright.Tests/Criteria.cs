@@ -309,6 +309,11 @@ internal static class Criteria
         // a green reporting a claim nothing had read back, which is the admission the bucket exists
         // to keep honest.
 
+        new("WW619", "A packaged app's file opens through its AUMID", "", Unshown.NotBuilt,
+            "activating by ProgID shipped and ActivatesTests reads it in the guest; an AUMID in 'through' "
+                + "is refused until ActivateForFile is built, and its proof needs an MSIX the guest can "
+                + "register only with Developer Mode on"),
+
         // WW86's criterion stood here and went with the line. Check-Interaction.ps1 is deleted in
         // claude-tray, its last claim is `cases/icon.cases.json`, and every case passed there against
         // 0.1.0-alpha.18, which carries WW486's click on a hidden icon. Nothing there runs the script

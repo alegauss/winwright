@@ -4,7 +4,7 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW619** (deps: —) (from: modelado) **A fixture cannot start the application through a file's association, as Open with or a double-click in Explorer does** — A packaged app's file association can only be proven by a script beside the case, and the activation itself stays unread. → §WW619
+- ⏳ **WW619** (deps: —) (from: modelado) **A fixture cannot start the application through a file's association, as Open with or a double-click in Explorer does** — Activating a packaged app's file by AUMID needs an MSIX registered in a guest with Developer Mode on. → §WW619
 - 📋 **WW620** (deps: —) (from: modelado) **A fixture cannot follow the window a launcher's child process draws, so an app reached via a launcher is unobserved** — A packaged app reached only through its CLI alias, or any launcher stub, cannot be driven by a case at all. → §WW620
 - 📋 **WW621** (deps: —) (from: modelado) **A run refused because an earlier run's app still holds the guest tree offers only the guest console or a snapshot revert** — Any run whose -Run died, that -Bound gave up on or that was killed leaves the tree held, and the only remedy named is the guest console. → §WW621
 
@@ -159,6 +159,13 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
+
+## Done when — WW619
+
+- **A packaged app's file opens through its AUMID** A guest run with Developer Mode on
+  registers an unsigned MSIX layout of the fixture declaring a type, and a case whose
+  'through' is its AUMID reads the window ActivateForFile opened, with an AUMID not
+  declaring the type refused.
 
 ## Non-goals
 

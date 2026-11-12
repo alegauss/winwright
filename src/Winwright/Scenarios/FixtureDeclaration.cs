@@ -301,6 +301,33 @@ public sealed record FixtureDeclaration
             : System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(Resolved(Opens, root, "opens")), root);
     }
 
+    /// <summary>
+    /// The file this launch activates through its association, as declared — relative to the
+    /// project's root or naming a token — or empty where it starts an executable. WW619.
+    /// <para>
+    /// Found by Modelado (MOD75, MOD78): the claim was that a model opened the way Open with opens it
+    /// lands in the window, and a fixture could only start the executable with the path as an
+    /// argument. Activated through <see cref="Through"/> and never the default handler, which is the
+    /// desk's choice. The process the shell starts is taken on as an adopted one, so it is stopped
+    /// with its case, and what that process starts in turn is not tracked.
+    /// </para>
+    /// </summary>
+    public string Activates { get; private init; } = "";
+
+    /// <summary>The ProgID <see cref="Activates"/> goes through, or empty where it activates nothing. WW619.</summary>
+    public string Through { get; private init; } = "";
+
+    /// <summary>The file <see cref="Activates"/> names, resolved, or null where it activates none. WW619.</summary>
+    /// <param name="root">The project's root.</param>
+    public string? Activating(string root)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(root);
+
+        return Activates.Length == 0
+            ? null
+            : System.IO.Path.GetFullPath(System.Environment.ExpandEnvironmentVariables(Resolved(Activates, root, "activates")), root);
+    }
+
     /// <summary>The token the arguments and variables name <see cref="Reaches"/>' first address by. WW522.</summary>
     public const string FirstReach = "{reach0}";
 
@@ -346,6 +373,7 @@ public sealed record FixtureDeclaration
         Files.Count > 0
         || WorkingDirectory.Contains(Staged, StringComparison.Ordinal)
         || Opens.Contains(Staged, StringComparison.Ordinal)
+        || Activates.Contains(Staged, StringComparison.Ordinal)
         || Arguments.Any(argument => argument.Contains(Staged, StringComparison.Ordinal))
         || Variables.Values.Any(value => value.Contains(Staged, StringComparison.Ordinal))
         || Before.Any(NamesStaged);
@@ -408,6 +436,8 @@ public sealed record FixtureDeclaration
     /// <param name="unset">The inherited variables the launch removes, by name. WW564.</param>
     /// <param name="application">The executable this launch starts instead of the project's. WW575.</param>
     /// <param name="before">The commands run once the files are staged and before the launch. WW582.</param>
+    /// <param name="activates">The file to activate through its association instead of starting an executable. WW619.</param>
+    /// <param name="activatesThrough">The ProgID that activation goes through, written 'through' in a case file. WW619.</param>
     /// <exception cref="ScenarioRefusedException">
     /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not
     /// one, or files are declared that neither the launch nor a step reaches.
@@ -428,10 +458,14 @@ public sealed record FixtureDeclaration
         bool stepsNameStaged = false,
         IEnumerable<string>? unset = null,
         string? application = null,
-        IEnumerable<BeforeCommand>? before = null)
+        IEnumerable<BeforeCommand>? before = null,
+        string? activates = null,
+        string? activatesThrough = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
         var opening = Opened(called, opens, shareable);
+        var (activating, by) = Activated(
+            called, activates, activatesThrough, environment, flag, arguments, variables, unset, application, resident);
         if (string.IsNullOrWhiteSpace(name))
             throw new ScenarioRefusedException(called, "a fixture is named, because a report says which one a case ran against");
 
@@ -568,6 +602,7 @@ public sealed record FixtureDeclaration
             && !commands.Exists(NamesStaged)
             && !starting.Contains(Staged, StringComparison.Ordinal)
             && !opening.Contains(Staged, StringComparison.Ordinal)
+            && !activating.Contains(Staged, StringComparison.Ordinal)
             && !rest.Any(argument => argument.Contains(Staged, StringComparison.Ordinal))
             && !set.Values.Any(value => value.Contains(Staged, StringComparison.Ordinal)))
         {
@@ -613,7 +648,80 @@ public sealed record FixtureDeclaration
         {
             Application = application?.Trim() ?? "",
             Before = new ReadOnlyCollection<BeforeCommand>(commands),
+            Activates = activating,
+            Through = by,
         };
+    }
+
+    /// <summary>
+    /// The file a fixture activates and the ProgID it goes through, as written, or a refusal. WW619.
+    /// <para>
+    /// The two come together or not at all: a file with no ProgID would be opened by the desk's own
+    /// default, and a ProgID with no file activates nothing. Beside anything that decides what an
+    /// executable is started with — its arguments, its variables, the executable itself — it is
+    /// refused, because the shell starts what the association says, with what it says, and that
+    /// field would reach the launch nowhere. A resident activation is refused for the reason a
+    /// resident launch waits for no window: the activation is the window being asked for.
+    /// </para>
+    /// </summary>
+    private static (string File, string ProgId) Activated(
+        string called,
+        string? activates,
+        string? through,
+        string? environment,
+        string? flag,
+        IEnumerable<string>? arguments,
+        IReadOnlyDictionary<string, string>? variables,
+        IEnumerable<string>? unset,
+        string? application,
+        bool resident)
+    {
+        if (activates is null && through is null)
+            return ("", "");
+
+        if (string.IsNullOrWhiteSpace(activates))
+            throw new ScenarioRefusedException(called, "it names a ProgID in 'through' and no file in 'activates' to activate through it");
+
+        if (string.IsNullOrWhiteSpace(through))
+        {
+            throw new ScenarioRefusedException(
+                called,
+                "it activates a file and names no ProgID in 'through' — the default handler is the desk's choice, so a case "
+                    + "would be about whichever application this machine happens to open it with");
+        }
+
+        var progId = through.Trim();
+        if (progId.Contains('!', StringComparison.Ordinal))
+        {
+            throw new ScenarioRefusedException(
+                called,
+                $"'{progId}' is a packaged application's user model ID, and activating a file through one is not supported "
+                    + "yet — name the ProgID the package registers for the type");
+        }
+
+        var beside = new List<string>();
+        if (!string.IsNullOrWhiteSpace(environment) || !string.IsNullOrWhiteSpace(flag))
+            beside.Add("an environment");
+        if (arguments?.Any() == true)
+            beside.Add("'arguments'");
+        if (variables?.Count > 0)
+            beside.Add("'variables'");
+        if (unset?.Any() == true)
+            beside.Add("'unset'");
+        if (!string.IsNullOrWhiteSpace(application))
+            beside.Add("'application'");
+        if (resident)
+            beside.Add("'resident'");
+
+        if (beside.Count > 0)
+        {
+            throw new ScenarioRefusedException(
+                called,
+                $"it activates a file and also declares {string.Join(" and ", beside)}, which the activation never "
+                    + "carries — the shell starts what the association says, with what it says");
+        }
+
+        return (activates.Trim(), progId);
     }
 
     /// <summary>
@@ -1048,6 +1156,10 @@ public sealed record FixtureDeclaration
         // WW575. The binary first among what the launch was, because a run says which one it drove.
         if (Application.Length > 0)
             started = $", launching {Application}{started}";
+
+        // WW619. And for an activation, the file and the class, and that only the first process is held.
+        if (Activates.Length > 0)
+            started = $", activating {Activates} through {Through}, holding the process the shell started and not what it starts{started}";
 
         // WW582. Counted, as the staged files are: which commands ran is the declaration's business.
         if (Before.Count > 0)

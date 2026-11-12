@@ -7,27 +7,27 @@
 ### §WW619 Launching through a file association
 
 From Modelado's MOD75 and MOD78 (11/11/2026). The Store package declares a
-`uap:FileTypeAssociation` for .glb, .obj, .ply and .stl, and the claim to prove is that
-Open with in Explorer lists Modelado and that activating a file through the association
-opens it in the window. A fixture can name an `application` and its `arguments`, and
-`opens` a folder in Explorer, but nothing starts the application the way the shell does
-for a file: through its association (ShellExecute with the file, or
-IApplicationActivationManager.ActivateForFile for a packaged app).
+`uap:FileTypeAssociation` for .glb, .obj, .ply and .stl, and the claim is that
+activating a file through the association opens it in the window.
 
-What the case settled for (`cases-packaged\packaged.cases.json`, fixture "the packaged
-window opened on a model the way Open with does"): the execution alias started with the
-bare path, which is the command line the association runs, plus a registry check in
-`build\check-msix.ps1` that the package's ProgID is under `.glb\OpenWithProgids`. The
-activation itself, and the Open with list, stay unread.
+Landed (12/11/2026): a fixture's `activates` names a file and `through` a ProgID, and
+the launch goes through `ShellExecuteEx` with `SEE_MASK_CLASSNAME`
+(`src/Winwright/Processes/Activation.cs`). An extension with no association, an
+unregistered ProgID and one not claiming the type are refused before anything starts;
+the process the shell started is taken on with `ProcessRegister.Adopt`, outside the
+WW586 job, and the fixture's report line says what it starts is untracked; a process
+gone before it is held, or one that exits without a window, is refused and never
+attached to. `ActivatesTests` proves it in the guest against the fixture app under a
+per-user ProgID.
 
-What winwright should offer: a fixture field such as `"activates": "<file>"` that
-launches through the file's association: ShellExecuteEx with `SEE_MASK_CLASSNAME` and a
-ProgID, or `ActivateForFile` with an AUMID for a packaged app, since the default handler
-is the desk's choice. The broker's process is no child of the run, so it is taken on as
-an adopted process, outside the WW586 job, and the report says what it starts is
-untracked. Cases: an extension with no association, and a ProgID or AUMID not claiming
-the type, are refused with the reason; an activation landing in an instance already
-running is said as that, never attached to silently.
+What is left: a packaged application's user model ID in `through`, which is refused
+today ("not supported yet"). Build it as
+`IApplicationActivationManager.ActivateForFile(aumid, items, "open", out pid)`, the
+items from `SHCreateItemFromParsingName` and `SHCreateShellItemArrayFromShellItem`, and
+the pid handed to the same `Adopt`. Refuse an AUMID whose package does not declare the
+file type. The proof needs an MSIX registered in the guest, and an unsigned layout
+registers only with Developer Mode on (WW618's `-Needs developer-mode`), which the guest
+does not have today, so this waits for a person to turn it on.
 
 ### §WW620 Following the window a launcher's child draws
 
