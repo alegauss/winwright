@@ -252,7 +252,7 @@ public class ScenarioFileTests
             [
                 "name", "environment", "flag", "arguments", "variables", "shareable", "language", "resident",
                 "workingDirectory", "files", "opens", "reaches", "before", "application", "unset",
-                "activates", "through",
+                "activates", "through", "windowOf",
             ],
             ScenarioSchema.Fixture.Select(field => field.Name));
 

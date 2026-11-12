@@ -356,12 +356,15 @@ public static class Suite
                     register.Stop(adopted);
             }
 
-            if (result.ClaimedExit)
+            // WW620. A launcher whose window is a child it started has done its job when it leaves, so
+            // its exit is no early one: what the case is about is the child, stopped with the case.
+            var launcher = fixture.WindowOf.Length > 0 && window != AutomationElement.RootElement && Drew(window) != process.Pid;
+            if (result.ClaimedExit || launcher)
                 register.Claimed(process);
 
             // WW563. What the launch wrote, which the register kept off the runner's own streams.
             result = result.Hearing(process);
-            ran.Add(process.Departed is { } departed && !result.ClaimedExit ? result.After(departed) : result);
+            ran.Add(process.Departed is { } departed && !result.ClaimedExit && !launcher ? result.After(departed) : result);
         }
 
         return Remembered(asked, ran, skipped, project);
@@ -540,10 +543,22 @@ public static class Suite
         if (fixture.Resident)
             return (AutomationElement.RootElement, launched);
 
+        // WW620. Whose window the case is about: the launch's own, or, where the fixture names an
+        // image, a process of that image the launch started.
+        var since = Since(launched);
+        var drawing = launched.Pid;
         var drawn = Attempt.UntilTrue(
-            () => TopLevelWindows.Largest(launched.Pid) is not null,
+            () => (drawing = Drawing(launched, fixture.WindowOf, since) ?? 0) != 0,
             deadline,
             project.Timeouts.For("poll"));
+
+        if (!drawn.Happened && fixture.WindowOf.Length > 0)
+        {
+            throw new ScenarioRefusedException(
+                named,
+                $"'{fixture.Name}' follows the window {fixture.WindowOf} draws, and none drew one in {deadline}ms; "
+                    + $"the launch had started {Started(launched, since)}");
+        }
 
         if (!drawn.Happened)
         {
@@ -560,7 +575,100 @@ public static class Suite
                 $"'{fixture.Name}' drew no window in {deadline}ms, so nothing about this case was observed{gone}");
         }
 
-        return (AutomationElement.FromHandle(TopLevelWindows.Largest(launched.Pid)!.Handle), launched);
+        // WW620. A child outside the launch's job is put in it, so it is stopped with the case; one
+        // Windows will not let the run hold is refused by name rather than left on the desk.
+        if (drawing != launched.Pid && launched.Job is { } job && !job.Hold(drawing))
+        {
+            throw new ScenarioRefusedException(
+                named,
+                $"'{fixture.Name}' found the window {fixture.WindowOf} draws in process {drawing}, which this run "
+                    + "could not hold to stop with the case, so it does not drive it");
+        }
+
+        return (AutomationElement.FromHandle(TopLevelWindows.Largest(drawing)!.Handle), launched);
+    }
+
+    /// <summary>The pid drawing a window, or zero where it has gone and will not say. WW620.</summary>
+    private static int Drew(AutomationElement window)
+    {
+        try
+        {
+            return window.Current.ProcessId;
+        }
+        catch (ElementNotAvailableException)
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>When the launch started, for telling its children from older processes, or null where it will not say. WW620.</summary>
+    private static DateTime? Since(LaunchedProcess launched)
+    {
+        try
+        {
+            return launched.Underlying.StartTime;
+        }
+        catch (Exception unreadable) when (unreadable is InvalidOperationException or System.ComponentModel.Win32Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// The pid drawing the case's window, or null where none does yet. With no image named, the launch
+    /// itself; with one, a process of that image among the launch, its job's members and its
+    /// descendants — the launch included only where it is that image. WW620.
+    /// </summary>
+    private static int? Drawing(LaunchedProcess launched, string windowOf, DateTime? since)
+    {
+        if (windowOf.Length == 0)
+            return TopLevelWindows.Largest(launched.Pid) is not null ? launched.Pid : null;
+
+        foreach (var pid in Spawned(launched, since))
+        {
+            if (Image(pid) is { } image
+                && string.Equals(image, windowOf, StringComparison.OrdinalIgnoreCase)
+                && TopLevelWindows.Largest(pid) is not null)
+            {
+                return pid;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>The launch, its job's members and its descendants younger than it, each once. WW620.</summary>
+    private static List<int> Spawned(LaunchedProcess launched, DateTime? since)
+    {
+        var pids = new List<int> { launched.Pid };
+        if (launched.Job is { } job)
+            pids.AddRange(job.Members());
+
+        if (since is { } started)
+            pids.AddRange(ProcessJob.Descendants(launched.Pid, started));
+
+        return pids.Distinct().ToList();
+    }
+
+    /// <summary>What the launch had started when no window came, by image and pid, for the refusal. WW620.</summary>
+    private static string Started(LaunchedProcess launched, DateTime? since)
+    {
+        var said = Spawned(launched, since).Select(pid => $"{Image(pid) ?? "a process that has gone"} (pid {pid})").ToList();
+        return string.Join(", ", said);
+    }
+
+    /// <summary>A process's image name with its extension, or null where it has gone.</summary>
+    private static string? Image(int pid)
+    {
+        try
+        {
+            using var process = System.Diagnostics.Process.GetProcessById(pid);
+            return process.ProcessName + ".exe";
+        }
+        catch (Exception gone) when (gone is ArgumentException or InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     /// <summary>Start the fixture's executable through the register. The launch <see cref="Opened"/> makes when nothing is activated.</summary>

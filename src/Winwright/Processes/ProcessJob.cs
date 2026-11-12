@@ -198,6 +198,14 @@ internal sealed class ProcessJob : IDisposable
     /// <summary>Let go of the job. Its members end with it, which is what a job closed early is for.</summary>
     public void Dispose() => handle.Dispose();
 
+    /// <summary>
+    /// Put a process the launch started into the job after the fact, so it is stopped with the
+    /// launch. WW620: the window a launcher's child draws, where that child is not already a member.
+    /// False where it has gone or Windows refused.
+    /// </summary>
+    /// <param name="pid">A descendant of the launch.</param>
+    public bool Hold(int pid) => Members().Contains(pid) || Take(pid);
+
     /// <summary>Put one process into the job. False where it has gone or Windows refused.</summary>
     private bool Take(int pid)
     {
@@ -213,7 +221,7 @@ internal sealed class ProcessJob : IDisposable
     }
 
     /// <summary>The processes under <paramref name="root"/> that started at or after <paramref name="since"/>.</summary>
-    private static List<int> Descendants(int root, DateTime since)
+    internal static List<int> Descendants(int root, DateTime since)
     {
         var parents = new Dictionary<int, int>();
         using (var snapshot = CreateToolhelp32Snapshot(SnapProcess, 0))

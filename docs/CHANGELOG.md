@@ -134,6 +134,7 @@
 - ✅ **WW600** **The note after a red run on a 'shell' desk says the tree is not broken, whatever the run excused** — A red run on a 'shell' or 'stale' desk no longer calls the tree fine: the note quotes vm-run.log's excused count, or says the runner cannot tell (design recorded in `tools/desk-note.ps1`).
 - ✅ **WW618** (from: modelado) **A guest run cannot register an unsigned MSIX layout, since Developer Mode is off and no run can turn it on** — -Needs developer-mode is read in the guest before the carry and refused with the setting to change; an unknown need, before the VM (design recorded in `tools/guest-needs.ps1`).
 - ✅ **WW619 (activation through a ProgID)** (from: modelado) **A fixture cannot start the application through a file's association, as Open with or a double-click in Explorer does** — Fixture activates and through start the app via ShellExecuteEx with the ProgID, refusing one not claiming the type.
+- ✅ **WW620** (from: modelado) **A fixture cannot follow the window a launcher's child process draws, so an app reached via a launcher is unobserved** — A fixture's windowOf reads the window an image the launcher started draws, holds that child to stop it with the case, and the launcher leaving is no early exit.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 

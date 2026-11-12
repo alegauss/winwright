@@ -314,6 +314,19 @@ public sealed record FixtureDeclaration
     /// </summary>
     public string Activates { get; private init; } = "";
 
+    /// <summary>
+    /// The image whose window the case is about, such as <c>Modelado.exe</c>, where the launch is a
+    /// launcher that draws nothing itself; empty where the window is the launched process's own. WW620.
+    /// <para>
+    /// Found by Modelado (MOD79): a packaged app reached only through its CLI alias starts the window
+    /// as a child and waits, and the wait asked the launched pid alone, so the case was refused for a
+    /// window that was there. Opt-in and never a default, because a launcher that draws a splash would
+    /// otherwise be the window a case reads. The launcher leaving while that process lives is what a
+    /// launcher does, and is not reported as the application exiting early.
+    /// </para>
+    /// </summary>
+    public string WindowOf { get; private init; } = "";
+
     /// <summary>The ProgID <see cref="Activates"/> goes through, or empty where it activates nothing. WW619.</summary>
     public string Through { get; private init; } = "";
 
@@ -438,6 +451,7 @@ public sealed record FixtureDeclaration
     /// <param name="before">The commands run once the files are staged and before the launch. WW582.</param>
     /// <param name="activates">The file to activate through its association instead of starting an executable. WW619.</param>
     /// <param name="activatesThrough">The ProgID that activation goes through, written 'through' in a case file. WW619.</param>
+    /// <param name="windowOf">The image whose window the case is about, where the launch is a launcher. WW620.</param>
     /// <exception cref="ScenarioRefusedException">
     /// Where the environment reaches the launch nowhere, or reaches it twice, or the language is not
     /// one, or files are declared that neither the launch nor a step reaches.
@@ -460,9 +474,11 @@ public sealed record FixtureDeclaration
         string? application = null,
         IEnumerable<BeforeCommand>? before = null,
         string? activates = null,
-        string? activatesThrough = null)
+        string? activatesThrough = null,
+        string? windowOf = null)
     {
         var called = string.IsNullOrWhiteSpace(name) ? "<unnamed fixture>" : name.Trim();
+        var followed = Followed(called, windowOf, resident);
         var opening = Opened(called, opens, shareable);
         var (activating, by) = Activated(
             called, activates, activatesThrough, environment, flag, arguments, variables, unset, application, resident);
@@ -650,7 +666,31 @@ public sealed record FixtureDeclaration
             Before = new ReadOnlyCollection<BeforeCommand>(commands),
             Activates = activating,
             Through = by,
+            WindowOf = followed,
         };
+    }
+
+    /// <summary>
+    /// The image a fixture follows the window of, as an executable's file name, or a refusal. WW620.
+    /// Blank names nothing; a path is not an image name; and beside <c>resident</c> it is refused,
+    /// because a resident launch waits for no window at all.
+    /// </summary>
+    private static string Followed(string called, string? windowOf, bool resident)
+    {
+        if (windowOf is null)
+            return "";
+
+        if (string.IsNullOrWhiteSpace(windowOf))
+            throw new ScenarioRefusedException(called, "it follows the window of an image and names none in 'windowOf'");
+
+        var image = windowOf.Trim();
+        if (image.IndexOfAny(['\\', '/']) >= 0)
+            throw new ScenarioRefusedException(called, $"'windowOf' is an image name such as Modelado.exe, and '{image}' is a path");
+
+        if (resident)
+            throw new ScenarioRefusedException(called, "it follows the window of an image and is resident, which waits for no window");
+
+        return image.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? image : image + ".exe";
     }
 
     /// <summary>
@@ -1160,6 +1200,10 @@ public sealed record FixtureDeclaration
         // WW619. And for an activation, the file and the class, and that only the first process is held.
         if (Activates.Length > 0)
             started = $", activating {Activates} through {Through}, holding the process the shell started and not what it starts{started}";
+
+        // WW620. Which process the case's window belongs to, where it is not the one launched.
+        if (WindowOf.Length > 0)
+            started += $", reading the window {WindowOf} draws";
 
         // WW582. Counted, as the staged files are: which commands ran is the declaration's business.
         if (Before.Count > 0)

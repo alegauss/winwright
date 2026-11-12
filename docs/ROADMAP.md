@@ -4,7 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW620** (deps: —) (from: modelado) **A fixture cannot follow the window a launcher's child process draws, so an app reached via a launcher is unobserved** — A packaged app reached only through its CLI alias, or any launcher stub, cannot be driven by a case at all. → §WW620
 - 📋 **WW621** (deps: —) (from: modelado) **A run refused because an earlier run's app still holds the guest tree offers only the guest console or a snapshot revert** — Any run whose -Run died, that -Bound gave up on or that was killed leaves the tree held, and the only remedy named is the guest console. → §WW621
 
 ## Block C — Locate — the locator grammar and the tree an agent reads

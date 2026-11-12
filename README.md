@@ -1386,6 +1386,25 @@ model ID is not accepted yet; name the ProgID the package registers for the type
 { "name": "opened the way Open with does", "activates": "cases/fixtures/cube.glb", "through": "Modelado.glb" }
 ```
 
+`windowOf` is for a launch that is a launcher: a CLI alias or a stub that starts the application as
+a child and draws nothing itself. It names the image whose window the case is about, and the wait for
+a window then reads processes of that image among the ones the launch started (its job and its
+descendants), instead of the launched process. A child outside the launch's job is put in it, so it
+is stopped with the case, and one the run cannot hold is refused by name. The launcher leaving while
+the child lives is what a launcher does, and is not reported as the application exiting early. Where
+no process of that image draws a window in `timeouts.launch`, the refusal names every process the
+launch had started. It is never a default, so a launcher's splash is not read instead, and beside
+`resident` it is refused:
+
+```json
+{
+  "name": "through the alias",
+  "application": "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\modelado-cli.exe",
+  "arguments": ["window", "--provider", "cpu"],
+  "windowOf": "Modelado.exe"
+}
+```
+
 `opens` is a folder the fixture opens in Explorer beside the window under test, for a case that drops
 something onto it. It is written the way `workingDirectory` is, relative to the project's root or
 naming `{files}`, and created where it is not there. After the launch the two windows are put side by

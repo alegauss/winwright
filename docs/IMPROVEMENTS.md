@@ -29,33 +29,6 @@ file type. The proof needs an MSIX registered in the guest, and an unsigned layo
 registers only with Developer Mode on (WW618's `-Needs developer-mode`), which the guest
 does not have today, so this waits for a person to turn it on.
 
-### §WW620 Following the window a launcher's child draws
-
-From Modelado's MOD79 (11/11/2026). The Microsoft Store refused a package with a second
-application that has no Start entry (a headless app, HeadlessAppBypass), and an
-application may declare one execution alias, so Modelado's package aliases
-`modelado-cli.exe` alone. From outside the package the window is reached as
-`modelado-cli window [arguments]`: the CLI starts `Modelado.exe` beside it, with package
-identity, and waits until it closes (the Blender add-on follows that process to know
-when its session ends).
-
-`cases-packaged\packaged.cases.json` names that as the fixture's `application`
-(`%LOCALAPPDATA%\Microsoft\WindowsApps\modelado-cli.exe`, arguments `window --provider
-cpu`). winwright waits for the launched process to draw a window, and refuses: "drew no
-window in 10000ms, so nothing about this case was observed". The window is there, in the
-launched process's child.
-
-What the project settled for: `build\check-msix.ps1` starts the alias itself and reads
-the child's window (its process in the package folder, its title), and the three
-packaged cases stay declared but unrun.
-
-Validated 12/11/2026: WW586 already puts each launch in a job that the stop ends, so the
-child needs no new registration; only the window wait (`Suite.cs:570`) asks the launched
-pid alone. Offer an opt-in `"windowOf": "<image>"` that makes the wait ask the job's
-members of that image too, never a default, or a splash draws first. Cases: a packaged
-child outside the job is found by its parent pid or refused by name; a launcher exiting
-while its child lives is not WW606's refusal; no match names what the job held.
-
 ### §WW621 WW621 - A leftover app holding the guest tree
 
 From modelado, MOD81 (11/11/2026). `build\store-shots-vm.ps1` runs `run-tests-vm.ps1

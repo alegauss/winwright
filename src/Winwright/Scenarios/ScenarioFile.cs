@@ -309,7 +309,8 @@ public sealed class ScenarioFile
                 wrote.Text("application"),
                 wrote.Commands("before"),
                 wrote.Text("activates"),
-                wrote.Text("through")));
+                wrote.Text("through"),
+                wrote.Text("windowOf")));
 
             wrote.Handed("fixture");
 
