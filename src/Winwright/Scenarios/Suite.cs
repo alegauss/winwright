@@ -526,7 +526,7 @@ public static class Suite
         // WW619. A fixture that activates a file starts no executable of its own: the shell starts
         // what the association says, and the process it started is taken on and waited for like any.
         var launched = fixture.Activating(staged.Root) is { } activating
-            ? Activated(register, staged, activating, named)
+            ? Activated(register, staged, activating, named, project.Timeouts.For(WindowTimeout))
             : Started(register, project, staged, named, lent);
 
         var deadline = project.Timeouts.For(WindowTimeout);
@@ -719,7 +719,7 @@ public static class Suite
     /// to, because a window this run did not cause is not the window the case is about.
     /// </para>
     /// </summary>
-    private static LaunchedProcess Activated(ProcessRegister register, StagedFixture staged, string file, string named)
+    private static LaunchedProcess Activated(ProcessRegister register, StagedFixture staged, string file, string named, int waitMs)
     {
         var fixture = staged.Fixture;
         if (!System.IO.File.Exists(file))
@@ -734,7 +734,7 @@ public static class Suite
         int? pid;
         try
         {
-            pid = Processes.Activation.Activate(file, fixture.Through, fixture.StartsIn(staged.Root));
+            pid = Processes.Activation.Activate(file, fixture.Through, fixture.StartsIn(staged.Root), waitMs);
         }
         catch (System.ComponentModel.Win32Exception refused)
         {

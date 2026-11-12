@@ -106,6 +106,10 @@ internal static class Deadlines
             + "monitor (WW548). Each look rebuilds its own list every poll, the file is read whole and decoded afresh and both rectangles are "
             + "measured again each time, so what makes it false is what is there now rather than what "
             + "an earlier look kept"),
+        new("Activation.cs", 1, "false while no process running under the packaged application's user "
+            + "model ID has appeared since the activation (WW619). Each look lists the processes again and "
+            + "asks each its ID, so one the broker starts late is seen as it is now, and one that was "
+            + "already running before is never counted as this activation's"),
         new("Following.cs", 2, "false while the process a case follows is still running, and false while "
             + "no new process of the same executable draws a window (WW575). Each look asks Windows for "
             + "the process and the windows again, so an exit or a relaunch is seen as it is now"),

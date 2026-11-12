@@ -22,6 +22,8 @@
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
+- 📋 **WW623** (deps: —) **The fixture died once with 0xC0000409 right after a file was chosen in the Open dialog, and nothing kept why** — An intermittent fail-fast in the proving ground arrives as an exit code with no faulting module, so it cannot be told from a defect. → §WW623
+
 ## Block L — The documentation area — written for a reader who has installed nothing
 
 ## Block M — The site on the shared design system
@@ -153,13 +155,6 @@
 - **A shape exists because a defect existed** Every surface the fixture carries names
   the real defect it reproduces, and one that can name none is removed instead of
   maintained forever.
-
-## Done when — WW619
-
-- **A packaged app's file opens through its AUMID** A guest run with Developer Mode on
-  registers an unsigned MSIX layout of the fixture declaring a type, and a case whose
-  'through' is its AUMID reads the window ActivateForFile opened, with an AUMID not
-  declaring the type refused.
 
 ## Non-goals
 

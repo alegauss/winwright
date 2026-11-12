@@ -1379,11 +1379,20 @@ stopped with the case; what that process starts in turn is not tracked, and the 
 report says so. An activation that starts no process of its own, or whose process exits before it can
 be held, which is how a single-instance application hands a file to its running copy, is refused and
 never attached to. `activates` beside `application`, `arguments`, `variables`, `unset`, an environment
-or `resident` is refused, since the activation carries none of them. A packaged application's user
-model ID is not accepted yet; name the ProgID the package registers for the type:
+or `resident` is refused, since the activation carries none of them.
+
+`through` may instead name a packaged application's user model ID (`<package family name>!<app id>`,
+told from a ProgID by its `!`). The file is then activated the way Explorer opens a Store package's
+file type association: through the `AppX…` ProgID the package registered for the type and names that
+application under. The process is found by its user model ID, and one already running before the
+activation is never taken for it. An ID whose package does not declare the type is refused before
+anything starts.
+Registering an unsigned MSIX layout to test it needs Developer Mode, which the guest runner's
+`-Needs developer-mode` checks:
 
 ```json
 { "name": "opened the way Open with does", "activates": "cases/fixtures/cube.glb", "through": "Modelado.glb" }
+{ "name": "opened in the package", "activates": "cases/fixtures/cube.glb", "through": "Modelado_8wekyb3d8bbwe!App" }
 ```
 
 `windowOf` is for a launch that is a launcher: a CLI alias or a stub that starts the application as

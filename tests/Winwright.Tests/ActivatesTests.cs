@@ -56,8 +56,7 @@ public sealed class ActivatesTests : IDisposable
     [Trait(NoDesk.Key, NoDesk.Free)]
     [InlineData("cube.glb", null, "names no ProgID in 'through'")]
     [InlineData(null, "Modelado.glb", "no file in 'activates'")]
-    [InlineData("cube.glb", "Modelado_abc!App", "user model ID")]
-    public void An_activation_missing_its_half_or_naming_a_packaged_id_is_refused(string? file, string? through, string said)
+    public void An_activation_missing_its_half_is_refused(string? file, string? through, string said)
     {
         var refused = Assert.Throws<ScenarioRefusedException>(
             () => FixtureDeclaration.Of("opened", activates: file, activatesThrough: through));

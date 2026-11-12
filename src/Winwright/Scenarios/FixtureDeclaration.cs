@@ -730,14 +730,9 @@ public sealed record FixtureDeclaration
                     + "would be about whichever application this machine happens to open it with");
         }
 
+        // WW619's second half: a packaged application's user model ID is taken as well as a ProgID,
+        // and the activation goes through ActivateForFile for it.
         var progId = through.Trim();
-        if (progId.Contains('!', StringComparison.Ordinal))
-        {
-            throw new ScenarioRefusedException(
-                called,
-                $"'{progId}' is a packaged application's user model ID, and activating a file through one is not supported "
-                    + "yet — name the ProgID the package registers for the type");
-        }
 
         var beside = new List<string>();
         if (!string.IsNullOrWhiteSpace(environment) || !string.IsNullOrWhiteSpace(flag))
