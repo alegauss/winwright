@@ -51,3 +51,6 @@ declared = ["release"]
 name = "winwright"
 description = "Drives a Windows desktop app from a test and reports what was actually observed."
 icon = "🪄"
+
+[install]
+wired = "0.2.576"

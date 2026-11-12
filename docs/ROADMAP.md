@@ -4,6 +4,11 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW618** (deps: —) (from: modelado) **A guest run cannot register an unsigned MSIX layout, since Developer Mode is off and no run can turn it on** — Every packaged-app check an adopter writes fails at its first step, and the task waits on a person changing the VM by hand. → §WW618
+- 📋 **WW619** (deps: —) (from: modelado) **A fixture cannot start the application through a file's association, as Open with or a double-click in Explorer does** — A packaged app's file association can only be proven by a script beside the case, and the activation itself stays unread. → §WW619
+- 📋 **WW620** (deps: —) (from: modelado) **A fixture cannot follow the window a launcher's child process draws, so an app reached via a launcher is unobserved** — A packaged app reached only through its CLI alias, or any launcher stub, cannot be driven by a case at all. → §WW620
+- 📋 **WW621** (deps: —) (from: modelado) **A run refused because an earlier run's app still holds the guest tree offers only the guest console or a snapshot revert** — An adopter whose -Run died must find vmrun and the guest password to end a process the runner already named. → §WW621
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
