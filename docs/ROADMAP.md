@@ -4,7 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- ⏳ **WW619** (deps: —) (from: modelado) **A fixture cannot start the application through a file's association, as Open with or a double-click in Explorer does** — Activating a packaged app's file by AUMID needs an MSIX registered in a guest with Developer Mode on. → §WW619
 - 📋 **WW620** (deps: —) (from: modelado) **A fixture cannot follow the window a launcher's child process draws, so an app reached via a launcher is unobserved** — A packaged app reached only through its CLI alias, or any launcher stub, cannot be driven by a case at all. → §WW620
 - 📋 **WW621** (deps: —) (from: modelado) **A run refused because an earlier run's app still holds the guest tree offers only the guest console or a snapshot revert** — Any run whose -Run died, that -Bound gave up on or that was killed leaves the tree held, and the only remedy named is the guest console. → §WW621
 

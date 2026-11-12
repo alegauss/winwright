@@ -4,6 +4,8 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- ⏸ **WW619** (deps: —) (from: modelado) **A fixture cannot start the application through a file's association, as Open with or a double-click in Explorer does** — set aside (Guest Developer Mode is off.): Activating a packaged app's file by AUMID needs an MSIX registered in a guest with Developer Mode on. → §WW619
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
