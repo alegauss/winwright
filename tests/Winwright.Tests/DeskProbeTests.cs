@@ -268,9 +268,18 @@ public sealed class DeskProbeTests
                     $ErrorActionPreference = 'Stop'
                     . '{{walk}}' -DefineOnly
                     Get-WhatHolds -Tree '{{tree}}' | ForEach-Object { Write-Output $_ }
+                    Get-Endable -Tree '{{tree}}' | ForEach-Object { Write-Output "ENDS $_" }
                     """);
 
-                var said = Answered(script);
+                var answered = Answered(script);
+                var said = answered.Where(one => !one.StartsWith("ENDS ", StringComparison.Ordinal)).ToList();
+
+                // WW621. What runs from under the tree is what a run may end before replacing it, by
+                // pid, and the walk answers only that: never every process on the machine.
+                var ends = answered.Where(one => one.StartsWith("ENDS ", StringComparison.Ordinal)).ToList();
+                Assert.Contains($"ENDS {walking.Pid}", ends);
+                Assert.All(ends, one => Assert.DoesNotContain(
+                    System.Diagnostics.Process.GetProcessesByName("explorer").Select(e => $"ENDS {e.Id}"), e => e == one));
 
                 // The pid as well as the name, because the sentence exists to be acted on: two runs
                 // wedged in the guest are two of the same name, and a reader ending the wrong one

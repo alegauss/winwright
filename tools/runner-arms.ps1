@@ -20,9 +20,11 @@
   Three runs, in an order that is the design:
     the bound  a command that outlives -Bound 1, from an executable under the tree, so the refusal
                has a holder to name
-    the held   a second run straight after, whose sync meets that command still holding the tree
-    the red    once the command has ended: a run that loses its test host, whose gather keeps the
-               collector's files - and which syncs at all only if the held tree came free
+    the held   a second run straight after, whose sync meets that command still holding the tree and
+               ends it (WW621), naming it, before it syncs
+    the red    a run that loses its test host, whose gather keeps the collector's files - and which
+               syncs at all only if the held tree came free, whether by ending or by the end of its
+               command
 
   Under a -Name of its own, so the guest folders it syncs are never the ones run-tests-vm.cmd uses
   for this repository. A scratch run that went wrong leaves C:\src\winwright-arms behind and nothing
@@ -202,10 +204,16 @@ else {
 $second = Invoke-Arm -Arm 'the held tree: the next sync, with that command still running' -Script $hold -Bound 1
 Write-Host ''
 
+# WW621. The sync ends what an earlier run left running from the tree and goes on, rather than
+# refusing and sending a reader to the guest console.
+$freed = @($second.Said | Where-Object { $_.StartsWith('  held tree   ended ') })
 $refused = @($second.Said | Where-Object { $_.StartsWith('run-tests-vm: the guest tree is held open by ') })
-if ($refused.Count -eq 1) {
-    Held 'a sync meeting a held tree refuses' ($second.Code -eq 3) "it exited $($second.Code)"
-    Held 'the sync names what holds the tree' ($refused[0].Contains($holder)) "the refusal read '$($refused[0])'"
+if ($freed.Count -eq 1) {
+    Held 'a sync meeting a held tree ends what an earlier run left there' ($refused.Count -eq 0) "it refused after ending: '$($refused -join ' ')'"
+    Held 'the sync names what it ended' ($freed[0].Contains($holder)) "the line read '$($freed[0])'"
+}
+elseif ($refused.Count -eq 1) {
+    Held 'a sync meeting a held tree ends what an earlier run left there' $false "it refused without ending anything: '$($refused[0])'"
 }
 else {
     Unseen 'the held tree' "the second run did not meet a held tree (exit $($second.Code)), so the command had ended or the runner stopped first"
@@ -253,7 +261,7 @@ elseif ($ended.Count -eq 0) {
     Unseen 'the red run' "the runner stopped before it (exit $($lost.Code))"
 }
 else {
-    if ($refused.Count -eq 1) {
+    if ($freed.Count -eq 1) {
         Held 'a tree held by a command that ended is free for the next sync' $true ''
     }
 

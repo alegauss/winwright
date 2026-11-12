@@ -44,6 +44,7 @@ public sealed class GuestMarkerTests
     [
         ("GUEST-HELD", "the tree would not delete, and this is the sentence Windows gave for it"),
         ("GUEST-HOLDER", "one process running from under that tree, named so a reader is not sent to Task Manager"),
+        ("GUEST-ENDS", "one of those a run may end before it replaces the tree, by pid: an earlier run's leftover, never explorer"),
     ];
 
     /// <summary>

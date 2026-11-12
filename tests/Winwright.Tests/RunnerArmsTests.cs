@@ -36,6 +36,7 @@ public sealed class RunnerArmsTests
         ("run-tests-vm.ps1", "the guest run did not answer within ", "the bound gave up on a run that outlived it"),
         ("run-tests-vm.ps1", "the guest tree is ", "the sync refused, on the arm that says who has the tree"),
         ("run-tests-vm.ps1", "held open by ", "the sync's refusal named what holds the tree, rather than nothing"),
+        ("run-tests-vm.ps1", "  held tree   ended ", "the sync ended what an earlier run left holding the tree, and named it"),
         ("holders.ps1", "runs from ", "the holder walk named a process by the executable it runs from under the tree"),
     ];
 

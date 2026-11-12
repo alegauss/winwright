@@ -1827,6 +1827,12 @@ VM is touched:
 tools\run-tests-vm.ps1 -Tree D:\path\to\yours -NoGate -Needs developer-mode -Run "powershell -File check-msix.ps1"
 ```
 
+A `-Run` that died, one `-Bound` gave up on, or one killed by hand can leave its application running
+from the tree in the guest, and the next run cannot replace a tree something holds. Before it syncs,
+the runner ends what an earlier run left there: every process running from under the tree, and a .NET
+host whose command line names it, never explorer. It prints a `held tree` line naming each one by pid,
+then syncs again. A tree still held after that, by anything else, is refused with what holds it.
+
 This matters more for an adopter than it does here. Every reason this exists — a host run that
 reported eight failures of which two were only the desk, and a negative control that passed because
 the host wrote a file faster than the guest could — applies to anybody driving a window from a test,

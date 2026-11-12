@@ -4,8 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW621** (deps: —) (from: modelado) **A run refused because an earlier run's app still holds the guest tree offers only the guest console or a snapshot revert** — Any run whose -Run died, that -Bound gave up on or that was killed leaves the tree held, and the only remedy named is the guest console. → §WW621
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers

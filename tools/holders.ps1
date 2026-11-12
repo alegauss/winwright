@@ -51,6 +51,39 @@ function Get-WhatHolds {
     return $held
 }
 
+function Get-Endable {
+    <#
+      WW621. The holders a run may end before it replaces the tree: every process running from under
+      it, and a .NET host (dotnet, testhost) whose command line names it - the runtime that hosted an
+      earlier run's suite has the tree's assemblies loaded and runs from Program Files. Explorer
+      never, whatever it has open: it is the desk. Anything else holding the tree stays a refusal.
+
+      Safe because of when it is asked: the desk claim is taken before the sync, so no live run of
+      this host owns the tree, and what holds it is what an earlier run left.
+    #>
+    param([Parameter(Mandatory)] [string] $Tree)
+
+    $ends = @()
+    foreach ($one in Get-Process) {
+        if ($one.ProcessName -eq 'explorer') { continue }
+
+        $where = $null
+        try { $where = $one.Path } catch { }
+        if ($where -and $where.StartsWith($Tree, 'OrdinalIgnoreCase')) {
+            $ends += $one.Id
+            continue
+        }
+
+        if ($one.ProcessName -notin @('dotnet', 'testhost', 'testhost.x86')) { continue }
+
+        $line = $null
+        try { $line = (Get-CimInstance Win32_Process -Filter "ProcessId = $($one.Id)").CommandLine } catch { }
+        if ($line -and $line.IndexOf($Tree, [StringComparison]::OrdinalIgnoreCase) -ge 0) { $ends += $one.Id }
+    }
+
+    return $ends
+}
+
 if ($DefineOnly) { return }
 
 if (-not $Tree) { throw 'holders.ps1 needs -Tree, the directory to ask about.' }

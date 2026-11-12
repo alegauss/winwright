@@ -1563,6 +1563,7 @@ if (Test-Path -LiteralPath '$script:GuestRepo') {
     catch {
         Write-Output ('GUEST-HELD ' + (`$_.Exception.Message -replace '\s+', ' '))
         foreach (`$one in (Get-WhatHolds -Tree '$script:GuestRepo')) { Write-Output "GUEST-HOLDER `$one" }
+        foreach (`$one in (Get-Endable -Tree '$script:GuestRepo')) { Write-Output "GUEST-ENDS `$one" }
         exit $script:ExitHeldTree
     }
 }
@@ -1677,10 +1678,38 @@ foreach ($file in @('source.zip', 'sync.ps1', 'sync.cmd', 'run.cmd', 'run-comman
 $sentHolders = Send-HolderWalk -Vmx $vmxPath
 if ($sentHolders) { Refuse $sentHolders }
 
-$synced = Invoke-VmRun -Guest -Arguments @('runProgramInGuest', $vmxPath, "$script:GuestSync\sync.cmd")
-$syncLog = Join-Path $stage 'sync.log'
-$null = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\sync.log", $syncLog)
-$syncSaid = if (Test-Path -LiteralPath $syncLog) { (Read-ConsoleText $syncLog).Trim() } else { '' }
+# WW621. A tree held by what an earlier run left - a -Run that died, one -Bound gave up on, one
+# killed by hand - is freed here rather than sent to the guest console. The desk claim is this run's,
+# so no live run of this host owns the tree, and the guest named what may be ended (GUEST-ENDS):
+# whatever runs from under the tree, and a .NET host whose command line names it, never explorer.
+# Ended through vmrun, which a taskkill run in the guest was measured failing at, and said by pid.
+# Once: a tree still held after that is held by something this run does not end, and refuses.
+$script:Ended = @()
+foreach ($attempt in 1..2) {
+    $synced = Invoke-VmRun -Guest -Arguments @('runProgramInGuest', $vmxPath, "$script:GuestSync\sync.cmd")
+    $syncLog = Join-Path $stage 'sync.log'
+    $null = Invoke-VmRun -Guest -Arguments @('copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\sync.log", $syncLog)
+    $syncSaid = if (Test-Path -LiteralPath $syncLog) { (Read-ConsoleText $syncLog).Trim() } else { '' }
+
+    if ($synced.Ok -or $synced.ExitCode -ne $script:ExitHeldTree -or $attempt -eq 2) { break }
+
+    $lines = $syncSaid -split "`r?`n"
+    $ends = @(($lines | Where-Object { $_ -match '^GUEST-ENDS \d+$' }) -replace '^GUEST-ENDS ', '')
+    if ($ends.Count -eq 0) { break }
+
+    foreach ($ending in $ends) {
+        $killed = Invoke-VmRun -Guest -Arguments @('killProcessInGuest', $vmxPath, $ending)
+        $who = @(($lines | Where-Object { $_ -match "^GUEST-HOLDER .*\($ending\)" }) -replace '^GUEST-HOLDER ', '') | Select-Object -First 1
+        if (-not $who) { $who = "a .NET host (pid $ending) whose command line names the tree" }
+        $script:Ended += $(if ($killed.Ok) { $who } else { "$who, which vmrun would not end ($($killed.Output))" })
+    }
+
+    Write-Host "  held tree   ended $($script:Ended -join '; '): left by an earlier run, holding the tree this run replaces" -ForegroundColor Yellow
+
+    # A moment for Windows to close what the ended processes had open, so the walk meets the tree free.
+    Start-Sleep -Seconds 2
+    if (Test-Path -LiteralPath $syncLog) { Remove-Item -LiteralPath $syncLog -Force }
+}
 
 if (-not $synced.Ok) {
     # WW439. The code and not the log, which is the whole of that task: the guest says which failure
@@ -1714,8 +1743,10 @@ if (-not $synced.Ok) {
         $by = if ($holders.Count -gt 0) { "held open by $($holders -join '; ')" }
               elseif ($windows.Length -gt 0) { 'held open by nothing the guest is running, so something outside it has a file there' }
               else { 'held, and its own account of that did not come back' }
-        $because = if ($windows.Length -gt 0) { "Windows said: $windows. " } else { '' }
-        Refuse "the guest tree is $by" "${because}End them at the guest console, or revert the VM to a clean snapshot. A run that -Bound gave up on, or one killed by hand, leaves exactly this."
+        # WW621. Windows' sentence already ends in a period, and the one added here made two.
+        $because = if ($windows.Length -gt 0) { "Windows said: $($windows.TrimEnd('.')). " } else { '' }
+        $tried = if ($script:Ended.Count -gt 0) { "This run ended $($script:Ended -join '; ') and the tree is still held. " } else { '' }
+        Refuse "the guest tree is $by" "${because}${tried}This run ends only what runs from the tree and a .NET host whose command line names it, never explorer: end the rest at the guest console, or revert the VM to a clean snapshot."
     }
 
     Refuse "the guest tree would not sync: $syncSaid $($synced.Output)"

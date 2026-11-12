@@ -29,33 +29,6 @@ file type. The proof needs an MSIX registered in the guest, and an unsigned layo
 registers only with Developer Mode on (WW618's `-Needs developer-mode`), which the guest
 does not have today, so this waits for a person to turn it on.
 
-### §WW621 WW621 - A leftover app holding the guest tree
-
-From modelado, MOD81 (11/11/2026). `build\store-shots-vm.ps1` runs `run-tests-vm.ps1
--NoGate -Run 'powershell ... store-shots.ps1'`, a script that starts Modelado.exe from
-the carried tree, drives it and closes it. A first attempt threw half-way (a UI
-Automation lookup), so the script never closed the window. The run after it was refused
-before carrying anything:
-
-    run-tests-vm: the guest tree is held open by Modelado (11176) runs from C:\src\modelado-store-shots\app\Modelado.exe
-      -> Windows said: access to 'clrjit.dll' was denied.. End them at the guest console, or revert the VM to a clean snapshot.
-
-The runner already knows the holder's pid and that it runs from the very tree it is
-about to replace, yet the only remedies it offers are a person at the guest console or a
-snapshot revert. The workaround was by hand on the host: read `d:\tmp\winwright-vm.env`,
-then `vmrun listProcessesInGuest` and `vmrun killProcessInGuest <vmx> 11176` (a
-`taskkill /IM` through `runProgramInGuest` exited 1 without ending it). The script now
-closes its window in a `finally`, but any adopter whose `-Run` dies leaves the same
-lock.
-
-Validated 12/11/2026, and wider: winwright's own suite meets it after any `-Bound` or
-killed run. The desk claim is taken before the sync, so no live run of this host owns
-the tree then. What the runner should do: end through `vmrun killProcessInGuest` each
-holder running from the tree, say which pids, walk again and delete. One that only has a
-tree file loaded is ended where it is a dotnet host whose command line names the tree;
-explorer never, and the rest stay a refusal. No switch. The refusal's doubled period
-(`denied.. End`) goes, and `runner-arms.ps1`'s two held-tree cases change with it.
-
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
 ## Block D — Act — patterns before pointers
