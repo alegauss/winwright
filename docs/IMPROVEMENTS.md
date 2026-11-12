@@ -19,13 +19,15 @@ access denied. No `-Run` command can change that, so every packaged-app check an
 writes (Modelado's MOD73 and MOD78; claude-tray's packaged build) stops before its first
 step, and the task is deferred until a person changes the VM by hand.
 
-What winwright should offer: a desk requirement the run declares (say `-Needs
-developer-mode`, or a field in the settings file) that the runner either establishes on
-the guest through its own elevated tools channel before the run, or refuses up front
-with the sentence and the setting to change, rather than leaving the adopter's script to
-discover it as a deployment error halfway through. A guest-preparation step that turns
-Developer Mode on once, recorded in the guest's settings, would serve every adopter
-packaging an app.
+Validated 12/11/2026: the runner never turns it on. It does not provision a machine (the
+SDK arm says so, `run-tests-vm.ps1:1644`) and has no elevated channel to do it with.
+What it should offer: a requirement the run declares, `-Needs developer-mode`, read
+unelevated in the guest before the carry (`AllowDevelopmentWithoutDevLicense` is 1 under
+`AppModelUnlock`) and refused up front with the setting to change, so no script meets it
+as 0x80073CFF. The README's guest requirements gain the line. Only an unsigned layout
+needs it; a package signed with a trusted certificate does not. Cases: a need met runs,
+one unmet is refused before anything is carried, an unknown name is refused as a
+parameter.
 
 ### §WW619 Launching through a file association
 
@@ -44,10 +46,13 @@ bare path, which is the command line the association runs, plus a registry check
 activation itself, and the Open with list, stay unread.
 
 What winwright should offer: a fixture field such as `"activates": "<file>"` that
-launches the application through the file's association (by ProgID or AUMID where
-several apps claim the type, since the default handler is the desk's choice), tracks the
-process it lands in, and refuses with the reason when no association names the
-application.
+launches through the file's association: ShellExecuteEx with `SEE_MASK_CLASSNAME` and a
+ProgID, or `ActivateForFile` with an AUMID for a packaged app, since the default handler
+is the desk's choice. The broker's process is no child of the run, so it is taken on as
+an adopted process, outside the WW586 job, and the report says what it starts is
+untracked. Cases: an extension with no association, and a ProgID or AUMID not claiming
+the type, are refused with the reason; an activation landing in an instance already
+running is said as that, never attached to silently.
 
 ### §WW620 Following the window a launcher's child draws
 
@@ -69,11 +74,12 @@ What the project settled for: `build\check-msix.ps1` starts the alias itself and
 the child's window (its process in the package folder, its title), and the three
 packaged cases stay declared but unrun.
 
-What winwright should offer: a fixture field such as `"window": "child"` (or by process
-name, `"windowOf": "Modelado.exe"`) under which the case attaches to the first window a
-descendant of the launched process draws, registers that process for stopping as it does
-the launched one, and stops both at the end. The same serves any launcher, updater stub
-or shell-out the adopter starts the application through.
+Validated 12/11/2026: WW586 already puts each launch in a job that the stop ends, so the
+child needs no new registration; only the window wait (`Suite.cs:570`) asks the launched
+pid alone. Offer an opt-in `"windowOf": "<image>"` that makes the wait ask the job's
+members of that image too, never a default, or a splash draws first. Cases: a packaged
+child outside the job is found by its parent pid or refused by name; a launcher exiting
+while its child lives is not WW606's refusal; no match names what the job held.
 
 ### §WW621 WW621 - A leftover app holding the guest tree
 
@@ -94,10 +100,13 @@ then `vmrun listProcessesInGuest` and `vmrun killProcessInGuest <vmx> 11176` (a
 closes its window in a `finally`, but any adopter whose `-Run` dies leaves the same
 lock.
 
-What winwright should offer: when every holder runs from inside the guest tree it is
-about to replace (so it can only be a leftover of an earlier run of this same tree), end
-those processes itself and say which, or at least a `-EndHolders` switch that does it,
-and a refusal naming that switch. Processes outside the tree stay a refusal, as now.
+Validated 12/11/2026, and wider: winwright's own suite meets it after any `-Bound` or
+killed run. The desk claim is taken before the sync, so no live run of this host owns
+the tree then. What the runner should do: end through `vmrun killProcessInGuest` each
+holder running from the tree, say which pids, walk again and delete. One that only has a
+tree file loaded is ended where it is a dotnet host whose command line names the tree;
+explorer never, and the rest stay a refusal. No switch. The refusal's doubled period
+(`denied.. End`) goes, and `runner-arms.ps1`'s two held-tree cases change with it.
 
 ## Block C — Locate — the locator grammar and the tree an agent reads
 
