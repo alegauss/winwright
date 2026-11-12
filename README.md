@@ -70,10 +70,10 @@ Windows only, .NET 10 (`net10.0-windows`). The in-app half needs `<UseWPF>true</
 
 ```xml
 <!-- In the test project that drives the application. -->
-<PackageReference Include="Winwright" Version="1.1.8" />
+<PackageReference Include="Winwright" Version="1.1.9" />
 
 <!-- In the application under test, only if you want the readings it can only take from inside. -->
-<PackageReference Include="Winwright.InApp" Version="1.1.8" />
+<PackageReference Include="Winwright.InApp" Version="1.1.9" />
 ```
 
 `Winwright.InApp` is optional: every reading and every pattern act runs against an application
