@@ -1778,6 +1778,18 @@ that opens no window, such as a CLI, a download or a build, says **`-NoDesk`**: 
 read, tidied or asked for, and nothing about the desk refuses it. The desk claim is still taken, so two
 runs never interleave in the guest.
 
+The runner never changes the guest, and a `-Run` cannot either: it runs as the guest user, without
+elevation. What the run needs from the machine it says with **`-Needs`**, and the runner reads it in
+the guest before carrying anything, refusing with the setting to change where it is missing. Today it
+knows one: **`developer-mode`**, which registering an unsigned MSIX layout (`Add-AppxPackage
+-Register`) needs and which otherwise fails mid-script with 0x80073CFF. A package signed with a
+certificate the guest trusts does not need it. A name the runner does not know is refused before the
+VM is touched:
+
+```
+tools\run-tests-vm.ps1 -Tree D:\path\to\yours -NoGate -Needs developer-mode -Run "powershell -File check-msix.ps1"
+```
+
 This matters more for an adopter than it does here. Every reason this exists — a host run that
 reported eight failures of which two were only the desk, and a negative control that passed because
 the host wrote a file faster than the guest could — applies to anybody driving a window from a test,

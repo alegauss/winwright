@@ -4,7 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-- 📋 **WW618** (deps: —) (from: modelado) **A guest run cannot register an unsigned MSIX layout, since Developer Mode is off and no run can turn it on** — A run registering an unsigned layout fails mid-script with 0x80073CFF after the carry, and nothing said the guest lacked Developer Mode. → §WW618
 - 📋 **WW619** (deps: —) (from: modelado) **A fixture cannot start the application through a file's association, as Open with or a double-click in Explorer does** — A packaged app's file association can only be proven by a script beside the case, and the activation itself stays unread. → §WW619
 - 📋 **WW620** (deps: —) (from: modelado) **A fixture cannot follow the window a launcher's child process draws, so an app reached via a launcher is unobserved** — A packaged app reached only through its CLI alias, or any launcher stub, cannot be driven by a case at all. → §WW620
 - 📋 **WW621** (deps: —) (from: modelado) **A run refused because an earlier run's app still holds the guest tree offers only the guest console or a snapshot revert** — Any run whose -Run died, that -Bound gave up on or that was killed leaves the tree held, and the only remedy named is the guest console. → §WW621
@@ -24,6 +23,8 @@
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
+
+- 📋 **WW622** (deps: —) **The README's -Carry example fence has prose after it on the same line, so GitHub renders what follows as code** — An adopter reading the guest runner section sees two paragraphs and an example rendered as one code block. → §WW622
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 

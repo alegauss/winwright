@@ -132,6 +132,12 @@ param(
     # matches nothing is refused before the guest is touched. Read by `carry.ps1`.
     [string[]] $Carry,
 
+    # WW618. What the guest must already have for this -Run, read unelevated in the guest before the
+    # carry and refused up front, naming the setting to change. The runner never changes the guest.
+    # Known today: developer-mode, which registering an unsigned MSIX layout needs. A name it does
+    # not know is refused before the VM is touched. Read by `guest-needs.ps1`.
+    [string[]] $Needs,
+
     # WW386. How many minutes the guest run may take before this stops waiting on it.
     #
     # A bound on the wait and never a deadline for the suite: what it ends is this command, and what
@@ -1120,6 +1126,12 @@ if (-not $env:WINWRIGHT_GUEST_USER -or -not $env:WINWRIGHT_GUEST_PASSWORD) {
     Refuse 'no guest credentials are configured' 'Set WINWRIGHT_GUEST_USER and WINWRIGHT_GUEST_PASSWORD.'
 }
 
+# WW618. A need this runner cannot read is a parameter error, said before the VM is started.
+. (Join-Path $PSScriptRoot 'guest-needs.ps1') -DefineOnly
+$script:Needed = @()
+try { $script:Needed = @(Get-NeedNames -Need $Needs) }
+catch { Refuse $_.Exception.Message 'Name a requirement from that list, or leave -Needs out.' }
+
 $vmxPath = $env:WINWRIGHT_VMX
 Write-Host "run-tests-vm  $vmxPath" -ForegroundColor Cyan
 if ($envFile) { Write-Host "  settings    $envFile" }
@@ -1241,6 +1253,45 @@ Write-Host '  desk        a session is logged in'
 $stage = Join-Path ([IO.Path]::GetTempPath()) "$($script:Name)-vm"
 if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
 $null = New-Item -ItemType Directory -Path $stage
+
+# WW618. What the run declared it needs, read in the guest before anything is carried. Unelevated
+# and off the desk, because a registry read needs neither, and refused here rather than met by the
+# adopter's script as 0x80073CFF after the carry. The runner changes nothing in the guest.
+if ($script:Needed.Count -gt 0) {
+    $null = Invoke-VmRun -Guest -Arguments @('createDirectoryInGuest', $vmxPath, $script:GuestSync)
+    $null = Invoke-VmRun -Guest -Arguments @('deleteFileInGuest', $vmxPath, "$script:GuestSync\needs.txt")
+
+    $sent = Invoke-VmRun -Guest -Arguments @(
+        'copyFileFromHostToGuest', $vmxPath, (Join-Path $PSScriptRoot 'guest-needs.ps1'), "$script:GuestSync\needs.ps1")
+    if (-not $sent.Ok) { Refuse "could not copy the needs reading into the guest: $($sent.Output)" }
+
+    $null = Invoke-VmRun -Guest -Arguments @(
+        'runProgramInGuest', $vmxPath,
+        'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe',
+        '-NoProfile', '-ExecutionPolicy', 'Bypass',
+        '-File', "$script:GuestSync\needs.ps1",
+        '-Need', ($script:Needed -join ','),
+        '-Into', "$script:GuestSync\needs.txt")
+
+    $answerFile = Join-Path $stage 'needs.txt'
+    $null = Invoke-VmRun -Guest -Arguments @(
+        'copyFileFromGuestToHost', $vmxPath, "$script:GuestSync\needs.txt", $answerFile)
+
+    # A reading that wrote nothing is not a need met.
+    if (-not (Test-Path -LiteralPath $answerFile)) {
+        Refuse 'the needs reading wrote no answer in the guest' 'It runs as the guest user and writes one line per need beside itself. Check the guest console is reachable.'
+    }
+
+    $read = @((Read-ConsoleText $answerFile) -split "`r?`n" | Where-Object { $_.Trim() })
+    $unmet = @($read | Where-Object { $_ -notmatch '^met\|' })
+    if ($read.Count -ne $script:Needed.Count -or $unmet.Count -gt 0) {
+        $said = @($unmet | ForEach-Object { ($_ -split '\|', 3) | Select-Object -Last 1 })
+        if ($said.Count -eq 0) { $said = @("the guest answered $($read.Count) line(s) for $($script:Needed.Count) need(s)") }
+        Refuse "the guest lacks what this run needs: $($said -join '; ')" 'Change it in the guest by hand, once. The runner does not provision a machine and has no elevated channel to.'
+    }
+
+    Write-Host "  needs       $(($read | ForEach-Object { ($_ -split '\|', 3)[1] }) -join ', ') met in the guest"
+}
 
 # WW311. Before the carry and after the session, because those are the two things this costs: it
 # needs a desk to have a foreground at all, and it is worth nothing once the twenty minutes are

@@ -4,31 +4,6 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
-### §WW618 Developer Mode on the guest for packaged-app checks
-
-From Modelado's MOD73 (11/11/2026). `build\check-msix-vm.ps1` stages the unsigned MSIX
-layout `build-msix.cmd` makes and runs `tools\run-tests-vm.ps1 -Tree <stage> -NoGate
--Run "powershell ... check-msix.ps1"`, which calls `Add-AppxPackage -Register` on the
-layout, then starts the app through `shell:AppsFolder\<family>!<app>` to prove the Start
-entry.
-
-The guest refused it: HRESULT 0x80073CFF, no developer licence or sideload policy. The
-guest's Developer Mode is off, and the runner's session is not elevated, so the script's
-attempt to set `HKLM\...\AppModelUnlock\AllowDevelopmentWithoutDevLicense` failed with
-access denied. No `-Run` command can change that, so every packaged-app check an adopter
-writes (Modelado's MOD73 and MOD78; claude-tray's packaged build) stops before its first
-step, and the task is deferred until a person changes the VM by hand.
-
-Validated 12/11/2026: the runner never turns it on. It does not provision a machine (the
-SDK arm says so, `run-tests-vm.ps1:1644`) and has no elevated channel to do it with.
-What it should offer: a requirement the run declares, `-Needs developer-mode`, read
-unelevated in the guest before the carry (`AllowDevelopmentWithoutDevLicense` is 1 under
-`AppModelUnlock`) and refused up front with the setting to change, so no script meets it
-as 0x80073CFF. The README's guest requirements gain the line. Only an unsigned layout
-needs it; a package signed with a trusted certificate does not. Cases: a need met runs,
-one unmet is refused before anything is carried, an unknown name is refused as a
-parameter.
-
 ### §WW619 Launching through a file association
 
 From Modelado's MOD75 and MOD78 (11/11/2026). The Store package declares a
@@ -123,6 +98,22 @@ explorer never, and the rest stay a refusal. No switch. The refusal's doubled pe
 ## Block I — The in-app half — the app cooperates with the harness
 
 ## Block J — Adoption — the proof is the deletion
+
+### §WW622 The README fence the -Carry example never closes
+
+Found while adding `-Needs` to the README's "Running an adopting project's cases off the
+desk" section (WW618). The `-Carry` example closes its code block with a fence that has
+prose after it on the same line: the closing three backticks are followed by "**That the
+runner can carry two trees is why it prints which one it took** ...". A fence with text
+after it does not close a block in CommonMark, so on GitHub everything after the example
+renders as code until the next fence, which is the `-Needs` example below it.
+
+What to build: split the line, so the fence stands alone and the sentence about which
+tree the runner took is its own paragraph (it reads best after the `-Name` paragraph it
+explains). Then a desk-free case over README.md that every fenced block's closing line
+is the fence alone, so the next example added in this section cannot do it again. Check
+whether an existing README sweep (the WW503 and WW499 gates read the README) is the
+place for that rule rather than a new class.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
