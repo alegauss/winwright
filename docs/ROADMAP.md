@@ -20,8 +20,6 @@
 
 ## Block J — Adoption — the proof is the deletion
 
-- 📋 **WW622** (deps: —) **The README's -Carry example fence has prose after it on the same line, so GitHub renders what follows as code** — An adopter reading the guest runner section sees two paragraphs and an example rendered as one code block. → §WW622
-
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ## Block L — The documentation area — written for a reader who has installed nothing

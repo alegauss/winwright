@@ -45,22 +45,6 @@ does not have today, so this waits for a person to turn it on.
 
 ## Block J — Adoption — the proof is the deletion
 
-### §WW622 The README fence the -Carry example never closes
-
-Found while adding `-Needs` to the README's "Running an adopting project's cases off the
-desk" section (WW618). The `-Carry` example closes its code block with a fence that has
-prose after it on the same line: the closing three backticks are followed by "**That the
-runner can carry two trees is why it prints which one it took** ...". A fence with text
-after it does not close a block in CommonMark, so on GitHub everything after the example
-renders as code until the next fence, which is the `-Needs` example below it.
-
-What to build: split the line, so the fence stands alone and the sentence about which
-tree the runner took is its own paragraph (it reads best after the `-Name` paragraph it
-explains). Then a desk-free case over README.md that every fenced block's closing line
-is the fence alone, so the next example added in this section cannot do it again. Check
-whether an existing README sweep (the WW503 and WW499 gates read the README) is the
-place for that rule rather than a new class.
-
 ## Block K — The proving ground — a fixture app built to be hard to test
 
 ## Block L — The documentation area — written for a reader who has installed nothing

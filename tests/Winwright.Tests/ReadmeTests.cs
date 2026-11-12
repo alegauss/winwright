@@ -43,6 +43,37 @@ public sealed class ReadmeTests
     }
 
     [Fact]
+    public void Every_code_block_is_closed_by_a_fence_standing_alone()
+    {
+        // WW622. A closing fence with prose after it on the same line does not close the block in
+        // CommonMark, so on GitHub everything after the -Carry example rendered as code down to the
+        // next fence. Read the way a renderer reads it: inside a block, a line starting with a fence
+        // has to be the fence alone, and the file does not end inside one.
+        var open = 0;
+        var line = 0;
+        foreach (var one in Text().Split('\n'))
+        {
+            line++;
+            var trimmed = one.TrimEnd('\r', ' ');
+            if (!trimmed.StartsWith("```", StringComparison.Ordinal))
+                continue;
+
+            if (open == 0)
+            {
+                open = line;
+                continue;
+            }
+
+            Assert.True(
+                trimmed == "```",
+                $"README.md:{line} closes the block opened at line {open} with '{trimmed}', which no renderer reads as a close");
+            open = 0;
+        }
+
+        Assert.True(open == 0, $"the block opened at README.md:{open} is never closed");
+    }
+
+    [Fact]
     public void The_third_verdict_is_explained_and_not_merely_listed()
     {
         // The one an adopter has never met before. A table row naming it is not the same as a

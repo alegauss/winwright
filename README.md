@@ -1783,7 +1783,9 @@ files under `-ResultsIn`, as a list or joined by commas (`-Bring robot.glb,robot
 through `run-tests-vm.cmd`). An adopter's `-Run` gets every one of them back whether it passed or not,
 and each that did not come back is named. `-Run` is run in the
 guest as a line typed at a prompt: a chain joined by `&` or `&&` is logged whole and exits with the
-code a prompt would give, and a `for %B` loop means what it means there.
+code a prompt would give, and a `for %B` loop means what it means there. **That the runner can carry
+two trees is why it prints which one it took** — otherwise a green is a green about whichever tree
+the caller believed they named.
 
 The tree goes over as its git listing, tracked and untracked files minus what `.gitignore` covers.
 A build output the run needs, such as an installer under an ignored `artifacts\`, goes with
@@ -1793,9 +1795,7 @@ one naming a file outside the tree, is refused before the guest is touched:
 
 ```
 tools\run-tests-vm.ps1 -Tree D:\path\to\yours -NoGate -Run "check-installer.cmd" -Carry 'artifacts\installer\*.exe'
-``` **That the runner can
-carry two trees is why it prints which one it took** — otherwise a green is a green about whichever
-tree the caller believed they named.
+```
 
 **One run holds the guest desk at a time.** Two runs on one desk take each other's foreground, and
 each reads that, honestly, as a desk it could not get. So every run claims the desk for its whole

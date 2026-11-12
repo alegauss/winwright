@@ -550,6 +550,7 @@
 - ✅ **WW499** **the README's table of locator forms is a hand-kept copy of the parser's own, and the two already differ** — The README's grammar table is held to the parser both ways now: every form the grammar states is shown, and every form shown parses (design recorded in `tests/Winwright.Tests/Grammar.cs`).
 - ✅ **WW503** **the README's project example omits a key this build reads, and the gate over it checks nine names somebody typed** — The README's example is held to every key the build reads rather than to nine typed names, and it gained the one it was missing.
 - 🗑 **WW588** **A team whose app is on .NET 8 LTS cannot reference the in-app half or run the harness without a second runtime** — abandoned: Decided against: .NET 10 is the current LTS and .NET 8 support ends on 10/11/2026, so the premise fell; the non-goal on older targets holds it.
+- ✅ **WW622** **The README's -Carry example fence has prose after it on the same line, so GitHub renders what follows as code** — The -Carry example's fence stands alone again, its sentence joined the -Name paragraph, and ReadmeTests refuses any block closed by a fence with text after it.
 
 ## Block K — The proving ground — a fixture app built to be hard to test
 
