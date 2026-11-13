@@ -46,5 +46,5 @@
   <circle cx="184" cy="555" r="6" fill="#B070E0"/>
   <text x="206" y="563" font-family="DejaVu Sans, sans-serif" font-size="20" fill="#ada4cd">Passed · Failed · Degraded · Broken — and 2 is why</text>
 
-  <text x="1110" y="563" text-anchor="end" font-family="DejaVu Sans Mono, monospace" font-size="20" fill="#8a81ab">alegauss.github.io/winwright</text>
+  <text x="1110" y="563" text-anchor="end" font-family="DejaVu Sans Mono, monospace" font-size="20" fill="#8a81ab">alegauss.com/winwright</text>
 </svg>

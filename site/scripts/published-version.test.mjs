@@ -60,7 +60,7 @@ before(async () => {
 
   // Before React is imported, because `react-dom/client` reads the document at module scope.
   const dom = new JSDOM("<!doctype html><html><body><div id='root'></div></body></html>", {
-    url: "https://alegauss.github.io/winwright/",
+    url: "https://alegauss.com/winwright/",
   });
   globalThis.window = dom.window;
   globalThis.document = dom.window.document;

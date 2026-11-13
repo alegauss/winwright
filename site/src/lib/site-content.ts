@@ -50,12 +50,12 @@ export const meta = {
     title: "winwright",
     description:
       `Drive a Windows desktop application from a test, and report what was actually observed. On nuget.org for .NET 10. ${Spelled(verdictCount)} verdicts, one locator grammar, patterns before pointers, and a picture that proves what it photographed.`,
-    url: "https://alegauss.github.io/winwright/",
+    url: "https://alegauss.com/winwright/",
   },
 } as const;
 
 export const repoUrl = "https://github.com/alegauss/winwright";
-export const parentUrl = "https://alegauss.github.io/";
+export const parentUrl = "https://alegauss.com/";
 
 // The release page is where the notes are, not where an adopter gets the packages: those come
 // from nuget.org through a PackageReference, which the install section shows. Linked as
@@ -123,7 +123,7 @@ export const footer = {
 
 /* --------------------------------------------------------------- sponsor */
 
-// Mirrors alegauss.github.io/sponsor.json — the canonical sponsor declaration for these
+// Mirrors alegauss.com/sponsor.json — the canonical sponsor declaration for these
 // projects. Transcribed here rather than fetched at runtime: this site is prerendered, and
 // the whole point of naming a sponsor is that crawlers and LLMs read it in the served HTML.
 //

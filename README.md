@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://alegauss.github.io/winwright/logo.svg" alt="winwright logo" width="120">
+<img src="https://alegauss.com/winwright/logo.svg" alt="winwright logo" width="120">
 
 # winwright
 
@@ -16,7 +16,7 @@ Windows · .NET 10 · two NuGet packages, no external dependency · Apache-2.0
 [![Winwright on nuget.org](https://img.shields.io/nuget/v/Winwright?label=Winwright)](https://www.nuget.org/packages/Winwright)
 [![Winwright.InApp on nuget.org](https://img.shields.io/nuget/v/Winwright.InApp?label=Winwright.InApp)](https://www.nuget.org/packages/Winwright.InApp)
 
-**[alegauss.github.io/winwright](https://alegauss.github.io/winwright/)**: the short version of
+**[alegauss.com/winwright](https://alegauss.com/winwright/)**: the short version of
 the argument. This file is the long one.
 
 </div>
@@ -1858,17 +1858,17 @@ rather than by hand.
 
 For Claude Code:
 
-- **[Claude Code Tray](https://alegauss.github.io/claude-tray/)**: your rate-limit usage as a Windows tray icon that turns red before you run out.
-- **[roadkeep](https://alegauss.github.io/roadkeep/)**: keeps ROADMAP, CHANGELOG and IMPROVEMENTS to one format, as a CLI and a Claude Code plugin.
-- **[commitclerk](https://alegauss.github.io/commitclerk/)**: Conventional Commits messages from your staged diff, in a single-file Python CLI.
-- **[polyweave](https://alegauss.github.io/polyweave/)**: a Claude Code plugin that makes a game's 3D assets, sounds and names by declaring what each has to satisfy.
+- **[Claude Code Tray](https://alegauss.com/claude-tray/)**: your rate-limit usage as a Windows tray icon that turns red before you run out.
+- **[roadkeep](https://alegauss.com/roadkeep/)**: keeps ROADMAP, CHANGELOG and IMPROVEMENTS to one format, as a CLI and a Claude Code plugin.
+- **[commitclerk](https://alegauss.com/commitclerk/)**: Conventional Commits messages from your staged diff, in a single-file Python CLI.
+- **[polyweave](https://alegauss.com/polyweave/)**: a Claude Code plugin that makes a game's 3D assets, sounds and names by declaring what each has to satisfy.
 
 For Windows developers:
 
-- **[FreeHarbor](https://alegauss.github.io/freeharbor/)**: Docker on Windows without Docker Desktop, with no admin prompt and no telemetry.
-- **[Quickshell](https://alegauss.github.io/quickshell/)**: an SSH client for Windows with sessions, keys, SFTP and tunnels, and without the rest of the suite.
+- **[FreeHarbor](https://alegauss.com/freeharbor/)**: Docker on Windows without Docker Desktop, with no admin prompt and no telemetry.
+- **[Quickshell](https://alegauss.com/quickshell/)**: an SSH client for Windows with sessions, keys, SFTP and tunnels, and without the rest of the suite.
 
-All of them: [alegauss.github.io](https://alegauss.github.io/)
+All of them: [alegauss.com](https://alegauss.com/)
 
 ## Licence, and saying something is wrong
 

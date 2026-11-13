@@ -7,9 +7,9 @@ import { claudeCode, compare, meta } from "./lib/site-content";
 import { features } from "./lib/features";
 
 // GitHub Pages derives the base from the repository name: the site is served at
-// https://alegauss.github.io/winwright/, so canonical, og:url, the sitemap and every output
+// https://alegauss.com/winwright/, so canonical, og:url, the sitemap and every output
 // path carry it. Written here and in vite.config.ts, and nowhere else.
-export const SITE_ORIGIN = "https://alegauss.github.io";
+export const SITE_ORIGIN = "https://alegauss.com";
 export const BASE = "/winwright/";
 
 // The social card, rasterised to dist/og.png. Absolute, because a platform fetching the

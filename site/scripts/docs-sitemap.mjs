@@ -63,7 +63,7 @@ if (existing.length === 0) throw new Error("docs-sitemap: dist/sitemap.xml lists
 // format in one file is a file two readers parse differently.
 const lastmod = /<lastmod>([^<]+)<\/lastmod>/.exec(sitemap)?.[1] ?? "";
 const added = area.map((path) => {
-  const loc = `    <loc>https://alegauss.github.io${path}</loc>`;
+  const loc = `    <loc>https://alegauss.com${path}</loc>`;
   return lastmod.length > 0
     ? `  <url>\n${loc}\n    <lastmod>${lastmod}</lastmod>\n  </url>`
     : `  <url>\n${loc}\n  </url>`;

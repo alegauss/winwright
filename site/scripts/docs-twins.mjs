@@ -127,7 +127,7 @@ if (!Array.isArray(manifest.routes)) throw new Error("docs-twins: the manifest n
 // expensive one. Assigned rather than appended, so running this twice lists nothing twice.
 manifest.area = written.map((one) => ({
   path: one.path,
-  url: `https://alegauss.github.io${one.path}`,
+  url: `https://alegauss.com${one.path}`,
   title: one.title,
   markdown: one.markdown,
   markdownBytes: one.markdownBytes,
@@ -153,7 +153,7 @@ const listed = [
   "Longer reads for somebody deciding whether to adopt this, each with a Markdown twin beside",
   "it. Read `<route>index.md` rather than the HTML.",
   "",
-  ...written.map((one) => `- [${one.title}](https://alegauss.github.io${one.path}index.md)`),
+  ...written.map((one) => `- [${one.title}](https://alegauss.com${one.path}index.md)`),
   "",
 ].join("\n");
 

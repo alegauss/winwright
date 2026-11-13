@@ -17,9 +17,9 @@ This site answers a coding agent in files it can grep, not only in hydrated mark
 route has a Markdown twin beside it — the same page, converted from the same render, with
 the navigation, the footer and the call to action dropped. Read `<route>/index.md` instead
 of the HTML: the landing page is
-[`/index.md`](https://alegauss.github.io/winwright/index.md). The full list of routes,
+[`/index.md`](https://alegauss.com/winwright/index.md). The full list of routes,
 their twins and their byte sizes is in
-[`manifest.json`](https://alegauss.github.io/winwright/manifest.json).
+[`manifest.json`](https://alegauss.com/winwright/manifest.json).
 
 ## The verdict, and the exit code
 
@@ -217,8 +217,8 @@ organisations with a lot to publish — run on your own servers, with no per-use
 
 ## Links
 
-- [Website](https://alegauss.github.io/winwright/): the product page
-- [Manifest](https://alegauss.github.io/winwright/manifest.json): the routes and their Markdown twins
+- [Website](https://alegauss.com/winwright/): the product page
+- [Manifest](https://alegauss.com/winwright/manifest.json): the routes and their Markdown twins
 - [Winwright on nuget.org](https://www.nuget.org/packages/Winwright): the harness half
 - [Winwright.InApp on nuget.org](https://www.nuget.org/packages/Winwright.InApp): the optional in-app half
 - [GitHub repository](https://github.com/alegauss/winwright): source code and the full reference
