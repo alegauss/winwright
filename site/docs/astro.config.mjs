@@ -51,6 +51,8 @@ export default defineConfig({
         { icon: "github", label: "GitHub", href: "https://github.com/alegauss/winwright" },
       ],
       customCss: ["./src/styles/area.css"],
+      // A BreadcrumbList per page — see the file for why Google needs to be told.
+      routeMiddleware: "./src/breadcrumbs.ts",
       // WW553. Google Analytics after consent, by the pitch page's flow and the hub's key, so
       // every page under /winwright/ is measured by one property and asks one question. The
       // script is inlined rather than linked: a typed src is a link Astro does not rebase.
