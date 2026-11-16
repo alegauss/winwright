@@ -4,13 +4,22 @@
 
 ## Block B — Attach, launch, and leave nothing behind
 
+- 📋 **WW626** (deps: —) (from: modelado) **A fixture cannot point a Windows known folder such as Pictures at its staged directory, only say it was not (WW519)** — An app saving to Pictures must grow a test-only variable for a case to read what it wrote in a folder of its own. → §WW626
+
 ## Block C — Locate — the locator grammar and the tree an agent reads
+
+- 📋 **WW625** (deps: —) (from: modelado) **A case cannot reach the application's taskbar Jump List, so recent files fed to it go unchecked** — A Jump List the app writes ships as a claim no case can hold, on the installed build or the MSIX package. → §WW625
 
 ## Block D — Act — patterns before pointers
 
 ## Block E — Capture — the picture that proves what it photographed
 
 ## Block F — Assert — the expectation is derived, never typed
+
+- 📋 **WW624** (deps: —) (from: modelado) **A case cannot claim a control's words fit it, so a translated caption cut off inside its button passes** — Every translation task owes a no-clipping check that today reads the full name and the rectangle and passes either way. → §WW624
+- 📋 **WW627** (deps: —) (from: modelado) **A read under a popup menu fails as missing when the window under test never had the foreground; a drop is Unchecked** — The adopter reads a product failure and has to rerun an older commit to learn the desk closed the menu. → §WW627
+- 📋 **WW628** (deps: —) (from: modelado) **A file step cannot claim what a text file the app wrote holds, only its bytes against a fixture or an image** — A setting the app saves beside others cannot be checked by the case that made it, so the remembered half of a feature goes unproved. → §WW628
+- 📋 **WW629** (deps: —) (from: Claude Code Tray) **A case cannot read the memory of the application it launched, so a footprint ceiling has to live outside winwright** — A window never released only shows after it is opened and closed, which only a case drives, and no case can read the memory left. → §WW629
 
 ## Block G — The scenario — a case is a data file
 
